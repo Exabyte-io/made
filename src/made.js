@@ -1,4 +1,4 @@
-import {tolerance, coefficients, units, atomicCoordUnits} from "./constants";
+import {tolerance, coefficients, units, ATOMIC_COORD_UNITS} from "./constants";
 import MadeMath from "./math";
 import {Material, MaterialMixin, defaultMaterialConfig} from "./material";
 import {Lattice} from "./lattice/lattice";
@@ -15,7 +15,7 @@ export const Made = {
     coefficients: coefficients,
     tolerance: tolerance,
     units: units,
-    atomicCoordUnits: atomicCoordUnits,
+    ATOMIC_COORD_UNITS: ATOMIC_COORD_UNITS,
     math: MadeMath,
     Material,
     MaterialMixin,
