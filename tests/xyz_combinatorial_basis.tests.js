@@ -1,6 +1,7 @@
-import {Basis} from "../basis/basis";
-import {CombinatorialBasis} from "./xyz_combinatorial_basis";
 import {expect} from "chai";
+
+import {Basis} from "../src/basis/basis";
+import {CombinatorialBasis} from "../src/parsers/xyz_combinatorial_basis";
 
 describe('CombinatorialBasis', function () {
     it('toBasisConfig', function () {
