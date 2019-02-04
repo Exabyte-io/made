@@ -1,5 +1,6 @@
-import {Basis} from "./basis";
 import {expect} from "chai";
+
+import {Basis} from "../src/basis/basis";
 
 /*
  * @summary Tests boilerplate. Can be run as below:
