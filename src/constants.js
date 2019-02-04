@@ -21,7 +21,7 @@ export const units = {
 /**
  * @summary Coordinates units for a material's basis.
  */
-export const atomicCoordUnits = {
+export const ATOMIC_COORD_UNITS = {
     crystal: 'crystal',
     cartesian: 'cartesian'
 };
@@ -33,5 +33,5 @@ export default {
     coefficients,
     tolerance,
     units,
-    atomicCoordUnits,
+    ATOMIC_COORD_UNITS,
 }
