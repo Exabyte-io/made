@@ -57,32 +57,19 @@ export const defaultMaterialConfig = {
     }
 };
 
-class BaseMaterial {
-    constructor({name, lattice, basis}) {
-        this.name = name;
-        this.lattice = lattice;
-        this.basis = basis;
+export class Material {
+    constructor(config) {
+        this._json = lodash.cloneDeep(config || {});
     }
 
-    toJSON() {
-        return Object.assign({}, this);
-    }
-}
-
-export const MaterialPropMixin = (superclass) => class extends superclass {
-
-    prop(name, backupValue, deepClone = false) {
-        const value = lodash.get(this, name, backupValue);
-        return deepClone ? this._deepClone(value) : value;
+    prop(name, defaultValue) {
+        // `lodash.get` gets `null` when the value is `null`, but we still want a default value in this case, hence `||`
+        return lodash.get(this._json, name, defaultValue) || defaultValue;
     }
 
-    setProp(name, newValue) {
-        this[name] = newValue;
+    setProp(name, value) {
+        this._json[name] = value;
     }
-
-};
-
-export const MaterialMixin = (superclass) => class extends superclass {
 
     static get defaultConfig() {
         return defaultMaterialConfig;
@@ -250,10 +237,6 @@ export const MaterialMixin = (superclass) => class extends superclass {
         return parsers.poscar.toPoscar(this.toJSON(), omitConstraints);
     }
 
-};
-
-export const MaterialToJSONMixin = (superclass) => class extends superclass {
-
     toJSON() {
         return {
             lattice: this.Lattice.toJSON(),
@@ -262,6 +245,4 @@ export const MaterialToJSONMixin = (superclass) => class extends superclass {
         };
     }
 
-};
-
-export const Material = mix(BaseMaterial).with(MaterialPropMixin, MaterialMixin, MaterialToJSONMixin);
+}
