@@ -67,8 +67,7 @@ export class Material {
     }
 
     prop(name, defaultValue) {
-        // `lodash.get` gets `null` when the value is `null`, but we still want a default value in this case, hence `||`
-        return lodash.get(this._json, name, defaultValue) || defaultValue;
+        return lodash.get(this._json, name) || defaultValue;
     }
 
     setProp(name, value) {
