@@ -62,6 +62,10 @@ export class Material {
         this._json = lodash.cloneDeep(config || {});
     }
 
+    static get defaultConfig() {
+        return defaultMaterialConfig;
+    }
+
     prop(name, defaultValue) {
         // `lodash.get` gets `null` when the value is `null`, but we still want a default value in this case, hence `||`
         return lodash.get(this._json, name, defaultValue) || defaultValue;
@@ -69,14 +73,6 @@ export class Material {
 
     setProp(name, value) {
         this._json[name] = value;
-    }
-
-    static get defaultConfig() {
-        return defaultMaterialConfig;
-    }
-
-    _deepClone(object) {
-        return lodash.cloneDeep(object);
     }
 
     updateFormula() {
@@ -240,7 +236,7 @@ export class Material {
     toJSON() {
         return {
             lattice: this.Lattice.toJSON(),
-            basis: this.Lattice.toJSON(),
+            basis: this.Basis.toJSON(),
             name: this.name || this.formula
         };
     }
