@@ -18,7 +18,7 @@ export const Made = {
     ATOMIC_COORD_UNITS: ATOMIC_COORD_UNITS,
     math: MadeMath,
     Material,
-    defaultMaterial: defaultMaterialConfig,
+    defaultMaterialConfig,
     Lattice,
     ReciprocalLattice,
     Basis,
