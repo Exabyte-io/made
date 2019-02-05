@@ -62,10 +62,6 @@ export class Material {
         this._json = lodash.cloneDeep(config || {});
     }
 
-    static get defaultConfig() {
-        return defaultMaterialConfig;
-    }
-
     prop(name, defaultValue) {
         return lodash.get(this._json, name) || defaultValue;
     }
