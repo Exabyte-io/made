@@ -2,10 +2,6 @@ import {expect} from "chai";
 
 import {Basis} from "../src/basis/basis";
 
-/*
- * @summary Tests boilerplate. Can be run as below:
- * ./node_modules/.bin/mocha --compilers js:node_modules/babel-core/register.js imports/made/basis/basis.tests.js
- */
 describe('Basis', function () {
     it('isEqualTo', function () {
         const basis1 = new Basis({

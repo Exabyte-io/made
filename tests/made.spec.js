@@ -2,76 +2,81 @@ import {expect} from "chai";
 
 import {Made} from "../src/made";
 import {Basis} from "../src/basis/basis";
+import {Material} from "../src/material";
 
 describe('Made', function () {
     it('unitCellFormula', function () {
-        const elements = [
-            {
-                value: 'Si',
-                id: 1
-            },
-            {
-                value: 'Si',
-                id: 2
-            },
-            {
-                value: 'Li',
-                id: 3
-            },
-            {
-                value: 'Fe',
-                id: 4
-            },
-            {
-                value: 'Fe',
-                id: 5
-            },
-            {
-                value: 'Fe',
-                id: 6
-            },
-            {
-                value: 'Si',
-                id: 7
-            }
-        ];
-
-        expect(Made.unitCellFormula(elements)).to.be.equal('Si3LiFe3');
+        const basis = new Basis({
+            elements: [
+                {
+                    value: 'Si',
+                    id: 1
+                },
+                {
+                    value: 'Si',
+                    id: 2
+                },
+                {
+                    value: 'Li',
+                    id: 3
+                },
+                {
+                    value: 'Fe',
+                    id: 4
+                },
+                {
+                    value: 'Fe',
+                    id: 5
+                },
+                {
+                    value: 'Fe',
+                    id: 6
+                },
+                {
+                    value: 'Si',
+                    id: 7
+                }
+            ],
+            coordinates: []
+        });
+        expect(basis.unitCellFormula).to.be.equal('LiFe3Si3');
     });
 
     it('formula', function () {
-        const elements = [
-            {
-                value: 'Si',
-                id: 1
-            },
-            {
-                value: 'Si',
-                id: 2
-            },
-            {
-                value: 'O',
-                id: 3
-            },
-            {
-                value: 'O',
-                id: 4
-            },
-            {
-                value: 'O',
-                id: 5
-            },
-            {
-                value: 'O',
-                id: 6
-            }
-        ];
+        const basis = new Basis({
+            elements: [
+                {
+                    value: 'Si',
+                    id: 1
+                },
+                {
+                    value: 'Si',
+                    id: 2
+                },
+                {
+                    value: 'O',
+                    id: 3
+                },
+                {
+                    value: 'O',
+                    id: 4
+                },
+                {
+                    value: 'O',
+                    id: 5
+                },
+                {
+                    value: 'O',
+                    id: 6
+                }
+            ]
+        });
 
-        expect(Made.formula(elements)).to.be.equal('SiO2');
+        expect(basis.formula).to.be.equal('SiO2');
     });
 
     it('supercell', function () {
-        const material = {
+        const material = new Material({
             basis: {
                 elements: [
                     {
@@ -101,12 +106,13 @@ describe('Made', function () {
                 alpha: 90,
                 beta: 90,
                 gamma: 90,
+                "type": "TRI",
                 units: {
                     length: 'angstrom',
                     angle: 'degree'
                 }
             }
-        };
+        });
 
         const expectedSupercell = {
             basis: {
@@ -250,6 +256,7 @@ describe('Made', function () {
                 alpha: 90,
                 beta: 90,
                 gamma: 90,
+                type: "TRI",
                 units: {
                     length: 'angstrom',
                     angle: 'degree'
@@ -260,10 +267,9 @@ describe('Made', function () {
         const supercell = Made.tools.supercell.generateConfig(material, [[2, 0, 0], [0, 2, 0], [0, 0, 2]]);
         expect(supercell.lattice).deep.equal(expectedSupercell.lattice);
 
-        const basis1 = Basis.fromExabyteFormat(expectedSupercell.basis);
-        const basis2 = Basis.fromExabyteFormat(supercell.basis);
+        const basis1 = new Basis(expectedSupercell.basis);
+        const basis2 = new Basis(supercell.basis);
 
-        // TODO: enable after refactoring made.js: problem is because of 5 != 0.49999999999999994
-        // expect(basis1.equals(basis2)).to.be.ok;
+        expect(basis1.isEqualTo(basis2)).to.be.ok;
     });
 });
