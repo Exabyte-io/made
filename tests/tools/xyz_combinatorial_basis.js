@@ -1,7 +1,7 @@
 import {expect} from "chai";
 
-import {Basis} from "../src/basis/basis";
-import {CombinatorialBasis} from "../src/parsers/xyz_combinatorial_basis";
+import {Basis} from "../../src/basis/basis";
+import {CombinatorialBasis} from "../../src/parsers/xyz_combinatorial_basis";
 
 describe('CombinatorialBasis', function () {
     it('toBasisConfig', function () {
@@ -88,14 +88,6 @@ describe('CombinatorialBasis', function () {
             ]
         });
         expect(basis1.isEqualTo(basis2)).to.equal(true);
-    });
-
-    it('Regular XYZ in wrong format', function () {
-        const xyz = `
-            Si 0.0 0.0 0.0 0.0\n
-            O 0.5 0.5 0.5
-        `;
-        // TODO
     });
 
     it('Permutation XYZ', function () {
