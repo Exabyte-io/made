@@ -1,4 +1,4 @@
-import {ArrayWithIds} from "../primitive";
+import {ArrayWithIds} from "../abstract/array_with_ids";
 
 export class AtomicConstraints {
 
