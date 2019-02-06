@@ -4,7 +4,7 @@
     "description": "Materials Design in Javascript (made.js)",
     "scripts": {
         "postinstall": "mkdir -p lib; babel src --out-dir lib",
-        "test": "mocha $NODE_DEBUG_OPTION --bail --require @babel/register/lib tests/*.js"
+        "test": "mocha $NODE_DEBUG_OPTION --recursive --bail --require @babel/register/lib tests"
     },
     "repository": {
         "type": "git",
@@ -18,7 +18,8 @@
     "homepage": "https://github.com/Exabyte-io/made-js",
     "devDependencies": {
         "mocha": "^2.5.3",
-        "chai": "^3.5.0"
+        "chai": "^3.5.0",
+        "fs-extra": "^4.0.0"
     },
     "dependencies": {
         "@babel/cli": "7.0.0",
