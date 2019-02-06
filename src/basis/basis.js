@@ -3,7 +3,7 @@ import s from "underscore.string";
 import {ATOMIC_COORD_UNITS, HASH_TOLERANCE} from "../constants";
 import {Lattice} from "../lattice/lattice";
 import math from "../math";
-import {ArrayWithIds} from "../primitive";
+import {ArrayWithIds} from "../abstract/array_with_ids";
 import {getElectronegativity} from "../periodic_table/elements";
 
 export class Basis {
@@ -39,6 +39,12 @@ export class Basis {
     static get defaultCell() {
         return new Lattice().vectorArrays;
     }
+
+    toJSON() {
+        return JSON.parse(JSON.stringify(_.pick(this, ["elements", "coordinates", "units", "cell"])));
+    }
+
+    clone(extraContext) {return new this.constructor(Object.assign({}, this.toJSON(), extraContext))}
 
     getElementByIndex(idx) {
         return this._elements.getArrayElementByIndex(idx);
@@ -92,14 +98,6 @@ export class Basis {
         if (this.units === ATOMIC_COORD_UNITS.crystal) return;
         this._coordinates.mapArrayInPlace(point => math.multiply(point, math.inv(unitCell)));
         this.units = ATOMIC_COORD_UNITS.crystal;
-    }
-
-    toJSON() {
-        return JSON.parse(JSON.stringify(_.pick(this, ["elements", "coordinates", "units", "cell"])));
-    }
-
-    clone(extraContext) {
-        return new this.constructor(Object.assign({}, this.toJSON(), extraContext));
     }
 
     // assert that all coordinates are within 0 and 1 in crystal units
@@ -229,11 +227,6 @@ export class Basis {
         return hashString;
     }
 
-    // helper to compare basis instances
-    isEqualTo(anotherBasisCls) {
-        return this.hashString === anotherBasisCls.hashString;
-    }
-
     /**
      * @summary Returns atomic positions array.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
@@ -253,6 +246,28 @@ export class Basis {
      */
     get nAtoms() {
         return this._elements.array.length;
+    }
+
+    // helpers
+
+    /**
+     * @summary Returns true if bases are equal, otherwise - false.
+     * @param anotherBasisClsInstance {Basis} Another Basis.
+     * @return {Boolean}
+     */
+    isEqualTo(anotherBasisClsInstance) {
+        return this.hashString === anotherBasisClsInstance.hashString;
+    }
+
+    /**
+     * @summary Returns true if basis cells are equal, otherwise - false.
+     * @param anotherBasisClsInstance {Basis} Another Basis.
+     * @return {Boolean}
+     */
+    hasEquivalentCellTo(anotherBasisClsInstance) {
+        // this.cell {Array} - Cell Vectors 1, eg. [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        return !this.cell.map((vector, idx) => (math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell[idx])))
+            .some(x => !x);
     }
 
 }
