@@ -12,7 +12,7 @@ const ADD = math.add;
  * @param supercell {Cell}
  * @return {Basis}
  */
-function generateNewBasis(basis, cell, supercell) {
+function generateNewBasisWithinSupercell(basis, cell, supercell) {
 
     const oldBasis = basis.clone();
     const newBasis = basis.clone({isEmpty: true});
@@ -52,7 +52,7 @@ function generateConfig(material, supercellMatrix) {
     const cell = material.Lattice.Cell;
     const supercell = cell.cloneAndScaleByMatrix(supercellMatrix);
 
-    const newBasis = generateNewBasis(material.Basis, cell, supercell);
+    const newBasis = generateNewBasisWithinSupercell(material.Basis, cell, supercell);
     const newLattice = LatticeBravais.fromVectors({
         a: supercell.vector1,
         b: supercell.vector2,
@@ -68,5 +68,5 @@ function generateConfig(material, supercellMatrix) {
 
 export default {
     generateConfig,
-    generateNewBasis,
+    generateNewBasisWithinSupercell,
 }
