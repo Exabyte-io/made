@@ -1,8 +1,8 @@
 import s from "underscore.string";
 
 import {Basis} from "./basis";
-import {ArrayWithIds} from "../primitive";
-import {AtomicConstraints} from "../other/constraints";
+import {ArrayWithIds} from "../abstract/array_with_ids";
+import {AtomicConstraints} from "../constraints/constraints";
 
 /**
  * @summary Extension of the Basis class able to deal with atomic constraints
