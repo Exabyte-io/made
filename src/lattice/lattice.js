@@ -24,6 +24,26 @@ export class Lattice extends LatticeBravais {
         return new Lattice(LatticeBravais.fromVectors(config).toJSON());
     }
 
+    toJSON(skipRounding = false) {
+        const round = skipRounding ? () => {} : Lattice._roundValue;  // round values by default
+        return {
+            a: round(this.a),
+            b: round(this.b),
+            c: round(this.c),
+            alpha: round(this.alpha),
+            beta: round(this.beta),
+            gamma: round(this.gamma),
+            units: {
+                length: this.units.length,
+                angle: this.units.angle,
+            },
+            type: this.type,
+            vectors: this.vectors.toJSON(),
+        }
+    }
+
+    clone(extraContext) {return new this.constructor(Object.assign({}, this.toJSON(), extraContext))}
+
     get vectorArrays() {
         return this.vectors.vectorArrays;
     }
@@ -104,29 +124,6 @@ export class Lattice extends LatticeBravais {
         vectors.push(this.units.length);
         return new UnitCell(...vectors);
 
-    }
-
-    // round values by default
-    toJSON(skipRounding = false) {
-        const f_ = skipRounding ? () => {} : Lattice._roundValue;
-        return {
-            a: f_(this.a),
-            b: f_(this.b),
-            c: f_(this.c),
-            alpha: f_(this.alpha),
-            beta: f_(this.beta),
-            gamma: f_(this.gamma),
-            units: {
-                length: this.units.length,
-                angle: this.units.angle,
-            },
-            type: this.type,
-            vectors: this.vectors.toJSON(),
-        }
-    }
-
-    clone(extraContext) {
-        return new this.constructor(Object.assign({}, this.toJSON(), extraContext));
     }
 
     // returns a string for hash calculation
