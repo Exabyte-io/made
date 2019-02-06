@@ -34,6 +34,7 @@
         "mathjs": "^3.9.0",
         "mixwith": "^0.1.1",
         "underscore": "^1.8.3",
-        "underscore.string": "^3.3.4"
+        "underscore.string": "^3.3.4",
+        "periodic-table": "file:/stack/lib/periodic-table"
     }
 }
