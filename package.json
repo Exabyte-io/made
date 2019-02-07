@@ -4,7 +4,7 @@
     "description": "Materials Design in Javascript (made.js)",
     "scripts": {
         "postinstall": "mkdir -p lib; babel src --out-dir lib",
-        "test": "mocha $NODE_DEBUG_OPTION --recursive --bail --require @babel/register/lib tests"
+        "test": "cucumber-js --require-module @babel/register --format node_modules/cucumber-pretty --require tests/cucumber/support tests/cucumber/features"
     },
     "repository": {
         "type": "git",
@@ -17,17 +17,20 @@
     },
     "homepage": "https://github.com/Exabyte-io/made-js",
     "devDependencies": {
-        "mocha": "^2.5.3",
         "chai": "^3.5.0",
-        "fs-extra": "^4.0.0"
+        "cucumber": "^5.1.0",
+        "cucumber-pretty": "^1.5.0",
+        "fs-extra": "^4.0.0",
+        "mocha": "^2.5.3",
+        "random-seed": "^0.3.0"
     },
     "dependencies": {
         "@babel/cli": "7.0.0",
         "@babel/core": "7.0.0",
-        "@babel/register": "7.0.0",
+        "@babel/plugin-proposal-class-properties": "7.0.0",
         "@babel/polyfill": "7.0.0",
         "@babel/preset-env": "7.0.0",
-        "@babel/plugin-proposal-class-properties": "7.0.0",
+        "@babel/register": "7.0.0",
         "array-almost-equal": "^1.0.0",
         "crypto-js": "^3.1.9-1",
         "lodash": "^4.17.4",
