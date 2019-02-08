@@ -65,7 +65,7 @@ const vDist = function (v1, v2) {
  * @param tolerance {Number} Tolerance
  * @return {Number}
  */
-const vEqualWithTolerance = (vec1, vec2, tolerance = TOLERANCE.pointsDistance) => (math.vDist(vec1, vec2) <= tolerance);
+const vEqualWithTolerance = (vec1, vec2, tolerance = TOLERANCE.pointsDistance) => (vDist(vec1, vec2) <= tolerance);
 
 /**
  * @summary Returns 0 if passed number is less than Made.math.EPSILON.
