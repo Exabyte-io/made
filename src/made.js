@@ -7,7 +7,6 @@ import {ReciprocalLattice} from "./lattice/reciprocal/lattice_reciprocal";
 import parsers from "./parsers/parsers";
 import tools from "./tools/index";
 import {DEFAULT_LATTICE_UNITS, LATTICE_TYPE_CONFIGS} from "./lattice/types";
-import {ELEMENTS, ELEMENTS_BY_SYMBOL} from "./periodic_table/elements";
 import {ArrayWithIds} from "./abstract/array_with_ids";
 import {AtomicConstraints} from "./constraints/constraints";
 
@@ -27,8 +26,6 @@ export const Made = {
 
     parsers,
     tools,
-    ELEMENTS,
-    ELEMENTS_BY_SYMBOL,
     LATTICE_TYPE_CONFIGS,
     DEFAULT_LATTICE_UNITS,
     primitive: {

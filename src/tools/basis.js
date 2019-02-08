@@ -77,13 +77,13 @@ function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
 
     const resultingListOfBases = [];
 
-    for (i = 1; i <= numberOfSteps; i++) {
+    for (let i = 1; i <= numberOfSteps; i++) {
         const normalizedStepIndex = i / (numberOfSteps + 1);
         const intermediateCoordinates = _linearInterpolation(initialCoordinates, delta, normalizedStepIndex);
         const vectorSize = 3;
         const intermediateCoordinatesAsNestedArray = _.toArray(
             _.groupBy(intermediateCoordinates, (a, b) => Math.floor(b / vectorSize))
-            );
+        );
         const intermediateBasis = initialBasis.clone();
         intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray;
         resultingListOfBases.push(intermediateBasis)

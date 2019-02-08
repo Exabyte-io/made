@@ -1,40 +1,11 @@
 import {expect} from "chai";
 
-import {Basis} from "../src/basis/basis";
-import {CombinatorialBasis} from "../src/parsers/xyz_combinatorial_basis";
+import {Basis} from "../../src/basis/basis";
+import {CombinatorialBasis} from "../../src/parsers/xyz_combinatorial_basis";
+import {AsGeBasis, FeLiSiBasis, Ge2Basis, OSiBasis, Si2Basis} from "../enums";
 
 describe('CombinatorialBasis', function () {
     it('toBasisConfig', function () {
-        const basisConfig1 = {
-            elements: [
-                {
-                    id: 1,
-                    value: 'Fe'
-                },
-                {
-                    id: 2,
-                    value: 'Li'
-                },
-                {
-                    id: 3,
-                    value: 'Si'
-                }
-            ],
-            coordinates: [
-                {
-                    id: 1,
-                    value: [0.5, 0.5, 0.5]
-                },
-                {
-                    id: 2,
-                    value: [0.3, 0.3, 0.3]
-                },
-                {
-                    id: 3,
-                    value: [0, 0, 0]
-                }
-            ]
-        };
 
         const basisConfig2 = new CombinatorialBasis.toBasisConfig([
             {
@@ -51,7 +22,7 @@ describe('CombinatorialBasis', function () {
             }
         ]);
 
-        const [basis1, basis2] = [new Basis(basisConfig1), new Basis(basisConfig2)];
+        const [basis1, basis2] = [new Basis(FeLiSiBasis), new Basis(basisConfig2)];
 
         expect(basis1.isEqualTo(basis2)).to.equal(true);
     });
@@ -65,37 +36,8 @@ describe('CombinatorialBasis', function () {
         const basis = new CombinatorialBasis(xyz);
         expect(basis.uniqueElements).deep.equal(['O', 'Si']);
         const basis1 = new Basis(basis.allBasisConfigs[0]);
-        const basis2 = new Basis({
-            elements: [
-                {
-                    id: 1,
-                    value: 'O'
-                },
-                {
-                    id: 2,
-                    value: 'Si'
-                }
-            ],
-            coordinates: [
-                {
-                    id: 1,
-                    value: [0.5, 0.5, 0.5]
-                },
-                {
-                    id: 2,
-                    value: [0, 0, 0]
-                }
-            ]
-        });
+        const basis2 = new Basis(OSiBasis);
         expect(basis1.isEqualTo(basis2)).to.equal(true);
-    });
-
-    it('Regular XYZ in wrong format', function () {
-        const xyz = `
-            Si 0.0 0.0 0.0 0.0\n
-            O 0.5 0.5 0.5
-        `;
-        // TODO
     });
 
     it('Permutation XYZ', function () {
@@ -105,77 +47,8 @@ describe('CombinatorialBasis', function () {
         `;
         const basis = new CombinatorialBasis(permutation);
         expect(basis.uniqueElements).deep.equal(['As', 'Ge', 'Si']);
-
         const basisList1 = basis.allBasisConfigs.map(c => new Basis(c));
-
-        const basisList2 = [
-            {
-                elements: [
-                    {
-                        id: 1,
-                        value: 'Si'
-                    },
-                    {
-                        id: 2,
-                        value: 'Si'
-                    }
-                ],
-                coordinates: [
-                    {
-                        id: 1,
-                        value: [0, 0, 0]
-                    },
-                    {
-                        id: 2,
-                        value: [0.5, 0.5, 0.5]
-                    }
-                ]
-            },
-            {
-                elements: [
-                    {
-                        id: 1,
-                        value: 'Ge'
-                    },
-                    {
-                        id: 2,
-                        value: 'Ge'
-                    }
-                ],
-                coordinates: [
-                    {
-                        id: 1,
-                        value: [0, 0, 0]
-                    },
-                    {
-                        id: 2,
-                        value: [0.5, 0.5, 0.5]
-                    }
-                ]
-            },
-            {
-                elements: [
-                    {
-                        id: 1,
-                        value: 'As'
-                    },
-                    {
-                        id: 2,
-                        value: 'Ge'
-                    }
-                ],
-                coordinates: [
-                    {
-                        id: 1,
-                        value: [0, 0, 0]
-                    },
-                    {
-                        id: 2,
-                        value: [0.5, 0.5, 0.5]
-                    }
-                ]
-            }
-        ].map(c => new Basis(c));
+        const basisList2 = [Si2Basis, Ge2Basis, AsGeBasis].map(c => new Basis(c));
 
         basisList1.forEach(basis1 => {
             const condition = basisList2.map(basis2 => basis2.isEqualTo(basis1)).reduce((a, b) => a || b);
