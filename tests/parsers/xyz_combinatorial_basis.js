@@ -29,7 +29,7 @@ describe('CombinatorialBasis', function () {
 
     it('Regular XYZ', function () {
         const xyz = `
-            Si 0.0 0.0 0.0\n
+            Si 0.0 0.0 0.0
             O 0.5 0.5 0.5
         `;
 
@@ -42,7 +42,7 @@ describe('CombinatorialBasis', function () {
 
     it('Permutation XYZ', function () {
         const permutation = `
-            Si/Ge/As 0.0 0.0 0.0\n
+            Si/Ge/As 0.0 0.0 0.0
             Si/Ge 0.5 0.5 0.5
         `;
         const basis = new CombinatorialBasis(permutation);
@@ -59,7 +59,7 @@ describe('CombinatorialBasis', function () {
 
     it('Combination XYZ', function () {
         const combination = `
-            Si,Ge,As 0.0 0.0 0.0\n
+            Si,Ge,As 0.0 0.0 0.0
             Si,Ge 0.5 0.5 0.5
         `;
         const basis = new CombinatorialBasis(combination);
