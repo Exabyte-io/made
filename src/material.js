@@ -57,39 +57,17 @@ export const defaultMaterialConfig = {
     }
 };
 
-class BaseMaterial {
-    constructor({name, lattice, basis}) {
-        this.name = name;
-        this.lattice = lattice;
-        this.basis = basis;
+export class Material {
+    constructor(config) {
+        this._json = lodash.cloneDeep(config || {});
     }
 
-    toJSON() {
-        return Object.assign({}, this);
-    }
-}
-
-export const MaterialPropMixin = (superclass) => class extends superclass {
-
-    prop(name, backupValue, deepClone = false) {
-        const value = lodash.get(this, name, backupValue);
-        return deepClone ? this._deepClone(value) : value;
+    prop(name, defaultValue) {
+        return lodash.get(this._json, name) || defaultValue;
     }
 
-    setProp(name, newValue) {
-        this[name] = newValue;
-    }
-
-};
-
-export const MaterialMixin = (superclass) => class extends superclass {
-
-    static get defaultConfig() {
-        return defaultMaterialConfig;
-    }
-
-    _deepClone(object) {
-        return lodash.cloneDeep(object);
+    setProp(name, value) {
+        this._json[name] = value;
     }
 
     updateFormula() {
@@ -250,18 +228,12 @@ export const MaterialMixin = (superclass) => class extends superclass {
         return parsers.poscar.toPoscar(this.toJSON(), omitConstraints);
     }
 
-};
-
-export const MaterialToJSONMixin = (superclass) => class extends superclass {
-
     toJSON() {
         return {
             lattice: this.Lattice.toJSON(),
-            basis: this.Lattice.toJSON(),
+            basis: this.Basis.toJSON(),
             name: this.name || this.formula
         };
     }
 
-};
-
-export const Material = mix(BaseMaterial).with(MaterialPropMixin, MaterialMixin, MaterialToJSONMixin);
+}

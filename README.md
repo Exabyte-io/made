@@ -1,2 +1,1 @@
-# made
-MAterial DEsign (MADE)
+# Materials Design in Javascript (Made.js)
