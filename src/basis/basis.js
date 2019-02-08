@@ -1,10 +1,11 @@
 import _ from "underscore";
 import s from "underscore.string";
-import {ATOMIC_COORD_UNITS, HASH_TOLERANCE} from "../constants";
-import {Lattice} from "../lattice/lattice";
+import {getElectronegativity} from "periodic-table";
+
 import math from "../math";
+import {Lattice} from "../lattice/lattice";
 import {ArrayWithIds} from "../abstract/array_with_ids";
-import {getElectronegativity} from "../periodic_table/elements";
+import {ATOMIC_COORD_UNITS, HASH_TOLERANCE} from "../constants";
 
 export class Basis {
     constructor({
