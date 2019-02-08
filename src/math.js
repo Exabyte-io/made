@@ -59,6 +59,15 @@ const vDist = function (v1, v2) {
 }
 
 /**
+ * @summary Returns checks whether 2 vector are equal within tolerance.
+ * @param vec1 {Number[]} Vector
+ * @param vec2 {Number[]} Vector
+ * @param tolerance {Number} Tolerance
+ * @return {Number}
+ */
+const vEqualWithTolerance = (vec1, vec2, tolerance = TOLERANCE.pointsDistance) => (math.vDist(vec1, vec2) <= tolerance);
+
+/**
  * @summary Returns 0 if passed number is less than Made.math.EPSILON.
  * @param n {Number}
  * @return {Number}
@@ -184,6 +193,7 @@ export default Object.assign({}, math, {
     angle,
     angleUpTo90,
     vDist,
+    vEqualWithTolerance,
     roundToZero,
     precise,
     mod,

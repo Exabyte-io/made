@@ -1,15 +1,14 @@
 import _ from "underscore";
 import {Basis} from "../basis/basis";
-import cell from "./cell";
 import math from "../math";
 
 const ADD = math.add;
 const MULT = math.multiply;
 
 /**
- * @summary Returns repeated basis of a crystal.
+ * @summary Returns a repeated basis of a crystal.
  * @param basis {Basis} Original basis.
- * @param repetitions{Number[]} Repetition vector `[x, y, z]`
+ * @param repetitions{Number[]} Repetition vector `[x, y, z]`, in each spatial dimension.
  * @return {Basis} New Basis.
  */
 function repeat(basis, repetitions) {
@@ -62,7 +61,7 @@ function repeat(basis, repetitions) {
  */
 function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
     // check that initial and final basis have the same cell
-    if (!cell.areEqual(initialBasis.cell, finalBasis.cell))
+    if (!initialBasis.hasEquivalentCellTo(finalBasis))
         throw new Error("basis.interpolate: Basis cells are not equal");
 
     // clone original initialBasis and assert it is in cartesian coordinates
@@ -78,13 +77,13 @@ function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
 
     const resultingListOfBases = [];
 
-    for (i = 1; i <= numberOfSteps; i++) {
+    for (let i = 1; i <= numberOfSteps; i++) {
         const normalizedStepIndex = i / (numberOfSteps + 1);
         const intermediateCoordinates = _linearInterpolation(initialCoordinates, delta, normalizedStepIndex);
         const vectorSize = 3;
         const intermediateCoordinatesAsNestedArray = _.toArray(
             _.groupBy(intermediateCoordinates, (a, b) => Math.floor(b / vectorSize))
-            );
+        );
         const intermediateBasis = initialBasis.clone();
         intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray;
         resultingListOfBases.push(intermediateBasis)
