@@ -29,9 +29,9 @@ export const ATOMIC_COORD_UNITS = {
 // Only 3 digits will be considered for lattice and basis params on hashing
 export const HASH_TOLERANCE = 3;
 
-
 export default {
     coefficients,
     tolerance,
-    units
+    units,
+    ATOMIC_COORD_UNITS,
 }
