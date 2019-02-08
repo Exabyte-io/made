@@ -1,5 +1,4 @@
 import lodash from "lodash";
-import {mix} from "mixwith";
 import CryptoJS from "crypto-js";
 
 import parsers from "./parsers/parsers";
@@ -70,6 +69,16 @@ export class Material {
         this._json[name] = value;
     }
 
+    toJSON() {
+        return {
+            lattice: this.Lattice.toJSON(),
+            basis: this.Basis.toJSON(),
+            name: this.name || this.formula
+        };
+    }
+
+    clone(extraContext) {return new this.constructor(Object.assign({}, this.toJSON(), extraContext))}
+
     updateFormula() {
         this.setProp('formula', this.Basis.formula);
         this.setProp('unitCellFormula', this.Basis.unitCellFormula);
@@ -114,10 +123,6 @@ export class Material {
             ...this.basis,
             constraints,
         })
-    }
-
-    clone(extraContext) {
-        return new this.constructor(Object.assign({}, this.toJSON(), extraContext));
     }
 
     get basis() {
@@ -226,14 +231,6 @@ export class Material {
             return this.src.text;
         }
         return parsers.poscar.toPoscar(this.toJSON(), omitConstraints);
-    }
-
-    toJSON() {
-        return {
-            lattice: this.Lattice.toJSON(),
-            basis: this.Basis.toJSON(),
-            name: this.name || this.formula
-        };
     }
 
 }
