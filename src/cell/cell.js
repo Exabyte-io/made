@@ -33,8 +33,12 @@ export class Cell {
         ].map(v => v.map(c => (math.abs(c) < constants.tolerance.lengthAngstrom) ? 0 : c));
     }
 
-    clone() {
-        return new this.constructor(this.vectorsAsArray);
+    clone() {return new this.constructor(this.vectorsAsArray)}
+
+    cloneAndScaleByMatrix(matrix) {
+        const newCell = this.clone();
+        newCell.scaleByMatrix(matrix);
+        return newCell;
     }
 
     convertPointToCartesian(point) {
@@ -85,12 +89,6 @@ export class Cell {
      */
     scaleByMatrix(matrix) {
         [this.vector1, this.vector2, this.vector3] = MATRIX_MULT(matrix, this.vectorsAsArray);
-    }
-
-    cloneAndScaleByMatrix(matrix) {
-        const newCell = this.clone();
-        newCell.scaleByMatrix(matrix);
-        return newCell;
     }
 
 }
