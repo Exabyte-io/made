@@ -59,6 +59,7 @@ export class Cell {
      *          obtaining the boundaries for the sub-interval where shifted point located on the lattice represented by
      *          latticeVectors is within the cell.
      *          TODO: implement an optimized version and auto-locate amplitude.
+     *          TODO: migrate to tools
      */
     generateTranslationCombinations(point, anotherCell, amplitude = 10) {
 
