@@ -1,5 +1,3 @@
-import _ from "underscore";
-
 /**
  * @summary Material's lattice units.
  */
@@ -153,19 +151,3 @@ export const LATTICE_TYPE_CONFIGS = [
         editablesConventional: ['a', 'b', 'c', 'alpha', 'beta', 'gamma'],
     }
 ];
-
-// TODO: check whether code below is used and remove if needed
-
-let obj = {};
-
-_.each(Object.keys(LATTICE_TYPE), function (el, idx) {
-    if (el in LATTICE_TYPE_EXTENDED) {
-        obj[el] = LATTICE_TYPE_EXTENDED[el];
-    } else if (`${el}_1` in LATTICE_TYPE_EXTENDED) {
-        obj[el] = LATTICE_TYPE_EXTENDED[`${el}_1`];
-    } else {
-        obj[el] = LATTICE_TYPE_EXTENDED[`${el}_1a`];
-    }
-});
-
-export const LATTICE_TYPE_BASIC_TO_EXTENDED = obj;
