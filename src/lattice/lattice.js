@@ -1,4 +1,6 @@
+import _ from "underscore";
 import lodash from "lodash";
+
 import math from "../math";
 import constants, {HASH_TOLERANCE} from "../constants";
 
