@@ -6,7 +6,7 @@ const ADD = math.add;
 const MULT = math.multiply;
 
 /**
- * @summary Returns a repeated basis of a crystal.
+ * Returns a repeated basis of a crystal.
  * @param basis {Basis} Original basis.
  * @param repetitions{Number[]} Repetition vector `[x, y, z]`, in each spatial dimension.
  * @return {Basis} New Basis.
@@ -52,7 +52,7 @@ function repeat(basis, repetitions) {
 }
 
 /**
- * @summary Returns a set of Bases for a crystal interpolated from initial to final crystal.
+ * Returns a set of Bases for a crystal interpolated from initial to final crystal.
  *          Can be used to generate atomic configurations along a chemical reaction path, for example.
  * @param initialBasis {Basis} Original initialBasis.
  * @param finalBasis {Basis} Final initialBasis.
@@ -93,7 +93,7 @@ function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
 }
 
 /**
- * @summary Simply executes `y = kx + b` for vectors. Isolated for modularity.
+ * Calculates linear function `y = kx + b` for vectors. Isolated for modularity.
  * @param initialCoordinates {Array} - b.
  * @param delta {Array} - x.
  * @param normalizedStepIndex {Number} - k.
