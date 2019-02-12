@@ -1,20 +1,16 @@
-/**
- * @summary Material's lattice units.
- */
 export const DEFAULT_LATTICE_UNITS = {
+    // by default lattice vectors shall be measured in angstrom, angles - in degrees
     length: {
-        // by default lattice vectors shall be measured in angstrom
         angstrom: 'angstrom',
     },
     angle: {
-        // by default lattice vectors shall be measured in angstrom
         degree: 'degree',
     },
 };
 
 /**
- * @summary Shortlist of lattice types (according to [AFLOW](https://arxiv.org/abs/1004.2974))
- * Convention used is similar to:
+ * Shortlist of lattice types (according to [AFLOW](https://arxiv.org/abs/1004.2974))
+ * Convention used is derived from:
  *   Setyawan, W., & Curtarolo, S. (2010). High-throughput electronic band structure calculations:
  *   Challenges and tools. Computational Materials Science, 49(2), 299-312. doi:10.1016/j.commatsci.2010.05.010
  * Lattice parameters a, b, c are stored for CONVENTIONAL lattice, however the default unit cell is calculated for
