@@ -11,12 +11,18 @@ const _latticeVectorsToString = (vectors) => vectors.map((v) => v.map(c => _prin
 
 const _atomicConstraintsCharFromBool = (bool) => bool ? "T" : "F";
 
-function toPoscar(materialConfig, omitConstraints = false) {
-    const lattice = new Lattice(materialConfig.lattice);
+/**
+ * Obtain a textual representation of a material in POSCAR format.
+ * @param {Material|Object} materialOrConfig - material class instance or config object.
+ * @param {Boolean} omitConstraints - whether to discard constraints passed with material.
+ * @return {string}
+ */
+function toPoscar(materialOrConfig, omitConstraints = false) {
+    const lattice = new Lattice(materialOrConfig.lattice);
     const vectorsAsString = _latticeVectorsToString(lattice.vectorArrays);
 
     const basis = new ConstrainedBasis({
-        ...materialConfig.basis,
+        ...materialOrConfig.basis,
         cell: lattice.vectorArrays
     });
 
@@ -34,10 +40,10 @@ function toPoscar(materialConfig, omitConstraints = false) {
     const elementsLine = Object.keys(basis.elementCounts).join(' ');
     const countsLine = Object.values(basis.elementCounts).map(x => parseInt(x)).join(' ');
 
-    const coordsType = materialConfig.basis.units === ATOMIC_COORD_UNITS.cartesian ? 'cartesian' : 'direct';
+    const coordsType = materialOrConfig.basis.units === ATOMIC_COORD_UNITS.cartesian ? 'cartesian' : 'direct';
 
     return [
-        materialConfig.name,
+        materialOrConfig.name,
         "1.0",
         vectorsAsString,
         elementsLine,
