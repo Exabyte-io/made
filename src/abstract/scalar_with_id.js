@@ -1,8 +1,7 @@
 import _ from "underscore";
 
 /**
- * Helper class representing a ScalarWithId.
- * @example {"id" : 0, "value" : "Si" }
+ * Helper class representing a scalar with an associated id.
  */
 export class ScalarWithId {
 
@@ -21,6 +20,10 @@ export class ScalarWithId {
         this.id = id;
     }
 
+    /**
+     * Serialize class instance to JSON.
+     * @example {"id" : 0, "value" : "Si" }
+     */
     toJSON() {
         return {
             id: this.id,
