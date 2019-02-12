@@ -157,7 +157,7 @@ export class CombinatorialBasis {
     }
 
     /**
-     * Returns array of regular basises extracted from current combinatorial basis with combinations.
+     * Returns array of regular bases extracted from current combinatorial basis with combinations.
      * @private
      */
     _combination() {
@@ -178,13 +178,13 @@ export class CombinatorialBasis {
     }
 
     /**
-     * Returns array of regular basises extracted from current combinatorial basis with permutations.
+     * Returns array of regular bases extracted from current combinatorial basis with permutations.
      * @return {Basis[]}
      * @private
      */
     _permutation() {
         const maxLen = Math.max.apply(Math, this._lines.map(x => x.elements.length));
-        const basises = [];
+        const bases = [];
         for (let i = 0; i < maxLen; i++) {
             const items = [];
             this._lines.forEach(function (line) {
@@ -194,9 +194,9 @@ export class CombinatorialBasis {
                     coordinates: line.coordinates
                 });
             });
-            basises.push(items);
+            bases.push(items);
         }
-        return basises;
+        return bases;
     }
 
     /**
