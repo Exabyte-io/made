@@ -11,7 +11,7 @@ import {CombinatorialBasis} from "./xyz_combinatorial_basis";
 const XYZ_LINE_REGEX = /[A-Z][a-z]?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+[0-1]\s+[0-1]\s+[0-1]\s+?)?)/;
 
 /**
- * @summary Validates that passed string is well-formed XYZ file.
+ * Validates that passed string is well-formed XYZ file.
  * @param xyzTxt {String}
  */
 export function validate(xyzTxt) {
@@ -19,7 +19,7 @@ export function validate(xyzTxt) {
 }
 
 /**
- * @summary Validates XYZ file's line. Line should be in following format "Si 0.5 0.5 0.5".
+ * Validates XYZ file's line. Line should be in following format "Si 0.5 0.5 0.5".
  * Raises an error if line is in wrong format.
  * @param xyzLine {String}
  * @param index {Number}
@@ -39,6 +39,11 @@ function validateLine(xyzLine, index) {
     });
 }
 
+/**
+ * Parses XYZ line and returns an object.
+ * @param {String} line - line of text
+ * @return {Object}
+ */
 function _parseXYZLineAsWords(line) {
     const words = s.words(line);
     return {
@@ -49,7 +54,7 @@ function _parseXYZLineAsWords(line) {
 }
 
 /**
- * @summary Parse XYZ text for basis.
+ * Parse XYZ text for basis.
  * @param txt {String} Text
  * @param units {String} Coordinate units
  * @param cell {Array} Basis Cell
@@ -88,7 +93,7 @@ function toBasisConfig(txt, units = 'angstrom', cell = Basis.defaultCell) {
 }
 
 /**
- * @summary create XYZ from Basis class instance.
+ * Create XYZ from Basis class instance.
  * @param basisClsInstance {ConstrainedBasis} Basis class instance.
  * @param printFormat {String} Output format for coordinates.
  * @return {String} Basis string in XYZ format
@@ -107,7 +112,7 @@ function fromBasis(basisClsInstance, printFormat = '%9.5f') {
 }
 
 /**
- * @summary create XYZ from Material class instance (or its JSON config).
+ * Create XYZ from Material class instance (or its JSON config).
  * @param materialOrConfig {Material|Object} Material.
  * @param fractional {Boolean} Coordinate units as fractional.
  * @return {ConstrainedBasis} Class Instance

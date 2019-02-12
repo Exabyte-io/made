@@ -1,5 +1,7 @@
 /**
- * @summary Extracts cif meta information
+ * Extracts meta information from a CIF file
+ * @param {String} txt - CIF file text.
+ * @return {Object}
  */
 function parseMeta(txt) {
     const REGEX = {
