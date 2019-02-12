@@ -3,8 +3,7 @@ import _ from "underscore";
 import {ScalarWithId} from "./scalar_with_id";
 
 /**
- * A helper class representing an ArrayWithIds.
- * @example [{"id" : 0, "value" : "Si" }, {"id" : 1, "value" : "Si" }]
+ * Helper class representing an ArrayWithIds. Used to explicitly track values assigned to atoms, for example.
  */
 export class ArrayWithIds {
     /**
@@ -17,13 +16,17 @@ export class ArrayWithIds {
         this.array = array.sort((a, b) => a.id - b.id).map(element => element.value || element);
     }
 
+    /**
+     * Serialize class instance to JSON.
+     * @example [{"id" : 0, "value" : "Si" }, {"id" : 1, "value" : "Si" }]
+     */
     toJSON() {
         // from ["a", "b"] to [{id: 0, value: "a"}, {id: 1, value: "b"}]
         return this.array.map((el, idx) => new ScalarWithId(el, idx).toJSON());
     }
 
     /**
-     * Apply function fn to each element of the array and save the result in 'array'
+     * Apply function fn to each element of the array and replace `array` with the result.
      * @param {Function} fn - The function to be applied to each array element.
      */
     mapArrayInPlace(fn) {
