@@ -1,6 +1,6 @@
 # Made.js
 
-Made.js is a library for MAterials DEsign in JavaScript allowing for the creation and manipulation of material structures.
+Made.js is a library for **MA**terials **DE**sign in **J**ava**S**cript allowing for the creation and manipulation of material structures.
 
 ## Conventions
 
