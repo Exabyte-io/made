@@ -2,7 +2,7 @@
 
 Made.js is a library for **MA**terials **DE**sign in **J**ava**S**cript allowing for the creation and manipulation of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript, both on the client (web browser) and server (eg. Node.js) side.
 
-The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. 
+The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. For example, [this page](https://platform.exabyte.io/demo/materials/n3HSzCmyoctgJFGGE) representing a crystal of Silicon online uses Made.js.
 
 Exabyte.io believe in a collaborative future of materials design on the web.
 
