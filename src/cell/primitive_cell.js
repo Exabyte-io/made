@@ -1,9 +1,9 @@
 import {LATTICE_TYPE} from "../lattice/types";
 import math from "../math";
 
-/*
- * @summary Routines for calculating primitive cell vectors from conventional cell Bravais parameters.
- *          Following Setyawan, W., & Curtarolo, S. (2010). doi:10.1016/j.commatsci.2010.05.010
+/**
+ * Routines for calculating primitive cell vectors from conventional cell Bravais parameters.
+ * Following Setyawan, W., & Curtarolo, S. (2010). doi:10.1016/j.commatsci.2010.05.010
  */
 const PRIMITIVE_CELLS = {
 
@@ -156,18 +156,15 @@ const PRIMITIVE_CELLS = {
 
 };
 
+/**
+ * Returns lattice vectors for a primitive cell for a lattice.
+ * @param {Lattice} lattice - Lattice instance.
+ * @param {Boolean[]} skipRounding - whether to skip rounding the lattice vectors.
+ * @return {Array[]} Cell.vectorsAsArray
+ */
 export function primitiveCell(lattice, skipRounding = false) {
     const [vectorA, vectorB, vectorC] = PRIMITIVE_CELLS[lattice.type || LATTICE_TYPE.TRI](lattice);
     // set precision and remove JS floating point artifacts
     !skipRounding && [vectorA, vectorB, vectorC].map(vec => vec.map(c => math.precise(c)).map(math.roundToZero));
     return [vectorA, vectorB, vectorC];
-}
-
-// Kept for a little while to avoid loosing lattice number rounding context
-// TODO: find out whether line 158 contains satisfactory rounding routines and remove the below code
-function _fix(num, pos) {
-    if (!pos) {
-        pos = 3;
-    }
-    return +(num.toFixed(pos));
 }
