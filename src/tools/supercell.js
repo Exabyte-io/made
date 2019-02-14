@@ -3,6 +3,8 @@ import {Basis} from "../basis/basis";
 import {Cell} from "../cell/cell";
 import {LatticeBravais} from "../lattice/lattice_bravais";
 
+import cellTools from "./cell";
+
 const ADD = math.add;
 
 /**
@@ -25,7 +27,7 @@ function generateNewBasisWithinSupercell(basis, cell, supercell) {
         const coordinate = oldBasis.getCoordinateByIndex(element.id);
         const cartesianCoordinate = cell.convertPointToCartesian(coordinate);
 
-        const combinations = cell.generateTranslationCombinations(cartesianCoordinate, supercell);
+        const combinations = cellTools.generateTranslationCombinations(cell, cartesianCoordinate, supercell);
         combinations.forEach(comb => {
             // "combination" is effectively a point in fractional coordinates here, hence the below
             const newPoint = ADD(cartesianCoordinate, cell.convertPointToCartesian(comb));

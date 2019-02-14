@@ -4,25 +4,31 @@ import constants from "../constants";
 const MATRIX = math.matrix;
 const MULT = math.multiply;
 const INV = math.inv;
-const ADD = math.add;
 const MATRIX_MULT = (...args) => MULT(...args.map(x => MATRIX(x))).toArray();
 
 /*
- * @summary Cell represents a unit cell in geometrical form: 3x3 matrix where rows are cell vectors:
- *          Example: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
- *
- * @param nestedArray {Number[][]} is an array of cell vectors in cartesian Angstrom units
+ * Cell represents a unit cell in geometrical form: 3x3 matrix where rows are cell vectors.
+ * Example: [[1, 0, 0], [0, 1, 0], [0, 0, 1]].
  */
 export class Cell {
 
     tolerance = 1;
 
+    /**
+     * Create a cell.
+     * @param nestedArray {Number[][]} is an array of cell vectors in cartesian Angstrom units.
+     */
     constructor(nestedArray) {
         this.vector1 = nestedArray[0];
         this.vector2 = nestedArray[1];
         this.vector3 = nestedArray[2];
     }
 
+    /**
+     * Get cell vectors as (a nested) array.
+     * @return {Array[]}
+     * @example [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+     */
     get vectorsAsArray() {
         return [
             this.vector1,
@@ -41,51 +47,41 @@ export class Cell {
         return newCell;
     }
 
-    convertPointToCartesian(point) {
-        return MULT(point, this.vectorsAsArray);
-    }
+    /**
+     * Convert a point (in crystal coordinates) to cartesian.
+     * @return {Array}
+     */
+    convertPointToCartesian(point) {return MULT(point, this.vectorsAsArray)}
 
-    convertPointToFractional(point) {
-        return MULT(point, INV(this.vectorsAsArray));
-    }
+    /**
+     * Convert a point (in cartesian coordinates) to crystal (fractional).
+     * @return {Array}
+     */
+    convertPointToFractional(point) {return MULT(point, INV(this.vectorsAsArray))}
 
+    /**
+     * Check whether a point is inside the cell.
+     * @param {Array} point - the point to conduct the check for.
+     * @param {Number} tolerance - numerical tolerance.
+     * @return {Boolean}
+     */
     isPointInsideCell(point, tolerance = constants.tolerance.length) {
         return this.convertPointToFractional(point).map(c => math.isBetweenZeroInclusiveAndOne(c, tolerance))
             .reduce((a, b) => a && b);
     }
 
-    /*
-     * @summary Counts integer shifts in both positive and negative directions by sweeping the [-10, 10] interval and
-     *          obtaining the boundaries for the sub-interval where shifted point located on the lattice represented by
-     *          latticeVectors is within the cell.
-     *          TODO: implement an optimized version and auto-locate amplitude.
+    /**
+     * Returns the index of the cell vector, most collinear with the testVector.
+     * @param testVector
+     * @return {Number}
      */
-    generateTranslationCombinations(point, anotherCell, amplitude = 10) {
-
-        const combinations = [];
-        const range = Array.from({length: 2 * amplitude + 1}, (v, k) => k - amplitude);
-
-        range.forEach(i => {
-            range.forEach(j => {
-                range.forEach(k => {
-                    const shift = this.convertPointToCartesian([i, j, k]);
-                    if (anotherCell.isPointInsideCell(ADD(point, shift))) {
-                        combinations.push([i, j, k]);
-                    }
-                })
-            })
-        });
-
-        return combinations;
-    }
-
     getMostCollinearVectorIndex(testVector) {
         const angles = this.vectorsAsArray.map(v => math.angleUpTo90(v, testVector));
         return angles.findIndex(el => el === math.min(angles));
     }
 
-    /*
-     * @summary Scaled this cell by right-multiplying it to a matrix (nested array)
+    /**
+     * Scale this cell by right-multiplying it to a matrix (nested array)
      */
     scaleByMatrix(matrix) {
         [this.vector1, this.vector2, this.vector3] = MATRIX_MULT(matrix, this.vectorsAsArray);
