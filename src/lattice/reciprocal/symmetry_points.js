@@ -1,5 +1,5 @@
 /**
- * Module contains methods for Brillouin zone symmetry points by lattice type.
+ * This file contains information about the Brillouin zone symmetry points by lattice type.
  * [AFLOW](https://arxiv.org/abs/1004.2974) methodology is used for implementation.
  */
 import {LATTICE_TYPE} from "../types";
@@ -1561,8 +1561,8 @@ const POINTS = {
 };
 
 /**
- * @summary Returns symmetry points for the specified lattice.
- * @param lattice {Object}
+ * Returns a list of symmetry points for the specified lattice.
+ * @param lattice {Lattice|Object}
  * @return {Object[]}
  */
 export function symmetryPoints(lattice) {

@@ -11,21 +11,65 @@ import {primitiveCell} from "../cell/primitive_cell";
 import {Cell} from "../cell/cell";
 
 /*
- * @summary Container class for crystal lattice and associated methods.
- *          Follows Bravais convention for lattice types and contains lattice vectors within.
- *          Units for lattice vector coordinates are "angstroms", and "degrees" for the corresponding angles.
+ * Container class for crystal lattice and associated methods.
+ * Follows Bravais convention for lattice types and contains lattice vectors within.
+ * Units for lattice vector coordinates are "angstroms", and "degrees" for the corresponding angles.
  */
 export class Lattice extends LatticeBravais {
 
+    /**
+     * Create a Lattice class from a config object.
+     * @param {Object} config - Config object. See LatticeVectors.fromBravais.
+     */
     constructor(config = {}) {
         super(config);
         this.vectors = LatticeVectors.fromBravais(config);
     }
 
+    /**
+     * Create a Lattice class from a list of vectors.
+     * @param {Object} config - Config object. See LatticeBravais.fromVectors.
+     */
     static fromVectors(config) {
         return new Lattice(LatticeBravais.fromVectors(config).toJSON());
     }
 
+    /**
+     * Serialize class instance to JSON.
+     * @example As below:
+         {
+            "a" : 3.867,
+            "b" : 3.867,
+            "c" : 3.867,
+            "alpha" : 60,
+            "beta" : 60,
+            "gamma" : 60,
+            "units" : {
+                "length" : "angstrom",
+                "angle" : "degree"
+            },
+            "type" : "FCC",
+            "vectors" : {
+                "a" : [
+                    3.34892,
+                    0,
+                    1.9335
+                ],
+                "b" : [
+                    1.116307,
+                    3.157392,
+                    1.9335
+                ],
+                "c" : [
+                    0,
+                    0,
+                    3.867
+                ],
+                "alat" : 1,
+                "units" : "angstrom"
+            }
+        }
+     */
     toJSON(skipRounding = false) {
         const round = skipRounding ? () => {} : Lattice._roundValue;  // round values by default
         return {
@@ -46,18 +90,24 @@ export class Lattice extends LatticeBravais {
 
     clone(extraContext) {return new this.constructor(Object.assign({}, this.toJSON(), extraContext))}
 
-    get vectorArrays() {
-        return this.vectors.vectorArrays;
-    }
+    /**
+     * Get lattice vectors as a nested array
+     * @return {Array[]}
+     */
+    get vectorArrays() {return this.vectors.vectorArrays}
 
-    get Cell() {
-        return new Cell(this.vectorArrays);
-    }
+    get Cell() {return new Cell(this.vectorArrays)}
 
-    get typeLabel() {
-        return lodash.get(LATTICE_TYPE_CONFIGS.find(c => c.code === this.type), 'label', 'Unknown');
-    }
+    /**
+     * Get a short label for the type of the lattice, eg. "MCLC".
+     * @return {String}
+     */
+    get typeLabel() {return lodash.get(LATTICE_TYPE_CONFIGS.find(c => c.code === this.type), 'label', 'Unknown')}
 
+    /**
+     * Get a short label for the extended type of the lattice, eg. "MCLC-5".
+     * @return {String}
+     */
     get typeExtended() {
         const {a, b, c, alpha, beta, gamma, type} = this;
         let cosAlpha = math.cos(alpha / 180 * math.PI);
@@ -92,12 +142,14 @@ export class Lattice extends LatticeBravais {
         }
     }
 
-    get volume() {
-        return math.abs(math.det(this.vectors));
-    }
+    /**
+     * Calculate the volume of the lattice cell.
+     * @return {Number}
+     */
+    get volume() {return math.abs(math.det(this.vectors))}
 
     /*
-     * @summary: Returns a "default" primitive lattice for each lattice type with lattice parameters scaled by "a",
+     * Returns a "default" primitive lattice by type, with lattice parameters scaled by the length of "a",
      * @param latticeConfig {Object} LatticeBravais config (see constructor)
      */
     static getDefaultPrimitiveLatticeConfigByType(latticeConfig) {
@@ -121,6 +173,7 @@ export class Lattice extends LatticeBravais {
 
     }
 
+    // TODO: remove
     get unitCell() {
         const vectors = _.flatten(this.vectorArrays);
         vectors.push(this.units.length);
@@ -128,7 +181,11 @@ export class Lattice extends LatticeBravais {
 
     }
 
-    // returns a string for hash calculation
+    /**
+     * Returns a string further used for the calculation of an unique hash.
+     * @param {Boolean} isScaled - Whether to scale the vectors by the length of the first vector initially.
+     * @return {string}
+     */
     getHashString(isScaled = false) {
         // lattice vectors must be measured in angstroms
         const latticeInAngstroms = this;
