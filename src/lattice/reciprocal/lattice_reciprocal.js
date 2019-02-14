@@ -6,10 +6,18 @@ import {symmetryPoints} from "./symmetry_points";
 
 export class ReciprocalLattice extends Lattice {
 
+    /**
+     * Create a Reciprocal lattice class.
+     * @param {Object} config - same as for Lattice.
+     */
     constructor(config) {
         super(config);
     }
 
+    /**
+     * Ger reciprocal vectors for the current Lattice.
+     * @return {Array[]}
+     */
     get reciprocalVectors() {
         const vectors_ = this.vectors.vectorArrays;
         const divider = math.multiply(vectors_[0], math.cross(vectors_[1], vectors_[2]));
@@ -20,19 +28,31 @@ export class ReciprocalLattice extends Lattice {
         ];
     }
 
-    getCartesianCoordinates(point) {
-        return math.multiply(point, math.inv(this.reciprocalVectors))
-    }
+    /**
+     * Get point (in crystal coordinates) in cartesian coordinates.
+     * @param {Array} point - point in 3D space
+     * @return {Array}
+     */
+    getCartesianCoordinates(point) {return math.multiply(point, math.inv(this.reciprocalVectors))}
 
-    get symmetryPoints() {
-        return symmetryPoints(this);
-    }
+    /**
+     * Get the list of high-symmetry points for the current lattice.
+     * @return {Object[]}
+     */
+    get symmetryPoints() {return symmetryPoints(this)}
 
-    get defaultKpointPath() {
-        return paths[this.typeExtended] || paths[this.type];
-    }
+    /**
+     * Get the default path in reciprocal space for the current lattice.
+     * @return {Array[]}
+     */
+    get defaultKpointPath() {return paths[this.typeExtended] || paths[this.type]}
 
-    extractKpointPath (dataPoints = []) {
+    /**
+     * Find/mark the high symmetry points on a list with raw data and return the edited list.
+     * @param {Array} dataPoints - list of point coordinates
+     * @return {Object[]}
+     */
+    extractKpointPath(dataPoints = []) {
         const kpointPath = [];
         const symmPoints = this.symmetryPoints;
 

@@ -8,8 +8,13 @@ const ADD = math.add;
 const DOT = math.product;
 const getMatrixInLeftHandedRepresentation = (matrix) => (math.det(matrix) < 0) ? MULT(matrix, -1) : matrix;
 
-// Helper function for extended GCD.
-// Adopted from https://gitlab.com/ase/ase/blob/master/ase/build/general_surface.py
+/**
+ * Helper function for extended GCD.
+ * Inspired by https://gitlab.com/ase/ase/blob/master/ase/build/general_surface.py
+ * @param {Number} a
+ * @param {Number} b
+ * @return {Array}
+ */
 function extGCD(a, b) {
     if (b === 0) return [1, 0];
     else if (math.mod(a, b) === 0) return [0, 1];
@@ -20,8 +25,8 @@ function extGCD(a, b) {
 }
 
 /**
- * @summary Generates a slab scaling matrix for the specified cell based on miller indices.
- *          Adopted from https://gitlab.com/ase/ase/blob/master/ase/build/general_surface.py
+ * Generates a slab scaling matrix for the specified cell based on miller indices.
+ * Inspired by from https://gitlab.com/ase/ase/blob/master/ase/build/general_surface.py.
  * @param cell {Cell}
  * @param millerIndices {Number[]}
  * @param tol {Number} Zero-value tolerance
@@ -74,12 +79,12 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
     return getMatrixInLeftHandedRepresentation(scalingMatrix);
 }
 
-/*
- * @summary Scale the surface cell in out-of-plane direction according to thickness and constructs the
-          lateral supercell from vx/vy parameters.
+/**
+ * Scale the surface cell in out-of-plane direction according to thickness
+ *  and construct the lateral supercell from vx/vy parameters.
  * @param bulkCell {Cell}
  * @param surfaceCell {Cell}
- * @param outOfPlaneIndex {Number} Index of the cell vector most collinear with the out-of-surface-plane vector
+ * @param outOfPlaneAxisIndex {Number} Index of the cell vector most collinear with the out-of-surface-plane vector
  * @param thickness {Number} Surface (Slab) thickness in layers (Positive Integer).
  * @param vx {Number} Size of lateral supercell along the direction of the first (x) cell vector (Positive Integer).
  * @param vy {Number} Size of lateral supercell along the direction of the second (y) cell vector (Positive Integer).
@@ -100,7 +105,7 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
 }
 
 /*
- * @summary Generates a config object for a surface based on a set of parameters
+ * Generate a config object for a surface based on a set of parameters.
  * @param material {Material} The parent material (bulk) this surface is constructed from
  * @param millerIndices {Number[]} Miller Indices that define the surface cleavage.
  * @param numberOfLayers {Number} Surface (Slab) thickness in layers (Positive Integer).
@@ -110,7 +115,7 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
  */
 function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy = 1) {
 
-    if (numberOfLayers < 1) throw new Error('generateSlabConfigFromMaterialAndMillerIndices: number of layers < 1.');
+    if (numberOfLayers < 1) throw new Error('Made.tools.surface.generateConfig: number of layers < 1.');
 
     const cell = material.Lattice.Cell;
 
