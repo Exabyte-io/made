@@ -16,3 +16,4 @@ export const Ge2Basis = readJSONFile(path.join(FIXTURES_DIR, "Ge2-basis.json"));
 export const AsGeBasis = readJSONFile(path.join(FIXTURES_DIR, "AsGe-basis.json"));
 export const FeLiSiBasis = readJSONFile(path.join(FIXTURES_DIR, "FeLiSi-basis.json"));
 export const LiFeSiBasis = readJSONFile(path.join(FIXTURES_DIR, "LiFeSi-basis.json"));
+export const atomicConstraints = readJSONFile(path.join(FIXTURES_DIR, "atomic-constraints.json"));
