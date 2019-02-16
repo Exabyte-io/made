@@ -146,7 +146,7 @@ export class Lattice extends LatticeBravais {
      * Calculate the volume of the lattice cell.
      * @return {Number}
      */
-    get volume() {return math.abs(math.det(this.vectors))}
+    get volume() {return math.abs(math.det(this.vectorArrays))}
 
     /*
      * Returns a "default" primitive lattice by type, with lattice parameters scaled by the length of "a",
