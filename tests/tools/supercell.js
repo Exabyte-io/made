@@ -5,9 +5,9 @@ import {Si, SiSupercell} from "../enums";
 import {Basis} from "../../src/basis/basis";
 import {Material} from "../../src/material";
 
-describe('supercell', function () {
+describe('Tools:Supercell', function () {
 
-    it('should generate proper supercell', function () {
+    it('should generate supercell', function () {
         const material = new Material(Si);
 
         const supercell = Made.tools.supercell.generateConfig(material, [[2, 0, 0], [0, 2, 0], [0, 0, 2]]);
@@ -16,6 +16,6 @@ describe('supercell', function () {
         const basis1 = new Basis(SiSupercell.basis);
         const basis2 = new Basis(supercell.basis);
 
-        expect(basis1.isEqualTo(basis2)).to.be.ok;
+        expect(basis1.isEqualTo(basis2)).to.be.equal(true);
     });
 });

@@ -1,0 +1,70 @@
+import {expect} from "chai";
+
+import {Na4Cl4, Si} from "../enums";
+import {assertDeepAlmostEqual} from "../utils";
+import {ReciprocalLattice} from "../../src/lattice/reciprocal/lattice_reciprocal";
+
+describe('Lattice Reciprocal', function () {
+
+    it('should extract kpoint path', function () {
+        const lattice = new ReciprocalLattice(Na4Cl4.lattice);
+        const expectedPath = [
+            {
+                "point": "Г",
+                "steps": 0,
+                "coordinates": [0, 0, 0]
+            },
+            {
+                "point": "R",
+                "steps": 1,
+                "coordinates": [0.5, 0.5, 0.5]
+            }
+        ];
+        const actualPath = lattice.extractKpointPath([[0, 0, 0], [0.5, 0.5, 0.5]]);
+        assertDeepAlmostEqual(expectedPath, actualPath);
+    });
+
+    it('should return cartesian coordinates of a point', function () {
+        const lattice = new ReciprocalLattice(Na4Cl4.lattice);
+        const expectedCoordinates = [2.845847, -2.8458470000000005, -2.845847];
+        const actualCoordinates = lattice.getCartesianCoordinates([0.5, 0.5, 0.5]);
+        assertDeepAlmostEqual(actualCoordinates, expectedCoordinates);
+    });
+
+    it('should return reciprocal vectors', function () {
+        const lattice = new ReciprocalLattice(Si.lattice);
+        const actualVectors = lattice.reciprocalVectors;
+        const expectedVectors = [
+            [0.2, 0, 0],
+            [0, -0.2, 0],
+            [0, 0, -0.2]
+        ];
+        assertDeepAlmostEqual(actualVectors, expectedVectors);
+    });
+
+    it('should extract symmetry points', function () {
+        const lattice = new ReciprocalLattice(Na4Cl4.lattice);
+        const actualPoints = lattice.symmetryPoints;
+        const expectedPoints = [
+                {
+                    "point": "Г",
+                    "coordinates": [0, 0, 0]
+                },
+                {
+                    "point": "R",
+                    "coordinates": [0.5, 0.5, 0.5]
+                },
+                {
+                    "point": "X",
+                    "coordinates": [0, 0.5, 0]
+                },
+                {
+                    "point": "M",
+                    "coordinates": [0.5, 0.5, 0]
+                }
+            ]
+        ;
+        assertDeepAlmostEqual(actualPoints, expectedPoints);
+    });
+
+});
