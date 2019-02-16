@@ -9,7 +9,7 @@ const _print = (x, printFormat = '%14.9f') => s.sprintf(printFormat, math.precis
 
 const _latticeVectorsToString = (vectors) => vectors.map((v) => v.map(c => _print(c)).join('\t')).join('\n');
 
-const _atomicConstraintsCharFromBool = (bool) => bool ? "T" : "F";
+const atomicConstraintsCharFromBool = (bool) => bool ? "T" : "F";
 
 /**
  * Obtain a textual representation of a material in POSCAR format.
@@ -31,7 +31,7 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
     basis._elements.array.forEach((item, idx) => {
         const coord = basis.getCoordinateByIndex(idx).map(x => _print(x));
         const constraintsAsString = omitConstraints ?
-            '' : basis.AtomicConstraints.getAsStringByIndex(idx, _atomicConstraintsCharFromBool);
+            '' : basis.AtomicConstraints.getAsStringByIndex(idx, atomicConstraintsCharFromBool);
         if (constraintsAsString && !omitConstraints) addSelectiveDynamics = true;
         BasisLines.push([coord.join(' '), constraintsAsString, item].join(' '));
     });
@@ -57,4 +57,5 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
 
 export default {
     toPoscar,
+    atomicConstraintsCharFromBool,
 }
