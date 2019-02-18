@@ -10,7 +10,7 @@ Exabyte.io believe in a collaborative future of materials design on the web.
 
 As below:
 
-- the package provides software environment for interacting with Materials-related data structures from ESSE Data Convention [[1]](#links) and is written in ECMAScript 2015 for use on the web
+- the package provides a software environment for interacting with Materials-related data structures from ESSE Data Convention [[1]](#links) and is written in ECMAScript 2015 for use on the web
 - High-level classes for the representation of the [Material](src/material.js) and the corresponding structural information, ie:
     - [Basis](src/basis/basis.js), 
     - [Lattice](src/lattice/lattice.js), 
@@ -66,11 +66,9 @@ Made.js is written in EcmaScript 6th edition [[2]](#links) with the application 
 
 2. Only materials-related code is considered. Properties related to [simulation model](https://docs.exabyte.io/models/overview/) parameters (eg. type of approximation, numerical parameters) shall go elsewhere.
 
-3. 
+3. `tools` directory contains helper functions that act on one or more classes and include an external parameter. Functions that use class data without any external parameters should be implemented inside the class. For example, `basis.clone()` is implemented in `Basis`, but basis repetition is implemented as a tool in the correspondingly named function ([tools/basis.js#repeat](src/tools/basis.js)) because the repetion requires a parameter external to basis - number of repetitions in 3 spatial dimensions.
 
-4. `tools` directory contains helper functions that act on one or more classes and include an external parameter. Functions that use class data without any external parameters should be implemented inside the class. For example, `basis.clone()` is implemented in `Basis`, but basis repetition is implemented as a tool in the correspondingly named function ([tools/basis.js#repeat](src/tools/basis.js)) because the repetion requires a parameter external to basis - number of repetitions in 3 spatial dimensions.
-
-5. `parsers` directory contains the parsers to- and from- ESSE format mentioned in 1. All functionality related to external data conversion is contained in this directory. 
+4. `parsers` directory contains the parsers to- and from- ESSE format mentioned in 1. All functionality related to external data conversion is contained in this directory. 
 
 
 ### TODO list
