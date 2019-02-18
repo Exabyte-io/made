@@ -91,14 +91,14 @@ Desirable features for implementation:
 
 ## Tests
 
-Made tests are written based on Mocha [6](#links) test framework and can be executed as follow.
+Made tests are written based on Mocha [6](#links) testing framework and can be executed as follow.
 
 ```bash
 npm install
 npm test
 ```
 
-Please follow the below instructions when adding new test cases. 
+### Tests Important Notes
 
 1. Keep the tests directory structure similar to the main codebase directory structure. Every JS module in the main codebase should have a corresponding module in tests directory which implements the tests for provided functionality.
 
@@ -116,4 +116,4 @@ Please follow the below instructions when adding new test cases.
 4. [XYZ file format, Wikipedia](https://en.wikipedia.org/wiki/XYZ_file_format)
 5. [Quantum ESPRESSO, Official Website](https://www.quantum-espresso.org/)
 6. [Mocha, Official Website](https://mochajs.org/)
-7. [Git KFS, Official Website](https://git-lfs.github.com/)
+7. [Git LFS, Official Website](https://git-lfs.github.com/)
