@@ -24,5 +24,5 @@ export const H2HImage = readJSONFile(path.join(FIXTURES_DIR, "H2+H-image.json"))
 export const SiSlab = readJSONFile(path.join(FIXTURES_DIR, "Si-slab.json"));
 export const SiPWSCFInput = readFile(path.join(FIXTURES_DIR, "Si-pwscf.in"));
 
-export const Zr12H24 = readJSONFile(path.join(FIXTURES_DIR, "Zr12H24.json"));
-export const Zr12H24Poscar = readFile(path.join(FIXTURES_DIR, "Zr12H24.poscar"));
+export const Zr1H23Zr1H1 = readJSONFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.json"));
+export const Zr1H23Zr1H1Poscar = readFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.poscar"));
