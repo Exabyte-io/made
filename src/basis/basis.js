@@ -239,22 +239,23 @@ export class Basis {
 
     /**
      * Returns chemical elements with their count wrt their original order in the basis.
+     * Note: entries for the same element separated by another element are considered separately.
      * [{"count":1, "value":"Zr"}, {"count":23, "value":"H"}, {"count":11, "value":"Zr"}, {"count":1, "value":"H"}]
      * @return {Object}
      */
     get elementCounts() {
         const elementCounts = [];
         this.elements.forEach((element, index) => {
-            let elementCountValue = 1;
             const previousElement = this.elements[index - 1];
             if (previousElement && previousElement.value === element.value) {
-                const previousElementCount = elementCounts.pop();
-                elementCountValue = previousElementCount.count + 1;
+                const previousElementCount = elementCounts[elementCounts.length - 1];
+                previousElementCount.count += 1;
+            } else {
+                elementCounts.push({
+                    count: 1,
+                    value: element.value
+                });
             }
-            elementCounts.push({
-                value: element.value,
-                count: elementCountValue
-            });
         });
         return elementCounts
     }
