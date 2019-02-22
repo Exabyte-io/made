@@ -227,14 +227,37 @@ export class Basis {
     }
 
     /**
-     * Unit cell formula as object `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
-     * Chemical elements are sorted by electronegativity.
+     * Returns unique chemical elements with their count sorted by electronegativity.
+     * `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
      * @return {Object}
      */
-    get elementCounts() {
+    get uniqueElementCountsSortedByElectronegativity() {
         return _.chain(this.elements)
             .sortBy('value').sortBy(x => getElectronegativity(x.value))
             .countBy(element => element.value).value();
+    }
+
+    /**
+     * Returns chemical elements with their count wrt their original order in the basis.
+     * Note: entries for the same element separated by another element are considered separately.
+     * [{"count":1, "value":"Zr"}, {"count":23, "value":"H"}, {"count":11, "value":"Zr"}, {"count":1, "value":"H"}]
+     * @return {Object}
+     */
+    get elementCounts() {
+        const elementCounts = [];
+        this.elements.forEach((element, index) => {
+            const previousElement = this.elements[index - 1];
+            if (previousElement && previousElement.value === element.value) {
+                const previousElementCount = elementCounts[elementCounts.length - 1];
+                previousElementCount.count += 1;
+            } else {
+                elementCounts.push({
+                    count: 1,
+                    value: element.value
+                });
+            }
+        });
+        return elementCounts
     }
 
     /**
@@ -242,7 +265,7 @@ export class Basis {
      * @return {String}
      */
     get formula() {
-        const counts = this.elementCounts;
+        const counts = this.uniqueElementCountsSortedByElectronegativity;
         const countsValues = _.values(counts);
         const gcd = countsValues.length > 1 ? math.gcd.apply(math, countsValues) : countsValues[0];
         return _.pairs(counts).map(x => x[0] + ((x[1] / gcd) === 1 ? '' : (x[1] / gcd))).reduce((mem, item) => {
@@ -255,7 +278,7 @@ export class Basis {
      * @return {Array}
      */
     get unitCellFormula() {
-        const counts = this.elementCounts;
+        const counts = this.uniqueElementCountsSortedByElectronegativity;
         return _.pairs(counts).map(x => x[0] + (x[1] === 1 ? '' : x[1])).reduce((mem, item) => {
             return mem + item;
         }, '');

@@ -53,10 +53,16 @@ describe('Basis', function () {
 
     it('should return elements count', function () {
         const basis = new Basis(Na4Cl4.basis);
-        expect(basis.elementCounts).to.be.deep.equal({
-            Na: 4,
-            Cl: 4
-        });
+        expect(basis.elementCounts).to.be.deep.equal([
+            {
+                value: "Na",
+                count: 4
+            },
+            {
+                value: "Cl",
+                count: 4
+            }
+        ]);
     });
 
     it('should set elements', function () {
