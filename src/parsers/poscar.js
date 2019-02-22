@@ -37,8 +37,8 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
     });
     const basisContent = BasisLines.join('\n');
 
-    const elementsLine = Object.keys(basis.elementCounts).join(' ');
-    const countsLine = Object.values(basis.elementCounts).map(x => parseInt(x)).join(' ');
+    const elementsLine = basis.elementCounts.map(e => e.value).join(' ');
+    const countsLine = basis.elementCounts.map(e => parseInt(e.count)).join(' ');
 
     const coordsType = materialOrConfig.basis.units === ATOMIC_COORD_UNITS.cartesian ? 'cartesian' : 'direct';
 
