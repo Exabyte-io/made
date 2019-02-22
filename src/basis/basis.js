@@ -227,14 +227,32 @@ export class Basis {
     }
 
     /**
-     * Unit cell formula as object `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
-     * Chemical elements are sorted by electronegativity.
+     * Returns chemical elements with their count sorted by a given function.
+     * `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
+     * @return {Object}
+     */
+    _elementCountsSortedBy(func) {
+        return _.chain(this.elements)
+            .sortBy('value').sortBy(x => func(x))
+            .countBy(element => element.value).value();
+    }
+
+    /**
+     * Returns chemical elements with their count sorted by electronegativity.
+     * `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
+     * @return {Object}
+     */
+    get elementCountsSortedByElectronegativity() {
+        return this._elementCountsSortedBy((x) => getElectronegativity(x.value));
+    }
+
+    /**
+     * Returns chemical elements with their count sorted by their original id.
+     * `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
      * @return {Object}
      */
     get elementCounts() {
-        return _.chain(this.elements)
-            .sortBy('value').sortBy(x => getElectronegativity(x.value))
-            .countBy(element => element.value).value();
+        return this._elementCountsSortedBy((x) => x.id);
     }
 
     /**
@@ -242,7 +260,7 @@ export class Basis {
      * @return {String}
      */
     get formula() {
-        const counts = this.elementCounts;
+        const counts = this.elementCountsSortedByElectronegativity;
         const countsValues = _.values(counts);
         const gcd = countsValues.length > 1 ? math.gcd.apply(math, countsValues) : countsValues[0];
         return _.pairs(counts).map(x => x[0] + ((x[1] / gcd) === 1 ? '' : (x[1] / gcd))).reduce((mem, item) => {
@@ -255,7 +273,7 @@ export class Basis {
      * @return {Array}
      */
     get unitCellFormula() {
-        const counts = this.elementCounts;
+        const counts = this.elementCountsSortedByElectronegativity;
         return _.pairs(counts).map(x => x[0] + (x[1] === 1 ? '' : x[1])).reduce((mem, item) => {
             return mem + item;
         }, '');
