@@ -69,6 +69,10 @@ export class Material {
         this._json[name] = value;
     }
 
+    unsetProp(name) {
+        delete this._json[name];
+    }
+
     toJSON() {
         return {
             lattice: this.Lattice.toJSON(),
@@ -231,6 +235,10 @@ export class Material {
             return this.src.text;
         }
         return parsers.poscar.toPoscar(this.toJSON(), omitConstraints);
+    }
+
+    cleanOnCopy() {
+        [].forEach(p => this.unsetProp(p));
     }
 
 }
