@@ -65,9 +65,9 @@ export class Material {
         return lodash.get(this._json, name) || defaultValue;
     }
 
-    setProp(name, value) {
-        this._json[name] = value;
-    }
+    unsetProp(name) {delete this._json[name]}
+
+    setProp(name, value) {this._json[name] = value;}
 
     toJSON() {
         return {
