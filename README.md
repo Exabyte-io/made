@@ -36,7 +36,7 @@ The package is written in a modular way easy to extend. Contributions can be in 
 From NPM for use within a software project:
 
 ```bash
-npm install made.js
+npm install @exabyte-io/made.js
 
 ```
 

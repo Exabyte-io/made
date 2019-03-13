@@ -1,6 +1,6 @@
 import _ from "underscore";
 import s from "underscore.string";
-import {getElectronegativity} from "periodic-table";
+import {getElectronegativity} from "@exabyte-io/periodic-table.js";
 
 import math from "../math";
 import {Lattice} from "../lattice/lattice";
