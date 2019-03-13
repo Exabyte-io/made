@@ -1,8 +1,8 @@
-# Made.js
+# Made-js
 
-Made.js is a library for **MA**terials **DE**sign in **J**ava**S**cript allowing for the creation and manipulation of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript, both on the client (web browser) and server (eg. Node.js) side.
+Made-js is a library for **MA**terials **DE**sign in **J**ava**S**cript allowing for the creation and manipulation of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript, both on the client (web browser) and server (eg. Node.js) side.
 
-The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. For example, [this page](https://platform.exabyte.io/demo/materials/n3HSzCmyoctgJFGGE) representing a crystal of Silicon online uses Made.js.
+The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. For example, [this page](https://platform.exabyte.io/demo/materials/n3HSzCmyoctgJFGGE) representing a crystal of Silicon online uses Made-js.
 
 Exabyte.io believe in a collaborative future of materials design on the web.
 
@@ -36,7 +36,7 @@ The package is written in a modular way easy to extend. Contributions can be in 
 From NPM for use within a software project:
 
 ```bash
-npm install made.js
+npm install made-js
 
 ```
 
@@ -60,7 +60,7 @@ We suggest forking this repository and introducing the adjustments there to be c
 
 ### Source code conventions
 
-Made.js is written in EcmaScript 6th edition [[2]](#links) with the application of object-oriented design patterns encapsulating key concepts following the conventions below.
+Made-js is written in EcmaScript 6th edition [[2]](#links) with the application of object-oriented design patterns encapsulating key concepts following the conventions below.
 
 1. Classes follow the Exabyte Data Convention and data structures defined in ESSE [[1]](#links)
 

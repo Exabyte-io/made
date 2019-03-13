@@ -1,9 +1,9 @@
 {
-    "name": "made.js",
-    "version": "0.1.0",
-    "description": "Materials Design in Javascript (made.js)",
+    "name": "made-js",
+    "version": "1.0.0",
+    "description": "Materials Design in Javascript",
     "scripts": {
-        "postinstall": "mkdir -p lib; babel src --out-dir lib",
+        "transpile": "mkdir -p lib; babel src --out-dir lib",
         "test": "mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests"
     },
     "repository": {
@@ -15,6 +15,7 @@
     "bugs": {
         "url": "https://github.com/Exabyte-io/made-js/issues"
     },
+    "license": "Apache-2.0",
     "homepage": "https://github.com/Exabyte-io/made-js",
     "devDependencies": {
         "chai": "^3.5.0",
@@ -36,6 +37,6 @@
         "mixwith": "^0.1.1",
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4",
-        "periodic-table": "file:/stack/lib/periodic-table"
+        "periodic-table-js": "1.0.0"
     }
 }
