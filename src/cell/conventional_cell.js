@@ -6,13 +6,15 @@ import {LATTICE_TYPE} from "../lattice/types";
  * Following Setyawan, W., & Curtarolo, S. (2010). doi:10.1016/j.commatsci.2010.05.010
  */
 
+const unitMatrix = [
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1]
+];
+
 const CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS = {
 
-    [LATTICE_TYPE.CUB]: [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    ],
+    [LATTICE_TYPE.CUB]: unitMatrix,
 
     [LATTICE_TYPE.FCC]: [
         [-1, 1, 1],
@@ -26,11 +28,7 @@ const CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS = {
         [1, 1, 0]
     ],
 
-    [LATTICE_TYPE.TET]: [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    ],
+    [LATTICE_TYPE.TET]: unitMatrix,
 
     [LATTICE_TYPE.BCT]: [
         [0, 1, 1],
@@ -38,11 +36,7 @@ const CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS = {
         [1, 1, 0]
     ],
 
-    [LATTICE_TYPE.ORC]: [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    ],
+    [LATTICE_TYPE.ORC]: unitMatrix,
 
     [LATTICE_TYPE.ORCF]: [
         [-1, 1, 1],
@@ -62,23 +56,11 @@ const CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS = {
         [0, 0, 1]
     ],
 
-    [LATTICE_TYPE.HEX]: [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    ],
+    [LATTICE_TYPE.HEX]: unitMatrix,
 
-    [LATTICE_TYPE.RHL]: [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    ],
+    [LATTICE_TYPE.RHL]: unitMatrix,
 
-    [LATTICE_TYPE.MCL]: [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    ],
+    [LATTICE_TYPE.MCL]: unitMatrix,
 
     [LATTICE_TYPE.MCLC]: [
         [1, -1, 0],
@@ -86,17 +68,9 @@ const CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS = {
         [0, 0, 1]
     ],
 
-    [LATTICE_TYPE.TRI]: [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    ],
+    [LATTICE_TYPE.TRI]: unitMatrix,
 
-    [LATTICE_TYPE.TRI + 'alt']: [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    ],
+    [LATTICE_TYPE.TRI + 'alt']: unitMatrix,
 
 };
 
