@@ -75,11 +75,11 @@ const CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS = {
 };
 
 /**
- * Returns lattice vectors for a conventional cell for a lattice.
+ * Returns lattice vectors of a conventional cell for a primitive lattice.
  * @param {Lattice} lattice - Lattice instance.
  * @return {Array[]} Cell.vectorsAsArray
  */
-export function conventionalCell(lattice) {
+export function getConventionalCellFromPrimitiveLattice(lattice) {
     const multiplier = CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[lattice.type || LATTICE_TYPE.TRI];
     return math.multiply(math.matrix(multiplier), math.matrix(lattice.vectorArrays)).toArray();
 }
