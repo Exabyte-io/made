@@ -12,7 +12,7 @@ const unitMatrix = [
     [0, 0, 1]
 ];
 
-const CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS = {
+export const CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS = {
 
     [LATTICE_TYPE.CUB]: unitMatrix,
 
