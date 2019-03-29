@@ -1,8 +1,9 @@
 {
     "name": "@exabyte-io/made.js",
-    "version": "2.0.0",
+    "version": "2.0.3",
     "description": "Materials Design in Javascript",
     "scripts": {
+        "prepublishOnly": "rm -rf lib; npm run transpile",
         "transpile": "mkdir -p lib; babel src --out-dir lib",
         "test": "mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests"
     },
@@ -37,6 +38,6 @@
         "mixwith": "^0.1.1",
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4",
-        "@exabyte-io/periodic-table.js": "2.0.0"
+        "@exabyte-io/periodic-table.js": "2.0.3"
     }
 }
