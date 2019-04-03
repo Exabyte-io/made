@@ -14,7 +14,7 @@ const ADD = math.add;
  * @param supercell {Cell}
  * @return {Basis}
  */
-function generateNewBasisWithinSupercell(basis, cell, supercell) {
+function generateNewBasisWithinSupercell(basis, cell, supercell, amplitude) {
 
     const oldBasis = basis.clone();
     const newBasis = basis.clone({isEmpty: true});
@@ -27,7 +27,7 @@ function generateNewBasisWithinSupercell(basis, cell, supercell) {
         const coordinate = oldBasis.getCoordinateByIndex(element.id);
         const cartesianCoordinate = cell.convertPointToCartesian(coordinate);
 
-        const combinations = cellTools.generateTranslationCombinations(cell, cartesianCoordinate, supercell);
+        const combinations = cellTools.generateTranslationCombinations(cell, cartesianCoordinate, supercell, amplitude);
         combinations.forEach(comb => {
             // "combination" is effectively a point in fractional coordinates here, hence the below
             const newPoint = ADD(cartesianCoordinate, cell.convertPointToCartesian(comb));
@@ -46,7 +46,7 @@ function generateNewBasisWithinSupercell(basis, cell, supercell) {
  * @param material {Object}
  * @param supercellMatrix {Number[][]}
  */
-function generateConfig(material, supercellMatrix) {
+function generateConfig(material, supercellMatrix, amplitude) {
     const det = math.det(supercellMatrix);
     if (det === 0) {
         throw new Error('Scaling matrix is degenerate.');
@@ -54,7 +54,7 @@ function generateConfig(material, supercellMatrix) {
     const cell = material.Lattice.Cell;
     const supercell = cell.cloneAndScaleByMatrix(supercellMatrix);
 
-    const newBasis = generateNewBasisWithinSupercell(material.Basis, cell, supercell);
+    const newBasis = generateNewBasisWithinSupercell(material.Basis, cell, supercell, amplitude);
     const newLattice = LatticeBravais.fromVectors({
         a: supercell.vector1,
         b: supercell.vector2,
