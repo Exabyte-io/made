@@ -13,7 +13,7 @@ export class ArrayWithIds {
     constructor(array = []) {
         if (!_.isArray(array)) throw new Error("ArrayWithIds.constructor: pass array on initialization");
         // if passed an array with ids as config, only store the values in array
-        this.array = array.sort((a, b) => a.id - b.id).map(element => element.value || element);
+        this.array = array.map(element => element.value || element);
     }
 
     /**
