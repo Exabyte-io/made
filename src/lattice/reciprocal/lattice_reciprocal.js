@@ -15,16 +15,17 @@ export class ReciprocalLattice extends Lattice {
     }
 
     /**
-     * Ger reciprocal vectors for the current Lattice.
+     * Get reciprocal vectors for the current Lattice in cartesian (2pi / a) units
      * @return {Array[]}
      */
     get reciprocalVectors() {
         const vectors_ = this.vectors.vectorArrays;
-        const divider = math.multiply(vectors_[0], math.cross(vectors_[1], vectors_[2]));
+        const a = math.vlen(vectors_[0]);
+        const divider = math.multiply(vectors_[0], math.cross(vectors_[1], vectors_[2])) / a;
         return [
             math.multiply(math.cross(vectors_[1], vectors_[2]), 1 / divider),
-            math.multiply(math.cross(vectors_[0], vectors_[2]), 1 / divider),
-            math.multiply(math.cross(vectors_[1], vectors_[0]), 1 / divider)
+            math.multiply(math.cross(vectors_[2], vectors_[0]), 1 / divider),
+            math.multiply(math.cross(vectors_[0], vectors_[1]), 1 / divider)
         ];
     }
 
@@ -33,7 +34,7 @@ export class ReciprocalLattice extends Lattice {
      * @param {Array} point - point in 3D space
      * @return {Array}
      */
-    getCartesianCoordinates(point) {return math.multiply(point, math.inv(this.reciprocalVectors))}
+    getCartesianCoordinates(point) {return math.multiply(point, this.reciprocalVectors)}
 
     /**
      * Get the list of high-symmetry points for the current lattice.
