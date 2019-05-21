@@ -13,11 +13,16 @@ const ADD = math.add;
  * @return {Array[]} - Nested array of integer shifts.
  * @example [[1, 0, 0], [-1, 0, 0]]
  */
-function generateTranslationCombinations(cell, point, anotherCell, amplitude = 10) {
+function generateTranslationCombinations(cell, point, anotherCell, amplitude) {
 
-    const combinations = [];
+    if (!amplitude) {
+        // Use the diagonal of the supercell as amplitude
+        const vectors = [anotherCell.vector1, anotherCell.vector2, anotherCell.vector3];
+        amplitude = parseInt(math.sqrt(vectors.reduce((a, b) => a + math.vlen(b) * math.vlen(b), 0))) + 1;
+    }
     const range = Array.from({length: 2 * amplitude + 1}, (v, k) => k - amplitude);
 
+    const combinations = [];
     range.forEach(i => {
         range.forEach(j => {
             range.forEach(k => {
@@ -28,7 +33,6 @@ function generateTranslationCombinations(cell, point, anotherCell, amplitude = 1
             })
         })
     });
-
     return combinations;
 }
 
