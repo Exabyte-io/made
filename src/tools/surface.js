@@ -113,7 +113,7 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
  * @param vy {Number} Size of lateral supercell along the direction of the second (y) cell vector (Positive Integer).
  * @return {Object}
  */
-function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy = 1) {
+function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy = 1, displacementFactor=10) {
 
     if (numberOfLayers < 1) throw new Error('Made.tools.surface.generateConfig: number of layers < 1.');
 
@@ -130,7 +130,7 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
     );
     const supercell = millerSupercell.cloneAndScaleByMatrix(dimensionsScalingMatrix);
 
-    const newBasis = SupercellTools.generateNewBasisWithinSupercell(material.Basis, cell, supercell);
+    const newBasis = SupercellTools.generateNewBasisWithinSupercell(material.Basis, cell, supercell, displacementFactor);
     const newLattice = LatticeBravais.fromVectors({
         a: supercell.vector1,
         b: supercell.vector2,
