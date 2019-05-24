@@ -26,7 +26,7 @@ describe('Lattice Reciprocal', function () {
 
     it('should return cartesian coordinates of a point', function () {
         const lattice = new ReciprocalLattice(Na4Cl4.lattice);
-        const expectedCoordinates = [2.845847, -2.8458470000000005, -2.845847];
+        const expectedCoordinates = [0.5, 0.5, 0.5];
         const actualCoordinates = lattice.getCartesianCoordinates([0.5, 0.5, 0.5]);
         assertDeepAlmostEqual(actualCoordinates, expectedCoordinates);
     });
@@ -35,9 +35,9 @@ describe('Lattice Reciprocal', function () {
         const lattice = new ReciprocalLattice(Si.lattice);
         const actualVectors = lattice.reciprocalVectors;
         const expectedVectors = [
-            [0.2, 0, 0],
-            [0, -0.2, 0],
-            [0, 0, -0.2]
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1]
         ];
         assertDeepAlmostEqual(actualVectors, expectedVectors);
     });
