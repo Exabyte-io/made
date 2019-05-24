@@ -128,9 +128,11 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
     const dimensionsScalingMatrix = getDimensionsScalingMatrix(
         cell, millerSupercell, outOfPlaneAxisIndex, numberOfLayers, vx, vy
     );
+
+    const supercellMatrix = MULT(dimensionsScalingMatrix, millerScalingMatrix);
     const supercell = millerSupercell.cloneAndScaleByMatrix(dimensionsScalingMatrix);
 
-    const newBasis = SupercellTools.generateNewBasisWithinSupercell(material.Basis, cell, supercell);
+    const newBasis = SupercellTools.generateNewBasisWithinSupercell(material.Basis, cell, supercell, supercellMatrix);
     const newLattice = LatticeBravais.fromVectors({
         a: supercell.vector1,
         b: supercell.vector2,
