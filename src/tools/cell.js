@@ -1,37 +1,30 @@
 import math from "../math";
-
-const ADD = math.add;
+import {Cell} from "../cell/cell";
 
 /**
- * Counts integer shifts in both positive and negative directions by sweeping the [-10, 10] interval and
- * obtaining the boundaries for the sub-interval where shifted point located on the lattice represented by
- * latticeVectors is within the cell.
- * TODO: implement an optimized version and auto-locate the amplitude.
- * @param {Cell} cell - initial cell.
- * @param {Array} point - point in 3D.
- * @param {Cell} anotherCell - supercell.
- * @return {Array[]} - Nested array of integer shifts.
- * @example [[1, 0, 0], [-1, 0, 0]]
+ * Returns the list of points on the original lattice contained in the supercell in fractional coordinates.
+ * Source: https://pymatgen.org/_modules/pymatgen/util/coord.html
  */
-function generateTranslationCombinations(cell, point, anotherCell, amplitude = 10) {
+function latticePointsInSupercell(supercellMatrix) {
 
-    const combinations = [];
-    const range = Array.from({length: 2 * amplitude + 1}, (v, k) => k - amplitude);
+    const supercell = new Cell(supercellMatrix);
+    const diagonals = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]];
+    const d_points = diagonals.map(p => supercell.convertPointToCartesian(p));
 
-    range.forEach(i => {
-        range.forEach(j => {
-            range.forEach(k => {
-                const shift = cell.convertPointToCartesian([i, j, k]);
-                if (anotherCell.isPointInsideCell(ADD(point, shift))) {
-                    combinations.push([i, j, k]);
-                }
-            })
-        })
-    });
+    const mins = [0, 1, 2].map(i => math.min(...d_points.map(p => p[i])));
+    const maxes = [0, 1, 2].map(i => math.max(...d_points.map(p => p[i])) + 1);
 
-    return combinations;
+    const points = [];
+    for (let i = mins[0]; i <= maxes[0]; i++) {
+        for (let j = mins[1]; j <= maxes[1]; j++) {
+            for (let k = mins[2]; k <= maxes[2]; k++) {
+                points.push(supercell.convertPointToFractional([i, j, k]));
+            }
+        }
+    }
+    return points;
 }
 
 export default {
-    generateTranslationCombinations,
+    latticePointsInSupercell,
 }
