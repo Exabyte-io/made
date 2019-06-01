@@ -89,7 +89,13 @@ Desirable features for implementation:
 
 ## Tests
 
-Made tests are written based on Mocha [6](#links) testing framework and can be executed as follow.
+Made tests are written based on Mocha [6](#links) testing framework and can be executed as follows.
+
+```bash
+git pull
+git lfs pull
+```
+to get the latest test fixtures from LFS, and then:
 
 ```bash
 npm install

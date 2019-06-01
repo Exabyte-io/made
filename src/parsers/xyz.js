@@ -6,9 +6,10 @@ import {InvalidLineError} from "./errors";
 import {Lattice} from "../lattice/lattice";
 import {ConstrainedBasis} from "../basis/constrained_basis";
 import {CombinatorialBasis} from "./xyz_combinatorial_basis";
+import math from "../math";
 
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
-const XYZ_LINE_REGEX = /[A-Z][a-z]?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+[0-1]\s+[0-1]\s+[0-1]\s+?)?)/;
+const XYZ_LINE_REGEX = /[A-Z][a-z]?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
 
 /**
  * Validates that passed string is well-formed XYZ file.
@@ -96,15 +97,19 @@ function toBasisConfig(txt, units = 'angstrom', cell = Basis.defaultCell) {
  * Create XYZ from Basis class instance.
  * @param basisClsInstance {ConstrainedBasis} Basis class instance.
  * @param printFormat {String} Output format for coordinates.
+ * @param skipRounding {Boolean} Whether to round the numbers (ie. to avoid negative zeros).
  * @return {String} Basis string in XYZ format
  */
-function fromBasis(basisClsInstance, printFormat = '%9.5f') {
+function fromBasis(basisClsInstance, printFormat = '%9.5f', skipRounding = false) {
     const clsInstance = basisClsInstance;
     const XYZArray = [];
     clsInstance._elements.array.forEach((item, idx) => {
         // assume that _elements and _coordinates are indexed equivalently
         const element = s.sprintf('%-3s', item);
-        const coordinates = clsInstance.getCoordinateByIndex(idx).map(x => s.sprintf(printFormat, x));
+        const coordinates = clsInstance.getCoordinateByIndex(idx)
+            .map(x => s.sprintf(
+                printFormat, skipRounding ? x : math.precise(math.roundToZero(x)))
+            );
         const constraints = clsInstance.constraints ? clsInstance.AtomicConstraints.getAsStringByIndex(idx) : '';
         XYZArray.push([element, coordinates.join(' '), constraints].join(' '));
     });
