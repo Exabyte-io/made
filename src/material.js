@@ -6,6 +6,13 @@ import {Lattice} from "./lattice/lattice";
 import {LATTICE_TYPE} from "./lattice/types";
 import {ATOMIC_COORD_UNITS, units} from "./constants";
 import {ConstrainedBasis} from "./basis/constrained_basis";
+import {
+    isConventionalCellSameAsPrimitiveForLatticeType,
+    PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS,
+    PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES
+} from "./cell/conventional_cell";
+
+import supercellTools from "./tools/supercell"
 
 export const defaultMaterialConfig = {
     name: 'Silicon FCC',
@@ -85,7 +92,7 @@ export class Material {
     }
 
     /**
-     * @summary Gets material's formula
+     * Gets material's formula
      */
     get formula() {
         return this.prop('formula') || this.Basis.formula;
@@ -151,7 +158,7 @@ export class Material {
     }
 
     /**
-     * @summary Calculates hash from basis and lattice. Algorithm expects the following:
+     * Calculates hash from basis and lattice. Algorithm expects the following:
      * - asserts lattice units to be angstrom
      * - asserts basis units to be crystal
      * - asserts basis coordinates and lattice measurements are rounded to hash precision
@@ -170,14 +177,14 @@ export class Material {
     }
 
     /**
-     * @summary Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
+     * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
     get scaledHash() {
         return this.calculateHash('', true);
     }
 
     /**
-     * @summary Converts basis to crystal/fractional coordinates.
+     * Converts basis to crystal/fractional coordinates.
      */
     toCrystal() {
         const basis = this.Basis;
@@ -186,7 +193,7 @@ export class Material {
     }
 
     /**
-     * @summary Converts current material's basis coordinates to cartesian.
+     * Converts current material's basis coordinates to cartesian.
      * No changes if coordinates already cartesian.
      */
     toCartesian() {
@@ -196,7 +203,7 @@ export class Material {
     }
 
     /**
-     * @summary Returns material's basis in XYZ format.
+     * Returns material's basis in XYZ format.
      * @return {String}
      */
     getBasisAsXyz(fractional = false) {
@@ -204,7 +211,7 @@ export class Material {
     }
 
     /**
-     * @summary Returns material in Quantum Espresso output format:
+     * Returns material in Quantum Espresso output format:
      * ```
      *    CELL_PARAMETERS (angstroms)
      *    -0.543131284  -0.000000000   0.543131284
@@ -222,7 +229,7 @@ export class Material {
     }
 
     /**
-     * @summary Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
+     * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
      */
     getAsPOSCAR(ignoreOriginal = false, omitConstraints = false) {
         const src = this.src;
@@ -233,4 +240,22 @@ export class Material {
         return parsers.poscar.toPoscar(this.toJSON(), omitConstraints);
     }
 
+    /**
+     * Returns a copy of the material with conventional cell constructed instead of primitive.
+     */
+    getACopyWithConventionalCell() {
+        let material = this.clone();
+
+        // if conventional and primitive cells are the same => return a copy.
+        if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type)) return material;
+
+        const conventionalSupercellMatrix = PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[this.Lattice.type];
+        const conventionalLatticeType = PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES[this.Lattice.type];
+        const config = supercellTools.generateConfig(material, conventionalSupercellMatrix, 1);
+
+        config.lattice.type = conventionalLatticeType;
+        config.name = `${material.name} - conventional cell`;
+
+        return new this.constructor(config);
+    }
 }
