@@ -50,7 +50,7 @@ function _parseXYZLineAsWords(line) {
     return {
         element: words[0],
         coordinates: [(+words[1]), (+words[2]), (+words[3])],
-        constraints: [(+words[4]), (+words[5]), (+words[6])].map(e => !!e),
+        constraints: [(+words[4]), (+words[5]), (+words[6])].map(e => parseInt(e) !== 0),
     };
 }
 
@@ -64,8 +64,6 @@ function _parseXYZLineAsWords(line) {
 function toBasisConfig(txt, units = 'angstrom', cell = Basis.defaultCell) {
     const lines = s(txt).trim().lines();
     const listOfObjects = _.map(lines, _parseXYZLineAsWords);
-
-    const addSelectiveDynamics = listOfObjects.some(line => (line.constraints || []).some(e => e));
 
     return {
         // using concat below to avoid modifying listOfObjects in place with map
@@ -83,7 +81,7 @@ function toBasisConfig(txt, units = 'angstrom', cell = Basis.defaultCell) {
         }),
         units: units,
         cell: cell,
-        constraints: !addSelectiveDynamics ? [] : [].concat(listOfObjects).map((elm, idx) => {
+        constraints: [].concat(listOfObjects).map((elm, idx) => {
             return {
                 id: idx,
                 value: elm.constraints
