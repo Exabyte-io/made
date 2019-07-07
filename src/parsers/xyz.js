@@ -50,6 +50,7 @@ function _parseXYZLineAsWords(line) {
     return {
         element: words[0],
         coordinates: [(+words[1]), (+words[2]), (+words[3])],
+        // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
         constraints: [(+words[4]), (+words[5]), (+words[6])].map(e => parseInt(e) !== 0),
     };
 }
