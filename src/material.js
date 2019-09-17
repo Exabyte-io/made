@@ -157,7 +157,7 @@ export const defaultMaterialConfig = {
                 ]
             },
             {
-                id: 11,
+                id: 12,
                 value: [
                     0.25,
                     0.75,
