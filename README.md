@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/%40exabyte-io%2Fmade.js.svg)](https://badge.fury.io/js/%40exabyte-io%2Fmade.js)
+
 # Made.js
 
 Made.js is a library for **MA**terials **DE**sign in **J**ava**S**cript allowing for the creation and manipulation of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript, both on the client (web browser) and server (eg. Node.js) side.
