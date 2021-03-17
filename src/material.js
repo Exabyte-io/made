@@ -3,6 +3,7 @@ import CryptoJS from "crypto-js";
 
 import parsers from "./parsers/parsers";
 import {Lattice} from "./lattice/lattice";
+import {Molecule} from "./molecular/molecule"
 import {LATTICE_TYPE} from "./lattice/types";
 import {ATOMIC_COORD_UNITS, units} from "./constants";
 import {ConstrainedBasis} from "./basis/constrained_basis";
@@ -170,6 +171,22 @@ export class Material {
     calculateHash(salt = '', isScaled = false) {
         const message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         return CryptoJS.MD5(message).toString();
+    }
+
+    /**
+    * Calculates hash from zmatrix. Algorithm expects the following:
+     * - asserts zmatrix in bonds, angles, dihedrals
+     * - Number of bonds = natoms - 1
+     * - Number of angles = natoms - 2
+     * - Number of dihedrals = natoms - 3
+     * - forms string for zmatrix and basis
+     * - creates MD5 hash from basisStr + zmatrixStr + salt
+     * @param salt {String} Salt for hashing, empty string by default.
+     * @param isScaled {Boolean} Whether to scale the lattie parameter 'a' to 1.
+    */
+    calculateZmatrixHash(salt= '', zmatrix = []) {
+        const message = this.Basis.hashstring + '#' + this.Molecule.getZmatrixHashString(zmatrix) + "#" + salt;
+        return CryptoJS.MD5(message).toString()
     }
 
     get hash() {
