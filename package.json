@@ -19,13 +19,13 @@
     "license": "Apache-2.0",
     "homepage": "https://github.com/Exabyte-io/made-js",
     "devDependencies": {
-        "chai": "^3.5.0",
+        "chai": "^4.3.4",
         "chai-almost": "^1.0.1",
-        "mocha": "^2.5.3"
+        "mocha": "^8.3.2"
     },
     "dependencies": {
-        "@babel/cli": "7.0.0",
-        "@babel/core": "7.0.0",
+        "@babel/cli": "7.1.0",
+        "@babel/core": "7.1.0",
         "@babel/register": "7.0.0",
         "@babel/polyfill": "7.0.0",
         "@babel/preset-env": "7.0.0",
