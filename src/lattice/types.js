@@ -29,7 +29,7 @@ export const LATTICE_TYPE = {
     RHL: 'RHL',
     MCL: 'MCL',
     MCLC: 'MCLC',
-    TRI: 'TRI'
+    TRI: 'TRI',
 };
 
 export const LATTICE_TYPE_EXTENDED = {
@@ -56,7 +56,7 @@ export const LATTICE_TYPE_EXTENDED = {
     TET: 'TET',
     TRI_1a: 'TRI_1a',
     TRI_2a: 'TRI_2a',
-    TRI_1b: 'TRI_1b'
+    TRI_1b: 'TRI_1b',
 };
 
 export const LATTICE_TYPE_CONFIGS = [
@@ -145,5 +145,5 @@ export const LATTICE_TYPE_CONFIGS = [
         code: LATTICE_TYPE.TRI,
         editables: ['a', 'b', 'c', 'alpha', 'beta', 'gamma'],
         editablesConventional: ['a', 'b', 'c', 'alpha', 'beta', 'gamma'],
-    }
+    },
 ];

@@ -1,10 +1,9 @@
-import _ from "underscore";
+import _ from 'underscore';
 
 /**
  * Helper class representing a scalar with an associated id.
  */
 export class ScalarWithId {
-
     /**
      * Create a an array with ids.
      * @param {Any} valueOrObject - a ScalarWithID, or any other type.
@@ -12,7 +11,8 @@ export class ScalarWithId {
      */
     constructor(valueOrObject, id = 0) {
         // if already passing a ScalarWithId => preserve original
-        if (_.isObject(valueOrObject) && !_.isArray(valueOrObject)) { // NOTE - Arrays are Objects too
+        if (_.isObject(valueOrObject) && !_.isArray(valueOrObject)) {
+            // NOTE - Arrays are Objects too
             id = valueOrObject.id;
             valueOrObject = valueOrObject.value;
         }
@@ -28,6 +28,6 @@ export class ScalarWithId {
         return {
             id: this.id,
             value: this.value,
-        }
+        };
     }
 }

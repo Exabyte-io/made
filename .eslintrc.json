@@ -13,7 +13,7 @@
     "node": true,
     "mocha": true
   },
-  "plugins": ["prettier", "simple-import-sort"],
+  "plugins": ["prettier", "simple-import-sort", "jsdoc"],
   "rules": {
     "prettier/prettier": "error",
     "camelcase": "off",
@@ -26,6 +26,9 @@
     "consistent-return": "off",
     "arrow-body-style": "off",
     "import/prefer-default-export": "off",
+    "import/no-named-as-default-member": "warn",
+    "no-param-reassign": "warn",
+    "max-classes-per-file": "warn",
     "simple-import-sort/imports": [
       "warn",
       {

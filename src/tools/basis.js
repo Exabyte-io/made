@@ -1,18 +1,24 @@
-import _ from "underscore";
-import {Basis} from "../basis/basis";
-import math from "../math";
+/* eslint no-loop-func:1 */
+import _ from 'underscore';
+
+import math from '../math';
 
 const ADD = math.add;
 const MULT = math.multiply;
 
 /**
  * Returns a repeated basis of a crystal.
- * @param basis {Basis} Original basis.
+ * @param basis {@import(../basis/basis).Basis} Original basis.
  * @param repetitions{Number[]} Repetition vector `[x, y, z]`, in each spatial dimension.
  * @return {Basis} New Basis.
  */
 function repeat(basis, repetitions) {
-    let i, j, k, shiftI = 0, shiftJ = 0, shiftK = 0;
+    let i;
+    let j;
+    let k;
+    let shiftI = 0;
+    let shiftJ = 0;
+    let shiftK = 0;
 
     // clone original basis and assert it is in cartesian coordinates
     const newBasis = basis.clone();
@@ -21,21 +27,18 @@ function repeat(basis, repetitions) {
     newBasis.toCrystal();
     basisCloneInCrystalCoordinates.toCrystal();
 
-    for (i = 1; i <= repetitions[0]; i++) {
-        for (j = 1; j <= repetitions[1]; j++) {
-            for (k = 1; k <= repetitions[2]; k++) {
+    for (i = 1; i <= repetitions[0]; i += 1) {
+        for (j = 1; j <= repetitions[1]; j += 1) {
+            for (k = 1; k <= repetitions[2]; k += 1) {
                 // for each atom in original basis add one with a repetition
                 basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
                     const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index);
                     // only add atoms if shifts are non-zero
-                    (shiftI || shiftJ || shiftK) && newBasis.addAtom({
-                        element: element,
-                        coordinate: [
-                            coord[0] + shiftI,
-                            coord[1] + shiftJ,
-                            coord[2] + shiftK
-                        ]
-                    });
+                    (shiftI || shiftJ || shiftK) &&
+                        newBasis.addAtom({
+                            element,
+                            coordinate: [coord[0] + shiftI, coord[1] + shiftJ, coord[2] + shiftK],
+                        });
                 });
                 shiftK += 1;
             }
@@ -52,6 +55,18 @@ function repeat(basis, repetitions) {
 }
 
 /**
+ * Calculates linear function `y = kx + b` for vectors. Isolated for modularity.
+ * @param initialCoordinates {Array} - b.
+ * @param delta {Array} - x.
+ * @param normalizedStepIndex {Number} - k.
+ * @return {Basis[]} List of all bases.
+ */
+
+function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
+    return ADD(initialCoordinates, MULT(delta, normalizedStepIndex));
+}
+
+/**
  * Returns a set of Bases for a crystal interpolated from initial to final crystal.
  *          Can be used to generate atomic configurations along a chemical reaction path, for example.
  * @param initialBasis {Basis} Original initialBasis.
@@ -62,7 +77,7 @@ function repeat(basis, repetitions) {
 function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
     // check that initial and final basis have the same cell
     if (!initialBasis.hasEquivalentCellTo(finalBasis))
-        throw new Error("basis.interpolate: Basis cells are not equal");
+        throw new Error('basis.interpolate: Basis cells are not equal');
 
     // clone original initialBasis and assert it is in cartesian coordinates
     const initialBasisCopy = initialBasis.clone();
@@ -77,34 +92,26 @@ function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
 
     const resultingListOfBases = [];
 
-    for (let i = 1; i <= numberOfSteps; i++) {
+    for (let i = 1; i <= numberOfSteps; i += 1) {
         const normalizedStepIndex = i / (numberOfSteps + 1);
-        const intermediateCoordinates = _linearInterpolation(initialCoordinates, delta, normalizedStepIndex);
+        const intermediateCoordinates = _linearInterpolation(
+            initialCoordinates,
+            delta,
+            normalizedStepIndex,
+        );
         const vectorSize = 3;
         const intermediateCoordinatesAsNestedArray = _.toArray(
-            _.groupBy(intermediateCoordinates, (a, b) => Math.floor(b / vectorSize))
+            _.groupBy(intermediateCoordinates, (a, b) => Math.floor(b / vectorSize)),
         );
         const intermediateBasis = initialBasis.clone();
         intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray;
-        resultingListOfBases.push(intermediateBasis)
+        resultingListOfBases.push(intermediateBasis);
     }
 
     return resultingListOfBases;
 }
 
-/**
- * Calculates linear function `y = kx + b` for vectors. Isolated for modularity.
- * @param initialCoordinates {Array} - b.
- * @param delta {Array} - x.
- * @param normalizedStepIndex {Number} - k.
- * @return {Basis[]} List of all bases.
- */
-
-function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
-    return ADD(initialCoordinates, MULT(delta, normalizedStepIndex))
-}
-
 export default {
     repeat,
     interpolate,
-}
+};

@@ -7,7 +7,9 @@
         "transpile": "mkdir -p lib; babel src --out-dir lib",
         "test": "mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests",
         "lint": "eslint src && prettier --write src",
-        "lint:fix": "eslint --fix src && prettier --write src"
+        "lint:fix": "eslint 'src/**/*.js' --fix",
+        "eslint": "eslint --fix",
+        "prettier": "prettier"
     },
     "repository": {
         "type": "git",
@@ -37,7 +39,7 @@
         "eslint-config-airbnb-base": "^14.2.1",
         "eslint-config-prettier": "^8.1.0",
         "eslint-plugin-import": "^2.22.1",
-        "eslint-plugin-prettier": "^3.3.1",
+        "eslint-plugin-jsdoc": "^32.3.0",
         "eslint-plugin-simple-import-sort": "^7.0.0",
         "husky": "^6.0.0",
         "lint-staged": "^10.5.4",
@@ -54,8 +56,14 @@
         "underscore.string": "^3.3.4",
         "@exabyte-io/periodic-table.js": "2.0.4"
     },
+    "husky": {
+        "hooks": {
+            "pre-push": "lint-staged",
+            "pre-commit": "lint-staged"
+        }
+    },
     "lint-staged": {
-        "!(*tests/**).js": [
+        "src/**/*.js": [
             "prettier --write",
             "eslint --fix",
             "git add"

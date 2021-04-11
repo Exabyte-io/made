@@ -1,5 +1,6 @@
-import math from "mathjs";
-import {tolerance as TOLERANCE} from "./constants";
+import math from 'mathjs';
+
+import { tolerance as TOLERANCE } from './constants';
 
 /**
  * @summary Zero threshold. Numbers below it are put to zero exactly.
@@ -15,7 +16,7 @@ const EPSILON = 1e-8;
 
 const product = function (v1, v2) {
     return math.multiply(v1, math.transpose(v2));
-}
+};
 
 /**
  * @summary Returns length of a vector.
@@ -24,7 +25,7 @@ const product = function (v1, v2) {
  */
 const vlen = function (v) {
     return math.sqrt(product(v, v));
-}
+};
 
 /**
  * @summary Returns angle between `a` and `b` vectors.
@@ -37,12 +38,12 @@ const angle = function (a, b, unit) {
     const lenA = vlen(a);
     const lenB = vlen(b);
     return math.unit(math.acos(product(a, b) / (lenA * lenB)), 'rad').toNumber(unit || 'deg');
-}
+};
 
 const angleUpTo90 = (...args) => {
     const angleUpTo180 = angle(...args);
-    return (angleUpTo180 < 90) ? angleUpTo180 : (180 - angleUpTo180);
-}
+    return angleUpTo180 < 90 ? angleUpTo180 : 180 - angleUpTo180;
+};
 
 /**
  * @summary Returns distance between 2 vectors.
@@ -52,11 +53,13 @@ const angleUpTo90 = (...args) => {
  */
 const vDist = function (v1, v2) {
     if (v1.length !== v2.length) {
-        console.error("Attempting to calculate distance between vectors of different dimensionality");
+        console.error(
+            'Attempting to calculate distance between vectors of different dimensionality',
+        );
         return;
     }
-    return vlen(v1.map((coordinate, index) => (coordinate - v2[index])));
-}
+    return vlen(v1.map((coordinate, index) => coordinate - v2[index]));
+};
 
 /**
  * @summary Returns checks whether 2 vector are equal within tolerance.
@@ -65,7 +68,8 @@ const vDist = function (v1, v2) {
  * @param tolerance {Number} Tolerance
  * @return {Number}
  */
-const vEqualWithTolerance = (vec1, vec2, tolerance = TOLERANCE.pointsDistance) => (vDist(vec1, vec2) <= tolerance);
+const vEqualWithTolerance = (vec1, vec2, tolerance = TOLERANCE.pointsDistance) =>
+    vDist(vec1, vec2) <= tolerance;
 
 /**
  * @summary Returns 0 if passed number is less than Made.math.EPSILON.
@@ -74,7 +78,7 @@ const vEqualWithTolerance = (vec1, vec2, tolerance = TOLERANCE.pointsDistance) =
  */
 const roundToZero = function (n) {
     return Math.abs(n) < EPSILON ? 0 : n;
-}
+};
 
 /**
  * @summary Returns number with specified precision.
@@ -84,7 +88,7 @@ const roundToZero = function (n) {
  */
 const precise = function (x, n = 7) {
     return Number(x.toPrecision(n));
-}
+};
 
 /**
  * @summary Returns mod of the passed value with the specified tolerance.
@@ -100,23 +104,23 @@ const mod = function (num, tolerance = 0.001) {
         return 0;
     }
     return x;
-}
+};
 
 /**
  * @summary Returns cartesian of passed arrays.
  * @example combinations([1,2], [4,5], [6]) = [[1,4,6], [1,5,6], [2,4,6], [2,5,6]];
  */
 const cartesianProduct = function (...arg) {
-    const r = [], max = arg.length - 1;
+    const r = [];
+    const max = arg.length - 1;
 
     function helper(arr, i) {
-        for (let j = 0, l = arg[i].length; j < l; j++) {
+        for (let j = 0, l = arg[i].length; j < l; j += 1) {
             const a = arr.slice(0); // clone arr
             a.push(arg[i][j]);
             if (i === max) {
                 r.push(a);
-            }
-            else {
+            } else {
                 helper(a, i + 1);
             }
         }
@@ -124,7 +128,7 @@ const cartesianProduct = function (...arg) {
 
     helper([], 0);
     return r;
-}
+};
 
 /**
  * @summary Returns all possible positive integer combinations where each value changes from 0 to a, b, c.
@@ -134,7 +138,7 @@ const cartesianProduct = function (...arg) {
  */
 const almostEqual = function (a, b, tolerance = TOLERANCE.pointsDistance) {
     return Math.abs(a - b) < tolerance;
-}
+};
 
 /**
  * @summary Returns true if number is 0 <= x < 1, inclusive, otherwise false.
@@ -142,12 +146,8 @@ const almostEqual = function (a, b, tolerance = TOLERANCE.pointsDistance) {
  * @number number {Number}
  */
 const isBetweenZeroInclusiveAndOne = function (number, tolerance = TOLERANCE.length) {
-    return 0 <= roundToZero(number)
-        &&
-        !almostEqual(number, 1, tolerance)
-        &&
-        number < 1;
-}
+    return roundToZero(number) >= 0 && !almostEqual(number, 1, tolerance) && number < 1;
+};
 
 /**
  * @summary Returns all possible positive integer combinations where each value changes from 0 to a, b, c.
@@ -160,9 +160,9 @@ const isBetweenZeroInclusiveAndOne = function (number, tolerance = TOLERANCE.len
  */
 function combinations(a, b, c) {
     const combs = [];
-    for (let i = 0; i <= a; i++) {
-        for (let j = 0; j <= b; j++) {
-            for (let k = 0; k <= c; k++) {
+    for (let i = 0; i <= a; i += 1) {
+        for (let j = 0; j <= b; j += 1) {
+            for (let k = 0; k <= c; k += 1) {
                 combs.push([i, j, k]);
             }
         }
@@ -175,9 +175,9 @@ function combinations(a, b, c) {
  */
 function combinationsFromIntervals(arrA, arrB, arrC) {
     const combs = [];
-    for (let i = arrA[0]; i <= arrA[1]; i++) {
-        for (let j = arrB[0]; j <= arrB[1]; j++) {
-            for (let k = arrC[0]; k <= arrC[1]; k++) {
+    for (let i = arrA[0]; i <= arrA[1]; i += 1) {
+        for (let j = arrB[0]; j <= arrB[1]; j += 1) {
+            for (let k = arrC[0]; k <= arrC[1]; k += 1) {
                 combs.push([i, j, k]);
             }
         }
@@ -185,7 +185,8 @@ function combinationsFromIntervals(arrA, arrB, arrC) {
     return combs;
 }
 
-export default Object.assign({}, math, {
+export default {
+    ...math,
     PI: Math.PI,
     trunc: Math.trunc,
     product,
@@ -202,4 +203,4 @@ export default Object.assign({}, math, {
     almostEqual,
     combinations,
     combinationsFromIntervals,
-});
+};

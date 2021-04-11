@@ -1,18 +1,17 @@
-import lodash from "lodash";
-import CryptoJS from "crypto-js";
+import CryptoJS from 'crypto-js';
+import lodash from 'lodash';
 
-import parsers from "./parsers/parsers";
-import {Lattice} from "./lattice/lattice";
-import {LATTICE_TYPE} from "./lattice/types";
-import {ATOMIC_COORD_UNITS, units} from "./constants";
-import {ConstrainedBasis} from "./basis/constrained_basis";
+import { ConstrainedBasis } from './basis/constrained_basis';
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
+    PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
     PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS,
-    PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES
-} from "./cell/conventional_cell";
-
-import supercellTools from "./tools/supercell"
+} from './cell/conventional_cell';
+import { ATOMIC_COORD_UNITS, units } from './constants';
+import { Lattice } from './lattice/lattice';
+import { LATTICE_TYPE } from './lattice/types';
+import parsers from './parsers/parsers';
+import supercellTools from './tools/supercell';
 
 export const defaultMaterialConfig = {
     name: 'Silicon FCC',
@@ -20,32 +19,24 @@ export const defaultMaterialConfig = {
         elements: [
             {
                 id: 1,
-                value: 'Si'
+                value: 'Si',
             },
             {
                 id: 2,
-                value: 'Si'
-            }
+                value: 'Si',
+            },
         ],
         coordinates: [
             {
                 id: 1,
-                value: [
-                    0.00,
-                    0.00,
-                    0.00
-                ]
+                value: [0.0, 0.0, 0.0],
             },
             {
                 id: 2,
-                value: [
-                    0.25,
-                    0.25,
-                    0.25
-                ]
-            }
+                value: [0.25, 0.25, 0.25],
+            },
         ],
-        units: ATOMIC_COORD_UNITS.crystal
+        units: ATOMIC_COORD_UNITS.crystal,
     },
     lattice: {
         // Primitive cell for Diamond FCC Silicon at ambient conditions
@@ -58,9 +49,9 @@ export const defaultMaterialConfig = {
         gamma: 60,
         units: {
             length: units.angstrom,
-            angle: units.degree
-        }
-    }
+            angle: units.degree,
+        },
+    },
 };
 
 export class Material {
@@ -72,19 +63,25 @@ export class Material {
         return lodash.get(this._json, name) || defaultValue;
     }
 
-    unsetProp(name) {delete this._json[name]}
+    unsetProp(name) {
+        delete this._json[name];
+    }
 
-    setProp(name, value) {this._json[name] = value;}
+    setProp(name, value) {
+        this._json[name] = value;
+    }
 
     toJSON() {
         return {
             lattice: this.Lattice.toJSON(),
             basis: this.Basis.toJSON(),
-            name: this.name || this.formula
+            name: this.name || this.formula,
         };
     }
 
-    clone(extraContext) {return new this.constructor(Object.assign({}, this.toJSON(), extraContext))}
+    clone(extraContext) {
+        return new this.constructor({ ...this.toJSON(), ...extraContext });
+    }
 
     updateFormula() {
         this.setProp('formula', this.Basis.formula);
@@ -102,24 +99,27 @@ export class Material {
         return this.prop('unitCellFormula') || this.Basis.unitCellFormula;
     }
 
-    get name() {return this.prop('name') || this.formula}
+    get name() {
+        return this.prop('name') || this.formula;
+    }
 
-    set name(name) {this.setProp('name', name)}
+    set name(name) {
+        this.setProp('name', name);
+    }
 
     /**
      * @param textOrObject {String} Basis text or JSON object.
      * @param format {String} Format (xyz, etc.)
-     * @param units {String} crystal/cartesian
+     * @param unitz {String} crystal/cartesian
      */
-    setBasis(textOrObject, format, units) {
+    setBasis(textOrObject, format, unitz) {
         let basis;
         switch (format) {
             case 'xyz':
-                basis = parsers.xyz.toBasisConfig(textOrObject, units);
+                basis = parsers.xyz.toBasisConfig(textOrObject, unitz);
                 break;
             default:
                 basis = textOrObject;
-
         }
         this.setProp('basis', basis);
         this.updateFormula();
@@ -129,7 +129,7 @@ export class Material {
         this.setBasis({
             ...this.basis,
             constraints,
-        })
+        });
     }
 
     get basis() {
@@ -140,7 +140,7 @@ export class Material {
     get Basis() {
         return new ConstrainedBasis({
             ...this.basis,
-            cell: this.Lattice.vectorArrays
+            cell: this.Lattice.vectorArrays,
         });
     }
 
@@ -168,7 +168,7 @@ export class Material {
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
     calculateHash(salt = '', isScaled = false) {
-        const message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        const message = `${this.Basis.hashString}#${this.Lattice.getHashString(isScaled)}#${salt}`;
         return CryptoJS.MD5(message).toString();
     }
 
@@ -189,7 +189,7 @@ export class Material {
     toCrystal() {
         const basis = this.Basis;
         basis.toCrystal();
-        this.setProp('basis', basis.toJSON())
+        this.setProp('basis', basis.toJSON());
     }
 
     /**
@@ -199,7 +199,7 @@ export class Material {
     toCartesian() {
         const basis = this.Basis;
         basis.toCartesian();
-        this.setProp('basis', basis.toJSON())
+        this.setProp('basis', basis.toJSON());
     }
 
     /**
@@ -232,9 +232,9 @@ export class Material {
      * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
      */
     getAsPOSCAR(ignoreOriginal = false, omitConstraints = false) {
-        const src = this.src;
+        const { src } = this;
         // By default return original source if exists
-        if ((src && src.extension === 'poscar') && !ignoreOriginal) {
+        if (src && src.extension === 'poscar' && !ignoreOriginal) {
             return this.src.text;
         }
         return parsers.poscar.toPoscar(this.toJSON(), omitConstraints);
@@ -244,13 +244,15 @@ export class Material {
      * Returns a copy of the material with conventional cell constructed instead of primitive.
      */
     getACopyWithConventionalCell() {
-        let material = this.clone();
+        const material = this.clone();
 
         // if conventional and primitive cells are the same => return a copy.
         if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type)) return material;
 
-        const conventionalSupercellMatrix = PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[this.Lattice.type];
-        const conventionalLatticeType = PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES[this.Lattice.type];
+        const conventionalSupercellMatrix =
+            PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[this.Lattice.type];
+        const conventionalLatticeType =
+            PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES[this.Lattice.type];
         const config = supercellTools.generateConfig(material, conventionalSupercellMatrix, 1);
 
         config.lattice.type = conventionalLatticeType;
