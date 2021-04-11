@@ -1,21 +1,21 @@
-import {expect} from "chai";
+import { Lattice } from '../../src/lattice/lattice';
+import { Si } from '../enums';
+import { assertDeepAlmostEqual } from '../utils';
 
-import {Si} from "../enums";
-import {assertDeepAlmostEqual} from "../utils";
-import {Lattice} from "../../src/lattice/lattice";
-
-describe('Cell', function () {
-
-    it('should return scaled cell', function () {
+describe('Cell', () => {
+    it('should return scaled cell', () => {
         const lattice = new Lattice(Si.lattice);
         const expectedCell = {
-            "tolerance": 1,
-            "vector1": [10, 0, 0],
-            "vector2": [0, 10, 0],
-            "vector3": [0, 0, 10]
+            tolerance: 1,
+            vector1: [10, 0, 0],
+            vector2: [0, 10, 0],
+            vector3: [0, 0, 10],
         };
-        const actualCell = lattice.Cell.cloneAndScaleByMatrix([[2, 0, 0], [0, 2, 0], [0, 0, 2]]);
+        const actualCell = lattice.Cell.cloneAndScaleByMatrix([
+            [2, 0, 0],
+            [0, 2, 0],
+            [0, 0, 2],
+        ]);
         assertDeepAlmostEqual(expectedCell, actualCell);
     });
-
 });
