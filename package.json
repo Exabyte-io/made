@@ -9,7 +9,8 @@
         "lint": "eslint src && prettier --write src",
         "lint:fix": "eslint 'src/**/*.js' --fix",
         "eslint": "eslint --fix",
-        "prettier": "prettier"
+        "prettier": "prettier",
+        "prepare": "husky install"
     },
     "repository": {
         "type": "git",
@@ -56,12 +57,6 @@
         "underscore.string": "^3.3.4",
         "@exabyte-io/periodic-table.js": "2.0.4"
     },
-    "husky": {
-        "hooks": {
-            "pre-push": "lint-staged",
-            "pre-commit": "lint-staged"
-        }
-    },
     "lint-staged": {
         "src/**/*.js": [
             "prettier --write",
@@ -70,6 +65,8 @@
         ],
         "tests/**/*.js": [
             "tests/node_modules/.bin/eslint"
-        ]
+        ],
+        "*.js": "eslint --cache --fix",
+        "*.{js,css,md}": "prettier --write"
     }
 }
