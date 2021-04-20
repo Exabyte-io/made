@@ -36,9 +36,7 @@ export class ArrayWithIds {
         this.array = this.array.map((...args) => fn(...args));
     }
 
-    getArrayElementByIndex(idx) {
-        return this.array[idx];
-    }
+    getArrayElementByIndex = (idx) => this.array[idx];
 
     /**
      * Get the index of the array element that passes the predicate.
