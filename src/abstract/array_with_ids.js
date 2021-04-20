@@ -42,17 +42,13 @@ export class ArrayWithIds {
      * Get the index of the array element that passes the predicate.
      * @param {Function} predicate - The function to be applied to each array element.
      */
-    getArrayIndexByPredicate(predicate) {
-        return this.array.findIndex((el) => predicate(el));
-    }
+    getArrayIndexByPredicate = (predicate) => this.array.findIndex((el) => predicate(el));
 
     /**
      * Add an entity to array.
      * @param {Any} el - The entity to be added to array. If Object with 'value' key, its value will be added.
      */
-    addElement(el) {
-        el && this.array.push(el.value || el);
-    }
+    addElement = (el) => el && this.array.push(el.value || el);
 
     /**
      * Remove an entity to array. Either by passing the entity, or the corresponding index.
