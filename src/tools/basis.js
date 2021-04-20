@@ -1,7 +1,7 @@
 /* eslint no-loop-func:1 */
-import _ from 'underscore';
+import _ from "underscore";
 
-import math from '../math';
+import math from "../math";
 
 const ADD = math.add;
 const MULT = math.multiply;
@@ -77,7 +77,7 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
 function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
     // check that initial and final basis have the same cell
     if (!initialBasis.hasEquivalentCellTo(finalBasis))
-        throw new Error('basis.interpolate: Basis cells are not equal');
+        throw new Error("basis.interpolate: Basis cells are not equal");
 
     // clone original initialBasis and assert it is in cartesian coordinates
     const initialBasisCopy = initialBasis.clone();

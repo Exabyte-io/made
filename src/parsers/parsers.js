@@ -1,7 +1,7 @@
-import cif from './cif';
-import espresso from './espresso';
-import poscar from './poscar';
-import xyz from './xyz';
+import cif from "./cif";
+import espresso from "./espresso";
+import poscar from "./poscar";
+import xyz from "./xyz";
 
 export default {
     xyz,

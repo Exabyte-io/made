@@ -13,19 +13,19 @@ export const tolerance = {
 };
 
 export const units = {
-    bohr: 'bohr',
-    angstrom: 'angstrom',
-    degree: 'degree',
-    radian: 'radian',
-    alat: 'alat',
+    bohr: "bohr",
+    angstrom: "angstrom",
+    degree: "degree",
+    radian: "radian",
+    alat: "alat",
 };
 
 /**
  * @summary Coordinates units for a material's basis.
  */
 export const ATOMIC_COORD_UNITS = {
-    crystal: 'crystal',
-    cartesian: 'cartesian',
+    crystal: "crystal",
+    cartesian: "cartesian",
 };
 
 // Only 3 digits will be considered for lattice and basis params on hashing

@@ -1,12 +1,12 @@
-import _ from 'underscore';
-import s from 'underscore.string';
+import _ from "underscore";
+import s from "underscore.string";
 
-import { Basis } from '../basis/basis';
-import { ConstrainedBasis } from '../basis/constrained_basis';
-import { Lattice } from '../lattice/lattice';
-import math from '../math';
-import { InvalidLineError } from './errors';
-import { CombinatorialBasis } from './xyz_combinatorial_basis';
+import { Basis } from "../basis/basis";
+import { ConstrainedBasis } from "../basis/constrained_basis";
+import { Lattice } from "../lattice/lattice";
+import math from "../math";
+import { InvalidLineError } from "./errors";
+import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
 const XYZ_LINE_REGEX = /[A-Z][a-z]?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
@@ -18,7 +18,7 @@ const XYZ_LINE_REGEX = /[A-Z][a-z]?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)
  * @param index {Number}
  */
 function validateLine(xyzLine, index) {
-    const words = xyzLine.split(' ').filter((x) => x.trim() !== '');
+    const words = xyzLine.split(" ").filter((x) => x.trim() !== "");
 
     if (!xyzLine.match(XYZ_LINE_REGEX)) {
         throw new InvalidLineError(index, xyzLine);
@@ -40,7 +40,7 @@ export function validate(xyzTxt) {
     s(xyzTxt)
         .trim()
         .lines()
-        .filter((x) => x.trim() !== '')
+        .filter((x) => x.trim() !== "")
         .forEach(validateLine);
 }
 
@@ -66,7 +66,7 @@ function _parseXYZLineAsWords(line) {
  * @param cell {Array} Basis Cell
  * @return {Object}
  */
-function toBasisConfig(txt, units = 'angstrom', cell = Basis.defaultCell) {
+function toBasisConfig(txt, units = "angstrom", cell = Basis.defaultCell) {
     const lines = s(txt).trim().lines();
     const listOfObjects = _.map(lines, _parseXYZLineAsWords);
 
@@ -102,12 +102,12 @@ function toBasisConfig(txt, units = 'angstrom', cell = Basis.defaultCell) {
  * @param skipRounding {Boolean} Whether to round the numbers (ie. to avoid negative zeros).
  * @return {String} Basis string in XYZ format
  */
-function fromBasis(basisClsInstance, printFormat = '%9.5f', skipRounding = false) {
+function fromBasis(basisClsInstance, printFormat = "%9.5f", skipRounding = false) {
     const clsInstance = basisClsInstance;
     const XYZArray = [];
     clsInstance._elements.array.forEach((item, idx) => {
         // assume that _elements and _coordinates are indexed equivalently
-        const element = s.sprintf('%-3s', item);
+        const element = s.sprintf("%-3s", item);
         const coordinates = clsInstance
             .getCoordinateByIndex(idx)
             .map((x) =>
@@ -115,10 +115,10 @@ function fromBasis(basisClsInstance, printFormat = '%9.5f', skipRounding = false
             );
         const constraints = clsInstance.constraints
             ? clsInstance.AtomicConstraints.getAsStringByIndex(idx)
-            : '';
-        XYZArray.push([element, coordinates.join(' '), constraints].join(' '));
+            : "";
+        XYZArray.push([element, coordinates.join(" "), constraints].join(" "));
     });
-    return `${XYZArray.join('\n')}\n`;
+    return `${XYZArray.join("\n")}\n`;
 }
 
 /**
@@ -136,7 +136,7 @@ function fromMaterial(materialOrConfig, fractional = false) {
     if (fractional) {
         basis.toCrystal();
     }
-    return fromBasis(basis, '%11.6f');
+    return fromBasis(basis, "%11.6f");
 }
 
 export default {

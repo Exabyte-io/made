@@ -1,6 +1,6 @@
 /* eslint no-unused-vars: 0 */
-import { LATTICE_TYPE } from '../lattice/types';
-import math from '../math';
+import { LATTICE_TYPE } from "../lattice/types";
+import math from "../math";
 
 /**
  * Routines for calculating primitive cell vectors from conventional cell Bravais parameters.
@@ -124,7 +124,7 @@ const PRIMITIVE_CELLS = {
     [LATTICE_TYPE.TRI]: ({ a, b, c, alpha, beta, gamma }) => {
         // convert angles to Radians
         [alpha, beta, gamma] = [alpha, beta, gamma].map(
-            (x) => math.unit(x, 'degree').to('rad').value,
+            (x) => math.unit(x, "degree").to("rad").value,
         );
 
         const [cosAlpha, cosBeta, cosGamma] = [alpha, beta, gamma].map((x) => math.cos(x));

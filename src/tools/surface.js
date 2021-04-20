@@ -1,6 +1,6 @@
-import { LatticeBravais } from '../lattice/lattice_bravais';
-import math from '../math';
-import SupercellTools from './supercell';
+import { LatticeBravais } from "../lattice/lattice_bravais";
+import math from "../math";
+import SupercellTools from "./supercell";
 
 const MULT = math.multiply;
 const ADD = math.add;
@@ -33,7 +33,7 @@ function extGCD(a, b) {
  */
 function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
     if (!millerIndices.reduce((a, b) => math.abs(a) + math.abs(b)))
-        throw new Error('Miller indices are zeros.');
+        throw new Error("Miller indices are zeros.");
 
     let scalingMatrix;
 
@@ -131,7 +131,7 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
  */
 function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy = 1) {
     if (numberOfLayers < 1)
-        throw new Error('Made.tools.surface.generateConfig: number of layers < 1.');
+        throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
 
     const cell = material.Lattice.Cell;
 

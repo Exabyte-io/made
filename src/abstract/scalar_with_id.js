@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from "underscore";
 
 /**
  * Helper class representing a scalar with an associated id.

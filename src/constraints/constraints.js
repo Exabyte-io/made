@@ -1,4 +1,4 @@
-import { ArrayWithIds } from '../abstract/array_with_ids';
+import { ArrayWithIds } from "../abstract/array_with_ids";
 
 export class AtomicConstraints {
     static fromArray(array) {
@@ -11,7 +11,7 @@ export class AtomicConstraints {
      * @param {ArrayWithIds|Array} config.values
      */
     constructor(config = {}) {
-        this.name = 'atomic_constraints';
+        this.name = "atomic_constraints";
         this.values = new ArrayWithIds(config.values || []);
     }
 
@@ -46,6 +46,6 @@ export class AtomicConstraints {
      * @return {String[]}
      */
     getAsStringByIndex(idx, mapFn = (boolean) => (boolean ? 1 : 0)) {
-        return this.getByIndex(idx).map(mapFn).join(' ');
+        return this.getByIndex(idx).map(mapFn).join(" ");
     }
 }

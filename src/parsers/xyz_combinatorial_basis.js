@@ -1,8 +1,8 @@
-import _ from 'underscore';
-import * as s from 'underscore.string';
+import _ from "underscore";
+import * as s from "underscore.string";
 
-import { Basis } from '../basis/basis';
-import math from '../math';
+import { Basis } from "../basis/basis";
+import math from "../math";
 
 /**
  * @summary Combinatorial XYZ basis class and related. Create and get all information about basis and elements in it.
@@ -32,10 +32,10 @@ import math from '../math';
  */
 const LINE_REGEX = /^([A-Z][a-z]?\/?,?)+\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s*$/gi;
 // vacancy characters will be used to create vacancies on basis generation
-const VACANCY_CHARACTER = 'VAC';
+const VACANCY_CHARACTER = "VAC";
 
-const COMBINATION_DELIMITER = ',';
-const PERMUTATION_DELIMITER = '/';
+const COMBINATION_DELIMITER = ",";
+const PERMUTATION_DELIMITER = "/";
 
 /**
  * Basis validation error codes.
@@ -64,7 +64,7 @@ export class CombinatorialBasis {
         this._lines = s
             .lines(eXYZ)
             .map((x) => x.trim())
-            .filter((x) => x !== '')
+            .filter((x) => x !== "")
             .map(this._parseBasisLine);
 
         this._hasPermutationLine = this._lines.reduce((mem, a) => {
@@ -152,10 +152,10 @@ export class CombinatorialBasis {
             .sort();
     }
 
-    static toBasisConfig(array, units = 'crystal', cell = Basis.defaultCell) {
+    static toBasisConfig(array, units = "crystal", cell = Basis.defaultCell) {
         return {
-            elements: _.pluck(array, 'element'),
-            coordinates: _.pluck(array, 'coordinates'),
+            elements: _.pluck(array, "element"),
+            coordinates: _.pluck(array, "coordinates"),
             units,
             cell,
         };

@@ -1,5 +1,5 @@
-import { LATTICE_TYPE } from '../lattice/types';
-import math from '../math';
+import { LATTICE_TYPE } from "../lattice/types";
+import math from "../math";
 
 /**
  * Routines for calculating conventional cell vectors from primitive cell Bravais parameters.

@@ -1,9 +1,9 @@
-import almostEqual from 'array-almost-equal';
+import almostEqual from "array-almost-equal";
 
-import math from '../../math';
-import { Lattice } from '../lattice';
-import { paths } from './paths';
-import { symmetryPoints } from './symmetry_points';
+import math from "../../math";
+import { Lattice } from "../lattice";
+import { paths } from "./paths";
+import { symmetryPoints } from "./symmetry_points";
 
 export class ReciprocalLattice extends Lattice {
     /**

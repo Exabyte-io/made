@@ -1,29 +1,29 @@
-import CryptoJS from 'crypto-js';
-import lodash from 'lodash';
+import CryptoJS from "crypto-js";
+import lodash from "lodash";
 
-import { ConstrainedBasis } from './basis/constrained_basis';
+import { ConstrainedBasis } from "./basis/constrained_basis";
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
     PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS,
-} from './cell/conventional_cell';
-import { ATOMIC_COORD_UNITS, units } from './constants';
-import { Lattice } from './lattice/lattice';
-import { LATTICE_TYPE } from './lattice/types';
-import parsers from './parsers/parsers';
-import supercellTools from './tools/supercell';
+} from "./cell/conventional_cell";
+import { ATOMIC_COORD_UNITS, units } from "./constants";
+import { Lattice } from "./lattice/lattice";
+import { LATTICE_TYPE } from "./lattice/types";
+import parsers from "./parsers/parsers";
+import supercellTools from "./tools/supercell";
 
 export const defaultMaterialConfig = {
-    name: 'Silicon FCC',
+    name: "Silicon FCC",
     basis: {
         elements: [
             {
                 id: 1,
-                value: 'Si',
+                value: "Si",
             },
             {
                 id: 2,
-                value: 'Si',
+                value: "Si",
             },
         ],
         coordinates: [
@@ -84,27 +84,27 @@ export class Material {
     }
 
     updateFormula() {
-        this.setProp('formula', this.Basis.formula);
-        this.setProp('unitCellFormula', this.Basis.unitCellFormula);
+        this.setProp("formula", this.Basis.formula);
+        this.setProp("unitCellFormula", this.Basis.unitCellFormula);
     }
 
     /**
      * Gets material's formula
      */
     get formula() {
-        return this.prop('formula') || this.Basis.formula;
+        return this.prop("formula") || this.Basis.formula;
     }
 
     get unitCellFormula() {
-        return this.prop('unitCellFormula') || this.Basis.unitCellFormula;
+        return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
     }
 
     get name() {
-        return this.prop('name') || this.formula;
+        return this.prop("name") || this.formula;
     }
 
     set name(name) {
-        this.setProp('name', name);
+        this.setProp("name", name);
     }
 
     /**
@@ -115,13 +115,13 @@ export class Material {
     setBasis(textOrObject, format, unitz) {
         let basis;
         switch (format) {
-            case 'xyz':
+            case "xyz":
                 basis = parsers.xyz.toBasisConfig(textOrObject, unitz);
                 break;
             default:
                 basis = textOrObject;
         }
-        this.setProp('basis', basis);
+        this.setProp("basis", basis);
         this.updateFormula();
     }
 
@@ -133,7 +133,7 @@ export class Material {
     }
 
     get basis() {
-        return this.prop('basis', undefined, true);
+        return this.prop("basis", undefined, true);
     }
 
     // returns the instance of {ConstrainedBasis} class
@@ -145,11 +145,11 @@ export class Material {
     }
 
     get lattice() {
-        return this.prop('lattice', undefined, true);
+        return this.prop("lattice", undefined, true);
     }
 
     set lattice(config) {
-        return this.setProp('lattice', config);
+        return this.setProp("lattice", config);
     }
 
     // returns the instance of {Lattice} class
@@ -167,7 +167,7 @@ export class Material {
      * @param salt {String} Salt for hashing, empty string by default.
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
-    calculateHash(salt = '', isScaled = false) {
+    calculateHash(salt = "", isScaled = false) {
         const message = `${this.Basis.hashString}#${this.Lattice.getHashString(isScaled)}#${salt}`;
         return CryptoJS.MD5(message).toString();
     }
@@ -180,7 +180,7 @@ export class Material {
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
     get scaledHash() {
-        return this.calculateHash('', true);
+        return this.calculateHash("", true);
     }
 
     /**
@@ -189,7 +189,7 @@ export class Material {
     toCrystal() {
         const basis = this.Basis;
         basis.toCrystal();
-        this.setProp('basis', basis.toJSON());
+        this.setProp("basis", basis.toJSON());
     }
 
     /**
@@ -199,7 +199,7 @@ export class Material {
     toCartesian() {
         const basis = this.Basis;
         basis.toCartesian();
-        this.setProp('basis', basis.toJSON());
+        this.setProp("basis", basis.toJSON());
     }
 
     /**
@@ -234,7 +234,7 @@ export class Material {
     getAsPOSCAR(ignoreOriginal = false, omitConstraints = false) {
         const { src } = this;
         // By default return original source if exists
-        if (src && src.extension === 'poscar' && !ignoreOriginal) {
+        if (src && src.extension === "poscar" && !ignoreOriginal) {
             return this.src.text;
         }
         return parsers.poscar.toPoscar(this.toJSON(), omitConstraints);

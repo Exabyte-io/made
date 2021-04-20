@@ -1,5 +1,5 @@
-import { Cell } from '../cell/cell';
-import math from '../math';
+import { Cell } from "../cell/cell";
+import math from "../math";
 
 /**
  * Returns the list of points on the original lattice contained in the supercell in fractional coordinates.

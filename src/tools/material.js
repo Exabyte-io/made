@@ -5,7 +5,7 @@
  * @param factor {Number} Float scaling factor.
  */
 
-function scaleOneLatticeVector(material, key = 'a', factor = 1.0) {
+function scaleOneLatticeVector(material, key = "a", factor = 1.0) {
     material.toCartesian();
 
     const { lattice } = material;

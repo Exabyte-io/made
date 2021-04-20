@@ -1,6 +1,6 @@
-import math from 'mathjs';
+import math from "mathjs";
 
-import { tolerance as TOLERANCE } from './constants';
+import { tolerance as TOLERANCE } from "./constants";
 
 /**
  * @summary Zero threshold. Numbers below it are put to zero exactly.
@@ -37,7 +37,7 @@ const vlen = function (v) {
 const angle = function (a, b, unit) {
     const lenA = vlen(a);
     const lenB = vlen(b);
-    return math.unit(math.acos(product(a, b) / (lenA * lenB)), 'rad').toNumber(unit || 'deg');
+    return math.unit(math.acos(product(a, b) / (lenA * lenB)), "rad").toNumber(unit || "deg");
 };
 
 const angleUpTo90 = (...args) => {
@@ -54,7 +54,7 @@ const angleUpTo90 = (...args) => {
 const vDist = function (v1, v2) {
     if (v1.length !== v2.length) {
         console.error(
-            'Attempting to calculate distance between vectors of different dimensionality',
+            "Attempting to calculate distance between vectors of different dimensionality",
         );
         return;
     }

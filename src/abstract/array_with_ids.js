@@ -1,6 +1,6 @@
-import _ from 'underscore';
+import _ from "underscore";
 
-import { ScalarWithId } from './scalar_with_id';
+import { ScalarWithId } from "./scalar_with_id";
 
 /**
  * Helper class representing an ArrayWithIds. Used to explicitly track values assigned to atoms, for example.
@@ -12,7 +12,7 @@ export class ArrayWithIds {
      */
     constructor(array = []) {
         if (!_.isArray(array))
-            throw new Error('ArrayWithIds.constructor: pass array on initialization');
+            throw new Error("ArrayWithIds.constructor: pass array on initialization");
         // if passed an array with ids as config, only store the values in array
         this.array = array.sort((a, b) => a.id - b.id).map((element) => element.value || element);
     }
@@ -32,7 +32,7 @@ export class ArrayWithIds {
      */
     mapArrayInPlace(fn) {
         if (!_.isFunction(fn))
-            throw new Error('ArrayWithIds.mapArray: must pass function as argument');
+            throw new Error("ArrayWithIds.mapArray: must pass function as argument");
         this.array = this.array.map((...args) => fn(...args));
     }
 

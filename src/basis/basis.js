@@ -1,11 +1,11 @@
-import { getElectronegativity } from '@exabyte-io/periodic-table.js';
-import _ from 'underscore';
-import s from 'underscore.string';
+import { getElectronegativity } from "@exabyte-io/periodic-table.js";
+import _ from "underscore";
+import s from "underscore.string";
 
-import { ArrayWithIds } from '../abstract/array_with_ids';
-import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from '../constants';
-import { Lattice } from '../lattice/lattice';
-import math from '../math';
+import { ArrayWithIds } from "../abstract/array_with_ids";
+import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
+import { Lattice } from "../lattice/lattice";
+import math from "../math";
 
 /**
  * A class representing a crystal basis.
@@ -21,7 +21,7 @@ export class Basis {
      * @param {Boolean} isEmpty - crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
      */
     constructor({
-        elements = ['Si'],
+        elements = ["Si"],
         coordinates = [[0, 0, 0]],
         units,
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
@@ -29,7 +29,7 @@ export class Basis {
     }) {
         if (!units) {
             units = Basis.unitsOptionsDefaultValue;
-            console.warn('Basis.constructor: units are not provided => set to crystal');
+            console.warn("Basis.constructor: units are not provided => set to crystal");
         }
         if (isEmpty) {
             elements = [];
@@ -108,7 +108,7 @@ export class Basis {
      */
     toJSON() {
         return JSON.parse(
-            JSON.stringify(_.pick(this, ['elements', 'coordinates', 'units', 'cell'])),
+            JSON.stringify(_.pick(this, ["elements", "coordinates", "units", "cell"])),
         );
     }
 
@@ -209,7 +209,7 @@ export class Basis {
      * @param {String} element - Chemical element.
      * @param {Array} coordinate - 3-dimensional coordinate.
      */
-    addAtom({ element = 'Si', coordinate = [0.5, 0.5, 0.5] }) {
+    addAtom({ element = "Si", coordinate = [0.5, 0.5, 0.5] }) {
         this._elements.addElement(element);
         this._coordinates.addElement(coordinate);
     }
@@ -259,7 +259,7 @@ export class Basis {
      */
     get uniqueElementCountsSortedByElectronegativity() {
         return _.chain(this.elements)
-            .sortBy('value')
+            .sortBy("value")
             .sortBy((x) => getElectronegativity(x.value))
             .countBy((element) => element.value)
             .value();
@@ -297,10 +297,10 @@ export class Basis {
         const countsValues = _.values(counts);
         const gcd = countsValues.length > 1 ? math.gcd(...countsValues) : countsValues[0];
         return _.pairs(counts)
-            .map((x) => x[0] + (x[1] / gcd === 1 ? '' : x[1] / gcd))
+            .map((x) => x[0] + (x[1] / gcd === 1 ? "" : x[1] / gcd))
             .reduce((mem, item) => {
                 return mem + item;
-            }, '');
+            }, "");
     }
 
     /**
@@ -310,10 +310,10 @@ export class Basis {
     get unitCellFormula() {
         const counts = this.uniqueElementCountsSortedByElectronegativity;
         return _.pairs(counts)
-            .map((x) => x[0] + (x[1] === 1 ? '' : x[1]))
+            .map((x) => x[0] + (x[1] === 1 ? "" : x[1]))
             .reduce((mem, item) => {
                 return mem + item;
-            }, '');
+            }, "");
     }
 
     /**
@@ -353,7 +353,7 @@ export class Basis {
                 return `${element} ${toleratedCoordinates.join()}`;
             })
             .sort()
-            .join(';')};`;
+            .join(";")};`;
     }
 
     /**
@@ -381,7 +381,7 @@ export class Basis {
         return this.elementsAndCoordinatesArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
-            return `${element} ${coordinate.map((x) => s.sprintf('%14.9f', x).trim()).join(' ')}`;
+            return `${element} ${coordinate.map((x) => s.sprintf("%14.9f", x).trim()).join(" ")}`;
         });
     }
 

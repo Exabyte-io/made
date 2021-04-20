@@ -1,14 +1,14 @@
-import lodash from 'lodash';
-import _ from 'underscore';
+import lodash from "lodash";
+import _ from "underscore";
 
-import { Cell } from '../cell/cell';
-import { primitiveCell } from '../cell/primitive_cell';
-import { HASH_TOLERANCE } from '../constants';
-import math from '../math';
-import { LatticeBravais } from './lattice_bravais';
-import { LatticeVectors } from './lattice_vectors';
-import { LATTICE_TYPE, LATTICE_TYPE_CONFIGS, LATTICE_TYPE_EXTENDED } from './types';
-import { UnitCell } from './unit_cell';
+import { Cell } from "../cell/cell";
+import { primitiveCell } from "../cell/primitive_cell";
+import { HASH_TOLERANCE } from "../constants";
+import math from "../math";
+import { LatticeBravais } from "./lattice_bravais";
+import { LatticeVectors } from "./lattice_vectors";
+import { LATTICE_TYPE, LATTICE_TYPE_CONFIGS, LATTICE_TYPE_EXTENDED } from "./types";
+import { UnitCell } from "./unit_cell";
 
 /*
  * Container class for crystal lattice and associated methods.
@@ -110,8 +110,8 @@ export class Lattice extends LatticeBravais {
     get typeLabel() {
         return lodash.get(
             LATTICE_TYPE_CONFIGS.find((c) => c.code === this.type),
-            'label',
-            'Unknown',
+            "label",
+            "Unknown",
         );
     }
 
@@ -218,6 +218,6 @@ export class Lattice extends LatticeBravais {
             scaledLattice.gamma,
         ]
             .map((x) => math.round(x, HASH_TOLERANCE))
-            .join(';')};`;
+            .join(";")};`;
     }
 }

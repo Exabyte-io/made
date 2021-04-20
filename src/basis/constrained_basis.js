@@ -1,8 +1,8 @@
-import s from 'underscore.string';
+import s from "underscore.string";
 
-import { ArrayWithIds } from '../abstract/array_with_ids';
-import { AtomicConstraints } from '../constraints/constraints';
-import { Basis } from './basis';
+import { ArrayWithIds } from "../abstract/array_with_ids";
+import { AtomicConstraints } from "../constraints/constraints";
+import { Basis } from "./basis";
 
 /**
  * @summary Extension of the Basis class able to deal with atomic constraints.
@@ -83,9 +83,9 @@ export class ConstrainedBasis extends Basis {
             const coordinate = entry[1];
             const constraint = entry[2];
             return `${
-                s.sprintf('%-4s', element) +
-                coordinate.map((x) => s.sprintf('%14.9f', x).trim()).join(' ')
-            } ${constraint.map((x) => (x ? 1 : 0)).join(' ')}`;
+                s.sprintf("%-4s", element) +
+                coordinate.map((x) => s.sprintf("%14.9f", x).trim()).join(" ")
+            } ${constraint.map((x) => (x ? 1 : 0)).join(" ")}`;
         });
     }
 }

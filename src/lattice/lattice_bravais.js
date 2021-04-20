@@ -1,6 +1,6 @@
-import constants from '../constants';
-import math from '../math';
-import { LATTICE_TYPE_CONFIGS } from './types';
+import constants from "../constants";
+import math from "../math";
+import { LATTICE_TYPE_CONFIGS } from "./types";
 
 /*
  * @summary: class that holds parameters of a Bravais Lattice: a, b, c, alpha, beta, gamma + corresponding units.
@@ -29,10 +29,10 @@ export class LatticeBravais {
             beta = alpha,
             gamma = alpha,
             // if we do not know what lattice type this is => set to TRI
-            type = 'TRI',
+            type = "TRI",
             units = {
-                length: 'angstrom',
-                angle: 'degree',
+                length: "angstrom",
+                angle: "degree",
             },
         } = config;
         const k =
@@ -69,8 +69,8 @@ export class LatticeBravais {
         b,
         c,
         alat = 1,
-        units = 'angstrom',
-        type = 'TRI',
+        units = "angstrom",
+        type = "TRI",
         skipRounding = false,
     }) {
         const roundValue = skipRounding ? (x) => x : this._roundValue;
@@ -78,14 +78,14 @@ export class LatticeBravais {
             a: roundValue(math.vlen(a) * alat),
             b: roundValue(math.vlen(b) * alat),
             c: roundValue(math.vlen(c) * alat),
-            alpha: roundValue(math.angle(b, c, 'deg')),
-            beta: roundValue(math.angle(a, c, 'deg')),
-            gamma: roundValue(math.angle(a, b, 'deg')),
+            alpha: roundValue(math.angle(b, c, "deg")),
+            beta: roundValue(math.angle(a, c, "deg")),
+            gamma: roundValue(math.angle(a, b, "deg")),
             // initially we do not know what lattice type this is => set to TRI
             type,
             units: {
                 length: units,
-                angle: 'degree',
+                angle: "degree",
             },
         });
     }

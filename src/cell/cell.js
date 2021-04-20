@@ -1,5 +1,5 @@
-import { tolerance as tol } from '../constants';
-import math from '../math';
+import { tolerance as tol } from "../constants";
+import math from "../math";
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;

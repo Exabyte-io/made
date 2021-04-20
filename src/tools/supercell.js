@@ -1,6 +1,6 @@
-import { LatticeBravais } from '../lattice/lattice_bravais';
-import math from '../math';
-import cellTools from './cell';
+import { LatticeBravais } from "../lattice/lattice_bravais";
+import math from "../math";
+import cellTools from "./cell";
 
 const ADD = math.add;
 
@@ -46,7 +46,7 @@ function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix
 function generateConfig(material, supercellMatrix) {
     const det = math.det(supercellMatrix);
     if (det === 0) {
-        throw new Error('Scaling matrix is degenerate.');
+        throw new Error("Scaling matrix is degenerate.");
     }
     const cell = material.Lattice.Cell;
     const supercell = cell.cloneAndScaleByMatrix(supercellMatrix);

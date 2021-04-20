@@ -1,6 +1,6 @@
-import { primitiveCell } from '../cell/primitive_cell';
-import constants from '../constants';
-import math from '../math';
+import { primitiveCell } from "../cell/primitive_cell";
+import constants from "../constants";
+import math from "../math";
 
 /*
  * @summary: class that holds parameters of a Bravais Lattice: a, b, c, alpha, beta, gamma + corresponding units.
@@ -17,14 +17,14 @@ export class LatticeVectors {
      * @param {String} config.units - units container.
      */
     constructor(config) {
-        const { a, b, c, alat = 1, units = 'angstrom' } = config;
+        const { a, b, c, alat = 1, units = "angstrom" } = config;
         const k = constants.units.bohr === units ? constants.coefficients.BOHR_TO_ANGSTROM : 1;
         Object.assign(this, {
             a: a.map((x) => x * k),
             b: b.map((x) => x * k),
             c: c.map((x) => x * k),
             alat,
-            units: 'angstrom',
+            units: "angstrom",
         });
     }
 
@@ -46,14 +46,14 @@ export class LatticeVectors {
         beta = 90,
         gamma = 90,
         units = {
-            length: 'angstrom',
-            angle: 'degree',
+            length: "angstrom",
+            angle: "degree",
         },
         type,
         isConventional = false,
     }) {
         // use "direct" lattice constructor for primitive lattice
-        if (!isConventional) type = 'TRI';
+        if (!isConventional) type = "TRI";
 
         // set precision and remove JS floating point artifacts
         const [vectorA, vectorB, vectorC] = primitiveCell({
