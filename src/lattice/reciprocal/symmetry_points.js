@@ -10,15 +10,27 @@ const POINTS = {
         return [
             {
                 point: "R",
-                coordinates: [0.5, 0.5, 0.5],
+                coordinates: [
+                    0.5,
+                    0.5,
+                    0.5,
+                ],
             },
             {
                 point: "X",
-                coordinates: [0.0, 0.5, 0.0],
+                coordinates: [
+                    0.0,
+                    0.5,
+                    0.0,
+                ],
             },
             {
                 point: "M",
-                coordinates: [0.5, 0.5, 0.0],
+                coordinates: [
+                    0.5,
+                    0.5,
+                    0.0,
+                ],
             },
         ];
     },
@@ -27,23 +39,42 @@ const POINTS = {
         return [
             {
                 point: "K",
-                coordinates: [3 / 8, 3 / 8, 3 / 4],
+                coordinates: [
+                    3 / 8,
+                    3 / 8,
+                    3 / 4,
+                ],
             },
             {
                 point: "L",
-                coordinates: [1 / 2, 1 / 2, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "U",
-                coordinates: [5 / 8, 1 / 4, 5 / 8],
+                coordinates: [
+                    5 / 8,
+                    1 / 4,
+                    5 / 8,
+                ],
             },
             {
                 point: "W",
-                coordinates: [1 / 2, 1 / 4, 3 / 4],
+                coordinates: [
+                    1 / 2,
+                    1 / 4,
+                    3 / 4,
+                ],
             },
             {
                 point: "X",
-                coordinates: [1 / 2, 0.0, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    1 / 2],
             },
         ];
     },
@@ -52,15 +83,26 @@ const POINTS = {
         return [
             {
                 point: "H",
-                coordinates: [1 / 2, -1 / 2, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    -1 / 2,
+                    1 / 2],
             },
             {
                 point: "P",
-                coordinates: [1 / 4, 1 / 4, 1 / 4],
+                coordinates: [
+                    1 / 4,
+                    1 / 4,
+                    1 / 4,
+                ],
             },
             {
                 point: "N",
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
         ];
     },
@@ -69,23 +111,43 @@ const POINTS = {
         return [
             {
                 point: "A",
-                coordinates: [1 / 2, 1 / 2, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "M",
-                coordinates: [1 / 2, 1 / 2, 0.0],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "R",
-                coordinates: [0.0, 1 / 2, 1 / 2],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "X",
-                coordinates: [0.0, 1 / 2, 0.0],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
         ];
     },
@@ -98,27 +160,51 @@ const POINTS = {
             return [
                 {
                     point: "M",
-                    coordinates: [-1 / 2, 1 / 2, 1 / 2],
+                    coordinates: [
+                        -1 / 2,
+                        1 / 2,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "N",
-                    coordinates: [0.0, 1 / 2, 0.0],
+                    coordinates: [
+                        0.0,
+                        1 / 2,
+                        0.0,
+                    ],
                 },
                 {
                     point: "P",
-                    coordinates: [1 / 4, 1 / 4, 1 / 4],
+                    coordinates: [
+                        1 / 4,
+                        1 / 4,
+                        1 / 4,
+                    ],
                 },
                 {
                     point: "X",
-                    coordinates: [0.0, 0.0, 1 / 2],
+                    coordinates: [
+                        0.0,
+                        0.0,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "Z",
-                    coordinates: [n, n, -n],
+                    coordinates: [
+                        n,
+                        n,
+                        -n,
+                    ],
                 },
                 {
                     point: "Z1",
-                    coordinates: [-n, 1 - n, n],
+                    coordinates: [
+                        -n,
+                        1 - n,
+                        n,
+                    ],
                 },
             ];
         }
@@ -128,35 +214,67 @@ const POINTS = {
         return [
             {
                 point: "N",
-                coordinates: [0.0, 1 / 2, 0.0],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "P",
-                coordinates: [1 / 4, 1 / 4, 1 / 4],
+                coordinates: [
+                    1 / 4,
+                    1 / 4,
+                    1 / 4,
+                ],
             },
             {
                 point: "∑",
-                coordinates: [-n, n, n],
+                coordinates: [
+                    -n,
+                    n,
+                    n,
+                ],
             },
             {
                 point: "∑1",
-                coordinates: [n, 1 - n, -n],
+                coordinates: [
+                    n,
+                    1 - n,
+                    -n,
+                ],
             },
             {
                 point: "X",
-                coordinates: [0, 0, 1 / 2],
+                coordinates: [
+                    0,
+                    0,
+                    1 / 2,
+                ],
             },
             {
                 point: "Y",
-                coordinates: [-e, e, 1 / 2],
+                coordinates: [
+                    -e,
+                    e,
+                    1 / 2,
+                ],
             },
             {
                 point: "Y1",
-                coordinates: [1 / 2, 1 / 2, -e],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    -e,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [1 / 2, 1 / 2, -1 / 2],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    -1 / 2,
+                ],
             },
         ];
     },
@@ -165,31 +283,59 @@ const POINTS = {
         return [
             {
                 point: "R",
-                coordinates: [1 / 2, 1 / 2, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "S",
-                coordinates: [1 / 2, 1 / 2, 0.0],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "T",
-                coordinates: [0.0, 1 / 2, 1 / 2],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "U",
-                coordinates: [1 / 2, 0.0, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    1 / 2,
+                ],
             },
             {
                 point: "X",
-                coordinates: [1 / 2, 0.0, 0.0],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    0.0,
+                ],
             },
             {
                 point: "Y",
-                coordinates: [0.0, 1 / 2, 0.0],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
         ];
     },
@@ -203,35 +349,67 @@ const POINTS = {
             return [
                 {
                     point: "A",
-                    coordinates: [1 / 2, 1 / 2 + e, e],
+                    coordinates: [
+                        1 / 2,
+                        1 / 2 + e,
+                        e,
+                    ],
                 },
                 {
                     point: "A1",
-                    coordinates: [0.0, 1 / 2 - e, 1 - e],
+                    coordinates: [
+                        0.0,
+                        1 / 2 - e,
+                        1 - e,
+                    ],
                 },
                 {
                     point: "L",
-                    coordinates: [1 / 2, 1 / 2, 1 / 2],
+                    coordinates: [
+                        1 / 2,
+                        1 / 2,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "T",
-                    coordinates: [1.0, 1 / 2, 1 / 2],
+                    coordinates: [
+                        1.0,
+                        1 / 2,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "X",
-                    coordinates: [0.0, n, n],
+                    coordinates: [
+                        0.0,
+                        n,
+                        n,
+                    ],
                 },
                 {
                     point: "X1",
-                    coordinates: [1.0, 1 - n, 1 - n],
+                    coordinates: [
+                        1.0,
+                        1 - n,
+                        1 - n,
+                    ],
                 },
                 {
                     point: "Y",
-                    coordinates: [1 / 2, 0.0, 1 / 2],
+                    coordinates: [
+                        1 / 2,
+                        0.0,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "Z",
-                    coordinates: [1 / 2, 1 / 2, 0.0],
+                    coordinates: [
+                        1 / 2,
+                        1 / 2,
+                        0.0,
+                    ],
                 },
             ];
         }
@@ -242,43 +420,83 @@ const POINTS = {
         return [
             {
                 point: "C",
-                coordinates: [1 / 2, 1 / 2 - n, 1 - n],
+                coordinates: [
+                    1 / 2,
+                    1 / 2 - n,
+                    1 - n,
+                ],
             },
             {
                 point: "C1",
-                coordinates: [0.0, 1 / 2 + n, n],
+                coordinates: [
+                    0.0,
+                    1 / 2 + n,
+                    n,
+                ],
             },
             {
                 point: "D",
-                coordinates: [1 / 2 - d, 1 / 2, 1 - d],
+                coordinates: [
+                    1 / 2 - d,
+                    1 / 2,
+                    1 - d,
+                ],
             },
             {
                 point: "D1",
-                coordinates: [1 / 2 + d, 1 / 2, d],
+                coordinates: [
+                    1 / 2 + d,
+                    1 / 2,
+                    d,
+                ],
             },
             {
                 point: "L",
-                coordinates: [1 / 2, 1 / 2, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "H",
-                coordinates: [1 - f, 1 / 2 - f, 1 / 2],
+                coordinates: [
+                    1 - f,
+                    1 / 2 - f,
+                    1 / 2,
+                ],
             },
             {
                 point: "H1",
-                coordinates: [f, 1 / 2 + f, 1 / 2],
+                coordinates: [
+                    f,
+                    1 / 2 + f,
+                    1 / 2,
+                ],
             },
             {
                 point: "X",
-                coordinates: [0.0, 1 / 2, 1 / 2],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "Y",
-                coordinates: [1 / 2, 0.0, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    1 / 2,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [1 / 2, 1 / 2, 0.0],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    0.0,
+                ],
             },
         ];
     },
@@ -291,51 +509,99 @@ const POINTS = {
         return [
             {
                 point: "L",
-                coordinates: [-m, m, 1 / 2 - d],
+                coordinates: [
+                    -m,
+                    m,
+                    1 / 2 - d,
+                ],
             },
             {
                 point: "L1",
-                coordinates: [m, -m, 1 / 2 + d],
+                coordinates: [
+                    m,
+                    -m,
+                    1 / 2 + d,
+                ],
             },
             {
                 point: "L2",
-                coordinates: [1 / 2 - d, 1 / 2 + d, -m],
+                coordinates: [
+                    1 / 2 - d,
+                    1 / 2 + d,
+                    -m,
+                ],
             },
             {
                 point: "R",
-                coordinates: [0.0, 1 / 2, 0.0],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "S",
-                coordinates: [1 / 2, 0.0, 0.0],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    0.0,
+                ],
             },
             {
                 point: "T",
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
             {
                 point: "W",
-                coordinates: [1 / 4, 1 / 4, 1 / 4],
+                coordinates: [
+                    1 / 4,
+                    1 / 4,
+                    1 / 4,
+                ],
             },
             {
                 point: "X",
-                coordinates: [-e, e, e],
+                coordinates: [
+                    -e,
+                    e,
+                    e,
+                ],
             },
             {
                 point: "X1",
-                coordinates: [e, 1 - e, -e],
+                coordinates: [
+                    e,
+                    1 - e,
+                    -e,
+                ],
             },
             {
                 point: "Y",
-                coordinates: [n, -n, n],
+                coordinates: [
+                    n,
+                    -n,
+                    n,
+                ],
             },
             {
                 point: "Y1",
-                coordinates: [1 - n, n, -n],
+                coordinates: [
+                    1 - n,
+                    n,
+                    -n,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [1 / 2, 1 / 2, -1 / 2],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    -1 / 2,
+                ],
             },
         ];
     },
@@ -345,39 +611,75 @@ const POINTS = {
         return [
             {
                 point: "A",
-                coordinates: [e, e, 1 / 2],
+                coordinates: [
+                    e,
+                    e,
+                    1 / 2,
+                ],
             },
             {
                 point: "A1",
-                coordinates: [-e, 1 - e, 1 / 2],
+                coordinates: [
+                    -e,
+                    1 - e,
+                    1 / 2,
+                ],
             },
             {
                 point: "R",
-                coordinates: [0.0, 1 / 2, 1 / 2],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "S",
-                coordinates: [0.0, 1 / 2, 0.0],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "T",
-                coordinates: [-1 / 2, 1 / 2, 1 / 2],
+                coordinates: [
+                    -1 / 2,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "X",
-                coordinates: [e, e, 0.0],
+                coordinates: [
+                    e,
+                    e,
+                    0.0,
+                ],
             },
             {
                 point: "X1",
-                coordinates: [-e, 1 - e, 0.0],
+                coordinates: [
+                    -e,
+                    1 - e,
+                    0.0,
+                ],
             },
             {
                 point: "Y",
-                coordinates: [-1 / 2, 1 / 2, 0.0],
+                coordinates: [
+                    -1 / 2,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
         ];
     },
@@ -386,23 +688,43 @@ const POINTS = {
         return [
             {
                 point: "A",
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
             {
                 point: "H",
-                coordinates: [1 / 3, 1 / 3, 1 / 2],
+                coordinates: [
+                    1 / 3,
+                    1 / 3,
+                    1 / 2,
+                ],
             },
             {
                 point: "K",
-                coordinates: [1 / 3, 1 / 3, 0.0],
+                coordinates: [
+                    1 / 3,
+                    1 / 3,
+                    0.0,
+                ],
             },
             {
                 point: "L",
-                coordinates: [1 / 2, 0.0, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    1 / 2,
+                ],
             },
             {
                 point: "M",
-                coordinates: [1 / 2, 0.0, 0.0],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    0.0,
+                ],
             },
         ];
     },
@@ -418,47 +740,91 @@ const POINTS = {
             return [
                 {
                     point: "B",
-                    coordinates: [n, 1 / 2, 1 - n],
+                    coordinates: [
+                        n,
+                        1 / 2,
+                        1 - n,
+                    ],
                 },
                 {
                     point: "B1",
-                    coordinates: [1 / 2, 1 - n, n - 1],
+                    coordinates: [
+                        1 / 2,
+                        1 - n,
+                        n - 1,
+                    ],
                 },
                 {
                     point: "F",
-                    coordinates: [1 / 2, 1 / 2, 0.0],
+                    coordinates: [
+                        1 / 2,
+                        1 / 2,
+                        0.0,
+                    ],
                 },
                 {
                     point: "L",
-                    coordinates: [1 / 2, 0.0, 0.0],
+                    coordinates: [
+                        1 / 2,
+                        0.0,
+                        0.0,
+                    ],
                 },
                 {
                     point: "L1",
-                    coordinates: [0.0, 0.0, -1 / 2],
+                    coordinates: [
+                        0.0,
+                        0.0,
+                        -1 / 2,
+                    ],
                 },
                 {
                     point: "P",
-                    coordinates: [n, v, v],
+                    coordinates: [
+                        n,
+                        v,
+                        v,
+                    ],
                 },
                 {
                     point: "P1",
-                    coordinates: [1 - v, 1 - v, 1 - n],
+                    coordinates: [
+                        1 - v,
+                        1 - v,
+                        1 - n,
+                    ],
                 },
                 {
                     point: "P2",
-                    coordinates: [v, v, n - 1],
+                    coordinates: [
+                        v,
+                        v,
+                        n - 1,
+                    ],
                 },
                 {
                     point: "Q",
-                    coordinates: [1 - v, v, 0.0],
+                    coordinates: [
+                        1 - v,
+                        v,
+                        0.0,
+                    ],
                 },
                 {
                     point: "X",
-                    coordinates: [v, 0.0, -v],
+                    coordinates: [
+                        v,
+                        0.0,
+                        -v,
+                    ],
                 },
                 {
                     point: "Z",
-                    coordinates: [1 / 2, 1 / 2, 1 / 2],
+                    coordinates: [
+                        1 / 2,
+                        1 / 2,
+                        1 / 2,
+                    ],
                 },
             ];
         }
@@ -468,31 +834,59 @@ const POINTS = {
         return [
             {
                 point: "F",
-                coordinates: [1 / 2, -1 / 2, 0.0],
+                coordinates: [
+                    1 / 2,
+                    -1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "L",
-                coordinates: [1 / 2, 0.0, 0.0],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    0.0,
+                ],
             },
             {
                 point: "P",
-                coordinates: [1 - v, -v, 1 - v],
+                coordinates: [
+                    1 - v,
+                    -v,
+                    1 - v,
+                ],
             },
             {
                 point: "P1",
-                coordinates: [v, v - 1, v - 1],
+                coordinates: [
+                    v,
+                    v - 1,
+                    v - 1,
+                ],
             },
             {
                 point: "Q",
-                coordinates: [n, n, n],
+                coordinates: [
+                    n,
+                    n,
+                    n,
+                ],
             },
             {
                 point: "Q1",
-                coordinates: [1 - n, -n, -n],
+                coordinates: [
+                    1 - n,
+                    -n,
+                    -n,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [1 / 2, -1 / 2, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    -1 / 2,
+                    1 / 2,
+                ],
             },
         ];
     },
@@ -504,63 +898,123 @@ const POINTS = {
         return [
             {
                 point: "A",
-                coordinates: [1 / 2, 1 / 2, 0.0],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "C",
-                coordinates: [0.0, 1 / 2, 1 / 2],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "D",
-                coordinates: [1 / 2, 0.0, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    1 / 2,
+                ],
             },
             {
                 point: "D1",
-                coordinates: [1 / 2, 0.0, -1 / 2],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    -1 / 2,
+                ],
             },
             {
                 point: "E",
-                coordinates: [1 / 2, 1 / 2, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "H",
-                coordinates: [0.0, n, 1 - v],
+                coordinates: [
+                    0.0,
+                    n,
+                    1 - v,
+                ],
             },
             {
                 point: "H1",
-                coordinates: [0.0, 1 - n, v],
+                coordinates: [
+                    0.0,
+                    1 - n,
+                    v,
+                ],
             },
             {
                 point: "H2",
-                coordinates: [0.0, n, -v],
+                coordinates: [
+                    0.0,
+                    n,
+                    -v,
+                ],
             },
             {
                 point: "M",
-                coordinates: [1 / 2, n, 1 - v],
+                coordinates: [
+                    1 / 2,
+                    n,
+                    1 - v,
+                ],
             },
             {
                 point: "M1",
-                coordinates: [1 / 2, 1 - n, v],
+                coordinates: [
+                    1 / 2,
+                    1 - n,
+                    v,
+                ],
             },
             {
                 point: "M2",
-                coordinates: [1 / 2, n, -v],
+                coordinates: [
+                    1 / 2,
+                    n,
+                    -v,
+                ],
             },
             {
                 point: "X",
-                coordinates: [0.0, 1 / 2, 0.0],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "Y",
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
             {
                 point: "Y1",
-                coordinates: [0.0, 0.0, -1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    -1 / 2,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [1 / 2, 0.0, 0.0],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    0.0,
+                ],
             },
         ];
     },
@@ -583,67 +1037,131 @@ const POINTS = {
             return [
                 {
                     point: "N",
-                    coordinates: [1 / 2, 0.0, 0.0],
+                    coordinates: [
+                        1 / 2,
+                        0.0,
+                        0.0,
+                    ],
                 },
                 {
                     point: "N1",
-                    coordinates: [0.0, -1 / 2, 0.0],
+                    coordinates: [
+                        0.0,
+                        -1 / 2,
+                        0.0,
+                    ],
                 },
                 {
                     point: "F",
-                    coordinates: [1 - e, 1 - e, 1 - n],
+                    coordinates: [
+                        1 - e,
+                        1 - e,
+                        1 - n,
+                    ],
                 },
                 {
                     point: "F1",
-                    coordinates: [e, e, n],
+                    coordinates: [
+                        e,
+                        e,
+                        n,
+                    ],
                 },
                 {
                     point: "F2",
-                    coordinates: [-e, -e, 1 - n],
+                    coordinates: [
+                        -e,
+                        -e,
+                        1 - n,
+                    ],
                 },
                 {
                     point: "F3",
-                    coordinates: [1 - e, -e, 1 - n],
+                    coordinates: [
+                        1 - e,
+                        -e,
+                        1 - n,
+                    ],
                 },
                 {
                     point: "I",
-                    coordinates: [f, 1 - f, 1 / 2],
+                    coordinates: [
+                        f,
+                        1 - f,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "I1",
-                    coordinates: [1 - f, f - 1, 1 / 2],
+                    coordinates: [
+                        1 - f,
+                        f - 1,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "L",
-                    coordinates: [1 / 2, 1 / 2, 1 / 2],
+                    coordinates: [
+                        1 / 2,
+                        1 / 2,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "M",
-                    coordinates: [1 / 2, 0.0, 1 / 2],
+                    coordinates: [
+                        1 / 2,
+                        0.0,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "X",
-                    coordinates: [1 - p, p - 1, 0.0],
+                    coordinates: [
+                        1 - p,
+                        p - 1,
+                        0.0,
+                    ],
                 },
                 {
                     point: "X1",
-                    coordinates: [p, 1 - p, 0.0],
+                    coordinates: [
+                        p,
+                        1 - p,
+                        0.0,
+                    ],
                 },
                 {
                     point: "X2",
-                    coordinates: [p - 1, -p, 0.0],
+                    coordinates: [
+                        p - 1,
+                        -p,
+                        0.0,
+                    ],
                 },
                 {
                     point: "Y",
-                    coordinates: [1 / 2, 1 / 2, 0.0],
+                    coordinates: [
+                        1 / 2,
+                        1 / 2,
+                        0.0,
+                    ],
                 },
                 {
                     point: "Y1",
-                    coordinates: [-1 / 2, -1 / 2, 0.0],
+                    coordinates: [
+                        -1 / 2,
+                        -1 / 2,
+                        0.0,
+                    ],
                 },
                 {
                     point: "Z",
-                    coordinates: [0.0, 0.0, 1 / 2],
+                    coordinates: [
+                        0.0,
+                        0.0,
+                        1 / 2,
+                    ],
                 },
             ];
         }
@@ -658,67 +1176,131 @@ const POINTS = {
             return [
                 {
                     point: "N",
-                    coordinates: [1 / 2, 0.0, 0.0],
+                    coordinates: [
+                        1 / 2,
+                        0.0,
+                        0.0,
+                    ],
                 },
                 {
                     point: "N1",
-                    coordinates: [0.0, -1 / 2, 0.0],
+                    coordinates: [
+                        0.0,
+                        -1 / 2,
+                        0.0,
+                    ],
                 },
                 {
                     point: "F",
-                    coordinates: [1 - f, 1 - f, 1 - p],
+                    coordinates: [
+                        1 - f,
+                        1 - f,
+                        1 - p,
+                    ],
                 },
                 {
                     point: "F1",
-                    coordinates: [f, f - 1, p],
+                    coordinates: [
+                        f,
+                        f - 1,
+                        p,
+                    ],
                 },
                 {
                     point: "F2",
-                    coordinates: [1 - f, -f, 1 - p],
+                    coordinates: [
+                        1 - f,
+                        -f,
+                        1 - p,
+                    ],
                 },
                 {
                     point: "H",
-                    coordinates: [e, e, n],
+                    coordinates: [
+                        e,
+                        e,
+                        n,
+                    ],
                 },
                 {
                     point: "H1",
-                    coordinates: [1 - e, -e, 1 - n],
+                    coordinates: [
+                        1 - e,
+                        -e,
+                        1 - n,
+                    ],
                 },
                 {
                     point: "H2",
-                    coordinates: [-e, -e, 1 - n],
+                    coordinates: [
+                        -e,
+                        -e,
+                        1 - n,
+                    ],
                 },
                 {
                     point: "I",
-                    coordinates: [1 / 2, -1 / 2, 1 / 2],
+                    coordinates: [
+                        1 / 2,
+                        -1 / 2,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "M",
-                    coordinates: [1 / 2, 0.0, 1 / 2],
+                    coordinates: [
+                        1 / 2,
+                        0.0,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "X",
-                    coordinates: [1 / 2, -1 / 2, 0.0],
+                    coordinates: [
+                        1 / 2,
+                        -1 / 2,
+                        0.0,
+                    ],
                 },
                 {
                     point: "Y",
-                    coordinates: [m, m, d],
+                    coordinates: [
+                        m,
+                        m,
+                        d,
+                    ],
                 },
                 {
                     point: "Y1",
-                    coordinates: [1 - m, -m, -d],
+                    coordinates: [
+                        1 - m,
+                        -m,
+                        -d,
+                    ],
                 },
                 {
                     point: "Y2",
-                    coordinates: [-m, -m, -d],
+                    coordinates: [
+                        -m,
+                        -m,
+                        -d,
+                    ],
                 },
                 {
                     point: "Y3",
-                    coordinates: [m, m - 1, d],
+                    coordinates: [
+                        m,
+                        m - 1,
+                        d,
+                    ],
                 },
                 {
                     point: "Z",
-                    coordinates: [0.0, 0.0, 1 / 2],
+                    coordinates: [
+                        0.0,
+                        0.0,
+                        1 / 2,
+                    ],
                 },
             ];
         }
@@ -734,75 +1316,147 @@ const POINTS = {
         return [
             {
                 point: "N",
-                coordinates: [1 / 2, 0.0, 0.0],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    0.0,
+                ],
             },
             {
                 point: "N1",
-                coordinates: [0.0, -1 / 2, 0.0],
+                coordinates: [
+                    0.0,
+                    -1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "F",
-                coordinates: [v, v, w],
+                coordinates: [
+                    v,
+                    v,
+                    w,
+                ],
             },
             {
                 point: "F1",
-                coordinates: [1 - v, 1 - v, 1 - w],
+                coordinates: [
+                    1 - v,
+                    1 - v,
+                    1 - w,
+                ],
             },
             {
                 point: "F2",
-                coordinates: [v, v - 1, w],
+                coordinates: [
+                    v,
+                    v - 1,
+                    w,
+                ],
             },
             {
                 point: "H",
-                coordinates: [e, e, n],
+                coordinates: [
+                    e,
+                    e,
+                    n,
+                ],
             },
             {
                 point: "H1",
-                coordinates: [1 - e, -e, 1 - n],
+                coordinates: [
+                    1 - e,
+                    -e,
+                    1 - n,
+                ],
             },
             {
                 point: "H2",
-                coordinates: [-e, -e, 1 - n],
+                coordinates: [
+                    -e,
+                    -e,
+                    1 - n,
+                ],
             },
             {
                 point: "I",
-                coordinates: [r, 1 - r, 1 / 2],
+                coordinates: [
+                    r,
+                    1 - r,
+                    1 / 2,
+                ],
             },
             {
                 point: "I1",
-                coordinates: [1 - r, r - 1, 1 / 2],
+                coordinates: [
+                    1 - r,
+                    r - 1,
+                    1 / 2,
+                ],
             },
             {
                 point: "L",
-                coordinates: [1 / 2, 1 / 2, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "M",
-                coordinates: [1 / 2, 0.0, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    1 / 2,
+                ],
             },
             {
                 point: "X",
-                coordinates: [1 / 2, -1 / 2, 0.0],
+                coordinates: [
+                    1 / 2,
+                    -1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "Y",
-                coordinates: [m, m, d],
+                coordinates: [
+                    m,
+                    m,
+                    d,
+                ],
             },
             {
                 point: "Y1",
-                coordinates: [1 - m, -m, -d],
+                coordinates: [
+                    1 - m,
+                    -m,
+                    -d,
+                ],
             },
             {
                 point: "Y2",
-                coordinates: [-m, -m, -d],
+                coordinates: [
+                    -m,
+                    -m,
+                    -d,
+                ],
             },
             {
                 point: "Y3",
-                coordinates: [m, m - 1, d],
+                coordinates: [
+                    m,
+                    m - 1,
+                    d,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
         ];
     },
@@ -813,31 +1467,59 @@ const POINTS = {
             return [
                 {
                     point: "L",
-                    coordinates: [1 / 2, 1 / 2, 0.0],
+                    coordinates: [
+                        1 / 2,
+                        1 / 2,
+                        0.0,
+                    ],
                 },
                 {
                     point: "M",
-                    coordinates: [0.0, 1 / 2, 1 / 2],
+                    coordinates: [
+                        0.0,
+                        1 / 2,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "N",
-                    coordinates: [1 / 2, 0.0, 1 / 2],
+                    coordinates: [
+                        1 / 2,
+                        0.0,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "R",
-                    coordinates: [1 / 2, 1 / 2, 1 / 2],
+                    coordinates: [
+                        1 / 2,
+                        1 / 2,
+                        1 / 2,
+                    ],
                 },
                 {
                     point: "X",
-                    coordinates: [1 / 2, 0.0, 0.0],
+                    coordinates: [
+                        1 / 2,
+                        0.0,
+                        0.0,
+                    ],
                 },
                 {
                     point: "Y",
-                    coordinates: [0.0, 1 / 2, 0.0],
+                    coordinates: [
+                        0.0,
+                        1 / 2,
+                        0.0,
+                    ],
                 },
                 {
                     point: "Z",
-                    coordinates: [0.0, 0.0, 1 / 2],
+                    coordinates: [
+                        0.0,
+                        0.0,
+                        1 / 2,
+                    ],
                 },
             ];
         }
@@ -845,31 +1527,59 @@ const POINTS = {
         return [
             {
                 point: "L",
-                coordinates: [1 / 2, -1 / 2, 0.0],
+                coordinates: [
+                    1 / 2,
+                    -1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "M",
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
             {
                 point: "N",
-                coordinates: [-1 / 2, -1 / 2, 1 / 2],
+                coordinates: [
+                    -1 / 2,
+                    -1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "R",
-                coordinates: [0.0, -1 / 2, 1 / 2],
+                coordinates: [
+                    0.0,
+                    -1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: "X",
-                coordinates: [0.0, -1 / 2, 0.0],
+                coordinates: [
+                    0.0,
+                    -1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: "Y",
-                coordinates: [1 / 2, 0.0, 0.0],
+                coordinates: [
+                    1 / 2,
+                    0.0,
+                    0.0,
+                ],
             },
             {
                 point: "Z",
-                coordinates: [-1 / 2, 0.0, 1 / 2],
+                coordinates: [
+                    -1 / 2,
+                    0.0,
+                    1 / 2,
+                ],
             },
         ];
     },
@@ -884,7 +1594,11 @@ export function symmetryPoints(lattice) {
     return [
         {
             point: "Г",
-            coordinates: [0.0, 0.0, 0.0],
+            coordinates: [
+                0.0,
+                0.0,
+                0.0,
+            ],
         },
     ].concat(POINTS[lattice.type](lattice) || []);
 }
