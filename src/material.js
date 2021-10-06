@@ -90,13 +90,6 @@ export class Material {
         this.setProp('formula', this.Basis.formula);
         this.setProp('unitCellFormula', this.Basis.unitCellFormula);
     }
-    set isNonPeriodic() {
-        this.setProp('isNonPeriodic', true)
-    }
-
-    get isNonPeriodic() {
-        return this.prop('isNonPeriodic', undefined, true)
-    }
 
     /**
      * Gets material's formula
