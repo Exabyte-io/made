@@ -92,6 +92,14 @@ export class Material {
     }
 
     /**
+     * Gets Bolean value for whether or not a material is non-periodic vs periodic.
+     * False = periodic, True = non-periodic
+     */
+    get isNonPeriodic() {
+        return this.prop('isNonPeriodic');
+    }
+
+    /**
      * Gets material's formula
      */
     get formula() {
