@@ -96,7 +96,7 @@ export class Material {
      * False = periodic, True = non-periodic
      */
     get isNonPeriodic() {
-        return this.prop('isNonPeriodic');
+        return this.prop('isNonPeriodic', false, true);
     }
 
     /**
