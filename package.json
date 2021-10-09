@@ -4,6 +4,7 @@
     "description": "Materials Design in Javascript",
     "scripts": {
         "prepublishOnly": "rm -rf lib; npm run transpile",
+        "postinstall": "npm run transpile",
         "transpile": "mkdir -p lib; babel src --out-dir lib",
         "test": "mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests"
     },
