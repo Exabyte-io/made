@@ -1,7 +1,8 @@
 import _ from "underscore";
 import s from "underscore.string";
 import {getElectronegativity} from "@exabyte-io/periodic-table.js";
-
+import {centeredMolecule, moleculeMaxRadius} from "../tools/basis";
+import {molecularLatticeCenterPoint} from "../tools/cell";
 import math from "../math";
 import {Lattice} from "../lattice/lattice";
 import {ArrayWithIds} from "../abstract/array_with_ids";
@@ -27,6 +28,7 @@ export class Basis {
                     units,
                     cell = Basis.defaultCell,   // by default, assume a cubic unary cell
                     isEmpty = false,            // whether to generate an empty Basis
+                    isNonPeriodic = false,   // by default, assume structure is periodic
                 }) {
         if (!units) {
             units = Basis.unitsOptionsDefaultValue;
@@ -40,6 +42,7 @@ export class Basis {
         this._coordinates = new ArrayWithIds(coordinates);
         this.units = units;
         this.cell = cell;
+        this.isNonPeriodic = isNonPeriodic;
     }
 
     static get unitsOptionsConfig() {
@@ -164,11 +167,36 @@ export class Basis {
         this._coordinates.mapArrayInPlace(point => point.map(x => math.mod(x)));
     }
 
-    /** A representation where all coordinates are within 0 and 1 in crystal units */
+    /**
+     * A representation where coordinates are shifted so that the molecule is centered around the midpoint of a
+     * cell who's dimensions are 2x the size of the molecule.
+     */
+    toMoleculeStandardRepresentation() {
+        this.toCartesian();
+        const centerMoleculeShifts = centeredMolecule(this._coordinates)
+        this._coordinates.mapArrayInPlace(point => point.map(x => math.centerMod(x, index, centerMoleculeShifts)));
+
+        const moleculeCellNestedArray = moleculeCellNestedArray(this._coordiantes);
+        const centerCellShift = molecularLatticeCenterPoint(moleculeCellNestedArray);
+        if (centerCellShift[0] === centerCellShift[1] && centerCellShift[0] === centerCellShift[2]) {
+            this._coordinates.mapArrayInPlace((point => math.add(point, centerCellShift[0])))
+        } else {
+            this.toStandardRepresentation()
+        }
+    }
+
+    /**
+     * A representation where all coordinates are within 0 and 1 in crystal units
+     * or all coordianted are centered in a cubic cell
+     * */
     get standardRepresentation() {
         const originalUnits = this.units;
 
-        this.toStandardRepresentation();
+        if (this.isNonPeriodic) {
+            this.toMoleculeStandardRepresentation();
+        } else {
+            this.toStandardRepresentation();
+        }
         const result = this.toJSON();
 
         // preserve the original state
