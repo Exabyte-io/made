@@ -105,56 +105,56 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
 }
 
 /**
- * @summary finds the displacement needed for the molecule to be centered around (0,0,0)
- * @param initialCoordinates
- * @returns {number[]}
+ * @summary Function takes initial basis coordinates and transposes them so that all X, Y, and Z dimension
+ * values are in their own nested array. Then the sums of each nested array are computed and used to calculate
+ * the center point shift needed to move a molecule so that it is centered around a point (0,0,0)
+ *
+ * initialCoordinates
+ * [[x1, y1, z1],
+ *  [x2, y2, z2],
+ *  [.., .., ..],
+ *  [xn, yn, zn]]
+ *
+ * transposedInitialCoordaintes
+ * [[x1, x2, ...xn],
+ *  [y1, y2, ...yn],
+ *  [z1, z2, ...zn]]
+ *
+ * center point x = sum(all x elements) / no. x elements
+ *
+ * @param basis
+ * @returns {*}
  */
-function centeredMolecule(initialCoordinates) {
-    const nAtoms = initialCoordinates.length;
-    const mass = 1.0;
-    let atomCounter = 0;
-    let xSum = 0;
-    let ySum = 0;
-    let zSum = 0;
-    while (atomCounter < nAtoms) {
-        xSum += initialCoordinates[atomCounter[0]]
-        ySum += initialCoordinates[atomCounter[1]]
-        zSum += initialCoordinates[atomCounter[2]]
-        atomCounter++;
+function centerPointShift(basis) {
+    const transposedInitialCoordinates = math.transpose(basis);
+    const centerPointShift = [];
+    for (let i = 0; i < transposedInitialCoordinates.length; i++) {
+        let center = transposedInitialCoordinates[i].reduce((a, b) => a + b) / basis.length;
+        centerPointShift.push(center);
     }
-
-    const xCenter = x_sum / (mass * nAtoms);
-    const yCenter = y_sum / (mass * nAtoms);
-    const zCenter = z_sum / (mass * nAtoms);
-    const centerOfStructureShift = [xCenter, yCenter, zCenter];
-
-    return centerOfStructureShift
+    return centerPointShift
 }
 
-function moleculeMaxRadius(initialCoordinates) {
-    let maxRadius = 0.;
-    let atomCounterA = 0;
-    let atomCounterB = 0;
-    const nAtoms = initialCoordinates.length;
-    while (atomCounterA < nAtoms) {
-        while (atomCounterB < nAtoms) {
-            const atomA = initialCoordinates[atomCounterA];
-            const atomB = initialCoordinates[atomCounterB];
-            const distance = math.distance(atomA, atomB);
-            if (distance > maxRadius) {
-                maxRadius = distance;
+/**
+ * @summary function returns the max distance between pairs of basis elements.
+ * @param basis
+ */
+function maxPairwiseDistance(basis) {
+    const maxDistance = 0;
+    for (let i = 0; i < len(this._coordinates); i++) {
+        for (let j = 0; j < len(this._coordinates); j++) {
+            const distance = math.vDist(this._coordinates[i], this._coordinates[j]);
+            if (distance >  maxDistance) {
+                let maxDistance = distance;
             }
-            atomCounterB++;
         }
-        atomCounterA++;
     }
-    maxRadius = math.ceil(maxRadius);
-    return maxRadius
+    return maxDistance
 }
 
 export default {
     repeat,
     interpolate,
-    moleculeMaxRadius,
-    centeredMolecule,
+    centerPointShift,
+    maxPairwiseDistance
 }

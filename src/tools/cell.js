@@ -1,8 +1,5 @@
 import math from "../math";
 import {Cell} from "../cell/cell";
-import {centerCell} from "../math";
-import {moleculeMaxRadius} from "./basis";
-
 /**
  * Returns the list of points on the original lattice contained in the supercell in fractional coordinates.
  * Source: https://pymatgen.org/_modules/pymatgen/util/coord.html
@@ -27,30 +24,6 @@ function latticePointsInSupercell(supercellMatrix) {
     return points;
 }
 
-/**
- *
- * @param dimension
- * @returns {((*|number)[]|(number|*)[])[] }
- */
-function moleculeCellNestedArray(moleculeCoordinates) {
-    const cellDimension = math.ceil(2 * moleculeMaxRadius(moleculeCoordinates));
-    const nestedArray = [[cellDimension, 0., 0.], [0., cellDimension, 0.], [0., 0., cellDimension]];
-    return nestedArray
-}
-
-/**
- *
- * @param moleculeMatrix
- * @returns {*}
- */
-function molecularLatticeCenterPoint(moleculeMatrix) {
-    const moleculeCell = new Cell(moleculeMatrix);
-    const centerPoints = centerCell(moleculeCell);
-    return centerPoints
-}
-
 export default {
     latticePointsInSupercell,
-    moleculeCellNestedArray,
-    molecularLatticeCenterPoint,
 }

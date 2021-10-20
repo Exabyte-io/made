@@ -1,7 +1,7 @@
 import _ from "underscore";
 import s from "underscore.string";
 import {getElectronegativity} from "@exabyte-io/periodic-table.js";
-import {centeredMolecule, moleculeMaxRadius} from "../tools/basis";
+import {centerPointShift, maxPairwiseDistance} from "../tools/basis";
 import {molecularLatticeCenterPoint} from "../tools/cell";
 import math from "../math";
 import {Lattice} from "../lattice/lattice";
@@ -168,35 +168,25 @@ export class Basis {
     }
 
     /**
-     * A representation where coordinates are shifted so that the molecule is centered around the midpoint of a
-     * cell who's dimensions are 2x the size of the molecule.
+     * Sends the basis to JSON schema without any mirroring of the atoms if they fall outside the cell.
+     * This representation is envoked in web-app/src/exabyte/imports/materials/server/hook.js when
+     * the doc.isNonPeriodic value is `true`.
+     *
+     * A representation where coordinates may exist outsdie the range of 0 and 1 in crystal units.
+     * @returns {any}
      */
-    toMoleculeStandardRepresentation() {
-        this.toCartesian();
-        const centerMoleculeShifts = centeredMolecule(this._coordinates)
-        this._coordinates.mapArrayInPlace(point => point.map(x => math.centerMod(x, index, centerMoleculeShifts)));
-
-        const moleculeCellNestedArray = moleculeCellNestedArray(this._coordiantes);
-        const centerCellShift = molecularLatticeCenterPoint(moleculeCellNestedArray);
-        if (centerCellShift[0] === centerCellShift[1] && centerCellShift[0] === centerCellShift[2]) {
-            this._coordinates.mapArrayInPlace((point => math.add(point, centerCellShift[0])))
-        } else {
-            this.toStandardRepresentation()
-        }
+    get standardCenteredRepresentation() {
+        const originalUnits = this.units;
+        const result = this.toJSON();
+        return result;
     }
-
     /**
      * A representation where all coordinates are within 0 and 1 in crystal units
-     * or all coordianted are centered in a cubic cell
      * */
     get standardRepresentation() {
         const originalUnits = this.units;
 
-        if (this.isNonPeriodic) {
-            this.toMoleculeStandardRepresentation();
-        } else {
-            this.toStandardRepresentation();
-        }
+        this.toStandardRepresentation();
         const result = this.toJSON();
 
         // preserve the original state
@@ -404,6 +394,31 @@ export class Basis {
         // this.cell {Array} - Cell Vectors 1, eg. [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         return !this.cell.map((vector, idx) => (math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell[idx])))
             .some(x => !x);
+    }
+
+     /**
+     * @summary Calls the maxPairWiseDistance calculator of tools/basis.js to return the max distance between
+     * pairs of points inside a basis.
+     * @returns {*}
+     */
+    get maxPairwiseDistance() {
+        const maxPairWiseDistance = maxPairwiseDistance(this._coordinates);
+        return maxPairWiseDistance
+    }
+
+    /**
+     * @summary function that does the following:
+     *      1. Calculates the [x,y,z] vector needed to shift basis so that it is centered at [0,0,0]
+     *      2. Applies the vector from step 1 to the basis
+     *      3. Calcualtes the center point of the lattice by cutting latticeVectors in half.
+     *      4. Translates the basis by adding the centerLatticeShift value to each element.
+     * @param latticeVectors
+     */
+    translateToCenterPointToCellCenterPoint(latticeVectors) {
+        const centerPointShifts = centerPointShift(this._coordinates);
+        this._coordinates.mapArrayInPlace((point => point.map(x => math.add(x, centerPointShifts))))
+        const centerLatticeShift = math.multiply(latticeVectors, 0.5)
+        this._coordinates.mapArrayInPlace(point => point.map(x => math.add(x, centerLatticeShift)));
     }
 
 }
