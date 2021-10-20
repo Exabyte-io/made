@@ -103,6 +103,57 @@ const mod = function (num, tolerance = 0.001) {
 }
 
 /**
+ *
+ * @param num
+ * @param index
+ * @param shifts
+ * @returns {*}
+ */
+const centerMod = function(num, index, shifts) {
+    const shiftX = shifts[0];
+    const shiftY = shifts[1];
+    const shiftZ = shifts[2];
+    let x = num;
+    if (index % 3 === 0) {
+        x = num + shiftX;
+    } else if (index % 3 === 1) {
+        x = num + shiftY;
+    } else {
+        x = num + shiftZ;
+    }
+    return x
+}
+
+/**
+ *
+ * @param cellMatrix
+ * @returns {[number, number, number]}
+ */
+const centerCell = function centerCell(cellMatrix) {
+    const xShift = 0.5 * cellMatrix[0][0];
+    const yShift = 0.5 * cellMatrix[1][1];
+    const zShift = 0.5 * cellMatrix[2][2];
+    return [xShift, yShift, zShift]
+}
+
+/**
+ *
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+const distance = function getDistance(a, b) {
+    if (a === b) {
+        return 0;
+    } else {
+        const xDiff = b[0] - a[0];
+        const yDiff = b[1] - a[1];
+        const zDiff = b[2] - 1[2];
+        return Math.sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
+    }
+}
+
+/**
  * @summary Returns cartesian of passed arrays.
  * @example combinations([1,2], [4,5], [6]) = [[1,4,6], [1,5,6], [2,4,6], [2,5,6]];
  */
@@ -202,4 +253,7 @@ export default Object.assign({}, math, {
     almostEqual,
     combinations,
     combinationsFromIntervals,
+    distance,
+    centerMod,
+    centerCell,
 });

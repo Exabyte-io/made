@@ -104,7 +104,57 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
     return ADD(initialCoordinates, MULT(delta, normalizedStepIndex))
 }
 
+/**
+ * @summary finds the displacement needed for the molecule to be centered around (0,0,0)
+ * @param initialCoordinates
+ * @returns {number[]}
+ */
+function centeredMolecule(initialCoordinates) {
+    const nAtoms = initialCoordinates.length;
+    const mass = 1.0;
+    let atomCounter = 0;
+    let xSum = 0;
+    let ySum = 0;
+    let zSum = 0;
+    while (atomCounter < nAtoms) {
+        xSum += initialCoordinates[atomCounter[0]]
+        ySum += initialCoordinates[atomCounter[1]]
+        zSum += initialCoordinates[atomCounter[2]]
+        atomCounter++;
+    }
+
+    const xCenter = x_sum / (mass * nAtoms);
+    const yCenter = y_sum / (mass * nAtoms);
+    const zCenter = z_sum / (mass * nAtoms);
+    const centerOfStructureShift = [xCenter, yCenter, zCenter];
+
+    return centerOfStructureShift
+}
+
+function moleculeMaxRadius(initialCoordinates) {
+    let maxRadius = 0.;
+    let atomCounterA = 0;
+    let atomCounterB = 0;
+    const nAtoms = initialCoordinates.length;
+    while (atomCounterA < nAtoms) {
+        while (atomCounterB < nAtoms) {
+            const atomA = initialCoordinates[atomCounterA];
+            const atomB = initialCoordinates[atomCounterB];
+            const distance = math.distance(atomA, atomB);
+            if (distance > maxRadius) {
+                maxRadius = distance;
+            }
+            atomCounterB++;
+        }
+        atomCounterA++;
+    }
+    maxRadius = math.ceil(maxRadius);
+    return maxRadius
+}
+
 export default {
     repeat,
     interpolate,
+    moleculeMaxRadius,
+    centeredMolecule,
 }
