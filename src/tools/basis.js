@@ -104,10 +104,9 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
     return ADD(initialCoordinates, MULT(delta, normalizedStepIndex))
 }
 
- /**
- *  *  * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the
- *  the basis are in their own nested array. Then the sums of each nested array are computed and used to calculate
- * the center point of each dimensions coordinates.
+/**
+ * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the
+ *  the basis are in their own nested array. Then the center point for each dimension of the coordinates is calculated.
  *
  * initial basisCoordinates
  * [[x1, y1, z1],
@@ -120,15 +119,8 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
  *  [y1, y2, ...yn],
  *  [z1, z2, ...zn]]
  *
- * calculate the center point for each dimensions coordinates
- * example x dimension, Nx = number of X dimension coordinates
- * centerOfCoordinateDimension = (sum(coords in dimension x) / Nx)
- * centerOfCoordinatesVectors
- *      [[xCenter, 0, 0],
- *       [0, yCenter, 0],
- *       [0, 0, zCenter]]
+ * Returns an array = [xCenter, yCenter, zCenter]
  *
- * @param basisCoordinates
  * @param basisCoordinates
  * @returns {*[]}
  */
@@ -136,11 +128,10 @@ function centerOfCoordinates(basisCoordinates) {
     const transposedBasisCoordinates = math.transpose(basisCoordinates);
     const centerOfCoordinatesVectors = [];
     for (let i = 0; i < transposedBasisCoordinates.length; i++) {
-        const centerOfCoordinateDimension = new Array(transposedBasisCoordinates.length).fill(0);
-        centerOfCoordinateDimension[i] = transposedBasisCoordinates[i].reduce((a, b) => a + b) / basisCoordinates.length;
-        centerOfCoordinatesVectors.push(centerOfCoordinateDimension);
+        let center = transposedBasisCoordinates[i].reduce((a, b) => a + b) / basisCoordinates.length;
+        centerOfCoordinatesVectors.push(center);
     }
-    return centerOfCoordinatesVectors
+    return centerOfCoordinatesVectors;
 }
 
 /**
@@ -162,7 +153,7 @@ function centerOfCoordinates(basisCoordinates) {
  */
 function pairwiseDistance(basisCoordinates) {
     const maxDistance = 0;
-    for (let i = 0; i < len(basisCoordinates; i++) {
+    for (let i = 0; i < len(basisCoordinates); i++) {
         for (let j = i + 1; j < len(basisCoordinates); j++) {
             const distance = math.vDist(basisCoordinates[i], basisCoordinates[j]);
             if (distance > maxDistance) {
@@ -170,7 +161,7 @@ function pairwiseDistance(basisCoordinates) {
             }
         }
     }
-    return maxDistance
+    return maxDistance;
 }
 
 export default {
