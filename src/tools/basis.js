@@ -109,7 +109,7 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
  * values are in their own nested array. Then the sums of each nested array are computed and used to calculate
  * the center point shift needed to move a molecule so that it is centered around a point (0,0,0)
  *
- * initialCoordinates
+ * initialBasis
  * [[x1, y1, z1],
  *  [x2, y2, z2],
  *  [.., .., ..],
@@ -120,30 +120,39 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
  *  [y1, y2, ...yn],
  *  [z1, z2, ...zn]]
  *
- * center point x = sum(all x elements) / no. x elements
+ * centerPointShift = [xshift, yshift, zshift] = [sum(x coords) / Nx], [sum(y coords) / Ny],[sum(z coords) / Nz]
+ *
+ * Translation = basis coordinates for each atom + shift value
+ *
+ * newBasis
+ * [[x1, y1, z1] + [xshift, yshift, zshift]
+ *  [x2, y2, z2] + [xshift, yshift, zshift]
+ *  [.., .., ..] + [xshift, yshift, zshift]
+ *  [xn, yn, zn] + [xshift, yshift, zshift]]
  *
  * @param basis
  * @returns {*}
  */
-function centerPointShift(basis) {
-    const transposedInitialCoordinates = math.transpose(basis);
+function centerPointShift(initialBasis) {
+    const transposedInitialCoordinates = math.transpose(initialBasis);
     const centerPointShift = [];
     for (let i = 0; i < transposedInitialCoordinates.length; i++) {
-        let center = transposedInitialCoordinates[i].reduce((a, b) => a + b) / basis.length;
+        let center = transposedInitialCoordinates[i].reduce((a, b) => a + b) / initialBasis.length;
         centerPointShift.push(center);
     }
-    return centerPointShift
+    const newBasis = initialBasis.mapArrayInPlace((point => point.map(x => math.add(x, centerPointShift))));
+    return newBasis
 }
 
 /**
  * @summary function returns the max distance between pairs of basis elements.
  * @param basis
  */
-function maxPairwiseDistance(basis) {
+function pairwiseDistance(initialBasis) {
     const maxDistance = 0;
-    for (let i = 0; i < len(this._coordinates); i++) {
-        for (let j = 0; j < len(this._coordinates); j++) {
-            const distance = math.vDist(this._coordinates[i], this._coordinates[j]);
+    for (let i = 0; i < len(initialBasis); i++) {
+        for (let j = i + 1; j < len(initialBasis); j++) {
+            const distance = math.vDist(initialBasis[i], intitialBasis[j]);
             if (distance >  maxDistance) {
                 let maxDistance = distance;
             }
@@ -156,5 +165,5 @@ export default {
     repeat,
     interpolate,
     centerPointShift,
-    maxPairwiseDistance
+    pairwiseDistance
 }

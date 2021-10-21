@@ -202,7 +202,4 @@ export default Object.assign({}, math, {
     almostEqual,
     combinations,
     combinationsFromIntervals,
-    distance,
-    centerMod,
-    centerCell,
 });
