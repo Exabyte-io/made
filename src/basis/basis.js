@@ -1,7 +1,7 @@
 import _ from "underscore";
 import s from "underscore.string";
 import {getElectronegativity} from "@exabyte-io/periodic-table.js";
-import {centerPointShift, pairwiseDistance} from "../tools/basis";
+import {centerOfCoordinates, pairwiseDistance} from "../tools/basis";
 import math from "../math";
 import {Lattice} from "../lattice/lattice";
 import {ArrayWithIds} from "../abstract/array_with_ids";
@@ -382,25 +382,26 @@ export class Basis {
 
      /**
      * @summary Calls the maxPairWiseDistance calculator of tools/basis.js to return the max distance between
-     * pairs of points inside a basis.
+     * all pairs of points inside a basis.
      * @returns {*}
      */
-    get maxPairwiseDistance() {
+    maxPairwiseDistance() {
         const maxDistance = pairwiseDistance(this._coordinates);
         return maxDistance
     }
 
     /**
      * @summary function that does the following:
-     *      1. Shifts the basis so that it is centered at (0,0,0)
-     *      3. Calcualtes the center point of the lattice by cutting latticeVectors in half.
-     *      4. Translates the basis by adding the centerLatticeShift value to each element.
-     * @param latticeVectors
+     *      1. Calcualtes the center point of the basis coordinates.
+     *      2. Calcualtes the center point of the lattice by cutting latticeVectors in half.
+     *      3. Finds the shift needed to center the coordinates by subtracting Lattice Center from Coordinates Center
+     *      4. Shifts the basis coordinates using the shift calculated in step 3.
+     * @param latticeVectorArrays
      */
-    translateToCenterPointToCellCenterPoint(latticeVectors) {
-        this._coordinates= centerPointShift(this._coordinates);
-        const centerLatticeShift = math.multiply(latticeVectors, 0.5)
+    translateToCenterOfCell(latticeVectorArrays) {
+        const centerOfCoordinatesPoint = centerOfCoordinates(this._coordinates);
+        const centerOfLatticePoint = math.multiply(latticeVectorArrays, 0.5);
+        const centerLatticeShift = math.subtract(centerOfLatticePoint, centerOfCoordinatesPoint);
         this._coordinates.mapArrayInPlace(point => point.map(x => math.add(x, centerLatticeShift)));
     }
-
 }
