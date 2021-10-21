@@ -385,23 +385,25 @@ export class Basis {
      * all pairs of points inside a basis.
      * @returns {*}
      */
-    maxPairwiseDistance() {
+    get maxPairwiseDistance() {
         const maxDistance = pairwiseDistance(this._coordinates);
         return maxDistance
     }
 
     /**
-     * @summary function that does the following:
-     *      1. Calcualtes the center point of the basis coordinates.
-     *      2. Calcualtes the center point of the lattice by cutting latticeVectors in half.
-     *      3. Finds the shift needed to center the coordinates by subtracting Lattice Center from Coordinates Center
-     *      4. Shifts the basis coordinates using the shift calculated in step 3.
-     * @param latticeVectorArrays
+     * Function returns the center point of coordinates passed as an argument.
+     * @returns {*}
      */
-    translateToCenterOfCell(latticeVectorArrays) {
+    get centerOfCoordinatesPoint() {
         const centerOfCoordinatesPoint = centerOfCoordinates(this._coordinates);
-        const centerOfLatticePoint = math.multiply(latticeVectorArrays, 0.5);
-        const centerLatticeShift = math.subtract(centerOfLatticePoint, centerOfCoordinatesPoint);
-        this._coordinates.mapArrayInPlace(point => point.map(x => math.add(x, centerLatticeShift)));
+        return centerOfCoordinatesPoint
+    }
+
+    /**
+     * @summary Function translates coordinates by the vector passed as an argument.
+     * @param translationVector
+     */
+    translateByVector(translationVector) {
+         this._coordinates.mapArrayInPlace(point => point.map(x => math.add(x, translationVector)));
     }
 }
