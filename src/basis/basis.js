@@ -1,7 +1,7 @@
 import _ from "underscore";
 import s from "underscore.string";
 import {getElectronegativity} from "@exabyte-io/periodic-table.js";
-import {centerOfCoordinates, pairwiseDistance} from "../tools/basis";
+import {coordinatesGetCenterOfSpaceAsVector, coordinatesGetMaxPairwiseDistance} from "../tools/coordinates";
 import math from "../math";
 import {Lattice} from "../lattice/lattice";
 import {ArrayWithIds} from "../abstract/array_with_ids";
@@ -106,41 +106,65 @@ export class Basis {
             ]
         }
      */
-    toJSON() {return JSON.parse(JSON.stringify(_.pick(this, ["elements", "coordinates", "units", "cell"])))}
+    toJSON() {
+        return JSON.parse(JSON.stringify(_.pick(this, ["elements", "coordinates", "units", "cell"])))
+    }
 
     /**
      * Create an identical copy of the class instance.
      * @param {Object} extraContext - Extra context to be passed to the new class instance on creation.
      */
-    clone(extraContext) {return new this.constructor(Object.assign({}, this.toJSON(), extraContext))}
+    clone(extraContext) {
+        return new this.constructor(Object.assign({}, this.toJSON(), extraContext))
+    }
 
-    getElementByIndex(idx) {return this._elements.getArrayElementByIndex(idx)}
+    getElementByIndex(idx) {
+        return this._elements.getArrayElementByIndex(idx)
+    }
 
-    getCoordinateByIndex(idx) {return this._coordinates.getArrayElementByIndex(idx)}
+    getCoordinateByIndex(idx) {
+        return this._coordinates.getArrayElementByIndex(idx)
+    }
 
-    get elements() {return this._elements.toJSON()}
+    get elements() {
+        return this._elements.toJSON()
+    }
 
-    get elementsArray() {return this._elements.array}
+    get elementsArray() {
+        return this._elements.array
+    }
 
     /**
      * Set basis elements to passed array.
      * @param {Array|ArrayWithIds} elementsArray - New elements array.
      */
-    set elements(elementsArray) {this._elements = new ArrayWithIds(elementsArray)}
+    set elements(elementsArray) {
+        this._elements = new ArrayWithIds(elementsArray)
+    }
 
-    get coordinates() {return this._coordinates.toJSON()}
+    get coordinates() {
+        return this._coordinates.toJSON()
+    }
 
     /**
      * Set basis elements to passed array.
      * @param {Array|ArrayWithIds} coordinatesNestedArray - New coordinates array.
      */
-    set coordinates(coordinatesNestedArray) {this._coordinates = new ArrayWithIds(coordinatesNestedArray)}
+    set coordinates(coordinatesNestedArray) {
+        this._coordinates = new ArrayWithIds(coordinatesNestedArray)
+    }
 
-    get coordinatesAsArray() {return this._coordinates.array}
+    get coordinatesAsArray() {
+        return this._coordinates.array
+    }
 
-    get isInCrystalUnits() {return this.units === ATOMIC_COORD_UNITS.crystal}
+    get isInCrystalUnits() {
+        return this.units === ATOMIC_COORD_UNITS.crystal
+    }
 
-    get isInCartesianUnits() {return this.units === ATOMIC_COORD_UNITS.cartesian}
+    get isInCartesianUnits() {
+        return this.units === ATOMIC_COORD_UNITS.cartesian
+    }
 
     toCartesian() {
         const unitCell = this.cell;
@@ -356,7 +380,9 @@ export class Basis {
     /**
      * @summary Returns number of atoms in material
      */
-    get nAtoms() {return this._elements.array.length}
+    get nAtoms() {
+        return this._elements.array.length
+    }
 
     // helpers
 
@@ -380,13 +406,13 @@ export class Basis {
             .some(x => !x);
     }
 
-     /**
+    /**
      * @summary Calls the maxPairWiseDistance calculator of tools/basis.js to return the max distance between
      * all pairs of points inside a basis.
      * @returns {*}
      */
     get maxPairwiseDistance() {
-         return pairwiseDistance(this._coordinates)
+        return coordinatesGetMaxPairwiseDistance(this._coordinates, this._elements.array.length)
     }
 
     /**
@@ -394,7 +420,7 @@ export class Basis {
      * @returns {*}
      */
     get centerOfCoordinatesPoint() {
-        return centerOfCoordinates(this._coordinates)
+        return coordinatesGetCenterOfSpaceAsVector(this._coordinates, this._elements.array.length)
     }
 
     /**
@@ -402,8 +428,7 @@ export class Basis {
      * @param translationVector
      */
     translateByVector(translationVector) {
-         this._coordinates.mapArrayInPlace(point => point.map(x => math.add(x, translationVector)));
-         const result = this.toJSON()
-        return result;
+        this._coordinates.mapArrayInPlace(x => math.add(x, translationVector));
+        return this._coordinates
     }
 }
