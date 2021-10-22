@@ -124,7 +124,7 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
  * @param basisCoordinates
  * @returns {*[]}
  */
-function centerOfCoordinates(basisCoordinates) {
+export function centerOfCoordinates(basisCoordinates) {
     const transposedBasisCoordinates = math.transpose(basisCoordinates);
     const centerOfCoordinatesVectors = [];
     for (let i = 0; i < transposedBasisCoordinates.length; i++) {
@@ -151,10 +151,10 @@ function centerOfCoordinates(basisCoordinates) {
  *
  * @param basisCoordinates
  */
-function pairwiseDistance(basisCoordinates) {
+export function pairwiseDistance(basisCoordinates) {
     const maxDistance = 0;
-    for (let i = 0; i < len(basisCoordinates); i++) {
-        for (let j = i + 1; j < len(basisCoordinates); j++) {
+    for (let i = 0; i < basisCoordinates.length; i++) {
+        for (let j = i + 1; j < basisCoordinates.length; j++) {
             const distance = math.vDist(basisCoordinates[i], basisCoordinates[j]);
             if (distance > maxDistance) {
                 let maxDistance = distance;

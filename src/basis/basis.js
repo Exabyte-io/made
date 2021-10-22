@@ -386,8 +386,7 @@ export class Basis {
      * @returns {*}
      */
     get maxPairwiseDistance() {
-        const maxDistance = pairwiseDistance(this._coordinates);
-        return maxDistance
+         return pairwiseDistance(this._coordinates)
     }
 
     /**
@@ -395,8 +394,7 @@ export class Basis {
      * @returns {*}
      */
     get centerOfCoordinatesPoint() {
-        const centerOfCoordinatesPoint = centerOfCoordinates(this._coordinates);
-        return centerOfCoordinatesPoint
+        return centerOfCoordinates(this._coordinates)
     }
 
     /**
@@ -405,5 +403,7 @@ export class Basis {
      */
     translateByVector(translationVector) {
          this._coordinates.mapArrayInPlace(point => point.map(x => math.add(x, translationVector)));
+         const result = this.toJSON()
+        return result;
     }
 }
