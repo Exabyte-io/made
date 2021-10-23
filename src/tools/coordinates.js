@@ -20,9 +20,9 @@ const MULT = math.multiply;
  *
  * Returns an array = [xCenter, yCenter, zCenter]
  *
- * @param basisCoordinates
- * @param nAtoms
- * @returns {*[]}
+ * @param {array_with_ids} basisCoordinates
+ * @param {number} nAtoms
+ * @returns {array} centerOfCoordinatesVectors
  */
 export function coordinatesGetCenterOfSpaceAsVector(basisCoordinates, nAtoms) {
     const coordinates = []
@@ -53,8 +53,9 @@ export function coordinatesGetCenterOfSpaceAsVector(basisCoordinates, nAtoms) {
  *      -     -    -         ...      ...
  *      -     -    -         ...      ... pair n-1, n
  *
- * @param basisCoordinates
- * @param nAtoms
+ * @param {array_with_ids} basisCoordinates
+ * @param {number} nAtoms
+ * @return {number} maxDistance
  */
 export function coordinatesGetMaxPairwiseDistance(basisCoordinates, nAtoms) {
     let maxDistance = 0;
