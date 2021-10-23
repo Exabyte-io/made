@@ -1,8 +1,5 @@
 import math from "../math";
 
-const ADD = math.add;
-const MULT = math.multiply;
-
 /**
  * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the
  *  the basis are in their own nested array. Then the center point for each dimension of the coordinates is calculated.
@@ -20,16 +17,13 @@ const MULT = math.multiply;
  *
  * Returns an array = [xCenter, yCenter, zCenter]
  *
- * @param {array_with_ids} basisCoordinates
+ * @param {array} basisCoordinatesArray
  * @param {number} nAtoms
- * @returns {array} centerOfCoordinatesVectors
+ * @returns {array}
  */
-export function coordinatesGetCenterOfSpaceAsVector(basisCoordinates, nAtoms) {
+export function coordinatesGetCenterOfSpaceAsVector(basisCoordinatesArray, nAtoms) {
     const coordinates = []
-    for (let i = 0; i < nAtoms; i++) {
-        coordinates.push(basisCoordinates.getArrayElementByIndex(i));
-    }
-    const transposedBasisCoordinates = math.transpose(coordinates);
+    const transposedBasisCoordinates = math.transpose(basisCoordinatesArray);
     const centerOfCoordinatesVectors = [];
     for (let i = 0; i < 3; i++) {
         let center = transposedBasisCoordinates[i].reduce((a, b) => a + b) / nAtoms;
@@ -55,7 +49,7 @@ export function coordinatesGetCenterOfSpaceAsVector(basisCoordinates, nAtoms) {
  *
  * @param {array_with_ids} basisCoordinates
  * @param {number} nAtoms
- * @return {number} maxDistance
+ * @return {number}
  */
 export function coordinatesGetMaxPairwiseDistance(basisCoordinates, nAtoms) {
     let maxDistance = 0;

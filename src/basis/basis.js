@@ -392,16 +392,15 @@ export class Basis {
      * @returns {Array}
      */
     get centerOfCoordinatesPoint() {
-        return coordinatesGetCenterOfSpaceAsVector(this._coordinates, this._elements.array.length)
+        return coordinatesGetCenterOfSpaceAsVector(this._coordinates.array, this._elements.array.length)
     }
 
     /**
      * @summary Function translates coordinates by the vector passed as an argument.
      * @param {array} translationVector
-     * @returns {array_with_ids}
+
      */
     translateByVector(translationVector) {
         this._coordinates.mapArrayInPlace(x => math.add(x, translationVector));
-        return this._coordinates
     }
 }
