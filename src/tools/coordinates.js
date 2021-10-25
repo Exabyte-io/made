@@ -17,9 +17,9 @@ import math from "../math";
  *
  * Returns an array = [xCenter, yCenter, zCenter]
  *
- * @param {array} basisCoordinatesArray
- * @param {number} nAtoms
- * @returns {array}
+ * @param {Array} basisCoordinatesArray
+ * @param {Number} nAtoms
+ * @returns {Array}
  */
 export function coordinatesGetCenterOfSpaceAsVector(basisCoordinatesArray, nAtoms) {
     const coordinates = []
@@ -47,9 +47,9 @@ export function coordinatesGetCenterOfSpaceAsVector(basisCoordinatesArray, nAtom
  *      -     -    -         ...      ...
  *      -     -    -         ...      ... pair n-1, n
  *
- * @param {array_with_ids} basisCoordinates
- * @param {number} nAtoms
- * @return {number}
+ * @param {ArrayWithIds} basisCoordinates
+ * @param {Number} nAtoms
+ * @return {Number}
  */
 export function coordinatesGetMaxPairwiseDistance(basisCoordinates, nAtoms) {
     let maxDistance = 0;
