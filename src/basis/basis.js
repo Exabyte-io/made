@@ -397,7 +397,7 @@ export class Basis {
 
     /**
      * @summary Function translates coordinates by the vector passed as an argument.
-     * @param {array} translationVector
+     * @param {Array} translationVector
 
      */
     translateByVector(translationVector) {
