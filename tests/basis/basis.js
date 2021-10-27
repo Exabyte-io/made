@@ -165,7 +165,7 @@ describe('Basis', function () {
     //** Pairwise Distance */
     it('should return max distance', function() {
         const basis = new Basis(C2H4.basis);
-        const maxDistance = 1.5811388300841898;
+        const maxDistance = 1.581;
         expect(basis.maxPairwiseDistance).to.be.equal(maxDistance);
     });
 
@@ -180,7 +180,7 @@ describe('Basis', function () {
     //** Translation by Vector */
     it('should return the updated basis coordinates', function() {
         const basis = new Basis(C2H4.basis);
-        const translationVector = [1.691667, 1.966667, 2 ];
+        const translationVector = [1.6917, 1.9667, 2 ];
         basis.translateByVector(translationVector)
         assertDeepAlmostEqual(basis.coordinates, C2H4Translated.basis.coordinates);
     });
