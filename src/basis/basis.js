@@ -1,7 +1,6 @@
 import _ from "underscore";
 import s from "underscore.string";
 import {getElectronegativity} from "@exabyte-io/periodic-table.js";
-import {coordinatesGetCenterOfSpaceAsVector, coordinatesGetMaxPairwiseDistance} from "../tools/coordinates";
 import math from "../math";
 import {Lattice} from "../lattice/lattice";
 import {ArrayWithIds} from "../abstract/array_with_ids";
@@ -384,7 +383,7 @@ export class Basis {
      * @returns {Number}
      */
     get maxPairwiseDistance() {
-        return coordinatesGetMaxPairwiseDistance(this._coordinates, this._elements.array.length)
+        return this.coordinatesGetMaxPairwiseDistance;
     }
 
     /**
@@ -392,7 +391,7 @@ export class Basis {
      * @returns {Array}
      */
     get centerOfCoordinatesPoint() {
-        return coordinatesGetCenterOfSpaceAsVector(this._coordinates.array, this._elements.array.length)
+        return this.coordinatesGetCenterOfSpaceAsVector;
     }
 
     /**
@@ -402,5 +401,64 @@ export class Basis {
      */
     translateByVector(translationVector) {
         this._coordinates.mapArrayInPlace(x => math.add(x, translationVector));
+    }
+
+    /**
+     * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the
+     *  the basis are in their own nested array. Then the center point for each dimension of the coordinates is calculated.
+     *
+     * initial basisCoordinates
+     * [[x1, y1, z1],
+     *  [x2, y2, z2],
+     *  [.., .., ..],
+     *  [xn, yn, zn]]
+     *
+     * transposed basisCoordinates
+     * [[x1, x2, ...xn],
+     *  [y1, y2, ...yn],
+     *  [z1, z2, ...zn]]
+     *
+     * Returns an array = [xCenter, yCenter, zCenter]
+     *
+     * @returns {Array} centerOfCoordinatesVector
+     */
+    coordinatesGetCenterOfSpaceAsVector() {
+        const transposedBasisCoordinates = math.transpose(this._coordinates.array);
+        const centerOfCoordinatesVector = [];
+        for (let i = 0; i < 3; i++) {
+            let center = transposedBasisCoordinates[i].reduce((a, b) => a + b) / this._elements.array.length;
+            centerOfCoordinatesVector.push(center);
+        }
+        return centerOfCoordinatesVector;
+    }
+
+    /**
+     * @summary function returns the max distance between pairs of basis coordinates
+     * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
+     * calculates distance between each basis coordinate set.
+     * n = last set of coordinates
+     * n-1 = second to last set of coordinates
+     *
+     * Iterate through pairs without redundancy.
+     * pair 0,1   pair 0,2  pair 0,3 ... pair 0,n
+     * -          pair 1,2  pair 1,3 ... pair 1,n
+     * -     -    -         pair 2,3 ... pair 2,n
+     * -     -    -         ...      ...
+     * -     -    -         ...      ... pair n-1, n
+     *
+     * @returns {Number}
+     */
+    coordinatesGetMaxPairwiseDistance() {
+        let maxDistance = 0;
+        for (let i = 0; i < this._elements.array.length; i++) {
+            for (let j = i + 1; j < this._elements.array.length; j++) {
+                const distance = math.vDist(this._coordinates.array.getArrayElementByIndex(i),
+                                            this._coordinates.array.getArrayElementByIndex(j));
+                if (distance > maxDistance) {
+                    maxDistance = distance;
+                }
+            }
+        }
+        return maxDistance;
     }
 }
