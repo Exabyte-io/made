@@ -379,10 +379,9 @@ export class Basis {
     }
 
     /**
-     * @summary function returns the max distance between pairs of basis coordinates
+     * @summary function returns the max distance between pairs of basis coordinates by
+     * calculating the distance between pairs of basis coordinates.
      * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
-     *
-     * calculates distance between each basis coordinate set.
      * n = last set of coordinates
      * n-1 = second to last set of coordinates
      *
@@ -406,12 +405,13 @@ export class Basis {
                 }
             }
         }
-        return maxDistance;
+        return math.precise(maxDistance, 4);
     }
 
     /**
      * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the
-     *  the basis are in their own nested array. Then the center point for each dimension of the coordinates is calculated.
+     *  the basis are in their own nested array.
+     *  Then the center point for each dimension of the coordinates is calculated.
      *
      * initial basisCoordinates
      * [[x1, y1, z1],
