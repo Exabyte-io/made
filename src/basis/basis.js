@@ -379,35 +379,9 @@ export class Basis {
     }
 
     /**
-     * @summary Calls the maxPairWiseDistance calculator of tools/basis.js to return the max distance between
-     * all pairs of points inside a basis.
-     * @returns {Number}
-     */
-    get maxPairwiseDistance() {
-        return this.coordinatesGetMaxPairwiseDistance();
-    }
-
-    /**
-     * Function returns the center point of basis._coordinates
-     * @returns {Array}
-     */
-    get centerOfCoordinatesPoint() {
-        return this.coordinatesGetCenterOfSpaceAsVector();
-    }
-
-    /**
-     * @summary Function translates coordinates by the vector passed as an argument.
-     * @param {Array} translationVector
-     */
-    translateByVector(translationVector) {
-        this._coordinates.mapArrayInPlace(x => math.add(x, translationVector));
-    }
-
-    /**
-     *  * @summary function returns the max distance between pairs of basis coordinates
-    * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
-     *
-     * calculates distance between each basis coordinate set.
+     * @summary function returns the max distance between pairs of basis coordinates by
+     * calculating the distance between pairs of basis coordinates.
+     * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
      * n = last set of coordinates
      * n-1 = second to last set of coordinates
      *
@@ -420,7 +394,7 @@ export class Basis {
      *
      * @returns {Number}
      */
-    coordinatesGetMaxPairwiseDistance() {
+    get maxPairwiseDistance() {
         let maxDistance = 0;
         for (let i = 0; i < this._elements.array.length; i++) {
             for (let j = i + 1; j < this._elements.array.length; j++) {
@@ -436,7 +410,8 @@ export class Basis {
 
     /**
      * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the
-     *  the basis are in their own nested array. Then the center point for each dimension of the coordinates is calculated.
+     *  the basis are in their own nested array.
+     *  Then the center point for each dimension of the coordinates is calculated.
      *
      * initial basisCoordinates
      * [[x1, y1, z1],
@@ -450,10 +425,9 @@ export class Basis {
      *  [z1, z2, ...zn]]
      *
      * Returns an array = [xCenter, yCenter, zCenter]
-     *
      * @returns {Array}
      */
-    coordinatesGetCenterOfSpaceAsVector() {
+    get centerOfCoordinatesPoint() {
         const transposedBasisCoordinates = math.transpose(this._coordinates.array);
         const centerOfCoordinatesVectors = [];
         for (let i = 0; i < 3; i++) {
@@ -461,5 +435,14 @@ export class Basis {
             centerOfCoordinatesVectors.push(math.precise(center, 4));
         }
         return centerOfCoordinatesVectors;
+    }
+
+    /**
+     * @summary Function translates coordinates by the vector passed as an argument.
+     * @param {Array} translationVector
+
+     */
+    translateByVector(translationVector) {
+        this._coordinates.mapArrayInPlace(x => math.add(x, translationVector));
     }
 }
