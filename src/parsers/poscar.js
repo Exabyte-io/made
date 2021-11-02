@@ -55,7 +55,15 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
     ].join('\n');
 }
 
+export function lineCount(poscarFileContent) {
+    const lines = poscarFileContent.split('\n');
+    const numLines = lines.length;
+    return numLines;
+}
+
+
 export default {
     toPoscar,
     atomicConstraintsCharFromBool,
+    lineCount,
 }
