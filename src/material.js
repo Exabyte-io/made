@@ -150,6 +150,10 @@ export class Material {
         return this.prop('basis', undefined, true);
     }
 
+    set basis(config) {
+        return this.setProp('basis', config);
+    }
+
     // returns the instance of {ConstrainedBasis} class
     get Basis() {
         return new ConstrainedBasis({
