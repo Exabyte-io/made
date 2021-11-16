@@ -103,7 +103,7 @@ export class Material {
      * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
      * @param bool
      */
-    updateIsNonPeriodic(bool) { this.prop('isNonPeriodic', bool);}
+    set isNonPeriodic(bool) {this.setProp('isNonPeriodic', bool);}
 
     /**
      * Gets material's formula
@@ -161,6 +161,8 @@ export class Material {
             cell: this.Lattice.vectorArrays
         });
     }
+
+    set Basis(config) {return this.setProp('basis', config);}
 
     get lattice() {
         return this.prop('lattice', undefined, true);
