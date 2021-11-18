@@ -405,6 +405,9 @@ export class Basis {
                 }
             }
         }
+        if (maxDistance === 0) {
+            maxDistance = 2;
+        }
         return math.precise(maxDistance, 4);
     }
 
