@@ -150,10 +150,6 @@ export class Material {
         return this.prop('basis', undefined, true);
     }
 
-    set basis(config) {
-        return this.setProp('basis', config);
-    }
-
     // returns the instance of {ConstrainedBasis} class
     get Basis() {
         return new ConstrainedBasis({
@@ -161,8 +157,6 @@ export class Material {
             cell: this.Lattice.vectorArrays
         });
     }
-
-    set Basis(config) {return this.setProp('basis', config);}
 
     get lattice() {
         return this.prop('lattice', undefined, true);
