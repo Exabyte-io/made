@@ -164,8 +164,8 @@ export class Material {
 
     set Basis(config) {
         const newConfig = {
-            elements: config._elements.array,
-            coordinates: config._coordinates.array,
+            elements: config.elements,
+            coordinates: config.coordinates,
             units: config.units,
             cell: config.cell,
             isEmpty: false
