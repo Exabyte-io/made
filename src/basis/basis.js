@@ -1,11 +1,12 @@
 import _ from "underscore";
 import s from "underscore.string";
-import {getElectronegativity} from "@exabyte-io/periodic-table.js";
+import {PERIODIC_TABLE, getElectronegativity} from "@exabyte-io/periodic-table.js";
 
 import math from "../math";
 import {Lattice} from "../lattice/lattice";
 import {ArrayWithIds} from "../abstract/array_with_ids";
 import {ATOMIC_COORD_UNITS, HASH_TOLERANCE} from "../constants";
+
 
 /**
  * A class representing a crystal basis.
@@ -396,18 +397,28 @@ export class Basis {
      */
     get maxPairwiseDistance() {
         let maxDistance = 0;
-        for (let i = 0; i < this._elements.array.length; i++) {
-            for (let j = i + 1; j < this._elements.array.length; j++) {
-                const distance = math.vDist(
-                    this._coordinates.getArrayElementByIndex(i), this._coordinates.getArrayElementByIndex(j));
-                if (distance > maxDistance) {
-                    maxDistance = distance;
+        if (this._elements.array.length >= 2) {
+            for (let i = 0; i < this._elements.array.length; i++) {
+                for (let j = i + 1; j < this._elements.array.length; j++) {
+                    const distance = math.vDist(
+                        this._coordinates.getArrayElementByIndex(i), this._coordinates.getArrayElementByIndex(j));
+                    if (distance > maxDistance) {
+                        maxDistance = distance;
+                    }
                 }
             }
+        } else if(this._elements.array.length === 1) {
+            const element = this._elements.getArrayElementByIndex(0);
+            Object.keys(PERIODIC_TABLE).forEach(key => {
+                if (element === PERIODIC_TABLE[key].symbol) {
+                    maxDistance = math.precise(PERIODIC_TABLE[key].atomic_radius_pm * 0.01, 4);
+                }
+            });
         }
         if (maxDistance === 0) {
             maxDistance = 2;
         }
+        console.log(maxDistance);
         return math.precise(maxDistance, 4);
     }
 
