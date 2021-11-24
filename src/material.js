@@ -103,7 +103,7 @@ export class Material {
      * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
      * @param bool
      */
-    updateIsNonPeriodic(bool) { this.prop('isNonPeriodic', bool);}
+    set isNonPeriodic(bool) {this.setProp('isNonPeriodic', bool);}
 
     /**
      * Gets material's formula
