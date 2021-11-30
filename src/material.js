@@ -100,6 +100,12 @@ export class Material {
     }
 
     /**
+     * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
+     * @param bool
+     */
+    set isNonPeriodic(bool) {this.setProp('isNonPeriodic', bool);}
+
+    /**
      * Gets material's formula
      */
     get formula() {
@@ -144,6 +150,10 @@ export class Material {
         return this.prop('basis', undefined, true);
     }
 
+    set basis(config) {
+        this.setProp('basis', config);
+    }
+
     // returns the instance of {ConstrainedBasis} class
     get Basis() {
         return new ConstrainedBasis({
@@ -152,12 +162,26 @@ export class Material {
         });
     }
 
+    set Basis(config) {
+        const newConfig = {
+            elements: config.elements,
+            coordinates: config.coordinates,
+            units: config.units,
+            cell: config.cell,
+            isEmpty: false
+        };
+        return new ConstrainedBasis({
+                ...newConfig
+            }
+        );
+    }
+
     get lattice() {
         return this.prop('lattice', undefined, true);
     }
 
     set lattice(config) {
-        return this.setProp('lattice', config);
+        this.setProp('lattice', config);
     }
 
     // returns the instance of {Lattice} class

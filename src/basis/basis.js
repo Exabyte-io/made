@@ -1,11 +1,12 @@
 import _ from "underscore";
 import s from "underscore.string";
-import {getElectronegativity} from "@exabyte-io/periodic-table.js";
+import {PERIODIC_TABLE, getElectronegativity} from "@exabyte-io/periodic-table.js";
 
 import math from "../math";
 import {Lattice} from "../lattice/lattice";
 import {ArrayWithIds} from "../abstract/array_with_ids";
 import {ATOMIC_COORD_UNITS, HASH_TOLERANCE} from "../constants";
+
 
 /**
  * A class representing a crystal basis.
@@ -378,4 +379,83 @@ export class Basis {
             .some(x => !x);
     }
 
+    /**
+     * @summary function returns the max distance between pairs of basis coordinates by
+     * calculating the distance between pairs of basis coordinates.
+     * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
+     * n = last set of coordinates
+     * n-1 = second to last set of coordinates
+     *
+     * Iterate through pairs without redundancy.
+     *      pair 0,1   pair 0,2  pair 0,3 ... pair 0,n
+     *      -          pair 1,2  pair 1,3 ... pair 1,n
+     *      -     -    -         pair 2,3 ... pair 2,n
+     *      -     -    -         ...      ...
+     *      -     -    -         ...      ... pair n-1, n
+     *
+     * @returns {Number}
+     */
+    get maxPairwiseDistance() {
+        let maxDistance = 0;
+        if (this._elements.array.length >= 2) {
+            for (let i = 0; i < this._elements.array.length; i++) {
+                for (let j = i + 1; j < this._elements.array.length; j++) {
+                    const distance = math.vDist(
+                        this._coordinates.getArrayElementByIndex(i), this._coordinates.getArrayElementByIndex(j));
+                    if (distance > maxDistance) {
+                        maxDistance = distance;
+                    }
+                }
+            }
+        } else if(this._elements.array.length === 1) {
+            const element = this._elements.getArrayElementByIndex(0);
+            Object.keys(PERIODIC_TABLE).forEach(key => {
+                if (element === PERIODIC_TABLE[key].symbol) {
+                    maxDistance = math.precise(PERIODIC_TABLE[key].atomic_radius_pm * 0.01, 4);
+                }
+            });
+        }
+        if (maxDistance === 0) {
+            maxDistance = 2;
+        }
+        return math.precise(maxDistance, 4);
+    }
+
+    /**
+     * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the
+     *  the basis are in their own nested array.
+     *  Then the center point for each dimension of the coordinates is calculated.
+     *
+     * initial basisCoordinates
+     * [[x1, y1, z1],
+     *  [x2, y2, z2],
+     *  [.., .., ..],
+     *  [xn, yn, zn]]
+     *
+     * transposed basisCoordinates
+     * [[x1, x2, ...xn],
+     *  [y1, y2, ...yn],
+     *  [z1, z2, ...zn]]
+     *
+     * Returns an array = [xCenter, yCenter, zCenter]
+     * @returns {Array}
+     */
+    get centerOfCoordinatesPoint() {
+        const transposedBasisCoordinates = math.transpose(this._coordinates.array);
+        const centerOfCoordinatesVectors = [];
+        for (let i = 0; i < 3; i++) {
+            let center = transposedBasisCoordinates[i].reduce((a, b) => a + b) / this._elements.array.length;
+            centerOfCoordinatesVectors.push(math.precise(center, 4));
+        }
+        return centerOfCoordinatesVectors;
+    }
+
+    /**
+     * @summary Function translates coordinates by the vector passed as an argument.
+     * @param {Array} translationVector
+
+     */
+    translateByVector(translationVector) {
+        this._coordinates.mapArrayInPlace(x => math.add(x, translationVector));
+    }
 }
