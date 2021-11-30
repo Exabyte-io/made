@@ -3,7 +3,6 @@ import CryptoJS from "crypto-js";
 
 import parsers from "./parsers/parsers";
 import {Lattice} from "./lattice/lattice";
-import {Molecule} from "./molecular/molecule"
 import {LATTICE_TYPE} from "./lattice/types";
 import {ATOMIC_COORD_UNITS, units} from "./constants";
 import {ConstrainedBasis} from "./basis/constrained_basis";
@@ -93,6 +92,14 @@ export class Material {
     }
 
     /**
+     * Gets Bolean value for whether or not a material is non-periodic vs periodic.
+     * False = periodic, True = non-periodic
+     */
+    get isNonPeriodic() {
+        return this.prop('isNonPeriodic', false, true);
+    }
+
+    /**
      * Gets material's formula
      */
     get formula() {
@@ -174,23 +181,31 @@ export class Material {
     }
 
     /**
-    * Calculates hash from zmatrix. Algorithm expects the following:
-     * - asserts zmatrix in bonds, angles, dihedrals
-     * - Number of bonds = natoms - 1
-     * - Number of angles = natoms - 2
-     * - Number of dihedrals = natoms - 3
-     * - forms string for zmatrix and basis
-     * - creates MD5 hash from basisStr + zmatrixStr + salt
-     * @param salt {String} Salt for hashing, empty string by default.
-     * @param isScaled {Boolean} Whether to scale the lattie parameter 'a' to 1.
-    */
-    calculateZmatrixHash(salt= '', zmatrix = []) {
-        const message = this.Basis.hashstring + '#' + this.Molecule.getZmatrixHashString(zmatrix) + "#" + salt;
-        return CryptoJS.MD5(message).toString()
+     * Calculates the has inchi string and inchi key string
+     */
+    calculateNonPeriodicHash() {
+        const nonPeriodicMessage = this.getDerivedPropertiesInchiForHash();
+        return CryptoJS.MD5(nonPeriodicMessage).toString();
     }
 
     get hash() {
+        if (this._json.isNonPeriodic) {
+            return this.calculateNonPeriodicHash();
+        }
         return this.calculateHash();
+    }
+
+    /**
+     * Returns the inchi value from the derived properties of the material.
+     * If the inchi value is undefined it returns undefined
+     */
+    getDerivedPropertiesInchiForHash() {
+        const derivedProperties = this._json.derivedProperties;
+        const inchi = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === "inchi") : null;
+        if (inchi) {
+            return inchi.value;
+        }
+        return;
     }
 
     /**
