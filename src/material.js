@@ -2,6 +2,7 @@ import lodash from "lodash";
 import CryptoJS from "crypto-js";
 
 import parsers from "./parsers/parsers";
+import {Basis} from "./basis/basis";
 import {Lattice} from "./lattice/lattice";
 import {LATTICE_TYPE} from "./lattice/types";
 import {ATOMIC_COORD_UNITS, units} from "./constants";
@@ -13,6 +14,7 @@ import {
 } from "./cell/conventional_cell";
 
 import supercellTools from "./tools/supercell"
+import math from "./math";
 
 export const defaultMaterialConfig = {
     name: 'Silicon FCC',
@@ -162,20 +164,6 @@ export class Material {
         });
     }
 
-    set Basis(config) {
-        const newConfig = {
-            elements: config.elements,
-            coordinates: config.coordinates,
-            units: config.units,
-            cell: config.cell,
-            isEmpty: false
-        };
-        return new ConstrainedBasis({
-                ...newConfig
-            }
-        );
-    }
-
     get lattice() {
         return this.prop('lattice', undefined, true);
     }
@@ -289,5 +277,21 @@ export class Material {
         config.name = `${material.name} - conventional cell`;
 
         return new this.constructor(config);
+    }
+
+    translateMaterialBasis() {
+        const lattice = [this.Lattice.a, this.Lattice.b, this.Lattice.c];
+        const updatedBasis = new Basis(this.basis);
+        // calculate basis translation
+        const centerOfCoordiantes = updatedBasis.centerOfCoordinatesPoint;
+        const centerOfLattice = math.multiply(0.5, lattice);
+        const translationVector = math.subtract(centerOfLattice, centerOfCoordiantes);
+        updatedBasis.translateByVector(translationVector);
+        const newBasis = {
+            coordinates: updatedBasis._coordinates.array,
+            elements: updatedBasis._elements.array,
+            units: "cartesian"
+        }
+        return newBasis
     }
 }
