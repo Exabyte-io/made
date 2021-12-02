@@ -1,7 +1,8 @@
 import {expect} from "chai";
 
 import {Basis} from "../../src/basis/basis";
-import {AsGeBasis, FeLiSiBasis, LiFeSiBasis, Na4Cl4, Na4Cl4Cartesian} from "../enums";
+import {AsGeBasis, FeLiSiBasis, LiFeSiBasis, Na4Cl4, Na4Cl4Cartesian, C2H4, C2H4Translated} from "../enums";
+import {assertDeepAlmostEqual} from "../utils";
 
 describe('Basis', function () {
 
@@ -161,4 +162,26 @@ describe('Basis', function () {
         expect(basis.standardRepresentation).to.be.deep.almost.equal(Na4Cl4.basis);
     });
 
+    //** Pairwise Distance */
+    it('should return max distance', function() {
+        const basis = new Basis(C2H4.basis);
+        const maxDistance = 1.581;
+        expect(basis.maxPairwiseDistance).to.be.equal(maxDistance);
+    });
+
+    //** Center of Coordinates */
+    it('should return center of coordinates', function() {
+        const basis = new Basis(C2H4.basis);
+        const centerOfCoordinatesArray = [ 0.3333, -0.0417, 0.0917 ];
+        const basisCenterOfCoordinatesPoint = basis.centerOfCoordinatesPoint;
+        assertDeepAlmostEqual(basisCenterOfCoordinatesPoint, centerOfCoordinatesArray);
+    });
+
+    //** Translation by Vector */
+    it('should return the updated basis coordinates', function() {
+        const basis = new Basis(C2H4.basis);
+        const translationVector = [1.6917, 1.9667, 2 ];
+        basis.translateByVector(translationVector)
+        assertDeepAlmostEqual(basis.coordinates, C2H4Translated.basis.coordinates);
+    });
 });
