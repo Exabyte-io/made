@@ -408,17 +408,31 @@ export class Basis {
                 }
             }
         } else if(this._elements.array.length === 1) {
-            const element = this._elements.getArrayElementByIndex(0);
-            Object.keys(PERIODIC_TABLE).forEach(key => {
-                if (element === PERIODIC_TABLE[key].symbol) {
-                    maxDistance = math.precise(PERIODIC_TABLE[key].atomic_radius_pm * 0.01, 4);
-                }
-            });
+            maxDistance = this.getElementAtomicRadius(this._elements.getArrayElementByIndex(0));
         }
-        if (maxDistance === 0) {
-            maxDistance = 2;
-        }
+        console.log(maxDistance);
         return math.precise(maxDistance, 4);
+    }
+
+
+    /**
+     * Finds the atomic radius for an element based on it's atomic symbol (i.e. 'O' for Oxygen)
+     * The atomicRadius returned from PERIODIC_TABLE is in units of picometers (pm).
+     * To convert pm to Angstroms, multiply the pm value by 0.01.
+     *
+     * If the element does not exist inside the PERIODIC_TABLE then the atomicRadius is returned as 1.0.
+     * A value of 1.0 is chosen so that the lattice will not collapse to a size of 0, but instead will have
+     * a size of at least 2.0 angstroms once it is multipled by the lattice scaling factor for non-periodic systems.
+     *
+     * @param {String} elementSymbol
+     * @returns {Number}
+    */
+    getElementAtomicRadius(elementSymbol) {
+        const elementName = Object.keys(PERIODIC_TABLE).find(key => elementSymbol === PERIODIC_TABLE[key].symbol);
+        if (elementName) {
+            return PERIODIC_TABLE[elementName].atomic_radius_pm * 0.01;
+        }
+        return 1.0;
     }
 
     /**
