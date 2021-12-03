@@ -11,12 +11,10 @@ import {primitiveCell} from "../cell/primitive_cell";
 import {Cell} from "../cell/cell";
 
 /**
- * Additive factor used to calculate the new lattice size for non-periodic systems.
- * The ensures that a non-periodic structure will have a minimum lattice size of 2x2x2.
- * The minimum lattice size ensures that the structures coordinates will fit inside the cell
- * used to hold the structure.
+ * Scaling factor used to calculate the new lattice size for non-periodic systems.
+ * The scaling factor ensures that a non-periodic structure will have have a lattice greater than the structures size.
  */
-export const nonPeriodicLatticeMinimumSizeAngstroms = 2.0;
+export const nonPeriodicLatticeScalingFactor = 2.0;
 
 /*
  * Container class for crystal lattice and associated methods.
