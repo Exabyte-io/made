@@ -3,7 +3,7 @@ import s from "underscore.string";
 import {PERIODIC_TABLE, getElectronegativity} from "@exabyte-io/periodic-table.js";
 
 import math from "../math";
-import {Lattice} from "../lattice/lattice";
+import {Lattice, nonPeriodicLatticeMinimumSizeAngstroms} from "../lattice/lattice";
 import {ArrayWithIds} from "../abstract/array_with_ids";
 import {ATOMIC_COORD_UNITS, HASH_TOLERANCE} from "../constants";
 
@@ -380,6 +380,22 @@ export class Basis {
     }
 
     /**
+     * @summary function returns the minimum basis lattice size for a structure.
+     * The lattice size is based on the atomic radius of an element if the basis contains a single atom.
+     * The lattice size is based on the maximum pairwise distance across a structure if the basis contains > 2 atoms.
+     * @returns {Number}
+     */
+    minimumBasisLatticeSize() {
+        let singleAtomAtomicRadii = 0;
+        if (this.elementsArray.length === 1) {
+            singleAtomAtomicRadii = this.getElementAtomicRadius;
+        }
+        const maxPairwiseDistance = this.maxPairwiseDistance * nonPeriodicLatticeMinimumSizeAngstroms;
+        const latticeSize = singleAtomAtomicRadii + maxPairwiseDistance;
+        return math.precise(latticeSize, 4);
+    }
+
+    /**
      * @summary function returns the max distance between pairs of basis coordinates by
      * calculating the distance between pairs of basis coordinates.
      * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
@@ -407,13 +423,10 @@ export class Basis {
                     }
                 }
             }
-        } else if(this._elements.array.length === 1) {
-            maxDistance = this.getElementAtomicRadius(this._elements.getArrayElementByIndex(0));
         }
         console.log(maxDistance);
         return math.precise(maxDistance, 4);
     }
-
 
     /**
      * Finds the atomic radius for an element based on it's atomic symbol (i.e. 'O' for Oxygen)
@@ -424,10 +437,10 @@ export class Basis {
      * A value of 1.0 is chosen so that the lattice will not collapse to a size of 0, but instead will have
      * a size of at least 2.0 angstroms once it is multipled by the lattice scaling factor for non-periodic systems.
      *
-     * @param {String} elementSymbol
      * @returns {Number}
     */
-    getElementAtomicRadius(elementSymbol) {
+    getElementAtomicRadius() {
+        const elementSymbol = this._elements.getArrayElementByIndex(0)
         const elementName = Object.keys(PERIODIC_TABLE).find(key => elementSymbol === PERIODIC_TABLE[key].symbol);
         if (elementName) {
             return PERIODIC_TABLE[elementName].atomic_radius_pm * 0.01;
