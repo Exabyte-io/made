@@ -80,7 +80,8 @@ export class Material {
         return {
             lattice: this.Lattice.toJSON(),
             basis: this.Basis.toJSON(),
-            name: this.name || this.formula
+            name: this.name || this.formula,
+            isNonPeriodic: this.isNonPeriodic || false
         };
     }
 
