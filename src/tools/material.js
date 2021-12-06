@@ -1,3 +1,4 @@
+import math from "mathjs";
 import {Basis} from "../basis/basis";
 import {Lattice} from "../lattice/lattice";
 /**
@@ -39,7 +40,28 @@ function scaleNonPeriodicLattice(material) {
     return newLattice;
 }
 
+function getBasisConfigTranslatedToCenter(material) {
+    const lattice = new Lattice(material.lattice);
+    const basis = new Basis({
+        ...material.basis,
+        cell: lattice.vectorArrays
+    });
+    basis.toCartesian();
+    const centerOfCoordinates = basis.centerOfCoordinatesPoint;
+    const centerOfLattice = math.multiply(0.5, lattice.vectorArrays.reduce((a, b) => math.add(a, b)));
+    const translationVector = math.subtract(centerOfLattice, centerOfCoordinates);
+    basis.translateByVector(translationVector);
+    const newBasisConfig = {
+        elements: basis.elements,
+        coordinates: basis.coordinates,
+        cell: basis.cell,
+        units: basis.units
+    };
+    return newBasisConfig;
+}
+
 export default {
     scaleOneLatticeVector,
     scaleNonPeriodicLattice,
+    getBasisConfigTranslatedToCenter,
 }
