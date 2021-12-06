@@ -279,20 +279,4 @@ export class Material {
 
         return new this.constructor(config);
     }
-
-    translateMaterialBasis() {
-        const lattice = [this.Lattice.a, this.Lattice.b, this.Lattice.c];
-        const updatedBasis = new Basis(this.basis);
-        // calculate basis translation
-        const centerOfCoordiantes = updatedBasis.centerOfCoordinatesPoint;
-        const centerOfLattice = math.multiply(0.5, lattice);
-        const translationVector = math.subtract(centerOfLattice, centerOfCoordiantes);
-        updatedBasis.translateByVector(translationVector);
-        const newBasis = {
-            coordinates: updatedBasis._coordinates.array,
-            elements: updatedBasis._elements.array,
-            units: "cartesian"
-        }
-        return newBasis
-    }
 }
