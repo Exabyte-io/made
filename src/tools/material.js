@@ -1,6 +1,7 @@
 import math from "mathjs";
 import {Basis} from "../basis/basis";
-import {Lattice} from "../lattice/lattice";
+import {Lattice, nonPeriodicLatticeScalingFactor} from "../lattice/lattice";
+
 /**
  * Scales one lattice vector for the given material
  * @param material {Material} The material acted upon.
@@ -21,7 +22,13 @@ function scaleOneLatticeVector(material, key = 'a', factor = 1.0) {
 
 }
 
-function scaleNonPeriodicLattice(material) {
+/**
+ * Returns the lattice for a non-periodic structure. The lattice has been scaled to accomodate the size of the
+ * non-periodic structure.
+ * @param material {Material}
+ * @returns lattice
+ */
+function scaleLatticeToMakeNonPeriodic(material) {
     const lattice = new Lattice(material.lattice);
     const basis = new Basis({
         ...material.basis,
@@ -30,8 +37,7 @@ function scaleNonPeriodicLattice(material) {
     })
     basis.toCartesian();
     basis.toJSON();
-    //TODO: Change to match the new scaling factor variable from SOF-5214
-    const scalingFactor = 2.0;
+    const scalingFactor = nonPeriodicLatticeScalingFactor;
     const newLattice = new Lattice({
         a: basis.maxPairwiseDistance * scalingFactor,
         type: "CUB"
@@ -62,6 +68,6 @@ function getBasisConfigTranslatedToCenter(material) {
 
 export default {
     scaleOneLatticeVector,
-    scaleNonPeriodicLattice,
+    scaleLatticeToMakeNonPeriodic,
     getBasisConfigTranslatedToCenter,
 }
