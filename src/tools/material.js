@@ -46,24 +46,24 @@ function scaleLatticeToMakeNonPeriodic(material) {
     return newLattice;
 }
 
+/**
+ * Returns the basis of a material that has been translated so that the center of the coordinates
+ * aligns with the center of the materials lattice.
+ * @param material {Material}
+ * @returns {Object}
+ */
 function getBasisConfigTranslatedToCenter(material) {
     const lattice = new Lattice(material.lattice);
     const basis = new Basis({
-        ...material.basis,
-        cell: lattice.vectorArrays
+        ...material.Basis.toJSON()
     });
     basis.toCartesian();
     const centerOfCoordinates = basis.centerOfCoordinatesPoint;
     const centerOfLattice = math.multiply(0.5, lattice.vectorArrays.reduce((a, b) => math.add(a, b)));
     const translationVector = math.subtract(centerOfLattice, centerOfCoordinates);
     basis.translateByVector(translationVector);
-    const newBasisConfig = {
-        elements: basis.elements,
-        coordinates: basis.coordinates,
-        cell: basis.cell,
-        units: basis.units
-    };
-    return newBasisConfig;
+
+    return basis.toJSON();
 }
 
 export default {
