@@ -2,7 +2,6 @@ import lodash from "lodash";
 import CryptoJS from "crypto-js";
 
 import parsers from "./parsers/parsers";
-import {Basis} from "./basis/basis";
 import {Lattice} from "./lattice/lattice";
 import {LATTICE_TYPE} from "./lattice/types";
 import {ATOMIC_COORD_UNITS, units} from "./constants";
@@ -14,7 +13,6 @@ import {
 } from "./cell/conventional_cell";
 
 import supercellTools from "./tools/supercell"
-import math from "./math";
 
 export const defaultMaterialConfig = {
     name: 'Silicon FCC',
