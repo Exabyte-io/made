@@ -1,14 +1,14 @@
-import _ from "underscore";
 import lodash from "lodash";
+import _ from "underscore";
 
+import { Cell } from "../cell/cell";
+import { primitiveCell } from "../cell/primitive_cell";
+import { HASH_TOLERANCE } from "../constants";
 import math from "../math";
-import constants, {HASH_TOLERANCE} from "../constants";
-
-import {LATTICE_TYPE, LATTICE_TYPE_EXTENDED, LATTICE_TYPE_CONFIGS} from "./types";
-import {LatticeBravais} from "./lattice_bravais";
-import {LatticeVectors} from "./lattice_vectors";
-import {primitiveCell} from "../cell/primitive_cell";
-import {Cell} from "../cell/cell";
+import { LatticeBravais } from "./lattice_bravais";
+import { LatticeVectors } from "./lattice_vectors";
+import { LATTICE_TYPE, LATTICE_TYPE_CONFIGS, LATTICE_TYPE_EXTENDED } from "./types";
+import { UnitCell } from "./unit_cell";
 
 /*
  * Container class for crystal lattice and associated methods.
@@ -16,7 +16,6 @@ import {Cell} from "../cell/cell";
  * Units for lattice vector coordinates are "angstroms", and "degrees" for the corresponding angles.
  */
 export class Lattice extends LatticeBravais {
-
     /**
      * Create a Lattice class from a config object.
      * @param {Object} config - Config object. See LatticeVectors.fromBravais.
@@ -71,7 +70,7 @@ export class Lattice extends LatticeBravais {
         }
      */
     toJSON(skipRounding = false) {
-        const round = skipRounding ? () => {} : Lattice._roundValue;  // round values by default
+        const round = skipRounding ? () => {} : Lattice._roundValue; // round values by default
         return {
             a: round(this.a),
             b: round(this.b),
@@ -85,32 +84,44 @@ export class Lattice extends LatticeBravais {
             },
             type: this.type,
             vectors: this.vectors.toJSON(),
-        }
+        };
     }
 
-    clone(extraContext) {return new this.constructor(Object.assign({}, this.toJSON(), extraContext))}
+    clone(extraContext) {
+        return new this.constructor({ ...this.toJSON(), ...extraContext });
+    }
 
     /**
      * Get lattice vectors as a nested array
      * @return {Array[]}
      */
-    get vectorArrays() {return this.vectors.vectorArrays}
+    get vectorArrays() {
+        return this.vectors.vectorArrays;
+    }
 
-    get Cell() {return new Cell(this.vectorArrays)}
+    get Cell() {
+        return new Cell(this.vectorArrays);
+    }
 
     /**
      * Get a short label for the type of the lattice, eg. "MCLC".
      * @return {String}
      */
-    get typeLabel() {return lodash.get(LATTICE_TYPE_CONFIGS.find(c => c.code === this.type), 'label', 'Unknown')}
+    get typeLabel() {
+        return lodash.get(
+            LATTICE_TYPE_CONFIGS.find((c) => c.code === this.type),
+            "label",
+            "Unknown",
+        );
+    }
 
     /**
      * Get a short label for the extended type of the lattice, eg. "MCLC-5".
      * @return {String}
      */
     get typeExtended() {
-        const {a, b, c, alpha, beta, gamma, type} = this;
-        let cosAlpha = math.cos(alpha / 180 * math.PI);
+        const { a, b, c, alpha, beta, gamma, type } = this;
+        const cosAlpha = math.cos((alpha / 180) * math.PI);
 
         switch (type) {
             case LATTICE_TYPE.BCT:
@@ -126,7 +137,8 @@ export class Lattice extends LatticeBravais {
                 if (gamma >= 90) {
                     // MCLC-1,2
                     return LATTICE_TYPE_EXTENDED.MCLC_1;
-                } else if (b / c * cosAlpha + b * b / (a * a) * (1 - cosAlpha * cosAlpha) <= 1) {
+                }
+                if ((b / c) * cosAlpha + ((b * b) / (a * a)) * (1 - cosAlpha * cosAlpha) <= 1) {
                     // MCLC-3,4
                     return LATTICE_TYPE_EXTENDED.MCLC_3;
                 }
@@ -146,7 +158,9 @@ export class Lattice extends LatticeBravais {
      * Calculate the volume of the lattice cell.
      * @return {Number}
      */
-    get volume() {return math.abs(math.det(this.vectorArrays))}
+    get volume() {
+        return math.abs(math.det(this.vectorArrays));
+    }
 
     /*
      * Returns a "default" primitive lattice by type, with lattice parameters scaled by the length of "a",
@@ -157,10 +171,10 @@ export class Lattice extends LatticeBravais {
         // construct new primitive cell using lattice parameters and skip rounding the vectors
         const pCell = primitiveCell(latticeConfig, true);
         // create new lattice from primitive cell
-        const newLattice = Object.assign({}, Lattice.fromVectorArrays(pCell, latticeConfig.type));
+        const newLattice = { ...Lattice.fromVectorArrays(pCell, latticeConfig.type) };
 
         // preserve the new type and scale back the lattice parameters
-        let k = latticeConfig.a / newLattice.a;
+        const k = latticeConfig.a / newLattice.a;
 
         return Object.assign(newLattice, {
             a: f_(newLattice.a * k),
@@ -170,7 +184,6 @@ export class Lattice extends LatticeBravais {
             beta: f_(newLattice.beta),
             gamma: f_(newLattice.gamma),
         });
-
     }
 
     // TODO: remove
@@ -178,7 +191,6 @@ export class Lattice extends LatticeBravais {
         const vectors = _.flatten(this.vectorArrays);
         vectors.push(this.units.length);
         return new UnitCell(...vectors);
-
     }
 
     /**
@@ -189,53 +201,23 @@ export class Lattice extends LatticeBravais {
     getHashString(isScaled = false) {
         // lattice vectors must be measured in angstroms
         const latticeInAngstroms = this;
-        let scaleK = (isScaled) ? latticeInAngstroms.a : 1;
-        const scaledLattice = Object.assign({}, latticeInAngstroms, {
+        const scaleK = isScaled ? latticeInAngstroms.a : 1;
+        const scaledLattice = {
+            ...latticeInAngstroms,
             a: latticeInAngstroms.a / scaleK,
             b: latticeInAngstroms.b / scaleK,
-            c: latticeInAngstroms.c / scaleK
-        });
+            c: latticeInAngstroms.c / scaleK,
+        };
         // form lattice string
-        return [
+        return `${[
             scaledLattice.a,
             scaledLattice.b,
             scaledLattice.c,
             scaledLattice.alpha,
             scaledLattice.beta,
-            scaledLattice.gamma
-        ].map(x => math.round(x, HASH_TOLERANCE)).join(';') + ";";
-    }
-
-}
-
-// TODO: refactor and remove the need for UnitCell
-class UnitCell {
-    constructor(ax, ay, az, bx, by, bz, cx, cy, cz, units) {
-        this.ax = ax;
-        this.ay = ay;
-        this.az = az;
-        this.bx = bx;
-        this.by = by;
-        this.bz = bz;
-        this.cx = cx;
-        this.cy = cy;
-        this.cz = cz;
-        this.units = units;
-    }
-
-    vectorA() {
-        return [this.ax, this.ay, this.az];
-    }
-
-    vectorB() {
-        return [this.bx, this.by, this.bz];
-    }
-
-    vectorC() {
-        return [this.cx, this.cy, this.cz];
-    }
-
-    axes() {
-        return [this.vectorA(), this.vectorB(), this.vectorC()]
+            scaledLattice.gamma,
+        ]
+            .map((x) => math.round(x, HASH_TOLERANCE))
+            .join(";")};`;
     }
 }

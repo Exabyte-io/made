@@ -1,15 +1,14 @@
 import s from "underscore.string";
 
-import {Basis} from "./basis";
-import {ArrayWithIds} from "../abstract/array_with_ids";
-import {AtomicConstraints} from "../constraints/constraints";
+import { ArrayWithIds } from "../abstract/array_with_ids";
+import { AtomicConstraints } from "../constraints/constraints";
+import { Basis } from "./basis";
 
 /**
  * @summary Extension of the Basis class able to deal with atomic constraints.
  * @extends Basis
  */
 export class ConstrainedBasis extends Basis {
-
     /**
      * Create a an array with ids.
      * @param {Object} config
@@ -20,11 +19,17 @@ export class ConstrainedBasis extends Basis {
         this._constraints = new ArrayWithIds(config.constraints); // `constraints` is an Array with ids
     }
 
-    get constraints() {return this._constraints}
+    get constraints() {
+        return this._constraints;
+    }
 
-    set constraints(newConstraints) {this._constraints = new ArrayWithIds(newConstraints)}
+    set constraints(newConstraints) {
+        this._constraints = new ArrayWithIds(newConstraints);
+    }
 
-    get AtomicConstraints() {return AtomicConstraints.fromArray(this.constraints.array)}
+    get AtomicConstraints() {
+        return AtomicConstraints.fromArray(this.constraints.array);
+    }
 
     /**
      * Serialize class instance to JSON.
@@ -47,10 +52,12 @@ export class ConstrainedBasis extends Basis {
         return {
             ...super.toJSON(),
             constraints: this.constraints.toJSON(),
-        }
+        };
     }
 
-    getConstraintByIndex(idx) {return this._constraints.getArrayElementByIndex(idx) || []}
+    getConstraintByIndex(idx) {
+        return this._constraints.getArrayElementByIndex(idx) || [];
+    }
 
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
@@ -71,15 +78,14 @@ export class ConstrainedBasis extends Basis {
      * @return {String[]}
      */
     get atomicPositionsWithConstraints() {
-        const clsInstance = this;
         return this.elementsCoordinatesConstraintsArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
             const constraint = entry[2];
-            return s.sprintf('%-4s', element) +
-                coordinate.map(x => s.sprintf('%14.9f', x).trim()).join(' ') +
-                ' ' + constraint.map(x => x ? 1 : 0).join(' ');
+            return `${
+                s.sprintf("%-4s", element) +
+                coordinate.map((x) => s.sprintf("%14.9f", x).trim()).join(" ")
+            } ${constraint.map((x) => (x ? 1 : 0)).join(" ")}`;
         });
     }
-
 }

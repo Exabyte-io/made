@@ -1,5 +1,5 @@
+import { LATTICE_TYPE } from "../lattice/types";
 import math from "../math";
-import {LATTICE_TYPE} from "../lattice/types";
 
 /**
  * Routines for calculating conventional cell vectors from primitive cell Bravais parameters.
@@ -9,7 +9,7 @@ import {LATTICE_TYPE} from "../lattice/types";
 const unitMatrix = [
     [1, 0, 0],
     [0, 1, 0],
-    [0, 0, 1]
+    [0, 0, 1],
 ];
 
 // (Conventional cellVectors) = (Primitive cellVectors) * (PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIER matrix)
@@ -19,34 +19,34 @@ export const PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS = {
     [LATTICE_TYPE.FCC]: [
         [-1, 1, 1],
         [1, -1, 1],
-        [1, 1, -1]
+        [1, 1, -1],
     ],
     [LATTICE_TYPE.BCC]: [
         [0, 1, 1],
         [1, 0, 1],
-        [1, 1, 0]
+        [1, 1, 0],
     ],
     [LATTICE_TYPE.TET]: unitMatrix,
     [LATTICE_TYPE.BCT]: [
         [0, 1, 1],
         [1, 0, 1],
-        [1, 1, 0]
+        [1, 1, 0],
     ],
     [LATTICE_TYPE.ORC]: unitMatrix,
     [LATTICE_TYPE.ORCF]: [
         [-1, 1, 1],
         [1, -1, 1],
-        [1, 1, -1]
+        [1, 1, -1],
     ],
     [LATTICE_TYPE.ORCI]: [
         [0, 1, 1],
         [1, 0, 1],
-        [1, 1, 0]
+        [1, 1, 0],
     ],
     [LATTICE_TYPE.ORCC]: [
         [1, -1, 0],
         [1, 1, 0],
-        [0, 0, 1]
+        [0, 0, 1],
     ],
     [LATTICE_TYPE.HEX]: unitMatrix,
     [LATTICE_TYPE.RHL]: unitMatrix,
@@ -54,11 +54,10 @@ export const PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS = {
     [LATTICE_TYPE.MCLC]: [
         [1, -1, 0],
         [1, 1, 0],
-        [0, 0, 1]
+        [0, 0, 1],
     ],
     [LATTICE_TYPE.TRI]: unitMatrix,
-    [LATTICE_TYPE.TRI + 'alt']: unitMatrix,
-
+    [`${LATTICE_TYPE.TRI}alt`]: unitMatrix,
 };
 
 export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES = {
@@ -78,8 +77,7 @@ export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES = {
     [LATTICE_TYPE.MCLC]: LATTICE_TYPE.MCL,
     [LATTICE_TYPE.TRI]: LATTICE_TYPE.TRI,
     // TODO: Legacy `TRI_alt` type, assert not used and remove
-    [LATTICE_TYPE.TRI + 'alt']: LATTICE_TYPE.TRI,
-
+    [`${LATTICE_TYPE.TRI}alt`]: LATTICE_TYPE.TRI,
 };
 
 export function isConventionalCellSameAsPrimitiveForLatticeType(latticeType) {
