@@ -14,7 +14,7 @@ const EPSILON = 1e-8;
  * @return {Number}
  */
 
-const product = function (v1, v2) {
+const product = (v1, v2) => {
     return math.multiply(v1, math.transpose(v2));
 };
 
@@ -23,7 +23,7 @@ const product = function (v1, v2) {
  * @param v {Number[]} Vector
  * @return {Number}
  */
-const vlen = function (v) {
+const vlen = (v) => {
     return math.sqrt(product(v, v));
 };
 
@@ -34,7 +34,7 @@ const vlen = function (v) {
  * @param [unit] {String} `rad`, `deg`
  * @return {Number}
  */
-const angle = function (a, b, unit) {
+const angle = (a, b, unit) => {
     const lenA = vlen(a);
     const lenB = vlen(b);
     return math.unit(math.acos(product(a, b) / (lenA * lenB)), "rad").toNumber(unit || "deg");
@@ -51,7 +51,7 @@ const angleUpTo90 = (...args) => {
  * @param v2 {Number[]} Vector
  * @return {Number}
  */
-const vDist = function (v1, v2) {
+const vDist = (v1, v2) => {
     if (v1.length !== v2.length) {
         console.error(
             "Attempting to calculate distance between vectors of different dimensionality",
@@ -76,7 +76,7 @@ const vEqualWithTolerance = (vec1, vec2, tolerance = TOLERANCE.pointsDistance) =
  * @param n {Number}
  * @return {Number}
  */
-const roundToZero = function (n) {
+const roundToZero = (n) => {
     return Math.abs(n) < EPSILON ? 0 : n;
 };
 
@@ -86,7 +86,7 @@ const roundToZero = function (n) {
  * @param n {Number}
  * @return {Number}
  */
-const precise = function (x, n = 7) {
+const precise = (x, n = 7) => {
     return Number(x.toPrecision(n));
 };
 
@@ -96,7 +96,7 @@ const precise = function (x, n = 7) {
  * @param tolerance {Number}
  * @return {Number}
  */
-const mod = function (num, tolerance = 0.001) {
+const mod = (num, tolerance = 0.001) => {
     const m = num % 1;
     const x = num >= 0 ? m : 1 + m;
 
@@ -110,7 +110,7 @@ const mod = function (num, tolerance = 0.001) {
  * @summary Returns cartesian of passed arrays.
  * @example combinations([1,2], [4,5], [6]) = [[1,4,6], [1,5,6], [2,4,6], [2,5,6]];
  */
-const cartesianProduct = function (...arg) {
+const cartesianProduct = (...arg) => {
     const r = [];
     const max = arg.length - 1;
 
@@ -136,7 +136,7 @@ const cartesianProduct = function (...arg) {
  * @param b {Number}
  * @param tolerance {Number}
  */
-const almostEqual = function (a, b, tolerance = TOLERANCE.pointsDistance) {
+const almostEqual = (a, b, tolerance = TOLERANCE.pointsDistance) => {
     return Math.abs(a - b) < tolerance;
 };
 
@@ -145,7 +145,7 @@ const almostEqual = function (a, b, tolerance = TOLERANCE.pointsDistance) {
  * Helper to deal with JS arithmetic artifacts.
  * @number number {Number}
  */
-const isBetweenZeroInclusiveAndOne = function (number, tolerance = TOLERANCE.length) {
+const isBetweenZeroInclusiveAndOne = (number, tolerance = TOLERANCE.length) => {
     return roundToZero(number) >= 0 && !almostEqual(number, 1, tolerance) && number < 1;
 };
 
