@@ -29,7 +29,7 @@
         "arrow-body-style": "off",
         "import/prefer-default-export": "off",
         "import/no-named-as-default-member": "warn",
-        "no-param-reassign": "warn",
+        "no-param-reassign": ["warn", { "props": false }],
         "max-classes-per-file": "warn",
         "simple-import-sort/imports": [
             "warn",
