@@ -1,14 +1,14 @@
-import {tolerance, coefficients, units, ATOMIC_COORD_UNITS} from "./constants";
+import { ArrayWithIds } from "./abstract/array_with_ids";
+import { Basis } from "./basis/basis";
+import { ATOMIC_COORD_UNITS, coefficients, tolerance, units } from "./constants";
+import { AtomicConstraints } from "./constraints/constraints";
+import { Lattice } from "./lattice/lattice";
+import { ReciprocalLattice } from "./lattice/reciprocal/lattice_reciprocal";
+import { DEFAULT_LATTICE_UNITS, LATTICE_TYPE_CONFIGS } from "./lattice/types";
+import { defaultMaterialConfig, Material } from "./material";
 import MadeMath from "./math";
-import {Material, defaultMaterialConfig} from "./material";
-import {Lattice} from "./lattice/lattice";
-import {Basis} from "./basis/basis";
-import {ReciprocalLattice} from "./lattice/reciprocal/lattice_reciprocal";
 import parsers from "./parsers/parsers";
 import tools from "./tools/index";
-import {DEFAULT_LATTICE_UNITS, LATTICE_TYPE_CONFIGS} from "./lattice/types";
-import {ArrayWithIds} from "./abstract/array_with_ids";
-import {AtomicConstraints} from "./constraints/constraints";
 
 export const Made = {
     coefficients,

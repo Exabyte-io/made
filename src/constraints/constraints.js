@@ -1,8 +1,9 @@
-import {ArrayWithIds} from "../abstract/array_with_ids";
+import { ArrayWithIds } from "../abstract/array_with_ids";
 
 export class AtomicConstraints {
-
-    static fromArray(array) {return new AtomicConstraints({values: array})}
+    static fromArray(array) {
+        return new AtomicConstraints({ values: array });
+    }
 
     /**
      * Create atomic constraints.
@@ -10,7 +11,7 @@ export class AtomicConstraints {
      * @param {ArrayWithIds|Array} config.values
      */
     constructor(config = {}) {
-        this.name = 'atomic_constraints';
+        this.name = "atomic_constraints";
         this.values = new ArrayWithIds(config.values || []);
     }
 
@@ -30,11 +31,13 @@ export class AtomicConstraints {
     toJSON() {
         return {
             name: this.name,
-            values: this.values.toJSON()
-        }
+            values: this.values.toJSON(),
+        };
     }
 
-    getByIndex(idx) {return this.values.getArrayElementByIndex(idx) || []}
+    getByIndex(idx) {
+        return this.values.getArrayElementByIndex(idx) || [];
+    }
 
     /**
      * Get constraints for an atom with index as string.
@@ -42,6 +45,7 @@ export class AtomicConstraints {
      * @param {Function} mapFn (OPTIONAL) - a function to be applied to each constraint. By default 0 or 1 is returned.
      * @return {String[]}
      */
-    getAsStringByIndex(idx, mapFn = (boolean) => boolean ? 1 : 0) {return this.getByIndex(idx).map(mapFn).join(' ')}
-
+    getAsStringByIndex(idx, mapFn = (boolean) => (boolean ? 1 : 0)) {
+        return this.getByIndex(idx).map(mapFn).join(" ");
+    }
 }

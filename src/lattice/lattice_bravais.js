@@ -1,13 +1,12 @@
 import constants from "../constants";
 import math from "../math";
-import {LATTICE_TYPE_CONFIGS} from "./types";
+import { LATTICE_TYPE_CONFIGS } from "./types";
 
 /*
  * @summary: class that holds parameters of a Bravais Lattice: a, b, c, alpha, beta, gamma + corresponding units.
  * When stored as class variables units for lengths are always "angstrom"s, angle - "degree"s
  */
 export class LatticeBravais {
-
     /**
      * Create a Bravais lattice.
      * @param {Object} config - Config object.
@@ -30,13 +29,14 @@ export class LatticeBravais {
             beta = alpha,
             gamma = alpha,
             // if we do not know what lattice type this is => set to TRI
-            type = 'TRI',
+            type = "TRI",
             units = {
-                length: 'angstrom',
-                angle: 'degree'
-            }
+                length: "angstrom",
+                angle: "degree",
+            },
         } = config;
-        const k = constants.units.bohr === units.length ? constants.coefficients.BOHR_TO_ANGSTROM : 1;
+        const k =
+            constants.units.bohr === units.length ? constants.coefficients.BOHR_TO_ANGSTROM : 1;
         Object.assign(this, {
             a: a * k,
             b: b * k,
@@ -47,10 +47,11 @@ export class LatticeBravais {
             type,
             units,
         });
-
     }
 
-    static _roundValue(x) {return math.precise(math.roundToZero(x))}
+    static _roundValue(x) {
+        return math.precise(math.roundToZero(x));
+    }
 
     /**
      * Create a Bravais lattice from vectors.
@@ -63,21 +64,29 @@ export class LatticeBravais {
      * @param {String} type - type of the lattice to be created, defaults to TRI when not provided.
      * @param {Boolean} skipRounding - whether to skip rounding the resulting lattice values, defaults to `false`.
      */
-    static fromVectors({a, b, c, alat = 1, units = 'angstrom', type = 'TRI', skipRounding = false}) {
-        const roundValue = skipRounding ? x => x : this._roundValue;
+    static fromVectors({
+        a,
+        b,
+        c,
+        alat = 1,
+        units = "angstrom",
+        type = "TRI",
+        skipRounding = false,
+    }) {
+        const roundValue = skipRounding ? (x) => x : this._roundValue;
         return new this.prototype.constructor({
             a: roundValue(math.vlen(a) * alat),
             b: roundValue(math.vlen(b) * alat),
             c: roundValue(math.vlen(c) * alat),
-            alpha: roundValue(math.angle(b, c, 'deg')),
-            beta: roundValue(math.angle(a, c, 'deg')),
-            gamma: roundValue(math.angle(a, b, 'deg')),
+            alpha: roundValue(math.angle(b, c, "deg")),
+            beta: roundValue(math.angle(a, c, "deg")),
+            gamma: roundValue(math.angle(a, b, "deg")),
             // initially we do not know what lattice type this is => set to TRI
             type,
             units: {
                 length: units,
-                angle: 'degree'
-            }
+                angle: "degree",
+            },
         });
     }
 
@@ -90,7 +99,7 @@ export class LatticeBravais {
             b: array[1],
             c: array[2],
             type,
-            skipRounding,  // do not round the values to avoid loosing precision by default
+            skipRounding, // do not round the values to avoid loosing precision by default
         });
     }
 
@@ -101,12 +110,13 @@ export class LatticeBravais {
      */
     get editables() {
         const object = {};
-        const editablesList = LATTICE_TYPE_CONFIGS.find(entry => entry.code === this.type).editables;
+        const editablesList = LATTICE_TYPE_CONFIGS.find((entry) => entry.code === this.type)
+            .editables;
         // ["a", "gamma"] => {a: true, gamma: true}
-        editablesList.forEach(element => {
+        editablesList.forEach((element) => {
             Object.assign(object, {
                 [element]: true,
-            })
+            });
         });
         return object;
     }
@@ -129,11 +139,12 @@ export class LatticeBravais {
          }
      */
     toJSON() {
-        return Object.assign({}, this, {
+        return {
+            ...this,
             units: {
                 length: this.units.length,
                 angle: this.units.angle,
-            }
-        })
+            },
+        };
     }
 }

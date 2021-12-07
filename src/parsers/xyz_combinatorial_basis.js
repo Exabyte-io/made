@@ -1,7 +1,8 @@
 import _ from "underscore";
 import * as s from "underscore.string";
+
+import { Basis } from "../basis/basis";
 import math from "../math";
-import {Basis} from "../basis/basis";
 
 /**
  * @summary Combinatorial XYZ basis class and related. Create and get all information about basis and elements in it.
@@ -29,12 +30,12 @@ import {Basis} from "../basis/basis";
  * Regular expression for basis line.
  * @type {RegExp}
  */
-const LINE_REGEX = /^([A-Z][a-z]?\/?,?)+\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s*$/ig;
+const LINE_REGEX = /^([A-Z][a-z]?\/?,?)+\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s*$/gi;
 // vacancy characters will be used to create vacancies on basis generation
 const VACANCY_CHARACTER = "VAC";
 
-const COMBINATION_DELIMITER = ',';
-const PERMUTATION_DELIMITER = '/';
+const COMBINATION_DELIMITER = ",";
+const PERMUTATION_DELIMITER = "/";
 
 /**
  * Basis validation error codes.
@@ -43,8 +44,15 @@ const PERMUTATION_DELIMITER = '/';
 const ERROR_CODES = {
     MIXING_IN_SINGLE_LINE: 1,
     MIXING_IN_MULTI_LINES: 2,
-    REGEX_NOT_PASSED: 3
+    REGEX_NOT_PASSED: 3,
 };
+
+export class WrongBasisFormat extends Error {
+    constructor(xyz, message, type) {
+        super(message, type);
+        this.xyz = xyz;
+    }
+}
 
 export class CombinatorialBasis {
     /**
@@ -53,7 +61,11 @@ export class CombinatorialBasis {
      */
     constructor(eXYZ) {
         this._xyz = eXYZ;
-        this._lines = s.lines(eXYZ).map(x => x.trim()).filter(x => x !== '').map(this._parseBasisLine);
+        this._lines = s
+            .lines(eXYZ)
+            .map((x) => x.trim())
+            .filter((x) => x !== "")
+            .map(this._parseBasisLine);
 
         this._hasPermutationLine = this._lines.reduce((mem, a) => {
             return mem || a.isPermutation;
@@ -63,9 +75,11 @@ export class CombinatorialBasis {
         }, false);
 
         if (this._hasPermutationLine && this._hasCombinationLine) {
-            throw new WrongBasisFormat(this._xyz,
+            throw new WrongBasisFormat(
+                this._xyz,
                 `Basis contains mixed permutation and combination.`,
-                ERROR_CODES.MIXING_IN_MULTI_LINES);
+                ERROR_CODES.MIXING_IN_MULTI_LINES,
+            );
         }
     }
 
@@ -80,40 +94,49 @@ export class CombinatorialBasis {
      */
     _parseBasisLine(str, index) {
         if (!str.match(LINE_REGEX)) {
-            throw new WrongBasisFormat(this._xyz, `Line #${index + 1}: "${str}" contains errors. ` +
-                `Allowed formats: "Si 0 0 0", "Si/Li 0.5 0.5 0.5", "Si,Ge 0.7 0.7 0.8"`, ERROR_CODES.REGEX_NOT_PASSED);
+            throw new WrongBasisFormat(
+                this._xyz,
+                `Line #${index + 1}: "${str}" contains errors. ` +
+                    `Allowed formats: "Si 0 0 0", "Si/Li 0.5 0.5 0.5", "Si,Ge 0.7 0.7 0.8"`,
+                ERROR_CODES.REGEX_NOT_PASSED,
+            );
         }
 
         const containsPermutation = str.indexOf(PERMUTATION_DELIMITER) > -1;
         const containsCombination = str.indexOf(COMBINATION_DELIMITER) > -1;
 
         if (containsCombination && containsPermutation) {
-            throw new WrongBasisFormat(this._xyz,
+            throw new WrongBasisFormat(
+                this._xyz,
                 `Line #${index} contains mixed permutation and combination.`,
-                ERROR_CODES.MIXING_IN_SINGLE_LINE);
+                ERROR_CODES.MIXING_IN_SINGLE_LINE,
+            );
         }
 
         let elements = [];
 
-        const words = s.words(str).map(x => x.trim()).filter(x => x != null);
+        const words = s
+            .words(str)
+            .map((x) => x.trim())
+            .filter((x) => x != null);
 
         if (containsCombination) {
-            elements = words[0].split(COMBINATION_DELIMITER).map(x => x.trim());
+            elements = words[0].split(COMBINATION_DELIMITER).map((x) => x.trim());
         } else if (containsPermutation) {
-            elements = words[0].split(PERMUTATION_DELIMITER).map(x => x.trim());
+            elements = words[0].split(PERMUTATION_DELIMITER).map((x) => x.trim());
         } else {
             elements = [words[0]];
         }
 
-        let coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
+        const coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
 
         return {
             displayName: `ELEMENT_${index}`,
             isCombination: containsCombination,
             isPermutation: containsPermutation,
-            elements: elements,
-            coordinates: coordinates
-        }
+            elements,
+            coordinates,
+        };
     }
 
     /**
@@ -121,13 +144,18 @@ export class CombinatorialBasis {
      * @return {String[]}
      */
     get uniqueElements() {
-        return _.chain(this._lines).map(line => line.elements).flatten().unique().value().sort();
+        return _.chain(this._lines)
+            .map((line) => line.elements)
+            .flatten()
+            .unique()
+            .value()
+            .sort();
     }
 
-    static toBasisConfig(array, units = 'crystal', cell = Basis.defaultCell) {
+    static toBasisConfig(array, units = "crystal", cell = Basis.defaultCell) {
         return {
-            elements: _.pluck(array, 'element'),
-            coordinates: _.pluck(array, 'coordinates'),
+            elements: _.pluck(array, "element"),
+            coordinates: _.pluck(array, "coordinates"),
             units,
             cell,
         };
@@ -145,15 +173,15 @@ export class CombinatorialBasis {
             result = this._combination();
         } else {
             const items = [];
-            this._lines.forEach(function (line, index) {
+            this._lines.forEach((line) => {
                 items.push({
                     element: line.elements[0],
-                    coordinates: line.coordinates
+                    coordinates: line.coordinates,
                 });
             });
             result = [items];
         }
-        return result.map(x => CombinatorialBasis.toBasisConfig(x));
+        return result.map((x) => CombinatorialBasis.toBasisConfig(x));
     }
 
     /**
@@ -162,19 +190,21 @@ export class CombinatorialBasis {
      */
     _combination() {
         const dimensions = [];
-        this._lines.forEach(line => {
+        this._lines.forEach((line) => {
             const itemsSet = [];
-            line.elements.forEach(element => {
+            line.elements.forEach((element) => {
                 // omit vacancy characters
                 itemsSet.push({
-                    element: element,
-                    coordinates: line.coordinates
+                    element,
+                    coordinates: line.coordinates,
                 });
             });
             dimensions.push(itemsSet);
         });
         const basisSet = math.cartesianProduct.apply(null, dimensions);
-        return basisSet.map(basis => basis.filter(entry => (entry.element !== VACANCY_CHARACTER)));
+        return basisSet.map((basis) =>
+            basis.filter((entry) => entry.element !== VACANCY_CHARACTER),
+        );
     }
 
     /**
@@ -183,16 +213,18 @@ export class CombinatorialBasis {
      * @private
      */
     _permutation() {
-        const maxLen = Math.max.apply(Math, this._lines.map(x => x.elements.length));
+        const maxLen = Math.max(...this._lines.map((x) => x.elements.length));
         const bases = [];
         for (let i = 0; i < maxLen; i++) {
             const items = [];
-            this._lines.forEach(function (line) {
-                const element = line.elements.length <= i ? _.last(line.elements) : line.elements[i];
-                (element !== VACANCY_CHARACTER) && items.push({
-                    element: element,
-                    coordinates: line.coordinates
-                });
+            this._lines.forEach((line) => {
+                const element =
+                    line.elements.length <= i ? _.last(line.elements) : line.elements[i];
+                element !== VACANCY_CHARACTER &&
+                    items.push({
+                        element,
+                        coordinates: line.coordinates,
+                    });
             });
             bases.push(items);
         }
@@ -205,13 +237,5 @@ export class CombinatorialBasis {
      */
     isCombinatorial() {
         return this._hasCombinationLine || this._hasPermutationLine;
-    }
-}
-
-export class WrongBasisFormat extends Error {
-
-    constructor(xyz, message, type) {
-        super(message, type);
-        this.xyz = xyz;
     }
 }

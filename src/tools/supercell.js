@@ -1,8 +1,5 @@
+import { LatticeBravais } from "../lattice/lattice_bravais";
 import math from "../math";
-import {Basis} from "../basis/basis";
-import {Cell} from "../cell/cell";
-import {LatticeBravais} from "../lattice/lattice_bravais";
-
 import cellTools from "./cell";
 
 const ADD = math.add;
@@ -15,20 +12,18 @@ const ADD = math.add;
  * @return {Basis}
  */
 function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix) {
-
     const oldBasis = basis.clone();
-    const newBasis = basis.clone({isEmpty: true});
+    const newBasis = basis.clone({ isEmpty: true });
 
     oldBasis.toCrystal();
     newBasis.toCrystal();
 
-    oldBasis.elements.forEach(element => {
-
+    oldBasis.elements.forEach((element) => {
         const coordinate = oldBasis.getCoordinateByIndex(element.id);
         const cartesianCoordinate = cell.convertPointToCartesian(coordinate);
 
         const shifts = cellTools.latticePointsInSupercell(supercellMatrix);
-        shifts.forEach(comb => {
+        shifts.forEach((comb) => {
             // "combination" is effectively a point in fractional coordinates here, hence the below
             const newPoint = ADD(cartesianCoordinate, supercell.convertPointToCartesian(comb));
             if (supercell.isPointInsideCell(newPoint)) {
@@ -51,12 +46,17 @@ function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix
 function generateConfig(material, supercellMatrix) {
     const det = math.det(supercellMatrix);
     if (det === 0) {
-        throw new Error('Scaling matrix is degenerate.');
+        throw new Error("Scaling matrix is degenerate.");
     }
     const cell = material.Lattice.Cell;
     const supercell = cell.cloneAndScaleByMatrix(supercellMatrix);
 
-    const newBasis = generateNewBasisWithinSupercell(material.Basis, cell, supercell, supercellMatrix);
+    const newBasis = generateNewBasisWithinSupercell(
+        material.Basis,
+        cell,
+        supercell,
+        supercellMatrix,
+    );
     const newLattice = LatticeBravais.fromVectors({
         a: supercell.vector1,
         b: supercell.vector2,
@@ -67,10 +67,10 @@ function generateConfig(material, supercellMatrix) {
         name: `${material.name} - supercell ${JSON.stringify(supercellMatrix)}`,
         basis: newBasis.toJSON(),
         lattice: newLattice.toJSON(),
-    }
+    };
 }
 
 export default {
     generateConfig,
     generateNewBasisWithinSupercell,
-}
+};
