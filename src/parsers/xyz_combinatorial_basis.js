@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import _ from "underscore";
 import * as s from "underscore.string";
 
@@ -220,11 +221,12 @@ export class CombinatorialBasis {
             this._lines.forEach((line) => {
                 const element =
                     line.elements.length <= i ? _.last(line.elements) : line.elements[i];
-                element !== VACANCY_CHARACTER &&
+                if (element !== VACANCY_CHARACTER) {
                     items.push({
                         element,
                         coordinates: line.coordinates,
                     });
+                }
             });
             bases.push(items);
         }
