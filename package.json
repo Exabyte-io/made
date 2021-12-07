@@ -6,7 +6,11 @@
         "prepublishOnly": "rm -rf lib; npm run transpile",
         "postinstall": "npm run transpile",
         "transpile": "mkdir -p lib; babel src --out-dir lib",
-        "test": "mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests"
+        "test": "nyc --reporter=text mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests",
+        "lint": "eslint src tests && prettier --write src tests",
+        "lint:fix": "eslint --fix --cache src tests && prettier --write src tests",
+        "prettier": "prettier --check src tests",
+        "prepare": "husky install"
     },
     "repository": {
         "type": "git",
@@ -19,19 +23,33 @@
     },
     "license": "Apache-2.0",
     "homepage": "https://github.com/Exabyte-io/made-js",
-    "devDependencies": {
-        "chai": "^3.5.0",
-        "chai-almost": "^1.0.1",
-        "fs-extra": "^4.0.0",
-        "mocha": "^2.5.3"
+    "engines": {
+        "node": ">=0.12"
     },
-    "dependencies": {
-        "@babel/cli": "7.0.0",
-        "@babel/core": "7.0.0",
-        "@babel/register": "7.0.0",
+    "devDependencies": {
+        "@babel/cli": "7.1.0",
+        "@babel/core": "7.1.0",
+        "@babel/plugin-proposal-class-properties": "7.0.0",
         "@babel/polyfill": "7.0.0",
         "@babel/preset-env": "7.0.0",
-        "@babel/plugin-proposal-class-properties": "7.0.0",
+        "@babel/register": "7.0.0",
+        "babel-eslint": "^10.1.0",
+        "chai": "^4.3.4",
+        "chai-almost": "^1.0.1",
+        "eslint": "^7.24.0",
+        "eslint-config-airbnb-base": "^14.2.1",
+        "eslint-config-prettier": "^8.1.0",
+        "eslint-plugin-import": "^2.22.1",
+        "eslint-plugin-jsdoc": "^32.3.0",
+        "eslint-plugin-prettier": "^3.3.1",
+        "eslint-plugin-simple-import-sort": "^7.0.0",
+        "husky": "^6.0.0",
+        "lint-staged": "^10.5.4",
+        "mocha": "^8.3.2",
+        "nyc": "^15.1.0",
+        "prettier": "^2.2.1"
+    },
+    "dependencies": {
         "array-almost-equal": "^1.0.0",
         "crypto-js": "^3.1.9-1",
         "lodash": "^4.17.4",
@@ -40,5 +58,9 @@
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4",
         "@exabyte-io/periodic-table.js": "2.0.4"
+    },
+    "lint-staged": {
+        "*.js": "eslint --cache --fix",
+        "*.{js,css,md}": "prettier --write"
     }
 }
