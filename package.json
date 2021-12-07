@@ -8,7 +8,7 @@
         "test": "nyc --reporter=text mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests",
         "lint": "eslint src && prettier --write src",
         "lint:fix": "eslint --fix --cache src && prettier --write src",
-        "prettier": "prettier",
+        "prettier": "prettier --check src",
         "prepare": "husky install"
     },
     "repository": {
