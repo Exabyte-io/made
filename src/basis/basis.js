@@ -384,7 +384,7 @@ export class Basis {
      * The lattice size is based on the maximum pairwise distance across a structure if the basis contains > 2 atoms.
      * @returns {Number}
      */
-    getMinimumBasisLatticeSize() {
+    get minimumLatticeSize() {
         let latticeSizeAdditiveContribution = 0;
         if (this._elements.array.length === 1) {
             const elementSymbol = this._elements.getArrayElementByIndex(0)

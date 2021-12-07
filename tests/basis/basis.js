@@ -166,7 +166,7 @@ describe('Basis', function () {
     it('should return minimum lattice size for a molecule', function() {
         const basis = new Basis(C2H4.basis);
         const minimumBasisSize = 3.162;
-        const latticeSize = basis.getMinimumBasisLatticeSize();
+        const latticeSize = basis.minimumLatticeSize;
         expect(latticeSize).to.be.equal(minimumBasisSize);
     })
 
@@ -174,7 +174,7 @@ describe('Basis', function () {
     it('should return minimum lattice size for an atom', function() {
         const basis = new Basis(Na.basis);
         const minimumBasisSize = 1.9;
-        const latticeSize = basis.getMinimumBasisLatticeSize();
+        const latticeSize = basis.minimumLatticeSize;
         expect(latticeSize).to.be.equal(minimumBasisSize);
     })
 
