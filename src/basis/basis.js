@@ -1,9 +1,9 @@
 import _ from "underscore";
 import s from "underscore.string";
-import {getElectronegativity} from "@exabyte-io/periodic-table.js";
+import {getElectronegativity, getElementAtomicRadius} from "@exabyte-io/periodic-table.js";
 
 import math from "../math";
-import {Lattice} from "../lattice/lattice";
+import {Lattice, nonPeriodicLatticeScalingFactor} from "../lattice/lattice";
 import {ArrayWithIds} from "../abstract/array_with_ids";
 import {ATOMIC_COORD_UNITS, HASH_TOLERANCE} from "../constants";
 
@@ -379,6 +379,23 @@ export class Basis {
     }
 
     /**
+     * @summary function returns the minimum basis lattice size for a structure.
+     * The lattice size is based on the atomic radius of an element if the basis contains a single atom.
+     * The lattice size is based on the maximum pairwise distance across a structure if the basis contains > 2 atoms.
+     * @returns {Number}
+     */
+    get minimumLatticeSize() {
+        let latticeSizeAdditiveContribution = 0;
+        if (this._elements.array.length === 1) {
+            const elementSymbol = this._elements.getArrayElementByIndex(0)
+            latticeSizeAdditiveContribution = getElementAtomicRadius(elementSymbol);
+        }
+        const moleculeLatticeSize = this.maxPairwiseDistance * nonPeriodicLatticeScalingFactor;
+        const latticeSize = latticeSizeAdditiveContribution + moleculeLatticeSize;
+        return math.precise(latticeSize, 4);
+    }
+
+    /**
      * @summary function returns the max distance between pairs of basis coordinates by
      * calculating the distance between pairs of basis coordinates.
      * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
@@ -396,12 +413,14 @@ export class Basis {
      */
     get maxPairwiseDistance() {
         let maxDistance = 0;
-        for (let i = 0; i < this._elements.array.length; i++) {
-            for (let j = i + 1; j < this._elements.array.length; j++) {
-                const distance = math.vDist(
-                    this._coordinates.getArrayElementByIndex(i), this._coordinates.getArrayElementByIndex(j));
-                if (distance > maxDistance) {
-                    maxDistance = distance;
+        if (this._elements.array.length >= 2) {
+            for (let i = 0; i < this._elements.array.length; i++) {
+                for (let j = i + 1; j < this._elements.array.length; j++) {
+                    const distance = math.vDist(
+                        this._coordinates.getArrayElementByIndex(i), this._coordinates.getArrayElementByIndex(j));
+                    if (distance > maxDistance) {
+                        maxDistance = distance;
+                    }
                 }
             }
         }
