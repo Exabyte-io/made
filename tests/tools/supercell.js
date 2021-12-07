@@ -1,12 +1,12 @@
-import { expect } from 'chai';
+import { expect } from "chai";
 
-import { Basis } from '../../src/basis/basis';
-import { Made } from '../../src/made';
-import { Material } from '../../src/material';
-import { Si, SiSupercell } from '../enums';
+import { Basis } from "../../src/basis/basis";
+import { Made } from "../../src/made";
+import { Material } from "../../src/material";
+import { Si, SiSupercell } from "../enums";
 
-describe('Tools:Supercell', () => {
-    it('should generate supercell', () => {
+describe("Tools:Supercell", () => {
+    it("should generate supercell", () => {
         const material = new Material(Si);
 
         const supercell = Made.tools.supercell.generateConfig(material, [
@@ -14,7 +14,7 @@ describe('Tools:Supercell', () => {
             [0, 2, 0],
             [0, 0, 2],
         ]);
-        expect(supercell.lattice).deep.equal(SiSupercell.lattice, 'lattices are not equal');
+        expect(supercell.lattice).deep.equal(SiSupercell.lattice, "lattices are not equal");
 
         const basis1 = new Basis(SiSupercell.basis);
         const basis2 = new Basis(supercell.basis);

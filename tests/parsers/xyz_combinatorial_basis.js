@@ -1,22 +1,22 @@
-import { expect } from 'chai';
+import { expect } from "chai";
 
-import { Basis } from '../../src/basis/basis';
-import { CombinatorialBasis } from '../../src/parsers/xyz_combinatorial_basis';
-import { AsGeBasis, FeLiSiBasis, Ge2Basis, OSiBasis, Si2Basis } from '../enums';
+import { Basis } from "../../src/basis/basis";
+import { CombinatorialBasis } from "../../src/parsers/xyz_combinatorial_basis";
+import { AsGeBasis, FeLiSiBasis, Ge2Basis, OSiBasis, Si2Basis } from "../enums";
 
-describe('Parsers:CombinatorialBasis', () => {
-    it('toBasisConfig', () => {
+describe("Parsers:CombinatorialBasis", () => {
+    it("toBasisConfig", () => {
         const basisConfig2 = CombinatorialBasis.toBasisConfig([
             {
-                element: 'Si',
+                element: "Si",
                 coordinates: [0, 0, 0],
             },
             {
-                element: 'Li',
+                element: "Li",
                 coordinates: [0.3, 0.3, 0.3],
             },
             {
-                element: 'Fe',
+                element: "Fe",
                 coordinates: [0.5, 0.5, 0.5],
             },
         ]);
@@ -26,26 +26,26 @@ describe('Parsers:CombinatorialBasis', () => {
         expect(basis1.isEqualTo(basis2)).to.equal(true);
     });
 
-    it('Regular XYZ', () => {
+    it("Regular XYZ", () => {
         const xyz = `
             Si 0.0 0.0 0.0
             O 0.5 0.5 0.5
         `;
 
         const basis = new CombinatorialBasis(xyz);
-        expect(basis.uniqueElements).deep.equal(['O', 'Si']);
+        expect(basis.uniqueElements).deep.equal(["O", "Si"]);
         const basis1 = new Basis(basis.allBasisConfigs[0]);
         const basis2 = new Basis(OSiBasis);
         expect(basis1.isEqualTo(basis2)).to.equal(true);
     });
 
-    it('Permutation XYZ', () => {
+    it("Permutation XYZ", () => {
         const permutation = `
             Si/Ge/As 0.0 0.0 0.0
             Si/Ge 0.5 0.5 0.5
         `;
         const basis = new CombinatorialBasis(permutation);
-        expect(basis.uniqueElements).deep.equal(['As', 'Ge', 'Si']);
+        expect(basis.uniqueElements).deep.equal(["As", "Ge", "Si"]);
         const basisList1 = basis.allBasisConfigs.map((c) => new Basis(c));
         const basisList2 = [Si2Basis, Ge2Basis, AsGeBasis].map((c) => new Basis(c));
 
@@ -57,13 +57,13 @@ describe('Parsers:CombinatorialBasis', () => {
         });
     });
 
-    it('Combination XYZ', () => {
+    it("Combination XYZ", () => {
         const combination = `
             Si,Ge,As 0.0 0.0 0.0
             Si,Ge 0.5 0.5 0.5
         `;
         const basis = new CombinatorialBasis(combination);
-        expect(basis.uniqueElements).deep.equal(['As', 'Ge', 'Si']);
+        expect(basis.uniqueElements).deep.equal(["As", "Ge", "Si"]);
 
         const basisList1 = basis.allBasisConfigs.map((c) => new Basis(c));
         expect(basisList1.length).to.equal(6);
@@ -71,61 +71,61 @@ describe('Parsers:CombinatorialBasis', () => {
         const basisList2 = [
             CombinatorialBasis.toBasisConfig([
                 {
-                    element: 'Si',
+                    element: "Si",
                     coordinates: [0, 0, 0],
                 },
                 {
-                    element: 'Si',
+                    element: "Si",
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfig([
                 {
-                    element: 'Si',
+                    element: "Si",
                     coordinates: [0, 0, 0],
                 },
                 {
-                    element: 'Ge',
+                    element: "Ge",
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfig([
                 {
-                    element: 'Ge',
+                    element: "Ge",
                     coordinates: [0, 0, 0],
                 },
                 {
-                    element: 'Si',
+                    element: "Si",
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfig([
                 {
-                    element: 'Ge',
+                    element: "Ge",
                     coordinates: [0, 0, 0],
                 },
                 {
-                    element: 'Ge',
+                    element: "Ge",
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfig([
                 {
-                    element: 'As',
+                    element: "As",
                     coordinates: [0, 0, 0],
                 },
                 {
-                    element: 'Si',
+                    element: "Si",
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfig([
                 {
-                    element: 'As',
+                    element: "As",
                     coordinates: [0, 0, 0],
                 },
                 {
-                    element: 'Ge',
+                    element: "Ge",
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
@@ -139,7 +139,7 @@ describe('Parsers:CombinatorialBasis', () => {
         });
     });
 
-    it('Mixing combination and permutation should fail', () => {
+    it("Mixing combination and permutation should fail", () => {
         const mixedInMultipleLines = `
             Si/Ge/As 0.0 0.0 0.0\n
             Si,Ge 0.5 0.5 0.5

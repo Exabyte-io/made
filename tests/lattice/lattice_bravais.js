@@ -1,16 +1,16 @@
-import { expect } from 'chai';
+import { expect } from "chai";
 
-import { LatticeBravais } from '../../src/lattice/lattice_bravais';
-import { Na4Cl4 } from '../enums';
-import { assertDeepAlmostEqual } from '../utils';
+import { LatticeBravais } from "../../src/lattice/lattice_bravais";
+import { Na4Cl4 } from "../enums";
+import { assertDeepAlmostEqual } from "../utils";
 
-describe('Lattice Bravais', () => {
-    it('should return lattice bravais from vectors', () => {
+describe("Lattice Bravais", () => {
+    it("should return lattice bravais from vectors", () => {
         const lattice = LatticeBravais.fromVectors(Na4Cl4.lattice.vectors);
-        assertDeepAlmostEqual(lattice.toJSON(), Na4Cl4.lattice, ['type', 'vectors']);
+        assertDeepAlmostEqual(lattice.toJSON(), Na4Cl4.lattice, ["type", "vectors"]);
     });
 
-    it('should return a list of editable keys', () => {
+    it("should return a list of editable keys", () => {
         const lattice = new LatticeBravais(Na4Cl4.lattice);
         expect(lattice.editables).to.be.deep.equal({ a: true });
     });

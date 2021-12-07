@@ -1,10 +1,10 @@
-import { primitiveCell } from '../../src/cell/primitive_cell';
-import { Lattice } from '../../src/lattice/lattice';
-import { Na4Cl4 } from '../enums';
-import { assertDeepAlmostEqual } from '../utils';
+import { primitiveCell } from "../../src/cell/primitive_cell";
+import { Lattice } from "../../src/lattice/lattice";
+import { Na4Cl4 } from "../enums";
+import { assertDeepAlmostEqual } from "../utils";
 
-describe('Primitive Cell', () => {
-    it('should return primitive lattice', () => {
+describe("Primitive Cell", () => {
+    it("should return primitive lattice", () => {
         const lattice = new Lattice(Na4Cl4.lattice);
         const actualPrimitiveCell = primitiveCell(lattice);
         const expectedPrimitiveCell = [

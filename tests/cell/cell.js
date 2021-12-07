@@ -1,9 +1,9 @@
-import { Lattice } from '../../src/lattice/lattice';
-import { Si } from '../enums';
-import { assertDeepAlmostEqual } from '../utils';
+import { Lattice } from "../../src/lattice/lattice";
+import { Si } from "../enums";
+import { assertDeepAlmostEqual } from "../utils";
 
-describe('Cell', () => {
-    it('should return scaled cell', () => {
+describe("Cell", () => {
+    it("should return scaled cell", () => {
         const lattice = new Lattice(Si.lattice);
         const expectedCell = {
             tolerance: 1,
