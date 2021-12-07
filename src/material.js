@@ -153,10 +153,6 @@ export class Material {
         return this.prop('basis', undefined, true);
     }
 
-    set basis(config) {
-        this.setProp('basis', config);
-    }
-
     // returns the instance of {ConstrainedBasis} class
     get Basis() {
         return new ConstrainedBasis({
@@ -170,7 +166,7 @@ export class Material {
     }
 
     set lattice(config) {
-        this.setProp('lattice', config);
+        return this.setProp('lattice', config);
     }
 
     // returns the instance of {Lattice} class

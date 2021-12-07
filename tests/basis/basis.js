@@ -1,7 +1,7 @@
 import {expect} from "chai";
 
 import {Basis} from "../../src/basis/basis";
-import {AsGeBasis, FeLiSiBasis, LiFeSiBasis, Na4Cl4, Na4Cl4Cartesian, C2H4, C2H4Translated} from "../enums";
+import {AsGeBasis, FeLiSiBasis, LiFeSiBasis, Na4Cl4, Na4Cl4Cartesian, C2H4, C2H4Translated, Na} from "../enums";
 import {assertDeepAlmostEqual} from "../utils";
 
 describe('Basis', function () {
@@ -161,6 +161,22 @@ describe('Basis', function () {
         const basis = new Basis(Na4Cl4Cartesian.basis);
         expect(basis.standardRepresentation).to.be.deep.almost.equal(Na4Cl4.basis);
     });
+
+    //** Minimum Lattice Size Molecule//
+    it('should return minimum lattice size for a molecule', function() {
+        const basis = new Basis(C2H4.basis);
+        const minimumBasisSize = 3.162;
+        const latticeSize = basis.minimumLatticeSize;
+        expect(latticeSize).to.be.equal(minimumBasisSize);
+    })
+
+    //** Minimum Lattice Size Atom//
+    it('should return minimum lattice size for an atom', function() {
+        const basis = new Basis(Na.basis);
+        const minimumBasisSize = 1.9;
+        const latticeSize = basis.minimumLatticeSize;
+        expect(latticeSize).to.be.equal(minimumBasisSize);
+    })
 
     //** Pairwise Distance */
     it('should return max distance', function() {
