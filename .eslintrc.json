@@ -18,6 +18,7 @@
         "prettier/prettier": "error",
         "comma-dangle": ["error", "always-multiline"],
         "array-element-newline": ["error", "consistent"],
+        "no-plusplus": ["error", { "allowForLoopAfterthoughts":  true }],
         "camelcase": "off",
         "max-len": "off",
         "no-console": "off",

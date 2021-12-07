@@ -58,7 +58,19 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
     ].join("\n");
 }
 
+/**
+ * @summary calculates the number of atoms in a poscar file based on the summation of the numbers in line 7 of the file.
+ * Poscar file formatting: https://www.vasp.at/wiki/index.php/POSCAR
+ * @param poscarFileContent
+ * @returns {Number}
+ */
+export function atomsCount(poscarFileContent) {
+    const atomsLine = poscarFileContent.split("\n")[6].split(" ");
+    return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
+}
+
 export default {
     toPoscar,
     atomicConstraintsCharFromBool,
+    atomsCount,
 };
