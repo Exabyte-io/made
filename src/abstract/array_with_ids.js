@@ -56,7 +56,14 @@ export class ArrayWithIds {
      * @param {Any} idx - The entity to be added to array. If Object with 'value' key, its value will be added.
      */
     removeElement(el, idx) {
-        if (idx === undefined) idx = this.array.findIndex((elm) => elm === el);
-        idx !== undefined && this.array.splice(idx, 1);
+        let _idx;
+        if (idx === undefined) {
+            _idx = this.array.findIndex((elm) => elm === el);
+        } else {
+            _idx = idx;
+        }
+        if (_idx !== undefined) {
+            this.array.splice(_idx, 1);
+        }
     }
 }

@@ -27,18 +27,26 @@ export class Basis {
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
     }) {
+        let _units;
+        let _elements;
+        let _coordinates;
         if (!units) {
-            units = Basis.unitsOptionsDefaultValue;
+            _units = Basis.unitsOptionsDefaultValue;
             console.warn("Basis.constructor: units are not provided => set to crystal");
+        } else {
+            _units = units;
         }
         if (isEmpty) {
-            elements = [];
-            coordinates = [];
+            _elements = [];
+            _coordinates = [];
+        } else {
+            _elements = elements;
+            _coordinates = coordinates;
         }
         // assert that elements and coordinates have ids if not already passed in config + store Array helper classes
-        this._elements = new ArrayWithIds(elements);
-        this._coordinates = new ArrayWithIds(coordinates);
-        this.units = units;
+        this._elements = new ArrayWithIds(_elements);
+        this._coordinates = new ArrayWithIds(_coordinates);
+        this.units = _units;
         this.cell = cell;
     }
 
@@ -239,8 +247,10 @@ export class Basis {
                 (arrayCoordinate) =>
                     math.roundToZero(math.vDist(arrayCoordinate, coordinate)) === 0,
             );
-            index > -1 && this._elements.removeElement(null, index);
-            index > -1 && this._coordinates.removeElement(null, index);
+            if (index > -1) {
+                this._elements.removeElement(null, index);
+                this._coordinates.removeElement(null, index);
+            }
         }
     }
 
