@@ -9,6 +9,8 @@ export const Na4Cl4 = readJSONFile(path.join(FIXTURES_DIR, "Na4Cl4.json"));
 export const Na4Cl4Cartesian = readJSONFile(path.join(FIXTURES_DIR, "Na4Cl4-cartesian.json"));
 export const Na4Cl4Poscar = readFile(path.join(FIXTURES_DIR, "Na4Cl4.poscar"));
 export const SiSupercell = readJSONFile(path.join(FIXTURES_DIR, "Si-supercell.json"));
+export const C2H4 = readJSONFile(path.join(FIXTURES_DIR, "C2H4.json"));
+export const C2H4Translated = readJSONFile(path.join(FIXTURES_DIR, "C2H4-translated.json"));
 
 export const OSiBasis = readJSONFile(path.join(FIXTURES_DIR, "OSi-basis.json"));
 export const Si2Basis = readJSONFile(path.join(FIXTURES_DIR, "Si2-basis.json"));
@@ -26,3 +28,4 @@ export const SiPWSCFInput = readFile(path.join(FIXTURES_DIR, "Si-pwscf.in"));
 
 export const Zr1H23Zr1H1 = readJSONFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.json"));
 export const Zr1H23Zr1H1Poscar = readFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.poscar"));
+export const H2O = readFile(path.join(FIXTURES_DIR, "H2O.poscar"));
