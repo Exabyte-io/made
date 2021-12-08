@@ -162,20 +162,26 @@ describe('Basis', function () {
         expect(basis.standardRepresentation).to.be.deep.almost.equal(Na4Cl4.basis);
     });
 
-    //** Minimum Lattice Size Molecule//
+    /**
+     * Minimum lattice size generated for a molecule with more than one atom.
+     * The minimumLatticeSize is the maximum pairwise distance between two atoms
+     * of the structure, C2H4 in this case.
+     */
     it('should return minimum lattice size for a molecule', function() {
         const basis = new Basis(C2H4.basis);
-        const minimumBasisSize = 3.162;
-        const latticeSize = basis.minimumLatticeSize;
-        expect(latticeSize).to.be.equal(minimumBasisSize);
+        const minimumLatticeSize = 3.162;
+        const latticeSize = basis.getMinimumLatticeSize();
+        expect(latticeSize).to.be.equal(minimumLatticeSize);
     })
 
-    //** Minimum Lattice Size Atom//
-    it('should return minimum lattice size for an atom', function() {
+    /**
+     * Minimum lattice size generated for a structure made up of a single atom.
+     * The minimumLatticeSize is the atomic radii of the atom, Na in this case, in units of angstroms.
+     */    it('should return minimum lattice size for an atom', function() {
         const basis = new Basis(Na.basis);
-        const minimumBasisSize = 1.9;
-        const latticeSize = basis.minimumLatticeSize;
-        expect(latticeSize).to.be.equal(minimumBasisSize);
+        const minimumLatticeSize = 1.9;
+        const latticeSize = basis.getMinimumLatticeSize();
+        expect(latticeSize).to.be.equal(minimumLatticeSize);
     })
 
     //** Pairwise Distance */
