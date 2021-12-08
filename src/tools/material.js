@@ -1,5 +1,4 @@
-import {Basis} from "../basis/basis";
-import {Lattice, nonPeriodicLatticeScalingFactor} from "../lattice/lattice";
+import {Lattice} from "../lattice/lattice";
 
 /**
  * Scales one lattice vector for the given material
@@ -22,23 +21,15 @@ function scaleOneLatticeVector(material, key = 'a', factor = 1.0) {
 }
 
 /**
- * Returns the lattice for a non-periodic structure. The lattice has been scaled to accomodate the size of the
- * non-periodic structure.
+ * Updates the size of a materials lattice using the minimumLatticeSize function.
+ * The new size of the material is calculated based on the materials basis.
  * @param material {Material}
- * @returns {Object}
  */
 function scaleLatticeToMakeNonPeriodic(material) {
-    const basis = new Basis({
-        ...material.Basis.toJSON(),
-    })
-    basis.toCartesian();
-    const scalingFactor = nonPeriodicLatticeScalingFactor;
-    const newLattice = new Lattice({
-        a: basis.maxPairwiseDistance * scalingFactor,
+    material.lattice = new Lattice({
+        a: material.Basis.minimumLatticeSize,
         type: "CUB"
     });
-
-    return newLattice.toJSON();
 }
 
 export default {
