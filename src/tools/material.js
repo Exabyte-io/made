@@ -27,7 +27,7 @@ function scaleOneLatticeVector(material, key = 'a', factor = 1.0) {
  */
 function scaleLatticeToMakeNonPeriodic(material) {
     material.lattice = new Lattice({
-        a: material.Basis.minimumLatticeSize,
+        a: material.Basis.getMinimumLatticeSize(),
         type: "CUB"
     });
 }
