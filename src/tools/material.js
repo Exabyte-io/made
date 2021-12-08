@@ -1,6 +1,6 @@
 import math from "mathjs";
 import {Basis} from "../basis/basis";
-import {Lattice, nonPeriodicLatticeScalingFactor} from "../lattice/lattice";
+import {Lattice} from "../lattice/lattice";
 
 /**
  * Scales one lattice vector for the given material
@@ -23,31 +23,22 @@ function scaleOneLatticeVector(material, key = 'a', factor = 1.0) {
 }
 
 /**
- * Returns the lattice for a non-periodic structure. The lattice has been scaled to accomodate the size of the
- * non-periodic structure.
+ * Updates the size of a materials lattice using the minimumLatticeSize function.
+ * The new size of the material is calculated based on the materials basis.
  * @param material {Material}
- * @returns {Object}
  */
 function scaleLatticeToMakeNonPeriodic(material) {
-    const basis = new Basis({
-        ...material.Basis.toJSON(),
-    })
-    basis.toCartesian();
-    const scalingFactor = nonPeriodicLatticeScalingFactor;
-    const newLattice = new Lattice({
-        a: basis.maxPairwiseDistance * scalingFactor,
+    material.lattice = new Lattice({
+        a: material.Basis.getMinimumLatticeSize(),
         type: "CUB"
     });
-
-    return newLattice.toJSON();
 }
 
 /**
- * Returns the basis of a material that has been translated so that the center of the coordinates
- * aligns with the center of the materials lattice.
+ * Updates the basis of a material by translating the coordinates
+ * so that the center of the material and lattice are aligned.
  * @param material {Material}
- * @returns {Object}
- */
+ * */
 function getBasisConfigTranslatedToCenter(material) {
     const lattice = new Lattice(material.lattice);
     const basis = new Basis({
@@ -58,8 +49,7 @@ function getBasisConfigTranslatedToCenter(material) {
     const centerOfLattice = math.multiply(0.5, lattice.vectorArrays.reduce((a, b) => math.add(a, b)));
     const translationVector = math.subtract(centerOfLattice, centerOfCoordinates);
     basis.translateByVector(translationVector);
-
-    return basis.toJSON();
+    material.setBasis(basis.toJSON());
 }
 
 export default {
