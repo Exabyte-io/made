@@ -384,13 +384,13 @@ export class Basis {
      * The lattice size is based on the maximum pairwise distance across a structure if the basis contains > 2 atoms.
      * @returns {Number}
      */
-    get minimumLatticeSize() {
+    getMinimumLatticeSize(latticeScalingFactor = nonPeriodicLatticeScalingFactor) {
         let latticeSizeAdditiveContribution = 0;
         if (this._elements.array.length === 1) {
             const elementSymbol = this._elements.getArrayElementByIndex(0)
             latticeSizeAdditiveContribution = getElementAtomicRadius(elementSymbol);
         }
-        const moleculeLatticeSize = this.maxPairwiseDistance * nonPeriodicLatticeScalingFactor;
+        const moleculeLatticeSize = this.maxPairwiseDistance * latticeScalingFactor;
         const latticeSize = latticeSizeAdditiveContribution + moleculeLatticeSize;
         return math.precise(latticeSize, 4);
     }
@@ -412,6 +412,7 @@ export class Basis {
      * @returns {Number}
      */
     get maxPairwiseDistance() {
+        this.toCartesian();
         let maxDistance = 0;
         if (this._elements.array.length >= 2) {
             for (let i = 0; i < this._elements.array.length; i++) {
