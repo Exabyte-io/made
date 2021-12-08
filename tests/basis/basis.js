@@ -177,7 +177,8 @@ describe('Basis', function () {
     /**
      * Minimum lattice size generated for a structure made up of a single atom.
      * The minimumLatticeSize is the atomic radii of the atom, Na in this case, in units of angstroms.
-     */    it('should return minimum lattice size for an atom', function() {
+     */
+    it('should return minimum lattice size for an atom', function() {
         const basis = new Basis(Na.basis);
         const minimumLatticeSize = 1.9;
         const latticeSize = basis.getMinimumLatticeSize();
