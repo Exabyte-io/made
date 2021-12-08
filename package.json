@@ -27,13 +27,6 @@
         "node": ">=0.12"
     },
     "devDependencies": {
-        "@babel/cli": "7.1.0",
-        "@babel/core": "7.1.0",
-        "@babel/plugin-proposal-class-properties": "7.0.0",
-        "@babel/polyfill": "7.0.0",
-        "@babel/preset-env": "7.0.0",
-        "@babel/register": "7.0.0",
-        "babel-eslint": "^10.1.0",
         "chai": "^4.3.4",
         "chai-almost": "^1.0.1",
         "eslint": "^7.24.0",
@@ -50,6 +43,13 @@
         "prettier": "^2.2.1"
     },
     "dependencies": {
+        "@babel/cli": "7.1.0",
+        "@babel/core": "7.1.0",
+        "@babel/plugin-proposal-class-properties": "7.0.0",
+        "@babel/polyfill": "7.0.0",
+        "@babel/preset-env": "7.0.0",
+        "@babel/register": "7.0.0",
+        "babel-eslint": "^10.1.0",
         "array-almost-equal": "^1.0.0",
         "crypto-js": "^3.1.9-1",
         "lodash": "^4.17.4",
