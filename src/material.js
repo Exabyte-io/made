@@ -157,7 +157,7 @@ export class Material {
     }
 
     set lattice(config) {
-        return this.setProp("lattice", config);
+        this.setProp("lattice", config);
     }
 
     // returns the instance of {Lattice} class

@@ -124,9 +124,9 @@ export class Basis {
 
     getCoordinateByIndex(idx) { return this._coordinates.getArrayElementByIndex(idx); }
 
-    get elements() { return this._elements.toJSON(); }
-
     get elementsArray() { return this._elements.array; }
+
+    get elements() { return this._elements.toJSON(); }
 
     /**
      * Set basis elements to passed array.
@@ -327,15 +327,13 @@ export class Basis {
         // make a copy to prevent modifying class values
         const clsInstance = new Basis(this.toJSON());
         clsInstance.toStandardRepresentation();
-        return `${clsInstance.elementsAndCoordinatesArray
-            .map((entry) => {
-                const element = entry[0];
-                const coordinate = entry[1];
-                const toleratedCoordinates = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
-                return `${element} ${toleratedCoordinates.join()}`;
-            })
-            .sort()
-            .join(";")};`;
+        const standardRep = clsInstance.elementsAndCoordinatesArray.map((entry) => {
+            const element = entry[0];
+            const coordinate = entry[1];
+            const toleratedCoordinates = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
+            return `${element} ${toleratedCoordinates.join()}`;
+        })
+        return `${standardRep.sort().join(";")};`;
     }
 
     /**
@@ -390,8 +388,8 @@ export class Basis {
      */
     hasEquivalentCellTo(anotherBasisClsInstance) {
         // this.cell {Array} - Cell Vectors 1, eg. [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-        return !this.cell
-            .map((vector, idx) =>
+        // prettier-ignore
+        return !this.cell.map((vector, idx) =>
                 math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell[idx]),
             )
             .some((x) => !x);
