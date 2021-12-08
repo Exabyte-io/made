@@ -12,7 +12,6 @@ import xyz from "./xyz";
 function toEspressoFormat(materialOrConfig) {
     const l = new Lattice(materialOrConfig.lattice);
     const vectors = l.vectorArrays;
-
     const vectorsAsString = _.map(vectors, (v) => {
         return `${s.sprintf("%14.9f", v[0])}\t${s.sprintf("%14.9f", v[1])}\t${s.sprintf(
             "%14.9f",

@@ -27,9 +27,7 @@ export class Basis {
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
     }) {
-        let _elements;
-        let _coordinates;
-        let _units;
+        let _elements, _coordinates, _units;
         if (!units) {
             _units = Basis.unitsOptionsDefaultValue;
             console.warn("Basis.constructor: units are not provided => set to crystal");

@@ -21,7 +21,6 @@ describe("Parsers:CombinatorialBasis", () => {
                 coordinates: [0.5, 0.5, 0.5],
             },
         ]);
-
         const [basis1, basis2] = [new Basis(FeLiSiBasis), new Basis(basisConfig2)];
 
         expect(basis1.isEqualTo(basis2)).to.equal(true);
@@ -32,7 +31,6 @@ describe("Parsers:CombinatorialBasis", () => {
             Si 0.0 0.0 0.0
             O 0.5 0.5 0.5
         `;
-
         const basis = new CombinatorialBasis(xyz);
         expect(basis.uniqueElements).deep.equal(["O", "Si"]);
         const basis1 = new Basis(basis.allBasisConfigs[0]);

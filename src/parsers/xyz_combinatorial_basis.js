@@ -30,13 +30,12 @@ import math from "../math";
  * Regular expression for basis line.
  * @type {RegExp}
  */
-const LINE_REGEX = /^([A-Z][a-z]?\/?,?)+\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s*$/gi;
+const LINE_REGEX =
+    /^([A-Z][a-z]?\/?,?)+\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s*$/gi;
 // vacancy characters will be used to create vacancies on basis generation
 const VACANCY_CHARACTER = "VAC";
-
 const COMBINATION_DELIMITER = ",";
 const PERMUTATION_DELIMITER = "/";
-
 /**
  * Basis validation error codes.
  * @type {{MIXING_IN_SINGLE_LINE: number, MIXING_IN_MULTI_LINES: number, REGEX_NOT_PASSED: number}}

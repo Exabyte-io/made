@@ -21,7 +21,6 @@ function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix
     oldBasis.elements.forEach((element) => {
         const coordinate = oldBasis.getCoordinateByIndex(element.id);
         const cartesianCoordinate = cell.convertPointToCartesian(coordinate);
-
         const shifts = cellTools.latticePointsInSupercell(supercellMatrix);
         shifts.forEach((comb) => {
             // "combination" is effectively a point in fractional coordinates here, hence the below
@@ -50,7 +49,6 @@ function generateConfig(material, supercellMatrix) {
     }
     const cell = material.Lattice.Cell;
     const supercell = cell.cloneAndScaleByMatrix(supercellMatrix);
-
     const newBasis = generateNewBasisWithinSupercell(
         material.Basis,
         cell,
