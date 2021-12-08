@@ -412,6 +412,7 @@ export class Basis {
      * @returns {Number}
      */
     get maxPairwiseDistance() {
+        this.toCartesian();
         let maxDistance = 0;
         if (this._elements.array.length >= 2) {
             for (let i = 0; i < this._elements.array.length; i++) {
