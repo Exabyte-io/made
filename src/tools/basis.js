@@ -14,9 +14,7 @@ const MULT = math.multiply;
  * @return {Basis} New Basis.
  */
 function repeat(basis, repetitions) {
-    let i;
-    let j;
-    let k;
+    let i, j, k;
     let shiftI = 0;
     let shiftJ = 0;
     let shiftK = 0;
@@ -90,7 +88,6 @@ function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
     const initialCoordinates = _.flatten(initialBasisCopy.coordinatesAsArray);
     const finalCoordinates = _.flatten(finalBasisCopy.coordinatesAsArray);
     const delta = ADD(finalCoordinates, MULT(initialCoordinates, -1));
-
     const resultingListOfBases = [];
 
     for (let i = 1; i <= numberOfSteps; i++) {

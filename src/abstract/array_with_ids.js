@@ -53,9 +53,7 @@ export class ArrayWithIds {
      * @param {Any} el - The entity to be added to array. If Object with 'value' key, its value will be added.
      */
     addElement(el) {
-        if (el) {
-            this.array.push(el.value || el);
-        }
+        if (el) this.array.push(el.value || el);
     }
 
     /**

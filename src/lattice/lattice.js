@@ -172,7 +172,6 @@ export class Lattice extends LatticeBravais {
         const pCell = primitiveCell(latticeConfig, true);
         // create new lattice from primitive cell
         const newLattice = { ...Lattice.fromVectorArrays(pCell, latticeConfig.type) };
-
         // preserve the new type and scale back the lattice parameters
         const k = latticeConfig.a / newLattice.a;
 

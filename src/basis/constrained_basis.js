@@ -82,10 +82,12 @@ export class ConstrainedBasis extends Basis {
             const element = entry[0];
             const coordinate = entry[1];
             const constraint = entry[2];
-            return `${
+            return (
                 s.sprintf("%-4s", element) +
-                coordinate.map((x) => s.sprintf("%14.9f", x).trim()).join(" ")
-            } ${constraint.map((x) => (x ? 1 : 0)).join(" ")}`;
+                coordinate.map((x) => s.sprintf("%14.9f", x).trim()).join(" ") +
+                " " +
+                constraint.map((x) => (x ? 1 : 0)).join(" ")
+            );
         });
     }
 }

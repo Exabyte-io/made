@@ -110,8 +110,9 @@ export class LatticeBravais {
      */
     get editables() {
         const object = {};
-        const editablesList = LATTICE_TYPE_CONFIGS.find((entry) => entry.code === this.type)
-            .editables;
+        const editablesList = LATTICE_TYPE_CONFIGS.find(
+            (entry) => entry.code === this.type,
+        ).editables;
         // ["a", "gamma"] => {a: true, gamma: true}
         editablesList.forEach((element) => {
             Object.assign(object, {

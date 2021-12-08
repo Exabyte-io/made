@@ -114,23 +114,43 @@ const POINTS = {
         return [
             {
                 point: 'A',
-                coordinates: [1 / 2, 1 / 2, 1 / 2],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: 'M',
-                coordinates: [1 / 2, 1 / 2, 0.0],
+                coordinates: [
+                    1 / 2,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: 'R',
-                coordinates: [0.0, 1 / 2, 1 / 2],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    1 / 2,
+                ],
             },
             {
                 point: 'X',
-                coordinates: [0.0, 1 / 2, 0.0],
+                coordinates: [
+                    0.0,
+                    1 / 2,
+                    0.0,
+                ],
             },
             {
                 point: 'Z',
-                coordinates: [0.0, 0.0, 1 / 2],
+                coordinates: [
+                    0.0,
+                    0.0,
+                    1 / 2,
+                ],
             },
         ];
     },
@@ -713,8 +733,7 @@ const POINTS = {
     },
 
     [LATTICE_TYPE.RHL]: ({a, b, c, alpha, beta, gamma}) => {
-        let n;
-        let v;
+        let n, v;
         const cosAlpha = Math.cos(alpha / 180 * Math.PI);
         if (cosAlpha > 0) {
             // RHL-1
@@ -1004,13 +1023,7 @@ const POINTS = {
 
     [LATTICE_TYPE.MCLC]: ({a, b, c, alpha, beta, gamma}) => {
         const cosAlpha = Math.cos(alpha / 180 * Math.PI);
-        let e;
-        let n;
-        let p;
-        let f;
-        let m;
-        let d;
-        let v;
+        let e, n, p, f, m, d, v;
         if (gamma >= 90) {
             // MCLC-1,2
             e = (2 - b * cosAlpha / c) / (4 * (1 - cosAlpha * cosAlpha));

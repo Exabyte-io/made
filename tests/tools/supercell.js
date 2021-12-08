@@ -8,7 +8,6 @@ import { Si, SiSupercell } from "../enums";
 describe("Tools:Supercell", () => {
     it("should generate supercell", () => {
         const material = new Material(Si);
-
         const supercell = Made.tools.supercell.generateConfig(material, [
             [2, 0, 0],
             [0, 2, 0],

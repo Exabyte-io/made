@@ -63,7 +63,6 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
             ];
     } else {
         const [a1, a2, a3] = cell.vectorsAsArray;
-
         // z1 = (k * a1 - h * a2)
         // z2 = (l * a1 - h * a3)
         // z3 = l * a2 - k * a3)
@@ -82,7 +81,6 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
         }
 
         const [a, b] = extGCD(p * k + q * l, h);
-
         const c1 = [p * k + q * l, -p * h, -q * h];
         const c2 = [0, l, -k].map((c) => math.trunc(c / math.gcd(l, k))); // floor division
         const c3 = [b, a * p, a * q];
@@ -106,7 +104,6 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
  */
 function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, thickness, vx, vy) {
     const transformationMatrix = math.eye(3).toArray();
-
     const vxIndex = outOfPlaneAxisIndex === 2 ? 0 : outOfPlaneAxisIndex + 1;
     const vyIndex = vxIndex === 2 ? 0 : vxIndex + 1;
 
@@ -134,15 +131,11 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
         throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
 
     const cell = material.Lattice.Cell;
-
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
-
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
-    const outOfPlaneAxisIndex = millerSupercell.getMostCollinearVectorIndex(
-        millerPlanePseudoNormal,
-    );
-
+    const outOfPlaneAxisIndex =
+        millerSupercell.getMostCollinearVectorIndex(millerPlanePseudoNormal);
     const dimensionsScalingMatrix = getDimensionsScalingMatrix(
         cell,
         millerSupercell,
@@ -151,10 +144,8 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
         vx,
         vy,
     );
-
     const supercellMatrix = MULT(dimensionsScalingMatrix, millerScalingMatrix);
     const supercell = millerSupercell.cloneAndScaleByMatrix(dimensionsScalingMatrix);
-
     const newBasis = SupercellTools.generateNewBasisWithinSupercell(
         material.Basis,
         cell,
