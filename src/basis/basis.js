@@ -48,17 +48,11 @@ export class Basis {
         this.cell = cell;
     }
 
-    static get unitsOptionsConfig() {
-        return ATOMIC_COORD_UNITS;
-    }
+    static get unitsOptionsConfig() { return ATOMIC_COORD_UNITS; }
 
-    static get unitsOptionsDefaultValue() {
-        return ATOMIC_COORD_UNITS.crystal;
-    }
+    static get unitsOptionsDefaultValue() { return ATOMIC_COORD_UNITS.crystal; }
 
-    static get defaultCell() {
-        return new Lattice().vectorArrays;
-    }
+    static get defaultCell() { return new Lattice().vectorArrays; }
 
     /**
      * Serialize class instance to JSON.
@@ -126,33 +120,21 @@ export class Basis {
         return new this.constructor({ ...this.toJSON(), ...extraContext });
     }
 
-    getElementByIndex(idx) {
-        return this._elements.getArrayElementByIndex(idx);
-    }
+    getElementByIndex(idx) { return this._elements.getArrayElementByIndex(idx); }
 
-    getCoordinateByIndex(idx) {
-        return this._coordinates.getArrayElementByIndex(idx);
-    }
+    getCoordinateByIndex(idx) { return this._coordinates.getArrayElementByIndex(idx); }
 
-    get elements() {
-        return this._elements.toJSON();
-    }
+    get elements() { return this._elements.toJSON(); }
 
-    get elementsArray() {
-        return this._elements.array;
-    }
+    get elementsArray() { return this._elements.array; }
 
     /**
      * Set basis elements to passed array.
      * @param {Array|ArrayWithIds} elementsArray - New elements array.
      */
-    set elements(elementsArray) {
-        this._elements = new ArrayWithIds(elementsArray);
-    }
+    set elements(elementsArray) { this._elements = new ArrayWithIds(elementsArray); }
 
-    get coordinates() {
-        return this._coordinates.toJSON();
-    }
+    get coordinates() { return this._coordinates.toJSON(); }
 
     /**
      * Set basis elements to passed array.
@@ -162,17 +144,11 @@ export class Basis {
         this._coordinates = new ArrayWithIds(coordinatesNestedArray);
     }
 
-    get coordinatesAsArray() {
-        return this._coordinates.array;
-    }
+    get coordinatesAsArray() { return this._coordinates.array; }
 
-    get isInCrystalUnits() {
-        return this.units === ATOMIC_COORD_UNITS.crystal;
-    }
+    get isInCrystalUnits() { return this.units === ATOMIC_COORD_UNITS.crystal; }
 
-    get isInCartesianUnits() {
-        return this.units === ATOMIC_COORD_UNITS.cartesian;
-    }
+    get isInCartesianUnits() { return this.units === ATOMIC_COORD_UNITS.cartesian; }
 
     toCartesian() {
         const unitCell = this.cell;
@@ -256,9 +232,7 @@ export class Basis {
      * Unique names (symbols) of the chemical elements basis. E.g. `['Si', 'Li']`
      * @return {Array}
      */
-    get uniqueElements() {
-        return _.unique(this._elements.array);
-    }
+    get uniqueElements() { return _.unique(this._elements.array); }
 
     /**
      * Returns unique chemical elements with their count sorted by electronegativity.
@@ -396,9 +370,7 @@ export class Basis {
     /**
      * @summary Returns number of atoms in material
      */
-    get nAtoms() {
-        return this._elements.array.length;
-    }
+    get nAtoms() { return this._elements.array.length; }
 
     // helpers
 

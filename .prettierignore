@@ -1,2 +1,4 @@
+src/basis/basis.js
+src/abstract/array_with_ids.js
 src/lattice/reciprocal/paths.js
 src/lattice/reciprocal/symmetry_points.js
