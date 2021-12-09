@@ -20,8 +20,8 @@ As below:
     - [ReciprocalLattice](src/lattice/reciprocal/lattice_reciprocal.js), 
     - [Cell](src/cell/cell.js), 
     - [AtomicConstraints](src/constraints/constraints.js) 
-    - and others to be added. 
-- input/output support, including: 
+    - and others to be added.
+- input/output support, including:
     - POSCAR [[3]](#links), 
     - XYZ [[4]](#links),
     - Quantum ESPRESSO [[5]](#links),
@@ -73,6 +73,7 @@ Made.js is written in EcmaScript 6th edition [[2]](#links) with the application 
 
 4. `parsers` directory contains the parsers to- and from- ESSE format mentioned in 1. All functionality related to external data conversion is contained in this directory.
 
+
 ### TODO list
 
 Desirable features for implementation:
@@ -97,7 +98,6 @@ Made tests are written based on Mocha [6](#links) testing framework and can be e
 git pull
 git lfs pull
 ```
-
 to get the latest test fixtures from LFS, and then:
 
 ```bash
