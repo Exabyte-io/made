@@ -117,7 +117,11 @@ npm test
 
 ## Using Linter
 
-Linter setup will prevent committing files that don't adhere to the code standard
+Linter setup will prevent committing files that don't adhere to the code standard. It will
+attempt to fix what it can automatically prior to the commit in order to reduce diff noise. This can lead to "unexpected" behavior where a
+file that is staged for commit is not identical to the file that actually gets committed. This happens
+in the `lint-staged` directive of the `package.json` file (by using a `husky` pre-commit hook). For example,
+if you add extra whitespace to a file, stage it, and try to commit it, you will see the following:
 
 ```bash
 ➜  made-js git:(feature/SOF-4398-TB) ✗ git add src/basis/constrained_basis.js
@@ -134,11 +138,16 @@ Linter setup will prevent committing files that don't adhere to the code standar
 husky - pre-commit hook exited with code 1 (error)
 ```
 
-This can be fixed by running:
+The staged change may remain but will not have been committed. Then it will look like you still have a staged
+change to commit, but the pre-commit hook will not actually commit it for you, quite frustrating! Styling can
+be applied manually and fixed by running:
 
 ```bash
 npm run lint:fix
 ```
+
+In which case, you may need to then add the linter edits to your staging, which in the example above, puts the
+file back to identical with upstream, resulting in no staged changes whatsoever.
 
 ## Links
 
