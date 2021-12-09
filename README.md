@@ -147,7 +147,7 @@ npm run lint:fix
 ```
 
 In which case, you may need to then add the linter edits to your staging, which in the example above, puts the
-file back to identical with upstream, resulting in no staged changes whatsoever.
+file back to identical with the base branch, resulting in no staged changes whatsoever.
 
 ## Configuring WebStorm for use with Linter
 
