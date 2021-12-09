@@ -13,24 +13,24 @@ Exabyte.io believe in a collaborative future of materials design on the web.
 
 As below:
 
--  the package provides a software environment for interacting with Materials-related data structures from ESSE Data Convention [[1]](#links) and is written in ECMAScript 2015 for use on the web
--  High-level classes for the representation of the [Material](src/material.js) and the corresponding structural information, ie:
-    -  [Basis](src/basis/basis.js),
-    -  [Lattice](src/lattice/lattice.js),
-    -  [ReciprocalLattice](src/lattice/reciprocal/lattice_reciprocal.js),
-    -  [Cell](src/cell/cell.js),
-    -  [AtomicConstraints](src/constraints/constraints.js)
-    -  and others to be added.
--  input/output support, including:
-    -  POSCAR [[3]](#links),
-    -  XYZ [[4]](#links),
-    -  Quantum ESPRESSO [[5]](#links),
-    -  and others to be added.
--  structural generation and analysis tools:
-    -  [supercell](src/tools/supercell.js)
-    -  [surfaces](src/tools/surface.js)
-    -  [combinatorial sets](src/parsers/xyz_combinatorial_basis.js)
-    -  [interpolated sets for chemical reactions](src/tools/basis.js)
+- the package provides a software environment for interacting with Materials-related data structures from ESSE Data Convention [[1]](#links) and is written in ECMAScript 2015 for use on the web
+- High-level classes for the representation of the [Material](src/material.js) and the corresponding structural information, ie:
+    - [Basis](src/basis/basis.js), 
+    - [Lattice](src/lattice/lattice.js), 
+    - [ReciprocalLattice](src/lattice/reciprocal/lattice_reciprocal.js), 
+    - [Cell](src/cell/cell.js), 
+    - [AtomicConstraints](src/constraints/constraints.js) 
+    - and others to be added. 
+- input/output support, including: 
+    - POSCAR [[3]](#links), 
+    - XYZ [[4]](#links),
+    - Quantum ESPRESSO [[5]](#links),
+    - and others to be added.
+- structural generation and analysis tools:
+    - [supercell](src/tools/supercell.js)
+    - [surfaces](src/tools/surface.js)
+    - [combinatorial sets](src/parsers/xyz_combinatorial_basis.js)
+    - [interpolated sets for chemical reactions](src/tools/basis.js)
 
 The package is written in a modular way easy to extend. Contributions can be in the form of additional tools or modules you develop, or feature requests and [bug/issue reports](https://help.github.com/articles/creating-an-issue/).
 
@@ -77,17 +77,17 @@ Made.js is written in EcmaScript 6th edition [[2]](#links) with the application 
 
 Desirable features for implementation:
 
--  identify primitive / conventional structures
--  support for molecular geometries
--  support for polymer geometries
--  radial correlation function calculation
--  generation of complex atomic shapes:
-    -  fullerene
-    -  nanotube
-    -  nanowire
-    -  nano-cluster
-    -  a combination of the above
-    -  arbitrary atomic arrangement
+- identify primitive / conventional structures
+- support for molecular geometries
+- support for polymer geometries
+- radial correlation function calculation
+- generation of complex atomic shapes:
+    - fullerene
+    - nanotube
+    - nanowire
+    - nano-cluster
+    - a combination of the above
+    - arbitrary atomic arrangement
 
 ## Tests
 
