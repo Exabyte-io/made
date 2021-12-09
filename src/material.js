@@ -80,7 +80,8 @@ export class Material {
         return {
             lattice: this.Lattice.toJSON(),
             basis: this.Basis.toJSON(),
-            name: this.name || this.formula
+            name: this.name || this.formula,
+            isNonPeriodic: this.isNonPeriodic || false
         };
     }
 
@@ -101,7 +102,7 @@ export class Material {
 
     /**
      * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
-     * @param bool
+     * @param {Boolean} bool
      */
     set isNonPeriodic(bool) {this.setProp('isNonPeriodic', bool);}
 
@@ -150,10 +151,6 @@ export class Material {
         return this.prop('basis', undefined, true);
     }
 
-    set basis(config) {
-        this.setProp('basis', config);
-    }
-
     // returns the instance of {ConstrainedBasis} class
     get Basis() {
         return new ConstrainedBasis({
@@ -162,26 +159,12 @@ export class Material {
         });
     }
 
-    set Basis(config) {
-        const newConfig = {
-            elements: config.elements,
-            coordinates: config.coordinates,
-            units: config.units,
-            cell: config.cell,
-            isEmpty: false
-        };
-        return new ConstrainedBasis({
-                ...newConfig
-            }
-        );
-    }
-
     get lattice() {
         return this.prop('lattice', undefined, true);
     }
 
     set lattice(config) {
-        this.setProp('lattice', config);
+        return this.setProp('lattice', config);
     }
 
     // returns the instance of {Lattice} class
