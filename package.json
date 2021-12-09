@@ -63,6 +63,6 @@
     },
     "lint-staged": {
         "*.js": "eslint --cache --fix src tests",
-        "*.{js,css,md}": "prettier --write src tests"
+        "*.{js,css}": "prettier --write src tests"
     }
 }
