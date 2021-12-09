@@ -149,6 +149,13 @@ npm run lint:fix
 In which case, you may need to then add the linter edits to your staging, which in the example above, puts the
 file back to identical with upstream, resulting in no staged changes whatsoever.
 
+## Configuring WebStorm for use with Linter
+
+In order for the WebStorm IDE to take full advantage of the linting configuration, it can be configured in the project:
+
+- `Preferences -> Languages & Frameworks -> JavaScript -> Code Quality Tools -> ESLint`
+- Check `Automatic ESLint configuration` which should infer all the configurations from the project directory
+
 ## Links
 
 1. [Exabyte Source of Schemas and Examples (ESSE), Github Repository](https://github.com/exabyte-io/exabyte-esse)
