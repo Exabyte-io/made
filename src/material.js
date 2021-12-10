@@ -173,46 +173,44 @@ export class Material {
     }
 
     /**
-     * Calculates hash from basis and lattice. Algorithm expects the following:
+     * Calculates the hash for a material.
+     * If `isNonPeriodic` = false
+     * The hash is calculated from the basis and lattice. The algorithm expects the following:
      * - asserts lattice units to be angstrom
      * - asserts basis units to be crystal
      * - asserts basis coordinates and lattice measurements are rounded to hash precision
      * - forms strings for lattice and basis
      * - creates MD5 hash from basisStr + latticeStr + salt
+     *
+     * If `isNonPeriodic` = true
+     * The hash based on the `inchi` string for the material that is returned from getNonPeriodicHashMessage.
+     *
      * @param salt {String} Salt for hashing, empty string by default.
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
     calculateHash(salt = '', isScaled = false) {
-        const message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        let message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        if (this._json.isNonPeriodic) {
+            message = this.getNonPeriodicHashMessage() || message;
+        }
         return CryptoJS.MD5(message).toString();
     }
 
     /**
-     * Calculates the has inchi string and inchi key string
+     * Gets the `inchi` string from the derived properties and returns it as the message to use for
+     * generating the hash when `isNonPeriodic` = true.
+     * @returns String
      */
-    calculateNonPeriodicHash() {
-        const nonPeriodicMessage = this.getDerivedPropertiesInchiForHash();
-        return CryptoJS.MD5(nonPeriodicMessage).toString();
-    }
-
-    get hash() {
-        if (this._json.isNonPeriodic) {
-            return this.calculateNonPeriodicHash();
-        }
-        return this.calculateHash();
-    }
-
-    /**
-     * Returns the inchi value from the derived properties of the material.
-     * If the inchi value is undefined it returns undefined
-     */
-    getDerivedPropertiesInchiForHash() {
+    getNonPeriodicHashMessage() {
         const derivedProperties = this._json.derivedProperties;
         const inchi = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === "inchi") : null;
         if (inchi) {
             return inchi.value;
         }
-        return;
+    }
+
+    get hash() {
+        return this.calculateHash();
     }
 
     /**
