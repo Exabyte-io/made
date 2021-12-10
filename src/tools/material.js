@@ -1,4 +1,6 @@
+import math from "mathjs";
 import {Lattice} from "../lattice/lattice";
+import {ATOMIC_COORD_UNITS} from "../constants";
 
 /**
  * Scales one lattice vector for the given material
@@ -32,7 +34,25 @@ function scaleLatticeToMakeNonPeriodic(material) {
     });
 }
 
+/**
+ * Updates the basis of a material by translating the coordinates
+ * so that the center of the material and lattice are aligned.
+ * @param material {Material}
+ * */
+function getBasisConfigTranslatedToCenter(material) {
+    const originalUnits = material.Basis.units;
+    material.toCartesian();
+    const updatedBasis = material.Basis;
+    const centerOfCoordinates = updatedBasis.centerOfCoordinatesPoint;
+    const centerOfLattice = math.multiply(0.5, material.lattice.vectorArrays.reduce((a, b) => math.add(a, b)));
+    const translationVector = math.subtract(centerOfLattice, centerOfCoordinates);
+    updatedBasis.translateByVector(translationVector);
+    material.setBasis(updatedBasis.toJSON());
+    if (originalUnits !== ATOMIC_COORD_UNITS.cartesian) material.toCrystal();
+}
+
 export default {
     scaleOneLatticeVector,
     scaleLatticeToMakeNonPeriodic,
+    getBasisConfigTranslatedToCenter,
 }
