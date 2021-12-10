@@ -1,5 +1,6 @@
 import path from "path";
-import {readFile, readJSONFile} from "./utils";
+
+import { readFile, readJSONFile } from "./utils";
 
 export const TOLERANCE = 1e-3;
 
