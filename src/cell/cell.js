@@ -1,17 +1,16 @@
-import math from "../math";
 import constants from "../constants";
+import math from "../math";
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;
 const INV = math.inv;
-const MATRIX_MULT = (...args) => MULT(...args.map(x => MATRIX(x))).toArray();
+const MATRIX_MULT = (...args) => MULT(...args.map((x) => MATRIX(x))).toArray();
 
 /*
  * Cell represents a unit cell in geometrical form: 3x3 matrix where rows are cell vectors.
  * Example: [[1, 0, 0], [0, 1, 0], [0, 0, 1]].
  */
 export class Cell {
-
     tolerance = 1;
 
     /**
@@ -19,9 +18,7 @@ export class Cell {
      * @param nestedArray {Number[][]} is an array of cell vectors in cartesian Angstrom units.
      */
     constructor(nestedArray) {
-        this.vector1 = nestedArray[0];
-        this.vector2 = nestedArray[1];
-        this.vector3 = nestedArray[2];
+        [this.vector1, this.vector2, this.vector3] = nestedArray;
     }
 
     /**
@@ -33,13 +30,15 @@ export class Cell {
         return [
             this.vector1,
             this.vector2,
-            this.vector3
+            this.vector3,
             // assert that no near-zero artifacts are present (ie. 1.6 x 10^-16) before attempting inversion
             // @param tolerance {Number} Maximum tolerance to small numbers, used to avoid artifacts on matrix inversion
-        ].map(v => v.map(c => (math.abs(c) < constants.tolerance.lengthAngstrom) ? 0 : c));
+        ].map((v) => v.map((c) => (math.abs(c) < constants.tolerance.lengthAngstrom ? 0 : c)));
     }
 
-    clone() {return new this.constructor(this.vectorsAsArray)}
+    clone() {
+        return new this.constructor(this.vectorsAsArray);
+    }
 
     cloneAndScaleByMatrix(matrix) {
         const newCell = this.clone();
@@ -51,13 +50,17 @@ export class Cell {
      * Convert a point (in crystal coordinates) to cartesian.
      * @return {Array}
      */
-    convertPointToCartesian(point) {return MULT(point, this.vectorsAsArray)}
+    convertPointToCartesian(point) {
+        return MULT(point, this.vectorsAsArray);
+    }
 
     /**
      * Convert a point (in cartesian coordinates) to crystal (fractional).
      * @return {Array}
      */
-    convertPointToFractional(point) {return MULT(point, INV(this.vectorsAsArray))}
+    convertPointToFractional(point) {
+        return MULT(point, INV(this.vectorsAsArray));
+    }
 
     /**
      * Check whether a point is inside the cell.
@@ -66,7 +69,8 @@ export class Cell {
      * @return {Boolean}
      */
     isPointInsideCell(point, tolerance = constants.tolerance.length) {
-        return this.convertPointToFractional(point).map(c => math.isBetweenZeroInclusiveAndOne(c, tolerance))
+        return this.convertPointToFractional(point)
+            .map((c) => math.isBetweenZeroInclusiveAndOne(c, tolerance))
             .reduce((a, b) => a && b);
     }
 
@@ -76,8 +80,8 @@ export class Cell {
      * @return {Number}
      */
     getMostCollinearVectorIndex(testVector) {
-        const angles = this.vectorsAsArray.map(v => math.angleUpTo90(v, testVector));
-        return angles.findIndex(el => el === math.min(angles));
+        const angles = this.vectorsAsArray.map((v) => math.angleUpTo90(v, testVector));
+        return angles.findIndex((el) => el === math.min(angles));
     }
 
     /**
@@ -86,5 +90,4 @@ export class Cell {
     scaleByMatrix(matrix) {
         [this.vector1, this.vector2, this.vector3] = MATRIX_MULT(matrix, this.vectorsAsArray);
     }
-
 }
