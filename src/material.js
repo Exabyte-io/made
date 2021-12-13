@@ -206,7 +206,10 @@ export class Material {
     calculateHash(salt = '', isScaled = false) {
         const message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         if (this.prop('isNonPeriodic')) {
-            return this.getNonPeriodicHashMessage();
+            const nonPeriodicMessage = this.getNonPeriodicHashMessage();
+            if (nonPeriodicMessage) {
+                return nonPeriodicMessage
+            }
         }
         return CryptoJS.MD5(message).toString();
     }
@@ -219,10 +222,8 @@ export class Material {
     getNonPeriodicHashMessage() {
         const derivedProperties = this.prop('derivedProperties');
         const inchiKeyString = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === "inchi_key") : null;
-        if (inchiKeyString.value) {
+        if (inchiKeyString) {
             return inchiKeyString.value;
-        } else {
-            throw Error('Error: Cannot create Hash, InChI not found.')
         }
     }
 
