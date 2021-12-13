@@ -107,6 +107,21 @@ export class Material {
     set isNonPeriodic(bool) {this.setProp('isNonPeriodic', bool);}
 
     /**
+     * @summary Gets the array of derivedProperties for a material. Returns an empty array as the default value.
+     */
+    get derivedProperties() {
+        return this.prop('derivedProperties', []);
+    }
+
+    /**
+     * @summary Sets the derivedProperties array based on the array pass as an argument.
+     * @param {Array} derivedProperites
+     */
+    set derivedProperties(derivedProperites) {
+        this.setProp('derivedProperties', derivedProperites)
+    }
+
+    /**
      * Gets material's formula
      */
     get formula() {
@@ -189,9 +204,9 @@ export class Material {
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
     calculateHash(salt = '', isScaled = false) {
-        let message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
-        if (this._json.isNonPeriodic) {
-            message = this.getNonPeriodicHashMessage() || message;
+        const message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        if (this.prop('isNonPeriodic')) {
+            return this.getNonPeriodicHashMessage();
         }
         return CryptoJS.MD5(message).toString();
     }
@@ -202,10 +217,12 @@ export class Material {
      * @returns String
      */
     getNonPeriodicHashMessage() {
-        const derivedProperties = this._json.derivedProperties;
-        const inchi = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === "inchi") : null;
-        if (inchi) {
-            return inchi.value;
+        const derivedProperties = this.prop('derivedProperties');
+        const inchiKeyString = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === "inchi_key") : null;
+        if (inchiKeyString.value) {
+            return inchiKeyString.value;
+        } else {
+            throw Error('Error: Cannot create Hash, InChI not found.')
         }
     }
 
