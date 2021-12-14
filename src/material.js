@@ -197,12 +197,11 @@ export class Material {
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
     calculateHash(salt = '', isScaled = false) {
-        const message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        let message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         if (this.prop('isNonPeriodic')) {
             const nonPeriodicMessage = this.getNonPeriodicHashMessage();
             if (nonPeriodicMessage) {
-                this.hash = nonPeriodicMessage;
-                return nonPeriodicMessage;
+                message = nonPeriodicMessage;
             } else {
                 console.error("Non-Periodic hash could not be created. Missing InChI.");
             }
@@ -217,9 +216,9 @@ export class Material {
      */
     getNonPeriodicHashMessage() {
         const derivedProperties = this.prop('derivedProperties');
-        const inchiKeyString = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === "inchi_key") : null;
-        if (inchiKeyString) {
-            return inchiKeyString.value;
+        const inchiString = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === "inchi") : null;
+        if (inchiString) {
+            return inchiString.value;
         }
     }
 
