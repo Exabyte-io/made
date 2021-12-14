@@ -107,14 +107,6 @@ export class Material {
     set isNonPeriodic(bool) {this.setProp('isNonPeriodic', bool);}
 
     /**
-     * @summary Sets the derivedProperties array based on the array pass as an argument.
-     * @param {Array} derivedProperites
-     */
-    set derivedProperties(derivedProperites) {
-        this.setProp('derivedProperties', derivedProperites)
-    }
-
-    /**
      * Gets material's formula
      */
     get formula() {
