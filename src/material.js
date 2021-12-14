@@ -106,22 +106,6 @@ export class Material {
      */
     set isNonPeriodic(bool) {this.setProp('isNonPeriodic', bool);}
 
-    getDerivedPropertyByName(name) {
-        return this.getDerivedProperties().find(x => x.name === name);
-    }
-
-    static getDerivedPropertyByName(config, name) {
-        const derivedProperties = lodash.get(config, 'derivedProperties', []);
-        return lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === name) : null;
-    }
-
-    /**
-     * @summary Gets the array of derivedProperties for a material. Returns an empty array as the default value.
-     */
-    getDerivedProperties() {
-        return this.prop('derivedProperties', []);
-    }
-
     /**
      * @summary Sets the derivedProperties array based on the array pass as an argument.
      * @param {Array} derivedProperites
