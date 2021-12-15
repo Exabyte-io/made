@@ -218,8 +218,7 @@ export class Material {
      * @returns String
      */
     getNonPeriodicHashMessage() {
-        const derivedProperties = this.getDerivedProperties;
-        const inchiString = lodash.isArray(derivedProperties) ? this.getDerivedPropertyByName('inchi') : null;
+        const inchiString = this.getDerivedProperties() ? this.getDerivedPropertyByName('inchi') : null;
         if (inchiString) {
             return inchiString.value;
         } else {
