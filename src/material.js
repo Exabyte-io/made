@@ -172,6 +172,20 @@ export class Material {
         return new Lattice(this.lattice);
     }
 
+    // returns the derived properties array for a material
+    getderivedProperties() {
+        return this.prop('derivedProperties', []);
+    }
+
+    /**
+     * @summary Returns the a specific derived property of a material, as defined by name
+     * @param {String} name
+     * @returns {Object}
+     */
+    getDerivedPropertyByName(name) {
+        return this.getDerivedProperties().find(x => x.name === name);
+    }
+
     /**
      * Calculates the hash for a material.
      * If `isNonPeriodic` = false
@@ -189,14 +203,11 @@ export class Material {
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
     calculateHash(salt = '', isScaled = false) {
-        let message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
-        if (this.prop('isNonPeriodic')) {
-            const nonPeriodicMessage = this.getNonPeriodicHashMessage();
-            if (nonPeriodicMessage) {
-                message = nonPeriodicMessage;
-            } else {
-                console.error("Non-Periodic hash could not be created. Missing InChI.");
-            }
+        let message;
+        if (!this.isNonPeriodic) {
+            message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        } else {
+            message = this.getNonPeriodicHashMessage();
         }
         return CryptoJS.MD5(message).toString();
     }
@@ -207,10 +218,12 @@ export class Material {
      * @returns String
      */
     getNonPeriodicHashMessage() {
-        const derivedProperties = this.prop('derivedProperties');
-        const inchiString = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === "inchi") : null;
+        const derivedProperties = this.getDerivedProperties;
+        const inchiString = lodash.isArray(derivedProperties) ? this.getDerivedPropertyByName('inchi') : null;
         if (inchiString) {
             return inchiString.value;
+        } else {
+            console.error("Non-Periodic hash could not be created. Missing InChI.")
         }
     }
 
