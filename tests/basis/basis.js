@@ -1,7 +1,7 @@
 import {expect} from "chai";
 
 import {Basis} from "../../src/basis/basis";
-import {AsGeBasis, FeLiSiBasis, LiFeSiBasis, Na4Cl4, Na4Cl4Cartesian, C2H4, C2H4Translated} from "../enums";
+import {AsGeBasis, FeLiSiBasis, LiFeSiBasis, Na4Cl4, Na4Cl4Cartesian, C2H4, C2H4Translated, Na} from "../enums";
 import {assertDeepAlmostEqual} from "../utils";
 
 describe('Basis', function () {
@@ -161,6 +161,29 @@ describe('Basis', function () {
         const basis = new Basis(Na4Cl4Cartesian.basis);
         expect(basis.standardRepresentation).to.be.deep.almost.equal(Na4Cl4.basis);
     });
+
+    /**
+     * Minimum lattice size generated for a molecule with more than one atom.
+     * The minimumLatticeSize is the maximum pairwise distance between two atoms
+     * of the structure, C2H4 in this case.
+     */
+    it('should return minimum lattice size for a molecule', function() {
+        const basis = new Basis(C2H4.basis);
+        const minimumLatticeSize = 3.162;
+        const latticeSize = basis.getMinimumLatticeSize();
+        expect(latticeSize).to.be.equal(minimumLatticeSize);
+    })
+
+    /**
+     * Minimum lattice size generated for a structure made up of a single atom.
+     * The minimumLatticeSize is the atomic radii of the atom, Na in this case, in units of angstroms.
+     */
+    it('should return minimum lattice size for an atom', function() {
+        const basis = new Basis(Na.basis);
+        const minimumLatticeSize = 1.9;
+        const latticeSize = basis.getMinimumLatticeSize();
+        expect(latticeSize).to.be.equal(minimumLatticeSize);
+    })
 
     //** Pairwise Distance */
     it('should return max distance', function() {
