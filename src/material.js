@@ -66,7 +66,6 @@ export const defaultMaterialConfig = {
 export class Material {
     constructor(config) {
         this._json = lodash.cloneDeep(config || {});
-        this.setProp('isNonPeriodic', (config.tags || []).includes('non-periodic') || config.isNonPeriodic);
     }
 
     prop(name, defaultValue) {
@@ -223,8 +222,9 @@ export class Material {
         if (inchiString) {
             return inchiString.value;
         } else {
-            console.error("Non-Periodic hash could not be created. Missing InChI.")
+            throw new Error("Non-Periodic hash could not be created. Missing InChI.");
         }
+
     }
 
     /**
