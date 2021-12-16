@@ -66,6 +66,7 @@ export const defaultMaterialConfig = {
 export class Material {
     constructor(config) {
         this._json = lodash.cloneDeep(config || {});
+        this.setProp('isNonPeriodic', (config.tags || []).includes('non-periodic') || config.isNonPeriodic);
     }
 
     prop(name, defaultValue) {
@@ -226,13 +227,6 @@ export class Material {
         }
     }
 
-    get hash() {
-        return this.calculateHash();
-    }
-
-    set hash(hash) {
-        this.setProp('hash', hash)
-    }
     /**
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
