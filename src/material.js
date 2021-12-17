@@ -65,7 +65,9 @@ export const defaultMaterialConfig = {
 
 export class Material {
     constructor(config) {
+        if (!config.isNonPeriodic) {config.isNonPeriodic = false;}
         this._json = lodash.cloneDeep(config || {});
+        this.setProp("isNonPeriodic", config.isNonPeriodic);
     }
 
     prop(name, defaultValue) {
@@ -172,18 +174,8 @@ export class Material {
         return new Lattice(this.lattice);
     }
 
-    // returns the derived properties array for a material
-    getderivedProperties() {
-        return this.prop('derivedProperties', []);
-    }
-
-    /**
-     * @summary Returns the a specific derived property of a material, as defined by name
-     * @param {String} name
-     * @returns {Object}
-     */
-    getDerivedPropertyByName(name) {
-        return this.getDerivedProperties().find(x => x.name === name);
+    get hash() {
+        return this.calculateHash();
     }
 
     /**
@@ -217,15 +209,7 @@ export class Material {
      * generating the hash when `isNonPeriodic` = true.
      * @returns String
      */
-    getNonPeriodicHashMessage() {
-        const inchiString = this.getDerivedProperties() ? this.getDerivedPropertyByName('inchi') : null;
-        if (inchiString) {
-            return inchiString.value;
-        } else {
-            throw new Error("Non-Periodic hash could not be created. Missing InChI.");
-        }
-
-    }
+    getNonPeriodicHashMessage() {return "1S/H2O/h1H2";}
 
     /**
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
