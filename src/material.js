@@ -172,6 +172,23 @@ export class Material {
         return new Lattice(this.lattice);
     }
 
+    get isNonPeriodic() {
+        return this.prop('isNonPeriodic', false, true);
+    }
+
+    getDerivedPropertiesForHash() {
+        const derivedProperties = this._json.derivedProperties;
+        if (derivedProperties) {
+            const inchi = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === 'inchi') : null;
+            if (inchi) {
+                return inchi.value
+            } else {
+                throw new Error("Hash cannot be created. Missing InChI String")
+            }
+        }
+        return null
+    }
+
     /**
      * Calculates hash from basis and lattice. Algorithm expects the following:
      * - asserts lattice units to be angstrom
@@ -183,7 +200,13 @@ export class Material {
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
     calculateHash(salt = '', isScaled = false) {
-        const message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        let message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        if (this.isNonPeriodic) {
+            const inchiString = this.getDerivedPropertiesForHash();
+            if (inchiString) {
+                message = inchiString;
+            }
+        }
         return CryptoJS.MD5(message).toString();
     }
 
