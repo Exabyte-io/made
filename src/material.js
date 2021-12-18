@@ -172,10 +172,6 @@ export class Material {
         return new Lattice(this.lattice);
     }
 
-    get isNonPeriodic() {
-        return this.prop('isNonPeriodic', false, true);
-    }
-
     getDerivedPropertiesForHash() {
         const derivedProperties = this._json.derivedProperties;
         if (derivedProperties) {
