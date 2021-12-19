@@ -76,6 +76,7 @@ export class Material {
             lattice: this.Lattice.toJSON(),
             basis: this.Basis.toJSON(),
             name: this.name || this.formula,
+            isNonPeriodic: this.isNonPeriodic || false,
         };
     }
 
@@ -94,6 +95,14 @@ export class Material {
      */
     get isNonPeriodic() {
         return this.prop("isNonPeriodic", false, true);
+    }
+
+    /**
+     * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
+     * @param {Boolean} bool
+     */
+    set isNonPeriodic(bool) {
+        this.setProp("isNonPeriodic", bool);
     }
 
     /**

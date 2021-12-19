@@ -10,6 +10,12 @@ import { LatticeVectors } from "./lattice_vectors";
 import { LATTICE_TYPE, LATTICE_TYPE_CONFIGS, LATTICE_TYPE_EXTENDED } from "./types";
 import { UnitCell } from "./unit_cell";
 
+/**
+ * Scaling factor used to calculate the new lattice size for non-periodic systems.
+ * The scaling factor ensures that a non-periodic structure will have have a lattice greater than the structures size.
+ */
+export const nonPeriodicLatticeScalingFactor = 2.0;
+
 /*
  * Container class for crystal lattice and associated methods.
  * Follows Bravais convention for lattice types and contains lattice vectors within.
