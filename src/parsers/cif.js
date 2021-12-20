@@ -5,9 +5,8 @@
  */
 function parseMeta(txt) {
     const REGEX = {
-        ICSD_ID: /_database_code_ICSD\s+(\d+)/
+        ICSD_ID: /_database_code_ICSD\s+(\d+)/,
     };
-
     const meta = {};
     const groups = txt.match(REGEX.ICSD_ID);
 
@@ -19,5 +18,5 @@ function parseMeta(txt) {
 }
 
 export default {
-    parseMeta
+    parseMeta,
 };
