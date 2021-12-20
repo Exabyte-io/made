@@ -20,6 +20,175 @@ export const defaultMaterialConfig = {
         elements: [
             {
                 id: 1,
+                value: 'Zr'
+            },
+            {
+                id: 2,
+                value: 'Zr'
+            },
+            {
+                id: 3,
+                value: 'Zr'
+            },
+            {
+                id: 4,
+                value: 'Zr'
+            },
+            {
+                id: 5,
+                value: 'O'
+            },
+            {
+                id: 6,
+                value: 'O'
+            },
+            {
+                id: 7,
+                value: 'O'
+            },
+            {
+                id: 8,
+                value: 'O'
+            },
+            {
+                id: 9,
+                value: 'O'
+            },
+            {
+                id: 10,
+                value: 'O'
+            },
+            {
+                id: 11,
+                value: 'O'
+            },
+            {
+                id: 12,
+                value: 'O'
+            }
+        ],
+        coordinates: [
+            {
+                id: 1,
+                value: [
+                    0.00,
+                    0.00,
+                    0.00
+                ]
+            },
+            {
+                id: 2,
+                value: [
+                    0.50,
+                    0.50,
+                    0.00
+                ]
+            },
+            {
+                id: 3,
+                value: [
+                    0.50,
+                    0.00,
+                    0.50
+                ]
+            },
+            {
+                id: 4,
+                value: [
+                    0.00,
+                    0.50,
+                    0.50
+                ]
+            },
+            {
+                id: 5,
+                value: [
+                    0.25,
+                    0.25,
+                    0.25
+                ]
+            },
+            {
+                id: 6,
+                value: [
+                    0.75,
+                    0.75,
+                    0.75
+                ]
+            },
+            {
+                id: 7,
+                value: [
+                    0.25,
+                    0.25,
+                    0.75
+                ]
+            },
+            {
+                id: 8,
+                value: [
+                    0.75,
+                    0.75,
+                    0.25
+                ]
+            },
+            {
+                id: 9,
+                value: [
+                    0.75,
+                    0.25,
+                    0.75
+                ]
+            },
+            {
+                id: 10,
+                value: [
+                    0.25,
+                    0.75,
+                    0.25
+                ]
+            },
+            {
+                id: 11,
+                value: [
+                    0.75,
+                    0.25,
+                    0.25
+                ]
+            },
+            {
+                id: 12,
+                value: [
+                    0.25,
+                    0.75,
+                    0.75
+                ]
+            }
+        ],
+        units: ATOMIC_COORD_UNITS.crystal
+    },
+    lattice: {
+        type: LATTICE_TYPE.CUB,
+        a: 5.149966,
+        b: 5.149966,
+        c: 5.149966,
+        alpha: 90,
+        beta: 90,
+        gamma: 90,
+        units: {
+            length: units.angstrom,
+            angle: units.degree
+        }
+    }
+};
+
+/*
+export const defaultMaterialConfig = {
+    name: 'Silicon FCC',
+    basis: {
+        elements: [
+            {
+                id: 1,
                 value: 'Si'
             },
             {
@@ -62,6 +231,7 @@ export const defaultMaterialConfig = {
         }
     }
 };
+*/
 
 export class Material {
     constructor(config) {
