@@ -1,6 +1,6 @@
 {
     "name": "@exabyte-io/made.js",
-    "version": "2021.12.17-0",
+    "version": "2021.12.20-0",
     "description": "Materials Design in Javascript",
     "scripts": {
         "prepublishOnly": "rm -rf lib; npm run transpile",
