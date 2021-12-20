@@ -165,4 +165,3 @@ In order for the WebStorm IDE to take full advantage of the linting configuratio
 5. [Quantum ESPRESSO, Official Website](https://www.quantum-espresso.org/)
 6. [Mocha, Official Website](https://mochajs.org/)
 7. [Git LFS, Official Website](https://git-lfs.github.com/)
-
