@@ -191,14 +191,14 @@ export class Material {
         return new Lattice(this.lattice);
     }
 
-    getDerivedPropertiesForHash() {
+    getInchiStringForHash() {
         const derivedProperties = this.getDerivedProperties();
         if (derivedProperties.length > 0) {
-            const inchi = lodash.isArray(derivedProperties) ? this.getDerivedPropertyByName('inchi') : null;
+            const inchi = derivedProperties ? this.getDerivedPropertyByName('inchi') : null;
             if (inchi) {
                 return inchi.value
             } else {
-                throw new Error("Hash cannot be created. Missing InChI String")
+                throw new Error("Hash cannot be created. Missing InChI string in derivedProperties")
             }
         }
         return null
@@ -217,16 +217,29 @@ export class Material {
     calculateHash(salt = '', isScaled = false) {
         let message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         if (this.isNonPeriodic) {
-            const inchiString = this.getDerivedPropertiesForHash();
-            if (inchiString) {
-                message = inchiString;
+            const derivedProperties = this.getDerivedProperties();
+            if (derivedProperties) {
+                const inchiString = this.getInchiStringForHash();
+                if (inchiString) {
+                    message = inchiString;
+                }
+                else {
+                    throw new Error("Hash cannot be created. Missing InChI string");
+                }
             }
         }
         return CryptoJS.MD5(message).toString();
     }
 
+    set hash(hash) {
+        this.setProp('hash', hash);
+    }
+
     get hash() {
-        return this.calculateHash();
+        if (!this.prop('hash')) {
+            return this.calculateHash();
+        }
+        return this.prop('hash');
     }
 
     /**
