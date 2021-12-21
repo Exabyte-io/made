@@ -107,6 +107,23 @@ export class Material {
     set isNonPeriodic(bool) {this.setProp('isNonPeriodic', bool);}
 
     /**
+     * @summary Returns the specific derived property (as specified by name) for a material.
+     * @param {String} name
+     * @returns {Object}
+     */
+    getDerivedPropertyByName(name) {
+        return this.getDerivedProperties().find(x => x.name === name);
+    }
+
+    /**
+     * @summary Returns the derived properties array for a material.
+     * @returns {Array}
+     */
+    getDerivedProperties() {
+        return this.prop('derivedProperties', []);
+    }
+
+    /**
      * Gets material's formula
      */
     get formula() {
@@ -173,9 +190,9 @@ export class Material {
     }
 
     getDerivedPropertiesForHash() {
-        const derivedProperties = this._json.derivedProperties;
-        if (derivedProperties) {
-            const inchi = lodash.isArray(derivedProperties) ? derivedProperties.find(x => x.name === 'inchi') : null;
+        const derivedProperties = this.getDerivedProperties();
+        if (derivedProperties.length > 0) {
+            const inchi = lodash.isArray(derivedProperties) ? this.getDerivedPropertyByName('inchi') : null;
             if (inchi) {
                 return inchi.value
             } else {
