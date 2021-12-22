@@ -217,15 +217,12 @@ export class Material {
     calculateHash(salt = '', isScaled = false) {
         let message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         if (this.isNonPeriodic) {
-            const derivedProperties = this.getDerivedProperties();
-            if (derivedProperties) {
-                const inchiString = this.getInchiStringForHash();
-                if (inchiString) {
-                    message = inchiString;
-                }
-                else {
-                    throw new Error("Hash cannot be created. Missing InChI string");
-                }
+            const inchiString = this.getInchiStringForHash();
+            if (inchiString) {
+                message = inchiString;
+            }
+            else {
+                throw new Error("Hash cannot be created. Missing InChI string");
             }
         }
         return CryptoJS.MD5(message).toString();
@@ -236,9 +233,6 @@ export class Material {
     }
 
     get hash() {
-        if (!this.prop('hash')) {
-            return this.calculateHash();
-        }
         return this.prop('hash');
     }
 
