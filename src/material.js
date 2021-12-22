@@ -106,6 +106,23 @@ export class Material {
     }
 
     /**
+     * @summary Returns the specific derived property (as specified by name) for a material.
+     * @param {String} name
+     * @returns {Object}
+     */
+    getDerivedPropertyByName(name) {
+        return this.getDerivedProperties().find(x => x.name === name);
+    }
+
+    /**
+     * @summary Returns the derived properties array for a material.
+     * @returns {Array}
+     */
+    getDerivedProperties() {
+        return this.prop('derivedProperties', []);
+    }
+
+    /**
      * Gets material's formula
      */
     get formula() {
@@ -175,6 +192,20 @@ export class Material {
     }
 
     /**
+     * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
+     *  inchi cannot be found.
+     *  @returns {String}
+     */
+    getInchiStringForHash() {
+        const inchi = this.getDerivedPropertyByName('inchi');
+        if (inchi) {
+            return inchi.value
+        } else {
+            throw new Error("Hash cannot be created. Missing InChI string in derivedProperties")
+        }
+    }
+
+    /**
      * Calculates hash from basis and lattice. Algorithm expects the following:
      * - asserts lattice units to be angstrom
      * - asserts basis units to be crystal
@@ -184,13 +215,22 @@ export class Material {
      * @param salt {String} Salt for hashing, empty string by default.
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
-    calculateHash(salt = "", isScaled = false) {
-        const message = `${this.Basis.hashString}#${this.Lattice.getHashString(isScaled)}#${salt}`;
+    calculateHash(salt = '', isScaled = false) {
+        let message;
+        if (!this.isNonPeriodic) {
+            message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        } else {
+            message = this.getInchiStringForHash();
+        }
         return CryptoJS.MD5(message).toString();
     }
 
+    set hash(hash) {
+        this.setProp('hash', hash);
+    }
+
     get hash() {
-        return this.calculateHash();
+        return this.prop('hash');
     }
 
     /**
