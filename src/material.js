@@ -77,10 +77,15 @@ export class Material {
             basis: this.Basis.toJSON(),
             name: this.name || this.formula,
             isNonPeriodic: this.isNonPeriodic || false,
+            hash: this.hash,
         };
     }
 
     clone(extraContext) {
+        const resetHash = extraContext ? ("resetHash" in extraContext) : false;
+        if (resetHash) {
+            this.setProp('hash', '');
+        }
         return new this.constructor({ ...this.toJSON(), ...extraContext });
     }
 
@@ -191,17 +196,18 @@ export class Material {
         return new Lattice(this.lattice);
     }
 
+    /**
+     * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
+     *  inchi cannot be found.
+     *  @returns {String}
+     */
     getInchiStringForHash() {
-        const derivedProperties = this.getDerivedProperties();
-        if (derivedProperties.length > 0) {
-            const inchi = derivedProperties ? this.getDerivedPropertyByName('inchi') : null;
-            if (inchi) {
-                return inchi.value
-            } else {
-                throw new Error("Hash cannot be created. Missing InChI string in derivedProperties")
-            }
+        const inchi = this.getDerivedPropertyByName('inchi');
+        if (inchi) {
+            return inchi.value
+        } else {
+            throw new Error("Hash cannot be created. Missing InChI string in derivedProperties")
         }
-        return null
     }
 
     /**
@@ -215,15 +221,11 @@ export class Material {
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
     calculateHash(salt = '', isScaled = false) {
-        let message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
-        if (this.isNonPeriodic) {
-            const inchiString = this.getInchiStringForHash();
-            if (inchiString) {
-                message = inchiString;
-            }
-            else {
-                throw new Error("Hash cannot be created. Missing InChI string");
-            }
+        let message;
+        if (!this.isNonPeriodic) {
+            message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+        } else {
+            message = this.getInchiStringForHash();
         }
         return CryptoJS.MD5(message).toString();
     }
