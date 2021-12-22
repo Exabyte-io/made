@@ -77,15 +77,10 @@ export class Material {
             basis: this.Basis.toJSON(),
             name: this.name || this.formula,
             isNonPeriodic: this.isNonPeriodic || false,
-            hash: this.hash,
         };
     }
 
     clone(extraContext) {
-        const resetHash = extraContext ? ("resetHash" in extraContext) : false;
-        if (resetHash) {
-            this.setProp('hash', '');
-        }
         return new this.constructor({ ...this.toJSON(), ...extraContext });
     }
 
