@@ -15,7 +15,6 @@ function scaleOneLatticeVector(material, key = "a", factor = 1.0) {
 
     const { lattice } = material;
     lattice[key] *= factor;
-
     material.lattice = lattice;
 
     material.toCrystal();

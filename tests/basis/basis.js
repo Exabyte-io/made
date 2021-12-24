@@ -214,7 +214,7 @@ describe("Basis", () => {
     //* * Translation by Vector */
     it("should return the updated basis coordinates", () => {
         const basis = new Basis(C2H4.basis);
-        const translationVector = [1.6917, 1.9667, 2];
+        const translationVector = [2.512547, 2.887517, 2.754177];
         basis.translateByVector(translationVector);
         assertDeepAlmostEqual(basis.coordinates, C2H4Translated.basis.coordinates);
     });
