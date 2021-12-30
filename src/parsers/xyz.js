@@ -1,3 +1,4 @@
+import Integer from "lodash/string";
 import _ from "underscore";
 import s from "underscore.string";
 
@@ -140,10 +141,25 @@ function fromMaterial(materialOrConfig, fractional = false) {
     return fromBasis(basis, "%11.6f");
 }
 
+export function atomsCount(xyzFile) {
+    const xyzArray = xyzFile.split(/\r?\n/);
+    return Integer.parseInt(xyzArray[0]);
+}
+
+export function linesCount(xyzFile) {
+    const content = xyzFile.split(/\r?\n/);
+    if (!content[-1]) {
+        content.pop();
+    }
+    return content.length;
+}
+
 export default {
     validate,
     fromMaterial,
     toBasisConfig,
     fromBasis,
     CombinatorialBasis,
+    atomsCount,
+    linesCount,
 };
