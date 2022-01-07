@@ -6,15 +6,6 @@ import poscar from "./poscar";
 import xyz from "./xyz";
 
 /**
- * Function splits the contents of a string at each newline and returns the resulting array.
- * @param fileString
- * @returns {Array}
- */
-export function getFileStringAsArray(fileString) {
-    return fileString.split(/\r?\n/);
-}
-
-/**
  * Function returns the number of atoms in a file using the proper parser function based on the file extension.
  * @param {String} fileExtension
  * @param {String} fileContent
@@ -36,6 +27,5 @@ export default {
     poscar,
     cif,
     espresso,
-    getFileStringAsArray,
     getNumberOfAtomsInFileByExtension,
 };
