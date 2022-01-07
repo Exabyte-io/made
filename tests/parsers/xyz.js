@@ -1,8 +1,8 @@
 import { expect } from "chai";
 
 import parsers from "../../src/parsers/parsers";
-import { atomsCount, linesCount } from "../../src/parsers/xyz";
-import { CH4, Si } from "../enums";
+import { atomsCount, xyzToPoscar } from "../../src/parsers/xyz";
+import { CH4, CH4POSCAR, Si } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Parsers:XYZ", () => {
@@ -17,7 +17,7 @@ describe("Parsers:XYZ", () => {
     it("should return the number of atoms for a molecule in an xyz file", () => {
         expect(atomsCount(CH4)).to.be.equal(5);
     });
-    it("should return the number of lines in an xyz file", () => {
-        expect(linesCount(CH4)).to.be.equal(7);
+    it("should return the xyz file content in poscar file format", () => {
+        assertDeepAlmostEqual(xyzToPoscar(CH4), CH4POSCAR);
     });
 });

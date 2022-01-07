@@ -33,3 +33,4 @@ export const Zr1H23Zr1H1Poscar = readFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.p
 export const H2O = readFile(path.join(FIXTURES_DIR, "H2O.poscar"));
 
 export const CH4 = readFile(path.join(FIXTURES_DIR, "CH4.xyz"));
+export const CH4POSCAR = readFile(path.join(FIXTURES_DIR, "CH4.poscar"));
