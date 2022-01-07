@@ -20,13 +20,13 @@ export function getFileStringAsArray(fileString) {
  * @param {String} fileContent
  * @returns {Number}
  */
-export function getAtomsInFileByExtension(fileExtension, fileContent) {
+export function getNumberOfAtomsInFileByExtension(fileExtension, fileContent) {
     let numberOfAtoms = 0;
     if (fileExtension === "poscar") {
-        numberOfAtoms = poscar.atomsCount(fileContent);
+        numberOfAtoms = poscar.poscarFileAtomsCount(fileContent);
     }
     if (fileExtension === "xyz") {
-        numberOfAtoms = xyz.atomsCount(fileContent);
+        numberOfAtoms = xyz.xyzFileAtomsCount(fileContent);
     }
     return numberOfAtoms;
 }
@@ -37,5 +37,5 @@ export default {
     cif,
     espresso,
     getFileStringAsArray,
-    getAtomsInFileByExtension,
+    getNumberOfAtomsInFileByExtension,
 };

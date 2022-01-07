@@ -150,9 +150,8 @@ function fromMaterial(materialOrConfig, fractional = false) {
  * @param {String} xyzFile
  * @returns {Number}
  */
-export function atomsCount(xyzFile) {
-    const xyzArray = xyzFile.split(/\r?\n/);
-    return Integer.parseInt(xyzArray[0]);
+export function xyzFileAtomsCount(xyzFile) {
+    return Integer.parseInt(xyzFile.split(/\r?\n/)[0]);
 }
 
 /**
@@ -176,6 +175,6 @@ export default {
     toBasisConfig,
     fromBasis,
     CombinatorialBasis,
-    atomsCount,
+    xyzFileAtomsCount,
     xyzToPoscar,
 };
