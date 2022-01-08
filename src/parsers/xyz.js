@@ -1,15 +1,11 @@
-import Integer from "lodash/string";
 import _ from "underscore";
 import s from "underscore.string";
 
 import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Lattice } from "../lattice/lattice";
-// eslint-disable-next-line import/no-cycle
-import { defaultMaterialConfig } from "../material";
 import math from "../math";
 import { InvalidLineError } from "./errors";
-import poscar from "./poscar";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
@@ -150,23 +146,8 @@ function fromMaterial(materialOrConfig, fractional = false) {
  * @param {String} xyzFile
  * @returns {Number}
  */
-export function xyzFileAtomsCount(xyzFile) {
-    return Integer.parseInt(xyzFile.split(/\r?\n/)[0]);
-}
-
-/**
- * Function converts an XYZ formatted structure as a POSCAR formatted structure
- * @param {String} xyzContent
- * @returns {String}
- */
-export function xyzToPoscar(xyzContent) {
-    const xyzConfig = defaultMaterialConfig;
-    const xyzArray = xyzContent.split(/\r?\n/);
-    const xyzArrayBasisOnly = xyzArray.slice(2, -1);
-    const xyzBasis = xyzArrayBasisOnly.join("\n");
-    xyzConfig.basis = toBasisConfig(xyzBasis);
-    xyzConfig.basis.units = "cartesian";
-    return poscar.toPoscar(xyzConfig);
+export function getAtomsCount(xyzFile) {
+    return parseInt(xyzFile.split(/\r?\n/)[0], 10);
 }
 
 export default {
@@ -175,6 +156,5 @@ export default {
     toBasisConfig,
     fromBasis,
     CombinatorialBasis,
-    xyzFileAtomsCount,
-    xyzToPoscar,
+    getAtomsCount,
 };

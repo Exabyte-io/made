@@ -1,8 +1,8 @@
-import cif from "./cif";
 // eslint-disable-next-line import/no-cycle
+import { defaultMaterialConfig } from "../material";
+import cif from "./cif";
 import espresso from "./espresso";
 import poscar from "./poscar";
-// eslint-disable-next-line import/no-cycle
 import xyz from "./xyz";
 
 /**
@@ -14,12 +14,27 @@ import xyz from "./xyz";
 export function getNumberOfAtomsInFileByExtension(fileExtension, fileContent) {
     let numberOfAtoms = 0;
     if (fileExtension === "poscar") {
-        numberOfAtoms = poscar.poscarFileAtomsCount(fileContent);
+        numberOfAtoms = poscar.getAtomsCount(fileContent);
     }
     if (fileExtension === "xyz") {
-        numberOfAtoms = xyz.xyzFileAtomsCount(fileContent);
+        numberOfAtoms = xyz.getAtomsCount(fileContent);
     }
     return numberOfAtoms;
+}
+
+/**
+ * Function converts an XYZ formatted structure as a POSCAR formatted structure
+ * @param {String} xyzContent
+ * @returns {String}
+ */
+export function xyzToPoscar(xyzContent) {
+    const xyzConfig = defaultMaterialConfig;
+    const xyzArray = xyzContent.split(/\r?\n/);
+    const xyzArrayBasisOnly = xyzArray.slice(2, -1);
+    const xyzBasis = xyzArrayBasisOnly.join("\n");
+    xyzConfig.basis = xyz.toBasisConfig(xyzBasis);
+    xyzConfig.basis.units = "cartesian";
+    return poscar.toPoscar(xyzConfig);
 }
 
 export default {
@@ -28,4 +43,5 @@ export default {
     cif,
     espresso,
     getNumberOfAtomsInFileByExtension,
+    xyzToPoscar,
 };
