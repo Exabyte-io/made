@@ -140,10 +140,21 @@ function fromMaterial(materialOrConfig, fractional = false) {
     return fromBasis(basis, "%11.6f");
 }
 
+/**
+ * Function splits the xyzFile string at new lines and then returns the first element of the array.
+ * The first line of the XYZ file should contain the number of atoms in the structure.
+ * @param {String} xyzFile
+ * @returns {Number}
+ */
+export function getAtomsCount(xyzFile) {
+    return parseInt(xyzFile.split(/\r?\n/)[0], 10);
+}
+
 export default {
     validate,
     fromMaterial,
     toBasisConfig,
     fromBasis,
     CombinatorialBasis,
+    getAtomsCount,
 };

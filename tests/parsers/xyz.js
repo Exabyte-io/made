@@ -1,5 +1,8 @@
+import { expect } from "chai";
+
 import parsers from "../../src/parsers/parsers";
-import { Si } from "../enums";
+import { getAtomsCount } from "../../src/parsers/xyz";
+import { CH4, Si } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Parsers:XYZ", () => {
@@ -10,5 +13,8 @@ describe("Parsers:XYZ", () => {
             "cell",
             "units",
         ]);
+    });
+    it("should return the number of atoms for a molecule in an xyz file", () => {
+        expect(getAtomsCount(CH4)).to.be.equal(5);
     });
 });

@@ -58,7 +58,7 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
  * @param poscarFileContent
  * @returns {Number}
  */
-export function atomsCount(poscarFileContent) {
+export function getAtomsCount(poscarFileContent) {
     const atomsLine = poscarFileContent.split("\n")[6].split(" ");
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
@@ -66,5 +66,5 @@ export function atomsCount(poscarFileContent) {
 export default {
     toPoscar,
     atomicConstraintsCharFromBool,
-    atomsCount,
+    getAtomsCount,
 };

@@ -7,52 +7,9 @@ import {
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
     PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS,
 } from "./cell/conventional_cell";
-import { ATOMIC_COORD_UNITS, units } from "./constants";
 import { Lattice } from "./lattice/lattice";
-import { LATTICE_TYPE } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
-
-export const defaultMaterialConfig = {
-    name: "Silicon FCC",
-    basis: {
-        elements: [
-            {
-                id: 1,
-                value: "Si",
-            },
-            {
-                id: 2,
-                value: "Si",
-            },
-        ],
-        coordinates: [
-            {
-                id: 1,
-                value: [0.0, 0.0, 0.0],
-            },
-            {
-                id: 2,
-                value: [0.25, 0.25, 0.25],
-            },
-        ],
-        units: ATOMIC_COORD_UNITS.crystal,
-    },
-    lattice: {
-        // Primitive cell for Diamond FCC Silicon at ambient conditions
-        type: LATTICE_TYPE.FCC,
-        a: 3.867,
-        b: 3.867,
-        c: 3.867,
-        alpha: 60,
-        beta: 60,
-        gamma: 60,
-        units: {
-            length: units.angstrom,
-            angle: units.degree,
-        },
-    },
-};
 
 export class Material {
     constructor(config) {
@@ -111,7 +68,7 @@ export class Material {
      * @returns {Object}
      */
     getDerivedPropertyByName(name) {
-        return this.getDerivedProperties().find(x => x.name === name);
+        return this.getDerivedProperties().find((x) => x.name === name);
     }
 
     /**
@@ -119,7 +76,7 @@ export class Material {
      * @returns {Array}
      */
     getDerivedProperties() {
-        return this.prop('derivedProperties', []);
+        return this.prop("derivedProperties", []);
     }
 
     /**
@@ -197,12 +154,11 @@ export class Material {
      *  @returns {String}
      */
     getInchiStringForHash() {
-        const inchi = this.getDerivedPropertyByName('inchi');
+        const inchi = this.getDerivedPropertyByName("inchi");
         if (inchi) {
-            return inchi.value
-        } else {
-            throw new Error("Hash cannot be created. Missing InChI string in derivedProperties")
+            return inchi.value;
         }
+        throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
     }
 
     /**
@@ -215,10 +171,11 @@ export class Material {
      * @param salt {String} Salt for hashing, empty string by default.
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
-    calculateHash(salt = '', isScaled = false) {
+    calculateHash(salt = "", isScaled = false) {
         let message;
         if (!this.isNonPeriodic) {
-            message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+            message =
+                this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         } else {
             message = this.getInchiStringForHash();
         }
@@ -226,11 +183,11 @@ export class Material {
     }
 
     set hash(hash) {
-        this.setProp('hash', hash);
+        this.setProp("hash", hash);
     }
 
     get hash() {
-        return this.prop('hash');
+        return this.prop("hash");
     }
 
     /**
