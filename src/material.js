@@ -237,7 +237,11 @@ export class Material {
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
     get scaledHash() {
-        return this.calculateHash("", true);
+        return this.prop('scaledHash')
+    }
+
+    set scaledHash(scaledHash) {
+        this.setProp('scaledHash', scaledHash)
     }
 
     /**
