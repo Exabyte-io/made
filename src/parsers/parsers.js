@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-cycle
-import { defaultMaterialConfig } from "../material";
+import { defaultMaterialConfig } from "../default_material";
 import cif from "./cif";
 import espresso from "./espresso";
 import poscar from "./poscar";
