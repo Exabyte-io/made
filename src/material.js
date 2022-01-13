@@ -225,6 +225,17 @@ export class Material {
         return CryptoJS.MD5(message).toString();
     }
 
+    /**
+     * Function calculates the scaledHash for a material by calling the calculateHash function and passing it the proper
+     * salt String and isScaled Boolean value.
+     * @param {String} salt
+     * @param {Boolean} isScaled
+     * returns {String}
+     */
+    calculateScaledHash(salt = "", isScaled = true) {
+        return this.calculateHash(salt, isScaled);
+    }
+
     set hash(hash) {
         this.setProp("hash", hash);
     }
