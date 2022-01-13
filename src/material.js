@@ -111,7 +111,7 @@ export class Material {
      * @returns {Object}
      */
     getDerivedPropertyByName(name) {
-        return this.getDerivedProperties().find(x => x.name === name);
+        return this.getDerivedProperties().find((x) => x.name === name);
     }
 
     /**
@@ -119,7 +119,7 @@ export class Material {
      * @returns {Array}
      */
     getDerivedProperties() {
-        return this.prop('derivedProperties', []);
+        return this.prop("derivedProperties", []);
     }
 
     /**
@@ -197,12 +197,11 @@ export class Material {
      *  @returns {String}
      */
     getInchiStringForHash() {
-        const inchi = this.getDerivedPropertyByName('inchi');
+        const inchi = this.getDerivedPropertyByName("inchi");
         if (inchi) {
-            return inchi.value
-        } else {
-            throw new Error("Hash cannot be created. Missing InChI string in derivedProperties")
+            return inchi.value;
         }
+        throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
     }
 
     /**
@@ -215,10 +214,11 @@ export class Material {
      * @param salt {String} Salt for hashing, empty string by default.
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
-    calculateHash(salt = '', isScaled = false) {
+    calculateHash(salt = "", isScaled = false) {
         let message;
         if (!this.isNonPeriodic) {
-            message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+            message =
+                this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         } else {
             message = this.getInchiStringForHash();
         }
@@ -226,22 +226,22 @@ export class Material {
     }
 
     set hash(hash) {
-        this.setProp('hash', hash);
+        this.setProp("hash", hash);
     }
 
     get hash() {
-        return this.prop('hash');
+        return this.prop("hash");
     }
 
     /**
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
     get scaledHash() {
-        return this.prop('scaledHash')
+        return this.prop("scaledHash");
     }
 
     set scaledHash(scaledHash) {
-        this.setProp('scaledHash', scaledHash)
+        this.setProp("scaledHash", scaledHash);
     }
 
     /**
