@@ -234,7 +234,8 @@ export class Material {
      */
     get chemicalHash() {
         if (this.isNonPeriodic) {
-            return this.getInchiStringForHash();
+            const message = this.getInchiStringForHash();
+            return CryptoJS.MD5(message).toString();
         }
         return "";
     }
