@@ -226,33 +226,10 @@ export class Material {
     }
 
     /**
-     * Function calculates the scaledHash for a material by calling the calculateHash function and passing it the proper
-     * salt String and isScaled Boolean value.
-     * @param {String} salt
-     * @param {Boolean} isScaled
-     * returns {String}
-     */
-    calculateScaledHash(salt = "", isScaled = true) {
-        return this.calculateHash(salt, isScaled);
-    }
-
-    set hash(hash) {
-        this.setProp("hash", hash);
-    }
-
-    get hash() {
-        return this.prop("hash");
-    }
-
-    /**
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
     get scaledHash() {
-        return this.prop("scaledHash");
-    }
-
-    set scaledHash(scaledHash) {
-        this.setProp("scaledHash", scaledHash);
+        return this.calculateHash("", true);
     }
 
     /**
