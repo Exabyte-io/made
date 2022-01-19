@@ -215,13 +215,8 @@ export class Material {
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
     calculateHash(salt = "", isScaled = false) {
-        let message;
-        if (!this.isNonPeriodic) {
-            message =
-                this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
-        } else {
-            message = this.getInchiStringForHash();
-        }
+        const message =
+            this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         return CryptoJS.MD5(message).toString();
     }
 
@@ -230,6 +225,18 @@ export class Material {
      */
     get scaledHash() {
         return this.calculateHash("", true);
+    }
+
+    /**
+     * Calculates the chemicalHash for a non-periodic material. The chemical hash is based on the inchi string for the material.
+     * If the material is periodic, then an empty string is returned, as inchi strings do not apply to periodic materials.
+     * @returns {String}
+     */
+    get chemicalHash() {
+        if (this.isNonPeriodic) {
+            return this.getInchiStringForHash();
+        }
+        return "";
     }
 
     /**
