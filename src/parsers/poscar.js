@@ -63,8 +63,17 @@ export function atomsCount(poscarFileContent) {
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
 
+export function materialNameFromFileContents(name, fileContent) {
+    const materialNameFromFile = fileContent.split(/\r?\n/)[0];
+    if (name === materialNameFromFile || !materialNameFromFile) {
+        return name;
+    }
+    return materialNameFromFile;
+}
+
 export default {
     toPoscar,
     atomicConstraintsCharFromBool,
     atomsCount,
+    materialNameFromFileContents,
 };
