@@ -63,6 +63,13 @@ export function atomsCount(poscarFileContent) {
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
 
+/**
+ * Function returns the string on the first line of POSCAR file content. Generally the first line contains text
+ * containing the name of the structure.
+ * @param {String} name
+ * @param {String} fileContent
+ * @returns {String}
+ */
 export function materialNameFromFileContents(name, fileContent) {
     const materialNameFromFile = fileContent.split(/\r?\n/)[0];
     if (name === materialNameFromFile || !materialNameFromFile) {

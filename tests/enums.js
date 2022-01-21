@@ -32,3 +32,4 @@ export const Zr1H23Zr1H1 = readJSONFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.jso
 export const Zr1H23Zr1H1Poscar = readFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.poscar"));
 export const H2O = readFile(path.join(FIXTURES_DIR, "H2O.poscar"));
 export const GenericPoscar = readFile(path.join(FIXTURES_DIR, "POSCAR.poscar"));
+export const GenericXYZ = readFile(path.join(FIXTURES_DIR, "Structure.xyz"));

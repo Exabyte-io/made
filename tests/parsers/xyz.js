@@ -1,5 +1,8 @@
+import { expect } from "chai";
+
 import parsers from "../../src/parsers/parsers";
-import { Si } from "../enums";
+import { materialNameFromFileContents } from "../../src/parsers/xyz";
+import { GenericXYZ, Si } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Parsers:XYZ", () => {
@@ -10,5 +13,10 @@ describe("Parsers:XYZ", () => {
             "cell",
             "units",
         ]);
+    });
+    it("should return the material name based on the xyz file contents", () => {
+        const name = "test.xyz";
+        const fileContents = GenericXYZ;
+        expect(materialNameFromFileContents(name, fileContents)).to.be.equal("Methane");
     });
 });

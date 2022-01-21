@@ -140,10 +140,26 @@ function fromMaterial(materialOrConfig, fractional = false) {
     return fromBasis(basis, "%11.6f");
 }
 
+/**
+ * Function returns the string on the second line of XYZ file content. Generally the second line contains text
+ * containing the name of the structure.
+ * @param {String} name
+ * @param {String} fileContent
+ * @returns {String}
+ */
+export function materialNameFromFileContents(name, fileContent) {
+    const materialNameFromFile = fileContent.split(/\r?\n/)[1];
+    if (name === materialNameFromFile || !materialNameFromFile) {
+        return name;
+    }
+    return materialNameFromFile;
+}
+
 export default {
     validate,
     fromMaterial,
     toBasisConfig,
     fromBasis,
     CombinatorialBasis,
+    materialNameFromFileContents,
 };
