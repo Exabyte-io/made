@@ -1,7 +1,7 @@
 import _ from "underscore";
 import s from "underscore.string";
 
-import { Basis } from "../basis/basis";
+import { Basis, maximumNumberOfAtomsLimit } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
@@ -31,6 +31,18 @@ function validateLine(xyzLine, index) {
             throw new Error(`Coordinates should be a number. Possible error in ${i} coordinate`);
         }
     });
+}
+
+/**
+ * Function checks the number of atoms listed in the BasisText editor.
+ *
+ * @param {String} xyzTxt
+ * @return {Boolean}
+ */
+export function validateNumberOfAtoms(xyzTxt) {
+    const xyzArray = xyzTxt.split(/\r?\n/);
+    const nAtoms = xyzArray.length;
+    return nAtoms <= maximumNumberOfAtomsLimit;
 }
 
 /**

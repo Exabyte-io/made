@@ -1,5 +1,5 @@
 import { ArrayWithIds } from "./abstract/array_with_ids";
-import { Basis } from "./basis/basis";
+import { Basis, maximumNumberOfAtomsLimit } from "./basis/basis";
 import { ATOMIC_COORD_UNITS, coefficients, tolerance, units } from "./constants";
 import { AtomicConstraints } from "./constraints/constraints";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "./lattice/lattice";
@@ -23,6 +23,7 @@ export const Made = {
     nonPeriodicLatticeScalingFactor,
     ReciprocalLattice,
     Basis,
+    maximumNumberOfAtomsLimit,
     AtomicConstraints,
 
     parsers,

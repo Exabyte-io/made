@@ -31,3 +31,6 @@ export const SiPWSCFInput = readFile(path.join(FIXTURES_DIR, "Si-pwscf.in"));
 export const Zr1H23Zr1H1 = readJSONFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.json"));
 export const Zr1H23Zr1H1Poscar = readFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.poscar"));
 export const H2O = readFile(path.join(FIXTURES_DIR, "H2O.poscar"));
+
+export const smallBasis = readFile(path.join(FIXTURES_DIR, "smallBasis.txt"));
+export const largeBasis = readFile(path.join(FIXTURES_DIR, "largeBasis.txt"));
