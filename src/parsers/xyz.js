@@ -158,4 +158,5 @@ export default {
     toBasisConfig,
     fromBasis,
     CombinatorialBasis,
+    validateNumberOfAtoms,
 };
