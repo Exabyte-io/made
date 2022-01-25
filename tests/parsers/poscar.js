@@ -1,7 +1,7 @@
 import { expect } from "chai";
 
 import { Material } from "../../src/material";
-import { atomsCount, materialNameFromFileContents } from "../../src/parsers/poscar";
+import { atomsCount, getNameFromContents } from "../../src/parsers/poscar";
 import { GenericPoscar, H2O, Na4Cl4, Na4Cl4Poscar, Zr1H23Zr1H1, Zr1H23Zr1H1Poscar } from "../enums";
 
 describe("Parsers.POSCAR", () => {
@@ -19,8 +19,7 @@ describe("Parsers.POSCAR", () => {
         expect(atomsCount(H2O)).to.be.equal(3);
     });
     it("should return the material name based on the poscar file contents", () => {
-        const name = "POSCAR.poscar";
         const fileContents = GenericPoscar;
-        expect(materialNameFromFileContents(name, fileContents)).to.be.equal("H2S");
+        expect(getNameFromContents(fileContents)).to.be.equal("H2S");
     });
 });

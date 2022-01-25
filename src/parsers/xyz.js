@@ -6,6 +6,7 @@ import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
 import { InvalidLineError } from "./errors";
+import { getLineFromContent } from "./utils";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
@@ -143,16 +144,14 @@ function fromMaterial(materialOrConfig, fractional = false) {
 /**
  * Function returns the string on the second line of XYZ file content. Generally the second line contains text
  * containing the name of the structure.
- * @param {String} name
  * @param {String} fileContent
+ * @param {String} failoverName
  * @returns {String}
  */
-export function materialNameFromFileContents(name, fileContent) {
-    const materialNameFromFile = fileContent.split(/\r?\n/)[1];
-    if (name === materialNameFromFile || !materialNameFromFile) {
-        return name;
-    }
-    return materialNameFromFile;
+export function getNameFromContents(fileContent, failoverName = "material") {
+    const nameFromContent = getLineFromContent(fileContent, 1);
+    if (nameFromContent) return nameFromContent;
+    return failoverName;
 }
 
 export default {
@@ -161,5 +160,5 @@ export default {
     toBasisConfig,
     fromBasis,
     CombinatorialBasis,
-    materialNameFromFileContents,
+    getNameFromContents,
 };

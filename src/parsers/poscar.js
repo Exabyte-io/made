@@ -4,6 +4,7 @@ import { ConstrainedBasis } from "../basis/constrained_basis";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
+import { getLineFromContent } from "./utils";
 
 const _print = (x, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
 const _latticeVectorsToString = (vectors) =>
@@ -66,21 +67,19 @@ export function atomsCount(poscarFileContent) {
 /**
  * Function returns the string on the first line of POSCAR file content. Generally the first line contains text
  * containing the name of the structure.
- * @param {String} name
  * @param {String} fileContent
+ * @param {String} failoverName
  * @returns {String}
  */
-export function materialNameFromFileContents(name, fileContent) {
-    const materialNameFromFile = fileContent.split(/\r?\n/)[0];
-    if (name === materialNameFromFile || !materialNameFromFile) {
-        return name;
-    }
-    return materialNameFromFile;
+export function getNameFromContents(fileContent, failoverName = "material") {
+    const nameFromContent = getLineFromContent(fileContent, 0);
+    if (nameFromContent) return nameFromContent;
+    return failoverName;
 }
 
 export default {
     toPoscar,
     atomicConstraintsCharFromBool,
     atomsCount,
-    materialNameFromFileContents,
+    getNameFromContents,
 };
