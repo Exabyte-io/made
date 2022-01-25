@@ -15,9 +15,21 @@ describe("Parsers:XYZ", () => {
         ]);
     });
     it("should return the boolean of true for the file having less than the maximum number of atoms", () => {
-        expect(validateNumberOfAtoms(smallBasis)).to.be.equal(true);
+        let pass = true;
+        try {
+            validateNumberOfAtoms(smallBasis);
+        } catch (err) {
+            pass = false;
+        }
+        expect(pass).to.be.equal(true);
     });
     it("should return the boolean of false for the file having less than the maximum number of atoms", () => {
-        expect(validateNumberOfAtoms(largeBasis)).to.be.equal(false);
+        let pass = true;
+        try {
+            validateNumberOfAtoms(largeBasis);
+        } catch (err) {
+            pass = false;
+        }
+        expect(pass).to.be.equal(false);
     });
 });

@@ -1,7 +1,7 @@
 import _ from "underscore";
 import s from "underscore.string";
 
-import { Basis, maximumNumberOfAtomsLimit } from "../basis/basis";
+import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
@@ -35,14 +35,16 @@ function validateLine(xyzLine, index) {
 
 /**
  * Function checks the number of atoms listed in the BasisText editor.
+ * If the number of atoms > Basis.nonPeriodicMaxAtomsCount, then an error is thrown.
  *
  * @param {String} xyzTxt
- * @return {Boolean}
  */
 export function validateNumberOfAtoms(xyzTxt) {
     const xyzArray = xyzTxt.split(/\r?\n/);
     const nAtoms = xyzArray.length;
-    return nAtoms <= maximumNumberOfAtomsLimit;
+    if (nAtoms > Basis.nonPeriodicMaxAtomsCount) {
+        throw new Error("Non-Periodic max atom limit exceeded");
+    }
 }
 
 /**
@@ -50,6 +52,7 @@ export function validateNumberOfAtoms(xyzTxt) {
  * @param xyzTxt {String}
  */
 export function validate(xyzTxt) {
+    validateNumberOfAtoms(xyzTxt);
     s(xyzTxt)
         .trim()
         .lines()

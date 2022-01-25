@@ -7,12 +7,6 @@ import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import math from "../math";
 
-
-/**
- * Maximum number of atoms allowed in materials designer basis or a file upload basis.
- */
-export const maximumNumberOfAtomsLimit = 1000;
-
 /**
  * A class representing a crystal basis.
  */
@@ -53,6 +47,12 @@ export class Basis {
         this.units = _units;
         this.cell = cell;
     }
+
+    /**
+     * Static variable representing the maximum number of atoms that a non-periodic structure may have within the materials-designer.
+     * @type {number}
+     */
+    static nonPeriodicMaxAtomsCount = 1000;
 
     static get unitsOptionsConfig() { return ATOMIC_COORD_UNITS; }
 
