@@ -1,8 +1,9 @@
 import { expect } from "chai";
 
 import { Material } from "../../src/material";
+import { getNameFromContents } from "../../src/parsers/parsers";
 import { atomsCount } from "../../src/parsers/poscar";
-import { H2O, Na4Cl4, Na4Cl4Poscar, Zr1H23Zr1H1, Zr1H23Zr1H1Poscar } from "../enums";
+import { GenericPoscar, H2O, Na4Cl4, Na4Cl4Poscar, Zr1H23Zr1H1, Zr1H23Zr1H1Poscar } from "../enums";
 
 describe("Parsers.POSCAR", () => {
     it("should return a valid poscar", () => {
@@ -17,5 +18,8 @@ describe("Parsers.POSCAR", () => {
 
     it("should return the number of atoms for a molecule in a poscar file", () => {
         expect(atomsCount(H2O)).to.be.equal(3);
+    });
+    it("should return the material name based on the poscar file contents", () => {
+        expect(getNameFromContents(GenericPoscar, "poscar")).to.be.equal("H2S");
     });
 });
