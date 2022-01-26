@@ -1,7 +1,7 @@
 import { expect } from "chai";
 
 import parsers from "../../src/parsers/parsers";
-import { validateNumberOfAtoms } from "../../src/parsers/xyz";
+import { validate } from "../../src/parsers/xyz";
 import { largeBasis, Si, smallBasis } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
@@ -14,22 +14,12 @@ describe("Parsers:XYZ", () => {
             "units",
         ]);
     });
-    it("should return the boolean of true for the file having less than the maximum number of atoms", () => {
-        let pass = true;
-        try {
-            validateNumberOfAtoms(smallBasis);
-        } catch (err) {
-            pass = false;
-        }
-        expect(pass).to.be.equal(true);
+    it("should return error number for a structure having less than the maximum number of atoms", () => {
+        const error = validate(smallBasis);
+        expect(error).to.be.equal(0);
     });
-    it("should return the boolean of false for the file having less than the maximum number of atoms", () => {
-        let pass = true;
-        try {
-            validateNumberOfAtoms(largeBasis);
-        } catch (err) {
-            pass = false;
-        }
-        expect(pass).to.be.equal(false);
+    it("should return the error number for a structure having more than the maximum number of atoms", () => {
+        const error = validate(largeBasis);
+        expect(error).to.be.equal(2001);
     });
 });

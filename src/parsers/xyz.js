@@ -50,14 +50,24 @@ export function validateNumberOfAtoms(xyzTxt) {
 /**
  * Validates that passed string is well-formed XYZ file.
  * @param xyzTxt {String}
+ * @return {Number}
  */
 export function validate(xyzTxt) {
-    validateNumberOfAtoms(xyzTxt);
-    s(xyzTxt)
-        .trim()
-        .lines()
-        .filter((x) => x.trim() !== "")
-        .forEach(validateLine);
+    try {
+        s(xyzTxt)
+            .trim()
+            .lines()
+            .filter((x) => x.trim() !== "")
+            .forEach(validateLine);
+    } catch (err) {
+        return 1001;
+    }
+    try {
+        validateNumberOfAtoms(xyzTxt);
+    } catch (err) {
+        return 2001;
+    }
+    return 0;
 }
 
 /**
