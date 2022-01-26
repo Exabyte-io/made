@@ -1,7 +1,4 @@
 export function getLineFromContent(fileContent, lineNumber) {
-    return fileContent.split(/\r?\n/)[lineNumber];
+    const lineString = fileContent.split(/\r?\n/)[lineNumber];
+    return lineString.trim();
 }
-
-export default {
-    getLineFromContent,
-};
