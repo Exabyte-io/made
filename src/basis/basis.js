@@ -429,8 +429,6 @@ export class Basis {
      * @returns {Number}
      */
     get maxPairwiseDistance() {
-        const originalUnits = this.units;
-        this.toCartesian();
         let maxDistance = 0;
         if (this._elements.array.length >= 2) {
             for (let i = 0; i < this._elements.array.length; i++) {
@@ -443,7 +441,6 @@ export class Basis {
                 }
             }
         }
-        if (originalUnits !== ATOMIC_COORD_UNITS.cartesian) this.toCrystal();
         return math.precise(maxDistance, 4);
     }
 
