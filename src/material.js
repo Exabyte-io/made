@@ -192,19 +192,6 @@ export class Material {
     }
 
     /**
-     * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
-     *  inchi cannot be found.
-     *  @returns {String}
-     */
-    getInchiStringForHash() {
-        const inchi = this.getDerivedPropertyByName("inchi");
-        if (inchi) {
-            return inchi.value;
-        }
-        throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
-    }
-
-    /**
      * Calculates hash from basis and lattice. Algorithm expects the following:
      * - asserts lattice units to be angstrom
      * - asserts basis units to be crystal
@@ -225,19 +212,6 @@ export class Material {
      */
     get scaledHash() {
         return this.calculateHash("", true);
-    }
-
-    /**
-     * Calculates the chemicalHash for a non-periodic material. The chemical hash is based on the inchi string for the material.
-     * If the material is periodic, then an empty string is returned, as inchi strings do not apply to periodic materials.
-     * @returns {String}
-     */
-    get chemicalHash() {
-        if (this.isNonPeriodic) {
-            const message = this.getInchiStringForHash();
-            return CryptoJS.MD5(message).toString();
-        }
-        return "";
     }
 
     /**
