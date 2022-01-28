@@ -207,6 +207,14 @@ export class Material {
         return CryptoJS.MD5(message).toString();
     }
 
+    set hash(hash) {
+        this.setProp("hash", hash);
+    }
+
+    get hash() {
+        return this.prop("hash");
+    }
+
     /**
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
