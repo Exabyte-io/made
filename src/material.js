@@ -207,10 +207,6 @@ export class Material {
         return CryptoJS.MD5(message).toString();
     }
 
-    set hash(hash) {
-        this.setProp("hash", hash);
-    }
-
     get hash() {
         return this.calculateHash();
     }
