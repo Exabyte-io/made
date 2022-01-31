@@ -212,7 +212,7 @@ export class Material {
     }
 
     get hash() {
-        return this.prop("hash");
+        return this.calculateHash();
     }
 
     /**
