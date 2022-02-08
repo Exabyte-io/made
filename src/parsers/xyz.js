@@ -18,7 +18,7 @@ const XYZ_LINE_REGEX =
  * @param xyzLine {String}
  * @param index {Number}
  */
-function validateLine(xyzLine, index) {
+export function validateLine(xyzLine, index) {
     const words = xyzLine.split(" ").filter((x) => x.trim() !== "");
 
     if (!xyzLine.match(XYZ_LINE_REGEX)) {
@@ -48,11 +48,12 @@ export function validateNumberOfAtoms(xyzTxt) {
 }
 
 /**
- * Validates that passed string is well-formed XYZ file.
+ * Validates that passed string is well-formed XYZ file. Function returns an error code associated with a valid (0) or
+ * invalid (1001) format.
  * @param xyzTxt {String}
  * @return {Number}
  */
-export function validate(xyzTxt) {
+export function validateFormat(xyzTxt) {
     try {
         s(xyzTxt)
             .trim()
@@ -62,12 +63,23 @@ export function validate(xyzTxt) {
     } catch (err) {
         return 1001;
     }
+    return 0;
+}
+
+/**
+ * Validates that passed string is a valid XYZ file based on format and number of atoms present in the structure.
+ * Function returns a number associated with whether the xyz basis is valid.
+ * @param xyzTxt {String}
+ * @return {Number}
+ */
+export function validateAll(xyzTxt) {
+    let error = validateFormat(xyzTxt);
     try {
         validateNumberOfAtoms(xyzTxt);
     } catch (err) {
-        return 2001;
+        error = 2001;
     }
-    return 0;
+    return error;
 }
 
 /**
@@ -166,10 +178,11 @@ function fromMaterial(materialOrConfig, fractional = false) {
 }
 
 export default {
-    validate,
+    validateFormat,
     fromMaterial,
     toBasisConfig,
     fromBasis,
     CombinatorialBasis,
     validateNumberOfAtoms,
+    validateAll,
 };
