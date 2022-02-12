@@ -54,16 +54,11 @@ export function validateNumberOfAtoms(xyzTxt) {
  * @return {Number}
  */
 export function validateFormat(xyzTxt) {
-    try {
-        s(xyzTxt)
-            .trim()
-            .lines()
-            .filter((x) => x.trim() !== "")
-            .forEach(validateLine);
-    } catch (err) {
-        return 1001;
-    }
-    return 0;
+    s(xyzTxt)
+        .trim()
+        .lines()
+        .filter((x) => x.trim() !== "")
+        .forEach(validateLine);
 }
 
 /**
@@ -73,7 +68,12 @@ export function validateFormat(xyzTxt) {
  * @return {Number}
  */
 export function validateAll(xyzTxt) {
-    let error = validateFormat(xyzTxt);
+    let error = 0;
+    try {
+        validateFormat(xyzTxt);
+    } catch (err) {
+        error = 1001;
+    }
     try {
         validateNumberOfAtoms(xyzTxt);
     } catch (err) {
