@@ -1,8 +1,17 @@
 import { expect } from "chai";
 
 import { Material } from "../../src/material";
-import { getAtomsCount } from "../../src/parsers/poscar";
-import { H2O, Na4Cl4, Na4Cl4Poscar, Zr1H23Zr1H1, Zr1H23Zr1H1Poscar } from "../enums";
+import { convertFromOtherFormat, getAtomsCount } from "../../src/parsers/poscar";
+import {
+    CH4,
+    CH4POSCAR,
+    H2O,
+    Na4Cl4,
+    Na4Cl4Poscar,
+    Zr1H23Zr1H1,
+    Zr1H23Zr1H1Poscar,
+} from "../enums";
+import { assertDeepAlmostEqual } from "../utils";
 
 describe("Parsers.POSCAR", () => {
     it("should return a valid poscar", () => {
@@ -17,5 +26,8 @@ describe("Parsers.POSCAR", () => {
 
     it("should return the number of atoms for a molecule in a poscar file", () => {
         expect(getAtomsCount(H2O)).to.be.equal(3);
+    });
+    it("should return the xyz file content in poscar file format", () => {
+        assertDeepAlmostEqual(convertFromOtherFormat(CH4, "xyz"), CH4POSCAR);
     });
 });

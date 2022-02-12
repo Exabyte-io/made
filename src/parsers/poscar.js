@@ -2,8 +2,10 @@ import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { ATOMIC_COORD_UNITS } from "../constants";
+import { defaultMaterialConfig } from "../default_material";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
+import xyz from "./xyz";
 
 const _print = (x, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
 const _latticeVectorsToString = (vectors) =>
@@ -63,8 +65,39 @@ export function getAtomsCount(poscarFileContent) {
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
 
+/**
+ * Converts XYZ formated string content to POSCAR formated string content.
+ * @param xyzContent
+ * @returns {string}
+ */
+export function convertFromXyz(xyzContent) {
+    const xyzConfig = defaultMaterialConfig;
+    const xyzArray = xyzContent.split(/\r?\n/);
+    const xyzArrayBasisOnly = xyzArray.slice(2, -1);
+    const xyzBasis = xyzArrayBasisOnly.join("\n");
+    xyzConfig.basis = xyz.toBasisConfig(xyzBasis);
+    xyzConfig.basis.units = "cartesian";
+    return toPoscar(xyzConfig);
+}
+
+/**
+ * Function converts a string of content into a POSCAR formatted string of content. The function called to convert the
+ * format is determined by the format type passed to the function.
+ * @param {String} xyzContent
+ * @param {String} format
+ * @returns {String}
+ */
+export function convertFromOtherFormat(content, format) {
+    if (format === "xyz") {
+        return convertFromXyz(content);
+    }
+    return content;
+}
+
 export default {
     toPoscar,
     atomicConstraintsCharFromBool,
     getAtomsCount,
+    convertFromOtherFormat,
+    convertFromXyz,
 };

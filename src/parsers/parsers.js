@@ -1,4 +1,3 @@
-import { defaultMaterialConfig } from "../default_material";
 import cif from "./cif";
 import espresso from "./espresso";
 import poscar from "./poscar";
@@ -21,26 +20,10 @@ export function getNumberOfAtomsInFileByExtension(fileExtension, fileContent) {
     return numberOfAtoms;
 }
 
-/**
- * Function converts an XYZ formatted structure as a POSCAR formatted structure
- * @param {String} xyzContent
- * @returns {String}
- */
-export function xyzToPoscar(xyzContent) {
-    const xyzConfig = defaultMaterialConfig;
-    const xyzArray = xyzContent.split(/\r?\n/);
-    const xyzArrayBasisOnly = xyzArray.slice(2, -1);
-    const xyzBasis = xyzArrayBasisOnly.join("\n");
-    xyzConfig.basis = xyz.toBasisConfig(xyzBasis);
-    xyzConfig.basis.units = "cartesian";
-    return poscar.toPoscar(xyzConfig);
-}
-
 export default {
     xyz,
     poscar,
     cif,
     espresso,
     getNumberOfAtomsInFileByExtension,
-    xyzToPoscar,
 };
