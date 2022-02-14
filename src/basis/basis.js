@@ -48,6 +48,12 @@ export class Basis {
         this.cell = cell;
     }
 
+    /**
+     * Static variable representing the maximum number of atoms that a non-periodic structure may have within the materials-designer.
+     * @type {number}
+     */
+    static nonPeriodicMaxAtomsCount = 1000;
+
     static get unitsOptionsConfig() { return ATOMIC_COORD_UNITS; }
 
     static get unitsOptionsDefaultValue() { return ATOMIC_COORD_UNITS.crystal; }

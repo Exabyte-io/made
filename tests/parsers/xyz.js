@@ -1,5 +1,8 @@
+import { expect } from "chai";
+
 import parsers from "../../src/parsers/parsers";
-import { Si } from "../enums";
+import { validateAll } from "../../src/parsers/xyz";
+import { CH4InvalidFormat, largeBasis, Si, smallBasis } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Parsers:XYZ", () => {
@@ -10,5 +13,17 @@ describe("Parsers:XYZ", () => {
             "cell",
             "units",
         ]);
+    });
+    it("should return error number for a structure having less than the maximum number of atoms", () => {
+        const error = validateAll(smallBasis);
+        expect(error).to.be.equal(0);
+    });
+    it("should return the error number for a structure having more than the maximum number of atoms", () => {
+        const error = validateAll(largeBasis);
+        expect(error).to.be.equal(2001);
+    });
+    it("should return the error number for a structure that does not have a valid format", () => {
+        const error = validateAll(CH4InvalidFormat);
+        expect(error).to.be.equal(1001);
     });
 });

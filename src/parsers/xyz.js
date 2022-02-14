@@ -18,7 +18,7 @@ const XYZ_LINE_REGEX =
  * @param xyzLine {String}
  * @param index {Number}
  */
-function validateLine(xyzLine, index) {
+export function validateLine(xyzLine, index) {
     const words = xyzLine.split(" ").filter((x) => x.trim() !== "");
 
     if (!xyzLine.match(XYZ_LINE_REGEX)) {
@@ -34,15 +34,52 @@ function validateLine(xyzLine, index) {
 }
 
 /**
- * Validates that passed string is well-formed XYZ file.
- * @param xyzTxt {String}
+ * Function checks the number of atoms listed in the BasisText editor.
+ * If the number of atoms > Basis.nonPeriodicMaxAtomsCount, then an error is thrown.
+ *
+ * @param {String} xyzTxt
  */
-export function validate(xyzTxt) {
+export function validateNumberOfAtoms(xyzTxt) {
+    const xyzArray = xyzTxt.split(/\r?\n/);
+    const nAtoms = xyzArray.length;
+    if (nAtoms > Basis.nonPeriodicMaxAtomsCount) {
+        throw new Error("Non-Periodic max atom limit exceeded");
+    }
+}
+
+/**
+ * Validates that passed string is well-formed XYZ file. Function returns an error code associated with a valid (0) or
+ * invalid (1001) format.
+ * @param xyzTxt {String}
+ * @return {Number}
+ */
+export function validateFormat(xyzTxt) {
     s(xyzTxt)
         .trim()
         .lines()
         .filter((x) => x.trim() !== "")
         .forEach(validateLine);
+}
+
+/**
+ * Validates that passed string is a valid XYZ file based on format and number of atoms present in the structure.
+ * Function returns a number associated with whether the xyz basis is valid.
+ * @param xyzTxt {String}
+ * @return {Number}
+ */
+export function validateAll(xyzTxt) {
+    let error = 0;
+    try {
+        validateFormat(xyzTxt);
+    } catch (err) {
+        error = 1001;
+    }
+    try {
+        validateNumberOfAtoms(xyzTxt);
+    } catch (err) {
+        error = 2001;
+    }
+    return error;
 }
 
 /**
@@ -141,9 +178,11 @@ function fromMaterial(materialOrConfig, fractional = false) {
 }
 
 export default {
-    validate,
+    validateFormat,
     fromMaterial,
     toBasisConfig,
     fromBasis,
     CombinatorialBasis,
+    validateNumberOfAtoms,
+    validateAll,
 };
