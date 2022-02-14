@@ -1,6 +1,5 @@
 import math from "mathjs";
 
-import { ATOMIC_COORD_UNITS } from "../constants";
 import { Lattice } from "../lattice/lattice";
 
 /**
@@ -26,6 +25,7 @@ function scaleOneLatticeVector(material, key = "a", factor = 1.0) {
  * @param material {Material}
  */
 function scaleLatticeToMakeNonPeriodic(material) {
+    material.toCartesian();
     material.lattice = new Lattice({
         a: material.Basis.getMinimumLatticeSize(),
         type: "CUB",
@@ -38,8 +38,6 @@ function scaleLatticeToMakeNonPeriodic(material) {
  * @param material {Material}
  * */
 function getBasisConfigTranslatedToCenter(material) {
-    const originalUnits = material.Basis.units;
-    material.toCartesian();
     const updatedBasis = material.Basis;
     const centerOfCoordinates = updatedBasis.centerOfCoordinatesPoint;
     const centerOfLattice = math.multiply(
@@ -49,7 +47,6 @@ function getBasisConfigTranslatedToCenter(material) {
     const translationVector = math.subtract(centerOfLattice, centerOfCoordinates);
     updatedBasis.translateByVector(translationVector);
     material.setBasis(updatedBasis.toJSON());
-    if (originalUnits !== ATOMIC_COORD_UNITS.cartesian) material.toCrystal();
 }
 
 export default {

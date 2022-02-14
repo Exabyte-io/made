@@ -1,39 +1,47 @@
-import { Lattice } from "../../src/lattice/lattice";
-import { Material } from "../../src/material";
+import { expect } from "chai";
+
+import { Made } from "../../src/made";
 import tools from "../../src/tools";
-import { C2H4, C2H4Translated, Na4Cl4 } from "../enums";
+import { Na4Cl4 } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Tools:Material", () => {
-    it("should return a scaled lattice vector", () => {
-        const newMaterial = new Material(Na4Cl4);
-        const latticeVectorKey = "a";
-        const factor = 2.0;
-        const expectedLatticeVectorArray = [
-            newMaterial.lattice.a * factor,
-            newMaterial.lattice.b,
-            newMaterial.lattice.c,
-        ];
-        tools.material.scaleOneLatticeVector(newMaterial, latticeVectorKey, factor);
-        const actualLatticeVectorArray = [
-            newMaterial.lattice.a,
-            newMaterial.lattice.b,
-            newMaterial.lattice.c,
-        ];
-        assertDeepAlmostEqual(expectedLatticeVectorArray, actualLatticeVectorArray);
+    it("should return a material with the 'a' lattice vectors scaled by a factor of 2", () => {
+        const material = new Made.Material(Na4Cl4);
+        console.log(material);
+        tools.material.scaleOneLatticeVector(material, "a", 2.0);
+        console.log(material);
+        const referenceLatticeA = 11.383388;
+        expect(material.lattice.a).to.be.equal(referenceLatticeA);
     });
-    it("should return a scaled non-periodic lattice", () => {
-        const newMaterial = new Material(C2H4);
-        const expectedLatticeValue = 3.162;
-        tools.material.scaleLatticeToMakeNonPeriodic(newMaterial);
-        assertDeepAlmostEqual(expectedLatticeValue, newMaterial.lattice.a);
-        assertDeepAlmostEqual(expectedLatticeValue, newMaterial.lattice.b);
-        assertDeepAlmostEqual(expectedLatticeValue, newMaterial.lattice.c);
+    it("should return a material with the lattice scaled to the same value twice in a row", () => {
+        const material = new Made.Material(Na4Cl4);
+        tools.material.scaleLatticeToMakeNonPeriodic(material);
+        const updatedLatticeOne = material.lattice;
+        tools.material.scaleLatticeToMakeNonPeriodic(material);
+        const updatedLatticeTwo = material.lattice;
+        assertDeepAlmostEqual(updatedLatticeOne, updatedLatticeTwo);
     });
-    it("should return a material basis translated to the center of the material lattice", () => {
-        const newMaterial = new Material(C2H4);
-        newMaterial.lattice = new Lattice(newMaterial.lattice);
-        tools.material.getBasisConfigTranslatedToCenter(newMaterial);
-        assertDeepAlmostEqual(newMaterial.basis.coordinates, C2H4Translated.basis.coordinates);
+    it("should return a material with the basis translated to the same center of coordinates twice in a row", () => {
+        const material = new Made.Material(Na4Cl4);
+        material.lattice = new Made.Lattice(material.lattice);
+        tools.material.getBasisConfigTranslatedToCenter(material);
+        const updatedBasisOne = material.Basis.coordinates;
+        tools.material.getBasisConfigTranslatedToCenter(material);
+        const updatedBasisTwo = material.Basis.coordinates;
+        assertDeepAlmostEqual(updatedBasisOne, updatedBasisTwo);
+    });
+    it("should return a material with the basis and lattice scaled to the same values twice in a row", () => {
+        const material = new Made.Material(Na4Cl4);
+        tools.material.scaleLatticeToMakeNonPeriodic(material);
+        const updatedLatticeOne = material.lattice;
+        tools.material.getBasisConfigTranslatedToCenter(material);
+        const updatedBasisOne = material.Basis.coordinates;
+        tools.material.scaleLatticeToMakeNonPeriodic(material);
+        const updatedLatticeTwo = material.lattice;
+        tools.material.getBasisConfigTranslatedToCenter(material);
+        const updatedBasisTwo = material.Basis.coordinates;
+        assertDeepAlmostEqual(updatedLatticeOne, updatedLatticeTwo);
+        assertDeepAlmostEqual(updatedBasisOne, updatedBasisTwo);
     });
 });
