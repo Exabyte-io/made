@@ -1,5 +1,6 @@
 import s from "underscore.string";
 
+import { Material } from "../../lib/material";
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { defaultMaterialConfig } from "../default_material";
@@ -71,7 +72,8 @@ export function getAtomsCount(poscarFileContent) {
  * @returns {string}
  */
 export function convertFromXyz(xyzContent) {
-    const xyzConfig = defaultMaterialConfig;
+    const newMaterial = new Material(defaultMaterialConfig).clone();
+    const xyzConfig = newMaterial._json;
     const xyzArray = xyzContent.split(/\r?\n/);
     const xyzArrayBasisOnly = xyzArray.slice(2, -1);
     const xyzBasis = xyzArrayBasisOnly.join("\n");
