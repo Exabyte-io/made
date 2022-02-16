@@ -41,3 +41,16 @@ export const defaultMaterialConfig = {
         },
     },
 };
+
+/*
+ * Function returns the defaultMaterial object.
+ * @returns {Object}
+ */
+export function getDefaultMaterialConfig() {
+    return defaultMaterialConfig;
+}
+
+export default {
+    defaultMaterialConfig,
+    getDefaultMaterialConfig,
+};
