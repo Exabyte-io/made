@@ -83,15 +83,28 @@ export function convertFromXyz(xyzContent) {
 /**
  * Function converts a string of content into a POSCAR formatted string of content. The function called to convert the
  * format is determined by the format type passed to the function.
- * @param {String} xyzContent
+ * @param {String} content
  * @param {String} format
  * @returns {String}
  */
 export function convertFromOtherFormat(content, format) {
+    let updatedContent = content;
     if (format === "xyz") {
-        return convertFromXyz(content);
+        updatedContent = convertFromXyz(content);
     }
-    return content;
+    return updatedContent;
+}
+
+/**
+ * Function returns poscar as the new format type if the input format is xyz
+ * @param {String} format
+ * @returns {String}
+ */
+export function convertFormatTypeToPoscar(format) {
+    if (format === "xyz") {
+        return "poscar";
+    }
+    return format;
 }
 
 export default {
@@ -99,5 +112,6 @@ export default {
     atomicConstraintsCharFromBool,
     getAtomsCount,
     convertFromOtherFormat,
+    convertFormatTypeToPoscar,
     convertFromXyz,
 };
