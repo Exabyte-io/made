@@ -2,7 +2,7 @@ import { ArrayWithIds } from "./abstract/array_with_ids";
 import { Basis } from "./basis/basis";
 import { ATOMIC_COORD_UNITS, coefficients, tolerance, units } from "./constants";
 import { AtomicConstraints } from "./constraints/constraints";
-import { defaultMaterialConfig, getDefaultMaterialConfig } from "./default_material";
+import { getDefaultMaterialConfig } from "./default_material";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "./lattice/lattice";
 import { ReciprocalLattice } from "./lattice/reciprocal/lattice_reciprocal";
 import { DEFAULT_LATTICE_UNITS, LATTICE_TYPE_CONFIGS } from "./lattice/types";
@@ -19,7 +19,6 @@ export const Made = {
     math: MadeMath,
 
     Material,
-    defaultMaterialConfig,
     getDefaultMaterialConfig,
     Lattice,
     nonPeriodicLatticeScalingFactor,

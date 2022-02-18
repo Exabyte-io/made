@@ -47,10 +47,9 @@ export const defaultMaterialConfig = {
  * @returns {Object}
  */
 export function getDefaultMaterialConfig() {
-    return defaultMaterialConfig;
+    return { ...defaultMaterialConfig };
 }
 
 export default {
-    defaultMaterialConfig,
     getDefaultMaterialConfig,
 };
