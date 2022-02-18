@@ -1,7 +1,11 @@
 import { expect } from "chai";
 
 import { Material } from "../../src/material";
-import { convertFromOtherFormat, getAtomsCount } from "../../src/parsers/poscar";
+import {
+    convertFormatTypeToPoscar,
+    convertFromOtherFormat,
+    getAtomsCount,
+} from "../../src/parsers/poscar";
 import {
     CH4,
     CH4POSCAR,
@@ -29,5 +33,9 @@ describe("Parsers.POSCAR", () => {
     });
     it("should return the xyz file content in poscar file format", () => {
         assertDeepAlmostEqual(convertFromOtherFormat(CH4, "xyz"), CH4POSCAR);
+    });
+    it("should convert a format string for 'xyz' to 'poscar'", () => {
+        expect(convertFormatTypeToPoscar("xyz")).to.be.equal("poscar");
+        expect(convertFormatTypeToPoscar("cif")).to.be.equal("cif");
     });
 });
