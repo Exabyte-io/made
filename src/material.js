@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/no-unresolved
-import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/entity";
+import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import CryptoJS from "crypto-js";
 import lodash from "lodash";
 
