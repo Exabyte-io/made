@@ -1,4 +1,5 @@
-import { NamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
+// eslint-disable-next-line import/no-unresolved
+import { NamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/entity";
 import CryptoJS from "crypto-js";
 import lodash from "lodash";
 
