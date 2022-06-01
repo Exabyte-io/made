@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-unresolved
-import { NamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/entity";
+import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/entity";
 import CryptoJS from "crypto-js";
 import lodash from "lodash";
 
@@ -56,7 +56,7 @@ export const defaultMaterialConfig = {
     },
 };
 
-export class Material extends NamedDefaultableInMemoryEntity {
+export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
     constructor(config) {
         super(config);
         this._json = lodash.cloneDeep(config || {});
