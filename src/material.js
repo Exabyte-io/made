@@ -14,7 +14,7 @@ import { LATTICE_TYPE } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 
-export const defaultMaterialConfig = {
+const defaultMaterialConfig = {
     name: "Silicon FCC",
     basis: {
         elements: [
@@ -72,6 +72,10 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
 
     get name() {
         return super.name || this.formula;
+    }
+
+    static get defaultConfig() {
+        return defaultMaterialConfig;
     }
 
     updateFormula() {
