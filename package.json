@@ -53,6 +53,7 @@
         "@babel/preset-env": "^7.16.4",
         "@babel/register": "^7.16.0",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
+        "@exabyte-io/code.js": "git+ssh://github.com/Exabyte-io/code.js.git#5db3a57463b7e59d42e4f44f9d97b3c6fff491d3",
         "array-almost-equal": "^1.0.0",
         "crypto-js": "^3.1.9-1",
         "lodash": "^4.17.4",
