@@ -62,6 +62,10 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
     }
 
     toJSON() {
+        return this.toJSONDefault();
+    }
+
+    toJSONDefault() {
         return {
             lattice: this.Lattice.toJSON(),
             basis: this.Basis.toJSON(),
