@@ -1,3 +1,4 @@
+import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import CryptoJS from "crypto-js";
 import lodash from "lodash";
 
@@ -13,7 +14,7 @@ import { LATTICE_TYPE } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 
-export const defaultMaterialConfig = {
+const defaultMaterialConfig = {
     name: "Silicon FCC",
     basis: {
         elements: [
@@ -54,24 +55,17 @@ export const defaultMaterialConfig = {
     },
 };
 
-export class Material {
+export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
     constructor(config) {
+        super(config);
         this._json = lodash.cloneDeep(config || {});
     }
 
-    prop(name, defaultValue) {
-        return lodash.get(this._json, name) || defaultValue;
-    }
-
-    unsetProp(name) {
-        delete this._json[name];
-    }
-
-    setProp(name, value) {
-        this._json[name] = value;
-    }
-
     toJSON() {
+        return this.toJSONDefault();
+    }
+
+    toJSONDefault() {
         return {
             lattice: this.Lattice.toJSON(),
             basis: this.Basis.toJSON(),
@@ -80,8 +74,12 @@ export class Material {
         };
     }
 
-    clone(extraContext) {
-        return new this.constructor({ ...this.toJSON(), ...extraContext });
+    get name() {
+        return super.name || this.formula;
+    }
+
+    static get defaultConfig() {
+        return defaultMaterialConfig;
     }
 
     updateFormula() {
@@ -111,7 +109,7 @@ export class Material {
      * @returns {Object}
      */
     getDerivedPropertyByName(name) {
-        return this.getDerivedProperties().find(x => x.name === name);
+        return this.getDerivedProperties().find((x) => x.name === name);
     }
 
     /**
@@ -119,7 +117,7 @@ export class Material {
      * @returns {Array}
      */
     getDerivedProperties() {
-        return this.prop('derivedProperties', []);
+        return this.prop("derivedProperties", []);
     }
 
     /**
@@ -131,14 +129,6 @@ export class Material {
 
     get unitCellFormula() {
         return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
-    }
-
-    get name() {
-        return this.prop("name") || this.formula;
-    }
-
-    set name(name) {
-        this.setProp("name", name);
     }
 
     /**
@@ -197,12 +187,11 @@ export class Material {
      *  @returns {String}
      */
     getInchiStringForHash() {
-        const inchi = this.getDerivedPropertyByName('inchi');
+        const inchi = this.getDerivedPropertyByName("inchi");
         if (inchi) {
-            return inchi.value
-        } else {
-            throw new Error("Hash cannot be created. Missing InChI string in derivedProperties")
+            return inchi.value;
         }
+        throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
     }
 
     /**
@@ -215,10 +204,11 @@ export class Material {
      * @param salt {String} Salt for hashing, empty string by default.
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
-    calculateHash(salt = '', isScaled = false) {
+    calculateHash(salt = "", isScaled = false) {
         let message;
         if (!this.isNonPeriodic) {
-            message = this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
+            message =
+                this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         } else {
             message = this.getInchiStringForHash();
         }
@@ -226,11 +216,11 @@ export class Material {
     }
 
     set hash(hash) {
-        this.setProp('hash', hash);
+        this.setProp("hash", hash);
     }
 
     get hash() {
-        return this.prop('hash');
+        return this.prop("hash");
     }
 
     /**
