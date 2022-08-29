@@ -14,15 +14,15 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Exabyte-io/made-js.git"
+        "url": "https://github.com/Exabyte-io/made.js.git"
     },
     "main": "lib/made.js",
     "author": "Exabyte Inc.",
     "bugs": {
-        "url": "https://github.com/Exabyte-io/made-js/issues"
+        "url": "https://github.com/Exabyte-io/made.js/issues"
     },
     "license": "Apache-2.0",
-    "homepage": "https://github.com/Exabyte-io/made-js",
+    "homepage": "https://github.com/Exabyte-io/made.js",
     "engines": {
         "node": ">=0.12"
     },
