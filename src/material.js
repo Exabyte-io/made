@@ -78,6 +78,10 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         return super.name || this.formula;
     }
 
+    set name(name) {
+        super.name = name;
+    }
+
     static get defaultConfig() {
         return defaultMaterialConfig;
     }
