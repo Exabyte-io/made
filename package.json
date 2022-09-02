@@ -63,7 +63,7 @@
         "underscore.string": "^3.3.4"
     },
     "peerDependencies": {
-        "@exabyte-io/code.js": "2022.6.15-1"
+        "@exabyte-io/code.js": "*"
     },
     "lint-staged": {
         "*.js": "eslint --cache --fix",
