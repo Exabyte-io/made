@@ -219,9 +219,9 @@ export class Basis {
      */
     removeAtomAtCoordinate({ coordinate }) {
         if (coordinate.length > 0) {
-            const index = this._coordinates.getArrayIndexByPredicate(
-                (arrayCoordinate) => math.roundToZero(math.vDist(arrayCoordinate, coordinate)) === 0,
-            );
+            const index = this._coordinates.getArrayIndexByPredicate((arrayCoordinate) => {
+                return math.roundToZero(math.vDist(arrayCoordinate, coordinate)) === 0;
+            });
             if (index > -1) {
                 this._elements.removeElement(null, index);
                 this._coordinates.removeElement(null, index);
@@ -390,7 +390,10 @@ export class Basis {
     hasEquivalentCellTo(anotherBasisClsInstance) {
         // this.cell {Array} - Cell Vectors 1, eg. [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         // prettier-ignore
-        return !this.cell.map((vector, idx) => math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell[idx]))
+        return !this.cell
+            .map((vector, idx) => {
+                return math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell[idx]);
+            })
             .some((x) => !x);
     }
 
@@ -434,7 +437,10 @@ export class Basis {
         if (this._elements.array.length >= 2) {
             for (let i = 0; i < this._elements.array.length; i++) {
                 for (let j = i + 1; j < this._elements.array.length; j++) {
-                    const distance = math.vDist(this._coordinates.getArrayElementByIndex(i), this._coordinates.getArrayElementByIndex(j));
+                    const distance = math.vDist(
+                        this._coordinates.getArrayElementByIndex(i),
+                        this._coordinates.getArrayElementByIndex(j),
+                    );
                     if (distance > maxDistance) {
                         maxDistance = distance;
                     }
@@ -468,7 +474,8 @@ export class Basis {
         const transposedBasisCoordinates = math.transpose(this._coordinates.array);
         const centerOfCoordinatesVectors = [];
         for (let i = 0; i < 3; i++) {
-            const center = transposedBasisCoordinates[i].reduce((a, b) => a + b) / this._elements.array.length;
+            const center = transposedBasisCoordinates[i].reduce((a, b) => a + b)
+                / this._elements.array.length;
             centerOfCoordinatesVectors.push(math.precise(center, 4));
         }
         return centerOfCoordinatesVectors;

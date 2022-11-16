@@ -36,11 +36,12 @@ function repeat(basis, repetitions) {
                 basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
                     const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index);
                     // only add atoms if shifts are non-zero
-                    (shiftI || shiftJ || shiftK)
-                        && newBasis.addAtom({
+                    if (shiftI || shiftJ || shiftK) {
+                        newBasis.addAtom({
                             element,
                             coordinate: [coord[0] + shiftI, coord[1] + shiftJ, coord[2] + shiftK],
                         });
+                    }
                 });
                 shiftK += 1;
             }

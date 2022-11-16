@@ -472,6 +472,7 @@ const points = {
 
 export const paths = _.each(points, (val, key, obj) => {
     // merge sub-arrays
+    // eslint-disable-next-line no-param-reassign
     val = val.reduce((a, b) => a.concat(b));
 
     _.each(val, (el, idx, list) => {

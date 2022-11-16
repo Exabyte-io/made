@@ -14,7 +14,7 @@ import { LATTICE_TYPE } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 
-const defaultMaterialConfig = {
+export const defaultMaterialConfig = {
     name: "Silicon FCC",
     basis: {
         elements: [
@@ -299,8 +299,10 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         // if conventional and primitive cells are the same => return a copy.
         if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type)) return material;
 
-        const conventionalSupercellMatrix = PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[this.Lattice.type];
-        const conventionalLatticeType = PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES[this.Lattice.type];
+        const conventionalSupercellMatrix = PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[
+            this.Lattice.type];
+        const conventionalLatticeType = PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES[
+            this.Lattice.type];
         const config = supercellTools.generateConfig(material, conventionalSupercellMatrix, 1);
 
         config.lattice.type = conventionalLatticeType;

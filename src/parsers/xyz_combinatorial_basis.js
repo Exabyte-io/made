@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import _ from "underscore";
 import * as s from "underscore.string";
 
@@ -30,6 +31,7 @@ import math from "../math";
  * Regular expression for basis line.
  * @type {RegExp}
  */
+// eslint-disable-next-line max-len
 const LINE_REGEX = /^([A-Z][a-z]?\/?,?)+\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s*$/gi;
 // vacancy characters will be used to create vacancies on basis generation
 const VACANCY_CHARACTER = "VAC";
@@ -200,7 +202,9 @@ export class CombinatorialBasis {
             dimensions.push(itemsSet);
         });
         const basisSet = math.cartesianProduct.apply(null, dimensions);
-        return basisSet.map((basis) => basis.filter((entry) => entry.element !== VACANCY_CHARACTER));
+        return basisSet.map(
+            (basis) => basis.filter((entry) => entry.element !== VACANCY_CHARACTER),
+        );
     }
 
     /**
@@ -214,12 +218,15 @@ export class CombinatorialBasis {
         for (let i = 0; i < maxLen; i++) {
             const items = [];
             this._lines.forEach((line) => {
-                const element = line.elements.length <= i ? _.last(line.elements) : line.elements[i];
-                element !== VACANCY_CHARACTER
-                    && items.push({
+                const element = line.elements.length <= i
+                    ? _.last(line.elements)
+                    : line.elements[i];
+                if (element !== VACANCY_CHARACTER) {
+                    items.push({
                         element,
                         coordinates: line.coordinates,
                     });
+                }
             });
             bases.push(items);
         }
