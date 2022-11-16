@@ -5,8 +5,7 @@ import SupercellTools from "./supercell";
 const MULT = math.multiply;
 const ADD = math.add;
 const DOT = math.product;
-const getMatrixInLeftHandedRepresentation = (matrix) =>
-    math.det(matrix) < 0 ? MULT(matrix, -1) : matrix;
+const getMatrixInLeftHandedRepresentation = (matrix) => math.det(matrix) < 0 ? MULT(matrix, -1) : matrix;
 
 /**
  * Helper function for extended GCD.
@@ -32,8 +31,7 @@ function extGCD(a, b) {
  * @return {Number[][]}
  */
 function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
-    if (!millerIndices.reduce((a, b) => math.abs(a) + math.abs(b)))
-        throw new Error("Miller indices are zeros.");
+    if (!millerIndices.reduce((a, b) => math.abs(a) + math.abs(b))) throw new Error("Miller indices are zeros.");
 
     let scalingMatrix;
 
@@ -43,24 +41,27 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
     if ((h0 && k0) || (h0 && l0) || (k0 && l0)) {
         // if any two indices are zero
 
-        if (!h0)
+        if (!h0) {
             scalingMatrix = [
                 [0, 1, 0],
                 [0, 0, 1],
                 [1, 0, 0],
             ];
-        if (!k0)
+        }
+        if (!k0) {
             scalingMatrix = [
                 [0, 0, 1],
                 [1, 0, 0],
                 [0, 1, 0],
             ];
-        if (!l0)
+        }
+        if (!l0) {
             scalingMatrix = [
                 [1, 0, 0],
                 [0, 1, 0],
                 [0, 0, 1],
             ];
+        }
     } else {
         const [a1, a2, a3] = cell.vectorsAsArray;
         // z1 = (k * a1 - h * a2)
@@ -127,15 +128,13 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
  * @return {Object}
  */
 function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy = 1) {
-    if (numberOfLayers < 1)
-        throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
+    if (numberOfLayers < 1) throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
 
     const cell = material.Lattice.Cell;
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
-    const outOfPlaneAxisIndex =
-        millerSupercell.getMostCollinearVectorIndex(millerPlanePseudoNormal);
+    const outOfPlaneAxisIndex = millerSupercell.getMostCollinearVectorIndex(millerPlanePseudoNormal);
     const dimensionsScalingMatrix = getDimensionsScalingMatrix(
         cell,
         millerSupercell,

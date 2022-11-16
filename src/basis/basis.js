@@ -27,7 +27,9 @@ export class Basis {
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
     }) {
-        let _elements, _coordinates, _units;
+        let _elements,
+            _coordinates,
+            _units;
         if (!units) {
             _units = Basis.unitsOptionsDefaultValue;
             console.warn("Basis.constructor: units are not provided => set to crystal");
@@ -218,8 +220,7 @@ export class Basis {
     removeAtomAtCoordinate({ coordinate }) {
         if (coordinate.length > 0) {
             const index = this._coordinates.getArrayIndexByPredicate(
-                (arrayCoordinate) =>
-                    math.roundToZero(math.vDist(arrayCoordinate, coordinate)) === 0,
+                (arrayCoordinate) => math.roundToZero(math.vDist(arrayCoordinate, coordinate)) === 0,
             );
             if (index > -1) {
                 this._elements.removeElement(null, index);
@@ -332,7 +333,7 @@ export class Basis {
             const coordinate = entry[1];
             const toleratedCoordinates = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
             return `${element} ${toleratedCoordinates.join()}`;
-        })
+        });
         return `${standardRep.sort().join(";")};`;
     }
 
@@ -389,9 +390,7 @@ export class Basis {
     hasEquivalentCellTo(anotherBasisClsInstance) {
         // this.cell {Array} - Cell Vectors 1, eg. [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         // prettier-ignore
-        return !this.cell.map((vector, idx) =>
-                math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell[idx]),
-            )
+        return !this.cell.map((vector, idx) => math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell[idx]))
             .some((x) => !x);
     }
 
@@ -404,7 +403,7 @@ export class Basis {
     getMinimumLatticeSize(latticeScalingFactor = nonPeriodicLatticeScalingFactor) {
         let latticeSizeAdditiveContribution = 0;
         if (this._elements.array.length === 1) {
-            const elementSymbol = this._elements.getArrayElementByIndex(0)
+            const elementSymbol = this._elements.getArrayElementByIndex(0);
             latticeSizeAdditiveContribution = getElementAtomicRadius(elementSymbol);
         }
         const moleculeLatticeSize = this.maxPairwiseDistance * latticeScalingFactor;
@@ -435,8 +434,7 @@ export class Basis {
         if (this._elements.array.length >= 2) {
             for (let i = 0; i < this._elements.array.length; i++) {
                 for (let j = i + 1; j < this._elements.array.length; j++) {
-                    const distance = math.vDist(
-                        this._coordinates.getArrayElementByIndex(i), this._coordinates.getArrayElementByIndex(j));
+                    const distance = math.vDist(this._coordinates.getArrayElementByIndex(i), this._coordinates.getArrayElementByIndex(j));
                     if (distance > maxDistance) {
                         maxDistance = distance;
                     }
@@ -470,8 +468,7 @@ export class Basis {
         const transposedBasisCoordinates = math.transpose(this._coordinates.array);
         const centerOfCoordinatesVectors = [];
         for (let i = 0; i < 3; i++) {
-            const center =
-                transposedBasisCoordinates[i].reduce((a, b) => a + b) / this._elements.array.length;
+            const center = transposedBasisCoordinates[i].reduce((a, b) => a + b) / this._elements.array.length;
             centerOfCoordinatesVectors.push(math.precise(center, 4));
         }
         return centerOfCoordinatesVectors;

@@ -6,7 +6,7 @@ import _ from "underscore";
  *  Paths are split in parts for clarity.
  */
 const points = {
-    "CUB": [
+    CUB: [
         [
             "Г",
             "X",
@@ -20,7 +20,7 @@ const points = {
             "R",
         ],
     ],
-    "BCC": [
+    BCC: [
         [
             "Г",
             "H",
@@ -34,7 +34,7 @@ const points = {
             "N",
         ],
     ],
-    "FCC": [
+    FCC: [
         [
             "Г",
             "X",
@@ -51,7 +51,7 @@ const points = {
             "X",
         ],
     ],
-    "TET": [
+    TET: [
         [
             "Г",
             "X",
@@ -107,7 +107,7 @@ const points = {
             "P",
         ],
     ],
-    "ORC": [
+    ORC: [
         [
             "Г",
             "X",
@@ -209,7 +209,7 @@ const points = {
             "Г",
         ],
     ],
-    "ORCI": [
+    ORCI: [
         [
             "Г",
             "X",
@@ -233,7 +233,7 @@ const points = {
             "Z",
         ],
     ],
-    "ORCC": [
+    ORCC: [
         [
             "Г",
             "X",
@@ -253,7 +253,7 @@ const points = {
             "T",
         ],
     ],
-    "HEX": [
+    HEX: [
         [
             "Г",
             "M",
@@ -310,7 +310,7 @@ const points = {
             "Z",
         ],
     ],
-    "MCL": [
+    MCL: [
         [
             "Г",
             "Y",
@@ -447,7 +447,7 @@ const points = {
             "Г",
         ],
     ],
-    "TRI": [
+    TRI: [
         [
             "X",
             "Г",
@@ -471,7 +471,6 @@ const points = {
 };
 
 export const paths = _.each(points, (val, key, obj) => {
-
     // merge sub-arrays
     val = val.reduce((a, b) => a.concat(b));
 
@@ -480,7 +479,7 @@ export const paths = _.each(points, (val, key, obj) => {
             point: el,
             // TODO: calculate number of steps based on distance in k-space
             steps: 10,
-        }
+        };
     });
 
     obj[key] = val;
