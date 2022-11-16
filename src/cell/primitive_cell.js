@@ -7,7 +7,9 @@ import math from "../math";
  * Following Setyawan, W., & Curtarolo, S. (2010). doi:10.1016/j.commatsci.2010.05.010
  */
 const PRIMITIVE_CELLS = {
-    [LATTICE_TYPE.CUB]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.CUB]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [a, 0, 0],
             [0, a, 0],
@@ -15,7 +17,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.FCC]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.FCC]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [0.0, a / 2, a / 2],
             [a / 2, 0.0, a / 2],
@@ -23,7 +27,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.BCC]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.BCC]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [-a / 2, a / 2, a / 2],
             [a / 2, -a / 2, a / 2],
@@ -31,7 +37,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.TET]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.TET]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [a, 0, 0],
             [0, a, 0],
@@ -39,7 +47,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.BCT]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.BCT]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [-a / 2, a / 2, c / 2],
             [a / 2, -a / 2, c / 2],
@@ -47,7 +57,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.ORC]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.ORC]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [a, 0, 0],
             [0, b, 0],
@@ -55,7 +67,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.ORCF]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.ORCF]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [0, b / 2, c / 2],
             [a / 2, 0, c / 2],
@@ -63,7 +77,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.ORCI]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.ORCI]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [-a / 2, b / 2, c / 2],
             [a / 2, -b / 2, c / 2],
@@ -71,7 +87,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.ORCC]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.ORCC]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [a / 2, b / 2, 0],
             [-a / 2, b / 2, 0],
@@ -79,7 +97,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.HEX]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.HEX]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         return [
             [a / 2, (-a * math.sqrt(3)) / 2, 0],
             [a / 2, (a * math.sqrt(3)) / 2, 0],
@@ -87,7 +107,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.RHL]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.RHL]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         const cosHalfAlpha = math.sqrt((1 / 2) * (1 + cosAlpha));
         const sinHalfAlpha = math.sqrt((1 / 2) * (1 - cosAlpha));
@@ -102,7 +124,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.MCL]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.MCL]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         return [
             [a, 0, 0],
@@ -111,7 +135,9 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.MCLC]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.MCLC]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         return [
             [a / 2, b / 2, 0],
@@ -121,7 +147,9 @@ const PRIMITIVE_CELLS = {
     },
 
     // Algorithm from http://pymatgen.org/_modules/pymatgen/core/lattice.html (from_params)
-    [LATTICE_TYPE.TRI]: ({ a, b, c, alpha, beta, gamma }) => {
+    [LATTICE_TYPE.TRI]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         // convert angles to Radians
         [alpha, beta, gamma] = [alpha, beta, gamma].map(
             (x) => math.unit(x, "degree").to("rad").value,
@@ -141,7 +169,9 @@ const PRIMITIVE_CELLS = {
     },
 
     // alternative implementation
-    [`${LATTICE_TYPE.TRI}alt`]: ({ a, b, c, alpha, beta, gamma }) => {
+    [`${LATTICE_TYPE.TRI}alt`]: ({
+        a, b, c, alpha, beta, gamma,
+    }) => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         const cosBeta = math.cos((beta / 180) * math.PI);
         const cosGamma = math.cos((gamma / 180) * math.PI);
@@ -152,12 +182,12 @@ const PRIMITIVE_CELLS = {
             [
                 c * cosBeta,
                 (c / sinGamma) * (cosAlpha - cosBeta * cosGamma),
-                (c / sinGamma) *
-                    math.sqrt(
-                        sinGamma * sinGamma -
-                            cosAlpha * cosAlpha -
-                            cosBeta * cosBeta +
-                            2 * cosAlpha * cosBeta * cosGamma,
+                (c / sinGamma)
+                    * math.sqrt(
+                        sinGamma * sinGamma
+                            - cosAlpha * cosAlpha
+                            - cosBeta * cosBeta
+                            + 2 * cosAlpha * cosBeta * cosGamma,
                     ),
             ],
         ];
@@ -173,9 +203,7 @@ const PRIMITIVE_CELLS = {
 export function primitiveCell(lattice, skipRounding = false) {
     const [vectorA, vectorB, vectorC] = PRIMITIVE_CELLS[lattice.type || LATTICE_TYPE.TRI](lattice);
     // set precision and remove JS floating point artifacts
-    !skipRounding &&
-        [vectorA, vectorB, vectorC].map((vec) =>
-            vec.map((c) => math.precise(c)).map(math.roundToZero),
-        );
+    !skipRounding
+        && [vectorA, vectorB, vectorC].map((vec) => vec.map((c) => math.precise(c)).map(math.roundToZero));
     return [vectorA, vectorB, vectorC];
 }

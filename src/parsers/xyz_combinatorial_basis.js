@@ -30,8 +30,7 @@ import math from "../math";
  * Regular expression for basis line.
  * @type {RegExp}
  */
-const LINE_REGEX =
-    /^([A-Z][a-z]?\/?,?)+\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s*$/gi;
+const LINE_REGEX = /^([A-Z][a-z]?\/?,?)+\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s*$/gi;
 // vacancy characters will be used to create vacancies on basis generation
 const VACANCY_CHARACTER = "VAC";
 const COMBINATION_DELIMITER = ",";
@@ -76,7 +75,7 @@ export class CombinatorialBasis {
         if (this._hasPermutationLine && this._hasCombinationLine) {
             throw new WrongBasisFormat(
                 this._xyz,
-                `Basis contains mixed permutation and combination.`,
+                "Basis contains mixed permutation and combination.",
                 ERROR_CODES.MIXING_IN_MULTI_LINES,
             );
         }
@@ -95,8 +94,8 @@ export class CombinatorialBasis {
         if (!str.match(LINE_REGEX)) {
             throw new WrongBasisFormat(
                 this._xyz,
-                `Line #${index + 1}: "${str}" contains errors. ` +
-                    `Allowed formats: "Si 0 0 0", "Si/Li 0.5 0.5 0.5", "Si,Ge 0.7 0.7 0.8"`,
+                `Line #${index + 1}: "${str}" contains errors. `
+                    + "Allowed formats: \"Si 0 0 0\", \"Si/Li 0.5 0.5 0.5\", \"Si,Ge 0.7 0.7 0.8\"",
                 ERROR_CODES.REGEX_NOT_PASSED,
             );
         }
@@ -201,9 +200,7 @@ export class CombinatorialBasis {
             dimensions.push(itemsSet);
         });
         const basisSet = math.cartesianProduct.apply(null, dimensions);
-        return basisSet.map((basis) =>
-            basis.filter((entry) => entry.element !== VACANCY_CHARACTER),
-        );
+        return basisSet.map((basis) => basis.filter((entry) => entry.element !== VACANCY_CHARACTER));
     }
 
     /**
@@ -217,10 +214,9 @@ export class CombinatorialBasis {
         for (let i = 0; i < maxLen; i++) {
             const items = [];
             this._lines.forEach((line) => {
-                const element =
-                    line.elements.length <= i ? _.last(line.elements) : line.elements[i];
-                element !== VACANCY_CHARACTER &&
-                    items.push({
+                const element = line.elements.length <= i ? _.last(line.elements) : line.elements[i];
+                element !== VACANCY_CHARACTER
+                    && items.push({
                         element,
                         coordinates: line.coordinates,
                     });

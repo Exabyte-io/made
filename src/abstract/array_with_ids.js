@@ -11,8 +11,7 @@ export class ArrayWithIds {
      * @param {Array} array - Either regular array or ArrayWithIds (see @example above)
      */
     constructor(array = []) {
-        if (!_.isArray(array))
-            throw new Error("ArrayWithIds.constructor: pass array on initialization");
+        if (!_.isArray(array)) throw new Error("ArrayWithIds.constructor: pass array on initialization");
         // if passed an array with ids as config, only store the values in array
         this.array = array.sort((a, b) => a.id - b.id).map((element) => element.value || element);
     }
@@ -31,8 +30,7 @@ export class ArrayWithIds {
      * @param {Function} fn - The function to be applied to each array element.
      */
     mapArrayInPlace(fn) {
-        if (!_.isFunction(fn))
-            throw new Error("ArrayWithIds.mapArray: must pass function as argument");
+        if (!_.isFunction(fn)) throw new Error("ArrayWithIds.mapArray: must pass function as argument");
         this.array = this.array.map((...args) => fn(...args));
     }
 
