@@ -5,7 +5,11 @@ import SupercellTools from "./supercell";
 const MULT = math.multiply;
 const ADD = math.add;
 const DOT = math.product;
-const getMatrixInLeftHandedRepresentation = (matrix) => math.det(matrix) < 0 ? MULT(matrix, -1) : matrix;
+const getMatrixInLeftHandedRepresentation = (matrix) => {
+    return math.det(matrix) < 0
+        ? MULT(matrix, -1)
+        : matrix;
+};
 
 /**
  * Helper function for extended GCD.
@@ -134,7 +138,8 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
-    const outOfPlaneAxisIndex = millerSupercell.getMostCollinearVectorIndex(millerPlanePseudoNormal);
+    const outOfPlaneAxisIndex = millerSupercell
+        .getMostCollinearVectorIndex(millerPlanePseudoNormal);
     const dimensionsScalingMatrix = getDimensionsScalingMatrix(
         cell,
         millerSupercell,

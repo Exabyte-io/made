@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-operators */
 /* eslint no-unused-vars: 0 */
 /**
  * This file contains information about the Brillouin zone symmetry points by lattice type.
@@ -1336,6 +1337,7 @@ const POINTS = {
         // MCLC-5
         e = 1 / 4 * ((b * b) / (a * a) + (1 - b * cosAlpha / c) / (1 - cosAlpha * cosAlpha));
         m = n / 2 + b * b / (a * a) / 4 - b * c * cosAlpha / (2 * a * a);
+        // eslint-disable-next-line max-len
         const w = (4 * v - 1 - b * b * (1 - cosAlpha * cosAlpha) / (a * a)) * c / (2 * b * cosAlpha);
         n = 1 / 2 + (2 * e * c * cosAlpha) / b;
         d = e * c / b * cosAlpha + w / 2 - 1 / 4;

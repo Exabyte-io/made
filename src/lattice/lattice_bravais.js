@@ -35,7 +35,9 @@ export class LatticeBravais {
                 angle: "degree",
             },
         } = config;
-        const k = constants.units.bohr === units.length ? constants.coefficients.BOHR_TO_ANGSTROM : 1;
+        const k = constants.units.bohr === units.length
+            ? constants.coefficients.BOHR_TO_ANGSTROM
+            : 1;
         Object.assign(this, {
             a: a * k,
             b: b * k,
