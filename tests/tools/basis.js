@@ -1,8 +1,6 @@
 import { Basis } from "../../src/basis/basis";
 import tools from "../../src/tools";
-import {
-    H2HFinal, H2HImage, H2HInitial, Si2Basis, Si2BasisRepeated,
-} from "../enums";
+import { H2HFinal, H2HImage, H2HInitial, Si2Basis, Si2BasisRepeated } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Tools:Basis", () => {

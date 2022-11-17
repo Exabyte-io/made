@@ -14,9 +14,7 @@ const MULT = math.multiply;
  * @return {Basis} New Basis.
  */
 function repeat(basis, repetitions) {
-    let i,
-        j,
-        k;
+    let i, j, k;
     let shiftI = 0;
     let shiftJ = 0;
     let shiftK = 0;
@@ -78,7 +76,8 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
  */
 function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
     // check that initial and final basis have the same cell
-    if (!initialBasis.hasEquivalentCellTo(finalBasis)) throw new Error("basis.interpolate: Basis cells are not equal");
+    if (!initialBasis.hasEquivalentCellTo(finalBasis))
+        throw new Error("basis.interpolate: Basis cells are not equal");
 
     // clone original initialBasis and assert it is in cartesian coordinates
     const initialBasisCopy = initialBasis.clone();

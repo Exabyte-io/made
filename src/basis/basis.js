@@ -27,9 +27,7 @@ export class Basis {
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
     }) {
-        let _elements,
-            _coordinates,
-            _units;
+        let _elements, _coordinates, _units;
         if (!units) {
             _units = Basis.unitsOptionsDefaultValue;
             console.warn("Basis.constructor: units are not provided => set to crystal");
@@ -50,11 +48,17 @@ export class Basis {
         this.cell = cell;
     }
 
-    static get unitsOptionsConfig() { return ATOMIC_COORD_UNITS; }
+    static get unitsOptionsConfig() {
+        return ATOMIC_COORD_UNITS;
+    }
 
-    static get unitsOptionsDefaultValue() { return ATOMIC_COORD_UNITS.crystal; }
+    static get unitsOptionsDefaultValue() {
+        return ATOMIC_COORD_UNITS.crystal;
+    }
 
-    static get defaultCell() { return new Lattice().vectorArrays; }
+    static get defaultCell() {
+        return new Lattice().vectorArrays;
+    }
 
     /**
      * Serialize class instance to JSON.
@@ -122,21 +126,33 @@ export class Basis {
         return new this.constructor({ ...this.toJSON(), ...extraContext });
     }
 
-    getElementByIndex(idx) { return this._elements.getArrayElementByIndex(idx); }
+    getElementByIndex(idx) {
+        return this._elements.getArrayElementByIndex(idx);
+    }
 
-    getCoordinateByIndex(idx) { return this._coordinates.getArrayElementByIndex(idx); }
+    getCoordinateByIndex(idx) {
+        return this._coordinates.getArrayElementByIndex(idx);
+    }
 
-    get elementsArray() { return this._elements.array; }
+    get elementsArray() {
+        return this._elements.array;
+    }
 
-    get elements() { return this._elements.toJSON(); }
+    get elements() {
+        return this._elements.toJSON();
+    }
 
     /**
      * Set basis elements to passed array.
      * @param {Array|ArrayWithIds} elementsArray - New elements array.
      */
-    set elements(elementsArray) { this._elements = new ArrayWithIds(elementsArray); }
+    set elements(elementsArray) {
+        this._elements = new ArrayWithIds(elementsArray);
+    }
 
-    get coordinates() { return this._coordinates.toJSON(); }
+    get coordinates() {
+        return this._coordinates.toJSON();
+    }
 
     /**
      * Set basis elements to passed array.
@@ -146,11 +162,17 @@ export class Basis {
         this._coordinates = new ArrayWithIds(coordinatesNestedArray);
     }
 
-    get coordinatesAsArray() { return this._coordinates.array; }
+    get coordinatesAsArray() {
+        return this._coordinates.array;
+    }
 
-    get isInCrystalUnits() { return this.units === ATOMIC_COORD_UNITS.crystal; }
+    get isInCrystalUnits() {
+        return this.units === ATOMIC_COORD_UNITS.crystal;
+    }
 
-    get isInCartesianUnits() { return this.units === ATOMIC_COORD_UNITS.cartesian; }
+    get isInCartesianUnits() {
+        return this.units === ATOMIC_COORD_UNITS.cartesian;
+    }
 
     toCartesian() {
         const unitCell = this.cell;
@@ -233,7 +255,9 @@ export class Basis {
      * Unique names (symbols) of the chemical elements basis. E.g. `['Si', 'Li']`
      * @return {Array}
      */
-    get uniqueElements() { return _.unique(this._elements.array); }
+    get uniqueElements() {
+        return _.unique(this._elements.array);
+    }
 
     /**
      * Returns unique chemical elements with their count sorted by electronegativity.
@@ -369,7 +393,9 @@ export class Basis {
     /**
      * @summary Returns number of atoms in material
      */
-    get nAtoms() { return this._elements.array.length; }
+    get nAtoms() {
+        return this._elements.array.length;
+    }
 
     // helpers
 
@@ -474,8 +500,8 @@ export class Basis {
         const transposedBasisCoordinates = math.transpose(this._coordinates.array);
         const centerOfCoordinatesVectors = [];
         for (let i = 0; i < 3; i++) {
-            const center = transposedBasisCoordinates[i].reduce((a, b) => a + b)
-                / this._elements.array.length;
+            const center =
+                transposedBasisCoordinates[i].reduce((a, b) => a + b) / this._elements.array.length;
             centerOfCoordinatesVectors.push(math.precise(center, 4));
         }
         return centerOfCoordinatesVectors;

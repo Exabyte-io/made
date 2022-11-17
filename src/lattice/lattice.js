@@ -126,9 +126,7 @@ export class Lattice extends LatticeBravais {
      * @return {String}
      */
     get typeExtended() {
-        const {
-            a, b, c, alpha, beta, gamma, type,
-        } = this;
+        const { a, b, c, alpha, beta, gamma, type } = this;
         const cosAlpha = math.cos((alpha / 180) * math.PI);
 
         switch (type) {

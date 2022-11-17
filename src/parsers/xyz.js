@@ -10,7 +10,8 @@ import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
 // eslint-disable-next-line max-len
-const XYZ_LINE_REGEX = /[A-Z][a-z]?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
+const XYZ_LINE_REGEX =
+    /[A-Z][a-z]?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
 
 /**
  * Validates XYZ file's line. Line should be in following format "Si 0.5 0.5 0.5".
@@ -109,11 +110,9 @@ function fromBasis(basisClsInstance, printFormat = "%9.5f", skipRounding = false
     clsInstance._elements.array.forEach((item, idx) => {
         // assume that _elements and _coordinates are indexed equivalently
         const element = s.sprintf("%-3s", item);
-        const coordinates = clsInstance
-            .getCoordinateByIndex(idx)
-            .map((x) => {
-                return s.sprintf(printFormat, skipRounding ? x : math.precise(math.roundToZero(x)));
-            });
+        const coordinates = clsInstance.getCoordinateByIndex(idx).map((x) => {
+            return s.sprintf(printFormat, skipRounding ? x : math.precise(math.roundToZero(x)));
+        });
         const constraints = clsInstance.constraints
             ? clsInstance.AtomicConstraints.getAsStringByIndex(idx)
             : "";
