@@ -17,7 +17,9 @@ export class LatticeVectors {
      * @param {String} config.units - units container.
      */
     constructor(config) {
-        const { a, b, c, alat = 1, units = "angstrom" } = config;
+        const {
+            a, b, c, alat = 1, units = "angstrom",
+        } = config;
         const k = constants.units.bohr === units ? constants.coefficients.BOHR_TO_ANGSTROM : 1;
         Object.assign(this, {
             a: a.map((x) => x * k),
@@ -53,6 +55,7 @@ export class LatticeVectors {
         isConventional = false,
     }) {
         // use "direct" lattice constructor for primitive lattice
+        // eslint-disable-next-line no-param-reassign
         if (!isConventional) type = "TRI";
 
         // set precision and remove JS floating point artifacts

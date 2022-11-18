@@ -159,8 +159,7 @@ describe("Basis", () => {
 
     it("should return the string", () => {
         const basis = new Basis(Na4Cl4.basis);
-        const string =
-            "Cl 0,0,0.5;Cl 0,0.5,0;Cl 0.5,0,0;Cl 0.5,0.5,0.5;Na 0,0,0;Na 0,0.5,0.5;Na 0.5,0,0.5;Na 0.5,0.5,0;";
+        const string = "Cl 0,0,0.5;Cl 0,0.5,0;Cl 0.5,0,0;Cl 0.5,0.5,0.5;Na 0,0,0;Na 0,0.5,0.5;Na 0.5,0,0.5;Na 0.5,0.5,0;";
         expect(basis.getAsSortedString()).to.be.equal(string);
     });
 
