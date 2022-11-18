@@ -2,9 +2,7 @@ import { expect } from "chai";
 
 import { Basis } from "../../src/basis/basis";
 import { CombinatorialBasis } from "../../src/parsers/xyz_combinatorial_basis";
-import {
-    AsGeBasis, FeLiSiBasis, Ge2Basis, OSiBasis, Si2Basis,
-} from "../enums";
+import { AsGeBasis, FeLiSiBasis, Ge2Basis, OSiBasis, Si2Basis } from "../enums";
 
 describe("Parsers:CombinatorialBasis", () => {
     it("toBasisConfig", () => {
