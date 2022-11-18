@@ -14,7 +14,9 @@ const MULT = math.multiply;
  * @return {Basis} New Basis.
  */
 function repeat(basis, repetitions) {
-    let i, j, k;
+    let i,
+        j,
+        k;
     let shiftI = 0;
     let shiftJ = 0;
     let shiftK = 0;
@@ -34,11 +36,12 @@ function repeat(basis, repetitions) {
                 basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
                     const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index);
                     // only add atoms if shifts are non-zero
-                    (shiftI || shiftJ || shiftK) &&
+                    if (shiftI || shiftJ || shiftK) {
                         newBasis.addAtom({
                             element,
                             coordinate: [coord[0] + shiftI, coord[1] + shiftJ, coord[2] + shiftK],
                         });
+                    }
                 });
                 shiftK += 1;
             }
@@ -75,8 +78,7 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
  */
 function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
     // check that initial and final basis have the same cell
-    if (!initialBasis.hasEquivalentCellTo(finalBasis))
-        throw new Error("basis.interpolate: Basis cells are not equal");
+    if (!initialBasis.hasEquivalentCellTo(finalBasis)) throw new Error("basis.interpolate: Basis cells are not equal");
 
     // clone original initialBasis and assert it is in cartesian coordinates
     const initialBasisCopy = initialBasis.clone();
