@@ -7,8 +7,9 @@
         "postinstall": "npm run transpile",
         "transpile": "mkdir -p lib && babel src --out-dir lib",
         "test": "nyc --reporter=text mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests",
-        "lint": "eslint src tests",
-        "lint:fix": "eslint --fix --cache src tests",
+        "lint": "eslint src tests && prettier --write src tests",
+        "lint:fix": "eslint --fix --cache src tests && prettier --write src tests",
+        "prettier": "prettier --check src tests",
         "prepare": "husky install"
     },
     "repository": {
@@ -27,13 +28,16 @@
     },
     "devDependencies": {
         "@exabyte-io/code.js": "2022.6.15-1",
+        "@exabyte-io/eslint-config": "^2022.11.17-0",
         "chai": "^4.3.4",
         "chai-almost": "^1.0.1",
         "eslint": "^7.32.0",
         "eslint-config-airbnb": "^19.0.2",
+        "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-import": "^2.25.3",
         "eslint-plugin-jsdoc": "^37.1.0",
         "eslint-plugin-jsx-a11y": "^6.5.1",
+        "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-react": "^7.27.1",
         "eslint-plugin-react-hooks": "^4.3.0",
         "eslint-plugin-simple-import-sort": "^7.0.0",
@@ -50,7 +54,6 @@
         "@babel/plugin-proposal-class-properties": "^7.16.0",
         "@babel/preset-env": "^7.16.4",
         "@babel/register": "^7.16.0",
-        "@exabyte-io/eslint-config": "^2022.11.16-0",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
         "array-almost-equal": "^1.0.0",
         "crypto-js": "^3.1.9-1",
@@ -64,6 +67,7 @@
         "@exabyte-io/code.js": "*"
     },
     "lint-staged": {
-        "*.js": "eslint --cache --fix"
+        "*.js": "eslint --cache --fix",
+        "*.{js,css}": "prettier --write"
     }
 }

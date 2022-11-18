@@ -6,9 +6,7 @@ const MULT = math.multiply;
 const ADD = math.add;
 const DOT = math.product;
 const getMatrixInLeftHandedRepresentation = (matrix) => {
-    return math.det(matrix) < 0
-        ? MULT(matrix, -1)
-        : matrix;
+    return math.det(matrix) < 0 ? MULT(matrix, -1) : matrix;
 };
 
 /**
@@ -35,7 +33,8 @@ function extGCD(a, b) {
  * @return {Number[][]}
  */
 function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
-    if (!millerIndices.reduce((a, b) => math.abs(a) + math.abs(b))) throw new Error("Miller indices are zeros.");
+    if (!millerIndices.reduce((a, b) => math.abs(a) + math.abs(b)))
+        throw new Error("Miller indices are zeros.");
 
     let scalingMatrix;
 
@@ -132,14 +131,15 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
  * @return {Object}
  */
 function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy = 1) {
-    if (numberOfLayers < 1) throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
+    if (numberOfLayers < 1)
+        throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
 
     const cell = material.Lattice.Cell;
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
-    const outOfPlaneAxisIndex = millerSupercell
-        .getMostCollinearVectorIndex(millerPlanePseudoNormal);
+    const outOfPlaneAxisIndex =
+        millerSupercell.getMostCollinearVectorIndex(millerPlanePseudoNormal);
     const dimensionsScalingMatrix = getDimensionsScalingMatrix(
         cell,
         millerSupercell,
