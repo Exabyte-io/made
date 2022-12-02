@@ -208,8 +208,9 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      * @param salt {String} Salt for hashing, empty string by default.
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
-    calculateHash(salt = "", isScaled = false) {
+    calculateHash(salt = "", isScaled = false, bypassNonPeriodicCheck = false) {
         let message;
+        if (bypassNonPeriodicCheck) return "";
         if (!this.isNonPeriodic) {
             message =
                 this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
