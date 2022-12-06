@@ -190,8 +190,7 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      *  inchi cannot be found.
      *  @returns {String}
      */
-    getInchiStringForHash(bypassNonPeriodicCheck = false) {
-        if (bypassNonPeriodicCheck) return "";
+    getInchiStringForHash() {
         const inchi = this.getDerivedPropertyByName("inchi");
         if (inchi) {
             return inchi.value;
@@ -211,11 +210,11 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      */
     calculateHash(salt = "", isScaled = false, bypassNonPeriodicCheck = false) {
         let message;
-        if (!this.isNonPeriodic) {
+        if (!this.isNonPeriodic || bypassNonPeriodicCheck) {
             message =
                 this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         } else {
-            message = this.getInchiStringForHash(bypassNonPeriodicCheck);
+            message = this.getInchiStringForHash();
         }
         return CryptoJS.MD5(message).toString();
     }
