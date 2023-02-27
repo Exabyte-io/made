@@ -1,4 +1,5 @@
 import almostEqual from "array-almost-equal";
+import lodash from "lodash";
 
 import math from "../../math";
 import { Lattice } from "../lattice";
@@ -110,5 +111,17 @@ export class ReciprocalLattice extends Lattice {
     getDimensionsFromPoints(nKpoints) {
         const indices = [0, 1, 2];
         return indices.map((i) => this.calculateDimension(nKpoints, i));
+    }
+
+    /**
+     * Calculate grid dimensions from k-point spacing, i.e.
+     * the maximum distance between adjacent points along a reciprocal axis.
+     * @param {number} spacing - maximum Spacing between k-points (1/Ang)
+     * @return {number[]}
+     */
+    getDimensionsFromSpacing(spacing) {
+        return this.reciprocalVectorNorms.map((norm) => {
+            return Math.max(1, Math.ceil(lodash.round(norm / spacing, 4)));
+        });
     }
 }
