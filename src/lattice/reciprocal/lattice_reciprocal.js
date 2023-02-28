@@ -124,4 +124,14 @@ export class ReciprocalLattice extends Lattice {
             return Math.max(1, Math.ceil(lodash.round(norm / spacing, 4)));
         });
     }
+
+    /**
+     * Calculate grid spacing as average of spacing along individual reciprocal axes.
+     * @param {number[]} dimensions - Array of dimensions
+     * @return {number} - average grid spacing
+     */
+    getSpacingFromDimensions(dimensions) {
+        const norms = this.reciprocalVectorNorms;
+        return math.mean(dimensions.map((dim, i) => norms[i] / Math.max(1, dim)));
+    }
 }
