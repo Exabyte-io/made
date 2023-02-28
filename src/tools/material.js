@@ -45,7 +45,7 @@ function getBasisConfigTranslatedToCenter(material) {
     const centerOfCoordinates = updatedBasis.centerOfCoordinatesPoint;
     const centerOfLattice = math.multiply(
         0.5,
-        material.lattice.vectorArrays.reduce((a, b) => math.add(a, b)),
+        material.Lattice.vectorArrays.reduce((a, b) => math.add(a, b)),
     );
     const translationVector = math.subtract(centerOfLattice, centerOfCoordinates);
     updatedBasis.translateByVector(translationVector);
