@@ -113,25 +113,42 @@ export class ReciprocalLattice extends Lattice {
         return indices.map((i) => this.calculateDimension(nKpoints, i));
     }
 
+    get conversionTable() {
+        const a = math.norm(this.vectorArrays[0]);
+        return {
+            cartesian: {
+                angstrom: (2 * Math.PI) / a,
+            },
+            angstrom: {
+                cartesian: a / (2 * Math.PI),
+            },
+        };
+    }
+
     /**
      * Calculate grid dimensions from k-point spacing, i.e.
      * the maximum distance between adjacent points along a reciprocal axis.
-     * @param {number} spacing - maximum Spacing between k-points (1/Ang)
+     * Note: just as the lattice vectors spacing is in cartesian (2pi / a) units by default
+     * @param {number} spacing - maximum Spacing between k-points
+     * @param {string} units - units of spacing parameter (default: 2pi / a)
      * @return {number[]}
      */
-    getDimensionsFromSpacing(spacing) {
+    getDimensionsFromSpacing(spacing, units = "cartesian") {
+        const factor = this.conversionTable[units]?.cartesian || 1;
         return this.reciprocalVectorNorms.map((norm) => {
-            return Math.max(1, Math.ceil(lodash.round(norm / spacing, 4)));
+            return Math.max(1, Math.ceil(lodash.round(norm / (spacing * factor), 4)));
         });
     }
 
     /**
      * Calculate grid spacing as average of spacing along individual reciprocal axes.
      * @param {number[]} dimensions - Array of dimensions
+     * @param {string} units - units of spacing parameter (default: 2pi / a)
      * @return {number} - average grid spacing
      */
-    getSpacingFromDimensions(dimensions) {
+    getSpacingFromDimensions(dimensions, units = "cartesian") {
+        const factor = this.conversionTable.cartesian[units] || 1;
         const norms = this.reciprocalVectorNorms;
-        return math.mean(dimensions.map((dim, i) => norms[i] / Math.max(1, dim)));
+        return factor * math.mean(dimensions.map((dim, i) => norms[i] / Math.max(1, dim)));
     }
 }
