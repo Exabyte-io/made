@@ -91,24 +91,24 @@ export class ReciprocalLattice extends Lattice {
 
     /**
      * Calculate grid dimension based on reciprocal lattice vectors.
-     * @param nPoints - Total number of points
-     * @param index - Index of reciprocal vector
+     * @param {number} nPoints - Total number of points
+     * @param {number} index - Index of reciprocal vector
      * @return {number} - Grid dimension in direction of reciprocal vector
      * @todo This could be moved to a separate KGrid class.
      */
     calculateDimension(nPoints, index) {
         const norms = this.reciprocalVectorNorms;
         const [j, k] = [0, 1, 2].filter((i) => i !== index); // get indices of other two dimensions
-        const N = Math.cbrt((nPoints * norms[index] ** 2) / (norms[j] * norms[k]));
-        return Math.max(1, Math.ceil(N));
+        const N = math.cbrt((nPoints * norms[index] ** 2) / (norms[j] * norms[k]));
+        return math.max(1, math.ceil(N));
     }
 
     /**
      * Calculate grid dimensions from total number of k-points.
-     * @param nKpoints - Total number of k-points.
+     * @param {number} nKpoints - Total number of k-points.
      * @return {number[]} - Grid dimensions
      */
-    getDimensionsFromPoints(nKpoints) {
+    getDimensionsFromPointsCount(nKpoints) {
         const indices = [0, 1, 2];
         return indices.map((i) => this.calculateDimension(nKpoints, i));
     }

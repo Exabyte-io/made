@@ -68,7 +68,7 @@ describe("Lattice Reciprocal", () => {
 
     it("should calculate k-grid dimension based on number of points", () => {
         const lattice = new ReciprocalLattice(SiSlab.lattice);
-        const dimensions = lattice.getDimensionsFromPoints(500);
+        const dimensions = lattice.getDimensionsFromPointsCount(500);
         const expectedDimensions = [12, 12, 4];
         assertDeepAlmostEqual(dimensions, expectedDimensions);
     });
