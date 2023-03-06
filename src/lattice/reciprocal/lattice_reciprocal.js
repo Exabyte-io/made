@@ -118,10 +118,10 @@ export class ReciprocalLattice extends Lattice {
         const a = math.norm(this.vectorArrays[0]);
         return {
             [ATOMIC_COORD_UNITS.cartesian]: {
-                [UNITS.angstrom]: (2 * Math.PI) / a,
+                [UNITS.angstrom]: (2 * math.PI) / a,
             },
             [UNITS.angstrom]: {
-                [ATOMIC_COORD_UNITS.cartesian]: a / (2 * Math.PI),
+                [ATOMIC_COORD_UNITS.cartesian]: a / (2 * math.PI),
             },
         };
     }
@@ -137,7 +137,7 @@ export class ReciprocalLattice extends Lattice {
     getDimensionsFromSpacing(spacing, units = ATOMIC_COORD_UNITS.cartesian) {
         const factor = this.conversionTable[units][ATOMIC_COORD_UNITS.cartesian] || 1;
         return this.reciprocalVectorNorms.map((norm) => {
-            return Math.max(1, Math.ceil(lodash.round(norm / (spacing * factor), 4)));
+            return math.max(1, math.ceil(lodash.round(norm / (spacing * factor), 4)));
         });
     }
 
@@ -150,6 +150,6 @@ export class ReciprocalLattice extends Lattice {
     getSpacingFromDimensions(dimensions, units = ATOMIC_COORD_UNITS.cartesian) {
         const factor = this.conversionTable[ATOMIC_COORD_UNITS.cartesian][units] || 1;
         const norms = this.reciprocalVectorNorms;
-        return factor * math.mean(dimensions.map((dim, i) => norms[i] / Math.max(1, dim)));
+        return factor * math.mean(dimensions.map((dim, i) => norms[i] / math.max(1, dim)));
     }
 }
