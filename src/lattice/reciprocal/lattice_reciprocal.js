@@ -22,6 +22,24 @@ export class ReciprocalLattice extends Lattice {
     }
 
     /**
+     * Norms of reciprocal vectors.
+     * @return {number[]}
+     */
+    get reciprocalVectorNorms() {
+        return this.reciprocalVectors.map((vec) => math.norm(vec));
+    }
+
+    /**
+     * Ratio of reciprocal vector norms scaled by the inverse of the largest component.
+     * @return {number[]}
+     */
+    get reciprocalVectorRatios() {
+        const norms = this.reciprocalVectorNorms;
+        const maxNorm = math.max(...norms);
+        return norms.map((n) => n / maxNorm);
+    }
+
+    /**
      * Get point (in crystal coordinates) in cartesian coordinates.
      * @param {Array} point - point in 3D space
      * @return {Array}
@@ -68,5 +86,29 @@ export class ReciprocalLattice extends Lattice {
             }
         });
         return kpointPath;
+    }
+
+    /**
+     * Calculate grid dimension based on reciprocal lattice vectors.
+     * @param {number} nPoints - Total number of points
+     * @param {number} index - Index of reciprocal vector
+     * @return {number} - Grid dimension in direction of reciprocal vector
+     * @todo This could be moved to a separate KGrid class.
+     */
+    calculateDimension(nPoints, index) {
+        const norms = this.reciprocalVectorNorms;
+        const [j, k] = [0, 1, 2].filter((i) => i !== index); // get indices of other two dimensions
+        const N = math.cbrt((nPoints * norms[index] ** 2) / (norms[j] * norms[k]));
+        return math.max(1, math.ceil(N));
+    }
+
+    /**
+     * Calculate grid dimensions from total number of k-points.
+     * @param {number} nKpoints - Total number of k-points.
+     * @return {number[]} - Grid dimensions
+     */
+    getDimensionsFromPointsCount(nKpoints) {
+        const indices = [0, 1, 2];
+        return indices.map((i) => this.calculateDimension(nKpoints, i));
     }
 }
