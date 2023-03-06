@@ -1,5 +1,5 @@
 import { ReciprocalLattice } from "../../src/lattice/reciprocal/lattice_reciprocal";
-import { Na4Cl4, Si } from "../enums";
+import { Na4Cl4, Si, SiSlab } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Lattice Reciprocal", () => {
@@ -64,5 +64,12 @@ describe("Lattice Reciprocal", () => {
             },
         ];
         assertDeepAlmostEqual(actualPoints, expectedPoints);
+    });
+
+    it("should calculate k-grid dimension based on number of points", () => {
+        const lattice = new ReciprocalLattice(SiSlab.lattice);
+        const dimensions = lattice.getDimensionsFromPointsCount(500);
+        const expectedDimensions = [12, 12, 4];
+        assertDeepAlmostEqual(dimensions, expectedDimensions);
     });
 });
