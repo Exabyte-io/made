@@ -72,4 +72,18 @@ describe("Lattice Reciprocal", () => {
         const expectedDimensions = [12, 12, 4];
         assertDeepAlmostEqual(dimensions, expectedDimensions);
     });
+
+    it("should calculate k-grid dimension based on spacing in cartesian units", () => {
+        const lattice = new ReciprocalLattice(SiSlab.lattice);
+        const dimensions = lattice.getDimensionsFromSpacing(0.09);
+        const expectedDimensions = [12, 12, 4];
+        assertDeepAlmostEqual(dimensions, expectedDimensions);
+    });
+
+    it("should calculate k-grid dimension based on spacing in 1/angstrom", () => {
+        const lattice = new ReciprocalLattice(SiSlab.lattice);
+        const dimensions = lattice.getDimensionsFromSpacing(0.11, "angstrom");
+        const expectedDimensions = [12, 12, 4];
+        assertDeepAlmostEqual(dimensions, expectedDimensions);
+    });
 });
