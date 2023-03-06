@@ -1,3 +1,4 @@
+import { ATOMIC_COORD_UNITS, units as UNITS } from "@exabyte-io/code.js/dist/constants";
 import almostEqual from "array-almost-equal";
 import lodash from "lodash";
 
@@ -116,11 +117,11 @@ export class ReciprocalLattice extends Lattice {
     get conversionTable() {
         const a = math.norm(this.vectorArrays[0]);
         return {
-            cartesian: {
-                angstrom: (2 * Math.PI) / a,
+            [ATOMIC_COORD_UNITS.cartesian]: {
+                [UNITS.angstrom]: (2 * Math.PI) / a,
             },
-            angstrom: {
-                cartesian: a / (2 * Math.PI),
+            [UNITS.angstrom]: {
+                [ATOMIC_COORD_UNITS.cartesian]: a / (2 * Math.PI),
             },
         };
     }
@@ -133,8 +134,8 @@ export class ReciprocalLattice extends Lattice {
      * @param {string} units - units of spacing parameter (default: 2pi / a)
      * @return {number[]}
      */
-    getDimensionsFromSpacing(spacing, units = "cartesian") {
-        const factor = this.conversionTable[units]?.cartesian || 1;
+    getDimensionsFromSpacing(spacing, units = ATOMIC_COORD_UNITS.cartesian) {
+        const factor = this.conversionTable[units][ATOMIC_COORD_UNITS.cartesian] || 1;
         return this.reciprocalVectorNorms.map((norm) => {
             return Math.max(1, Math.ceil(lodash.round(norm / (spacing * factor), 4)));
         });
@@ -146,8 +147,8 @@ export class ReciprocalLattice extends Lattice {
      * @param {string} units - units of spacing parameter (default: 2pi / a)
      * @return {number} - average grid spacing
      */
-    getSpacingFromDimensions(dimensions, units = "cartesian") {
-        const factor = this.conversionTable.cartesian[units] || 1;
+    getSpacingFromDimensions(dimensions, units = ATOMIC_COORD_UNITS.cartesian) {
+        const factor = this.conversionTable[ATOMIC_COORD_UNITS.cartesian][units] || 1;
         const norms = this.reciprocalVectorNorms;
         return factor * math.mean(dimensions.map((dim, i) => norms[i] / Math.max(1, dim)));
     }
