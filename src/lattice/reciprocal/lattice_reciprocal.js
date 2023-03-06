@@ -98,8 +98,8 @@ export class ReciprocalLattice extends Lattice {
     calculateDimension(nPoints, index) {
         const norms = this.reciprocalVectorNorms;
         const [j, k] = [0, 1, 2].filter((i) => i !== index); // get indices of other two dimensions
-        const N = Math.cbrt((nPoints * norms[index] ** 2) / (norms[j] * norms[k]));
-        return Math.max(1, Math.ceil(N));
+        const N = math.cbrt((nPoints * norms[index] ** 2) / (norms[j] * norms[k]));
+        return math.max(1, math.ceil(N));
     }
 
     /**
