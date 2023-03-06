@@ -115,7 +115,7 @@ export class ReciprocalLattice extends Lattice {
     }
 
     get conversionTable() {
-        const a = math.norm(this.vectorArrays[0]);
+        const { a } = this;
         return {
             [ATOMIC_COORD_UNITS.cartesian]: {
                 [UNITS.angstrom]: (2 * math.PI) / a,
