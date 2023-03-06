@@ -90,8 +90,8 @@ export class ReciprocalLattice extends Lattice {
 
     /**
      * Calculate grid dimension based on reciprocal lattice vectors.
-     * @param nPoints - Total number of points
-     * @param index - Index of reciprocal vector
+     * @param {number} nPoints - Total number of points
+     * @param {number} index - Index of reciprocal vector
      * @return {number} - Grid dimension in direction of reciprocal vector
      * @todo This could be moved to a separate KGrid class.
      */
@@ -104,7 +104,7 @@ export class ReciprocalLattice extends Lattice {
 
     /**
      * Calculate grid dimensions from total number of k-points.
-     * @param nKpoints - Total number of k-points.
+     * @param {number} nKpoints - Total number of k-points.
      * @return {number[]} - Grid dimensions
      */
     getDimensionsFromPoints(nKpoints) {
