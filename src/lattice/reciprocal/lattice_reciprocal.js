@@ -1,4 +1,6 @@
+import { ATOMIC_COORD_UNITS, units as UNITS } from "@exabyte-io/code.js/dist/constants";
 import almostEqual from "array-almost-equal";
+import lodash from "lodash";
 
 import math from "../../math";
 import { Lattice } from "../lattice";
@@ -110,5 +112,44 @@ export class ReciprocalLattice extends Lattice {
     getDimensionsFromPointsCount(nKpoints) {
         const indices = [0, 1, 2];
         return indices.map((i) => this.calculateDimension(nKpoints, i));
+    }
+
+    get conversionTable() {
+        const { a } = this;
+        return {
+            [ATOMIC_COORD_UNITS.cartesian]: {
+                [UNITS.angstrom]: (2 * math.PI) / a,
+            },
+            [UNITS.angstrom]: {
+                [ATOMIC_COORD_UNITS.cartesian]: a / (2 * math.PI),
+            },
+        };
+    }
+
+    /**
+     * Calculate grid dimensions from k-point spacing, i.e.
+     * the maximum distance between adjacent points along a reciprocal axis.
+     * Note: just as the lattice vectors spacing is in cartesian (2pi / a) units by default
+     * @param {number} spacing - maximum Spacing between k-points
+     * @param {string} units - units of spacing parameter (default: 2pi / a)
+     * @return {number[]}
+     */
+    getDimensionsFromSpacing(spacing, units = ATOMIC_COORD_UNITS.cartesian) {
+        const factor = this.conversionTable[units][ATOMIC_COORD_UNITS.cartesian] || 1;
+        return this.reciprocalVectorNorms.map((norm) => {
+            return math.max(1, math.ceil(lodash.round(norm / (spacing * factor), 4)));
+        });
+    }
+
+    /**
+     * Calculate grid spacing as average of spacing along individual reciprocal axes.
+     * @param {number[]} dimensions - Array of dimensions
+     * @param {string} units - units of spacing parameter (default: 2pi / a)
+     * @return {number} - average grid spacing
+     */
+    getSpacingFromDimensions(dimensions, units = ATOMIC_COORD_UNITS.cartesian) {
+        const factor = this.conversionTable[ATOMIC_COORD_UNITS.cartesian][units] || 1;
+        const norms = this.reciprocalVectorNorms;
+        return factor * math.mean(dimensions.map((dim, i) => norms[i] / math.max(1, dim)));
     }
 }
