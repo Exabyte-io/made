@@ -14,6 +14,47 @@ import { LATTICE_TYPE } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 
+export const simpleBasisMaterialConfig = {
+    name: "Silicon Cubic",
+    basis: {
+        elements: [
+            {
+                id: 1,
+                value: "Si",
+            },
+            {
+                id: 2,
+                value: "Si",
+            },
+        ],
+        coordinates: [
+            {
+                id: 1,
+                value: [0.0, 0.0, 0.0],
+            },
+            {
+                id: 2,
+                value: [0.25, 0.25, 0.25],
+            },
+        ],
+        units: ATOMIC_COORD_UNITS.crystal,
+    },
+    lattice: {
+        // Conventional cubic cell
+        type: LATTICE_TYPE.CUB,
+        a: 5.43,
+        b: 5.43,
+        c: 5.43,
+        alpha: 90,
+        beta: 90,
+        gamma: 90,
+        units: {
+            length: units.angstrom,
+            angle: units.degree,
+        },
+    },
+};
+
 export const defaultMaterialConfig = {
     name: "Silicon FCC",
     basis: {
