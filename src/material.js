@@ -15,26 +15,19 @@ import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 
 export const simpleBasisMaterialConfig = {
-    name: "Silicon Cubic",
+    name: "As Simple Cubic",
+    description: "https://materialsproject.org/materials/mp-10",
     basis: {
         elements: [
             {
                 id: 1,
-                value: "Si",
-            },
-            {
-                id: 2,
-                value: "Si",
+                value: "As",
             },
         ],
         coordinates: [
             {
                 id: 1,
-                value: [0.0, 0.0, 0.0],
-            },
-            {
-                id: 2,
-                value: [0.25, 0.25, 0.25],
+                value: [0.5, 0.5, 0.5],
             },
         ],
         units: ATOMIC_COORD_UNITS.crystal,
@@ -42,9 +35,9 @@ export const simpleBasisMaterialConfig = {
     lattice: {
         // Conventional cubic cell
         type: LATTICE_TYPE.CUB,
-        a: 5.43,
-        b: 5.43,
-        c: 5.43,
+        a: 2.7,
+        b: 2.7,
+        c: 2.7,
         alpha: 90,
         beta: 90,
         gamma: 90,
