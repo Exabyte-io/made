@@ -123,6 +123,7 @@ const PRIMITIVE_CELLS = {
     // Algorithm from http://pymatgen.org/_modules/pymatgen/core/lattice.html (from_params)
     [LATTICE_TYPE.TRI]: ({ a, b, c, alpha, beta, gamma }) => {
         // convert angles to Radians
+        // eslint-disable-next-line no-param-reassign
         [alpha, beta, gamma] = [alpha, beta, gamma].map(
             (x) => math.unit(x, "degree").to("rad").value,
         );
@@ -173,9 +174,10 @@ const PRIMITIVE_CELLS = {
 export function primitiveCell(lattice, skipRounding = false) {
     const [vectorA, vectorB, vectorC] = PRIMITIVE_CELLS[lattice.type || LATTICE_TYPE.TRI](lattice);
     // set precision and remove JS floating point artifacts
-    !skipRounding &&
+    if (!skipRounding) {
         [vectorA, vectorB, vectorC].map((vec) =>
             vec.map((c) => math.precise(c)).map(math.roundToZero),
         );
+    }
     return [vectorA, vectorB, vectorC];
 }

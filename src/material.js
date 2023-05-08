@@ -14,7 +14,7 @@ import { LATTICE_TYPE } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 
-const defaultMaterialConfig = {
+export const defaultMaterialConfig = {
     name: "Silicon FCC",
     basis: {
         elements: [
@@ -76,6 +76,10 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
 
     get name() {
         return super.name || this.formula;
+    }
+
+    set name(name) {
+        super.name = name;
     }
 
     static get defaultConfig() {
@@ -212,9 +216,9 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      * @param salt {String} Salt for hashing, empty string by default.
      * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
      */
-    calculateHash(salt = "", isScaled = false) {
+    calculateHash(salt = "", isScaled = false, bypassNonPeriodicCheck = false) {
         let message;
-        if (!this.isNonPeriodic) {
+        if (!this.isNonPeriodic || bypassNonPeriodicCheck) {
             message =
                 this.Basis.hashString + "#" + this.Lattice.getHashString(isScaled) + "#" + salt;
         } else {

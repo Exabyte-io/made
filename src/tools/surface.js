@@ -5,8 +5,9 @@ import SupercellTools from "./supercell";
 const MULT = math.multiply;
 const ADD = math.add;
 const DOT = math.product;
-const getMatrixInLeftHandedRepresentation = (matrix) =>
-    math.det(matrix) < 0 ? MULT(matrix, -1) : matrix;
+const getMatrixInLeftHandedRepresentation = (matrix) => {
+    return math.det(matrix) < 0 ? MULT(matrix, -1) : matrix;
+};
 
 /**
  * Helper function for extended GCD.
@@ -43,24 +44,27 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
     if ((h0 && k0) || (h0 && l0) || (k0 && l0)) {
         // if any two indices are zero
 
-        if (!h0)
+        if (!h0) {
             scalingMatrix = [
                 [0, 1, 0],
                 [0, 0, 1],
                 [1, 0, 0],
             ];
-        if (!k0)
+        }
+        if (!k0) {
             scalingMatrix = [
                 [0, 0, 1],
                 [1, 0, 0],
                 [0, 1, 0],
             ];
-        if (!l0)
+        }
+        if (!l0) {
             scalingMatrix = [
                 [1, 0, 0],
                 [0, 1, 0],
                 [0, 0, 1],
             ];
+        }
     } else {
         const [a1, a2, a3] = cell.vectorsAsArray;
         // z1 = (k * a1 - h * a2)

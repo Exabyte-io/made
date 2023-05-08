@@ -53,6 +53,7 @@ export class LatticeVectors {
         isConventional = false,
     }) {
         // use "direct" lattice constructor for primitive lattice
+        // eslint-disable-next-line no-param-reassign
         if (!isConventional) type = "TRI";
 
         // set precision and remove JS floating point artifacts
