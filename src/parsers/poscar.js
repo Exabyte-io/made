@@ -1,10 +1,11 @@
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
-import { ATOMIC_COORD_UNITS } from "../constants";
+import { ATOMIC_COORD_UNITS, units } from "../constants";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
 import { Material } from "../material";
+import { LATTICE_TYPE } from "../lattice/types";
 
 const _print = (x, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
 const _latticeVectorsToString = (vectors) =>
@@ -122,26 +123,20 @@ function fromPoscar(fileContent) {
             atomIndex++;
         }
     }
-
+    
+    const latticeType = LATTICE_TYPE.HEX; // TODO: handle actual lattice
 
     const materialConfig = {
-        lattice: {
-            a: 1,  // TODO: handle this later
-            alpha: 90,
-            basis: latticeVectors,
-            units: {
-                "length": "angstrom",
-                "angle": "degree"
-            },
-        },
+        name: comment,
         basis: {
             elements: atomSymbols.flatMap((symbol, i) =>
                 Array(atomCounts[i]).fill(symbol)
             ),
             coordinates,
-            units: coordinateType === "direct" ? "fractional" : "angstrom",
-            cell: latticeVectors,
+            units: coordinateType === "direct" ? ATOMIC_COORD_UNITS.direct : ATOMIC_COORD_UNITS.cartesian,
+            cell:  latticeVectors,
         },
+        lattice: new Lattice(latticeType, latticeVectors)
     };
 
     if (selectiveDynamics) {
