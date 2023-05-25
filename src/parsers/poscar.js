@@ -63,8 +63,91 @@ export function atomsCount(poscarFileContent) {
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
 
+/**
+ * Parses POSCAR file into a Material object.
+ * @param {string} fileContent - POSCAR file content.
+ * @return {Object} Material Config.
+ */
+function fromPoscar(fileContent) {
+    const lines = fileContent.split("\n");
+
+    const comment = lines[0];
+    const latticeConstant = parseFloat(lines[1].trim());
+
+    const latticeVectors = [
+        lines[2].split(" ").map(Number),
+        lines[3].split(" ").map(Number),
+        lines[4].split(" ").map(Number),
+    ].map((vector) => vector.map((component) => component * latticeConstant));
+
+    // Atom symbols and counts
+    const atomSymbols = lines[5].trim().split(" ");
+    const atomCounts = lines[6].trim().split(" ").map(Number);
+
+    // Check if selective dynamics and coordinates type is used
+    let selectiveDynamics = false;
+    let coordinateType = "";
+    let startLine = 7;
+    if (lines[startLine].trim()[0].toLowerCase() === "s") {
+        selectiveDynamics = true;
+        coordinateType = lines[8].trim().toLowerCase();
+        startLine = 9;
+    } else {
+        coordinateType = lines[7].trim().toLowerCase();
+        startLine = 8;
+    }
+
+    // Atom coordinates and constraints
+    const coordinates = [];
+    const constraints = [];
+    let atomIndex = 0;
+    for (let i = 0; i < atomSymbols.length; i++) {
+        for (let j = 0; j < atomCounts[i]; j++) {
+            const lineComponents = lines[startLine + atomIndex].trim().split(" ");
+            const coordinate = [
+                parseFloat(lineComponents[0]),
+                parseFloat(lineComponents[1]),
+                parseFloat(lineComponents[2]),
+            ];
+            coordinates.push(coordinate);
+            if (selectiveDynamics) {
+                const constraint = [
+                    lineComponents[3] === "T",
+                    lineComponents[4] === "T",
+                    lineComponents[5] === "T",
+                ];
+                constraints.push(constraint);
+            }
+            atomIndex += 1;
+        }
+    }
+
+    const latticeType = Lattice.latticeType.HEX; // TODO: handle actual lattice
+
+    const materialConfig = {
+        name: comment,
+        basis: {
+            elements: atomSymbols.flatMap((symbol, i) => Array(atomCounts[i]).fill(symbol)),
+            coordinates,
+            units:
+                coordinateType === "direct"
+                    ? ATOMIC_COORD_UNITS.direct
+                    : ATOMIC_COORD_UNITS.cartesian,
+            cell: latticeVectors,
+        },
+        lattice: new Lattice(latticeType, latticeVectors),
+    };
+
+    if (selectiveDynamics) {
+        materialConfig.basis.constraints = constraints;
+    }
+
+    return materialConfig;
+}
+
 export default {
     toPoscar,
+    fromPoscar,
     atomicConstraintsCharFromBool,
     atomsCount,
 };
