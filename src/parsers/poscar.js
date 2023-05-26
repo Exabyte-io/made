@@ -91,7 +91,9 @@ function fromPoscar(fileContent) {
         startLine = 8;
     }
 
-    const elements = atomSymbols.flatMap((symbol, i) => Array(atomCounts[i]).fill(symbol));
+    const elements = atomSymbols
+        .map((symbol, i) => Array(atomCounts[i]).fill(symbol))
+        .reduce((a, b) => a.concat(b), []);
 
     // Atom coordinates and constraints
     const coordinates = [];
