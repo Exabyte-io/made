@@ -59,14 +59,14 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
  * @returns {Number}
  */
 export function atomsCount(poscarFileContent) {
-    const atomsLine = poscarFileContent.split("\n")[6].split(" ");
+    const atomsLine = poscarFileContent.split("\n")[6].split(/\s+/);
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
 
 /**
- * Parses POSCAR file into a Material object.
+ * Parses POSCAR file into a Material config object.
  * @param {string} fileContent - POSCAR file content.
- * @return {Object} Material Config.
+ * @return {Object} Material config.
  */
 function fromPoscar(fileContent) {
     const lines = fileContent.split("\n");
@@ -74,15 +74,9 @@ function fromPoscar(fileContent) {
     const comment = lines[0];
     const latticeConstant = parseFloat(lines[1].trim());
 
-    const latticeVectors = [
-        lines[2].split(" ").map(Number),
-        lines[3].split(" ").map(Number),
-        lines[4].split(" ").map(Number),
-    ].map((vector) => vector.map((component) => component * latticeConstant));
-
     // Atom symbols and counts
-    const atomSymbols = lines[5].trim().split(" ");
-    const atomCounts = lines[6].trim().split(" ").map(Number);
+    const atomSymbols = lines[5].trim().split(/\s+/);
+    const atomCounts = lines[6].trim().split(/\s+/).map(Number);
 
     // Check if selective dynamics and coordinates type is used
     let selectiveDynamics = false;
@@ -90,12 +84,14 @@ function fromPoscar(fileContent) {
     let startLine = 7;
     if (lines[startLine].trim()[0].toLowerCase() === "s") {
         selectiveDynamics = true;
-        coordinateType = lines[8].trim().toLowerCase();
+        coordinateType = lines[8].trim()[0].toLowerCase();
         startLine = 9;
     } else {
-        coordinateType = lines[7].trim().toLowerCase();
+        coordinateType = lines[7].trim()[0].toLowerCase();
         startLine = 8;
     }
+
+    const elements = atomSymbols.flatMap((symbol, i) => Array(atomCounts[i]).fill(symbol));
 
     // Atom coordinates and constraints
     const coordinates = [];
@@ -103,44 +99,49 @@ function fromPoscar(fileContent) {
     let atomIndex = 0;
     for (let i = 0; i < atomSymbols.length; i++) {
         for (let j = 0; j < atomCounts[i]; j++) {
-            const lineComponents = lines[startLine + atomIndex].trim().split(" ");
+            const lineComponents = lines[startLine + atomIndex].trim().split(/\s+/);
             const coordinate = [
                 parseFloat(lineComponents[0]),
                 parseFloat(lineComponents[1]),
                 parseFloat(lineComponents[2]),
             ];
             coordinates.push(coordinate);
+
+            // Add constraints if selective dynamics is used
             if (selectiveDynamics) {
                 const constraint = [
                     lineComponents[3] === "T",
                     lineComponents[4] === "T",
                     lineComponents[5] === "T",
                 ];
-                constraints.push(constraint);
+                constraints.push({ id: j, value: constraint });
             }
             atomIndex += 1;
         }
     }
 
-    const latticeType = Lattice.latticeType.HEX; // TODO: handle actual lattice
+    const lattice = Lattice.fromVectors({
+        a: lines[2].trim().split(/\s+/).map(Number),
+        b: lines[3].trim().split(/\s+/).map(Number),
+        c: lines[4].trim().split(/\s+/).map(Number),
+        alat: latticeConstant, // assuming unit scale for the lattice vectors
+        units: "angstrom",
+    });
+
+    const basis = new ConstrainedBasis({
+        elements,
+        coordinates,
+        units: coordinateType === "c" ? ATOMIC_COORD_UNITS.cartesian : ATOMIC_COORD_UNITS.crystal,
+        cell: lattice.vectorArrays,
+        constraints,
+    });
 
     const materialConfig = {
+        lattice: lattice.toJSON(),
+        basis: basis.toJSON(),
         name: comment,
-        basis: {
-            elements: atomSymbols.flatMap((symbol, i) => Array(atomCounts[i]).fill(symbol)),
-            coordinates,
-            units:
-                coordinateType === "direct"
-                    ? ATOMIC_COORD_UNITS.direct
-                    : ATOMIC_COORD_UNITS.cartesian,
-            cell: latticeVectors,
-        },
-        lattice: new Lattice(latticeType, latticeVectors),
+        isNonPeriodic: false,
     };
-
-    if (selectiveDynamics) {
-        materialConfig.basis.constraints = constraints;
-    }
 
     return materialConfig;
 }
