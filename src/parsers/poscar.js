@@ -146,7 +146,51 @@ function fromPoscar(fileContent) {
     return materialConfig;
 }
 
+/**
+ * @summary Checks if a string has a POSCAR format (first 8 lines are read)
+ * @param {string} text - string to check
+ * @returns {boolean}
+ */
+function isPoscar(text) {
+    const lines = text.split("\n");
+
+    // Checking number of lines, minimum requirement for POSCAR
+    if (lines.length < 7) {
+        return false;
+    }
+
+    // Check the lattice constant (a single floating point number)
+    if (!/^[+-]?[\d.]+$/.test(lines[1].trim())) {
+        return false;
+    }
+
+    // Check the lattice vectors (three lines, each with three floating point numbers)
+    for (let i = 2; i <= 4; i++) {
+        if (!/^[+-]?[\d.\s]+$/.test(lines[i].trim())) {
+            return false;
+        }
+    }
+
+    // Check the atomic species line (alphabetic characters, space-separated)
+    if (!/^[a-zA-Z\s]+$/.test(lines[5].trim())) {
+        return false;
+    }
+
+    // Check the number of atoms per species line (digits, space-separated)
+    if (!/^[\d\s]+$/.test(lines[6].trim())) {
+        return false;
+    }
+
+    // Check the coordinate type line (only first character is neccessary, "s" or "S" for "Selective dynamics",
+    // "d" or "D" for "Direct", or "c" or "C" for "Cartesian")
+    if (!/^[sdc]/.test(lines[7].trim().toLowerCase())) {
+        return false;
+    }
+    return true;
+}
+
 export default {
+    isPoscar,
     toPoscar,
     fromPoscar,
     atomicConstraintsCharFromBool,
