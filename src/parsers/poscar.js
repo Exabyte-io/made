@@ -124,7 +124,7 @@ function fromPoscar(fileContent) {
         a: lines[2].trim().split(/\s+/).map(Number),
         b: lines[3].trim().split(/\s+/).map(Number),
         c: lines[4].trim().split(/\s+/).map(Number),
-        alat: latticeConstant, // assuming unit scale for the lattice vectors
+        alat: latticeConstant,
         units: "angstrom",
     });
 
