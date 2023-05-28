@@ -7,6 +7,7 @@ export const NATIVE_FORMAT = {
     CIF: "cif",
     PWX: "pwx",
     XYZ: "xyz",
+    UNKNOWN: "unknown",
 };
 
 /**
@@ -20,7 +21,7 @@ function detectFormat(text) {
     if (jsonRegex.test(text)) return NATIVE_FORMAT.JSON;
     if (Poscar.isPoscar(text)) return NATIVE_FORMAT.POSCAR;
 
-    throw new Error("Unknown format");
+    return NATIVE_FORMAT.UNKNOWN;
 }
 
 /**
@@ -37,6 +38,8 @@ function convertFromNative(text) {
             return JSON.parse(text);
         case NATIVE_FORMAT.POSCAR:
             return Poscar.fromPoscar(text);
+        case NATIVE_FORMAT.UNKNOWN:
+            throw new Error(`Unknown format`);
         // TODO:  add more formats
         default:
             throw new Error(`Unsupported format: ${format}`);
