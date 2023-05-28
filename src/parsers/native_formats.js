@@ -43,4 +43,7 @@ function convertFromNative(text) {
     }
 }
 
-export default convertFromNative;
+export default {
+    detectFormat,
+    convertFromNative,
+};
