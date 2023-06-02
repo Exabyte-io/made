@@ -1,6 +1,5 @@
 import Poscar from "./poscar";
 
-// TODO: move this enum to an appropriate file
 const NATIVE_FORMAT = {
     JSON: "json",
     POSCAR: "poscar",
@@ -30,7 +29,7 @@ function detectFormat(text) {
  * @throws {Error} - If the input string is of unknown format
  * @return {Object} - Material config
  */
-function convertFromNative(text) {
+function convertFromNativeFormat(text) {
     const format = detectFormat(text);
 
     switch (format) {
@@ -48,5 +47,5 @@ function convertFromNative(text) {
 
 export default {
     detectFormat,
-    convertFromNative,
+    convertFromNativeFormat,
 };
