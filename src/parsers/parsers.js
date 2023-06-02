@@ -1,6 +1,6 @@
 import cif from "./cif";
 import espresso from "./espresso";
-import nativeFormats from "./native_formats";
+import nativeFormatParsers from "./native_format_parsers";
 import poscar from "./poscar";
 import xyz from "./xyz";
 
@@ -9,5 +9,5 @@ export default {
     poscar,
     cif,
     espresso,
-    nativeFormats,
+    nativeFormatParsers,
 };
