@@ -1,7 +1,7 @@
 import Poscar from "./poscar";
 
 // TODO: move this enum to an appropriate file
-export const NATIVE_FORMAT = {
+const NATIVE_FORMAT = {
     JSON: "json",
     POSCAR: "poscar",
     CIF: "cif",
