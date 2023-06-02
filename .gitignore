@@ -4,4 +4,3 @@ node_modules/
 .idea/**
 .husky
 .nyc_output
-.DS_Store
