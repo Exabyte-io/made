@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import nativeFormats from "../../src/parsers/native_formats";
+import nativeFormats from "../../src/parsers/native_format_parsers";
 import { Graphene, GraphenePoscar, NiHex, NiHexPoscar } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
