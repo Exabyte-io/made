@@ -31,3 +31,9 @@ export const SiPWSCFInput = readFile(path.join(FIXTURES_DIR, "Si-pwscf.in"));
 export const Zr1H23Zr1H1 = readJSONFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.json"));
 export const Zr1H23Zr1H1Poscar = readFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.poscar"));
 export const H2O = readFile(path.join(FIXTURES_DIR, "H2O.poscar"));
+
+export const Graphene = readJSONFile(path.join(FIXTURES_DIR, "Graphene.json"));
+export const GraphenePoscar = readFile(path.join(FIXTURES_DIR, "Graphene.poscar"));
+export const NiHex = readJSONFile(path.join(FIXTURES_DIR, "Ni-hex.json"));
+export const NiHexPoscar = readFile(path.join(FIXTURES_DIR, "Ni-hex.poscar"));
+export const SiHex = readJSONFile(path.join(FIXTURES_DIR, "Si-hex.json"));
