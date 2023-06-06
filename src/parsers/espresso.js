@@ -29,8 +29,8 @@ function toEspressoFormat(materialOrConfig) {
 
 /**
  * @summary checks if the given fileContent is in the format of a Quantum ESPRESSO .in file.
- * @param fileContent
- * @returns {boolean}
+ * @param {String} fileContent
+ * @return {boolean}
  */
 function isEspressoFormat(fileContent) {
     const lines = fileContent.split("\n");
@@ -41,7 +41,7 @@ function isEspressoFormat(fileContent) {
 /**
  * @summary Function to convert Fortran namelist to JavaScript object.
  * @param {String} data - Fortran string.
- * @returns {Object}
+ * @return {Object}
  */
 function parseFortranNameList(data) {
     const blocks = data.split(/\/\n+/);
@@ -82,38 +82,32 @@ function parseFortranNameList(data) {
  * @summary Function to get atomic species from Fortran namelist.
  * @param {String[]} lines - Fortran card_lines string.
  * @param {Number} nSpecies - Number of atomic species.
- * @returns {Object}
+ * @return {String[]} - atomic species labels.
  */
 function getAtomicSpecies(lines, nSpecies) {
-    let species = null;
-
     // filter out blank or comment lines
     const trimmedLines = lines.filter((line) => line.trim() && !line.startsWith("#"));
+    const species = [];
 
     trimmedLines.forEach((line) => {
+        // TODO: redo here everything. Something is uttterly wrong
         if (line.startsWith("ATOMIC_SPECIES")) {
-            if (species !== null) {
-                throw new Error("Multiple ATOMIC_SPECIES specified");
-            }
-
-            species = [];
+            // find the next ATOMIC_SPECIES line
+            const atomicSpeciesLineIndex = trimmedLines.findIndex((_line) =>
+                _line.startsWith("ATOMIC_SPECIES"),
+            );
 
             for (let i = 0; i < nSpecies; i++) {
-                // find the next ATOMIC_SPECIES line
-                const atomicSpeciesLine = trimmedLines.find(
-                    (_line, index) => index > i && _line.startsWith("ATOMIC_SPECIES"),
-                );
-
-                const labelWeightPseudo = atomicSpeciesLine.split(" ");
+                const labelWeightPseudo = trimmedLines[atomicSpeciesLineIndex + i + 1].split(" ");
                 species.push({
                     label: labelWeightPseudo[0],
-                    weight: parseFloat(labelWeightPseudo[1]),
-                    pseudo: labelWeightPseudo[2],
+                    // Only atom symbol is used now
+                    // weight: parseFloat(labelWeightPseudo[1]),
+                    // pseudo: labelWeightPseudo[2],
                 });
             }
         }
     });
-
     return species;
 }
 
@@ -121,7 +115,7 @@ function getAtomicSpecies(lines, nSpecies) {
  * @summary Parse unit cell from CELL_PARAMETERS card.
  * @param {String[]} lines - Fortran card_lines string.
  * @param {Number | Null} alat -
- * @returns {*[]}
+ * @returns {Number[][]} cell - unit cell vectors.
  */
 function getCellParameters(lines, alat = null) {
     let cell = null;
@@ -200,7 +194,7 @@ function fromEspressoFormat(fileContent) {
     const materialConfig = {
         lattice: lattice.toJSON(),
         basis: basis.toJSON(),
-        name: "comment",
+        name: "comment", // TODO: add actual system name
         isNonPeriodic: false,
     };
     return materialConfig;
