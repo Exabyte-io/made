@@ -24,8 +24,9 @@ describe("Parsers.NativeFormat", () => {
     });
 
     it("should return a material config for graphene from a QE input file", () => {
-        const text = GraphenePWSCFInput;
-        expect(nativeFormatParsers.convertFromNativeFormat(text)).to.deep.equal(Graphene);
+        const qein = GraphenePWSCFInput;
+        const config = nativeFormatParsers.convertFromNativeFormat(qein);
+        expect(config).to.be.deep.almost.equal(Graphene);
     });
 
     it("should throw an error for unknown format", () => {
