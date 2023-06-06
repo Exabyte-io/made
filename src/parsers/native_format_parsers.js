@@ -1,10 +1,11 @@
+import Espresso from "./espresso";
 import Poscar from "./poscar";
 
 const NATIVE_FORMAT = {
     JSON: "json",
     POSCAR: "poscar",
     CIF: "cif",
-    PWX: "pwx",
+    IN: "in",
     XYZ: "xyz",
     UNKNOWN: "unknown",
 };
@@ -19,7 +20,7 @@ function detectFormat(text) {
     const jsonRegex = /^\s*\{/;
     if (jsonRegex.test(text)) return NATIVE_FORMAT.JSON;
     if (Poscar.isPoscar(text)) return NATIVE_FORMAT.POSCAR;
-
+    if (Espresso.isEspressoFormat(text)) return NATIVE_FORMAT.IN;
     return NATIVE_FORMAT.UNKNOWN;
 }
 
@@ -37,6 +38,8 @@ function convertFromNativeFormat(text) {
             return JSON.parse(text);
         case NATIVE_FORMAT.POSCAR:
             return Poscar.fromPoscar(text);
+        case NATIVE_FORMAT.IN:
+            return Espresso.fromEspressoFormat(text);
         case NATIVE_FORMAT.UNKNOWN:
             throw new Error(`Unknown format`);
         // TODO:  add more formats
