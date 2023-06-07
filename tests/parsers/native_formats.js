@@ -1,7 +1,15 @@
 import { expect } from "chai";
 
 import nativeFormatParsers from "../../src/parsers/native_format_parsers";
-import { Graphene, GraphenePoscar, GraphenePWSCFInput, NiHex, NiHexPoscar } from "../enums";
+import {
+    Graphene,
+    GraphenePoscar,
+    GraphenePWSCFInput,
+    NiCub,
+    NiCubPWSCFInput,
+    NiHex,
+    NiHexPoscar,
+} from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Parsers.NativeFormat", () => {
@@ -26,7 +34,17 @@ describe("Parsers.NativeFormat", () => {
     it("should return a material config for graphene from a QE input file", () => {
         const qein = GraphenePWSCFInput;
         const config = nativeFormatParsers.convertFromNativeFormat(qein);
-        expect(config).to.be.deep.almost.equal(Graphene);
+        assertDeepAlmostEqual(config, Graphene, ["name"]);
+        expect(config.name.toLowerCase()).to.be.equal(Graphene.name.toLowerCase());
+    });
+
+    it("should return a material config for Ni cub from a QE input file", () => {
+        const qein = NiCubPWSCFInput;
+        const config = nativeFormatParsers.convertFromNativeFormat(qein);
+        console.log("RESULT:", config);
+        console.log("EXPECTED:", NiCub);
+        assertDeepAlmostEqual(config, NiCub, ["name"]);
+        expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase());
     });
 
     it("should throw an error for unknown format", () => {

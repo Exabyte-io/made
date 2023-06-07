@@ -37,4 +37,5 @@ export const GraphenePoscar = readFile(path.join(FIXTURES_DIR, "Graphene.poscar"
 export const GraphenePWSCFInput = readFile(path.join(FIXTURES_DIR, "Graphene-pwscf.in"));
 export const NiHex = readJSONFile(path.join(FIXTURES_DIR, "Ni-hex.json"));
 export const NiHexPoscar = readFile(path.join(FIXTURES_DIR, "Ni-hex.poscar"));
-export const SiHex = readJSONFile(path.join(FIXTURES_DIR, "Si-hex.json"));
+export const NiCub = readFile(path.join(FIXTURES_DIR, "Ni-cub.json"));
+export const NiCubPWSCFInput = readFile(path.join(FIXTURES_DIR, "Ni-cub-pwscf.in"));
