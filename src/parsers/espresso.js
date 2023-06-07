@@ -161,17 +161,16 @@ function getCellParameters(cards, alat = null) {
 function ibravToCell(system) {
     let cell,
         type,
+        alat,
         sinab,
         sinac,
         tx,
         ty,
         tz,
-        // eslint-disable-next-line no-unused-vars
         a_prime,
         u,
         v,
         v3,
-        alat,
         b_over_a,
         c_over_a,
         cosab,
@@ -200,7 +199,6 @@ function ibravToCell(system) {
         throw new Error("Missing celldm(1)");
     }
 
-    // TODO: check the implementation:
     switch (system.ibrav) {
         case 1:
             cell = [
@@ -254,29 +252,31 @@ function ibravToCell(system) {
             type = LATTICE_TYPE.TRI;
             break;
         case -5:
-            u = (1.0 - cosab) / 4.0;
-            v = (1.0 - 2.0 * cosab + 2.0 * math.sqrt(1 + cosab)) / 4.0;
-            v3 = 2.0 * math.sqrt(v);
+            ty = math.sqrt((1.0 - cosab) / 6.0);
+            tz = math.sqrt((1 + 2 * cosab) / 3.0);
+            a_prime = alat / math.sqrt(3);
+            u = tz - 2 * math.sqrt(2) * ty;
+            v = tz + math.sqrt(2) * ty;
             cell = [
-                [u * alat, v3 * alat, (0.5 - u) * alat],
-                [-u * alat, v3 * alat, (0.5 + u) * alat],
-                [(0.5 - v) * alat, -v3 * alat, -0.5 * alat],
+                [u * a_prime, v * a_prime, v * a_prime],
+                [v * a_prime, u * a_prime, v * a_prime],
+                [v * a_prime, v * a_prime, u * a_prime],
             ];
             type = LATTICE_TYPE.TRI;
             break;
         case 6:
             cell = [
                 [alat, 0, 0],
-                [0, b_over_a * alat, 0],
+                [0, alat, 0],
                 [0, 0, c_over_a * alat],
             ];
             type = LATTICE_TYPE.TET;
             break;
         case 7:
             cell = [
-                [alat, 0, 0],
-                [0, b_over_a * alat, 0],
-                [0, b_over_a * alat * cosab, math.sqrt((b_over_a * alat) ** 2 * (1 - cosab ** 2))],
+                [0.5 * alat, -0.5 * alat, c_over_a],
+                [0.5 * alat, 0.5 * alat, c_over_a],
+                [-0.5 * alat, -0.5 * alat, c_over_a * 0.5 * alat],
             ];
             type = LATTICE_TYPE.TET;
             break;
@@ -306,17 +306,17 @@ function ibravToCell(system) {
             break;
         case 10:
             cell = [
-                [alat, 0, 0],
-                [alat * cosab, alat * math.sin(math.acos(cosab)), 0],
-                [c_over_a * alat * cosac, 0, c_over_a * alat * math.sin(math.acos(cosac))],
+                [0.5 * alat, 0, 0.5 * c_over_a],
+                [0.5 * alat, 0.5 * b_over_a * alat, 0],
+                [0, 0.5 * b_over_a * alat, 0.5 * c_over_a * alat],
             ];
             type = LATTICE_TYPE.ORCF;
             break;
         case 11:
             cell = [
-                [alat * 0.5, (-alat * math.sqrt(3)) / 2, 0],
-                [alat * 0.5, (alat * math.sqrt(3)) / 2, 0],
-                [alat * cosab, alat * math.sqrt(1 - cosab ** 2), c_over_a * alat],
+                [0.5 * alat, 0.5 * b_over_a * alat, 0.5 * c_over_a * alat],
+                [-0.5 * alat, 0.5 * b_over_a * alat, 0.5 * c_over_a * alat],
+                [-0.5 * alat, -0.5 * b_over_a * alat, 0.5 * c_over_a * alat],
             ];
             type = LATTICE_TYPE.ORCI;
             break;
@@ -341,9 +341,9 @@ function ibravToCell(system) {
         case 13:
             sinab = math.sqrt(1.0 - cosab ** 2);
             cell = [
-                [0.5 * alat, 0, (-c_over_a * alat) / 2],
+                [0.5 * alat, 0, -0.5 * c_over_a * alat],
                 [b_over_a * alat * cosab, b_over_a * alat * sinab, 0],
-                [0.5 * alat, 0, (c_over_a * alat) / 2],
+                [0.5 * alat, 0, 0.5 * c_over_a * alat],
             ];
             type = LATTICE_TYPE.MCLC; // Monoclinic P, base centered
             break;
