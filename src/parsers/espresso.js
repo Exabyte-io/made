@@ -407,11 +407,14 @@ function getAtomicPositions(cards) {
     const constraints = [];
 
     const linePattern = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\S+)\s+(\S+)\s+(\S+))?/;
-    atomicPosData.split("\n").forEach((line) => {
+    atomicPosData.split("\n").forEach((line, index) => {
         const lineMatch = linePattern.exec(line.trim());
         if (lineMatch) {
-            elements.push(lineMatch[1]);
-            coordinates.push([Number(lineMatch[2]), Number(lineMatch[3]), Number(lineMatch[4])]);
+            elements.push({ id: index, value: lineMatch[1] });
+            coordinates.push({
+                id: index,
+                value: [Number(lineMatch[2]), Number(lineMatch[3]), Number(lineMatch[4])],
+            });
 
             // If there are no constraints in the line, match[5], match[6], match[7] will be undefined
             if (
@@ -419,11 +422,14 @@ function getAtomicPositions(cards) {
                 lineMatch[6] !== undefined &&
                 lineMatch[7] !== undefined
             ) {
-                constraints.push([
-                    Boolean(Number(lineMatch[5])),
-                    Boolean(Number(lineMatch[6])),
-                    Boolean(Number(lineMatch[7])),
-                ]);
+                constraints.push({
+                    id: index,
+                    value: [
+                        Boolean(Number(lineMatch[5])),
+                        Boolean(Number(lineMatch[6])),
+                        Boolean(Number(lineMatch[7])),
+                    ],
+                });
             }
         }
     });
