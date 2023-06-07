@@ -5,6 +5,7 @@ import { ConstrainedBasis } from "../basis/constrained_basis";
 // eslint-disable-next-line no-unused-vars
 import { ATOMIC_COORD_UNITS, coefficients } from "../constants";
 import { Lattice } from "../lattice/lattice";
+import math from "../math";
 import xyz from "./xyz";
 
 /**
@@ -57,17 +58,28 @@ function parseFortranNameList(data) {
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (line) {
-                    const [key, value] = line.split("=").map((str) => str.trim());
-                    // convert Fortran boolean to JavaScript boolean
-                    if (value === ".true.") {
-                        blockContent[key] = true;
-                    } else if (value === ".false.") {
-                        blockContent[key] = false;
-                    } else if (Number.isNaN(Number(value))) {
-                        // if value is not a number, keep it as a string
-                        blockContent[key] = value.replace(/'/g, ""); // remove single quotes
+                    // Check if the line contains celldm(i)
+                    const celldmMatch = line.match(/celldm\((\d+)\)\s+=\s+(.+)/);
+                    if (celldmMatch) {
+                        const index = Number(celldmMatch[1]);
+                        const value = Number(celldmMatch[2]);
+                        if (!blockContent.celldm) {
+                            blockContent.celldm = {}; // Initialize if not present
+                        }
+                        blockContent.celldm[index] = value; // Store value at index
                     } else {
-                        blockContent[key] = Number(value); // convert to number
+                        const [key, value] = line.split("=").map((str) => str.trim());
+                        // convert Fortran boolean to JavaScript boolean
+                        if (value === ".true.") {
+                            blockContent[key] = true;
+                        } else if (value === ".false.") {
+                            blockContent[key] = false;
+                        } else if (Number.isNaN(Number(value))) {
+                            // if value is not a number, keep it as a string
+                            blockContent[key] = value.replace(/'/g, ""); // remove single quotes
+                        } else {
+                            blockContent[key] = Number(value); // convert to number
+                        }
                     }
                 }
             }
@@ -76,198 +88,48 @@ function parseFortranNameList(data) {
             result.cards = block;
         }
     });
+
     return result;
 }
-
-// function parseCards(cards) {
-//     const result = {};
-//     const sections = cards.split(
-//         /^\s*(ATOMIC_SPECIES|ATOMIC_POSITIONS|K_POINTS|CELL_PARAMETERS|OCCUPATIONS|CONSTRAINTS)\s/gm,
-//     );
-//
-//     sections.forEach((section) => {
-//         const sectionName = section.trim();
-//         const sectionData = section
-//             .trim()
-//             .split("\n")
-//             .map((line) => {
-//                 // Remove any comments and trim line
-//                 const cleanLine = line.replace(/(!|#).*$/, "").trim();
-//                 if (cleanLine) {
-//                     // split by spaces
-//                     return cleanLine.split(/\s+/);
-//                 }
-//                 return null;
-//             })
-//             .filter(Boolean); // Remove null entries
-//
-//         result[sectionName.convertKeysToCamelCaseForObject()] = sectionData;
-//     });
-//
-//     return result;
-// }
-
-// /**
-//  * @summary Function to get atomic species from Fortran namelist.
-//  * @param {String} cards - Fortran cards string.
-//  * @param {Number} nSpecies - Number of atomic species.
-//  * @return {{symbol: String, weight: Number, pseudo: String}[]} - atomic species labels.
-//  */
-// function getAtomicSpecies(cards, nSpecies) {
-//     const species = [];
-//     const regex = /ATOMIC_SPECIES\s+((?:\S+\s+\S+\s+\S+\s*){1,nSpecies})/s;
-//     const match = cards.match(regex);
-//     console.log(match);
-//
-//     if (match && match[1]) {
-//         const speciesLines = match[1].trim().split("\n");
-//
-//         for (const line of speciesLines) {
-//             const [label, weight, pseudo] = line.trim().split(/\s+/);
-//             species.push({
-//                 label,
-//                 weight: parseFloat(weight),
-//                 pseudo,
-//             });
-//         }
-//     }
-//
-//     return species;
-// }
-//
-// /**
-//  * @summary Parse unit cell from CELL_PARAMETERS card.
-//  * @param {String} cards - Fortran card_lines string.
-//  * @param {Number | Null} alat
-//  * @return {{Number[][], Number}} [cell, cellAlat] - unit cell vectors.
-//  */
-// function getCellParameters(cards, alat = null) {
-//     // Regular expression to find cell parameters section
-//     // const regex = /CELL_PARAMETERS\s*\(([^)]+)\)((?:[\s\S](?!#))*)/s;
-//     // const match = cards.match(regex);
-//     // console.log(match);
-//     // if (!match) {
-//     //     throw new Error("CELL_PARAMETERS not found in input");
-//     // }
-//
-//     const regex =
-//         /ATOMIC_POSITIONS \(w*?\)([\s\S]*?)CELL_PARAMETERS \(w*?\)([\s\S]*?)K_POINTS automatic([\s\S]*)/;
-//
-//     const match = input.match(regex);
-//
-//     if (match) {
-//         const [, positions, parameters, kPoints] = match;
-//
-//         const atomicSpecies = {
-//             positions: positions
-//                 .trim()
-//                 .split("\n")
-//                 .map((line) => line.trim().split(" ").slice(1).map(Number)),
-//             parameters: parameters
-//                 .trim()
-//                 .split("\n")
-//                 .map((line) => line.trim().split(" ").map(Number)),
-//             kPoints: kPoints.trim().split(" ").map(Number),
-//         };
-//
-//         console.log(atomicSpecies);
-//     } else {
-//         console.log("No match found.");
-//     }
-//
-//     let cellUnits, cellAlat;
-//     const units = match[1].toLowerCase();
-//
-//     if (units.includes("bohr")) {
-//         if (alat !== null) {
-//             throw new Error(
-//                 "Lattice parameters given in &SYSTEM celldm/A and CELL_PARAMETERS bohr",
-//             );
-//         }
-//         cellUnits = coefficients.BOHR_TO_ANGSTROM;
-//     } else if (units.includes("angstrom")) {
-//         if (alat !== null) {
-//             throw new Error(
-//                 "Lattice parameters given in &SYSTEM celldm/A and CELL_PARAMETERS angstrom",
-//             );
-//         }
-//         cellUnits = 1.0;
-//     } else if (units.includes("alat")) {
-//         if (match[1].includes("=")) {
-//             cellAlat = parseFloat(units.split("=")[1]) * coefficients.BOHR_TO_ANGSTROM;
-//         } else if (alat === null) {
-//             throw new Error("Lattice parameters must be set in &SYSTEM for alat units");
-//         }
-//         cellUnits = alat;
-//     } else if (alat === null) {
-//         cellUnits = coefficients.BOHR_TO_ANGSTROM;
-//     } else {
-//         cellUnits = alat;
-//     }
-//
-//     const lines = match[2]
-//         .split("\n")
-//         .filter((line) => line.trim() && !line.trim().startsWith("#"));
-//
-//     if (lines.length < 3) {
-//         throw new Error("Incomplete CELL_PARAMETERS data");
-//     }
-//
-//     const cell = lines.slice(0, 3).map((str) => {
-//         return str
-//             .split(/\s+/)
-//             .filter((el) => el)
-//             .map((num) => parseFloat(num) * cellUnits);
-//     });
-//
-//     return { cell, cellAlat };
-// }
-//
-// /**
-//  * @summary Parses atomic positions from ATOMIC_POSITIONS card.
-//  * @param {String[]} lines
-//  * @param {Number} nAtoms
-//  * @param {Number[][] | null} cell - unit cell with angstroms
-//  * @param {Number | null} alat
-//  * @return {{coordinates: Number[][], constraints: Object[]}}
-//  */
-// function getAtomicPositions(lines, nAtoms, cell = null, alat = null) {
-//     const coordinates = [];
-//     const constraints = [];
-//
-//     const trimmedLines = lines.filter((line) => line.trim() && line[0] !== "#");
-//
-//     trimmedLines.forEach((line, index) => {
-//         if (line.trim().startsWith("ATOMIC_POSITIONS")) {
-//             for (let i = 0; i < nAtoms; i++) {
-//                 const [element, x, y, z, ifX, ifY, ifZ] = trimmedLines[index + 1 + i].split(/\s+/);
-//
-//                 coordinates.push([parseFloat(x), parseFloat(y), parseFloat(z)]);
-//                 constraints.push({ id: i, value: [ifX === "T", ifY === "T", ifZ === "T"] });
-//             }
-//         }
-//     });
-//
-//     return { coordinates, constraints };
-// }
 
 /**
  * @summary Read unit cell parameters from CELL_PARAMETERS card
  * @param {String} cards
- * @param {String} cell
- * @returns {{Number[][], Number}}
+ * @param {Number} alat
+ * @returns {cell: Number[][], alat: Number, units: String}
  */
-
-// eslint-disable-next-line no-unused-vars
-function getCellParameters(cards, cell) {
+function getCellParameters(cards, alat = null) {
     const cellParamsRegex = /CELL_PARAMETERS\s\(([\w]+)\)(?:\n?([!#].*)?)\n(((-?\d+.\d+)\s+)*)/gm;
     // Extract cell parameters section
     const cellParamsMatch = cellParamsRegex.exec(cards);
 
-    console.log(cellParamsMatch);
-    // Extract the unit
-    // eslint-disable-next-line no-unused-vars
-    const unit = cellParamsMatch[1];
+    // Extract the units
+    const units = cellParamsMatch[1];
+    let cellUnits = 1.0;
+
+    if (units === "bohr") {
+        if (alat !== null) {
+            throw new Error(
+                "Lattice parameters given in &SYSTEM celldm/A and CELL_PARAMETERS bohr",
+            );
+        }
+        cellUnits = coefficients.BOHR_TO_ANGSTROM;
+    } else if (units === "angstrom") {
+        if (alat !== null) {
+            throw new Error(
+                "Lattice parameters given in &SYSTEM celldm/A and CELL_PARAMETERS angstrom",
+            );
+        }
+        cellUnits = 1.0;
+    } else if (units === "alat") {
+        if (alat === null) {
+            throw new Error("Lattice parameters must be set in &SYSTEM for alat units");
+        } else cellUnits = alat * coefficients.BOHR_TO_ANGSTROM;
+    } else if (alat === null) {
+        cellUnits = coefficients.BOHR_TO_ANGSTROM;
+    } else {
+        cellUnits = alat;
+    }
 
     const cellParamsData = cellParamsMatch[3].trim().split("\n");
 
@@ -276,23 +138,225 @@ function getCellParameters(cards, cell) {
         const values = line
             .trim()
             .match(/([\d.-]+)/g)
-            .map(Number);
+            .map(Number)
+            .map((value) => value * cellUnits);
         cellVectors.push(values);
     });
-    console.log("cellvectors:::::", cellVectors);
 
-    const alat = 1.0; // TODO: depends on unit
+    // eslint-disable-next-line no-param-reassign
+    alat = 1; // TODO: remove and change this
     return {
         cell: cellVectors,
         alat,
+        units,
     };
+}
+
+/**
+ * @summary Creates cell from ibrav and celldm(i) parameters
+ * @param {Object} system
+ * @returns {Number[][], Number, String}
+ */
+function ibravToCell(system) {
+    let cell,
+        sinab,
+        sinac,
+        tx,
+        ty,
+        tz,
+        // eslint-disable-next-line no-unused-vars
+        a_prime,
+        u,
+        v,
+        v3,
+        alat,
+        b_over_a,
+        c_over_a,
+        cosab,
+        cosac,
+        cosbc;
+    if (system.celldm[1] && system.a) {
+        throw new Error("do not specify both celldm and a,b,c!");
+    } else if (system.celldm[1]) {
+        // celldm(x) in bohr
+        // eslint-disable-next-line prefer-destructuring
+        alat = system.celldm[1];
+        b_over_a = system.celldm[2] || 0.0;
+        c_over_a = system.celldm[3] || 0.0;
+        cosab = system.celldm[4] || 0.0;
+        cosac = system.celldm[5] || 0.0;
+        cosbc = 0.0;
+        if (system.ibrav === 14) {
+            cosbc = system.celldm[4] || 0.0;
+            cosac = system.celldm[5] || 0.0;
+            cosab = system.celldm[6] || 0.0;
+        }
+    } else if (system.a) {
+        // a, b, c, cosAB, cosAC, cosBC in Angstrom
+        throw new Error("params_to_cell() does not yet support A/B/C/cosAB/cosAC/cosBC");
+    } else {
+        throw new Error("Missing celldm(1)");
+    }
+
+    switch (system.ibrav) {
+        case 1:
+            cell = [
+                [alat, 0, 0],
+                [0, alat, 0],
+                [0, 0, alat],
+            ];
+            break;
+        case 2:
+            cell = [
+                [-0.5 * alat, 0, 0.5 * alat],
+                [0, 0.5 * alat, 0.5 * alat],
+                [-0.5 * alat, 0.5 * alat, 0],
+            ];
+            break;
+        case 3:
+            cell = [
+                [0.5 * alat, 0.5 * alat, 0.5 * alat],
+                [-0.5 * alat, 0.5 * alat, 0.5 * alat],
+                [-0.5 * alat, -0.5 * alat, 0.5 * alat],
+            ];
+            break;
+        case -3:
+            cell = [
+                [-0.5 * alat, 0.5 * alat, 0.5 * alat],
+                [0.5 * alat, -0.5 * alat, 0.5 * alat],
+                [0.5 * alat, 0.5 * alat, -0.5 * alat],
+            ];
+            break;
+        case 4:
+            cell = [
+                [alat, 0, 0],
+                [-0.5 * alat, 0.5 * alat * math.sqrt(3), 0],
+                [0, 0, c_over_a * alat],
+            ];
+            break;
+        case 5:
+            tx = math.sqrt((1.0 - cosab) / 2.0);
+            ty = math.sqrt((1.0 - cosab) / 6.0);
+            tz = math.sqrt((1 + 2 * cosab) / 3.0);
+            cell = [
+                [tx * alat, -ty * alat, tz * alat],
+                [0, 2 * ty * alat, tz * alat],
+                [-tx * alat, -ty * alat, tz * alat],
+            ];
+            break;
+        case -5:
+            u = (1.0 - cosab) / 4.0;
+            v = (1.0 - 2.0 * cosab + 2.0 * math.sqrt(1 + cosab)) / 4.0;
+            v3 = 2.0 * math.sqrt(v);
+            cell = [
+                [u * alat, v3 * alat, (0.5 - u) * alat],
+                [-u * alat, v3 * alat, (0.5 + u) * alat],
+                [(0.5 - v) * alat, -v3 * alat, -0.5 * alat],
+            ];
+            break;
+        case 6:
+            cell = [
+                [alat, 0, 0],
+                [0, b_over_a * alat, 0],
+                [0, 0, c_over_a * alat],
+            ];
+            break;
+        case 7:
+            cell = [
+                [alat, 0, 0],
+                [0, b_over_a * alat, 0],
+                [0, b_over_a * alat * cosab, math.sqrt((b_over_a * alat) ** 2 * (1 - cosab ** 2))],
+            ];
+            break;
+        case 8:
+            cell = [
+                [alat, 0, 0],
+                [0, b_over_a * alat, 0],
+                [0, 0, c_over_a * alat],
+            ];
+            break;
+        case 9:
+            cell = [
+                [0.5 * alat, (b_over_a * alat) / 2, 0],
+                [-0.5 * alat, (b_over_a * alat) / 2, 0],
+                [0, 0, c_over_a * alat],
+            ];
+            break;
+        case -9:
+            cell = [
+                [0.5 * alat, (-b_over_a * alat) / 2, 0],
+                [0.5 * alat, (b_over_a * alat) / 2, 0],
+                [0, 0, c_over_a * alat],
+            ];
+            break;
+        case 10:
+            cell = [
+                [alat, 0, 0],
+                [alat * cosab, alat * math.sin(math.acos(cosab)), 0],
+                [c_over_a * alat * cosac, 0, c_over_a * alat * math.sin(math.acos(cosac))],
+            ];
+            break;
+        case 11:
+            cell = [
+                [alat * 0.5, (-alat * math.sqrt(3)) / 2, 0],
+                [alat * 0.5, (alat * math.sqrt(3)) / 2, 0],
+                [alat * cosab, alat * math.sqrt(1 - cosab ** 2), c_over_a * alat],
+            ];
+            break;
+        case 12:
+            sinab = math.sqrt(1.0 - cosab ** 2);
+            cell = [
+                [alat, 0, 0],
+                [b_over_a * alat * cosab, b_over_a * alat * sinab, 0],
+                [0, 0, c_over_a * alat],
+            ];
+            break;
+        case -12:
+            sinac = math.sqrt(1.0 - cosac ** 2);
+            cell = [
+                [alat, 0, 0],
+                [0, b_over_a * alat, 0],
+                [c_over_a * alat * cosac, 0, c_over_a * alat * sinac],
+            ];
+            break;
+        case 13:
+            sinab = math.sqrt(1.0 - cosab ** 2);
+            cell = [
+                [0.5 * alat, 0, (-c_over_a * alat) / 2],
+                [b_over_a * alat * cosab, b_over_a * alat * sinab, 0],
+                [0.5 * alat, 0, (c_over_a * alat) / 2],
+            ];
+            break;
+        case 14:
+            sinab = math.sqrt(1.0 - cosab ** 2);
+            v3 = [
+                c_over_a * cosac,
+                (c_over_a * (cosbc - cosac * cosab)) / sinab,
+                (c_over_a *
+                    math.sqrt(
+                        1 + 2 * cosbc * cosac * cosab - cosbc ** 2 - cosac ** 2 - cosab ** 2,
+                    )) /
+                    sinab,
+            ];
+            cell = [
+                [alat, 0, 0],
+                [b_over_a * alat * cosab, b_over_a * alat * sinab, 0],
+                [v3[0] * alat, v3[1] * alat, v3[2] * alat],
+            ];
+            break;
+        default:
+            throw new Error(`ibrav = ${system.ibrav} not implemented`);
+    }
+    const units = ATOMIC_COORD_UNITS.cartesian;
+    alat = 1; // to see if this will give the correct result
+    return { cell, alat, units };
 }
 
 /**
  * @summary function to get atomic positions from the ATOMIC_POSITIONS card
  * @param {String} cards
  * @param {Number} nAtoms
- * @returns {[String], [Number], [String], [Boolean]}
+ * @returns {[String], [Number], [Boolean], String}
  */
 function getAtomicPositions(cards) {
     const regex =
@@ -303,7 +367,19 @@ function getAtomicPositions(cards) {
         throw new Error("ATOMIC_POSITIONS section not found in input data.");
     }
 
-    // const coordSystem = match[1]; // TODO: use that info to multiply appropriayle
+    const coordSystem = match[1];
+    switch (coordSystem) {
+        case "angstrom":
+            break;
+        case "bohr":
+            break;
+        case "crystal":
+            break;
+        case "alat":
+            break;
+        default:
+            throw new Error(`unknown coordinate system: ${coordSystem}`);
+    }
     const atomicPosData = match[3];
 
     const elements = [];
@@ -319,10 +395,13 @@ function getAtomicPositions(cards) {
         }
     });
 
+    const units = coordSystem;
+
     return {
         elements,
         coordinates,
         constraints,
+        units,
     };
 }
 
@@ -335,27 +414,30 @@ function fromEspressoFormat(fileContent) {
     const data = parseFortranNameList(fileContent);
     // const nSpecies = data.system.ntyp;
     // const nAtoms = data.system.nat;
-    // const ibrav = data.system.ibrav;
+    const { ibrav } = data.system;
     const { cards } = data;
-    console.log(cards);
 
-    const cell = getCellParameters(cards);
-    const { elements } = getAtomicPositions(cards);
-    const { coordinates } = getAtomicPositions(cards);
-    const { constraints } = getAtomicPositions(cards);
+    let cell = null;
+    if (ibrav === 0) {
+        cell = getCellParameters(cards);
+    } else {
+        cell = ibravToCell(data.system);
+    }
+    const { elements, coordinates, constraints, units } = getAtomicPositions(cards);
 
     const lattice = Lattice.fromVectors({
         a: cell.cell[0],
         b: cell.cell[1],
         c: cell.cell[2],
         alat: cell.alat,
-        units: ATOMIC_COORD_UNITS.angstrom,
+        units: cell.units,
     });
+    // TODO: add lattice.type
 
     const basis = new ConstrainedBasis({
         elements,
         coordinates,
-        units: ATOMIC_COORD_UNITS.cartesian,
+        units,
         cell: lattice.vectorArrays,
         constraints,
     });
