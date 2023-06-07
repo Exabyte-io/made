@@ -36,9 +36,8 @@ function toEspressoFormat(materialOrConfig) {
  * @return {boolean}
  */
 function isEspressoFormat(fileContent) {
-    const lines = fileContent.split("\n");
-    if (lines[0].trim() === "&CONTROL") return true;
-    return false;
+    const regex = /&CONTROL|&SYSTEM|CELL_PARAMETERS|ATOMIC_POSITIONS/i;
+    return regex.test(fileContent);
 }
 
 /**
@@ -60,7 +59,7 @@ function parseFortranNameList(data) {
                 const line = lines[i].trim();
                 if (line) {
                     // Check if the line contains celldm(i)
-                    const celldmMatch = line.match(/celldm\((\d+)\)\s+=\s+(.+)/);
+                    const celldmMatch = line.match(/celldm\((\d+)\)\s*=\s*(.+)/);
                     if (celldmMatch) {
                         const index = Number(celldmMatch[1]);
                         const value = Number(celldmMatch[2]);
@@ -159,9 +158,9 @@ function getCellParameters(cards, alat = null) {
  * @returns {Number[][], Number, String, String}
  */
 function ibravToCell(system) {
+    let alat = 1.0;
     let cell,
         type,
-        alat,
         sinab,
         sinac,
         tx,
@@ -181,7 +180,15 @@ function ibravToCell(system) {
     } else if (system.celldm[1]) {
         // celldm(x) in bohr
         // eslint-disable-next-line prefer-destructuring
-        alat = system.celldm[1];
+        alat = system.celldm[1] * coefficients.BOHR_TO_ANGSTROM; // this value given in Bohr (a.u.) as per QE specs
+        console.log(
+            "celldm=",
+            system.celldm[1],
+            "\nalat  =",
+            alat,
+            "\nbohr  =",
+            coefficients.BOHR_TO_ANGSTROM,
+        );
         b_over_a = system.celldm[2] || 0.0;
         c_over_a = system.celldm[3] || 0.0;
         cosab = system.celldm[4] || 0.0;
@@ -369,7 +376,7 @@ function ibravToCell(system) {
             throw new Error(`ibrav = ${system.ibrav} not implemented`);
     }
     const units = ATOMIC_COORD_UNITS.angstrom;
-    alat = 1; // to see if this will give the correct result
+
     return { cell, alat, units, type };
 }
 
@@ -381,7 +388,7 @@ function ibravToCell(system) {
  */
 function getAtomicPositions(cards) {
     const regex =
-        /ATOMIC_POSITIONS\s\(([\w]+)\)(?:\n?([!#].*)?)\n((?:\w+\s+[-?\d+.\d+\s+]*\n)*(?!\w+\s+\())?/gm;
+        /ATOMIC_POSITIONS\s\(([\w]+)\)(?:\n?([!#].*)?)\n((?:\s*\w+\s+[-?\d+.\d+\s+]*\n)*(?!\w+\s+\())?/gm;
     const match = regex.exec(cards);
 
     if (!match) {
