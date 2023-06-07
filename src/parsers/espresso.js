@@ -155,10 +155,11 @@ function getCellParameters(cards, alat = null) {
 /**
  * @summary Creates cell from ibrav and celldm(i) parameters
  * @param {Object} system
- * @returns {Number[][], Number, String}
+ * @returns {Number[][], Number, String, String}
  */
 function ibravToCell(system) {
     let cell,
+        type,
         sinab,
         sinac,
         tx,
@@ -205,6 +206,7 @@ function ibravToCell(system) {
                 [0, alat, 0],
                 [0, 0, alat],
             ];
+            type = "CUB";
             break;
         case 2:
             cell = [
@@ -347,9 +349,9 @@ function ibravToCell(system) {
         default:
             throw new Error(`ibrav = ${system.ibrav} not implemented`);
     }
-    const units = ATOMIC_COORD_UNITS.cartesian;
+    const units = ATOMIC_COORD_UNITS.angstrom;
     alat = 1; // to see if this will give the correct result
-    return { cell, alat, units };
+    return { cell, alat, units, type };
 }
 
 /**
@@ -386,12 +388,25 @@ function getAtomicPositions(cards) {
     const coordinates = [];
     const constraints = [];
 
+    const linePattern = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)(?:\s+(\S+)\s+(\S+)\s+(\S+))?/;
     atomicPosData.split("\n").forEach((line) => {
-        if (line.trim()) {
-            const [atom, x, y, z, if_x, if_y, if_z] = line.trim().split(/\s+/);
-            elements.push(atom);
-            coordinates.push([Number(x), Number(y), Number(z)]);
-            constraints.push([Boolean(Number(if_x)), Boolean(Number(if_y)), Boolean(Number(if_z))]);
+        const lineMatch = linePattern.exec(line.trim());
+        if (lineMatch) {
+            elements.push(lineMatch[1]);
+            coordinates.push([Number(lineMatch[2]), Number(lineMatch[3]), Number(lineMatch[4])]);
+
+            // If there are no constraints in the line, match[5], match[6], match[7] will be undefined
+            if (
+                lineMatch[5] !== undefined &&
+                lineMatch[6] !== undefined &&
+                lineMatch[7] !== undefined
+            ) {
+                constraints.push([
+                    Boolean(Number(lineMatch[5])),
+                    Boolean(Number(lineMatch[6])),
+                    Boolean(Number(lineMatch[7])),
+                ]);
+            }
         }
     });
 
@@ -432,7 +447,7 @@ function fromEspressoFormat(fileContent) {
         alat: cell.alat,
         units: cell.units,
     });
-    // TODO: add lattice.type
+    if (cell.type) lattice.type = cell.type;
 
     const basis = new ConstrainedBasis({
         elements,
