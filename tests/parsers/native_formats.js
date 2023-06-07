@@ -9,6 +9,8 @@ import {
     NiCubPWSCFInput,
     NiHex,
     NiHexPoscar,
+    Sb2S3Orc,
+    Sb2S3OrcPWSCFInput,
 } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
@@ -35,16 +37,23 @@ describe("Parsers.NativeFormat", () => {
         const qein = GraphenePWSCFInput;
         const config = nativeFormatParsers.convertFromNativeFormat(qein);
         assertDeepAlmostEqual(config, Graphene, ["name"]);
-        expect(config.name.toLowerCase()).to.be.equal(Graphene.name.toLowerCase());
+        expect(config.name.toLowerCase()).to.be.equal(Graphene.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should return a material config for Ni cub from a QE input file", () => {
         const qein = NiCubPWSCFInput;
         const config = nativeFormatParsers.convertFromNativeFormat(qein);
-        console.log("RESULT:", config);
-        console.log("EXPECTED:", NiCub);
         assertDeepAlmostEqual(config, NiCub, ["name"]);
-        expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase());
+        expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
+    });
+
+    it("should return a material config for Sb2S3 from a QE input file", () => {
+        const qein = Sb2S3OrcPWSCFInput;
+        const config = nativeFormatParsers.convertFromNativeFormat(qein);
+        console.log(config);
+        console.log(Sb2S3Orc);
+        assertDeepAlmostEqual(config, Sb2S3Orc, ["name"]);
+        expect(config.name.toLowerCase()).to.be.equal(Sb2S3Orc.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should throw an error for unknown format", () => {
