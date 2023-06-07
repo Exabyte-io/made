@@ -59,7 +59,7 @@ function parseFortranNameList(data) {
                 const line = lines[i].trim();
                 if (line) {
                     // Check if the line contains celldm(i)
-                    const celldmMatch = line.match(/celldm\((\d+)\)\s*=\s*(.+)/);
+                    const celldmMatch = line.match(/celldm\((\d+)\)\s*=\s*(\d.\d+).*(#.*)?/);
                     if (celldmMatch) {
                         const index = Number(celldmMatch[1]);
                         const value = Number(celldmMatch[2]);
@@ -376,7 +376,7 @@ function ibravToCell(system) {
             throw new Error(`ibrav = ${system.ibrav} not implemented`);
     }
     const units = ATOMIC_COORD_UNITS.angstrom;
-
+    alat = 1.0;
     return { cell, alat, units, type };
 }
 
