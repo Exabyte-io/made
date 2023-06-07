@@ -181,14 +181,6 @@ function ibravToCell(system) {
         // celldm(x) in bohr
         // eslint-disable-next-line prefer-destructuring
         alat = system.celldm[1] * coefficients.BOHR_TO_ANGSTROM; // this value given in Bohr (a.u.) as per QE specs
-        console.log(
-            "celldm=",
-            system.celldm[1],
-            "\nalat  =",
-            alat,
-            "\nbohr  =",
-            coefficients.BOHR_TO_ANGSTROM,
-        );
         b_over_a = system.celldm[2] || 0.0;
         c_over_a = system.celldm[3] || 0.0;
         cosab = system.celldm[4] || 0.0;

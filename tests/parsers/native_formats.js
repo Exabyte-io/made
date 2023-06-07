@@ -50,8 +50,6 @@ describe("Parsers.NativeFormat", () => {
     it("should return a material config for Sb2S3 from a QE input file", () => {
         const qein = Sb2S3OrcPWSCFInput;
         const config = nativeFormatParsers.convertFromNativeFormat(qein);
-        console.log(config);
-        console.log(Sb2S3Orc);
         assertDeepAlmostEqual(config, Sb2S3Orc, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(Sb2S3Orc.name.toLowerCase()); // to compare case insensitively
     });
