@@ -99,7 +99,7 @@ function parseFortranNameList(data) {
  * @returns {cell: Number[][], alat: Number, units: String}
  */
 function getCellParameters(cards, alat = null) {
-    const cellParamsRegex = /CELL_PARAMETERS\s\(([\w]+)\)(?:\n?([!#].*)?)\n(((-?\d+.\d+)\s+)*)/gm;
+    const cellParamsRegex = /CELL_PARAMETERS\s\(?([\w]+)\)?(?:\n?([!#].*)?)\n(((-?\d+.\d+)\s+)*)/gm;
     // Extract cell parameters section
     const cellParamsMatch = cellParamsRegex.exec(cards);
 
@@ -380,7 +380,7 @@ function ibravToCell(system) {
  */
 function getAtomicPositions(cards) {
     const regex =
-        /ATOMIC_POSITIONS\s\(([\w]+)\)(?:\n?([!#].*)?)\n((?:\s*\w+\s+[-?\d+.\d+\s+]*\n)*(?!\w+\s+\())?/gm;
+        /ATOMIC_POSITIONS\s\(?([\w]+)\)?(?:\n?([!#].*)?)\n((?:\s*\w+\s+[-?\d+.\d+\s+]*\n)*(?!\w+\s+\())?/gm;
     const match = regex.exec(cards);
 
     if (!match) {
@@ -456,10 +456,20 @@ function fromEspressoFormat(fileContent) {
     const { ibrav } = data.system;
     const { cards } = data;
 
-    let cell = null;
+    // Check for errors
+    if (data.system === undefined) {
+        throw new Error("No SYSTEM section found in input data.");
+    }
+    if (ibrav === undefined) {
+        throw new Error("ibrav is required in &SYSTEM.");
+    }
+
+    let cell;
     if (ibrav === 0) {
+        // Read the cell parameters from the CELL_PARAMETERS section
         cell = getCellParameters(cards);
     } else {
+        // Create unit cell from given ibrav (and celldm(i) or A) with algorithm
         cell = ibravToCell(data.system);
     }
     const { elements, coordinates, constraints, units } = getAtomicPositions(cards);
