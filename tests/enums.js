@@ -41,3 +41,8 @@ export const NiCub = readJSONFile(path.join(FIXTURES_DIR, "Ni-cub.json"));
 export const NiCubPWSCFInput = readFile(path.join(FIXTURES_DIR, "Ni-cub-pwscf.in"));
 export const Sb2S3Orc = readJSONFile(path.join(FIXTURES_DIR, "Sb2S3-ORC.json"));
 export const Sb2S3OrcPWSCFInput = readFile(path.join(FIXTURES_DIR, "Sb2S3-ORC-pwscf.in"));
+export const BNHex = readJSONFile(path.join(FIXTURES_DIR, "BN-hex.json"));
+export const BNHexPWSCFInput = readFile(path.join(FIXTURES_DIR, "BN-hex-pwscf.in"));
+
+export const FortranFile1 = readFile(path.join(FIXTURES_DIR, "fortran-file-1.txt"));
+export const FortranFile1JSON = readJSONFile(path.join(FIXTURES_DIR, "fortran-file-1.json"));
