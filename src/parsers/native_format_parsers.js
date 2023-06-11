@@ -5,7 +5,7 @@ const NATIVE_FORMAT = {
     JSON: "json",
     POSCAR: "poscar",
     CIF: "cif",
-    IN: "in",
+    QE: "qe",
     XYZ: "xyz",
     UNKNOWN: "unknown",
 };
