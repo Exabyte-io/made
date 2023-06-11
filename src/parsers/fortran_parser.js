@@ -7,10 +7,10 @@ const fortranArrayRegex = "^\\s*{0}\\({1}\\)\\s*=\\s*{2}\\s*\\n"; // /gm, captur
 const fortranBooleanRegex = "\\.(true|false)\\."; // capturing group: 1 - boolean value
 
 /**
- * @summary
+ * @summary Formats a string with other string to be used as a regex.
  * @param {String} str
  * @param {String | String[]} values
- * @returns {*}
+ * @returns {String}
  */
 function formatString(str, ...values) {
     return str.replace(/{(\d+)}/g, (match, index) => {
@@ -53,6 +53,11 @@ const regex = {
     ),
 };
 
+/**
+ * @summary Extracts an array of the key value pairs from a Fortran namelist.
+ * @param {String} data
+ * @returns {Object[]}
+ */
 function extractKeyValuePairs(data) {
     const output = {};
 
@@ -86,7 +91,17 @@ function extractKeyValuePairs(data) {
     return output;
 }
 
-function extractNamelistData(text, namelistNames) {
+/**
+ * @summary Extracts namelist data from a string.
+ * @param {String}
+ * @param text
+ * @returns {{}}
+ */
+function extractNamelistData(text) {
+    const namelistNameRegex = /&(\w+)/g;
+    const matches = Array.from(text.matchAll(namelistNameRegex));
+    const namelistNames = matches.map((match) => match[1].toLowerCase());
+
     // Create an object to hold all the key-value pairs for each namelist
     const namelists = {};
 
@@ -101,21 +116,17 @@ function extractNamelistData(text, namelistNames) {
         // Extract the key-value pairs and store them in the namelists object
         namelists[namelistName] = extractKeyValuePairs(data);
     });
-
+    console.log(namelists);
     return namelists;
 }
 
-function findNamelistNames(text) {
-    const namelistNameRegex = /&(\w+)/g;
-    const matches = Array.from(text.matchAll(namelistNameRegex));
-    const namelistNames = matches.map((match) => match[1].toLowerCase());
-    return namelistNames;
-}
-
+/**
+ * @summary Parses Fortran namelists and cards data from a string for a QE input file
+ * @param {String} text
+ * @returns {Object[]}
+ */
 function parseFortranFile(text) {
-    const namelistNames = findNamelistNames(text);
-
-    const output = extractNamelistData(text, namelistNames);
+    const output = extractNamelistData(text);
 
     // Cards are retrieved in a dedicated fashion:
     const cellParameters = text.match(regex.cellParameters);
@@ -137,7 +148,6 @@ function parseFortranFile(text) {
                 parseFloat(cellParameters[10]),
             ],
             units: cellParameters[1],
-            // alat =?
         };
     }
 
