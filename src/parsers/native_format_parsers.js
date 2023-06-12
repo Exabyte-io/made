@@ -20,7 +20,7 @@ function detectFormat(text) {
     const jsonRegex = /^\s*\{/;
     if (jsonRegex.test(text)) return NATIVE_FORMAT.JSON;
     if (Poscar.isPoscar(text)) return NATIVE_FORMAT.POSCAR;
-    if (Espresso.isEspressoFormat(text)) return NATIVE_FORMAT.IN;
+    if (Espresso.isEspressoFormat(text)) return NATIVE_FORMAT.QE;
     return NATIVE_FORMAT.UNKNOWN;
 }
 
@@ -38,7 +38,7 @@ function convertFromNativeFormat(text) {
             return JSON.parse(text);
         case NATIVE_FORMAT.POSCAR:
             return Poscar.fromPoscar(text);
-        case NATIVE_FORMAT.IN:
+        case NATIVE_FORMAT.QE:
             return Espresso.fromEspressoFormat(text);
         case NATIVE_FORMAT.UNKNOWN:
             throw new Error(`Unknown format`);

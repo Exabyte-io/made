@@ -2,7 +2,7 @@ const fortranDoubleRegex = "([-+]?\\d*\\.?\\d*(?:[Eed][+-]?\\d+)?)";
 const fortranNamelistRegex = "&({0})((?:\\s|\\S)*?)\\/"; // capturing group: 1 - namelist name, 2 - data
 const keyValueRegex = "^\\s*{0}\\s*=\\s*{1}\\s*\\n"; // 0 = string value name, 1 = str|bool|number
 const stringRegex = "([+\\w.\\-\\/]*)"; // capturing group: 1 - string value
-const fortranStringRegex = "'([\\w.\\-\\+\\/]*)'"; // capturing group: 1 - string value
+const fortranStringRegex = "'([\\w.\\-\\+\\/ ]*)'"; // capturing group: 1 - string value
 const fortranArrayRegex = "^\\s*{0}\\({1}\\)\\s*=\\s*{2}\\s*\\n"; // /gm, capturing groups: 0 - array name, 1 - array index, 2 - value
 const fortranBooleanRegex = "\\.(true|false)\\."; // capturing group: 1 - boolean value
 
@@ -37,7 +37,7 @@ const regex = {
     ),
     atomicPositions: new RegExp(
         formatString(
-            "\\b([A-Z][a-z]*)\\b\\s+{0}\\s+{0}\\s+{0}(?:\\s+(0|1)\\s+(0|1)\\s+(0|1))?",
+            "\\b([A-Z][a-z]*)\\b\\s+{0}\\s+{0}\\s+{0}(?:\\s+(0|1)\\s+(0|1)\\s+(0|1))?(?=\\s*\\n)",
             fortranDoubleRegex,
         ),
         "gm",
@@ -46,9 +46,9 @@ const regex = {
     cellParameters: new RegExp(
         formatString(
             "CELL_PARAMETERS\\s*(?:\\((\\w+)\\))?" +
-                "\\s+({0})\\s+({0})\\s+({0})" +
-                "\\s+({0})\\s+({0})\\s+({0})" +
-                "\\s+({0})\\s+({0})\\s+({0})",
+                "\\s+{0}\\s+{0}\\s+{0}" +
+                "\\s+{0}\\s+{0}\\s+{0}" +
+                "\\s+{0}\\s+{0}\\s+{0}",
             fortranDoubleRegex,
         ),
     ),
@@ -124,27 +124,29 @@ function extractNamelistData(text) {
  * @param {String} text
  * @returns {Object}
  */
-function parseFortranFile(text) {
+export function parseFortranFile(text) {
     const output = extractNamelistData(text);
 
     // Cards are retrieved in a dedicated fashion:
     const cellParameters = text.match(regex.cellParameters);
     if (cellParameters) {
         output.cell = {
-            a: [
-                parseFloat(cellParameters[2]),
-                parseFloat(cellParameters[3]),
-                parseFloat(cellParameters[4]),
-            ],
-            b: [
-                parseFloat(cellParameters[5]),
-                parseFloat(cellParameters[6]),
-                parseFloat(cellParameters[7]),
-            ],
-            c: [
-                parseFloat(cellParameters[8]),
-                parseFloat(cellParameters[9]),
-                parseFloat(cellParameters[10]),
+            cell: [
+                [
+                    parseFloat(cellParameters[2]),
+                    parseFloat(cellParameters[3]),
+                    parseFloat(cellParameters[4]),
+                ],
+                [
+                    parseFloat(cellParameters[5]),
+                    parseFloat(cellParameters[6]),
+                    parseFloat(cellParameters[7]),
+                ],
+                [
+                    parseFloat(cellParameters[8]),
+                    parseFloat(cellParameters[9]),
+                    parseFloat(cellParameters[10]),
+                ],
             ],
             units: cellParameters[1],
         };
@@ -157,27 +159,22 @@ function parseFortranFile(text) {
         potential: match[3],
     }));
     const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
-    output.basis = {};
-    output.basis.elements = atomicPositionsMatches.map((match, index) => ({
+    output.elements = atomicPositionsMatches.map((match, index) => ({
         id: index,
         value: match[1],
     }));
-    output.basis.coordinates = atomicPositionsMatches.map((match, index) => ({
+    output.coordinates = atomicPositionsMatches.map((match, index) => ({
         id: index,
         value: [parseFloat(match[2]), parseFloat(match[3]), parseFloat(match[4])],
     }));
-    output.basis.constraints = atomicPositionsMatches
+    output.constraints = atomicPositionsMatches
         .filter((match) => match[5] && match[6] && match[7]) // Check if all three constrtaints exist
         .map((match, index) => ({
             id: index,
             value: [match[5] === "1", match[6] === "1", match[7] === "1"],
         }));
     // eslint-disable-next-line prefer-destructuring
-    output.basis.units = text.match(regex.atomicPositionsUnits)[1];
+    output.units = text.match(regex.atomicPositionsUnits)[1];
 
     return output;
 }
-
-export default {
-    parseFortranFile,
-};
