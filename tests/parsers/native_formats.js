@@ -2,6 +2,8 @@ import { expect } from "chai";
 
 import nativeFormatParsers from "../../src/parsers/native_format_parsers";
 import {
+    BNHex,
+    BNHexPWSCFInput,
     Graphene,
     GraphenePoscar,
     GraphenePWSCFInput,
@@ -34,24 +36,26 @@ describe("Parsers.NativeFormat", () => {
     });
 
     it("should return a material config for graphene from a QE input file", () => {
-        const qein = GraphenePWSCFInput;
-        const config = nativeFormatParsers.convertFromNativeFormat(qein);
+        const config = nativeFormatParsers.convertFromNativeFormat(GraphenePWSCFInput);
         assertDeepAlmostEqual(config, Graphene, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(Graphene.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should return a material config for Ni cub from a QE input file", () => {
-        const qein = NiCubPWSCFInput;
-        const config = nativeFormatParsers.convertFromNativeFormat(qein);
+        const config = nativeFormatParsers.convertFromNativeFormat(NiCubPWSCFInput);
         assertDeepAlmostEqual(config, NiCub, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should return a material config for Sb2S3 from a QE input file", () => {
-        const qein = Sb2S3OrcPWSCFInput;
-        const config = nativeFormatParsers.convertFromNativeFormat(qein);
+        const config = nativeFormatParsers.convertFromNativeFormat(Sb2S3OrcPWSCFInput);
         assertDeepAlmostEqual(config, Sb2S3Orc, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(Sb2S3Orc.name.toLowerCase()); // to compare case insensitively
+    });
+
+    it("should return a material config for BN hex from a QE input file", () => {
+        const config = nativeFormatParsers.convertFromNativeFormat(BNHexPWSCFInput);
+        assertDeepAlmostEqual(config, BNHex, ["name"]); // title is omitted in input file
     });
 
     it("should throw an error for unknown format", () => {
