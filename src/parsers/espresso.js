@@ -134,7 +134,7 @@ function getAtomicPositions(text) {
  * @summary Creates cell from ibrav and celldm(i) parameters
  * @param {Object} system - The system parameters from &SYSTEM namelist
  * @param {Number} system.ibrav - ibrav parameter
- * @param {Number[]} [system.celldm] - celldm parameters
+ * @param {Number[]} system.celldm - celldm parameters
  * @param {Number} [system.a] - a parameter
  * @param {Number} [system.b] - b parameter
  * @param {Number} [system.c] - c parameter
@@ -158,7 +158,8 @@ function ibravToCell(system) {
         units = "bohr";
     } else if (a) {
         // a, b, c, cosAB, cosAC, cosBC in Angstrom
-        throw new Error("ibravToCell() does not yet support A/B/C/cosAB/cosAC/cosBC");
+        alat = a;
+        units = "angstrom";
     } else {
         throw new Error("Missing celldm(1)");
     }
@@ -222,7 +223,8 @@ function ibravToCell(system) {
             throw new Error(`ibrav = ${system.ibrav} not implemented`);
     }
 
-    const vectors = []; // TODO: implement
+    let vectors = []; // TODO: implement
+    vectors = Lattice.vectorsFromType(a);
 
     const config = {
         a: vectors[0],
@@ -230,7 +232,7 @@ function ibravToCell(system) {
         c: vectors[2],
         alat,
         type,
-        units,
+        units: { length: units },
     };
 
     return new Lattice(config);
