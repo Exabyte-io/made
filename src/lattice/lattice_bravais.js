@@ -123,6 +123,36 @@ export class LatticeBravais {
     }
 
     /**
+     * Return lattice type from vectors array.
+     * @param {Number[][]} array
+     * @returns {String}
+     */
+    // eslint-disable-next-line no-unused-vars
+    static typeFromArrays(array) {
+        const type = "unknown";
+        // TODO: implement
+        return type;
+    }
+
+    /**
+     * Return lattice vectors from type and necessary parameters of: a, b, c, cosbc, cosac, cosab.
+     * @param {string} type
+     * @param {number} a
+     * @param {number} [b]
+     * @param {number} [c]
+     * @param {number} [cosbc]
+     * @param {number} [cosac]
+     * @param {number} [cosab]
+     * @returns {{vectors: number[][], type: string}}
+     */
+    // eslint-disable-next-line no-unused-vars
+    static vectorsFromType(type, a, b, c, cosbc, cosac, cosab) {
+        const vectors = [];
+        // TODO: implement
+        return { vectors, type };
+    }
+
+    /**
      * Serialize class instance to JSON.
      * @example As below:
          {
