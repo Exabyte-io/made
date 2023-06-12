@@ -1,58 +1,4 @@
-const fortranDoubleRegex = "([-+]?\\d*\\.?\\d*(?:[Eed][+-]?\\d+)?)";
-const fortranNamelistRegex = "&({0})((?:\\s|\\S)*?)\\/"; // capturing group: 1 - namelist name, 2 - data
-const keyValueRegex = "^\\s*{0}\\s*=\\s*{1}\\s*\\n"; // 0 = string value name, 1 = str|bool|number
-const stringRegex = "([+\\w.\\-\\/]*)"; // capturing group: 1 - string value
-const fortranStringRegex = "'([\\w.\\-\\+\\/ ]*)'"; // capturing group: 1 - string value
-const fortranArrayRegex = "^\\s*{0}\\({1}\\)\\s*=\\s*{2}\\s*\\n"; // /gm, capturing groups: 0 - array name, 1 - array index, 2 - value
-const fortranBooleanRegex = "\\.(true|false)\\."; // capturing group: 1 - boolean value
-
-/**
- * @summary Formats a string with other string to be used as a regex.
- * @param {String} str
- * @param {String | String[]} values
- * @returns {String}
- */
-function formatString(str, ...values) {
-    return str.replace(/{(\d+)}/g, (match, index) => {
-        return typeof values[index] !== "undefined" ? values[index] : match;
-    });
-}
-
-// Regexes for the namelists & cards
-const regex = {
-    stringKeyValue: new RegExp(formatString(keyValueRegex, stringRegex, fortranStringRegex), "gm"),
-    numberKeyValue: new RegExp(formatString(keyValueRegex, stringRegex, fortranDoubleRegex), "gm"),
-    booleanKeyValue: new RegExp(
-        formatString(keyValueRegex, stringRegex, fortranBooleanRegex),
-        "gm",
-    ),
-    numberArrayKeyValue: new RegExp(
-        formatString(fortranArrayRegex, stringRegex, "(\\d+)", fortranDoubleRegex),
-        "gm",
-    ),
-
-    atomicSpecies: new RegExp(
-        formatString("([A-Z][a-z]?)\\s+{0}\\s+([\\S]*)\\s*(?=\\n)", fortranDoubleRegex),
-        "gm",
-    ),
-    atomicPositions: new RegExp(
-        formatString(
-            "\\b([A-Z][a-z]*)\\b\\s+{0}\\s+{0}\\s+{0}(?:\\s+(0|1)\\s+(0|1)\\s+(0|1))?(?=\\s*\\n)",
-            fortranDoubleRegex,
-        ),
-        "gm",
-    ),
-    atomicPositionsUnits: /ATOMIC_POSITIONS\s\(?([\w]+)\)?/,
-    cellParameters: new RegExp(
-        formatString(
-            "CELL_PARAMETERS\\s*(?:\\((\\w+)\\))?" +
-                "\\s+{0}\\s+{0}\\s+{0}" +
-                "\\s+{0}\\s+{0}\\s+{0}" +
-                "\\s+{0}\\s+{0}\\s+{0}",
-            fortranDoubleRegex,
-        ),
-    ),
-};
+import { regex } from "./utils";
 
 /**
  * @summary Extracts an array of the key value pairs from a Fortran namelist.
@@ -85,7 +31,7 @@ function extractKeyValuePairs(data) {
     });
 
     numberArrayPairs.forEach((pair) => {
-        if (!output[pair[0]]) output[pair[0]] = [null]; // to have celldm[i] start with 1 set the 0th element as null and push to it
+        if (!output[pair[0]]) output[pair[0]] = [];
         output[pair[0]].push(pair[1]);
     });
 
@@ -108,7 +54,7 @@ function extractNamelistData(text) {
     // Iterate through each provided namelist name
     namelistNames.forEach((namelistName) => {
         // Create a new RegExp for the current namelist name
-        const _regex = new RegExp(formatString(fortranNamelistRegex, namelistName.toUpperCase()));
+        const _regex = regex.namelists(namelistName);
 
         // Find the data for the current namelist
         const data = text.match(_regex)[2];
@@ -126,55 +72,7 @@ function extractNamelistData(text) {
  */
 export function parseFortranFile(text) {
     const output = extractNamelistData(text);
-
-    // Cards are retrieved in a dedicated fashion:
-    const cellParameters = text.match(regex.cellParameters);
-    if (cellParameters) {
-        output.cell = {
-            cell: [
-                [
-                    parseFloat(cellParameters[2]),
-                    parseFloat(cellParameters[3]),
-                    parseFloat(cellParameters[4]),
-                ],
-                [
-                    parseFloat(cellParameters[5]),
-                    parseFloat(cellParameters[6]),
-                    parseFloat(cellParameters[7]),
-                ],
-                [
-                    parseFloat(cellParameters[8]),
-                    parseFloat(cellParameters[9]),
-                    parseFloat(cellParameters[10]),
-                ],
-            ],
-            units: cellParameters[1],
-        };
-    }
-
-    const atomicSpeciesMatches = Array.from(text.matchAll(regex.atomicSpecies));
-    output.atomicSpecies = atomicSpeciesMatches.map((match) => ({
-        element: match[1],
-        mass: parseFloat(match[2]),
-        potential: match[3],
-    }));
-    const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
-    output.elements = atomicPositionsMatches.map((match, index) => ({
-        id: index,
-        value: match[1],
-    }));
-    output.coordinates = atomicPositionsMatches.map((match, index) => ({
-        id: index,
-        value: [parseFloat(match[2]), parseFloat(match[3]), parseFloat(match[4])],
-    }));
-    output.constraints = atomicPositionsMatches
-        .filter((match) => match[5] && match[6] && match[7]) // Check if all three constrtaints exist
-        .map((match, index) => ({
-            id: index,
-            value: [match[5] === "1", match[6] === "1", match[7] === "1"],
-        }));
     // eslint-disable-next-line prefer-destructuring
-    output.units = text.match(regex.atomicPositionsUnits)[1];
-
+    output.cards = text.match(regex.cards)[1];
     return output;
 }
