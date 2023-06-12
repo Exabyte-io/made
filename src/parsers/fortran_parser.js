@@ -65,14 +65,34 @@ function extractNamelistData(text) {
     return namelists;
 }
 
-/**
- * @summary Parses Fortran namelists and cards data from a string for a QE input file
- * @param {String} text
- * @returns {Object}
+/** s
+ * Parses Fortran namelists and cards data from a string.
+ *
+ * @summary Parses Fortran namelists and cards data from a string for a QE input file.
+ * @param {String} text - The text to parse. This should be the contents of a Fortran file.
+ * @throws {Error} If no namelist data is found in `text`.
+ * @throws {Error} If no cards data is found in `text`.
+ * @returns {Object} An object containing the parsed namelist and cards data. The exact structure of this object will depend on the structure of the namelist and cards data in `text`.
  */
 export function parseFortranFile(text) {
-    const output = extractNamelistData(text);
-    // eslint-disable-next-line prefer-destructuring
-    output.cards = text.match(regex.cards)[1];
+    let output;
+    try {
+        output = extractNamelistData(text);
+    } catch (err) {
+        throw new Error("Incorrect fortran file");
+    }
+
+    if (!output) {
+        throw new Error("No namelists found");
+    }
+
+    const match = text.match(regex.cards);
+    if (!match || match.length < 2) {
+        throw new Error("No cards found");
+    } else {
+        // eslint-disable-next-line prefer-destructuring
+        output.cards = match[1];
+    }
+
     return output;
 }

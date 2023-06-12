@@ -46,3 +46,5 @@ export const BNHexPWSCFInput = readFile(path.join(FIXTURES_DIR, "BN-hex-pwscf.in
 
 export const FortranFile1 = readFile(path.join(FIXTURES_DIR, "fortran-file-1.txt"));
 export const FortranFile1JSON = readJSONFile(path.join(FIXTURES_DIR, "fortran-file-1.json"));
+export const FortranFileInvalid = readFile(path.join(FIXTURES_DIR, "fortran-file-invalid.txt"));
+export const FortranFileNoCards = readFile(path.join(FIXTURES_DIR, "fortran-file-no-cards.txt"));
