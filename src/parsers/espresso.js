@@ -150,7 +150,7 @@ function ibravToCell(system) {
 
     // celdm(1) = celldm[0]: index begins from 0
     if (celldm[0] && a) {
-        throw new Error("Both celldm and a,b,c are given");
+        throw new Error("Both celldm and A are given");
     } else if (celldm[0]) {
         // celldm(x) in bohr
         // eslint-disable-next-line prefer-destructuring
@@ -159,6 +159,7 @@ function ibravToCell(system) {
     } else if (a) {
         // a, b, c, cosAB, cosAC, cosBC in Angstrom
         alat = a;
+        // eslint-disable-next-line no-unused-vars
         units = "angstrom";
     } else {
         throw new Error("Missing celldm(1)");
@@ -224,15 +225,15 @@ function ibravToCell(system) {
     }
 
     let vectors = []; // TODO: implement
-    vectors = Lattice.vectorsFromType(a);
-
+    vectors = Lattice.vectorsFromType(type, a, b, c, cosab, cosac, cosbc);
+    console.log(alat);
     const config = {
         a: vectors[0],
         b: vectors[1],
         c: vectors[2],
         alat,
+        units: { length: "angstrom", angle: "degree" }, // units taken care of during vectors creation
         type,
-        units: { length: units },
     };
 
     return new Lattice(config);
