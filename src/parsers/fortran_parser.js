@@ -42,6 +42,7 @@ const regex = {
         ),
         "gm",
     ),
+    atomicPositionsUnits: /ATOMIC_POSITIONS\s\(?([\w]+)\)?/,
     cellParameters: new RegExp(
         formatString(
             "CELL_PARAMETERS\\s*(?:\\((\\w+)\\))?" +
@@ -93,9 +94,8 @@ function extractKeyValuePairs(data) {
 
 /**
  * @summary Extracts namelist data from a string.
- * @param {String}
- * @param text
- * @returns {{}}
+ * @param {String} text
+ * @returns {Object}
  */
 function extractNamelistData(text) {
     const namelistNameRegex = /&(\w+)/g;
@@ -116,14 +116,13 @@ function extractNamelistData(text) {
         // Extract the key-value pairs and store them in the namelists object
         namelists[namelistName] = extractKeyValuePairs(data);
     });
-    console.log(namelists);
     return namelists;
 }
 
 /**
  * @summary Parses Fortran namelists and cards data from a string for a QE input file
  * @param {String} text
- * @returns {Object[]}
+ * @returns {Object}
  */
 function parseFortranFile(text) {
     const output = extractNamelistData(text);
@@ -152,28 +151,29 @@ function parseFortranFile(text) {
     }
 
     const atomicSpeciesMatches = Array.from(text.matchAll(regex.atomicSpecies));
-    console.log(regex.atomicSpecies);
     output.atomicSpecies = atomicSpeciesMatches.map((match) => ({
         element: match[1],
         mass: parseFloat(match[2]),
         potential: match[3],
     }));
-
     const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
-    output.elements = atomicPositionsMatches.map((match, index) => ({
+    output.basis = {};
+    output.basis.elements = atomicPositionsMatches.map((match, index) => ({
         id: index,
         value: match[1],
     }));
-    output.coordinates = atomicPositionsMatches.map((match, index) => ({
+    output.basis.coordinates = atomicPositionsMatches.map((match, index) => ({
         id: index,
         value: [parseFloat(match[2]), parseFloat(match[3]), parseFloat(match[4])],
     }));
-    output.constraints = atomicPositionsMatches
+    output.basis.constraints = atomicPositionsMatches
         .filter((match) => match[5] && match[6] && match[7]) // Check if all three constrtaints exist
         .map((match, index) => ({
             id: index,
             value: [match[5] === "1", match[6] === "1", match[7] === "1"],
         }));
+    // eslint-disable-next-line prefer-destructuring
+    output.basis.units = text.match(regex.atomicPositionsUnits)[1];
 
     return output;
 }
