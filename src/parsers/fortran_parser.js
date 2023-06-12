@@ -34,6 +34,7 @@ function extractKeyValuePairs(data) {
         if (!output[pair[0]]) output[pair[0]] = [];
         output[pair[0]].push(pair[1]);
     });
+    // TODO: add string and boolean arrays
 
     return output;
 }
