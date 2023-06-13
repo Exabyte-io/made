@@ -48,7 +48,7 @@ export const regex = {
     atomicPositionsUnits: /ATOMIC_POSITIONS\s\(?([\w]+)\)?/,
     cellParameters: new RegExp(
         formatString(
-            "CELL_PARAMETERS\\s*(?:\\((\\w+)\\))?" +
+            "CELL_PARAMETERS\\s*(?:\\(?(\\w+)\\)?)?" +
                 "\\s+{0}\\s+{0}\\s+{0}" +
                 "\\s+{0}\\s+{0}\\s+{0}" +
                 "\\s+{0}\\s+{0}\\s+{0}",
