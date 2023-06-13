@@ -13,6 +13,7 @@ import {
     NiHex,
     NiHexPoscar,
     Sb2S3Orc,
+    Sb2S3OrcAPWSCFInput,
     Sb2S3OrcPWSCFInput,
 } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
@@ -56,6 +57,12 @@ describe("Parsers.NativeFormat", () => {
 
     it("should return a material config for Sb2S3 from a QE input file", () => {
         const config = nativeFormatParsers.convertFromNativeFormat(Sb2S3OrcPWSCFInput);
+        assertDeepAlmostEqual(config, Sb2S3Orc, ["name"]);
+        expect(config.name.toLowerCase()).to.be.equal(Sb2S3Orc.name.toLowerCase()); // to compare case insensitively
+    });
+
+    it("should return a material config for Sb2S3 with specified parameter A from a QE input file", () => {
+        const config = nativeFormatParsers.convertFromNativeFormat(Sb2S3OrcAPWSCFInput);
         assertDeepAlmostEqual(config, Sb2S3Orc, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(Sb2S3Orc.name.toLowerCase()); // to compare case insensitively
     });
