@@ -1,4 +1,4 @@
-import { coefficients } from "@exabyte-io/code.js/dist/constants";
+import { ATOMIC_COORD_UNITS, coefficients } from "@exabyte-io/code.js/dist/constants";
 import _ from "underscore";
 import s from "underscore.string";
 
@@ -112,13 +112,44 @@ function getAtomicPositions(text) {
         potential: match[3],
     }));
     const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
+    // eslint-disable-next-line prefer-destructuring
+    const units = text.match(regex.atomicPositionsUnits)[1];
+
+    let cellUnits, _units;
+    switch (units) {
+        case "alat":
+            cellUnits = 1.0; // ???
+            _units = ATOMIC_COORD_UNITS.crystal; // ???
+            break;
+        case "bohr":
+            cellUnits = coefficients.BOHR_TO_ANGSTROM;
+            _units = ATOMIC_COORD_UNITS.cartesian;
+            break;
+        case "angstrom":
+            cellUnits = 1.0;
+            _units = ATOMIC_COORD_UNITS.cartesian;
+            break;
+        case "crystal":
+            cellUnits = 1.0;
+            _units = ATOMIC_COORD_UNITS.crystal;
+            break;
+        case "crystal_sg":
+            throw new Error("crystal_sg not supported yet");
+        default:
+            throw new Error(`Units ${units} not supported`);
+    }
+
     const elements = atomicPositionsMatches.map((match, index) => ({
         id: index,
         value: match[1],
     }));
     const coordinates = atomicPositionsMatches.map((match, index) => ({
         id: index,
-        value: [parseFloat(match[2]), parseFloat(match[3]), parseFloat(match[4])],
+        value: [
+            parseFloat(match[2]) * cellUnits,
+            parseFloat(match[3]) * cellUnits,
+            parseFloat(match[4]) * cellUnits,
+        ],
     }));
     const constraints = atomicPositionsMatches
         .filter((match) => match[5] && match[6] && match[7]) // Check if all three constrtaints exist
@@ -126,10 +157,8 @@ function getAtomicPositions(text) {
             id: index,
             value: [match[5] === "1", match[6] === "1", match[7] === "1"],
         }));
-    // eslint-disable-next-line prefer-destructuring
-    const units = text.match(regex.atomicPositionsUnits)[1];
 
-    return { elements, coordinates, constraints, units };
+    return { elements, coordinates, constraints, units: _units };
 }
 
 /**
@@ -263,6 +292,7 @@ function fromEspressoFormat(fileContent) {
     if (ibrav === 0) {
         // Create unit cell from given cell parameters in CELL_PARAMETERS card
         cell = getCellParameters(data.cards);
+        cell.type = Lattice.typeFromVectors(cell.vectors);
     } else {
         // Create unit cell from given ibrav (and celldm(i) or A) with algorithm
         cell = ibravToCell(data.system);
@@ -283,9 +313,11 @@ function fromEspressoFormat(fileContent) {
         elements,
         coordinates,
         units,
+        type: cell.type,
         cell: lattice.vectorArrays,
         constraints,
     });
+    basis.toCrystal(); // It's default value when you download from Mat3ra Platform where all the fixtures came from
 
     const materialConfig = {
         lattice: lattice.toJSON(),
