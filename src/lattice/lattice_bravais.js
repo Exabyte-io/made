@@ -190,7 +190,6 @@ export class LatticeBravais {
             case LATTICE_TYPE.ORCF:
                 vectors = [
                     [0, b / 2, c / 2],
-
                     [a / 2, 0, c / 2],
                     [a / 2, b / 2, 0],
                 ];
