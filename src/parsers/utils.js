@@ -1,6 +1,6 @@
 const fortranDoubleRegex = "([-+]?\\d*\\.?\\d*(?:[Eed][+-]?\\d+)?)";
 const fortranNamelistRegex = "&({0})((?:\\s|\\S)*?)\\/"; // capturing group: 1 - namelist name, 2 - data
-const fortranCardsRegex = "^\\/(?![\\s\\S]*^\\/)([\\s\\S]*)"; // capturing group: 1 cards section string
+const fortranCardsRegex = "^\\s*\\/(?![\\s\\S]*^\\/)([\\s\\S]*)"; // capturing group: 1 cards section string
 const keyValueRegex = "^\\s*{0}\\s*=\\s*{1}\\s*\\n"; // 0 = string value name, 1 = str|bool|number
 const stringRegex = "([+\\w.\\-\\/]*)"; // capturing group: 1 - string value
 const fortranStringRegex = "'([\\w.\\-\\+\\/ ]*)'"; // capturing group: 1 - string value
