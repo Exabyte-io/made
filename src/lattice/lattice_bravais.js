@@ -1,6 +1,6 @@
 import constants from "../constants";
 import math from "../math";
-import { LATTICE_TYPE_CONFIGS } from "./types";
+import { LATTICE_TYPE, LATTICE_TYPE_CONFIGS } from "./types";
 
 /*
  * @summary: class that holds parameters of a Bravais Lattice: a, b, c, alpha, beta, gamma + corresponding units.
@@ -135,20 +135,136 @@ export class LatticeBravais {
     }
 
     /**
-     * Return lattice vectors from type and necessary parameters of: a, b, c, cosbc, cosac, cosab.
+     * Return primitive lattice vectors from type and necessary parameters of: a, b, c, cosbc, cosac, cosab.
+     * According to this: https://arxiv.org/pdf/1004.2974.pdf
      * @param {string} type
      * @param {number} a
      * @param {number} [b]
      * @param {number} [c]
-     * @param {number} [cosbc]
-     * @param {number} [cosac]
-     * @param {number} [cosab]
+     * @param {number} [alpha] - angle between b and c in radians
+     * @param {number} [beta] - angle between a and c in radians
+     * @param {number} [gamma] - angle between a and b in radians
      * @returns {{vectors: number[][], type: string}}
      */
     // eslint-disable-next-line no-unused-vars
-    static vectorsFromType(type, a, b, c, cosbc, cosac, cosab) {
-        const vectors = [];
-        // TODO: implement
+    static vectorsFromType(type, a, b, c, alpha, beta, gamma) {
+        let vectors = [];
+        // TODO: check if this many math.js operations give correct result
+        const z =
+            (c / math.sin(gamma)) *
+            math.sqrt(
+                math.sin(gamma) ** 2 -
+                    math.cos(alpha) ** 2 -
+                    math.cos(beta) ** 2 +
+                    2 * math.cos(alpha) * math.cos(beta) * math.cos(gamma),
+            );
+
+        switch (type) {
+            case LATTICE_TYPE.CUB:
+                vectors = [
+                    [a, 0, 0],
+                    [0, a, 0],
+                    [0, 0, a],
+                ];
+                break;
+            case LATTICE_TYPE.FCC:
+                vectors = [
+                    [0, a / 2, a / 2],
+                    [a / 2, 0, a / 2],
+                    [a / 2, a / 2, 0],
+                ];
+                break;
+            case LATTICE_TYPE.TET:
+                vectors = [
+                    [a, 0, 0],
+                    [0, a, 0],
+                    [0, 0, c],
+                ];
+                break;
+            case LATTICE_TYPE.BCT:
+                vectors = [
+                    [-a / 2, a / 2, c / 2],
+                    [a / 2, -a / 2, c / 2],
+                    [a / 2, a / 2, -c / 2],
+                ];
+                break;
+            case LATTICE_TYPE.ORC:
+                vectors = [
+                    [a, 0, 0],
+                    [0, b, 0],
+                    [0, 0, c],
+                ];
+                break;
+            case LATTICE_TYPE.ORCF:
+                vectors = [
+                    [0, b / 2, c / 2],
+
+                    [a / 2, 0, c / 2],
+                    [a / 2, b / 2, 0],
+                ];
+                break;
+            case LATTICE_TYPE.ORCI:
+                vectors = [
+                    [-a / 2, b / 2, c / 2],
+                    [a / 2, -b / 2, c / 2],
+                    [a / 2, b / 2, -c / 2],
+                ];
+                break;
+            case LATTICE_TYPE.ORCC:
+                vectors = [
+                    [a / 2, -b / 2, 0],
+                    [a / 2, b / 2, 0],
+                    [0, 0, c],
+                ];
+                break;
+            case LATTICE_TYPE.HEX:
+                vectors = [
+                    [a / 2, (-a * math.sqrt(3)) / 2, 0],
+                    [a / 2, (a * math.sqrt(3)) / 2, 0],
+                    [0, 0, c],
+                ];
+                break;
+            case LATTICE_TYPE.RHL:
+                vectors = [
+                    [a * math.cos(alpha / 2), -a * math.sin(alpha / 2), 0],
+                    [a * math.cos(alpha / 2), a * math.sin(alpha / 2), 0],
+                    [
+                        (a * math.cos(alpha)) / math.cos(alpha / 2),
+                        0,
+                        a * math.sqrt(1 - math.cos(alpha) ** 2 / math.cos(alpha / 2) ** 2),
+                    ],
+                ];
+                break;
+            case LATTICE_TYPE.MCL:
+                vectors = [
+                    [a, 0, 0],
+                    [0, b, 0],
+                    [0, c * math.cos(alpha), c * math.sin(alpha)],
+                ];
+                break;
+            case LATTICE_TYPE.MCLC:
+                vectors = [
+                    [a / 2, b / 2, 0],
+                    [-a / 2, b / 2, 0],
+                    [0, c * math.cos(alpha), c * math.sin(alpha)],
+                ];
+
+                break;
+            case LATTICE_TYPE.TRI:
+                vectors = [
+                    [a, 0, 0],
+                    [b * math.cos(gamma), b * math.sin(gamma), 0],
+                    [
+                        c * math.cos(beta),
+                        (c / math.sin(gamma)) *
+                            (math.cos(alpha) - math.cos(beta) * math.cos(gamma)),
+                        z,
+                    ],
+                ];
+                break;
+            default:
+                throw new Error("Unknown lattice type");
+        }
         return { vectors, type };
     }
 
