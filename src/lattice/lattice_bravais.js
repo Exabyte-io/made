@@ -150,14 +150,6 @@ export class LatticeBravais {
     static vectorsFromType(type, a, b, c, alpha, beta, gamma) {
         let vectors = [];
         // TODO: check if this many math.js operations give correct result
-        const z =
-            (c / math.sin(gamma)) *
-            math.sqrt(
-                math.sin(gamma) ** 2 -
-                    math.cos(alpha) ** 2 -
-                    math.cos(beta) ** 2 +
-                    2 * math.cos(alpha) * math.cos(beta) * math.cos(gamma),
-            );
 
         switch (type) {
             case LATTICE_TYPE.CUB:
@@ -251,6 +243,15 @@ export class LatticeBravais {
 
                 break;
             case LATTICE_TYPE.TRI:
+                // eslint-disable-next-line no-case-declarations
+                const z =
+                    (c / math.sin(gamma)) *
+                    math.sqrt(
+                        math.sin(gamma) ** 2 -
+                            math.cos(alpha) ** 2 -
+                            math.cos(beta) ** 2 +
+                            2 * math.cos(alpha) * math.cos(beta) * math.cos(gamma),
+                    );
                 vectors = [
                     [a, 0, 0],
                     [b * math.cos(gamma), b * math.sin(gamma), 0],
