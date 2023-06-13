@@ -1,9 +1,11 @@
+import { coefficients } from "@exabyte-io/code.js/dist/constants";
 import _ from "underscore";
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Lattice } from "../lattice/lattice";
 import { LATTICE_TYPE } from "../lattice/types";
+import math from "../math";
 import { parseFortranFile } from "./fortran_parser";
 import { regex } from "./utils";
 import xyz from "./xyz";
@@ -43,7 +45,7 @@ function isEspressoFormat(fileContent) {
  * @summary Read unit cell parameters from CELL_PARAMETERS card
  * @param {String} text - cards data
  * @param {Number} alat - lattice parameter
- * @returns {{vectors: number[][], alat: Number, units: {length: string}}}
+ * @returns {{vectors: number[][], alat: Number, units: string}}
  */
 function getCellParameters(text, alat = null) {
     let vectors = [];
@@ -131,36 +133,45 @@ function getAtomicPositions(text) {
 }
 
 /**
+ * QE docs: https://www.quantum-espresso.org/Doc/INPUT_PW.html#ibrav
+ * "If ibrav /= 0, specify EITHER [ celldm(1)-celldm(6) ]
+ *   OR [ A, B, C, cosAB, cosAC, cosBC ]
+ *   but NOT both. The lattice parameter "alat" is set to
+ *   alat = celldm(1) (in a.u.) or alat = A (in Angstrom);"
+ *
  * @summary Creates cell from ibrav and celldm(i) parameters
  * @param {Object} system - The system parameters from &SYSTEM namelist
  * @param {Number} system.ibrav - ibrav parameter
- * @param {Number[]} system.celldm - celldm parameters
- * @param {Number} [system.a] - a parameter
- * @param {Number} [system.b] - b parameter
- * @param {Number} [system.c] - c parameter
+ * @param {Number[]} system.celldm - celldm parameters, 0 - a (bohr), 1 - b/a (unitless), 2 - c/a (unitless), 3,4,5 - cosines
+ * @param {Number} [system.a] - a parameter in angstroms
+ * @param {Number} [system.b] - b parameter in angstroms
+ * @param {Number} [system.c] - c parameter in angstroms
  * @param {Number} [system.cosab] - cosab parameter
  * @param {Number} [system.cosac] - cosac parameter
  * @param {Number} [system.cosbc] - cosbc parameter
- * @returns {Lattice}
+ * @returns {{vectors: number[][], alat: Number, units: string}}
  */
 function ibravToCell(system) {
-    // eslint-disable-next-line no-unused-vars
     const { ibrav, celldm, a, b, c, cosab, cosac, cosbc } = system;
-    let alat, type, units;
+    const alat = 1;
+    let type, alpha, beta, gamma;
+    let _a = celldm[0] ? celldm[0] : a;
+    let _b = celldm[1] ? celldm[1] * celldm[0] : b; // celldm[1] is b/a
+    let _c = celldm[2] ? celldm[2] * celldm[0] : c; // celldm[2] is c/a
 
     // celdm(1) = celldm[0]: index begins from 0
     if (celldm[0] && a) {
         throw new Error("Both celldm and A are given");
     } else if (celldm[0]) {
         // celldm(x) in bohr - from QE docs
-        // eslint-disable-next-line prefer-destructuring
-        alat = celldm[0];
-        units = "bohr";
+        _a *= coefficients.BOHR_TO_ANGSTROM;
+        _b *= coefficients.BOHR_TO_ANGSTROM;
+        _c *= coefficients.BOHR_TO_ANGSTROM;
     } else if (a) {
         // a, b, c, cosAB, cosAC, cosBC in Angstrom - from QE docs
-        alat = a;
-        // eslint-disable-next-line no-unused-vars
-        units = "angstrom";
+        alpha = math.acos(cosbc);
+        beta = math.acos(cosac);
+        gamma = math.acos(cosab);
     } else {
         throw new Error("Missing celldm(1)");
     }
@@ -224,21 +235,8 @@ function ibravToCell(system) {
             throw new Error(`ibrav = ${system.ibrav} not implemented`);
     }
 
-    let vectors = []; // TODO: implement
-
-    // eslint-disable-next-line no-undef
-    vectors = Lattice.vectorsFromType(type, a, b, c, alpha, beta, gamma);
-    console.log(alat);
-    const config = {
-        a: vectors[0],
-        b: vectors[1],
-        c: vectors[2],
-        alat,
-        units: { length: "angstrom", angle: "degree" }, // units taken care of during vectors creation
-        type,
-    };
-
-    return new Lattice(config);
+    const { vectors } = Lattice.vectorsFromType(type, _a, _b, _c, alpha, beta, gamma);
+    return { vectors, alat, units: "angstrom", type };
 }
 
 /**
@@ -265,18 +263,20 @@ function fromEspressoFormat(fileContent) {
     if (ibrav === 0) {
         // Create unit cell from given cell parameters in CELL_PARAMETERS card
         cell = getCellParameters(data.cards);
-        lattice = Lattice.fromVectors({
-            a: cell.vectors[0],
-            b: cell.vectors[1],
-            c: cell.vectors[2],
-            alat: cell.alat,
-            units: cell.units,
-            type: cell.type,
-        });
     } else {
         // Create unit cell from given ibrav (and celldm(i) or A) with algorithm
-        lattice = ibravToCell(data.system);
+        cell = ibravToCell(data.system);
     }
+
+    lattice = Lattice.fromVectors({
+        a: cell.vectors[0],
+        b: cell.vectors[1],
+        c: cell.vectors[2],
+        alat: cell.alat,
+        units: cell.units,
+        type: cell.type,
+    });
+
     const { elements, coordinates, constraints, units } = getAtomicPositions(data.cards);
 
     const basis = new ConstrainedBasis({
