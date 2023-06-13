@@ -88,7 +88,8 @@ export function parseFortranFile(text) {
     }
 
     const match = text.match(regex.cards);
-    if (!match || match.length < 2) {
+    const qeCardsRegex = /ATOMIC_SPECIES|ATOMIC_POSITIONS/;
+    if (!match || !match[1] || !match[1].match(qeCardsRegex)) {
         throw new Error("No cards found");
     } else {
         // eslint-disable-next-line prefer-destructuring
