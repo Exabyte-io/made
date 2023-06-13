@@ -152,12 +152,12 @@ function ibravToCell(system) {
     if (celldm[0] && a) {
         throw new Error("Both celldm and A are given");
     } else if (celldm[0]) {
-        // celldm(x) in bohr
+        // celldm(x) in bohr - from QE docs
         // eslint-disable-next-line prefer-destructuring
         alat = celldm[0];
         units = "bohr";
     } else if (a) {
-        // a, b, c, cosAB, cosAC, cosBC in Angstrom
+        // a, b, c, cosAB, cosAC, cosBC in Angstrom - from QE docs
         alat = a;
         // eslint-disable-next-line no-unused-vars
         units = "angstrom";
@@ -225,7 +225,9 @@ function ibravToCell(system) {
     }
 
     let vectors = []; // TODO: implement
-    vectors = Lattice.vectorsFromType(type, a, b, c, cosab, cosac, cosbc);
+
+    // eslint-disable-next-line no-undef
+    vectors = Lattice.vectorsFromType(type, a, b, c, alpha, beta, gamma);
     console.log(alat);
     const config = {
         a: vectors[0],
