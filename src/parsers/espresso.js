@@ -155,23 +155,23 @@ function ibravToCell(system) {
     const { ibrav, celldm, a, b, c, cosab, cosac, cosbc } = system;
     const alat = 1;
     let type, alpha, beta, gamma;
-    let _a = celldm[0] ? celldm[0] : a;
-    let _b = celldm[1] ? celldm[1] * celldm[0] : b; // celldm[1] is b/a
-    let _c = celldm[2] ? celldm[2] * celldm[0] : c; // celldm[2] is c/a
+    let _a = celldm ? celldm[0] : a;
+    let _b = celldm ? celldm[1] * celldm[0] : b; // celldm[1] is b/a
+    let _c = celldm ? celldm[2] * celldm[0] : c; // celldm[2] is c/a
 
     // celdm(1) = celldm[0]: index begins from 0
-    if (celldm[0] && a) {
+    if (celldm && a) {
         throw new Error("Both celldm and A are given");
-    } else if (celldm[0]) {
+    } else if (celldm) {
         // celldm(x) in bohr - from QE docs
         _a *= coefficients.BOHR_TO_ANGSTROM;
         _b *= coefficients.BOHR_TO_ANGSTROM;
         _c *= coefficients.BOHR_TO_ANGSTROM;
     } else if (a) {
         // a, b, c, cosAB, cosAC, cosBC in Angstrom - from QE docs
-        alpha = math.acos(cosbc);
-        beta = math.acos(cosac);
-        gamma = math.acos(cosab);
+        if (cosbc) alpha = math.acos(cosbc);
+        if (cosac) beta = math.acos(cosac);
+        if (cosab) gamma = math.acos(cosab);
     } else {
         throw new Error("Missing celldm(1)");
     }

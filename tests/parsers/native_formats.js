@@ -8,6 +8,7 @@ import {
     GraphenePoscar,
     GraphenePWSCFInput,
     NiCub,
+    NiCubAPWSCFInput,
     NiCubPWSCFInput,
     NiHex,
     NiHexPoscar,
@@ -43,6 +44,12 @@ describe("Parsers.NativeFormat", () => {
 
     it("should return a material config for Ni cub from a QE input file", () => {
         const config = nativeFormatParsers.convertFromNativeFormat(NiCubPWSCFInput);
+        assertDeepAlmostEqual(config, NiCub, ["name"]);
+        expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
+    });
+
+    it("should return a material config for Ni cub with specified parameter A from a QE input file", () => {
+        const config = nativeFormatParsers.convertFromNativeFormat(NiCubAPWSCFInput);
         assertDeepAlmostEqual(config, NiCub, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
     });
