@@ -128,8 +128,8 @@ export class LatticeBravais {
      * @returns {String}
      */
     // eslint-disable-next-line no-unused-vars
-    static typeFromArrays(array) {
-        const type = "unknown";
+    static typeFromVectors(array) {
+        const type = "TRI"; // TODO: remove temporary assigment corresponding to default value in basis constructor
         // TODO: implement
         return type;
     }

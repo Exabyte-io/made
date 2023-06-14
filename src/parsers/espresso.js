@@ -185,7 +185,7 @@ function ibravToCell(system) {
     const alat = 1;
     let type, alpha, beta, gamma;
 
-    celldm.unshift(null); // Bmp indeces by 1 to make it easier to understand the logic. In QE input file celdm(1) array starts with 1, but parsed starting with 0.
+    if (celldm) celldm.unshift(null); // Bmp indeces by 1 to make it easier to understand the logic. In QE input file celdm(1) array starts with 1, but parsed starting with 0.
     let _a = celldm ? celldm[1] : a;
     let _b = celldm ? celldm[2] * celldm[1] : b; // celldm[2] is b/a
     let _c = celldm ? celldm[3] * celldm[1] : c; // celldm[3] is c/a
