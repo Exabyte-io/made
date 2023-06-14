@@ -184,11 +184,12 @@ function ibravToCell(system) {
     const { ibrav, celldm, a, b, c, cosab, cosac, cosbc } = system;
     const alat = 1;
     let type, alpha, beta, gamma;
-    let _a = celldm ? celldm[0] : a;
-    let _b = celldm ? celldm[1] * celldm[0] : b; // celldm[1] is b/a
-    let _c = celldm ? celldm[2] * celldm[0] : c; // celldm[2] is c/a
 
-    // celdm(1) = celldm[0]: index begins from 0
+    celldm.unshift(null); // Bmp indeces by 1 to make it easier to understand the logic. In QE input file celdm(1) array starts with 1, but parsed starting with 0.
+    let _a = celldm ? celldm[1] : a;
+    let _b = celldm ? celldm[2] * celldm[1] : b; // celldm[2] is b/a
+    let _c = celldm ? celldm[3] * celldm[1] : c; // celldm[3] is c/a
+
     if (celldm && a) {
         throw new Error("Both celldm and A are given");
     } else if (celldm) {
@@ -223,9 +224,11 @@ function ibravToCell(system) {
             break;
         case 5:
             type = LATTICE_TYPE.RHL;
+            if (celldm) gamma = math.acos(celldm[4]);
             break;
         case -5:
             type = LATTICE_TYPE.RHL;
+            if (celldm) gamma = math.acos(celldm[4]);
             break;
         case 6:
             type = LATTICE_TYPE.TET;
@@ -250,15 +253,27 @@ function ibravToCell(system) {
             break;
         case 12:
             type = LATTICE_TYPE.MCL; // Monoclinic P, unique axis c
+            if (celldm) gamma = math.acos(celldm[4]);
             break;
         case -12:
             type = LATTICE_TYPE.MCL; // Monoclinic P, unique axis b
+            if (celldm) beta = math.acos(celldm[5]); // Needs verification and understanding
             break;
         case 13:
             type = LATTICE_TYPE.MCLC; // Monoclinic P, base centered
+            if (celldm) gamma = math.acos(celldm[4]);
+            break;
+        case -13:
+            type = LATTICE_TYPE.MCLC; // Monoclinic P, unique axis b
+            if (celldm) beta = math.acos(celldm[5]);
             break;
         case 14:
             type = LATTICE_TYPE.TRI;
+            if (celldm) {
+                alpha = math.acos(celldm[4]);
+                beta = math.acos(celldm[5]);
+                gamma = math.acos(celldm[6]);
+            }
             break;
         default:
             throw new Error(`ibrav = ${system.ibrav} not implemented`);

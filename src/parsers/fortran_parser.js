@@ -22,6 +22,7 @@ function extractKeyValuePairs(data) {
     ]);
     const numberArrayPairs = Array.from(data.matchAll(regex.numberArrayKeyValue)).map((match) => [
         match[1],
+        parseInt(match[2], 10), // get the index of Fortran array
         parseFloat(match[3]),
     ]);
 
@@ -32,10 +33,10 @@ function extractKeyValuePairs(data) {
 
     numberArrayPairs.forEach((pair) => {
         if (!output[pair[0]]) output[pair[0]] = [];
-        output[pair[0]].push(pair[1]);
+        // eslint-disable-next-line prefer-destructuring
+        output[pair[0]][pair[1] - 1] = pair[2]; // use the index to put the value at the correct position
     });
     // TODO: add string and boolean arrays
-
     return output;
 }
 
