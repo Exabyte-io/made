@@ -1,7 +1,7 @@
 import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import CryptoJS from "crypto-js";
-import lodash from "lodash";
 
+// import lodash from "lodash";
 import { ConstrainedBasis } from "./basis/constrained_basis";
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
@@ -56,10 +56,10 @@ export const defaultMaterialConfig = {
 };
 
 export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
-    constructor(config) {
-        super(config);
-        this._json = lodash.cloneDeep(config || {});
-    }
+    // constructor(config) {
+    //     super(config);
+    //     // this._json = lodash.cloneDeep(config || {});
+    // }
 
     toJSON() {
         return this.toJSONDefault();
@@ -81,6 +81,8 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
     set name(name) {
         super.name = name;
     }
+
+    static _isDeepCloneRequired = true;
 
     static get defaultConfig() {
         return defaultMaterialConfig;
@@ -171,8 +173,8 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
             cell: this.Lattice.vectorArrays,
         });
     }
-    
-    /** High-level access to unique elements from material instead of basis. 
+
+    /** High-level access to unique elements from material instead of basis.
      *
      * @return {String[]}
      */
