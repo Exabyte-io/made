@@ -45,6 +45,9 @@ export const Sb2S3OrcPWSCFInput = readFile(path.join(FIXTURES_DIR, "Sb2S3-ORC-pw
 export const Sb2S3OrcAPWSCFInput = readFile(path.join(FIXTURES_DIR, "Sb2S3-ORC-a-pwscf.in"));
 export const BNHex = readJSONFile(path.join(FIXTURES_DIR, "BN-hex.json"));
 export const BNHexPWSCFInput = readFile(path.join(FIXTURES_DIR, "BN-hex-pwscf.in"));
+export const BNHexIbravPWSCFInput = readFile(path.join(FIXTURES_DIR, "BN-hex-ibrav-pwscf.in"));
+export const SiFccIbravPWSCFInput = readFile(path.join(FIXTURES_DIR, "Si-fcc-ibrav-pwscf.in"));
+export const SiFcc = readJSONFile(path.join(FIXTURES_DIR, "Si-fcc.json"));
 
 export const FortranFile1 = readFile(path.join(FIXTURES_DIR, "fortran-file-1.txt"));
 export const FortranFile1JSON = readJSONFile(path.join(FIXTURES_DIR, "fortran-file-1.json"));
