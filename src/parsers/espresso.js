@@ -34,7 +34,7 @@ function toEspressoFormat(materialOrConfig) {
 /**
  * @summary checks if the given fileContent is in the format of a Quantum ESPRESSO .in file.
  * @param {String} fileContent
- * @return {boolean}
+ * @return {Boolean}
  */
 function isEspressoFormat(fileContent) {
     const espressoRegex = /&CONTROL|&SYSTEM|ATOMIC_POSITIONS/i;
@@ -45,7 +45,7 @@ function isEspressoFormat(fileContent) {
  * @summary Read unit cell parameters from CELL_PARAMETERS card
  * @param {String} text - cards data
  * @param {Number} alat - lattice parameter
- * @returns {{vectors: number[][], alat: Number, units: string}}
+ * @return {{vectors: Number[][], alat: Number, units: String}}
  */
 function getCellParameters(text, alat = null) {
     let vectors = [];
@@ -172,13 +172,13 @@ function getAtomicPositions(text) {
  * @param {Object} system - The system parameters from &SYSTEM namelist
  * @param {Number} system.ibrav - ibrav parameter
  * @param {Number[]} system.celldm - celldm parameters, 0 - a (bohr), 1 - b/a (unitless), 2 - c/a (unitless), 3,4,5 - cosines
- * @param {Number} [system.a] - a parameter in angstroms
- * @param {Number} [system.b] - b parameter in angstroms
- * @param {Number} [system.c] - c parameter in angstroms
- * @param {Number} [system.cosab] - cosab parameter
- * @param {Number} [system.cosac] - cosac parameter
- * @param {Number} [system.cosbc] - cosbc parameter
- * @returns {{vectors: number[][], alat: Number, units: string}}
+ * @param {Number} [system.a] - A parameter in angstroms
+ * @param {Number} [system.b] - B parameter in angstroms
+ * @param {Number} [system.c] - C parameter in angstroms
+ * @param {Number} [system.cosab] - cosAB parameter
+ * @param {Number} [system.cosac] - cosAC parameter
+ * @param {Number} [system.cosbc] - cosBC parameter
+ * @returns {{vectors: Number[][], alat: Number, units: String}}
  */
 function ibravToCell(system) {
     const { ibrav, celldm, a, b, c, cosab, cosac, cosbc } = system;
