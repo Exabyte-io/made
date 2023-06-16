@@ -148,10 +148,12 @@ export class LatticeBravais {
      * @returns {{vectors: Number[][], type: String}}
      */
     // eslint-disable-next-line no-unused-vars
-    static vectorsFromType(type, a, b, c, alpha, beta, gamma) {
-        let vectors = [];
-        // TODO: check if this many math.js operations give correct result
+    static vectorsFromType({ type, a = 1, b = a, c = a, alpha = 90, beta = 90, gamma = 90 }) {
+        alpha *= math.PI / 180;
+        beta *= math.PI / 180;
+        gamma *= math.PI / 180;
 
+        let vectors = [];
         switch (type) {
             case LATTICE_TYPE.CUB:
                 vectors = [
