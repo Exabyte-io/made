@@ -5,6 +5,11 @@ import { readFile, readJSONFile } from "./utils";
 export const TOLERANCE = 1e-3;
 
 export const FIXTURES_DIR = path.resolve(__dirname, "./fixtures");
+export const PARSERS_DIR = path.resolve(FIXTURES_DIR, "./parsers");
+export const JSON_DIR = path.resolve(PARSERS_DIR, "./json");
+export const POSCAR_DIR = path.resolve(PARSERS_DIR, "./poscar");
+export const ESPRESSO_DIR = path.resolve(PARSERS_DIR, "./espresso");
+
 export const Si = readJSONFile(path.join(FIXTURES_DIR, "Si.json"));
 export const Na4Cl4 = readJSONFile(path.join(FIXTURES_DIR, "Na4Cl4.json"));
 export const Na4Cl4Cartesian = readJSONFile(path.join(FIXTURES_DIR, "Na4Cl4-cartesian.json"));
@@ -32,24 +37,29 @@ export const Zr1H23Zr1H1 = readJSONFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.jso
 export const Zr1H23Zr1H1Poscar = readFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.poscar"));
 export const H2O = readFile(path.join(FIXTURES_DIR, "H2O.poscar"));
 
-export const Graphene = readJSONFile(path.join(FIXTURES_DIR, "Graphene.json"));
-export const GraphenePoscar = readFile(path.join(FIXTURES_DIR, "Graphene.poscar"));
-export const GraphenePWSCFInput = readFile(path.join(FIXTURES_DIR, "Graphene-pwscf.in"));
-export const NiHex = readJSONFile(path.join(FIXTURES_DIR, "Ni-hex.json"));
-export const NiHexPoscar = readFile(path.join(FIXTURES_DIR, "Ni-hex.poscar"));
-export const NiCub = readJSONFile(path.join(FIXTURES_DIR, "Ni-cub.json"));
-export const NiCubPWSCFInput = readFile(path.join(FIXTURES_DIR, "Ni-cub-pwscf.in"));
-export const NiCubAPWSCFInput = readFile(path.join(FIXTURES_DIR, "Ni-cub-a-pwscf.in"));
-export const Sb2S3Orc = readJSONFile(path.join(FIXTURES_DIR, "Sb2S3-ORC.json"));
-export const Sb2S3OrcPWSCFInput = readFile(path.join(FIXTURES_DIR, "Sb2S3-ORC-pwscf.in"));
-export const Sb2S3OrcAPWSCFInput = readFile(path.join(FIXTURES_DIR, "Sb2S3-ORC-a-pwscf.in"));
-export const BNHex = readJSONFile(path.join(FIXTURES_DIR, "BN-hex.json"));
-export const BNHexPWSCFInput = readFile(path.join(FIXTURES_DIR, "BN-hex-pwscf.in"));
-export const BNHexIbravPWSCFInput = readFile(path.join(FIXTURES_DIR, "BN-hex-ibrav-pwscf.in"));
-export const SiFccIbravPWSCFInput = readFile(path.join(FIXTURES_DIR, "Si-fcc-ibrav-pwscf.in"));
-export const SiFcc = readJSONFile(path.join(FIXTURES_DIR, "Si-fcc.json"));
+export const Graphene = readJSONFile(path.join(JSON_DIR, "Graphene.json"));
+export const GraphenePoscar = readFile(path.join(POSCAR_DIR, "Graphene.poscar"));
+export const GraphenePWSCFInput = readFile(path.join(ESPRESSO_DIR, "Graphene-pwscf.in"));
 
-export const FortranFile1 = readFile(path.join(FIXTURES_DIR, "fortran-file-1.txt"));
-export const FortranFile1JSON = readJSONFile(path.join(FIXTURES_DIR, "fortran-file-1.json"));
-export const FortranFileInvalid = readFile(path.join(FIXTURES_DIR, "fortran-file-invalid.txt"));
-export const FortranFileNoCards = readFile(path.join(FIXTURES_DIR, "fortran-file-no-cards.txt"));
+export const NiHex = readJSONFile(path.join(JSON_DIR, "Ni-hex.json"));
+export const NiHexPoscar = readFile(path.join(POSCAR_DIR, "Ni-hex.poscar"));
+export const NiCub = readJSONFile(path.join(JSON_DIR, "Ni-cub.json"));
+export const NiCubCPPWSCFInput = readFile(path.join(ESPRESSO_DIR, "Ni-cub-cp-pwscf.in"));
+export const NiCubPWSCFInput = readFile(path.join(ESPRESSO_DIR, "Ni-cub-pwscf.in"));
+export const NiCubAPWSCFInput = readFile(path.join(ESPRESSO_DIR, "Ni-cub-a-pwscf.in"));
+
+export const Sb2S3Orc = readJSONFile(path.join(JSON_DIR, "Sb2S3-ORC.json"));
+export const Sb2S3OrcPWSCFInput = readFile(path.join(ESPRESSO_DIR, "Sb2S3-ORC-pwscf.in"));
+export const Sb2S3OrcAPWSCFInput = readFile(path.join(ESPRESSO_DIR, "Sb2S3-ORC-a-pwscf.in"));
+
+export const BNHex = readJSONFile(path.join(JSON_DIR, "BN-hex.json"));
+export const BNHexPWSCFInput = readFile(path.join(ESPRESSO_DIR, "BN-hex-pwscf.in"));
+export const BNHexIbravPWSCFInput = readFile(path.join(ESPRESSO_DIR, "BN-hex-ibrav-pwscf.in"));
+
+export const SiFccIbravPWSCFInput = readFile(path.join(ESPRESSO_DIR, "Si-fcc-ibrav-pwscf.in"));
+export const SiFcc = readJSONFile(path.join(JSON_DIR, "Si-fcc.json"));
+
+export const FortranFile1 = readFile(path.join(ESPRESSO_DIR, "fortran-file-1.txt"));
+export const FortranFile1JSON = readJSONFile(path.join(ESPRESSO_DIR, "fortran-file-1.json"));
+export const FortranFileInvalid = readFile(path.join(ESPRESSO_DIR, "fortran-file-invalid.txt"));
+export const FortranFileNoCards = readFile(path.join(ESPRESSO_DIR, "fortran-file-no-cards.txt"));
