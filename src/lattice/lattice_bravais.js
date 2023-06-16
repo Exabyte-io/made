@@ -137,14 +137,15 @@ export class LatticeBravais {
     /**
      * Return primitive lattice vectors from type and necessary parameters of: a, b, c, cosbc, cosac, cosab.
      * According to this: https://arxiv.org/pdf/1004.2974.pdf
-     * @param {string} type
-     * @param {number} a
-     * @param {number} [b]
-     * @param {number} [c]
-     * @param {number} [alpha] - angle between b and c in radians
-     * @param {number} [beta] - angle between a and c in radians
-     * @param {number} [gamma] - angle between a and b in radians
-     * @returns {{vectors: number[][], type: string}}
+     * @param {Object} config
+     * @param {String} config.type
+     * @param {Number} config.a
+     * @param {Number} config.b
+     * @param {Number} config.c
+     * @param {Number} config.alpha - angle between b and c in degrees
+     * @param {Number} config.beta - angle between a and c in degrees
+     * @param {Number} config.gamma - angle between a and b in degrees
+     * @returns {{vectors: Number[][], type: String}}
      */
     // eslint-disable-next-line no-unused-vars
     static vectorsFromType(type, a, b, c, alpha, beta, gamma) {
