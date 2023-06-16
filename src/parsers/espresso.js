@@ -278,9 +278,23 @@ function ibravToCell(system) {
         default:
             throw new Error(`ibrav = ${system.ibrav} not implemented`);
     }
+    const typeExtended = "Not implemented";
 
-    const { vectors } = Lattice.vectorsFromType(type, _a, _b, _c, alpha, beta, gamma);
-    return { vectors, alat, units: "angstrom", type };
+    alpha *= 180 / math.PI;
+    beta *= 180 / math.PI;
+    gamma *= 180 / math.PI;
+
+    const config = {
+        type,
+        a: _a,
+        b: _b,
+        c: _c,
+        alpha,
+        beta,
+        gamma,
+    };
+    const { vectors } = Lattice.vectorsFromType(config);
+    return { vectors, alat, units: "angstrom", type, typeExtended };
 }
 
 /**
