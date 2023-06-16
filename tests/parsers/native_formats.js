@@ -10,6 +10,7 @@ import {
     GraphenePWSCFInput,
     NiCub,
     NiCubAPWSCFInput,
+    NiCubCPPWSCFInput,
     NiCubPWSCFInput,
     NiHex,
     NiHexPoscar,
@@ -48,7 +49,13 @@ describe("Parsers.NativeFormat", () => {
         expect(config.name.toLowerCase()).to.be.equal(Graphene.name.toLowerCase()); // to compare case insensitively
     });
 
-    it("should return a material config for Ni CUB from a QE input file", () => {
+    it("should return a material config for Ni CUB with specified CELL_PARAMETERS from a QE input file", () => {
+        const config = nativeFormatParsers.convertFromNativeFormat(NiCubCPPWSCFInput);
+        assertDeepAlmostEqual(config, NiCub, ["name"]);
+        expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
+    });
+
+    it("should return a material config for Ni CUB with specified parameter celldm(1) from a QE input file", () => {
         const config = nativeFormatParsers.convertFromNativeFormat(NiCubPWSCFInput);
         assertDeepAlmostEqual(config, NiCub, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
