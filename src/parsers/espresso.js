@@ -3,6 +3,7 @@ import _ from "underscore";
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
+import { primitiveCell } from "../cell/primitive_cell";
 import { Lattice } from "../lattice/lattice";
 import { LATTICE_TYPE } from "../lattice/types";
 import math from "../math";
@@ -171,7 +172,7 @@ function getAtomicPositions(text) {
  * @summary Creates cell from ibrav and celldm(i) parameters
  * @param {Object} system - The system parameters from &SYSTEM namelist
  * @param {Number} system.ibrav - ibrav parameter
- * @param {Number[]} system.celldm - celldm parameters, 0 - a (bohr), 1 - b/a (unitless), 2 - c/a (unitless), 3,4,5 - cosines
+ * @param {Number[]} [system.celldm] - celldm parameters, 0 - a (bohr), 1 - b/a (unitless), 2 - c/a (unitless), 3,4,5 - cosines
  * @param {Number} [system.a] - A parameter in angstroms
  * @param {Number} [system.b] - B parameter in angstroms
  * @param {Number} [system.c] - C parameter in angstroms
@@ -215,6 +216,7 @@ function ibravToCell(system) {
             break;
         case 3:
             type = LATTICE_TYPE.BCC;
+
             break;
         case -3:
             type = LATTICE_TYPE.BCC;
@@ -234,7 +236,7 @@ function ibravToCell(system) {
             type = LATTICE_TYPE.TET;
             break;
         case 7:
-            type = LATTICE_TYPE.TET;
+            type = LATTICE_TYPE.BCT;
             break;
         case 8:
             type = LATTICE_TYPE.ORC;
@@ -293,7 +295,7 @@ function ibravToCell(system) {
         beta,
         gamma,
     };
-    const { vectors } = Lattice.vectorsFromType(config);
+    const vectors = primitiveCell(config);
     return { vectors, alat, units: "angstrom", type, typeExtended };
 }
 
