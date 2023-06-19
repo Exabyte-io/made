@@ -7,7 +7,7 @@ import { primitiveCell } from "../../cell/primitive_cell";
 import { Lattice } from "../../lattice/lattice";
 import { LATTICE_TYPE } from "../../lattice/types";
 import math from "../../math";
-import { parseFortranFile } from "../fortran/fortran";
+import { parseFortranFile } from "../../utils/parsers/fortran";
 import xyz from "../xyz";
 import { regex } from "./settings";
 

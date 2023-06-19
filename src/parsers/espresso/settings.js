@@ -1,28 +1,40 @@
-import { regex as fortranRegex } from "../fortran/settings";
-import { formatString } from "../utils";
+import { regex as fortranRegex } from "../../utils/parsers/settings";
 
+const QE_ENUMS = {
+    controlNamelist: {
+        header: "&CONTROL",
+    },
+    systemNamelist: {
+        header: "&SYSTEM",
+    },
+    atomicSpeciesCard: {
+        header: "ATOMIC_SPECIES",
+    },
+    atomicPositionsCard: {
+        header: "ATOMIC_POSITIONS",
+    },
+    cellParametersCard: {
+        header: "CELL_PARAMETERS",
+    },
+};
+
+const double = fortranRegex.fortranDouble;
 // Regexes for Espresso cards
 export const regex = {
-    espressoFingerprint: /&CONTROL|&SYSTEM|ATOMIC_POSITIONS/i,
-    atomicSpecies: new RegExp(
-        formatString("([A-Z][a-z]?)\\s+{0}\\s+([\\S]*)\\s*(?=\\n)", fortranRegex.fortranDouble),
-        "gm",
+    espressoFingerprint: new RegExp(
+        `${QE_ENUMS.controlNamelist.header}|${QE_ENUMS.systemNamelist.header}|${QE_ENUMS.atomicSpeciesCard.header}`,
+        "i",
     ),
+    atomicSpecies: new RegExp(`([A-Z][a-z]?)\\s+${double}\\s+(\\S*)\\s*(?=\\n)`, "gm"),
+    atomicPositionsUnits: new RegExp(`${QE_ENUMS.atomicPositionsCard.header}\\s\\(?(\\w+)\\)?`),
     atomicPositions: new RegExp(
-        formatString(
-            "\\b([A-Z][a-z]*)\\b\\s+{0}\\s+{0}\\s+{0}(?:\\s+(0|1)\\s+(0|1)\\s+(0|1))?(?=\\s*\\n)",
-            fortranRegex.fortranDouble,
-        ),
+        `\\b([A-Z][a-z]*)\\b\\s+${double}\\s+${double}\\s+${double}(?:\\s+(0|1)\\s+(0|1)\\s+(0|1))?(?=\\s*\\n)`,
         "gm",
     ),
-    atomicPositionsUnits: /ATOMIC_POSITIONS\s\(?(\w+)\)?/,
     cellParameters: new RegExp(
-        formatString(
-            "CELL_PARAMETERS\\s*(?:\\(?(\\w+)\\)?)?" +
-                "\\s+{0}\\s+{0}\\s+{0}" +
-                "\\s+{0}\\s+{0}\\s+{0}" +
-                "\\s+{0}\\s+{0}\\s+{0}",
-            fortranRegex.fortranDouble,
-        ),
+        `CELL_PARAMETERS\\s*(?:\\(?(\\w+)\\)?)?` +
+            `\\s+${double}\\s+${double}\\s+${double}` +
+            `\\s+${double}\\s+${double}\\s+${double}` +
+            `\\s+${double}\\s+${double}\\s+${double}`,
     ),
 };
