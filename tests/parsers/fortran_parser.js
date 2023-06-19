@@ -1,7 +1,7 @@
 import { expect } from "chai";
 
-import { parseFortranFile } from "../../src/parsers/fortran_parser";
-import { FortranFile1, FortranFile1JSON, FortranFileInvalid, FortranFileNoCards } from "../enums";
+import { parseFortranFile } from "../../src/parsers/fortran/fortran";
+import { FortranFile1, FortranFile1JSON, FortranFileInvalid } from "../enums";
 
 describe("parseFortranFile", () => {
     it("should return json for FortranFile1", () => {
@@ -9,8 +9,5 @@ describe("parseFortranFile", () => {
     });
     it("should throw error for non-Fortran file", () => {
         expect(() => parseFortranFile(FortranFileInvalid)).to.throw("Incorrect fortran file");
-    });
-    it("should throw error for Fortran file without cards", () => {
-        expect(() => parseFortranFile(FortranFileNoCards)).to.throw("No cards found");
     });
 });

@@ -17,10 +17,6 @@ import {
     Sb2S3Orc,
     Sb2S3OrcAPWSCFInput,
     Sb2S3OrcPWSCFInput,
-    // eslint-disable-next-line no-unused-vars
-    SiFcc,
-    // eslint-disable-next-line no-unused-vars
-    SiFccIbravPWSCFInput,
 } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
@@ -89,12 +85,6 @@ describe("Parsers.NativeFormat", () => {
         const config = nativeFormatParsers.convertFromNativeFormat(BNHexIbravPWSCFInput);
         assertDeepAlmostEqual(config, BNHex, ["name"]); // title is omitted in input file
     });
-
-    // it("should return a material config for Si FCC with specified ibrav from a QE input file", () => {
-    //     const config = nativeFormatParsers.convertFromNativeFormat(SiFccIbravPWSCFInput);
-    //     assertDeepAlmostEqual(config, SiFcc, ["name"]);
-    //     expect(config.name.toLowerCase()).to.be.equal(SiFcc.name.toLowerCase()); // to compare case insensitively
-    // });
 
     it("should throw an error for unknown format", () => {
         const text = "A\n snippet from an unknown format";
