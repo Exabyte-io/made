@@ -1,4 +1,4 @@
-import { regex } from "./utils";
+import { regex } from "./settings";
 
 /**
  * @summary Extracts an array of the key value pairs from a Fortran namelist.
@@ -7,7 +7,6 @@ import { regex } from "./utils";
  */
 function extractKeyValuePairs(data) {
     const output = {};
-
     const numberPairs = Array.from(data.matchAll(regex.numberKeyValue)).map((match) => [
         match[1],
         parseFloat(match[2]),
@@ -22,8 +21,8 @@ function extractKeyValuePairs(data) {
     ]);
     const numberArrayPairs = Array.from(data.matchAll(regex.numberArrayKeyValue)).map((match) => [
         match[1],
-        parseInt(match[2], 10), // get the index of Fortran array
-        parseFloat(match[3]),
+        parseInt(match[2], 10), // get the index of Fortran array element
+        parseFloat(match[3]), // get the value of the Fortran array element
     ]);
 
     [...numberPairs, ...stringPairs, ...booleanPairs].forEach((pair) => {
@@ -49,19 +48,12 @@ function extractNamelistData(text) {
     const namelistNameRegex = /&(\w+)/g;
     const matches = Array.from(text.matchAll(namelistNameRegex));
     const namelistNames = matches.map((match) => match[1].toLowerCase());
-
-    // Create an object to hold all the key-value pairs for each namelist
     const namelists = {};
 
-    // Iterate through each provided namelist name
     namelistNames.forEach((namelistName) => {
-        // Create a new RegExp for the current namelist name
         const _regex = regex.namelists(namelistName);
-
-        // Find the data for the current namelist
         const data = text.match(_regex)[2];
 
-        // Extract the key-value pairs and store them in the namelists object
         namelists[namelistName] = extractKeyValuePairs(data);
     });
     return namelists;
@@ -70,14 +62,14 @@ function extractNamelistData(text) {
 /** s
  * Parses Fortran namelists and cards data from a string.
  *
- * @summary Parses Fortran namelists and cards data from a string for a QE input file.
- * @param {String} text - The text to parse. This should be the contents of a Fortran file.
+ * @summary Parses Fortran namelists and cards data from a QE input file string.
+ * @param {String} text - The text to parse.
  * @throws {Error} If no namelist data is found in `text`.
  * @throws {Error} If no cards data is found in `text`.
  * @returns {Object} An object containing the parsed namelist and cards data. The exact structure of this object will depend on the structure of the namelist and cards data in `text`.
  */
 export function parseFortranFile(text) {
-    let output;
+    let output = {};
     try {
         output = extractNamelistData(text);
     } catch (err) {
@@ -89,8 +81,7 @@ export function parseFortranFile(text) {
     }
 
     const match = text.match(regex.cards);
-    const qeCardsRegex = /ATOMIC_SPECIES|ATOMIC_POSITIONS/;
-    if (!match || !match[1] || !match[1].match(qeCardsRegex)) {
+    if (!match || !match[1]) {
         throw new Error("No cards found");
     } else {
         // eslint-disable-next-line prefer-destructuring
