@@ -45,15 +45,16 @@ function isEspressoFormat(fileContent) {
 /**
  * @summary Return unit cell parameters from CELL_PARAMETERS card
  * @param {String} text - cards data
- * @param {Number} alat - lattice parameter
- * @return {{vectors: Number[][], alat: Number, units: String}}
+ * @return {{vectors: Number[][], units: String}}
  */
-function getCellConfig(text, alat = null) {
+function getCellConfig(text) {
     let vectors = [];
     let units;
     const cellParameters = text.match(regex.cellParameters);
 
     if (cellParameters) {
+        // eslint-disable-next-line prefer-destructuring
+        units = cellParameters[1];
         vectors = [
             [
                 parseFloat(cellParameters[2]),
@@ -71,22 +72,9 @@ function getCellConfig(text, alat = null) {
                 parseFloat(cellParameters[10]),
             ],
         ];
-        // eslint-disable-next-line prefer-destructuring
-        units = cellParameters[1];
     }
 
-    // Quantum Espresso docs prohibit duplication of parameters
-    if (alat !== null && (units === "bohr" || units === "angstrom")) {
-        throw new Error(
-            `Lattice parameters given in &SYSTEM celldm/A and CELL_PARAMETERS ${units}`,
-        );
-    } else if (alat === null && units === "alat") {
-        throw new Error("Lattice parameters must be set in &SYSTEM for alat units");
-    }
-
-    // eslint-disable-next-line no-param-reassign
-    alat = 1; // Supplied data already taken in consideration so here it set to unity
-    return { vectors, alat, units };
+    return { vectors, units };
 }
 
 /**
@@ -331,6 +319,22 @@ function ibravToCellConfig(system) {
 }
 
 /**
+ * @summary Checks for QE specific errors in the input data.
+ * @param {Object} data - The input data
+ * @returns {Boolean}
+ */
+function checkForErrors(data) {
+    if (data.system === undefined) {
+        throw new Error("No &SYSTEM section found in input data.");
+    }
+    if (data.system.ibrav === undefined) {
+        throw new Error("ibrav is required in &SYSTEM.");
+    }
+
+    return false;
+}
+
+/**
  * Parses QE .in file into a Material config object.
  * @param {String} fileContent - contents of the .in file
  * @return {Object} Material config.
@@ -339,47 +343,43 @@ function fromEspressoFormat(fileContent) {
     const data = parseFortranFile(fileContent);
     let cell = {};
     let lattice = {};
+    let materialConfig = {};
 
-    if (data.system === undefined) {
-        throw new Error("No &SYSTEM section found in input data.");
+    if (!checkForErrors(data)) {
+        if (data.system.ibrav === 0) {
+            cell = getCellConfig(data.cards);
+            cell.type = Lattice.typeFromVectors(cell.vectors); // not implemented yet, defaults to TRI
+        } else {
+            cell = ibravToCellConfig(data.system);
+        }
+
+        lattice = Lattice.fromVectors({
+            a: cell.vectors[0],
+            b: cell.vectors[1],
+            c: cell.vectors[2],
+            alat: cell.alat,
+            units: cell.units,
+            type: cell.type,
+        });
+
+        const { elements, coordinates, constraints, units } = getAtomicPositions(data.cards);
+        const basis = new ConstrainedBasis({
+            elements,
+            coordinates,
+            units,
+            type: cell.type,
+            cell: lattice.vectorArrays,
+            constraints,
+        });
+        basis.toCrystal(); // It's default value when you download from Mat3ra Platform where all the fixtures came from
+        materialConfig = {
+            lattice: lattice.toJSON(),
+            basis: basis.toJSON(),
+            name: data.control.title,
+            isNonPeriodic: false,
+        };
     }
-    if (data.system.ibrav === undefined) {
-        throw new Error("ibrav is required in &SYSTEM.");
-    }
-
-    if (data.system.ibrav === 0) {
-        cell = getCellConfig(data.cards);
-        cell.type = Lattice.typeFromVectors(cell.vectors); // not implemented yet, defaults to TRI
-    } else {
-        cell = ibravToCellConfig(data.system);
-    }
-
-    lattice = Lattice.fromVectors({
-        a: cell.vectors[0],
-        b: cell.vectors[1],
-        c: cell.vectors[2],
-        alat: cell.alat,
-        units: cell.units,
-        type: cell.type,
-    });
-
-    const { elements, coordinates, constraints, units } = getAtomicPositions(data.cards);
-    const basis = new ConstrainedBasis({
-        elements,
-        coordinates,
-        units,
-        type: cell.type,
-        cell: lattice.vectorArrays,
-        constraints,
-    });
-    basis.toCrystal(); // It's default value when you download from Mat3ra Platform where all the fixtures came from
-
-    return {
-        lattice: lattice.toJSON(),
-        basis: basis.toJSON(),
-        name: data.control.title,
-        isNonPeriodic: false,
-    };
+    return materialConfig;
 }
 
 export default {
