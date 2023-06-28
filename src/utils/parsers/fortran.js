@@ -24,18 +24,29 @@ function extractKeyValuePairs(data) {
         parseInt(match[2], 10), // get the index of Fortran array element
         parseFloat(match[3]), // get the value of the Fortran array element
     ]);
+    const stringArrayPairs = Array.from(data.matchAll(regex.stringArrayKeyValue)).map((match) => [
+        match[1],
+        parseInt(match[2], 10), // get the index of Fortran array element
+        match[3], // get the value of the Fortran array element
+    ]);
+    const booleanArrayPairs = Array.from(data.matchAll(regex.booleanArrayKeyValue)).map((match) => [
+        match[1],
+        parseInt(match[2], 10), // get the index of Fortran array element
+        match[3] === "true", // get the value of the Fortran array element
+    ]);
 
     [...numberPairs, ...stringPairs, ...booleanPairs].forEach((pair) => {
         // eslint-disable-next-line prefer-destructuring
         output[pair[0]] = pair[1];
     });
 
-    numberArrayPairs.forEach((pair) => {
-        if (!output[pair[0]]) output[pair[0]] = [];
-        // eslint-disable-next-line prefer-destructuring
-        output[pair[0]][pair[1] - 1] = pair[2]; // use the index to put the value at the correct position
+    [numberArrayPairs, stringArrayPairs, booleanArrayPairs].forEach((arrayPairs) => {
+        arrayPairs.forEach(([key, index, value]) => {
+            if (!output[key]) output[key] = [];
+            output[key][index - 1] = value; // use the index to put the value at the correct position
+        });
     });
-    // TODO: add string and boolean arrays
+
     return output;
 }
 
@@ -45,7 +56,7 @@ function extractKeyValuePairs(data) {
  * @returns {Object}
  */
 function extractNamelistData(text) {
-    const namelistNameRegex = /&(\w+)/g;
+    const namelistNameRegex = /^&(\w+)/gm;
     const matches = Array.from(text.matchAll(namelistNameRegex));
     const namelistNames = matches.map((match) => match[1].toLowerCase());
     const namelists = {};
@@ -56,6 +67,7 @@ function extractNamelistData(text) {
 
         namelists[namelistName] = extractKeyValuePairs(data);
     });
+    console.log(namelists);
     return namelists;
 }
 
