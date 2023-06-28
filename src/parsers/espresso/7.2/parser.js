@@ -1,36 +1,10 @@
 import { ATOMIC_COORD_UNITS, coefficients } from "@exabyte-io/code.js/dist/constants";
-import _ from "underscore";
-import s from "underscore.string";
 
-import { ConstrainedBasis } from "../../basis/constrained_basis";
-import { primitiveCell } from "../../cell/primitive_cell";
-import { Lattice } from "../../lattice/lattice";
-import { LATTICE_TYPE } from "../../lattice/types";
-import math from "../../math";
-import { parseFortranFile } from "../../utils/parsers/fortran";
-import xyz from "../xyz";
-import { regex } from "./settings";
-
-/**
- * Construct textual representation of a materialOrConfig according to Quantum ESPRESSO pw.x input format.
- * @param {Material|Object} materialOrConfig - material class instance or its config object
- * @return {String}
- */
-function toEspressoFormat(materialOrConfig) {
-    const l = new Lattice(materialOrConfig.lattice);
-    const vectors = l.vectorArrays;
-    const vectorsAsString = _.map(vectors, (v) => {
-        return `${s.sprintf("%14.9f", v[0])}\t${s.sprintf("%14.9f", v[1])}\t${s.sprintf(
-            "%14.9f",
-            v[2],
-        )}`;
-    }).join("\n");
-    return s.sprintf(
-        "CELL_PARAMETERS (angstroms)\n%s\n\nATOMIC_POSITIONS (crystal)\n%s",
-        vectorsAsString,
-        xyz.fromMaterial(materialOrConfig),
-    );
-}
+import { primitiveCell } from "../../../cell/primitive_cell";
+import { Lattice } from "../../../lattice/lattice";
+import math from "../../../math";
+import { parseFortranFile } from "../../../utils/parsers/fortran";
+import { IBRAV_TO_LATTICE_TYPE_MAP, regex } from "./settings";
 
 /**
  * @summary checks if the given fileContent is in the format of a Quantum ESPRESSO .in file.
@@ -48,35 +22,17 @@ function isEspressoFormat(fileContent) {
  * @return {{vectors: Number[][], units: String}}
  */
 function getCellConfig(text) {
-    let vectors = [];
-    let units;
-    const cellParameters = text.match(regex.cellParameters);
-
-    if (cellParameters) {
-        // eslint-disable-next-line prefer-destructuring
-        units = cellParameters[1];
-        vectors = [
-            [
-                parseFloat(cellParameters[2]),
-                parseFloat(cellParameters[3]),
-                parseFloat(cellParameters[4]),
-            ],
-            [
-                parseFloat(cellParameters[5]),
-                parseFloat(cellParameters[6]),
-                parseFloat(cellParameters[7]),
-            ],
-            [
-                parseFloat(cellParameters[8]),
-                parseFloat(cellParameters[9]),
-                parseFloat(cellParameters[10]),
-            ],
+    const match = regex.cellParameters.exec(text);
+    if (match) {
+        const vectors = [
+            [parseFloat(match.groups.x1), parseFloat(match.groups.y1), parseFloat(match.groups.z1)],
+            [parseFloat(match.groups.x2), parseFloat(match.groups.y2), parseFloat(match.groups.z2)],
+            [parseFloat(match.groups.x3), parseFloat(match.groups.y3), parseFloat(match.groups.z3)],
         ];
+        const { units } = match.groups;
+        return { vectors, units };
     }
-
-    return { vectors, units };
 }
-
 /**
  * @summary Return units and scaling factor according to Quantum Espresso docs
  * @param {String} units - units from ATOMIC_POSITIONS card
@@ -155,67 +111,9 @@ function getAtomicPositions(text) {
  * @returns {String}
  */
 function ibravToCellType(ibrav) {
-    let type;
-    switch (ibrav) {
-        case 1:
-            type = LATTICE_TYPE.CUB;
-            break;
-        case 2:
-            type = LATTICE_TYPE.FCC;
-            break;
-        case 3:
-            type = LATTICE_TYPE.BCC;
-            break;
-        case -3:
-            type = LATTICE_TYPE.BCC;
-            break;
-        case 4:
-            type = LATTICE_TYPE.HEX;
-            break;
-        case 5:
-            type = LATTICE_TYPE.RHL;
-            break;
-        case -5:
-            type = LATTICE_TYPE.RHL;
-            break;
-        case 6:
-            type = LATTICE_TYPE.TET;
-            break;
-        case 7:
-            type = LATTICE_TYPE.BCT;
-            break;
-        case 8:
-            type = LATTICE_TYPE.ORC;
-            break;
-        case 9:
-            type = LATTICE_TYPE.ORCC;
-            break;
-        case -9:
-            type = LATTICE_TYPE.ORCC;
-            break;
-        case 10:
-            type = LATTICE_TYPE.ORCF;
-            break;
-        case 11:
-            type = LATTICE_TYPE.ORCI;
-            break;
-        case 12:
-            type = LATTICE_TYPE.MCL; // Monoclinic P, unique axis c
-            break;
-        case -12:
-            type = LATTICE_TYPE.MCL; // Monoclinic P, unique axis b
-            break;
-        case 13:
-            type = LATTICE_TYPE.MCLC; // Monoclinic P, base centered
-            break;
-        case -13:
-            type = LATTICE_TYPE.MCLC; // Monoclinic P, unique axis b
-            break;
-        case 14:
-            type = LATTICE_TYPE.TRI;
-            break;
-        default:
-            throw new Error(`ibrav = ${ibrav} not implemented`);
+    const type = IBRAV_TO_LATTICE_TYPE_MAP[ibrav];
+    if (type === undefined) {
+        throw new Error(`Invalid ibrav value: ${ibrav}`);
     }
     return type;
 }
@@ -337,13 +235,11 @@ function checkForErrors(data) {
 /**
  * Parses QE .in file into a Material config object.
  * @param {String} fileContent - contents of the .in file
- * @return {Object} Material config.
+ * @return {{cell: Object, elements: Object[], coordinates: Object[], constraints: Object[], units: String, name: String}}
  */
 function fromEspressoFormat(fileContent) {
     const data = parseFortranFile(fileContent);
     let cell = {};
-    let lattice = {};
-    let materialConfig = {};
 
     if (!checkForErrors(data)) {
         if (data.system.ibrav === 0) {
@@ -353,37 +249,10 @@ function fromEspressoFormat(fileContent) {
             cell = ibravToCellConfig(data.system);
         }
 
-        lattice = Lattice.fromVectors({
-            a: cell.vectors[0],
-            b: cell.vectors[1],
-            c: cell.vectors[2],
-            alat: cell.alat,
-            units: cell.units,
-            type: cell.type,
-        });
-
         const { elements, coordinates, constraints, units } = getAtomicPositions(data.cards);
-        const basis = new ConstrainedBasis({
-            elements,
-            coordinates,
-            units,
-            type: cell.type,
-            cell: lattice.vectorArrays,
-            constraints,
-        });
-        basis.toCrystal(); // It's default value when you download from Mat3ra Platform where all the fixtures came from
-        materialConfig = {
-            lattice: lattice.toJSON(),
-            basis: basis.toJSON(),
-            name: data.control.title,
-            isNonPeriodic: false,
-        };
+        const name = data.control.title;
+        return { cell, elements, coordinates, constraints, units, name };
     }
-    return materialConfig;
 }
 
-export default {
-    isEspressoFormat,
-    toEspressoFormat,
-    fromEspressoFormat,
-};
+export default { fromEspressoFormat, isEspressoFormat };
