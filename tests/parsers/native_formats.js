@@ -40,54 +40,54 @@ describe("Parsers.NativeFormat", () => {
     });
 
     it("should return a material config for graphene from a QE input file", () => {
-        const config = nativeFormatParsers.convertFromNativeFormat(GraphenePWSCFInput);
+        const config = nativeFormatParsers.getMaterialConfig(GraphenePWSCFInput);
         assertDeepAlmostEqual(config, Graphene, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(Graphene.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should return a material config for Ni CUB with specified CELL_PARAMETERS from a QE input file", () => {
-        const config = nativeFormatParsers.convertFromNativeFormat(NiCubCPPWSCFInput);
+        const config = nativeFormatParsers.getMaterialConfig(NiCubCPPWSCFInput);
         assertDeepAlmostEqual(config, NiCub, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should return a material config for Ni CUB with specified parameter celldm(1) from a QE input file", () => {
-        const config = nativeFormatParsers.convertFromNativeFormat(NiCubPWSCFInput);
+        const config = nativeFormatParsers.getMaterialConfig(NiCubPWSCFInput);
         assertDeepAlmostEqual(config, NiCub, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should return a material config for Ni CUB with specified parameter A from a QE input file", () => {
-        const config = nativeFormatParsers.convertFromNativeFormat(NiCubAPWSCFInput);
+        const config = nativeFormatParsers.getMaterialConfig(NiCubAPWSCFInput);
         assertDeepAlmostEqual(config, NiCub, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should return a material config for Sb2S3 ORC from a QE input file", () => {
-        const config = nativeFormatParsers.convertFromNativeFormat(Sb2S3OrcPWSCFInput);
+        const config = nativeFormatParsers.getMaterialConfig(Sb2S3OrcPWSCFInput);
         assertDeepAlmostEqual(config, Sb2S3Orc, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(Sb2S3Orc.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should return a material config for Sb2S3 ORC with specified parameter A from a QE input file", () => {
-        const config = nativeFormatParsers.convertFromNativeFormat(Sb2S3OrcAPWSCFInput);
+        const config = nativeFormatParsers.getMaterialConfig(Sb2S3OrcAPWSCFInput);
         assertDeepAlmostEqual(config, Sb2S3Orc, ["name"]);
         expect(config.name.toLowerCase()).to.be.equal(Sb2S3Orc.name.toLowerCase()); // to compare case insensitively
     });
 
     it("should return a material config for BN HEX from a QE input file", () => {
-        const config = nativeFormatParsers.convertFromNativeFormat(BNHexPWSCFInput);
+        const config = nativeFormatParsers.getMaterialConfig(BNHexPWSCFInput);
         assertDeepAlmostEqual(config, BNHex, ["name", "lattice"]); // title is omitted in input file
         assertDeepAlmostEqual(config.lattice, BNHex.lattice, ["type"]); // lattice type isn't detected currently
     });
 
     it("should return a material config for BN HEX with specified ibrav from a QE input file", () => {
-        const config = nativeFormatParsers.convertFromNativeFormat(BNHexIbravPWSCFInput);
+        const config = nativeFormatParsers.getMaterialConfig(BNHexIbravPWSCFInput);
         assertDeepAlmostEqual(config, BNHex, ["name"]); // title is omitted in input file
     });
 
     it("should throw an error for unknown format", () => {
         const text = "A\n snippet from an unknown format";
-        expect(() => nativeFormatParsers.convertFromNativeFormat(text)).to.throw("Unknown format");
+        expect(() => nativeFormatParsers.getMaterialConfig(text)).to.throw("Unknown format");
     });
 });
