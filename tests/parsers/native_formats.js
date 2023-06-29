@@ -28,13 +28,13 @@ describe("Parsers.NativeFormat", () => {
 
     it("should return a material config for graphene from a poscar", () => {
         const poscar = GraphenePoscar;
-        const config = nativeFormatParsers.convertFromNativeFormat(poscar);
+        const config = nativeFormatParsers.getMaterialConfig(poscar);
         expect(config).to.be.deep.almost.equal(Graphene);
     });
 
     it("should return a material config for Ni hex from a poscar", () => {
         const poscar = NiHexPoscar;
-        const config = nativeFormatParsers.convertFromNativeFormat(poscar);
+        const config = nativeFormatParsers.getMaterialConfig(poscar);
         assertDeepAlmostEqual(config, NiHex, ["lattice"]);
         assertDeepAlmostEqual(config.lattice, NiHex.lattice, ["type"]); // to omit "lattice.type" property
     });
