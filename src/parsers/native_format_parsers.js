@@ -1,16 +1,8 @@
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Lattice } from "../lattice/lattice";
+import { NATIVE_FORMATS } from "./enums";
 import EspressoParser from "./espresso/init";
-import Poscar from "./poscar";
-
-const NATIVE_FORMAT = {
-    JSON: "json",
-    POSCAR: "poscar",
-    CIF: "cif",
-    QE: "qe",
-    XYZ: "xyz",
-    UNKNOWN: "unknown",
-};
+import PoscarParser from "./poscar/init";
 
 /**
  * @summary Detects the format of the input string
@@ -20,11 +12,11 @@ const NATIVE_FORMAT = {
  */
 function detectFormat(text) {
     const jsonRegex = /^\s*\{/;
-    if (jsonRegex.test(text)) return { name: NATIVE_FORMAT.JSON, version: "" };
-    if (Poscar.isPoscar(text)) return { name: NATIVE_FORMAT.POSCAR, version: "5" };
+    if (jsonRegex.test(text)) return { name: NATIVE_FORMATS.JSON, version: "" };
+    if (PoscarParser.validate(text)) return { name: NATIVE_FORMATS.POSCAR, version: "5" };
     if (EspressoParser.validate(text))
-        return { name: NATIVE_FORMAT.QE, version: EspressoParser.getVersionByContent(text) };
-    return { name: NATIVE_FORMAT.UNKNOWN, version: "" };
+        return { name: NATIVE_FORMATS.QE, version: EspressoParser.getVersionByContent(text) };
+    return { name: NATIVE_FORMATS.UNKNOWN, version: "" };
 }
 
 /**
@@ -37,13 +29,13 @@ function convertFromNativeFormat(text) {
     const format = detectFormat(text);
 
     switch (format.name) {
-        case NATIVE_FORMAT.JSON:
+        case NATIVE_FORMATS.JSON:
             return JSON.parse(text);
-        case NATIVE_FORMAT.POSCAR:
-            return Poscar.fromPoscar(text);
-        case NATIVE_FORMAT.QE:
+        case NATIVE_FORMATS.POSCAR:
+            return PoscarParser.getIntermediateFormat(text);
+        case NATIVE_FORMATS.QE:
             return EspressoParser.getIntermediateFormat(text);
-        case NATIVE_FORMAT.UNKNOWN:
+        case NATIVE_FORMATS.UNKNOWN:
             throw new Error(`Unknown format`);
         // TODO:  add more formats
         default:
@@ -56,8 +48,11 @@ function serialize(intermediateFormat) {
     // for now only Espresso:
     let result;
     switch (intermediateFormat.metadata.format) {
-        case NATIVE_FORMAT.QE:
+        case NATIVE_FORMATS.QE:
             result = EspressoParser.serialize(intermediateFormat);
+            break;
+        case NATIVE_FORMATS.POSCAR:
+            result = PoscarParser.serialize(intermediateFormat);
             break;
         default:
             throw new Error(`Unsupported format: ${intermediateFormat.metadata.format}`);

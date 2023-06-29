@@ -1,3 +1,4 @@
+import { APPLICATIONS, NATIVE_FORMATS } from "../enums";
 import BaseParser from "../init";
 import parser7_2 from "./7.2/parser";
 
@@ -51,8 +52,8 @@ class EspressoParser extends BaseParser {
         const parser = EspressoParser.getParserByVersion(version);
         return {
             metadata: {
-                application: "Espresso",
-                format: "qe",
+                application: APPLICATIONS.ESPRESSO,
+                format: NATIVE_FORMATS.QE,
                 version: EspressoParser.getVersionByContent(text),
             },
             data: parser.fromEspressoFormat(text),
