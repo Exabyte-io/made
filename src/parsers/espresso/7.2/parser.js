@@ -203,15 +203,7 @@ function ibravToCellConfig(system) {
     const [_a, _b, _c] = calculateABC(celldm, a, b, c);
     const [alpha, beta, gamma] = calculateAngles(celldm, cosbc, cosac, cosab);
 
-    const config = {
-        type,
-        a: _a,
-        b: _b,
-        c: _c,
-        alpha,
-        beta,
-        gamma,
-    };
+    const config = new Lattice({ type, _a, _b, _c, alpha, beta, gamma });
     const vectors = primitiveCell(config);
     return { vectors, units: "angstrom", type };
 }

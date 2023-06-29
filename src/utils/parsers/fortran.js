@@ -67,7 +67,6 @@ function extractNamelistData(text) {
 
         namelists[namelistName] = extractKeyValuePairs(data);
     });
-    console.log(namelists);
     return namelists;
 }
 
