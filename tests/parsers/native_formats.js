@@ -28,13 +28,13 @@ describe("Parsers.NativeFormat", () => {
 
     it("should return a material config for graphene from a poscar", () => {
         const poscar = GraphenePoscar;
-        const config = nativeFormatParsers.getMaterialConfig(poscar);
+        const config = nativeFormatParsers.convertFromNativeFormat(poscar);
         expect(config).to.be.deep.almost.equal(Graphene);
     });
 
     it("should return a material config for Ni hex from a poscar", () => {
         const poscar = NiHexPoscar;
-        const config = nativeFormatParsers.getMaterialConfig(poscar);
+        const config = nativeFormatParsers.convertFromNativeFormat(poscar);
         assertDeepAlmostEqual(config, NiHex, ["lattice"]);
         assertDeepAlmostEqual(config.lattice, NiHex.lattice, ["type"]); // to omit "lattice.type" property
     });
@@ -47,8 +47,9 @@ describe("Parsers.NativeFormat", () => {
 
     it("should return a material config for Ni CUB with specified CELL_PARAMETERS from a QE input file", () => {
         const config = nativeFormatParsers.getMaterialConfig(NiCubCPPWSCFInput);
-        assertDeepAlmostEqual(config, NiCub, ["name"]);
+        assertDeepAlmostEqual(config, NiCub, ["name", "lattice"]);
         expect(config.name.toLowerCase()).to.be.equal(NiCub.name.toLowerCase()); // to compare case insensitively
+        assertDeepAlmostEqual(config.lattice, NiCub.lattice, ["type"]); // to omit "lattice.type" property while the function to detect type is not present
     });
 
     it("should return a material config for Ni CUB with specified parameter celldm(1) from a QE input file", () => {

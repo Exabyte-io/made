@@ -2,6 +2,7 @@ import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Lattice } from "../lattice/lattice";
 import { NATIVE_FORMATS } from "./enums";
 import EspressoParser from "./espresso/init";
+import Poscar from "./poscar";
 import PoscarParser from "./poscar/init";
 
 /**
@@ -32,7 +33,8 @@ function convertFromNativeFormat(text) {
         case NATIVE_FORMATS.JSON:
             return JSON.parse(text);
         case NATIVE_FORMATS.POSCAR:
-            return PoscarParser.getIntermediateFormat(text);
+            return Poscar.fromPoscar(text); // TODO: rewrite when ready to use PoscarParser
+        // return PoscarParser.getIntermediateFormat(text);
         case NATIVE_FORMATS.QE:
             return EspressoParser.getIntermediateFormat(text);
         case NATIVE_FORMATS.UNKNOWN:
