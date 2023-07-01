@@ -5,10 +5,14 @@ class BaseParser {
         this.content = content;
     }
 
-    // Returns desired object
-    // eslint-disable-next-line class-methods-use-this
-    serialize() {
-        throw new Error("Not Defined");
+    /**
+     * Serializes intermediate format to Object.
+     * @param {Object} intermediateFormat
+     * @returns {{cell: Object, elements: Object, coordinates: Object[], units: String, constraints: Object[], name: String}}
+     */
+    static serialize(intermediateFormat) {
+        const { cell, elements, coordinates, units, constraints, name } = intermediateFormat.data;
+        return { cell, elements, coordinates, units, constraints, name };
     }
 
     // eslint-disable-next-line class-methods-use-this

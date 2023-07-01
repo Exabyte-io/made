@@ -44,12 +44,6 @@ class PoscarParser extends BaseParser {
             data: parser.fromPoscar(text),
         };
     }
-
-    static serialize(intermediateFormat) {
-        // get all the paramteres according to the version
-        const { cell, elements, coordinates, units, constraints, name } = intermediateFormat.data;
-        return { cell, elements, coordinates, units, constraints, name };
-    }
 }
 
 export default PoscarParser;
