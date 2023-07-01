@@ -1,4 +1,5 @@
 import { ATOMIC_COORD_UNITS, coefficients } from "@exabyte-io/code.js/dist/constants";
+import _ from "underscore";
 
 import { primitiveCell } from "../../../cell/primitive_cell";
 import { Lattice } from "../../../lattice/lattice";
@@ -24,15 +25,18 @@ function isEspressoFormat(fileContent) {
 function getCellConfig(text) {
     const match = regex.cellParameters.exec(text);
     if (match) {
-        const vectors = [
-            [parseFloat(match.groups.x1), parseFloat(match.groups.y1), parseFloat(match.groups.z1)],
-            [parseFloat(match.groups.x2), parseFloat(match.groups.y2), parseFloat(match.groups.z2)],
-            [parseFloat(match.groups.x3), parseFloat(match.groups.y3), parseFloat(match.groups.z3)],
-        ];
+        const keys = ["1", "2", "3"];
+        const vectors = _.map(keys, (key) => [
+            parseFloat(match.groups["x" + key]),
+            parseFloat(match.groups["y" + key]),
+            parseFloat(match.groups["z" + key]),
+        ]);
         const { units } = match.groups;
         return { vectors, units };
     }
+    throw new Error("Couldn't read cell parameters");
 }
+
 /**
  * @summary Return units and scaling factor according to Quantum Espresso docs
  * @param {String} units - units from ATOMIC_POSITIONS card
@@ -119,14 +123,14 @@ function ibravToCellType(ibrav) {
 }
 
 /**
- * @summary Calculates cell parameters from celldm(i) or A, B, C parameters. Specific to Quantum Espresso.
+ * @summary Calculates cell parameters from celldm(i) or A, B, C parameters depending on which are present. Specific to Quantum Espresso.
  * @param {Number[]} [celldm] - celldm(i) parameters
  * @param {Number} [a] - A parameter
  * @param {Number} [b] - B parameter
  * @param {Number} [c] - C parameter
  * @returns {Number[]}
  */
-function calculateABC(celldm, a, b, c) {
+function getCellConstants(celldm, a, b, c) {
     let _a = celldm ? celldm[1] : a;
     let _b = celldm ? celldm[2] * celldm[1] : b; // celldm[2] is b/a
     let _c = celldm ? celldm[3] * celldm[1] : c; // celldm[3] is c/a
@@ -144,7 +148,7 @@ function calculateABC(celldm, a, b, c) {
  * @param {Number} [cosab]   - cosAB parameter
  * @returns {Number[]}
  */
-function calculateAngles(celldm, cosbc, cosac, cosab) {
+function getCellAngles(celldm, cosbc, cosac, cosab) {
     let alpha, beta, gamma;
     if (cosbc) alpha = math.acos(cosbc);
     if (cosac) beta = math.acos(cosac);
@@ -187,7 +191,7 @@ function calculateAngles(celldm, cosbc, cosac, cosab) {
  * @param {Number} [system.cosab] - cosAB parameter
  * @param {Number} [system.cosac] - cosAC parameter
  * @param {Number} [system.cosbc] - cosBC parameter
- * @returns {{vectors: Number[][], units: String}}
+ * @returns {{vectors: Number[][], type: String}}
  */
 function ibravToCellConfig(system) {
     const { ibrav, celldm, a, b, c, cosab, cosac, cosbc } = system;
@@ -200,28 +204,20 @@ function ibravToCellConfig(system) {
     if (celldm) celldm.unshift(null); // Bump indices by 1 to make it easier to understand the logic. In QE input file celdm(1) array starts with 1, but parsed starting with 0.
 
     const type = ibravToCellType(ibrav);
-    const [_a, _b, _c] = calculateABC(celldm, a, b, c);
-    const [alpha, beta, gamma] = calculateAngles(celldm, cosbc, cosac, cosab);
+    const [_a, _b, _c] = getCellConstants(celldm, a, b, c);
+    const [alpha, beta, gamma] = getCellAngles(celldm, cosbc, cosac, cosab);
 
-    const config = new Lattice({ type, _a, _b, _c, alpha, beta, gamma });
-    const vectors = primitiveCell(config);
-    return { vectors, units: "angstrom", type };
-}
-
-/**
- * @summary Checks for QE specific errors in the input data.
- * @param {Object} data - The input data
- * @returns {Boolean}
- */
-function checkForErrors(data) {
-    if (data.system === undefined) {
-        throw new Error("No &SYSTEM section found in input data.");
-    }
-    if (data.system.ibrav === undefined) {
-        throw new Error("ibrav is required in &SYSTEM.");
-    }
-
-    return false;
+    const lattice = new Lattice({
+        a: _a,
+        b: _b,
+        c: _c,
+        alpha,
+        beta,
+        gamma,
+        type,
+    });
+    const vectors = primitiveCell(lattice);
+    return { vectors, type };
 }
 
 /**
@@ -231,20 +227,21 @@ function checkForErrors(data) {
  */
 function fromEspressoFormat(fileContent) {
     const data = parseFortranFile(fileContent);
+
+    if (data.system === undefined) throw new Error("No &SYSTEM section found in input data.");
+    if (data.system.ibrav === undefined) throw new Error("ibrav is required in &SYSTEM.");
+
     let cell = {};
-
-    if (!checkForErrors(data)) {
-        if (data.system.ibrav === 0) {
-            cell = getCellConfig(data.cards);
-            cell.type = Lattice.typeFromVectors(cell.vectors); // not implemented yet, defaults to TRI
-        } else {
-            cell = ibravToCellConfig(data.system);
-        }
-
-        const { elements, coordinates, constraints, units } = getAtomicPositions(data.cards);
-        const name = data.control.title;
-        return { cell, elements, coordinates, constraints, units, name };
+    if (data.system.ibrav === 0) {
+        cell = getCellConfig(data.cards);
+        cell.type = Lattice.typeFromVectors(cell.vectors); // not implemented yet, defaults to TRI
+    } else {
+        cell = ibravToCellConfig(data.system);
     }
+
+    const { elements, coordinates, constraints, units } = getAtomicPositions(data.cards);
+    const name = data.control.title;
+    return { cell, elements, coordinates, constraints, units, name };
 }
 
 export default { fromEspressoFormat, isEspressoFormat };
