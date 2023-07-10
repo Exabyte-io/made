@@ -9,6 +9,7 @@ import { IBRAV_TO_LATTICE_TYPE_MAP, regex } from "./settings";
 export class EspressoParser {
     constructor(content) {
         this.content = content;
+        this.intermediateFormat = this.getIntermediateFormat();
     }
 
     getIntermediateFormat() {
@@ -31,6 +32,17 @@ export class EspressoParser {
 
         console.log("intermediateFormat:", intermediateData);
         return intermediateData;
+    }
+
+    serialize() {
+        const { atomicSpecies } = this.intermediateFormat();
+        const { atomicPositions } = this.intermediateFormat();
+        const { cellParameters } = this.intermediateFormat();
+        if (!cellParameters) {
+            throw new Error("Couldn't read cell parameters");
+            // TODO: add cell generation from ibrav etc...
+        }
+        return { atomicSpecies, atomicPositions, cellParameters };
     }
 }
 
