@@ -14,30 +14,37 @@ export class EspressoParser {
 
     getIntermediateFormat() {
         const data = FortranParser.parse(this.content); // using static method
-        const intermediateData = data;
-
-        intermediateData.atomicSpecies = Array.from(data.cards.matchAll(regex.atomicSpecies)).map(
-            (match) => match.slice(1, match.length),
-        ); // This will only take the captured groups
-
-        intermediateData.atomicPositions = Array.from(
-            data.cards.matchAll(regex.atomicPositions),
-        ).map((match) => match.slice(1, match.length));
-
-        intermediateData.cellParameters = Array.from(data.cards.matchAll(regex.cellParameters)).map(
-            (match) => match.slice(1, match.length),
-        );
-
-        delete intermediateData.cards;
+        const intermediateData = {
+            control: data.control,
+            system: data.system,
+            electrons: data.electrons,
+            atomicSpecies: Array.from(data.cards.matchAll(regex.atomicSpecies)).map(
+                ([, element, mass, pseudoPotential]) => ({
+                    element,
+                    mass: parseFloat(mass),
+                    pseudoPotential,
+                }),
+            ),
+            atomicPositions: Array.from(data.cards.matchAll(regex.atomicPositions)).map(
+                ([, element, x, y, z, ...constraints]) => ({
+                    element,
+                    coordinates: [parseFloat(x), parseFloat(y), parseFloat(z)],
+                    constraints: constraints || [],
+                }),
+            ),
+            cellParameters: Array.from(data.cards.matchAll(regex.cellParameters)).map((params) =>
+                params.map((param) => parseFloat(param)),
+            ),
+        };
 
         console.log("intermediateFormat:", intermediateData);
         return intermediateData;
     }
 
     serialize() {
-        const { atomicSpecies } = this.intermediateFormat();
-        const { atomicPositions } = this.intermediateFormat();
-        const { cellParameters } = this.intermediateFormat();
+        const { atomicSpecies } = this.intermediateFormat;
+        const { atomicPositions } = this.intermediateFormat;
+        const { cellParameters } = this.intermediateFormat;
         if (!cellParameters) {
             throw new Error("Couldn't read cell parameters");
             // TODO: add cell generation from ibrav etc...
@@ -64,8 +71,9 @@ function isEspressoFormat(fileContent) {
 function getCellConfig(text) {
     const match = regex.cellParameters.exec(text);
     if (match) {
-        const { units } = match[1];
+        const units = match[1];
         const values = match.slice(2, 11);
+        // creating 3 vectors from 9 values
         const vectors = Array.from({ length: 3 }, (_, i) =>
             values.slice(i * 3, i * 3 + 3).map(Number),
         );

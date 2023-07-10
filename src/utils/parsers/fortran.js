@@ -54,9 +54,10 @@ function extractKeyValuePairs(data) {
     });
 
     [numberArrayPairs, stringArrayPairs, booleanArrayPairs].forEach((arrayPairs) => {
-        arrayPairs.forEach(([key, index, value]) => {
+        arrayPairs.forEach(([key, value]) => {
+            const [index, actualValue] = value;
             if (!output[key]) output[key] = [];
-            output[key][index - 1] = value; // use the index to put the value at the correct position
+            output[key][index - 1] = actualValue; // Subtract 1 because JavaScript arrays are 0-indexed
         });
     });
 
@@ -107,6 +108,7 @@ function parseFortranFile(text) {
 }
 
 export class FortranParser extends BaseParser {
+    // eslint-disable-next-line class-methods-use-this,no-unused-vars
     super(content) {}
 
     static parse(content) {
