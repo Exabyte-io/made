@@ -1,4 +1,11 @@
+import BaseParser from "../../parsers/init";
 import { regex } from "./settings";
+
+const typeParsers = {
+    [Number]: (value) => parseFloat(value),
+    [String]: (value) => value,
+    [Boolean]: (value) => value === "true",
+};
 
 /**
  * Extracts pairs from a string data using provided regex pattern and type.
@@ -16,23 +23,14 @@ import { regex } from "./settings";
  * @throws {Error} If an invalid type is provided.
  */
 function extractPairs(data, regexPattern, type, isArray) {
+    if (!typeParsers[type]) throw new Error("Invalid type");
+    const parser = typeParsers[type];
+
     return Array.from(data.matchAll(regexPattern)).map((match) => {
-        switch (type) {
-            case Number:
-                return isArray
-                    ? [match[1], parseInt(match[2], 10), parseFloat(match[3])]
-                    : [match[1], parseFloat(match[2])];
-            case String:
-                return isArray
-                    ? [match[1], parseInt(match[2], 10), match[3]]
-                    : [match[1], match[2]];
-            case Boolean:
-                return isArray
-                    ? [match[1], parseInt(match[2], 10), match[3] === "true"]
-                    : [match[1], match[2] === "true"];
-            default:
-                throw new Error("Invalid type");
-        }
+        const key = match[1];
+        const value = isArray ? [parseInt(match[2], 10), parser(match[3])] : parser(match[2]);
+
+        return [key, value];
     });
 }
 
@@ -94,7 +92,7 @@ function extractNamelistData(text) {
  * @throws {Error} If no cards data is found in `text`.
  * @returns {Object} An object containing the parsed namelist and cards data. The exact structure of this object will depend on the structure of the namelist and cards data in `text`.
  */
-export function parseFortranFile(text) {
+function parseFortranFile(text) {
     let output = {};
     try {
         output = extractNamelistData(text);
@@ -102,17 +100,16 @@ export function parseFortranFile(text) {
         throw new Error("Incorrect fortran file");
     }
 
-    if (!output) {
-        throw new Error("No namelists found");
-    }
-
-    const match = text.match(regex.cards);
-    if (!match || !match[1]) {
-        throw new Error("No cards found");
-    } else {
-        // eslint-disable-next-line prefer-destructuring
-        output.cards = match[1];
-    }
-
+    const match = regex.cards.exec(text);
+    // eslint-disable-next-line prefer-destructuring
+    output.cards = match[0];
     return output;
+}
+
+export class FortranParser extends BaseParser {
+    super(content) {}
+
+    static parse(content) {
+        return parseFortranFile(content);
+    }
 }

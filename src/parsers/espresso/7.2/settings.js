@@ -1,32 +1,40 @@
 import { LATTICE_TYPE } from "../../../lattice/types";
-import { regex as fortranRegex } from "../../../utils/parsers/settings";
 
-const double = fortranRegex.fortranDouble;
+const double =
+    "[-+]?" + // Optional leading sign
+    "\\d*" + // Zero or more digits before the decimal point
+    "\\.?" + // Optional decimal point
+    "\\d*" + // Zero or more digits after the decimal point
+    "(?:[Eed][+-]?\\d+)?"; // Optional exponent part
+
 // Regexes for Espresso cards
 export const regex = {
     espressoFingerprint: /&CONTROL|&SYSTEM|ATOMIC_SPECIES/i,
     atomicSpecies: new RegExp(
-        "([A-Z][a-z]?)\\s" + // element Aa
-            `${double}\\s` + // mass
+        "([A-Z][a-z]?)\\s+" + // element symbol Aa
+            `(${double})\\s` + // mass
             "(\\S*)\\s*" + // potential source file name
             "(?=\\n)", // end of line
         "gm",
     ),
     atomicPositionsUnits: new RegExp(
-        "ATOMIC_POSITIONS\\s" + // start of card
+        "ATOMIC_POSITIONS\\s+" + // start of card
             "\\(?" + // optional parentheses
             "(\\w+)" + // units
             "\\)?", // end of optional parentheses
     ),
     atomicPositions: new RegExp(
-        `\\b([A-Z][a-z]*)\\b\\s+${double}\\s+${double}\\s+${double}(?:\\s+(0|1)\\s+(0|1)\\s+(0|1))?(?=\\s*\\n)`,
+        `^\\s*([A-Z][a-z]*)\\s+` + // atomic element symbol
+            `(${double})\\s+(${double})\\s+(${double})` + // atomic coordinates
+            `(?:\\s+(0|1)\\s+(0|1)\\s+(0|1))?(?=\\s*\\n)`, // atomic constraints
         "gm",
     ),
     cellParameters: new RegExp(
-        `CELL_PARAMETERS\\s*(?:\\(?(?<units>\\w+)\\)?)?` +
-            `\\s+(?<x1>${double})\\s+(?<y1>${double})\\s+(?<z1>${double})` +
-            `\\s+(?<x2>${double})\\s+(?<y2>${double})\\s+(?<z2>${double})` +
-            `\\s+(?<x3>${double})\\s+(?<y3>${double})\\s+(?<z3>${double})`,
+        `CELL_PARAMETERS\\s*(?:\\(?(\\w+)\\)?)?` +
+            `\\s+(${double})\\s+(${double})\\s+(${double})` +
+            `\\s+(${double})\\s+(${double})\\s+(${double})` +
+            `\\s+(${double})\\s+(${double})\\s+(${double})`,
+        "gm",
     ),
 };
 

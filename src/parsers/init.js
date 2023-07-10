@@ -5,6 +5,10 @@ class BaseParser {
         this.content = content;
     }
 
+    static parse() {
+        throw new Error("parse() is not defined");
+    }
+
     /**
      * Serializes intermediate format to Object.
      * @param {Object} intermediateFormat

@@ -1,11 +1,38 @@
 import { ATOMIC_COORD_UNITS, coefficients } from "@exabyte-io/code.js/dist/constants";
-import _ from "underscore";
 
 import { primitiveCell } from "../../../cell/primitive_cell";
 import { Lattice } from "../../../lattice/lattice";
 import math from "../../../math";
-import { parseFortranFile } from "../../../utils/parsers/fortran";
+import { FortranParser } from "../../../utils/parsers/fortran";
 import { IBRAV_TO_LATTICE_TYPE_MAP, regex } from "./settings";
+
+export class EspressoParser {
+    constructor(content) {
+        this.content = content;
+    }
+
+    getIntermediateFormat() {
+        const data = FortranParser.parse(this.content); // using static method
+        const intermediateData = data;
+
+        intermediateData.atomicSpecies = Array.from(data.cards.matchAll(regex.atomicSpecies)).map(
+            (match) => match.slice(1, match.length),
+        ); // This will only take the captured groups
+
+        intermediateData.atomicPositions = Array.from(
+            data.cards.matchAll(regex.atomicPositions),
+        ).map((match) => match.slice(1, match.length));
+
+        intermediateData.cellParameters = Array.from(data.cards.matchAll(regex.cellParameters)).map(
+            (match) => match.slice(1, match.length),
+        );
+
+        delete intermediateData.cards;
+
+        console.log("intermediateFormat:", intermediateData);
+        return intermediateData;
+    }
+}
 
 /**
  * @summary checks if the given fileContent is in the format of a Quantum ESPRESSO .in file.
@@ -25,13 +52,11 @@ function isEspressoFormat(fileContent) {
 function getCellConfig(text) {
     const match = regex.cellParameters.exec(text);
     if (match) {
-        const keys = ["1", "2", "3"];
-        const vectors = _.map(keys, (key) => [
-            parseFloat(match.groups["x" + key]),
-            parseFloat(match.groups["y" + key]),
-            parseFloat(match.groups["z" + key]),
-        ]);
-        const { units } = match.groups;
+        const { units } = match[1];
+        const values = match.slice(2, 11);
+        const vectors = Array.from({ length: 3 }, (_, i) =>
+            values.slice(i * 3, i * 3 + 3).map(Number),
+        );
         return { vectors, units };
     }
     throw new Error("Couldn't read cell parameters");
@@ -226,7 +251,7 @@ function ibravToCellConfig(system) {
  * @return {{cell: Object, elements: Object[], coordinates: Object[], constraints: Object[], units: String, name: String}}
  */
 function fromEspressoFormat(fileContent) {
-    const data = parseFortranFile(fileContent);
+    const data = EspressoParser.parse(fileContent);
 
     if (data.system === undefined) throw new Error("No &SYSTEM section found in input data.");
     if (data.system.ibrav === undefined) throw new Error("ibrav is required in &SYSTEM.");

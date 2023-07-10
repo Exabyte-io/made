@@ -31,16 +31,13 @@ class EspressoParser extends BaseParser {
         return parser.isEspressoFormat(text);
     }
 
-    // eslint-disable-next-line no-unused-vars
     static getVersionByContent(text) {
-        // eslint-disable-next-line no-restricted-syntax
-        // for (const version in versionRegexMap) {
-        //     if (versionRegexMap[version].test(text)) {
-        //         return version;
-        //     }
-        // }
-        // throw new Error("Could not determine version from content.");
-        return "7.2"; // TODO: REMOVE
+        versionRegexMap.forEach((version) => {
+            if (versionRegexMap[version].test(text)) {
+                return version;
+            }
+        });
+        throw new Error("Could not determine version from content.");
     }
 
     static getParserByVersion(version) {
