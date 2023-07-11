@@ -19,22 +19,51 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
     }
 
     getElements() {
-        const { elements } = this.getAtomicPositions(this.data.cards);
+        const text = this.data.cards;
+        const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
+        const elements = atomicPositionsMatches.map((match, index) => ({
+            id: index,
+            value: match[1],
+        }));
         return elements;
     }
 
     getCoordinates() {
-        const { coordinates } = this.getAtomicPositions(this.data.cards);
+        const text = this.data.cards;
+        const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
+        const units = text.match(regex.atomicPositionsUnits)[1];
+        const { scalingFactor } = this.getCoordinatesUnitsScalingFactor(units);
+        const coordinates = atomicPositionsMatches.map((match, index) => ({
+            id: index,
+            value: [
+                parseFloat(match[2]) * scalingFactor,
+                parseFloat(match[3]) * scalingFactor,
+                parseFloat(match[4]) * scalingFactor,
+            ],
+        }));
         return coordinates;
     }
 
     getConstraints() {
-        const { constraints } = this.getAtomicPositions(this.data.cards);
+        const text = this.data.cards;
+        const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
+        const constraints = atomicPositionsMatches.reduce((acc, match, index) => {
+            if (match[5] && match[6] && match[7]) {
+                // Check if all three constraints exist
+                acc.push({
+                    id: index,
+                    value: [match[5] === "1", match[6] === "1", match[7] === "1"],
+                });
+            }
+            return acc;
+        }, []);
         return constraints;
     }
 
     getUnits() {
-        const { units } = this.getAtomicPositions(this.data.cards);
+        const text = this.data.cards;
+        const _units = text.match(regex.atomicPositionsUnits)[1];
+        const { units } = this.getCoordinatesUnitsScalingFactor(_units);
         return units;
     }
 
@@ -184,41 +213,6 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
             x === undefined ? x : (x * 180) / math.PI,
         );
         return [alpha, beta, gamma];
-    }
-
-    /**
-     * @summary Read atomic positions from ATOMIC_POSITIONS card
-     * @param {String} text - cards data
-     * @returns {{elements: Object[], coordinates: Object[], constraints: Object[], units: String}}
-     */
-    getAtomicPositions(text) {
-        const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
-        const units = text.match(regex.atomicPositionsUnits)[1];
-        const { _units, scalingFactor } = this.getCoordinatesUnitsScalingFactor(units);
-
-        const elements = atomicPositionsMatches.map((match, index) => ({
-            id: index,
-            value: match[1],
-        }));
-        const coordinates = atomicPositionsMatches.map((match, index) => ({
-            id: index,
-            value: [
-                parseFloat(match[2]) * scalingFactor,
-                parseFloat(match[3]) * scalingFactor,
-                parseFloat(match[4]) * scalingFactor,
-            ],
-        }));
-        const constraints = atomicPositionsMatches.reduce((acc, match, index) => {
-            if (match[5] && match[6] && match[7]) {
-                // Check if all three constraints exist
-                acc.push({
-                    id: index,
-                    value: [match[5] === "1", match[6] === "1", match[7] === "1"],
-                });
-            }
-            return acc;
-        }, []);
-        return { elements, coordinates, constraints, units: _units };
     }
 
     /**
