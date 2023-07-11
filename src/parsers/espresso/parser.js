@@ -18,10 +18,6 @@ export class ESPRESSOMaterialParser extends MaterialParser {
             this.data.cards,
         );
 
-        if (this.data.system === undefined)
-            throw new Error("No &SYSTEM section found in input this.data.");
-        if (this.data.system.ibrav === undefined) throw new Error("ibrav is required in &SYSTEM.");
-
         const lattice = Lattice.fromVectors({
             a: cell.cell[0],
             b: cell.cell[1],
@@ -37,7 +33,6 @@ export class ESPRESSOMaterialParser extends MaterialParser {
             cell: lattice.vectorArrays,
             constraints,
         });
-        // basis.toStandardRepresentation(); // To get the format obtained from the Mat3ra platform
 
         return {
             lattice: lattice.toJSON(),
@@ -54,6 +49,10 @@ export class ESPRESSOMaterialParser extends MaterialParser {
      */
     getCellConfig(text) {
         let cell = {};
+        if (this.data.system === undefined)
+            throw new Error("No &SYSTEM section found in input this.data.");
+        if (this.data.system.ibrav === undefined) throw new Error("ibrav is required in &SYSTEM.");
+
         if (this.data.system.ibrav === 0) {
             const match = regex.cellParameters.exec(text);
             if (match) {
@@ -158,7 +157,7 @@ export class ESPRESSOMaterialParser extends MaterialParser {
      * @param {Number} [cosbc] - cosBC parameter
      * @param {Number} [cosac] - cosAC parameter
      * @param {Number} [cosab]   - cosAB parameter
-     * @returns {Number[]}
+     * @returns {Array<Number | undefined>}
      */
     getLatticeAngles(celldm, cosbc, cosac, cosab) {
         let alpha, beta, gamma;
@@ -193,13 +192,6 @@ export class ESPRESSOMaterialParser extends MaterialParser {
      * @returns {{elements: Object[], coordinates: Object[], constraints: Object[], units: String}}
      */
     getAtomicPositions(text) {
-        const atomicSpeciesMatches = Array.from(text.matchAll(regex.atomicSpecies));
-        // eslint-disable-next-line no-unused-vars
-        const atomicSpecies = atomicSpeciesMatches.map((match) => ({
-            element: match[1],
-            mass: parseFloat(match[2]),
-            potential: match[3],
-        }));
         const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
         const units = text.match(regex.atomicPositionsUnits)[1];
         const { _units, scalingFactor } = this.getScalingFactor(units);
@@ -216,12 +208,16 @@ export class ESPRESSOMaterialParser extends MaterialParser {
                 parseFloat(match[4]) * scalingFactor,
             ],
         }));
-        const constraints = atomicPositionsMatches
-            .filter((match) => match[5] && match[6] && match[7]) // Check if all three constraints exist
-            .map((match, index) => ({
-                id: index,
-                value: [match[5] === "1", match[6] === "1", match[7] === "1"],
-            }));
+        const constraints = atomicPositionsMatches.reduce((acc, match, index) => {
+            if (match[5] && match[6] && match[7]) {
+                // Check if all three constraints exist
+                acc.push({
+                    id: index,
+                    value: [match[5] === "1", match[6] === "1", match[7] === "1"],
+                });
+            }
+            return acc;
+        }, []);
         return { elements, coordinates, constraints, units: _units };
     }
 

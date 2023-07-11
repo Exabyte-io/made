@@ -30,12 +30,12 @@ function convertFromNativeFormat(text) {
             return JSON.parse(text);
         case STRUCTURAL_INFORMATION_FORMATS.POSCAR:
             return Poscar.fromPoscar(text);
-        case STRUCTURAL_INFORMATION_FORMATS.UNKNOWN:
-            throw new Error(`Unknown format`);
         case STRUCTURAL_INFORMATION_FORMATS.QE:
             // eslint-disable-next-line no-case-declarations
             const parser = new ESPRESSOMaterialParser(); // TODO: replace with parsers factory
             return parser.parse(text, "material");
+        case STRUCTURAL_INFORMATION_FORMATS.UNKNOWN:
+            throw new Error(`Unknown format`);
         // TODO:  add more formats
         default:
             throw new Error(`Unsupported format: ${format}`);
