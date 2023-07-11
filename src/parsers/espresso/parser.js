@@ -26,7 +26,6 @@ export class ESPRESSOMaterialParser extends MaterialParser {
             a: cell.vectors[0],
             b: cell.vectors[1],
             c: cell.vectors[2],
-            alat: cell.alat,
             units: "angstrom",
         });
 
@@ -101,8 +100,8 @@ export class ESPRESSOMaterialParser extends MaterialParser {
         }
 
         const type = this.ibravToCellType(ibrav);
-        const [_a, _b, _c] = this.getCellConstants(celldm, a, b, c);
-        const [alpha, beta, gamma] = this.getCellAngles(celldm, cosbc, cosac, cosab);
+        const [_a, _b, _c] = this.getLatticeConstants(celldm, a, b, c);
+        const [alpha, beta, gamma] = this.getLatticeAngles(celldm, cosbc, cosac, cosab);
 
         const lattice = new Lattice({
             a: _a,
@@ -115,6 +114,74 @@ export class ESPRESSOMaterialParser extends MaterialParser {
         });
         const vectors = primitiveCell(lattice);
         return { vectors, type };
+    }
+
+    /**
+     * @summary Converts ibrav value to cell type according to Quantum ESPRESSO docs
+     * https://www.quantum-espresso.org/Doc/INPUT_PW.html#ibrav
+     * @param {Number} ibrav - ibrav parameter
+     * @returns {String}
+     */
+    ibravToCellType(ibrav) {
+        const type = IBRAV_TO_LATTICE_TYPE_MAP[ibrav];
+        if (type === undefined) {
+            throw new Error(`Invalid ibrav value: ${ibrav}`);
+        }
+        return type;
+    }
+
+    /**
+     * @summary Calculates cell parameters from celldm(i) or A, B, C parameters depending on which are present. Specific to Quantum ESPRESSO.
+     * @param {Number[]} [celldm] - celldm(i) parameters
+     * @param {Number} [a] - A parameter
+     * @param {Number} [b] - B parameter
+     * @param {Number} [c] - C parameter
+     * @returns {Number[]}
+     */
+    getLatticeConstants(celldm, a, b, c) {
+        // celldm indices shifted -1 from fortran list representation. In QE input file celldm(1) list starts with 1, but parsed starting with 0.
+        let _a = celldm ? celldm[0] : a; // celldm(1) is a in bohr
+        let _b = celldm ? celldm[1] * celldm[0] : b; // celldm(2) is b/a
+        let _c = celldm ? celldm[2] * celldm[0] : c; // celldm(3) is c/a
+        if (celldm) {
+            [_a, _b, _c] = [_a, _b, _c].map((x) => x * coefficients.BOHR_TO_ANGSTROM);
+        }
+        return [_a, _b, _c];
+    }
+
+    /**
+     * @summary Calculates cell angles from celldm(i) or cosAB, cosAC, cosBC parameters. Specific to Quantum ESPRESSO.
+     * @param {Number[]} [celldm] - celldm(i) parameters
+     * @param {Number} [cosbc] - cosBC parameter
+     * @param {Number} [cosac] - cosAC parameter
+     * @param {Number} [cosab]   - cosAB parameter
+     * @returns {Number[]}
+     */
+    getLatticeAngles(celldm, cosbc, cosac, cosab) {
+        let alpha, beta, gamma;
+        if (cosbc) alpha = math.acos(cosbc);
+        if (cosac) beta = math.acos(cosac);
+        if (cosab) gamma = math.acos(cosab);
+
+        // Case for some of the cell types in QE docs
+        // celldm indices shifted -1 from fortran list representation. In QE input file celdm(1) array starts with 1, but parsed starting with 0.
+        if (celldm && celldm[3]) {
+            gamma = math.acos(celldm[3]);
+        }
+
+        // Specific case for hexagonal cell in QE docs
+        // celldm indices shifted -1 from fortran list representation. In QE input file celdm(1) array starts with 1, but parsed starting with 0.
+        if (celldm && celldm[3] && celldm[4] && celldm[5]) {
+            alpha = math.acos(celldm[3]);
+            beta = math.acos(celldm[4]);
+            gamma = math.acos(celldm[5]);
+        }
+
+        // Convert radians to degrees which are used in lattice definitions
+        [alpha, beta, gamma] = [alpha, beta, gamma].map((x) =>
+            x === undefined ? x : (x * 180) / math.PI,
+        );
+        return [alpha, beta, gamma];
     }
 
     /**
@@ -152,16 +219,7 @@ export class ESPRESSOMaterialParser extends MaterialParser {
                 id: index,
                 value: [match[5] === "1", match[6] === "1", match[7] === "1"],
             }));
-        this.elements = elements;
-        this.coordinates = coordinates;
-        this.constraints = constraints;
-        this.units = _units;
-
         return { elements, coordinates, constraints, units: _units };
-    }
-
-    getElements() {
-        return this.getAtomicPositions(this.data.cards).elements;
     }
 
     /**
@@ -196,70 +254,19 @@ export class ESPRESSOMaterialParser extends MaterialParser {
         return { _units, scalingFactor };
     }
 
-    /**
-     * @summary Converts ibrav value to cell type according to Quantum ESPRESSO docs
-     * https://www.quantum-espresso.org/Doc/INPUT_PW.html#ibrav
-     * @param {Number} ibrav - ibrav parameter
-     * @returns {String}
-     */
-    ibravToCellType(ibrav) {
-        const type = IBRAV_TO_LATTICE_TYPE_MAP[ibrav];
-        if (type === undefined) {
-            throw new Error(`Invalid ibrav value: ${ibrav}`);
-        }
-        return type;
+    getElements(text) {
+        return this.getAtomicPositions(text).elements;
     }
 
-    /**
-     * @summary Calculates cell parameters from celldm(i) or A, B, C parameters depending on which are present. Specific to Quantum ESPRESSO.
-     * @param {Number[]} [celldm] - celldm(i) parameters
-     * @param {Number} [a] - A parameter
-     * @param {Number} [b] - B parameter
-     * @param {Number} [c] - C parameter
-     * @returns {Number[]}
-     */
-    getCellConstants(celldm, a, b, c) {
-        // celldm indices shifted -1 from fortran list representation. In QE input file celldm(1) list starts with 1, but parsed starting with 0.
-        let _a = celldm ? celldm[0] : a; // celldm(1) is a in bohr
-        let _b = celldm ? celldm[1] * celldm[0] : b; // celldm(2) is b/a
-        let _c = celldm ? celldm[2] * celldm[0] : c; // celldm(3) is c/a
-        if (celldm) {
-            [_a, _b, _c] = [_a, _b, _c].map((x) => x * coefficients.BOHR_TO_ANGSTROM);
-        }
-        return [_a, _b, _c];
+    getCoordinates(text) {
+        return this.getAtomicPositions(text).coordinates;
     }
 
-    /**
-     * @summary Calculates cell angles from celldm(i) or cosAB, cosAC, cosBC parameters. Specific to Quantum ESPRESSO.
-     * @param {Number[]} [celldm] - celldm(i) parameters
-     * @param {Number} [cosbc] - cosBC parameter
-     * @param {Number} [cosac] - cosAC parameter
-     * @param {Number} [cosab]   - cosAB parameter
-     * @returns {Number[]}
-     */
-    getCellAngles(celldm, cosbc, cosac, cosab) {
-        let alpha, beta, gamma;
-        if (cosbc) alpha = math.acos(cosbc);
-        if (cosac) beta = math.acos(cosac);
-        if (cosab) gamma = math.acos(cosab);
+    getConstraints(text) {
+        return this.getAtomicPositions(text).constraints;
+    }
 
-        // Case for some of the cell types in QE docs
-        if (celldm && celldm[3]) {
-            gamma = math.acos(celldm[3]);
-        }
-
-        // Specific case for hexagonal cell in QE docs
-        // celldm indices shifted -1 from fortran list representation. In QE input file celdm(1) array starts with 1, but parsed starting with 0.
-        if (celldm && celldm[3] && celldm[4] && celldm[5]) {
-            alpha = math.acos(celldm[3]);
-            beta = math.acos(celldm[4]);
-            gamma = math.acos(celldm[5]);
-        }
-
-        // Convert radians to degrees which are used in lattice definitions
-        [alpha, beta, gamma] = [alpha, beta, gamma].map((x) =>
-            x === undefined ? x : (x * 180) / math.PI,
-        );
-        return [alpha, beta, gamma];
+    getUnits(text) {
+        return this.getAtomicPositions(text).units;
     }
 }
