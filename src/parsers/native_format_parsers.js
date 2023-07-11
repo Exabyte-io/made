@@ -8,8 +8,9 @@ import Poscar from "./poscar";
  * @returns {string} - Format of the input string
  */
 function detectFormat(text) {
+    // TODO: replace with actual detection function
     const jsonRegex = /^\s*\{/;
-    const espressoRegex = /^\s*ATOMIC_SPECIES/m; // TODO: replace with actual detection function
+    const espressoRegex = /^\s*ATOMIC_SPECIES/m;
     if (jsonRegex.test(text)) return STRUCTURAL_INFORMATION_FORMATS.JSON;
     if (Poscar.isPoscar(text)) return STRUCTURAL_INFORMATION_FORMATS.POSCAR;
     if (espressoRegex.test(text)) return STRUCTURAL_INFORMATION_FORMATS.QE;
@@ -25,6 +26,7 @@ function detectFormat(text) {
 function convertFromNativeFormat(text) {
     const format = detectFormat(text);
 
+    // TODO: replace with parsers factory
     switch (format) {
         case STRUCTURAL_INFORMATION_FORMATS.JSON:
             return JSON.parse(text);
@@ -32,7 +34,7 @@ function convertFromNativeFormat(text) {
             return Poscar.fromPoscar(text);
         case STRUCTURAL_INFORMATION_FORMATS.QE:
             // eslint-disable-next-line no-case-declarations
-            const parser = new ESPRESSOMaterialParser(); // TODO: replace with parsers factory
+            const parser = new ESPRESSOMaterialParser();
             return parser.parse(text, "material");
         case STRUCTURAL_INFORMATION_FORMATS.UNKNOWN:
             throw new Error(`Unknown format`);
