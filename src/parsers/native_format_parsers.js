@@ -9,7 +9,7 @@ import Poscar from "./poscar";
  */
 function detectFormat(text) {
     const jsonRegex = /^\s*\{/;
-    const espressoRegex = /^\s*ATOMIC_SPECIES/; // TODO: replace with actual detection function
+    const espressoRegex = /^\s*ATOMIC_SPECIES/m; // TODO: replace with actual detection function
     if (jsonRegex.test(text)) return STRUCTURAL_INFORMATION_FORMATS.JSON;
     if (Poscar.isPoscar(text)) return STRUCTURAL_INFORMATION_FORMATS.POSCAR;
     if (espressoRegex.test(text)) return STRUCTURAL_INFORMATION_FORMATS.QE;

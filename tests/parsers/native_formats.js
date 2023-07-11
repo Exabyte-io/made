@@ -1,7 +1,14 @@
 import { expect } from "chai";
 
 import nativeFormatParsers from "../../src/parsers/native_format_parsers";
-import { Graphene, GraphenePoscar, NiHex, NiHexPoscar } from "../enums";
+import {
+    BNHex,
+    BNHexIbravPWSCFInput,
+    Graphene,
+    GraphenePoscar,
+    NiHex,
+    NiHexPoscar,
+} from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Parsers.NativeFormat", () => {
@@ -21,6 +28,11 @@ describe("Parsers.NativeFormat", () => {
         const config = nativeFormatParsers.convertFromNativeFormat(poscar);
         assertDeepAlmostEqual(config, NiHex, ["lattice"]);
         assertDeepAlmostEqual(config.lattice, NiHex.lattice, ["type"]); // to omit "lattice.type" property
+    });
+
+    it("should return a material config from QE input file for BN", () => {
+        const materialConfig = nativeFormatParsers.convertFromNativeFormat(BNHexIbravPWSCFInput);
+        assertDeepAlmostEqual(materialConfig, BNHex, ["name"]);
     });
 
     it("should throw an error for unknown format", () => {
