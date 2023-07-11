@@ -17,10 +17,10 @@ export const FortranParserMixin = (superclass) =>
          * @throws {Error} If no cards data is found in `text`.
          * @returns {Object} An object containing the parsed namelist and cards data. The exact structure of this object will depend on the structure of the namelist and cards data in `text`.
          */
-        parseNamelists(content) {
+        fortranParseNamelists(content) {
             let output = {};
             try {
-                output = this.extractNamelistData(content);
+                output = this.fortranExtractNamelistData(content);
             } catch (err) {
                 throw new Error("Incorrect fortran file");
             }
@@ -32,58 +32,61 @@ export const FortranParserMixin = (superclass) =>
         }
 
         /**
-         * Extracts pairs from a string data using provided regex pattern and type.
-         * If isArray is set to true, treats the value as an array.
-         *
-         * @param {String} data - The string data to extract pairs from.
-         * @param {RegExp} regexPattern - The regex pattern to use for extracting pairs.
-         * @param {Function | NumberConstructor} type - The type of the value.
-         * @param {Boolean} [isArray=false] - Whether to treat the value as an array.
-         *
-         * @returns {Array} The extracted pairs. Each pair is represented as an array,
-         *                  where the first element is the key and the second element is the value.
-         *                  If isArray is true, the value is an array where the first element
-         *                  is the index of the Fortran array element and the second element is the value.
-         * @throws {Error} If an invalid type is provided.
+         * @summary Extracts namelist data from a string.
+         * @param {String} text
+         * @returns {Object}
          */
-        extractPairs(data, regexPattern, type, isArray) {
-            if (!typeParsers[type]) throw new Error("Invalid type");
-            const parser = typeParsers[type];
+        fortranExtractNamelistData(text) {
+            const namelistNameRegex = /^&(\w+)/gm;
+            const matches = Array.from(text.matchAll(namelistNameRegex));
+            const namelistNames = matches.map((match) => match[1].toLowerCase());
+            const namelists = {};
 
-            return Array.from(data.matchAll(regexPattern)).map((match) => {
-                const key = match[1];
-                const value = isArray
-                    ? [parseInt(match[2], 10), parser(match[3])]
-                    : parser(match[2]);
-
-                return [key, value];
+            namelistNames.forEach((namelistName) => {
+                const namelistsRegex = regex.fortran.namelists(namelistName);
+                const namelistData = text.match(namelistsRegex)[2];
+                namelists[namelistName] = this.fortranGetKeyValuePairs(namelistData);
             });
+            return namelists;
         }
 
         /**
          * @summary Extracts an array of the key value pairs from a Fortran namelist.
-         * @param {String} data
+         * @param {String} data - namelist data
          * @returns {Object[]}
          */
-        extractKeyValuePairs(data) {
+        fortranGetKeyValuePairs(data) {
             const output = {};
-            const numberPairs = this.extractPairs(data, regex.fortran.numberKeyValue, Number); // TODO: Fix to convert numbers like 1.234D-567
-            const stringPairs = this.extractPairs(data, regex.fortran.stringKeyValue, String);
-            const booleanPairs = this.extractPairs(data, regex.fortran.booleanKeyValue, Boolean);
+            // TODO: Fix to convert numbers like 1.234D-567
+            const numberPairs = this.fortranExtractKeyValuePairs(
+                data,
+                regex.fortran.numberKeyValue,
+                Number,
+            );
+            const stringPairs = this.fortranExtractKeyValuePairs(
+                data,
+                regex.fortran.stringKeyValue,
+                String,
+            );
+            const booleanPairs = this.fortranExtractKeyValuePairs(
+                data,
+                regex.fortran.booleanKeyValue,
+                Boolean,
+            );
             // TODO: Add functionality to parse Fortran lists assigned with multiple values inline: list = 1,2,3 -- current implementation doesn't capture that
-            const numberArrayPairs = this.extractPairs(
+            const numberArrayPairs = this.fortranExtractKeyValuePairs(
                 data,
                 regex.fortran.numberArrayKeyValue,
                 Number,
                 true,
             );
-            const stringArrayPairs = this.extractPairs(
+            const stringArrayPairs = this.fortranExtractKeyValuePairs(
                 data,
                 regex.fortran.stringArrayKeyValue,
                 String,
                 true,
             );
-            const booleanArrayPairs = this.extractPairs(
+            const booleanArrayPairs = this.fortranExtractKeyValuePairs(
                 data,
                 regex.fortran.booleanArrayKeyValue,
                 Boolean,
@@ -107,21 +110,32 @@ export const FortranParserMixin = (superclass) =>
         }
 
         /**
-         * @summary Extracts namelist data from a string.
-         * @param {String} text
-         * @returns {Object}
+         * Extracts pairs from a string data using provided regex pattern and type.
+         * If isArray is set to true, treats the value as an array.
+         *
+         * @param {String} data - The string data to extract pairs from.
+         * @param {RegExp} regexPattern - The regex pattern to use for extracting pairs.
+         * @param {Function | NumberConstructor} type - The type of the value.
+         * @param {Boolean} [isArray=false] - Whether to treat the value as an array.
+         *
+         * @returns {Array} The extracted pairs. Each pair is represented as an array,
+         *                  where the first element is the key and the second element is the value.
+         *                  If isArray is true, the value is an array where the first element
+         *                  is the index of the Fortran array element and the second element is the value.
+         * @throws {Error} If an invalid type is provided.
          */
-        extractNamelistData(text) {
-            const namelistNameRegex = /^&(\w+)/gm;
-            const matches = Array.from(text.matchAll(namelistNameRegex));
-            const namelistNames = matches.map((match) => match[1].toLowerCase());
-            const namelists = {};
+        // eslint-disable-next-line class-methods-use-this
+        fortranExtractKeyValuePairs(data, regexPattern, type, isArray) {
+            if (!typeParsers[type]) throw new Error("Invalid type");
+            const parser = typeParsers[type];
 
-            namelistNames.forEach((namelistName) => {
-                const namelistsRegex = regex.fortran.namelists(namelistName);
-                const data = text.match(namelistsRegex)[2];
-                namelists[namelistName] = this.extractKeyValuePairs(data);
+            return Array.from(data.matchAll(regexPattern)).map((match) => {
+                const key = match[1];
+                const value = isArray
+                    ? [parseInt(match[2], 10), parser(match[3])]
+                    : parser(match[2]);
+
+                return [key, value];
             });
-            return namelists;
         }
     };

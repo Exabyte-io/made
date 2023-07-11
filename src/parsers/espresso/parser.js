@@ -10,7 +10,7 @@ import { IBRAV_TO_LATTICE_TYPE_MAP, regex } from "./settings";
 
 export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranParserMixin) {
     parse(content) {
-        this.data = this.parseNamelists(content);
+        this.data = this.fortranParseNamelists(content);
         return this.parseMaterial();
     }
 

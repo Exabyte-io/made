@@ -9,7 +9,7 @@ describe("Parsers:Fortran", () => {
     class TestParser extends mix(BaseParser).with(FortranParserMixin) {} // Test class
     it("should return intermediate format of parsed input file", () => {
         const parser = new TestParser({});
-        const data = parser.parseNamelists(FortranFile1);
+        const data = parser.fortranParseNamelists(FortranFile1);
         expect(data).to.be.deep.equal(FortranFile1JSON);
     });
 });
