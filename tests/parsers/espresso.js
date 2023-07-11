@@ -14,7 +14,7 @@ describe("Parsers:Espresso", () => {
 
     it("should return a material config from QE input file for BN", () => {
         const parser = new ESPRESSOMaterialParser();
-        const materialConfig = parser.parse(BNHexIbravPWSCFInput);
+        const materialConfig = parser.parse(BNHexIbravPWSCFInput, "material");
         assertDeepAlmostEqual(materialConfig, BNHex, ["name"]);
     });
 });

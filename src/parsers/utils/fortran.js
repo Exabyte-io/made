@@ -1,4 +1,3 @@
-import { BaseParser } from "../init";
 import { regex } from "./settings";
 
 const typeParsers = {
@@ -84,32 +83,28 @@ function extractNamelistData(text) {
     return namelists;
 }
 
-/** s
- * Parses Fortran namelists and cards data from a string.
- *
- * @summary Parses Fortran namelists and cards data from a QE input file string.
- * @param {String} text - The text to parse.
- * @throws {Error} If no namelist data is found in `text`.
- * @throws {Error} If no cards data is found in `text`.
- * @returns {Object} An object containing the parsed namelist and cards data. The exact structure of this object will depend on the structure of the namelist and cards data in `text`.
- */
-function parseFortranFile(text) {
-    let output = {};
-    try {
-        output = extractNamelistData(text);
-    } catch (err) {
-        throw new Error("Incorrect fortran file");
-    }
+export const FortranParserMixin = (superclass) =>
+    class extends superclass {
+        /**
+         * Parses Fortran namelists and cards data from a string.
+         *
+         * @summary Parses Fortran namelists and cards data from a QE input file string.
+         * @param {String} text - The text to parse.
+         * @throws {Error} If no namelist data is found in `text`.
+         * @throws {Error} If no cards data is found in `text`.
+         * @returns {Object} An object containing the parsed namelist and cards data. The exact structure of this object will depend on the structure of the namelist and cards data in `text`.
+         */
+        parseNamelists(content) {
+            let output = {};
+            try {
+                output = extractNamelistData(content);
+            } catch (err) {
+                throw new Error("Incorrect fortran file");
+            }
 
-    const match = regex.fortran.cards.exec(text);
-    // eslint-disable-next-line prefer-destructuring
-    output.cards = match[0];
-    return output;
-}
-
-export class FortranParser extends BaseParser {
-    // eslint-disable-next-line class-methods-use-this
-    parse(content) {
-        return parseFortranFile(content);
-    }
-}
+            const match = regex.fortran.cards.exec(content);
+            // eslint-disable-next-line prefer-destructuring
+            output.cards = match[0];
+            return output;
+        }
+    };

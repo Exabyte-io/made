@@ -1,45 +1,45 @@
 import { ATOMIC_COORD_UNITS, coefficients } from "@exabyte-io/code.js/dist/constants";
+import { mix } from "mixwith";
 
-import { ConstrainedBasis } from "../../basis/constrained_basis";
 import { primitiveCell } from "../../cell/primitive_cell";
 import { Lattice } from "../../lattice/lattice";
 import math from "../../math";
-import { MaterialParser } from "../init";
-import { FortranParser } from "../utils/fortran";
+import { MaterialParser } from "../structure";
+import { FortranParserMixin } from "../utils/fortran";
 import { IBRAV_TO_LATTICE_TYPE_MAP, regex } from "./settings";
 
-export class ESPRESSOMaterialParser extends MaterialParser {
-    parseMaterial(content) {
-        this.content = content;
-        const fortranParser = new FortranParser();
-        this.data = fortranParser.parse(this.content);
-        const cell = this.getCellConfig(this.data.cards);
-        const { elements, coordinates, units, constraints } = this.getAtomicPositions(
-            this.data.cards,
-        );
+export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranParserMixin) {
+    parse(content) {
+        this.data = this.parseNamelists(content);
+        return this.parseMaterial();
+    }
 
-        const lattice = Lattice.fromVectors({
-            a: cell.cell[0],
-            b: cell.cell[1],
-            c: cell.cell[2],
-            type: cell.type,
-        });
+    getCell() {
+        return this.getCellConfig(this.data.cards);
+    }
 
-        const basis = new ConstrainedBasis({
-            elements,
-            coordinates,
-            units,
-            type: cell.type,
-            cell: lattice.vectorArrays,
-            constraints,
-        });
+    getElements() {
+        const { elements } = this.getAtomicPositions(this.data.cards);
+        return elements;
+    }
 
-        return {
-            lattice: lattice.toJSON(),
-            basis: basis.toJSON(),
-            name: this.data.control.title,
-            isNonPeriodic: false,
-        };
+    getCoordinates() {
+        const { coordinates } = this.getAtomicPositions(this.data.cards);
+        return coordinates;
+    }
+
+    getConstraints() {
+        const { constraints } = this.getAtomicPositions(this.data.cards);
+        return constraints;
+    }
+
+    getUnits() {
+        const { units } = this.getAtomicPositions(this.data.cards);
+        return units;
+    }
+
+    getName() {
+        return this.data.control.title;
     }
 
     /**
@@ -194,7 +194,7 @@ export class ESPRESSOMaterialParser extends MaterialParser {
     getAtomicPositions(text) {
         const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
         const units = text.match(regex.atomicPositionsUnits)[1];
-        const { _units, scalingFactor } = this.getScalingFactor(units);
+        const { _units, scalingFactor } = this.getCoordinatesUnitsScalingFactor(units);
 
         const elements = atomicPositionsMatches.map((match, index) => ({
             id: index,
@@ -226,7 +226,7 @@ export class ESPRESSOMaterialParser extends MaterialParser {
      * @param {String} units - units from ATOMIC_POSITIONS card
      * @returns {{_units: String, scalingFactor: Number}}
      */
-    getScalingFactor(units) {
+    getCoordinatesUnitsScalingFactor(units) {
         let _units, scalingFactor;
         switch (units) {
             case "alat":
