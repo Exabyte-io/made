@@ -1,13 +1,5 @@
 import s from "underscore.string";
 
-const fortranDoubleRegex =
-    "([-+]?" + // Optional leading sign
-    "\\d*" + // Zero or more digits before the decimal point
-    "\\.?" + // Optional decimal point
-    "\\d*" + // Zero or more digits after the decimal point
-    "(?:[EeDd][+-]?\\d+)?" + // Optional exponent part
-    ")";
-
 const fortranNamelistRegex =
     "&" + // Start with an ampersand
     "%s" + // Namelist name placeholder
@@ -25,12 +17,6 @@ const keyValueRegex =
     "\\s*=\\s*" + // Equal sign with any leading and trailing spaces
     "%s" + // Value placeholder
     "\\s*\\n"; // Ends with a newline character
-
-const fortranStringRegex =
-    "'" + // Starting single quote
-    "([\\w.\\-\\+\\/ ]*)" + // Matches alphanumeric, period, hyphen, plus, slash, and space characters
-    "'"; // Ending single quote
-
 // TODO: Change regex and capturing to accommodate for: Fortran lists assigned multiple values inline: list = 1,2,3 -- current implementation doesn't capture that
 const fortranArrayRegex =
     "^\\s*" + // Array name at the start of a line with any leading spaces
@@ -42,20 +28,35 @@ const fortranArrayRegex =
     "%s" + // Value placeholder
     "\\s*\\n"; // Ends with a newline character
 
+const fortranDoubleRegex =
+    "([-+]?" + // Optional leading sign
+    "\\d*" + // Zero or more digits before the decimal point
+    "\\.?" + // Optional decimal point
+    "\\d*" + // Zero or more digits after the decimal point
+    "(?:[EeDd][+-]?\\d+)?" + // Optional exponent part
+    ")";
+
+const fortranStringRegex =
+    "'" + // Starting single quote
+    "([\\w.\\-\\+\\/ ]*)" + // Matches alphanumeric, period, hyphen, plus, slash, and space characters
+    "'"; // Ending single quote
+
 const fortranBooleanRegex =
     "\\." + // Starting period
     "(true|false)" + // Matches either "true" or "false" surrounded by periods
     "\\."; // Ending period
-
 const stringRegex = "([+\\w.\\-\\/]*)"; // Matches alphanumeric, plus, period, hyphen, and slash characters
+
+const doubleRegex =
+    "[-+]?" + // Optional leading sign
+    "\\d*" + // Zero or more digits before the decimal point
+    "\\.?" + // Optional decimal point
+    "\\d*" + // Zero or more digits after the decimal point
+    "(?:[Ee][+-]?\\d+)?"; // Optional exponent part,
+
 export const regex = {
     general: {
-        double:
-            "[-+]?" + // Optional leading sign
-            "\\d*" + // Zero or more digits before the decimal point
-            "\\.?" + // Optional decimal point
-            "\\d*" + // Zero or more digits after the decimal point
-            "(?:[Ee][+-]?\\d+)?", // Optional exponent part,
+        double: doubleRegex,
         string: stringRegex,
     },
     fortran: {
