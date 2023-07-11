@@ -47,16 +47,19 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
     getConstraints() {
         const text = this.data.cards;
         const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
-        const constraints = atomicPositionsMatches.reduce((acc, match, index) => {
+        const constraints = atomicPositionsMatches.map((match, index) => {
+            const value = [];
+
             if (match[5] && match[6] && match[7]) {
-                // Check if all three constraints exist
-                acc.push({
-                    id: index,
-                    value: [match[5] === "1", match[6] === "1", match[7] === "1"],
-                });
+                value.push(match[5] === "1", match[6] === "1", match[7] === "1");
             }
-            return acc;
-        }, []);
+
+            return {
+                id: index,
+                value,
+            };
+        });
+
         return constraints;
     }
 
