@@ -1,5 +1,5 @@
 import { LATTICE_TYPE } from "../../lattice/types";
-import { regex as commonRegex } from "../utils/parsers/settings";
+import { regex as commonRegex } from "../utils/settings";
 
 const { double } = commonRegex.general;
 export const regex = {

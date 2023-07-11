@@ -5,7 +5,7 @@ import { primitiveCell } from "../../cell/primitive_cell";
 import { Lattice } from "../../lattice/lattice";
 import math from "../../math";
 import { MaterialParser } from "../init";
-import { FortranParser } from "../utils/parsers/fortran";
+import { FortranParser } from "../utils/fortran";
 import { IBRAV_TO_LATTICE_TYPE_MAP, regex } from "./settings";
 
 export class ESPRESSOMaterialParser extends MaterialParser {
@@ -23,19 +23,19 @@ export class ESPRESSOMaterialParser extends MaterialParser {
         if (this.data.system.ibrav === undefined) throw new Error("ibrav is required in &SYSTEM.");
 
         const lattice = Lattice.fromVectors({
-            a: cell.vectors[0],
-            b: cell.vectors[1],
-            c: cell.vectors[2],
-            units: "angstrom",
+            a: cell.cell[0],
+            b: cell.cell[1],
+            c: cell.cell[2],
         });
 
         const basis = new ConstrainedBasis({
             elements,
             coordinates,
             units,
-            cell,
+            cell: cell.cell,
             constraints,
         });
+        // basis.toStandardRepresentation(); // To get the format obtained from the Mat3ra platform
 
         return {
             lattice: lattice.toJSON(),
@@ -48,9 +48,10 @@ export class ESPRESSOMaterialParser extends MaterialParser {
     /**
      * @summary Return unit cell parameters from CELL_PARAMETERS card
      * @param {String} text - cards data
-     * @return {{vectors: Number[][], units: String}}
+     * @return {{cell: Number[][], units: String}}
      */
     getCellConfig(text) {
+        let cell = {};
         if (this.data.system.ibrav === 0) {
             const match = regex.cellParameters.exec(text);
             if (match) {
@@ -60,13 +61,13 @@ export class ESPRESSOMaterialParser extends MaterialParser {
                 const vectors = Array.from({ length: 3 }, (_, i) =>
                     values.slice(i * 3, i * 3 + 3).map(Number),
                 );
-                this.cell = { vectors, units };
-                this.cell.type = "TRI"; // TODO: implement type detection, now defaults to TRI
-                return this.cell;
+                cell = { cell: vectors, units };
+                cell.type = "TRI"; // TODO: implement type detection, now defaults to TRI
+                return cell;
             }
         } else {
-            this.cell = this.ibravToCellConfig(this.data.system);
-            return this.cell;
+            cell = this.ibravToCellConfig(this.data.system);
+            return cell;
         }
         throw new Error("Couldn't read cell parameters");
     }
@@ -89,7 +90,7 @@ export class ESPRESSOMaterialParser extends MaterialParser {
      * @param {Number} [system.cosab] - cosAB parameter
      * @param {Number} [system.cosac] - cosAC parameter
      * @param {Number} [system.cosbc] - cosBC parameter
-     * @returns {{vectors: Number[][], type: String}}
+     * @returns {{cell: Number[][], type: String}}
      */
     ibravToCellConfig(system) {
         const { ibrav, celldm, a, b, c, cosab, cosac, cosbc } = system;
@@ -112,8 +113,8 @@ export class ESPRESSOMaterialParser extends MaterialParser {
             gamma,
             type,
         });
-        const vectors = primitiveCell(lattice);
-        return { vectors, type };
+        const cell = primitiveCell(lattice);
+        return { cell, type };
     }
 
     /**
@@ -252,21 +253,5 @@ export class ESPRESSOMaterialParser extends MaterialParser {
                 throw new Error(`Units ${units} not supported`);
         }
         return { _units, scalingFactor };
-    }
-
-    getElements(text) {
-        return this.getAtomicPositions(text).elements;
-    }
-
-    getCoordinates(text) {
-        return this.getAtomicPositions(text).coordinates;
-    }
-
-    getConstraints(text) {
-        return this.getAtomicPositions(text).constraints;
-    }
-
-    getUnits(text) {
-        return this.getAtomicPositions(text).units;
     }
 }
