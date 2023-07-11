@@ -45,7 +45,7 @@ export const FortranParserMixin = (superclass) =>
             namelistNames.forEach((namelistName) => {
                 const namelistsRegex = regex.fortran.namelists(namelistName);
                 const namelistData = text.match(namelistsRegex)[2];
-                namelists[namelistName] = this.fortranGetKeyValuePairs(namelistData);
+                namelists[namelistName] = this.fortranExtractKeyValuePairs(namelistData);
             });
             return namelists;
         }
@@ -53,68 +53,64 @@ export const FortranParserMixin = (superclass) =>
         /**
          * @summary Extracts an array of the key value pairs from a Fortran namelist.
          * @param {String} data - namelist data
-         * @returns {Object[]}
+         * @returns {Object}
+         *
+         * @example
+         * for input data:
+         *   ecutrho =   4.8000000000d+02
+         *   ecutwfc =   6.0000000000d+01
+         *   ibrav = 4
+         *   celldm(1) = 4.7478008
+         *   celldm(3) = 3.0676560682
+         *   nat = 4
+         *   nosym = .false.
+         *   ntyp = 2
+         *   occupations = 'fixed'
+         *
+         * should return object:
+         *  {
+         *    ecutrho: 480,
+         *    ecutwfc: 60,
+         *    ibrav: 4,
+         *    celldm: [4.7478008, null, 3.0676560682],
+         *    nat: 4,
+         *    nosym: false,
+         *    ntyp: 2,
+         *    occupations: 'fixed'
+         *    }
          */
-        fortranGetKeyValuePairs(data) {
-            const output = {};
-            // TODO: Fix to convert numbers like 1.234D-567
-            const numberPairs = this.fortranExtractKeyValuePairs(
-                data,
-                regex.fortran.numberKeyValue,
-                Number,
-            );
-            const stringPairs = this.fortranExtractKeyValuePairs(
-                data,
-                regex.fortran.stringKeyValue,
-                String,
-            );
-            const booleanPairs = this.fortranExtractKeyValuePairs(
-                data,
-                regex.fortran.booleanKeyValue,
-                Boolean,
-            );
-            // TODO: Add functionality to parse Fortran lists assigned with multiple values inline: list = 1,2,3 -- current implementation doesn't capture that
-            const numberArrayPairs = this.fortranExtractKeyValuePairs(
-                data,
-                regex.fortran.numberArrayKeyValue,
-                Number,
-                true,
-            );
-            const stringArrayPairs = this.fortranExtractKeyValuePairs(
-                data,
-                regex.fortran.stringArrayKeyValue,
-                String,
-                true,
-            );
-            const booleanArrayPairs = this.fortranExtractKeyValuePairs(
-                data,
-                regex.fortran.booleanArrayKeyValue,
-                Boolean,
-                true,
-            );
+        fortranExtractKeyValuePairs(data) {
+            const pairTypes = [
+                { regexPattern: regex.fortran.numberKeyValue, type: Number },
+                { regexPattern: regex.fortran.stringKeyValue, type: String },
+                { regexPattern: regex.fortran.booleanKeyValue, type: Boolean },
+                { regexPattern: regex.fortran.numberArrayKeyValue, type: Number, isArray: true },
+                { regexPattern: regex.fortran.stringArrayKeyValue, type: String, isArray: true },
+                { regexPattern: regex.fortran.booleanArrayKeyValue, type: Boolean, isArray: true },
+            ];
 
-            [...numberPairs, ...stringPairs, ...booleanPairs].forEach((pair) => {
-                // eslint-disable-next-line prefer-destructuring
-                output[pair[0]] = pair[1];
-            });
-
-            [numberArrayPairs, stringArrayPairs, booleanArrayPairs].forEach((arrayPairs) => {
-                arrayPairs.forEach(([key, value]) => {
-                    const [index, actualValue] = value;
-                    if (!output[key]) output[key] = [];
-                    output[key][index - 1] = actualValue; // to start arrays from index 0, while fortran lists start from 1
-                });
-            });
-
-            return output;
+            return pairTypes.reduce((output, { regexPattern, type, isArray }) => {
+                this.fortranExtractKeyValuePair(data, regexPattern, type, isArray).forEach(
+                    ([key, value]) => {
+                        if (isArray) {
+                            output[key] = output[key] || [];
+                            // eslint-disable-next-line prefer-destructuring
+                            output[key][value[0] - 1] = value[1]; // to start arrays from index 0, while Fortran lists start from 1
+                        } else {
+                            output[key] = value;
+                        }
+                    },
+                );
+                return output;
+            }, {});
         }
 
         /**
-         * Extracts pairs from a string data using provided regex pattern and type.
-         * If isArray is set to true, treats the value as an array.
+         * Extracts key-value pairs from a string data using provided regex pattern and type.
+         * If isArray is set to true, treats the key-value pair as an array.
          *
-         * @param {String} data - The string data to extract pairs from.
-         * @param {RegExp} regexPattern - The regex pattern to use for extracting pairs.
+         * @param {String} data - The string data to extract key-value pairs from.
+         * @param {RegExp} regexPattern - The regex pattern to use for extracting.
          * @param {Function | NumberConstructor} type - The type of the value.
          * @param {Boolean} [isArray=false] - Whether to treat the value as an array.
          *
@@ -125,17 +121,10 @@ export const FortranParserMixin = (superclass) =>
          * @throws {Error} If an invalid type is provided.
          */
         // eslint-disable-next-line class-methods-use-this
-        fortranExtractKeyValuePairs(data, regexPattern, type, isArray) {
-            if (!typeParsers[type]) throw new Error("Invalid type");
+        fortranExtractKeyValuePair(data, regexPattern, type, isArray = false) {
             const parser = typeParsers[type];
-
-            return Array.from(data.matchAll(regexPattern)).map((match) => {
-                const key = match[1];
-                const value = isArray
-                    ? [parseInt(match[2], 10), parser(match[3])]
-                    : parser(match[2]);
-
-                return [key, value];
-            });
+            return Array.from(data.matchAll(regexPattern)).map(([, key, index, value]) =>
+                isArray ? [key, [parseInt(index, 10), parser(value)]] : [key, parser(index)],
+            );
         }
     };
