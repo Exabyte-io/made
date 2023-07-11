@@ -1,4 +1,4 @@
-import { BaseParser } from "../../init";
+import { BaseParser } from "../init";
 import { regex } from "./settings";
 
 const typeParsers = {

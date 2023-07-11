@@ -38,5 +38,11 @@ export const NiHex = readJSONFile(path.join(FIXTURES_DIR, "Ni-hex.json"));
 export const NiHexPoscar = readFile(path.join(FIXTURES_DIR, "Ni-hex.poscar"));
 export const SiHex = readJSONFile(path.join(FIXTURES_DIR, "Si-hex.json"));
 
-export const BNPWSCFInput = readFile(path.join(FIXTURES_DIR, "/parsers/espresso/BN-pwscf.in"));
-export const BN = readJSONFile(path.join(FIXTURES_DIR, "/parsers/espresso/BN.json"));
+export const BNHexIbravPWSCFInput = readFile(
+    path.join(FIXTURES_DIR, "/parsers/espresso/BN-hex-ibrav-pwscf.in"),
+);
+export const BNHex = readJSONFile(path.join(FIXTURES_DIR, "/parsers/espresso/BN-hex.json"));
+export const FortranFile1 = readFile(path.join(FIXTURES_DIR, "/parsers/utils/fortran-file-1.in"));
+export const FortranFile1JSON = readJSONFile(
+    path.join(FIXTURES_DIR, "/parsers/utils/fortran-file-1.json"),
+);

@@ -3,7 +3,8 @@ import { expect } from "chai";
 import { Material } from "../../src/material";
 import { ESPRESSOMaterialParser } from "../../src/parsers/espresso/parser";
 import parsers from "../../src/parsers/parsers";
-import { BN, BNPWSCFInput, Si, SiPWSCFInput } from "../enums";
+import { BNHex, BNHexIbravPWSCFInput, Si, SiPWSCFInput } from "../enums";
+import { assertDeepAlmostEqual } from "../utils";
 
 describe("Parsers:Espresso", () => {
     it("should return textual representation of a material according to QE pw.x input format", () => {
@@ -13,8 +14,9 @@ describe("Parsers:Espresso", () => {
 
     it("should return a material config from QE input file for BN", () => {
         const parser = new ESPRESSOMaterialParser();
-        const materialConfig = parser.parse(BNPWSCFInput);
+        const materialConfig = parser.parse(BNHexIbravPWSCFInput);
         console.log(materialConfig);
-        expect(materialConfig).to.be.deep.equal(BN); // TODO: put actual material config from another commit
+        assertDeepAlmostEqual(materialConfig, BNHex, ["name"]);
+        // assertDeepAlmostEqual(materialConfig.lattice, BNHex.lattice, ["type"]); // It defaults to TRI currently
     });
 });
