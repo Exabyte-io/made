@@ -62,9 +62,8 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
 
     getUnits() {
         const text = this.data.cards;
-        const _units = text.match(regex.atomicPositionsUnits)[1];
-        const { units } = this.getCoordinatesUnitsScalingFactor(_units);
-        return units;
+        const units = text.match(regex.atomicPositionsUnits)[1];
+        return this.getCoordinatesUnitsScalingFactor(units).units;
     }
 
     getName() {
@@ -123,7 +122,8 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
      * @returns {{cell: Number[][], type: String}}
      */
     ibravToCellConfig(system) {
-        const { ibrav, celldm, a, b, c, cosab, cosac, cosbc } = system;
+        const { ibrav, celldm, cosab, cosac, cosbc } = system;
+        let { a, b, c } = system;
         if (celldm && a) {
             throw new Error("Both celldm and A are given");
         } else if (!celldm && !a) {
@@ -131,13 +131,13 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
         }
 
         const type = this.ibravToCellType(ibrav);
-        const [_a, _b, _c] = this.getLatticeConstants(celldm, a, b, c);
+        [a, b, c] = celldm ? this.getLatticeConstants(celldm) : [a, b, c];
         const [alpha, beta, gamma] = this.getLatticeAngles(celldm, cosbc, cosac, cosab);
 
         const lattice = new Lattice({
-            a: _a,
-            b: _b,
-            c: _c,
+            a,
+            b,
+            c,
             alpha,
             beta,
             gamma,
@@ -163,21 +163,15 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
 
     /**
      * @summary Calculates cell parameters from celldm(i) or A, B, C parameters depending on which are present. Specific to Quantum ESPRESSO.
-     * @param {Number[]} [celldm] - celldm(i) parameters
-     * @param {Number} [a] - A parameter
-     * @param {Number} [b] - B parameter
-     * @param {Number} [c] - C parameter
+     * @param {Number[]} celldm - celldm(i) parameters
      * @returns {Number[]}
      */
-    getLatticeConstants(celldm, a, b, c) {
+    getLatticeConstants(celldm) {
         // celldm indices shifted -1 from fortran list representation. In QE input file celldm(1) list starts with 1, but parsed starting with 0.
-        let _a = celldm ? celldm[0] : a; // celldm(1) is a in bohr
-        let _b = celldm ? celldm[1] * celldm[0] : b; // celldm(2) is b/a
-        let _c = celldm ? celldm[2] * celldm[0] : c; // celldm(3) is c/a
-        if (celldm) {
-            [_a, _b, _c] = [_a, _b, _c].map((x) => x * coefficients.BOHR_TO_ANGSTROM);
-        }
-        return [_a, _b, _c];
+        const a = celldm[0] * coefficients.BOHR_TO_ANGSTROM; // celldm(1) is a in bohr
+        const b = celldm[1] * celldm[0] * coefficients.BOHR_TO_ANGSTROM; // celldm(2) is b/a
+        const c = celldm[2] * celldm[0] * coefficients.BOHR_TO_ANGSTROM; // celldm(3) is c/a
+        return [a, b, c];
     }
 
     /**
@@ -218,7 +212,7 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
     /**
      * @summary Return units and scaling factor according to Quantum ESPRESSO docs
      * @param {String} units - units from ATOMIC_POSITIONS card
-     * @returns {{_units: String, scalingFactor: Number}}
+     * @returns {{units: String, scalingFactor: Number}}
      */
     getCoordinatesUnitsScalingFactor(units) {
         let _units, scalingFactor;
@@ -244,6 +238,6 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
             default:
                 throw new Error(`Units ${units} not supported`);
         }
-        return { _units, scalingFactor };
+        return { units: _units, scalingFactor };
     }
 }
