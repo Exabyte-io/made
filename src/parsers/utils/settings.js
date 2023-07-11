@@ -31,6 +31,7 @@ const fortranStringRegex =
     "([\\w.\\-\\+\\/ ]*)" + // Matches alphanumeric, period, hyphen, plus, slash, and space characters
     "'"; // Ending single quote
 
+// TODO: Change regex and capturing to accommodate for: Fortran lists assigned multiple values inline: list = 1,2,3 -- current implementation doesn't capture that
 const fortranArrayRegex =
     "^\\s*" + // Array name at the start of a line with any leading spaces
     "%s" + // Array name

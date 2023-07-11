@@ -14,10 +14,18 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
         return this.parseMaterial();
     }
 
+    /**
+     * @summary Return unit cell parameters from CELL_PARAMETERS card
+     * @returns {{cell: Number[][], units: String}}
+     */
     getCell() {
         return this.getCellConfig(this.data.cards);
     }
 
+    /**
+     * @summary Return elements from ATOMIC_SPECIES card
+     * @returns {{id: Number, value: String}[]}
+     */
     getElements() {
         const text = this.data.cards;
         const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
@@ -28,6 +36,10 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
         return elements;
     }
 
+    /**
+     * @summary Return atomic positions from ATOMIC_POSITIONS card
+     * @returns {{id: Number, value: Number[]}[]}
+     */
     getCoordinates() {
         const text = this.data.cards;
         const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
@@ -44,6 +56,10 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
         return coordinates;
     }
 
+    /**
+     * @summary Return atomic constraints from ATOMIC_POSITIONS card
+     * @returns {{id: Number, value: Boolean[]}[]}
+     */
     getConstraints() {
         const text = this.data.cards;
         const atomicPositionsMatches = Array.from(text.matchAll(regex.atomicPositions));
@@ -63,12 +79,21 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
         return constraints;
     }
 
+    /**
+     * @summary Return atomic coordinates units from ATOMIC_POSITIONS card
+     * @returns {String}
+     */
     getUnits() {
         const text = this.data.cards;
         const units = text.match(regex.atomicPositionsUnits)[1];
         return this.getCoordinatesUnitsScalingFactor(units).units;
     }
 
+    /**
+     * @summary Return material name from CONTROL card
+     * If not present, later will be generated from the formula in materialConfig object
+     * @returns {String}
+     */
     getName() {
         return this.data.control.title;
     }
@@ -168,7 +193,7 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
      * @summary Calculates cell parameters from celldm(i) or A, B, C parameters depending on which are present. Specific to Quantum ESPRESSO.
      * @param {Number[]} celldm - celldm(i) parameters
      * @returns {Number[]}
-     */
+     * */
     getLatticeConstants(celldm) {
         // celldm indices shifted -1 from fortran list representation. In QE input file celldm(1) list starts with 1, but parsed starting with 0.
         const a = celldm[0] * coefficients.BOHR_TO_ANGSTROM; // celldm(1) is a in bohr
@@ -184,7 +209,7 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
      * @param {Number} [cosac] - cosAC parameter
      * @param {Number} [cosab]   - cosAB parameter
      * @returns {Array<Number | undefined>}
-     */
+     * */
     getLatticeAngles(celldm, cosbc, cosac, cosab) {
         let alpha, beta, gamma;
         if (cosbc) alpha = math.acos(cosbc);
@@ -213,7 +238,7 @@ export class ESPRESSOMaterialParser extends mix(MaterialParser).with(FortranPars
     }
 
     /**
-     * @summary Return units and scaling factor according to Quantum ESPRESSO docs
+     * @summary Return units and scaling factor according to Quantum ESPRESSO 7.2 docs
      * @param {String} units - units from ATOMIC_POSITIONS card
      * @returns {{units: String, scalingFactor: Number}}
      */

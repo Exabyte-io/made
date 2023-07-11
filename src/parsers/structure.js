@@ -8,6 +8,10 @@ export class MaterialParser extends BaseParser {
         return this.parseMaterial();
     }
 
+    /**
+     * @summary Parses structural information from a string.
+     * @returns {Object} - materialConfig object
+     * */
     parseMaterial() {
         this.cell = this.getCell();
         this.elements = this.getElements();

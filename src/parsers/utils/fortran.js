@@ -12,7 +12,7 @@ export const FortranParserMixin = (superclass) =>
          * Parses Fortran namelists and cards data from a string.
          *
          * @summary Parses Fortran namelists and cards data from a QE input file string.
-         * @param {String} text - The text to parse.
+         * @param {String} content - The text to parse.
          * @throws {Error} If no namelist data is found in `text`.
          * @throws {Error} If no cards data is found in `text`.
          * @returns {Object} An object containing the parsed namelist and cards data. The exact structure of this object will depend on the structure of the namelist and cards data in `text`.
@@ -67,10 +67,10 @@ export const FortranParserMixin = (superclass) =>
          */
         extractKeyValuePairs(data) {
             const output = {};
-            const numberPairs = this.extractPairs(data, regex.fortran.numberKeyValue, Number); // FIXME: fails to convert numbers like 1.234D-567 due to 'D'
+            const numberPairs = this.extractPairs(data, regex.fortran.numberKeyValue, Number); // TODO: Fix to convert numbers like 1.234D-567
             const stringPairs = this.extractPairs(data, regex.fortran.stringKeyValue, String);
             const booleanPairs = this.extractPairs(data, regex.fortran.booleanKeyValue, Boolean);
-            // FIXME: Fortran lists can be assigned multiple values inline: list = 1,2,3 -- current implementation doesn't capture that
+            // TODO: Add functionality to parse Fortran lists assigned with multiple values inline: list = 1,2,3 -- current implementation doesn't capture that
             const numberArrayPairs = this.extractPairs(
                 data,
                 regex.fortran.numberArrayKeyValue,
@@ -118,9 +118,8 @@ export const FortranParserMixin = (superclass) =>
             const namelists = {};
 
             namelistNames.forEach((namelistName) => {
-                const _regex = regex.fortran.namelists(namelistName);
-                const data = text.match(_regex)[2];
-
+                const namelistsRegex = regex.fortran.namelists(namelistName);
+                const data = text.match(namelistsRegex)[2];
                 namelists[namelistName] = this.extractKeyValuePairs(data);
             });
             return namelists;
