@@ -37,3 +37,6 @@ export const GraphenePoscar = readFile(path.join(FIXTURES_DIR, "Graphene.poscar"
 export const NiHex = readJSONFile(path.join(FIXTURES_DIR, "Ni-hex.json"));
 export const NiHexPoscar = readFile(path.join(FIXTURES_DIR, "Ni-hex.poscar"));
 export const SiHex = readJSONFile(path.join(FIXTURES_DIR, "Si-hex.json"));
+
+export const BNPWSCFInput = readFile(path.join(FIXTURES_DIR, "/parsers/espresso/BN-pwscf.in"));
+export const BN = readJSONFile(path.join(FIXTURES_DIR, "/parsers/espresso/BN.json"));
