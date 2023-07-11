@@ -15,8 +15,6 @@ describe("Parsers:Espresso", () => {
     it("should return a material config from QE input file for BN", () => {
         const parser = new ESPRESSOMaterialParser();
         const materialConfig = parser.parse(BNHexIbravPWSCFInput);
-        console.log(materialConfig);
         assertDeepAlmostEqual(materialConfig, BNHex, ["name"]);
-        // assertDeepAlmostEqual(materialConfig.lattice, BNHex.lattice, ["type"]); // It defaults to TRI currently
     });
 });

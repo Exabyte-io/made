@@ -15,7 +15,7 @@ const fortranNamelistRegex =
     "\\/"; // Ends with a slash
 
 const fortranCardsRegex =
-    "^\\s*\\/" + // Slash at the start of a line with any leading spaces
+    // "^\\s*\\/" + // Slash at the start of a line with any leading spaces
     "(?![\\s\\S]*^\\/)" + // Negative lookahead for a slash at the beginning of the next line
     "([\\s\\S]*)"; // Capture all characters till end
 

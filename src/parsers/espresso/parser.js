@@ -26,13 +26,15 @@ export class ESPRESSOMaterialParser extends MaterialParser {
             a: cell.cell[0],
             b: cell.cell[1],
             c: cell.cell[2],
+            type: cell.type,
         });
 
         const basis = new ConstrainedBasis({
             elements,
             coordinates,
             units,
-            cell: cell.cell,
+            type: cell.type,
+            cell: lattice.vectorArrays,
             constraints,
         });
         // basis.toStandardRepresentation(); // To get the format obtained from the Mat3ra platform

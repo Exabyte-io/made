@@ -7,6 +7,6 @@ describe("Parsers:Fortran", () => {
     it("should return intermediate format of parsed input file", () => {
         const parser = new FortranParser();
         const data = parser.parse(FortranFile1);
-        expect(data).to.be.equal(FortranFile1JSON);
+        expect(data).to.be.deep.equal(FortranFile1JSON);
     });
 });
