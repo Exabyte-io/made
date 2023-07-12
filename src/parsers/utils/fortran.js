@@ -81,9 +81,11 @@ export const FortranParserMixin = (superclass) =>
          */
         fortranExtractKeyValuePairs(data) {
             const pairTypes = [
+                // TODO: add support for a number in form of 1.234D-56 -- current solution parses it as 1.234
                 { regexPattern: regex.fortran.numberKeyValue, type: Number },
                 { regexPattern: regex.fortran.stringKeyValue, type: String },
                 { regexPattern: regex.fortran.booleanKeyValue, type: Boolean },
+                // TODO: Change regex and capturing to accommodate for: Fortran lists assigned multiple values inline: list = 1,2,3 -- current implementation doesn't capture that
                 { regexPattern: regex.fortran.numberArrayKeyValue, type: Number, isArray: true },
                 { regexPattern: regex.fortran.stringArrayKeyValue, type: String, isArray: true },
                 { regexPattern: regex.fortran.booleanArrayKeyValue, type: Boolean, isArray: true },
