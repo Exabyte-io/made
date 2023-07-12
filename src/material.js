@@ -171,8 +171,8 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
             cell: this.Lattice.vectorArrays,
         });
     }
-    
-    /** High-level access to unique elements from material instead of basis. 
+
+    /** High-level access to unique elements from material instead of basis.
      *
      * @return {String[]}
      */
