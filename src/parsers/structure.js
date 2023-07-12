@@ -3,6 +3,8 @@ import { Lattice } from "../lattice/lattice";
 import { BaseParser } from "./init";
 
 export class MaterialParser extends BaseParser {
+    /* eslint-disable class-methods-use-this */
+
     parse(content, property_name = "material") {
         if (property_name !== "material") throw new Error("Implemented for material only");
         return this.parseMaterial();
