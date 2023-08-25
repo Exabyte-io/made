@@ -449,7 +449,7 @@ export class Basis {
         // TODO: make tolerance configurable
         const _tolerance = 0.15;
 
-        const overlaps = {};
+        const overlaps = [];
 
         elementsAndCoordinates.forEach((atom1, i) => {
             const overlappingAtomsForI = [];
@@ -465,7 +465,7 @@ export class Basis {
             });
 
             if (overlappingAtomsForI.length > 0) {
-                overlaps[i] = overlappingAtomsForI;
+                overlaps.push({ id: i, overlappingAtoms: overlappingAtomsForI });
             }
         });
 
