@@ -26,6 +26,10 @@ export const defaultMaterialConfig = {
                 id: 2,
                 value: "Si",
             },
+            {
+                id: 3,
+                value: "O",
+            },
         ],
         coordinates: [
             {
@@ -34,6 +38,10 @@ export const defaultMaterialConfig = {
             },
             {
                 id: 2,
+                value: [0.25, 0.25, 0.25],
+            },
+            {
+                id: 3,
                 value: [0.25, 0.25, 0.25],
             },
         ],
@@ -171,8 +179,8 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
             cell: this.Lattice.vectorArrays,
         });
     }
-    
-    /** High-level access to unique elements from material instead of basis. 
+
+    /** High-level access to unique elements from material instead of basis.
      *
      * @return {String[]}
      */
@@ -318,5 +326,32 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         config.name = `${material.name} - conventional cell`;
 
         return new this.constructor(config);
+    }
+
+    /**
+     * @summary a series of checks for the material and returns an array of results.
+     * @returns {*[]} - Array of checks results
+     */
+    runChecks() {
+        const checks = [];
+        const basis = this.Basis;
+
+        const overlappingGroups = basis.getOverlappingAtoms();
+        overlappingGroups.forEach((group) => {
+            group.forEach((atom) => {
+                const otherAtoms = group
+                    .filter((other) => other.id !== atom.id)
+                    .map((other) => `${other.element} (Line ${other.id + 1})`)
+                    .join(", ");
+
+                checks.push({
+                    type: "warning",
+                    message: `${atom.element} (Line ${atom.id + 1}) overlaps with ${otherAtoms}`,
+                    id: atom.id,
+                });
+            });
+        });
+
+        return checks;
     }
 }
