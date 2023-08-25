@@ -444,33 +444,27 @@ export class Basis {
      * @summary function returns an array of overlapping atoms within specified tolerance.
      * @returns {{element: String, id: Number}[]}
      */
-
     getOverlappingAtoms() {
         const overlappingGroups = [];
         const elementsAndCoordinates = this.elementsAndCoordinatesArray;
+        // TODO:  make tolerance configurable
         const _tolerance = 0.15;
 
-        const alreadyChecked = new Set();
-
         elementsAndCoordinates.forEach((atom1, i) => {
-            if (!alreadyChecked.has(i)) {
-                const currentGroup = [i];
-                alreadyChecked.add(i);
+            const currentGroup = [i];
 
-                elementsAndCoordinates.forEach((atom2, j) => {
-                    if (j <= i || alreadyChecked.has(j)) return;
+            elementsAndCoordinates.forEach((atom2, j) => {
+                if (j <= i) return;
 
-                    const distance = math.vDist(atom1[1], atom2[1]);
+                const distance = math.vDist(atom1[1], atom2[1]);
 
-                    if (distance < _tolerance) {
-                        currentGroup.push(j);
-                        alreadyChecked.add(j);
-                    }
-                });
-
-                if (currentGroup.length > 1) {
-                    overlappingGroups.push(currentGroup);
+                if (distance < _tolerance) {
+                    currentGroup.push(j);
                 }
+            });
+
+            if (currentGroup.length > 1) {
+                overlappingGroups.push(currentGroup);
             }
         });
 
