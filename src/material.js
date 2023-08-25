@@ -26,10 +26,6 @@ export const defaultMaterialConfig = {
                 id: 2,
                 value: "Si",
             },
-            {
-                id: 3,
-                value: "O",
-            },
         ],
         coordinates: [
             {
@@ -38,10 +34,6 @@ export const defaultMaterialConfig = {
             },
             {
                 id: 2,
-                value: [0.25, 0.25, 0.25],
-            },
-            {
-                id: 3,
                 value: [0.25, 0.25, 0.25],
             },
         ],
