@@ -328,19 +328,22 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         const checks = [];
         const basis = this.Basis;
 
-        const overlappingGroups = basis.getOverlappingAtoms();
-        overlappingGroups.forEach((group) => {
-            group.forEach((atom) => {
-                const otherAtoms = group
-                    .filter((other) => other.id !== atom.id)
-                    .map((other) => `${other.element} (Line ${other.id + 1})`)
-                    .join(", ");
+        const overlaps = basis.getOverlappingAtoms();
 
-                checks.push({
-                    type: "warning",
-                    message: `${atom.element} (Line ${atom.id + 1}) overlaps with ${otherAtoms}`,
-                    id: atom.id,
-                });
+        Object.keys(overlaps).forEach((atomId) => {
+            const atom = basis.elementsAndCoordinatesArray[atomId];
+            const overlappingAtoms = overlaps[atomId].map(
+                (id) => basis.elementsAndCoordinatesArray[id],
+            );
+
+            const otherAtoms = overlappingAtoms
+                .map((other) => `${other[0]} (Line ${other[1] + 1})`)
+                .join(", ");
+
+            checks.push({
+                type: "warning",
+                message: `${atom[0]} (Line ${atomId + 1}) overlaps with ${otherAtoms}`,
+                id: atomId,
             });
         });
 
