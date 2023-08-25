@@ -445,35 +445,31 @@ export class Basis {
      * @returns {{element: String, id: Number}[]}
      */
     getOverlappingAtoms() {
-        const overlappingGroups = [];
         const elementsAndCoordinates = this.elementsAndCoordinatesArray;
-        // TODO:  make tolerance configurable
+        // TODO: make tolerance configurable
         const _tolerance = 0.15;
 
+        const overlaps = {};
+
         elementsAndCoordinates.forEach((atom1, i) => {
-            const currentGroup = [i];
+            const overlappingAtomsForI = [];
 
             elementsAndCoordinates.forEach((atom2, j) => {
-                if (j <= i) return;
+                if (j === i) return; // Don't compare an atom with itself
 
                 const distance = math.vDist(atom1[1], atom2[1]);
 
                 if (distance < _tolerance) {
-                    currentGroup.push(j);
+                    overlappingAtomsForI.push(j);
                 }
             });
 
-            if (currentGroup.length > 1) {
-                overlappingGroups.push(currentGroup);
+            if (overlappingAtomsForI.length > 0) {
+                overlaps[i] = overlappingAtomsForI;
             }
         });
 
-        return overlappingGroups.map((group) =>
-            group.map((index) => ({
-                element: elementsAndCoordinates[index][0], // Getting the element of the atom
-                id: index,
-            })),
-        );
+        return overlaps;
     }
 
     /**
