@@ -441,6 +441,48 @@ export class Basis {
     }
 
     /**
+     * @summary function returns an array of overlapping atoms within specified tolerance.
+     * @returns {{element: String, id: Number}[]}
+     */
+
+    getOverlappingAtoms() {
+        const overlappingGroups = [];
+        const elementsAndCoordinates = this.elementsAndCoordinatesArray;
+        const _tolerance = 0.15;
+
+        const alreadyChecked = new Set();
+
+        elementsAndCoordinates.forEach((atom1, i) => {
+            if (!alreadyChecked.has(i)) {
+                const currentGroup = [i];
+                alreadyChecked.add(i);
+
+                elementsAndCoordinates.forEach((atom2, j) => {
+                    if (j <= i || alreadyChecked.has(j)) return;
+
+                    const distance = math.vDist(atom1[1], atom2[1]);
+
+                    if (distance < _tolerance) {
+                        currentGroup.push(j);
+                        alreadyChecked.add(j);
+                    }
+                });
+
+                if (currentGroup.length > 1) {
+                    overlappingGroups.push(currentGroup);
+                }
+            }
+        });
+
+        return overlappingGroups.map((group) =>
+            group.map((index) => ({
+                element: elementsAndCoordinates[index][0], // Getting the element of the atom
+                id: index,
+            })),
+        );
+    }
+
+    /**
      * @summary function returns the max distance between pairs of basis coordinates by
      * calculating the distance between pairs of basis coordinates.
      * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
