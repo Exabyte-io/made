@@ -328,22 +328,16 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         const checks = [];
         const basis = this.Basis;
 
-        const overlaps = basis.getOverlappingAtoms();
+        const overlappingAtomsGroups = basis.getOverlappingAtoms();
 
-        Object.keys(overlaps).forEach((atomId) => {
-            const atom = basis.elementsAndCoordinatesArray[atomId];
-            const overlappingAtoms = overlaps[atomId].map(
-                (id) => basis.elementsAndCoordinatesArray[id],
-            );
-
-            const otherAtoms = overlappingAtoms
-                .map((other) => `${other[0]} (Line ${other[1] + 1})`)
-                .join(", ");
-
+        // TODO: create mixin for checks and move logic there
+        overlappingAtomsGroups.forEach(({ id, overlappingAtoms }) => {
             checks.push({
                 type: "warning",
-                message: `${atom[0]} (Line ${atomId + 1}) overlaps with ${otherAtoms}`,
-                id: atomId,
+                name: "overlappingAtoms", // will come from an enum
+                arguments: null,
+                relatedObjects: overlappingAtoms,
+                targetObject: id,
             });
         });
 
