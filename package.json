@@ -5,7 +5,7 @@
     "scripts": {
         "prepublishOnly": "rm -rf lib; npm run transpile",
         "postinstall": "npm run transpile",
-        "transpile": "mkdir -p lib && babel src --out-dir lib",
+        "transpile": "mkdir -p lib && babel --extensions '.js,.jsx,.ts,.tsx' src --out-dir lib",
         "test": "nyc --reporter=text mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests",
         "lint": "eslint src tests && prettier --write src tests",
         "lint:fix": "eslint --fix --cache src tests && prettier --write src tests",
