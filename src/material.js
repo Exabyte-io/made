@@ -1,4 +1,4 @@
-import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
+import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import CryptoJS from "crypto-js";
 import lodash from "lodash";
 
@@ -55,7 +55,7 @@ export const defaultMaterialConfig = {
     },
 };
 
-export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
+export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity {
     constructor(config) {
         super(config);
         this._json = lodash.cloneDeep(config || {});
@@ -321,26 +321,37 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
     }
 
     /**
-     * @summary a series of checks for the material and returns an array of results.
+     * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
      * @returns {*[]} - Array of checks results
      */
-    runChecks() {
+    getConsistencyChecks() {
+        const consistencyCheckType = {
+            INFO: "info",
+            WARNING: "warning",
+            ERROR: "error",
+        };
+        const consistencyCheckName = {
+            ATOMS_OVERLAP: "atomsOverlap",
+            ATOMS_DUPLICATE: "atomsDuplicate",
+        };
+
         const checks = [];
         const basis = this.Basis;
 
         const overlappingAtomsGroups = basis.getOverlappingAtoms();
 
-        // TODO: create mixin for checks and move logic there
         overlappingAtomsGroups.forEach(({ id, overlappingAtoms }) => {
             checks.push({
-                type: "warning",
-                name: "overlappingAtoms", // will come from an enum
-                arguments: null,
-                relatedObjects: overlappingAtoms,
-                targetObject: id,
+                id,
+                type: consistencyCheckType.WARNING,
+                name: consistencyCheckName.ATOMS_OVERLAP,
+                arguments: overlappingAtoms,
             });
         });
 
+        // any other Material checks go here
+
+        console.debug("Made.js", checks);
         return checks;
     }
 }
