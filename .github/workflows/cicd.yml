@@ -36,7 +36,7 @@ jobs:
       - name: Validate JS Packages and Codebase
         uses: ./actions/js/validate
         with:
-          node-version: 14.19.x
+          node-version: ${{ matrix.node-version }}
           package-directory: ./
 
 
