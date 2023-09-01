@@ -27,7 +27,7 @@
         "node": ">=0.12"
     },
     "devDependencies": {
-        "@exabyte-io/code.js": "https://github.com/Exabyte-io/code.js#49190199fd121530a4757d5bf565bb2ba5aeacde",
+        "@exabyte-io/code.js": "https://github.com/Exabyte-io/code.js#67a0ca7fd75b815605d49d1e054ad38428032049",
         "@exabyte-io/eslint-config": "^2022.11.17-0",
         "chai": "^4.3.4",
         "chai-almost": "^1.0.1",
@@ -54,7 +54,7 @@
         "@babel/plugin-proposal-class-properties": "^7.16.0",
         "@babel/preset-env": "^7.16.4",
         "@babel/register": "^7.16.0",
-        "@exabyte-io/periodic-table.js": "2022.5.5-2",
+        "@exabyte-io/periodic-table.js": "2022.11.18-0",
         "array-almost-equal": "^1.0.0",
         "crypto-js": "^3.1.9-1",
         "lodash": "^4.17.4",
