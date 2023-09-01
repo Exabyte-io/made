@@ -322,10 +322,10 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
 
     /**
      * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
-     * @returns {*[]} - Array of checks results
+     * @returns {{keys: *[], messages: *[]}} - Array of checks results
      */
     getConsistencyChecks() {
-        const consistencyCheckType = {
+        const consistencyCheckSeverity = {
             INFO: "info",
             WARNING: "warning",
             ERROR: "error",
@@ -335,23 +335,27 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
             ATOMS_DUPLICATE: "atomsDuplicate",
         };
 
-        const checks = [];
         const basis = this.Basis;
 
+        const keys = new Set();
+        const messages = [];
         const overlappingAtomsGroups = basis.getOverlappingAtoms();
 
-        overlappingAtomsGroups.forEach(({ id, overlappingAtoms }) => {
-            checks.push({
-                id,
-                type: consistencyCheckType.WARNING,
-                name: consistencyCheckName.ATOMS_OVERLAP,
-                arguments: overlappingAtoms,
+        overlappingAtomsGroups.forEach(({ id, element, position }) => {
+            const key = `basis.coordinates.${id}`;
+            keys.add(key); // will be changed to real mongo notation
+            messages.push({
+                key,
+                checkName: consistencyCheckName.ATOMS_OVERLAP,
+                severity: consistencyCheckSeverity.WARNING,
+                message: `Atom overlaps with ${element} at position ${position + 1}`,
             });
         });
 
+        const checks = { keys: Array.from(keys), messages };
+
         // any other Material checks go here
 
-        console.debug("Made.js", checks);
         return checks;
     }
 }
