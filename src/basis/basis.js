@@ -445,28 +445,26 @@ export class Basis {
      * @returns {{element: String, id: Number}[]}
      */
     getOverlappingAtoms() {
-        const elementsAndCoordinates = this.elementsAndCoordinatesArray;
-        // TODO: make tolerance configurable
-        const _tolerance = 0.15;
-
+        this.toCartesian();
+        const { coordinates, elements } = this;
         const overlaps = [];
 
-        elementsAndCoordinates.forEach((atom1, i) => {
-            const overlappingAtomsForI = [];
+        coordinates.forEach((entry1) => {
+            coordinates.forEach((entry2) => {
+                if (entry1.id === entry2.id) return; // Don't compare an atom with itself
+                const el1 = elements.find((el) => el.id === entry1.id).value;
+                const el2 = elements.find((el) => el.id === entry2.id).value;
+                const tolerance = (getElementAtomicRadius(el1) + getElementAtomicRadius(el2)) / 10;
 
-            elementsAndCoordinates.forEach((atom2, j) => {
-                if (j === i) return; // Don't compare an atom with itself
-
-                const distance = math.vDist(atom1[1], atom2[1]);
-
-                if (distance < _tolerance) {
-                    overlappingAtomsForI.push(j);
+                const distance = math.vDist(entry1.value, entry2.value);
+                if (distance < tolerance) {
+                    overlaps.push({
+                        id: entry1.id,
+                        element: elements.find((el) => el.id === entry2.id).value,
+                        position: entry2.id,
+                    });
                 }
             });
-
-            if (overlappingAtomsForI.length > 0) {
-                overlaps.push({ id: i, overlappingAtoms: overlappingAtomsForI });
-            }
         });
 
         return overlaps;
