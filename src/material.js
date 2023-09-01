@@ -348,7 +348,7 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
                 key,
                 checkName: consistencyCheckName.ATOMS_OVERLAP,
                 severity: consistencyCheckSeverity.WARNING,
-                message: `Atom overlaps with ${element} at position ${position + 1}`,
+                message: `Atom is too close to ${element} at position ${position + 1}`,
             });
         });
 
