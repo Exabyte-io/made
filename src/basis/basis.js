@@ -445,8 +445,9 @@ export class Basis {
      * @returns {{element: String, id: Number}[]}
      */
     getOverlappingAtoms() {
-        this.toCartesian();
-        const { coordinates, elements } = this;
+        const _basis = this;
+        _basis.toCartesian();
+        const { coordinates, elements } = _basis;
         const overlaps = [];
 
         coordinates.forEach((entry1) => {
@@ -454,7 +455,10 @@ export class Basis {
                 if (entry1.id === entry2.id) return; // Don't compare an atom with itself
                 const el1 = elements.find((el) => el.id === entry1.id).value;
                 const el2 = elements.find((el) => el.id === entry2.id).value;
-                const tolerance = getElementAtomicRadius(el1) + getElementAtomicRadius(el2); // in angstroms
+                const overlapCoefficient = 0.75; // temporary value for overlap approximation, where atoms most certainly can't be located
+                const tolerance =
+                    overlapCoefficient *
+                    (getElementAtomicRadius(el1) + getElementAtomicRadius(el2)); // in angstroms
 
                 const distance = math.vDist(entry1.value, entry2.value);
                 if (distance < tolerance) {
