@@ -445,6 +445,7 @@ export class Basis {
      * @returns {{element: String, id: Number}[]}
      */
     getOverlappingAtoms() {
+        // to simplify calculations, convert to cartesian coordinates
         const _basis = this;
         _basis.toCartesian();
         const { coordinates, elements } = _basis;
@@ -463,9 +464,10 @@ export class Basis {
                 const distance = math.vDist(entry1.value, entry2.value);
                 if (distance < tolerance) {
                     overlaps.push({
-                        id: entry1.id,
-                        element: elements.find((el) => el.id === entry2.id).value,
-                        position: entry2.id,
+                        id1: entry1.id,
+                        id2: entry2.id,
+                        element1: elements.find((el) => el.id === entry1.id).value,
+                        element2: elements.find((el) => el.id === entry2.id).value,
                     });
                 }
             });

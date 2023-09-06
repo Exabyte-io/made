@@ -325,37 +325,38 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
      * @returns {{keys: *[], messages: *[]}} - Array of checks results
      */
     getConsistencyChecks() {
-        const consistencyCheckSeverity = {
-            INFO: "info",
-            WARNING: "warning",
-            ERROR: "error",
-        };
-        const consistencyCheckName = {
-            ATOMS_OVERLAP: "atomsOverlap",
-            ATOMS_DUPLICATE: "atomsDuplicate",
-        };
+        const basisChecks = this.getBasisConsistencyChecks();
 
-        const basis = this.Basis;
+        // any other Material checks can be added here
 
+        return {
+            keys: Array.from(basisChecks.keys),
+            messages: basisChecks.messages,
+        };
+    }
+
+    /**
+     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
+     * @returns {{keys: Set<any>, messages: *[]}}
+     */
+    getBasisConsistencyChecks() {
         const keys = new Set();
         const messages = [];
+
+        const basis = this.Basis;
         const overlappingAtomsGroups = basis.getOverlappingAtoms();
 
-        overlappingAtomsGroups.forEach(({ id, element, position }) => {
-            const key = `basis.coordinates.${id}`;
-            keys.add(key); // will be changed to real mongo notation
+        overlappingAtomsGroups.forEach(({ id1, id2, element1, element2 }) => {
+            const key = `basis.coordinates.${id1}`;
+            keys.add(key);
             messages.push({
                 key,
-                checkName: consistencyCheckName.ATOMS_OVERLAP,
-                severity: consistencyCheckSeverity.WARNING,
-                message: `Atom is too close to ${element} at position ${position + 1}`,
+                checkName: "atomsOverlap",
+                severity: "warning",
+                message: `Atom ${element1} is too close to ${element2} at position ${id2 + 1}`,
             });
         });
 
-        const checks = { keys: Array.from(keys), messages };
-
-        // any other Material checks go here
-
-        return checks;
+        return { keys, messages };
     }
 }
