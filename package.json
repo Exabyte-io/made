@@ -27,7 +27,7 @@
         "node": ">=0.12"
     },
     "devDependencies": {
-        "@exabyte-io/code.js": "https://github.com/Exabyte-io/code.js#67a0ca7fd75b815605d49d1e054ad38428032049",
+        "@exabyte-io/code.js": "https://github.com/Exabyte-io/code.js#d32988f65dcdd4a79e81716904e7905e694b2148",
         "@exabyte-io/eslint-config": "^2022.11.17-0",
         "chai": "^4.3.4",
         "chai-almost": "^1.0.1",
