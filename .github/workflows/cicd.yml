@@ -43,7 +43,7 @@ jobs:
   publish:
     needs: run-tests
     runs-on: ubuntu-latest
-    if: github.ref_name == 'dev'
+    if: github.ref_name == 'main'
 
     steps:
       - name: Checkout this repository
