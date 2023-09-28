@@ -27,7 +27,7 @@
         "node": ">=0.12"
     },
     "devDependencies": {
-        "@exabyte-io/code.js": "2022.6.15-1",
+        "@exabyte-io/code.js": "^2023.9.28-1",
         "@exabyte-io/eslint-config": "^2022.11.17-0",
         "chai": "^4.3.4",
         "chai-almost": "^1.0.1",
