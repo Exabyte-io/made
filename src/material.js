@@ -322,7 +322,7 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
 
     /**
      * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
-     * @returns {{keys: *[], messages: *[]}} - Array of checks results
+     * @returns {*[]}} - Array of checks results
      */
     getConsistencyChecks() {
         const basisChecks = this.getBasisConsistencyChecks();
@@ -330,33 +330,30 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
         // any other Material checks can be added here
 
         return {
-            keys: Array.from(basisChecks.keys),
-            messages: basisChecks.messages,
+            checks: basisChecks,
         };
     }
 
     /**
      * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
-     * @returns {{keys: Set<any>, messages: *[]}}
+     * @returns {*[]} - Array of checks results
      */
     getBasisConsistencyChecks() {
-        const keys = new Set();
-        const messages = [];
+        const checks = [];
 
         const basis = this.Basis;
         const overlappingAtomsGroups = basis.getOverlappingAtoms();
 
         overlappingAtomsGroups.forEach(({ id1, id2, element1, element2 }) => {
             const key = `basis.coordinates.${id1}`;
-            keys.add(key);
-            messages.push({
+            checks.push({
                 key,
-                checkName: "atomsOverlap",
+                name: "atomsOverlap",
                 severity: "warning",
                 message: `Atom ${element1} is too close to ${element2} at position ${id2 + 1}`,
             });
         });
 
-        return { keys, messages };
+        return checks;
     }
 }
