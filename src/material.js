@@ -338,26 +338,32 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
      */
     getBasisConsistencyChecks() {
         const checks = [];
-
+        const limit = 1000;
         const basis = this.Basis;
-        const overlappingAtomsGroups = basis.getOverlappingAtoms();
 
-        overlappingAtomsGroups.forEach(({ id1, id2, element1, element2 }) => {
-            const key = `basis.coordinates.${id1}`;
-            checks.push({
-                key,
-                name: "atomsOverlap",
-                severity: "warning",
-                message: `Atom ${element1} is too close to ${element2} at position ${id2 + 1}`,
+        if (this.Basis.elements.length < limit) {
+            const overlappingAtomsGroups = basis.getOverlappingAtoms();
+            overlappingAtomsGroups.forEach(({ id1, id2, element1, element2 }) => {
+                checks.push(
+                    {
+                        key: `basis.coordinates.${id1}`,
+                        name: "atomsOverlap",
+                        severity: "warning",
+                        message: `Atom ${element1} is too close to ${element2} at position ${
+                            id2 + 1
+                        }`,
+                    },
+                    {
+                        key: `basis.coordinates.${id2}`,
+                        name: "atomsOverlap",
+                        severity: "warning",
+                        message: `Atom ${element2} is too close to ${element1} at position ${
+                            id1 + 1
+                        }`,
+                    },
+                );
             });
-            const key2 = `basis.coordinates.${id2}`;
-            checks.push({
-                key: key2,
-                name: "atomsOverlap",
-                severity: "warning",
-                message: `Atom ${element2} is too close to ${element1} at position ${id1 + 1}`,
-            });
-        });
+        }
 
         return checks;
     }

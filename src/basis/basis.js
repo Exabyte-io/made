@@ -447,16 +447,17 @@ export class Basis {
     getOverlappingAtoms() {
         // to simplify calculations, convert to cartesian coordinates
         this.toCartesian();
-        const { coordinates } = this;
+        const { coordinates, elements } = this;
         const overlaps = [];
+        // temporary value for overlap approximation, where atoms most certainly can't be located
+        const overlapCoefficient = 0.75;
 
         coordinates.forEach((entry1, i) => {
-            coordinates.forEach((entry2, j) => {
-                if (i >= j) return;
-                const el1 = this.getElementByIndex(i);
-                const el2 = this.getElementByIndex(j);
-                // temporary value for overlap approximation, where atoms most certainly can't be located
-                const overlapCoefficient = 0.75;
+            for (let j = i + 1; j < coordinates.length; j++) {
+                const entry2 = coordinates[j];
+                const el1 = elements[i];
+                const el2 = elements[j];
+
                 const tolerance =
                     overlapCoefficient *
                     (getElementAtomicRadius(el1) + getElementAtomicRadius(el2)); // in angstroms
@@ -470,7 +471,7 @@ export class Basis {
                         element2: el2,
                     });
                 }
-            });
+            }
         });
 
         this.toCrystal();
