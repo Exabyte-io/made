@@ -447,14 +447,14 @@ export class Basis {
     getOverlappingAtoms() {
         // to simplify calculations, convert to cartesian coordinates
         this.toCartesian();
-        const { coordinates, elements } = this;
+        const { coordinates } = this;
         const overlaps = [];
 
-        coordinates.forEach((entry1) => {
-            coordinates.forEach((entry2) => {
-                if (entry1.id === entry2.id) return;
-                const el1 = elements.getElementByIndex(entry1.id);
-                const el2 = elements.getElementByIndex(entry2.id);
+        coordinates.forEach((entry1, i) => {
+            coordinates.forEach((entry2, j) => {
+                if (i >= j) return;
+                const el1 = this.getElementByIndex(i);
+                const el2 = this.getElementByIndex(j);
                 // temporary value for overlap approximation, where atoms most certainly can't be located
                 const overlapCoefficient = 0.75;
                 const tolerance =
@@ -464,8 +464,8 @@ export class Basis {
                 const distance = math.vDist(entry1.value, entry2.value);
                 if (distance < tolerance) {
                     overlaps.push({
-                        id1: entry1.id,
-                        id2: entry2.id,
+                        id1: i,
+                        id2: j,
                         element1: el1,
                         element2: el2,
                     });

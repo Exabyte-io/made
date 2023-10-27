@@ -329,9 +329,7 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
 
         // any other Material checks can be added here
 
-        return {
-            checks: basisChecks,
-        };
+        return basisChecks;
     }
 
     /**
@@ -351,6 +349,13 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
                 name: "atomsOverlap",
                 severity: "warning",
                 message: `Atom ${element1} is too close to ${element2} at position ${id2 + 1}`,
+            });
+            const key2 = `basis.coordinates.${id2}`;
+            checks.push({
+                key: key2,
+                name: "atomsOverlap",
+                severity: "warning",
+                message: `Atom ${element2} is too close to ${element1} at position ${id1 + 1}`,
             });
         });
 
