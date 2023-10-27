@@ -453,8 +453,8 @@ export class Basis {
         coordinates.forEach((entry1) => {
             coordinates.forEach((entry2) => {
                 if (entry1.id === entry2.id) return;
-                const el1 = elements.find((el) => el.id === entry1.id).value;
-                const el2 = elements.find((el) => el.id === entry2.id).value;
+                const el1 = elements.getElementByIndex(entry1.id);
+                const el2 = elements.getElementByIndex(entry2.id);
                 // temporary value for overlap approximation, where atoms most certainly can't be located
                 const overlapCoefficient = 0.75;
                 const tolerance =
@@ -466,8 +466,8 @@ export class Basis {
                     overlaps.push({
                         id1: entry1.id,
                         id2: entry2.id,
-                        element1: elements.find((el) => el.id === entry1.id).value,
-                        element2: elements.find((el) => el.id === entry2.id).value,
+                        element1: el1,
+                        element2: el2,
                     });
                 }
             });
