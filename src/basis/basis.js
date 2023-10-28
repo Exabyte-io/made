@@ -455,8 +455,8 @@ export class Basis {
         coordinates.forEach((entry1, i) => {
             for (let j = i + 1; j < coordinates.length; j++) {
                 const entry2 = coordinates[j];
-                const el1 = elements[i];
-                const el2 = elements[j];
+                const el1 = elements[i].value;
+                const el2 = elements[j].value;
 
                 const tolerance =
                     overlapCoefficient *
@@ -475,7 +475,6 @@ export class Basis {
         });
 
         this.toCrystal();
-
         return overlaps;
     }
 
