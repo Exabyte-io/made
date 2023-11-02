@@ -1,3 +1,4 @@
 {
-    "extends": ["@exabyte-io/eslint-config"]
+    "extends": ["@exabyte-io/eslint-config"],
+    "ignorePatterns": ["lib/"]
 }
