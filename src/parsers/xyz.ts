@@ -16,10 +16,8 @@ const XYZ_LINE_REGEX =
 /**
  * Validates XYZ file's line. Line should be in following format "Si 0.5 0.5 0.5".
  * Raises an error if line is in wrong format.
- * @param xyzLine {String}
- * @param index {Number}
  */
-function validateLine(xyzLine, index) {
+function validateLine(xyzLine: string, index: number) {
     const words = xyzLine.split(" ").filter((x) => x.trim() !== "");
 
     if (!xyzLine.match(XYZ_LINE_REGEX)) {
@@ -36,51 +34,57 @@ function validateLine(xyzLine, index) {
 
 /**
  * Validates that passed string is well-formed XYZ file.
- * @param xyzTxt {String}
  */
-export function validate(xyzTxt) {
+export function validate(xyzTxt: string) {
+    // The @types/underscore.string package does not provide interfaces for function chaining at the moment. Disable TS here
+    // @ts-ignore
     s(xyzTxt)
         .trim()
         .lines()
-        .filter((x) => x.trim() !== "")
+        .filter((x: string) => x.trim() !== "")
         .forEach(validateLine);
+}
+
+interface ParsedObject {
+    element: string;
+    coordinates: [number, number, number];
+    constraints: [boolean, boolean, boolean];
 }
 
 /**
  * Parses XYZ line and returns an object.
- * @param {String} line - line of text
- * @return {Object}
+ * @param line - line of text
  */
-function _parseXYZLineAsWords(line) {
+function _parseXYZLineAsWords(line: string): ParsedObject {
     const words = s.words(line);
+    const constraint = (n: number) => parseInt(`${n}`, 10) !== 0;
     return {
         element: words[0],
         coordinates: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
-        constraints: [+words[4], +words[5], +words[6]].map((e) => parseInt(e, 10) !== 0),
+        constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
     };
 }
 
 /**
  * Parse XYZ text for basis.
- * @param txt {String} Text
- * @param units {String} Coordinate units
- * @param cell {Array} Basis Cell
- * @return {Object}
+ * @param txt Text
+ * @param units Coordinate units
+ * @param cell Basis Cell
  */
-function toBasisConfig(txt, units = "angstrom", cell = Basis.defaultCell) {
-    const lines = s(txt).trim().lines();
+function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell) {
+    // @ts-ignore
+    const lines: string[] = s(txt).trim().lines();
     const listOfObjects = _.map(lines, _parseXYZLineAsWords);
 
     return {
-        // using concat below to avoid modifying listOfObjects in place with map
-        elements: [].concat(listOfObjects).map((elm, idx) => {
+        elements: listOfObjects.map((elm, idx) => {
             return {
                 id: idx,
                 value: elm.element,
             };
         }),
-        coordinates: [].concat(listOfObjects).map((elm, idx) => {
+        coordinates: listOfObjects.map((elm, idx) => {
             return {
                 id: idx,
                 value: elm.coordinates,
@@ -88,7 +92,7 @@ function toBasisConfig(txt, units = "angstrom", cell = Basis.defaultCell) {
         }),
         units,
         cell,
-        constraints: [].concat(listOfObjects).map((elm, idx) => {
+        constraints: listOfObjects.map((elm, idx) => {
             return {
                 id: idx,
                 value: elm.constraints,
@@ -125,7 +129,7 @@ function fromBasis(basisClsInstance, printFormat = "%9.5f", skipRounding = false
  * Create XYZ from Material class instance (or its JSON config).
  * @param materialOrConfig {Material|Object} Material.
  * @param fractional {Boolean} Coordinate units as fractional.
- * @return {ConstrainedBasis} Class Instance
+ * @return Class Instance
  */
 function fromMaterial(materialOrConfig, fractional = false) {
     const lattice = new Lattice(materialOrConfig.lattice);

@@ -15,6 +15,24 @@ export const DEFAULT_LATTICE_UNITS = {
  *   Challenges and tools. Computational Materials Science, 49(2), 299-312. doi:10.1016/j.commatsci.2010.05.010
  * Lattice parameters a, b, c are stored for CONVENTIONAL lattice, however the default unit cell is calculated for
  */
+
+export enum LatticeType {
+    CUB = "CUB",
+    FCC = "FCC",
+    BCC = "BCC",
+    TET = "TET",
+    BCT = "BCT",
+    ORC = "ORC",
+    ORCF = "ORCF",
+    ORCI = "ORCI",
+    ORCC = "ORCC",
+    HEX = "HEX",
+    RHL = "RHL",
+    MCL = "MCL",
+    MCLC = "MCLC",
+    TRI = "TRI",
+}
+
 export const LATTICE_TYPE = {
     CUB: "CUB",
     FCC: "FCC",
@@ -59,10 +77,29 @@ export const LATTICE_TYPE_EXTENDED = {
     TRI_1b: "TRI_1b",
 };
 
-export const LATTICE_TYPE_CONFIGS = [
+export interface Vector extends Array<number> {
+    0: number;
+    1: number;
+    2: number;
+}
+
+export interface VectorsAsArray extends Array<Vector> {
+    0: Vector;
+    1: Vector;
+    2: Vector;
+}
+
+interface LatticeTypeConfig {
+    label: string;
+    code: LatticeType;
+    editables: string[];
+    editablesConventional: string[];
+}
+
+export const LATTICE_TYPE_CONFIGS: LatticeTypeConfig[] = [
     {
         label: "Simple Cubic",
-        code: LATTICE_TYPE.CUB,
+        code: LatticeType.CUB,
         // editables for primitive cell => WARNING: not tested
         editables: ["a"],
         // editables for conventional cell, taken from the publication above
@@ -70,79 +107,79 @@ export const LATTICE_TYPE_CONFIGS = [
     },
     {
         label: "Face-centered Cubic",
-        code: LATTICE_TYPE.FCC,
+        code: LatticeType.FCC,
         editables: ["a"],
         editablesConventional: ["a"],
     },
     {
         label: "Body-centered Cubic",
-        code: LATTICE_TYPE.BCC,
+        code: LatticeType.BCC,
         editables: ["a"],
         editablesConventional: ["a"],
     },
     {
         label: "Tetragonal",
-        code: LATTICE_TYPE.TET,
+        code: LatticeType.TET,
         editables: ["a", "c"],
         editablesConventional: ["a", "c"],
     },
     {
         label: "Body-centered Tetragonal",
-        code: LATTICE_TYPE.BCT,
+        code: LatticeType.BCT,
         editables: ["a"],
         editablesConventional: ["a", "c"],
     },
     {
         label: "Orthorombic",
-        code: LATTICE_TYPE.ORC,
+        code: LatticeType.ORC,
         editables: ["a", "b", "c"],
         editablesConventional: ["a", "b", "c"],
     },
     {
         label: "Orthorombic Face-centered",
-        code: LATTICE_TYPE.ORCF,
+        code: LatticeType.ORCF,
         editables: ["a", "b", "c"],
         editablesConventional: ["a", "b", "c"],
     },
     {
         label: "Orthorombic Body-centered",
-        code: LATTICE_TYPE.ORCI,
+        code: LatticeType.ORCI,
         editables: ["a", "alpha", "gamma"],
         editablesConventional: ["a", "b", "c"],
     },
     {
         label: "Orthorombic Base-centered",
-        code: LATTICE_TYPE.ORCC,
+        code: LatticeType.ORCC,
         editables: ["a", "c", "alpha"],
         editablesConventional: ["a", "b", "c"],
     },
     {
         label: "Hexagonal",
-        code: LATTICE_TYPE.HEX,
+        code: LatticeType.HEX,
         editables: ["a", "c"],
         editablesConventional: ["a", "c"],
     },
     {
         label: "Rhombohedral",
-        code: LATTICE_TYPE.RHL,
+        code: LatticeType.RHL,
         editables: ["a", "alpha"],
         editablesConventional: ["a", "alpha"],
     },
     {
         label: "Monoclinic",
-        code: LATTICE_TYPE.MCL,
+        code: LatticeType.MCL,
         editables: ["a", "b", "c", "alpha"],
         editablesConventional: ["a", "b", "c", "alpha"],
     },
     {
         label: "Monoclinic Base-centered",
-        code: LATTICE_TYPE.MCLC,
+        code: LatticeType.MCLC,
         editables: ["a", "c", "alpha", "gamma"],
         editablesConventional: ["a", "b", "c", "alpha"],
     },
     {
         label: "Triclinic",
-        code: LATTICE_TYPE.TRI,
+        code: LatticeType.TRI,
         editables: ["a", "b", "c", "alpha", "beta", "gamma"],
         editablesConventional: ["a", "b", "c", "alpha", "beta", "gamma"],
     },

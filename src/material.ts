@@ -1,4 +1,5 @@
 import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
+import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
 import CryptoJS from "crypto-js";
 import lodash from "lodash";
 
@@ -10,6 +11,7 @@ import {
 } from "./cell/conventional_cell";
 import { ATOMIC_COORD_UNITS, units } from "./constants";
 import { Lattice } from "./lattice/lattice";
+import { BravaisConfigProps } from "./lattice/lattice_vectors";
 import { LATTICE_TYPE } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
@@ -56,7 +58,7 @@ export const defaultMaterialConfig = {
 };
 
 export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
-    constructor(config) {
+    constructor(config: AnyObject) {
         super(config);
         this._json = lodash.cloneDeep(config || {});
     }
@@ -74,7 +76,7 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         };
     }
 
-    get name() {
+    get name(): string {
         return super.name || this.formula;
     }
 
@@ -96,14 +98,13 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      * False = periodic, True = non-periodic
      */
     get isNonPeriodic() {
-        return this.prop("isNonPeriodic", false, true);
+        return this.prop("isNonPeriodic", false);
     }
 
     /**
      * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
-     * @param {Boolean} bool
      */
-    set isNonPeriodic(bool) {
+    set isNonPeriodic(bool: boolean) {
         this.setProp("isNonPeriodic", bool);
     }
 
@@ -112,7 +113,7 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      * @param {String} name
      * @returns {Object}
      */
-    getDerivedPropertyByName(name) {
+    getDerivedPropertyByName(name: string) {
         return this.getDerivedProperties().find((x) => x.name === name);
     }
 
@@ -136,12 +137,12 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
     }
 
     /**
-     * @param textOrObject {String} Basis text or JSON object.
-     * @param format {String} Format (xyz, etc.)
-     * @param unitz {String} crystal/cartesian
+     * @param textOrObject Basis text or JSON object.
+     * @param format Format (xyz, etc.)
+     * @param unitz crystal/cartesian
      */
-    setBasis(textOrObject, format, unitz) {
-        let basis;
+    setBasis(textOrObject: string | object, format: string, unitz: string) {
+        let basis: object | undefined;
         switch (format) {
             case "xyz":
                 basis = parsers.xyz.toBasisConfig(textOrObject, unitz);
@@ -161,7 +162,7 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
     }
 
     get basis() {
-        return this.prop("basis", undefined, true);
+        return this.prop("basis", undefined);
     }
 
     // returns the instance of {ConstrainedBasis} class
@@ -180,16 +181,15 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         return this.Basis.uniqueElements;
     }
 
-    get lattice() {
-        return this.prop("lattice", undefined, true);
+    get lattice(): BravaisConfigProps | undefined {
+        return this.prop("lattice", undefined);
     }
 
-    set lattice(config) {
+    set lattice(config: BravaisConfigProps | undefined) {
         this.setProp("lattice", config);
     }
 
-    // returns the instance of {Lattice} class
-    get Lattice() {
+    get Lattice(): Lattice {
         return new Lattice(this.lattice);
     }
 
@@ -213,10 +213,10 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      * - asserts basis coordinates and lattice measurements are rounded to hash precision
      * - forms strings for lattice and basis
      * - creates MD5 hash from basisStr + latticeStr + salt
-     * @param salt {String} Salt for hashing, empty string by default.
-     * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
+     * @param salt Salt for hashing, empty string by default.
+     * @param isScaled Whether to scale the lattice parameter 'a' to 1.
      */
-    calculateHash(salt = "", isScaled = false, bypassNonPeriodicCheck = false) {
+    calculateHash(salt = "", isScaled = false, bypassNonPeriodicCheck = false): string {
         let message;
         if (!this.isNonPeriodic || bypassNonPeriodicCheck) {
             message =
@@ -227,18 +227,18 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         return CryptoJS.MD5(message).toString();
     }
 
-    set hash(hash) {
+    set hash(hash: string) {
         this.setProp("hash", hash);
     }
 
-    get hash() {
+    get hash(): string {
         return this.prop("hash");
     }
 
     /**
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
-    get scaledHash() {
+    get scaledHash(): string {
         return this.calculateHash("", true);
     }
 
@@ -263,9 +263,8 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
 
     /**
      * Returns material's basis in XYZ format.
-     * @return {String}
      */
-    getBasisAsXyz(fractional = false) {
+    getBasisAsXyz(fractional = false): string {
         return parsers.xyz.fromMaterial(this.toJSON(), fractional);
     }
 

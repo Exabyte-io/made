@@ -2,15 +2,26 @@ import _ from "underscore";
 
 import { ScalarWithId } from "./scalar_with_id";
 
+interface ObjectWithId {
+    id: number;
+    value?: object;
+}
+
+type Predicate = (o: object) => boolean;
+
+type MapFunction = (value: object, index: number, array: object[]) => object;
+
 /**
  * Helper class representing an ArrayWithIds. Used to explicitly track values assigned to atoms, for example.
  */
 export class ArrayWithIds {
+    array: object[];
+
     /**
      * Create a an array with ids.
      * @param {Array} array - Either regular array or ArrayWithIds (see @example above)
      */
-    constructor(array = []) {
+    constructor(array: ObjectWithId[] = []) {
         if (!_.isArray(array))
             throw new Error("ArrayWithIds.constructor: pass array on initialization");
         // if passed an array with ids as config, only store the values in array
@@ -28,15 +39,15 @@ export class ArrayWithIds {
 
     /**
      * Apply function fn to each element of the array and replace `array` with the result.
-     * @param {Function} fn - The function to be applied to each array element.
+     * @param fn - The function to be applied to each array element.
      */
-    mapArrayInPlace(fn) {
+    mapArrayInPlace(fn: MapFunction) {
         if (!_.isFunction(fn))
             throw new Error("ArrayWithIds.mapArray: must pass function as argument");
         this.array = this.array.map((...args) => fn(...args));
     }
 
-    getArrayElementByIndex(idx) {
+    getArrayElementByIndex(idx: number) {
         return this.array[idx];
     }
 
@@ -44,24 +55,24 @@ export class ArrayWithIds {
      * Get the index of the array element that passes the predicate.
      * @param {Function} predicate - The function to be applied to each array element.
      */
-    getArrayIndexByPredicate(predicate) {
+    getArrayIndexByPredicate(predicate: Predicate) {
         return this.array.findIndex((el) => predicate(el));
     }
 
     /**
      * Add an entity to array.
-     * @param {Any} el - The entity to be added to array. If Object with 'value' key, its value will be added.
+     * @param el - The entity to be added to array. If Object with 'value' key, its value will be added.
      */
-    addElement(el) {
+    addElement(el: ObjectWithId) {
         if (el) this.array.push(el.value || el);
     }
 
     /**
      * Remove an entity to array. Either by passing the entity, or the corresponding index.
-     * @param {Any} el - The entity to be added to array. If Object with 'value' key, its value will be added.
-     * @param {Any} idx - The entity to be added to array. If Object with 'value' key, its value will be added.
+     * @param el - The entity to be added to array. If Object with 'value' key, its value will be added.
+     * @param idx - The entity to be added to array. If Object with 'value' key, its value will be added.
      */
-    removeElement(el, idx) {
+    removeElement(el: ObjectWithId, idx: number) {
         let _idx;
         if (idx === undefined) {
             _idx = this.array.findIndex((elm) => elm === el);

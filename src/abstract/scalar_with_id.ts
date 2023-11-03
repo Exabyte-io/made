@@ -1,15 +1,24 @@
 import _ from "underscore";
 
+interface ObjectWithId {
+    id: number;
+    value?: object;
+}
+
 /**
  * Helper class representing a scalar with an associated id.
  */
-export class ScalarWithId {
+export class ScalarWithId implements ObjectWithId {
+    id: number;
+
+    value?: object | ObjectWithId;
+
     /**
      * Create a an array with ids.
-     * @param {Any} valueOrObject - a ScalarWithID, or any other type.
-     * @param {Number} id - numerical id (Integer).
+     * @param valueOrObject - a ScalarWithID, or any other type.
+     * @param id - numerical id (Integer).
      */
-    constructor(valueOrObject, id = 0) {
+    constructor(valueOrObject: object | ObjectWithId, id = 0) {
         let _id, _value;
         // if already passing a ScalarWithId => preserve original
         if (_.isObject(valueOrObject) && !_.isArray(valueOrObject)) {
@@ -28,7 +37,7 @@ export class ScalarWithId {
      * Serialize class instance to JSON.
      * @example {"id" : 0, "value" : "Si" }
      */
-    toJSON() {
+    toJSON(): object {
         return {
             id: this.id,
             value: this.value,
