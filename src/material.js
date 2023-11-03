@@ -1,4 +1,4 @@
-import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
+import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import CryptoJS from "crypto-js";
 import lodash from "lodash";
 
@@ -55,7 +55,7 @@ export const defaultMaterialConfig = {
     },
 };
 
-export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
+export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity {
     constructor(config) {
         super(config);
         this._json = lodash.cloneDeep(config || {});
@@ -318,5 +318,53 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         config.name = `${material.name} - conventional cell`;
 
         return new this.constructor(config);
+    }
+
+    /**
+     * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
+     * @returns {*[]}} - Array of checks results
+     */
+    getConsistencyChecks() {
+        const basisChecks = this.getBasisConsistencyChecks();
+
+        // any other Material checks can be added here
+
+        return basisChecks;
+    }
+
+    /**
+     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
+     * @returns {*[]} - Array of checks results
+     */
+    getBasisConsistencyChecks() {
+        const checks = [];
+        const limit = 1000;
+        const basis = this.Basis;
+
+        if (this.Basis.elements.length < limit) {
+            const overlappingAtomsGroups = basis.getOverlappingAtoms();
+            overlappingAtomsGroups.forEach(({ id1, id2, element1, element2 }) => {
+                checks.push(
+                    {
+                        key: `basis.coordinates.${id1}`,
+                        name: "atomsOverlap",
+                        severity: "warning",
+                        message: `Atom ${element1} is too close to ${element2} at position ${
+                            id2 + 1
+                        }`,
+                    },
+                    {
+                        key: `basis.coordinates.${id2}`,
+                        name: "atomsOverlap",
+                        severity: "warning",
+                        message: `Atom ${element2} is too close to ${element1} at position ${
+                            id1 + 1
+                        }`,
+                    },
+                );
+            });
+        }
+
+        return checks;
     }
 }
