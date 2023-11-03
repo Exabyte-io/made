@@ -441,6 +441,44 @@ export class Basis {
     }
 
     /**
+     * @summary function returns an array of overlapping atoms within specified tolerance.
+     * @returns {{element: String, id: Number}[]}
+     */
+    getOverlappingAtoms() {
+        // to simplify calculations, convert to cartesian coordinates
+        this.toCartesian();
+        const { coordinates, elements } = this;
+        const overlaps = [];
+        // temporary value for overlap approximation, where atoms most certainly can't be located
+        const overlapCoefficient = 0.75;
+
+        coordinates.forEach((entry1, i) => {
+            for (let j = i + 1; j < coordinates.length; j++) {
+                const entry2 = coordinates[j];
+                const el1 = elements[i].value;
+                const el2 = elements[j].value;
+
+                const tolerance =
+                    overlapCoefficient *
+                    (getElementAtomicRadius(el1) + getElementAtomicRadius(el2)); // in angstroms
+
+                const distance = math.vDist(entry1.value, entry2.value);
+                if (distance < tolerance) {
+                    overlaps.push({
+                        id1: i,
+                        id2: j,
+                        element1: el1,
+                        element2: el2,
+                    });
+                }
+            }
+        });
+
+        this.toCrystal();
+        return overlaps;
+    }
+
+    /**
      * @summary function returns the max distance between pairs of basis coordinates by
      * calculating the distance between pairs of basis coordinates.
      * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
