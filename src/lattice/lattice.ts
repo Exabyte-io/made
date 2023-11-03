@@ -5,10 +5,18 @@ import { Cell } from "../cell/cell";
 import { primitiveCell } from "../cell/primitive_cell";
 import { HASH_TOLERANCE } from "../constants";
 import math from "../math";
-import { LatticeBravais } from "./lattice_bravais";
-import { LatticeVectors } from "./lattice_vectors";
+import { FromVectorsProps, LatticeBravais, RequiredBravaisConfig } from "./lattice_bravais";
+import {
+    BravaisConfigProps,
+    LatticeVectors,
+    RequiredLatticeVectorsConfig,
+} from "./lattice_vectors";
 import { LATTICE_TYPE, LATTICE_TYPE_CONFIGS, LATTICE_TYPE_EXTENDED } from "./types";
-import { UnitCell } from "./unit_cell";
+import { UnitCell, UnitCellProps } from "./unit_cell";
+
+interface RequiredBravaisConfigWithVectors extends RequiredBravaisConfig {
+    vectors: RequiredLatticeVectorsConfig;
+}
 
 /**
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
@@ -21,12 +29,14 @@ export const nonPeriodicLatticeScalingFactor = 2.0;
  * Follows Bravais convention for lattice types and contains lattice vectors within.
  * Units for lattice vector coordinates are "angstroms", and "degrees" for the corresponding angles.
  */
-export class Lattice extends LatticeBravais {
+export class Lattice extends LatticeBravais implements RequiredBravaisConfigWithVectors {
+    vectors: LatticeVectors;
+
     /**
      * Create a Lattice class from a config object.
      * @param {Object} config - Config object. See LatticeVectors.fromBravais.
      */
-    constructor(config = {}) {
+    constructor(config: BravaisConfigProps = {}) {
         super(config);
         this.vectors = LatticeVectors.fromBravais(config);
     }
@@ -35,7 +45,7 @@ export class Lattice extends LatticeBravais {
      * Create a Lattice class from a list of vectors.
      * @param {Object} config - Config object. See LatticeBravais.fromVectors.
      */
-    static fromVectors(config) {
+    static fromVectors(config: FromVectorsProps) {
         return new Lattice(LatticeBravais.fromVectors(config).toJSON());
     }
 
@@ -75,8 +85,8 @@ export class Lattice extends LatticeBravais {
             }
         }
      */
-    toJSON(skipRounding = false) {
-        const round = skipRounding ? () => {} : Lattice._roundValue; // round values by default
+    toJSON(skipRounding = false): RequiredBravaisConfigWithVectors {
+        const round = skipRounding ? (x: number) => x : Lattice._roundValue; // round values by default
         return {
             a: round(this.a),
             b: round(this.b),
@@ -93,13 +103,12 @@ export class Lattice extends LatticeBravais {
         };
     }
 
-    clone(extraContext) {
-        return new this.constructor({ ...this.toJSON(), ...extraContext });
+    clone(extraContext: BravaisConfigProps) {
+        return new (this.constructor as typeof Lattice)({ ...this.toJSON(), ...extraContext });
     }
 
     /**
      * Get lattice vectors as a nested array
-     * @return {Array[]}
      */
     get vectorArrays() {
         return this.vectors.vectorArrays;
@@ -111,9 +120,8 @@ export class Lattice extends LatticeBravais {
 
     /**
      * Get a short label for the type of the lattice, eg. "MCLC".
-     * @return {String}
      */
-    get typeLabel() {
+    get typeLabel(): string {
         return lodash.get(
             LATTICE_TYPE_CONFIGS.find((c) => c.code === this.type),
             "label",
@@ -123,9 +131,8 @@ export class Lattice extends LatticeBravais {
 
     /**
      * Get a short label for the extended type of the lattice, eg. "MCLC-5".
-     * @return {String}
      */
-    get typeExtended() {
+    get typeExtended(): string {
         const { a, b, c, alpha, beta, gamma, type } = this;
         const cosAlpha = math.cos((alpha / 180) * math.PI);
 
@@ -162,9 +169,8 @@ export class Lattice extends LatticeBravais {
 
     /**
      * Calculate the volume of the lattice cell.
-     * @return {Number}
      */
-    get volume() {
+    get volume(): number {
         return math.abs(math.det(this.vectorArrays));
     }
 
@@ -172,7 +178,7 @@ export class Lattice extends LatticeBravais {
      * Returns a "default" primitive lattice by type, with lattice parameters scaled by the length of "a",
      * @param latticeConfig {Object} LatticeBravais config (see constructor)
      */
-    static getDefaultPrimitiveLatticeConfigByType(latticeConfig) {
+    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: RequiredBravaisConfig) {
         const f_ = Lattice._roundValue;
         // construct new primitive cell using lattice parameters and skip rounding the vectors
         const pCell = primitiveCell(latticeConfig, true);
@@ -193,25 +199,22 @@ export class Lattice extends LatticeBravais {
 
     // TODO: remove
     get unitCell() {
-        const vectors = _.flatten(this.vectorArrays);
-        vectors.push(this.units.length);
-        return new UnitCell(...vectors);
+        const vectors = [..._.flatten(this.vectorArrays), this.units.length] as UnitCellProps;
+        return new UnitCell(vectors);
     }
 
     /**
      * Returns a string further used for the calculation of an unique hash.
-     * @param {Boolean} isScaled - Whether to scale the vectors by the length of the first vector initially.
-     * @return {string}
+     * @param isScaled - Whether to scale the vectors by the length of the first vector initially.
      */
-    getHashString(isScaled = false) {
+    getHashString(isScaled = false): string {
         // lattice vectors must be measured in angstroms
-        const latticeInAngstroms = this;
-        const scaleK = isScaled ? latticeInAngstroms.a : 1;
+        const scaleK = isScaled ? this.a : 1;
         const scaledLattice = {
-            ...latticeInAngstroms,
-            a: latticeInAngstroms.a / scaleK,
-            b: latticeInAngstroms.b / scaleK,
-            c: latticeInAngstroms.c / scaleK,
+            ...this,
+            a: this.a / scaleK,
+            b: this.b / scaleK,
+            c: this.c / scaleK,
         };
         // form lattice string
         return `${[

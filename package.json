@@ -6,7 +6,7 @@
         "prepublishOnly": "rm -rf lib; npm run transpile",
         "transpile": "tsc",
         "postinstall": "npm run transpile",
-        "test": "nyc --reporter=text mocha --recursive --bail --require @babel/register/lib --require tests/setup.js tests",
+        "test": "mocha",
         "lint": "eslint src tests && prettier --write src tests",
         "lint:fix": "eslint --fix --cache src tests && prettier --write src tests",
         "prettier": "prettier --check src tests",
@@ -27,8 +27,8 @@
         "node": ">=0.12"
     },
     "devDependencies": {
-        "@exabyte-io/code.js": "2022.6.15-1",
-        "@exabyte-io/eslint-config": "^2022.11.17-0",
+        "@exabyte-io/code.js": "^2023.11.1-0",
+        "@exabyte-io/eslint-config": "^2023.8.29-1",
         "chai": "^4.3.4",
         "chai-almost": "^1.0.1",
         "eslint": "^7.32.0",
@@ -48,17 +48,12 @@
         "prettier": "^2.5.1"
     },
     "dependencies": {
-        "@babel/cli": "^7.16.0",
-        "@babel/core": "^7.16.0",
-        "@babel/eslint-parser": "^7.16.3",
-        "@babel/plugin-proposal-class-properties": "^7.16.0",
-        "@babel/preset-env": "^7.16.4",
-        "@babel/register": "^7.16.0",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
         "@types/chai": "^4.3.5",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.4.2",
         "@types/underscore": "^1.11.6",
+        "@types/underscore.string": "^0.0.40",
         "array-almost-equal": "^1.0.0",
         "crypto-js": "^3.1.9-1",
         "lodash": "^4.17.4",

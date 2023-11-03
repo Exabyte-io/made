@@ -1,4 +1,5 @@
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
+import { Vector } from "src/lattice/types";
 import _ from "underscore";
 import s from "underscore.string";
 
@@ -7,10 +8,26 @@ import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import math from "../math";
 
+interface BasisProps {
+    elements: string[];
+    coordinates: [number, number, number][];
+    units: string;
+    cell: Vector[];
+    isEmpty: boolean;
+}
+
 /**
  * A class representing a crystal basis.
  */
 export class Basis {
+    _elements: ArrayWithIds;
+
+    _coordinates: ArrayWithIds;
+
+    units: string;
+
+    cell: Vector[];
+
     /**
      * Create a Basis class.
      * @param {Object} - Config object.
@@ -26,7 +43,7 @@ export class Basis {
         units,
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
-    }) {
+    }: BasisProps) {
         let _elements, _coordinates, _units;
         if (!units) {
             _units = Basis.unitsOptionsDefaultValue;
@@ -126,11 +143,11 @@ export class Basis {
         return new this.constructor({ ...this.toJSON(), ...extraContext });
     }
 
-    getElementByIndex(idx) {
+    getElementByIndex(idx: number) {
         return this._elements.getArrayElementByIndex(idx);
     }
 
-    getCoordinateByIndex(idx) {
+    getCoordinateByIndex(idx: number) {
         return this._coordinates.getArrayElementByIndex(idx);
     }
 
