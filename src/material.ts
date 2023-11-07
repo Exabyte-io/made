@@ -82,11 +82,10 @@ export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefau
         text: string;
     };
 
-    _json: MaterialSchemaJSON;
+    declare _json: MaterialSchemaJSON;
 
     constructor(config: MaterialSchemaJSON) {
         super(config);
-        this._json = { ...config };
         this.name = super.name || this.formula;
     }
 
