@@ -126,6 +126,7 @@ const PRIMITIVE_CELLS = {
         // convert angles to Radians
         // eslint-disable-next-line no-param-reassign
         [alpha, beta, gamma] = [alpha, beta, gamma].map(
+            // @ts-ignore
             (x) => math.unit(x, "degree").to("rad").value,
         );
 

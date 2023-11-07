@@ -7,6 +7,9 @@ import { Lattice } from "../lattice/lattice";
 import math from "../math";
 import { InvalidLineError } from "./errors";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
+import {  MaterialJSON } from "src/material";
+import { Vector } from "src/lattice/types";
+import { Constraint } from "src/constraints/constraints";
 
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
 // eslint-disable-next-line max-len
@@ -45,9 +48,9 @@ export function validate(xyzTxt: string) {
         .forEach(validateLine);
 }
 
-interface ParsedObject {
+export interface ParsedObject {
     element: string;
-    coordinates: [number, number, number];
+    coordinates: Vector;
     constraints: [boolean, boolean, boolean];
 }
 
@@ -66,13 +69,27 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
     };
 }
 
+export interface BasisConfig {
+    elements: {
+        id: number;
+        value: string;
+    }[];
+    coordinates: {
+        id: number;
+        value: Vector
+    }[];
+    units: string;
+    cell: Vector[];
+    constraints: Constraint[];
+}
+
 /**
  * Parse XYZ text for basis.
  * @param txt Text
  * @param units Coordinate units
  * @param cell Basis Cell
  */
-function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell) {
+function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell): BasisConfig {
     // @ts-ignore
     const lines: string[] = s(txt).trim().lines();
     const listOfObjects = _.map(lines, _parseXYZLineAsWords);
@@ -103,22 +120,21 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
 
 /**
  * Create XYZ from Basis class instance.
- * @param basisClsInstance {ConstrainedBasis} Basis class instance.
- * @param printFormat {String} Output format for coordinates.
- * @param skipRounding {Boolean} Whether to round the numbers (ie. to avoid negative zeros).
- * @return {String} Basis string in XYZ format
+ * @param basisClsInstance Basis class instance.
+ * @param printFormat Output format for coordinates.
+ * @param skipRounding Whether to round the numbers (ie. to avoid negative zeros).
+ * @return Basis string in XYZ format
  */
-function fromBasis(basisClsInstance, printFormat = "%9.5f", skipRounding = false) {
-    const clsInstance = basisClsInstance;
-    const XYZArray = [];
-    clsInstance._elements.array.forEach((item, idx) => {
+function fromBasis(basisClsInstance: ConstrainedBasis, printFormat = "%9.5f", skipRounding = false) {
+    const XYZArray: string[] = [];
+    basisClsInstance._elements.array.forEach((item, idx) => {
         // assume that _elements and _coordinates are indexed equivalently
         const element = s.sprintf("%-3s", item);
-        const coordinates = clsInstance.getCoordinateByIndex(idx).map((x) => {
+        const coordinates = basisClsInstance.getCoordinateByIndex(idx).map((x) => {
             return s.sprintf(printFormat, skipRounding ? x : math.precise(math.roundToZero(x)));
         });
-        const constraints = clsInstance.constraints
-            ? clsInstance.AtomicConstraints.getAsStringByIndex(idx)
+        const constraints = basisClsInstance.constraints
+            ? basisClsInstance.AtomicConstraints.getAsStringByIndex(idx)
             : "";
         XYZArray.push([element, coordinates.join(" "), constraints].join(" "));
     });
@@ -127,11 +143,11 @@ function fromBasis(basisClsInstance, printFormat = "%9.5f", skipRounding = false
 
 /**
  * Create XYZ from Material class instance (or its JSON config).
- * @param materialOrConfig {Material|Object} Material.
- * @param fractional {Boolean} Coordinate units as fractional.
+ * @param materialOrConfig Material.
+ * @param fractional Coordinate units as fractional.
  * @return Class Instance
  */
-function fromMaterial(materialOrConfig, fractional = false) {
+function fromMaterial(materialOrConfig: MaterialJSON, fractional = false): string {
     const lattice = new Lattice(materialOrConfig.lattice);
     const basis = new ConstrainedBasis({
         ...materialOrConfig.basis,

@@ -1,43 +1,55 @@
 import _ from "underscore";
 
-interface ObjectWithId {
+export interface ObjectWithIdAndValue<T> {
     id: number;
-    value?: object;
+    value: T;
+}
+
+export type ValueOrObject<T> = ObjectWithIdAndValue<T> | T;
+
+export type ValueOrObjectArray<T> = ObjectWithIdAndValue<T>[] | T[];
+
+export function isObjectWithIdAndValue<T>(
+    valueOrObject: ValueOrObject<T>,
+): valueOrObject is ObjectWithIdAndValue<T> {
+    return Boolean(
+        _.isObject(valueOrObject) &&
+            !_.isArray(valueOrObject) &&
+            valueOrObject.id &&
+            valueOrObject.value,
+    );
 }
 
 /**
  * Helper class representing a scalar with an associated id.
  */
-export class ScalarWithId implements ObjectWithId {
+export class ScalarWithId<T> {
     id: number;
 
-    value?: object | ObjectWithId;
+    value: T;
 
     /**
      * Create a an array with ids.
      * @param valueOrObject - a ScalarWithID, or any other type.
      * @param id - numerical id (Integer).
      */
-    constructor(valueOrObject: object | ObjectWithId, id = 0) {
-        let _id, _value;
+    constructor(valueOrObject: ValueOrObject<T>, id = 0) {
         // if already passing a ScalarWithId => preserve original
-        if (_.isObject(valueOrObject) && !_.isArray(valueOrObject)) {
+        if (isObjectWithIdAndValue(valueOrObject)) {
             // NOTE - Arrays are Objects too
-            _id = valueOrObject.id;
-            _value = valueOrObject.value;
+            this.id = valueOrObject.id;
+            this.value = valueOrObject.value;
         } else {
-            _id = id;
-            _value = valueOrObject;
+            this.id = id;
+            this.value = valueOrObject;
         }
-        this.value = _value;
-        this.id = _id;
     }
 
     /**
      * Serialize class instance to JSON.
      * @example {"id" : 0, "value" : "Si" }
      */
-    toJSON(): object {
+    toJSON(): ObjectWithIdAndValue<T> {
         return {
             id: this.id,
             value: this.value,

@@ -1,6 +1,9 @@
+import { Basis, Coordinate } from "src/basis/basis";
 import { LatticeBravais } from "../lattice/lattice_bravais";
 import math from "../math";
 import cellTools from "./cell";
+import { Cell } from "src/cell/cell";
+import { Material } from "../material";
 
 const ADD = math.add;
 
@@ -11,7 +14,7 @@ const ADD = math.add;
  * @param supercell {Cell}
  * @return {Basis}
  */
-function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix) {
+function generateNewBasisWithinSupercell(basis: Basis, cell: Cell, supercell: Cell, supercellMatrix: number[][]) {
     const oldBasis = basis.clone();
     const newBasis = basis.clone({ isEmpty: true });
 
@@ -28,7 +31,7 @@ function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix
             if (supercell.isPointInsideCell(newPoint)) {
                 newBasis.addAtom({
                     element: element.value,
-                    coordinate: supercell.convertPointToFractional(newPoint),
+                    coordinate: supercell.convertPointToFractional(newPoint) as Coordinate,
                 });
             }
         });
@@ -39,10 +42,10 @@ function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix
 
 /**
  * @summary Generates supercell config for the specified material.
- * @param material {Object}
+ * @param material 
  * @param supercellMatrix {Number[][]}
  */
-function generateConfig(material, supercellMatrix) {
+function generateConfig(material: Material, supercellMatrix: number[][]) {
     const det = math.det(supercellMatrix);
     if (det === 0) {
         throw new Error("Scaling matrix is degenerate.");

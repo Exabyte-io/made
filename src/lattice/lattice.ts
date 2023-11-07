@@ -14,9 +14,11 @@ import {
 import { LATTICE_TYPE, LATTICE_TYPE_CONFIGS, LATTICE_TYPE_EXTENDED } from "./types";
 import { UnitCell, UnitCellProps } from "./unit_cell";
 
-interface RequiredBravaisConfigWithVectors extends RequiredBravaisConfig {
+export interface RequiredBravaisConfigWithVectors extends RequiredBravaisConfig {
     vectors: RequiredLatticeVectorsConfig;
 }
+
+export type LatticeJSON = RequiredBravaisConfigWithVectors;
 
 /**
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
@@ -29,7 +31,7 @@ export const nonPeriodicLatticeScalingFactor = 2.0;
  * Follows Bravais convention for lattice types and contains lattice vectors within.
  * Units for lattice vector coordinates are "angstroms", and "degrees" for the corresponding angles.
  */
-export class Lattice extends LatticeBravais implements RequiredBravaisConfigWithVectors {
+export class Lattice extends LatticeBravais implements LatticeJSON {
     vectors: LatticeVectors;
 
     /**
@@ -85,7 +87,7 @@ export class Lattice extends LatticeBravais implements RequiredBravaisConfigWith
             }
         }
      */
-    toJSON(skipRounding = false): RequiredBravaisConfigWithVectors {
+    toJSON(skipRounding = false): LatticeJSON {
         const round = skipRounding ? (x: number) => x : Lattice._roundValue; // round values by default
         return {
             a: round(this.a),

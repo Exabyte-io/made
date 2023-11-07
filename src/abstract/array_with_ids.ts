@@ -1,50 +1,63 @@
 import _ from "underscore";
 
-import { ScalarWithId } from "./scalar_with_id";
+import {
+    isObjectWithIdAndValue,
+    ObjectWithIdAndValue,
+    ScalarWithId,
+    ValueOrObject,
+} from "./scalar_with_id";
 
-interface ObjectWithId {
-    id: number;
-    value?: object;
+type Predicate<T> = (o: T) => boolean;
+
+type MapFunction<T> = (value: T, index: number, array: T[]) => T;
+
+export function isArrayOfObjectsWithIdAndValue<T>(
+    valueOrObjects: ValueOrObject<T>[],
+): valueOrObjects is ObjectWithIdAndValue<T>[] {
+    return isObjectWithIdAndValue(valueOrObjects[0]);
 }
-
-type Predicate = (o: object) => boolean;
-
-type MapFunction = (value: object, index: number, array: object[]) => object;
 
 /**
  * Helper class representing an ArrayWithIds. Used to explicitly track values assigned to atoms, for example.
  */
-export class ArrayWithIds {
-    array: object[];
+export class ArrayWithIds<T> {
+    array: T[];
 
     /**
      * Create a an array with ids.
      * @param {Array} array - Either regular array or ArrayWithIds (see @example above)
      */
-    constructor(array: ObjectWithId[] = []) {
-        if (!_.isArray(array))
+    constructor(array: ObjectWithIdAndValue<T>[] | T[] = []) {
+        if (!_.isArray(array)) {
             throw new Error("ArrayWithIds.constructor: pass array on initialization");
+        }
         // if passed an array with ids as config, only store the values in array
-        this.array = array.sort((a, b) => a.id - b.id).map((element) => element.value || element);
+        if (isArrayOfObjectsWithIdAndValue<T>(array)) {
+            this.array = array.sort((a, b) => a.id - b.id).map((element) => element.value);
+        } else {
+            this.array = array;
+        }
     }
 
     /**
      * Serialize class instance to JSON.
      * @example [{"id" : 0, "value" : "Si" }, {"id" : 1, "value" : "Si" }]
      */
-    toJSON() {
+    toJSON(): ObjectWithIdAndValue<T>[] {
         // from ["a", "b"] to [{id: 0, value: "a"}, {id: 1, value: "b"}]
-        return this.array.map((el, idx) => new ScalarWithId(el, idx).toJSON());
+        return this.array.map((el, idx) => new ScalarWithId<T>(el, idx).toJSON());
     }
 
     /**
      * Apply function fn to each element of the array and replace `array` with the result.
      * @param fn - The function to be applied to each array element.
      */
-    mapArrayInPlace(fn: MapFunction) {
-        if (!_.isFunction(fn))
+    mapArrayInPlace(fn: MapFunction<T>) {
+        if (!_.isFunction(fn)) {
             throw new Error("ArrayWithIds.mapArray: must pass function as argument");
-        this.array = this.array.map((...args) => fn(...args));
+        }
+
+        this.array = this.array.map(fn);
     }
 
     getArrayElementByIndex(idx: number) {
@@ -55,7 +68,7 @@ export class ArrayWithIds {
      * Get the index of the array element that passes the predicate.
      * @param {Function} predicate - The function to be applied to each array element.
      */
-    getArrayIndexByPredicate(predicate: Predicate) {
+    getArrayIndexByPredicate(predicate: Predicate<T>) {
         return this.array.findIndex((el) => predicate(el));
     }
 
@@ -63,8 +76,9 @@ export class ArrayWithIds {
      * Add an entity to array.
      * @param el - The entity to be added to array. If Object with 'value' key, its value will be added.
      */
-    addElement(el: ObjectWithId) {
-        if (el) this.array.push(el.value || el);
+    addElement(el: ValueOrObject<T>) {
+        const value = isObjectWithIdAndValue(el) ? el.value : el;
+        if (el) this.array.push(value);
     }
 
     /**
@@ -72,7 +86,7 @@ export class ArrayWithIds {
      * @param el - The entity to be added to array. If Object with 'value' key, its value will be added.
      * @param idx - The entity to be added to array. If Object with 'value' key, its value will be added.
      */
-    removeElement(el: ObjectWithId, idx: number) {
+    removeElement(el: ValueOrObject<T> | null, idx?: number) {
         let _idx;
         if (idx === undefined) {
             _idx = this.array.findIndex((elm) => elm === el);

@@ -1,10 +1,15 @@
+import { Vector } from "src/lattice/types";
 import constants from "../constants";
 import math from "../math";
+import { Coordinate } from "src/basis/basis";
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;
 const INV = math.inv;
+// @ts-ignore
 const MATRIX_MULT = (...args) => MULT(...args.map((x) => MATRIX(x))).toArray();
+
+type Point =  Coordinate | math.Matrix | math.MathType;
 
 /*
  * Cell represents a unit cell in geometrical form: 3x3 matrix where rows are cell vectors.
@@ -13,34 +18,39 @@ const MATRIX_MULT = (...args) => MULT(...args.map((x) => MATRIX(x))).toArray();
 export class Cell {
     tolerance = 1;
 
+    vector1: Vector;
+
+    vector2: Vector;
+
+    vector3: Vector;
+
     /**
      * Create a cell.
      * @param nestedArray {Number[][]} is an array of cell vectors in cartesian Angstrom units.
      */
-    constructor(nestedArray) {
+    constructor(nestedArray: [Vector, Vector, Vector]) {
         [this.vector1, this.vector2, this.vector3] = nestedArray;
     }
 
     /**
      * Get cell vectors as (a nested) array.
-     * @return {Array[]}
      * @example [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
      */
-    get vectorsAsArray() {
+    get vectorsAsArray(): [Vector, Vector, Vector] {
         return [
             this.vector1,
             this.vector2,
             this.vector3,
             // assert that no near-zero artifacts are present (ie. 1.6 x 10^-16) before attempting inversion
             // @param tolerance {Number} Maximum tolerance to small numbers, used to avoid artifacts on matrix inversion
-        ].map((v) => v.map((c) => (math.abs(c) < constants.tolerance.lengthAngstrom ? 0 : c)));
+        ].map((v) => v.map((c) => (math.abs(c) < constants.tolerance.lengthAngstrom ? 0 : c))) as [Vector, Vector, Vector];
     }
 
-    clone() {
-        return new this.constructor(this.vectorsAsArray);
+    clone(): Cell {
+        return new (this.constructor as typeof Cell)(this.vectorsAsArray);
     }
 
-    cloneAndScaleByMatrix(matrix) {
+    cloneAndScaleByMatrix(matrix: number[][]) {
         const newCell = this.clone();
         newCell.scaleByMatrix(matrix);
         return newCell;
@@ -48,38 +58,36 @@ export class Cell {
 
     /**
      * Convert a point (in crystal coordinates) to cartesian.
-     * @return {Array}
      */
-    convertPointToCartesian(point) {
+    convertPointToCartesian(point: Point) {
         return MULT(point, this.vectorsAsArray);
     }
 
     /**
      * Convert a point (in cartesian coordinates) to crystal (fractional).
-     * @return {Array}
      */
-    convertPointToFractional(point) {
-        return MULT(point, INV(this.vectorsAsArray));
+    convertPointToFractional(point: Point): Coordinate {
+        return MULT(point, INV(this.vectorsAsArray)) as Coordinate;
     }
 
     /**
      * Check whether a point is inside the cell.
-     * @param {Array} point - the point to conduct the check for.
-     * @param {Number} tolerance - numerical tolerance.
-     * @return {Boolean}
+     * @param point - the point to conduct the check for.
+     * @param tolerance - numerical tolerance.
      */
-    isPointInsideCell(point, tolerance = constants.tolerance.length) {
+    isPointInsideCell(point: Point, tolerance = constants.tolerance.length): boolean {
         return this.convertPointToFractional(point)
-            .map((c) => math.isBetweenZeroInclusiveAndOne(c, tolerance))
-            .reduce((a, b) => a && b);
+            .map((c: number) => math.isBetweenZeroInclusiveAndOne(c, tolerance))
+            // @ts-ignore
+            .reduce((a: boolean, b: boolean): boolean => a && b);
     }
 
     /**
      * Returns the index of the cell vector, most collinear with the testVector.
      * @param testVector
-     * @return {Number}
      */
-    getMostCollinearVectorIndex(testVector) {
+    getMostCollinearVectorIndex(testVector: Vector): number {
+        // @ts-ignore
         const angles = this.vectorsAsArray.map((v) => math.angleUpTo90(v, testVector));
         return angles.findIndex((el) => el === math.min(angles));
     }
@@ -87,7 +95,7 @@ export class Cell {
     /**
      * Scale this cell by right-multiplying it to a matrix (nested array)
      */
-    scaleByMatrix(matrix) {
+    scaleByMatrix(matrix: number[][]) {
         [this.vector1, this.vector2, this.vector3] = MATRIX_MULT(matrix, this.vectorsAsArray);
     }
 }

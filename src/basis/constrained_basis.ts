@@ -1,34 +1,48 @@
 import s from "underscore.string";
 
 import { ArrayWithIds } from "../abstract/array_with_ids";
-import { AtomicConstraints } from "../constraints/constraints";
-import { Basis } from "./basis";
+import { AtomicConstraints, Constraint, ConstraintValue } from "../constraints/constraints";
+import { Basis, BasisJSON, BasisProps, Coordinate } from "./basis";
+import { ObjectWithIdAndValue } from "src/abstract/scalar_with_id";
+
+export interface ConstrainedBasisProps extends BasisProps {
+    constraints: Constraint[]
+}
+
+export interface ConstrainedBasisJSON extends BasisJSON {
+    constraints: ObjectWithIdAndValue<ConstraintValue>[]
+}
 
 /**
  * @summary Extension of the Basis class able to deal with atomic constraints.
  * @extends Basis
  */
 export class ConstrainedBasis extends Basis {
+    _constraints: ArrayWithIds<ConstraintValue>
     /**
      * Create a an array with ids.
      * @param {Object} config
      * @param {ArrayWithIds|Array} config.constraints - atomic constraints.
      */
-    constructor(config) {
+    constructor(config: ConstrainedBasisProps) {
         super(config);
-        this._constraints = new ArrayWithIds(config.constraints); // `constraints` is an Array with ids
+        this._constraints = new ArrayWithIds<ConstraintValue>(config.constraints); // `constraints` is an Array with ids
     }
 
     get constraints() {
-        return this._constraints;
+        return this._constraints.array;
     }
 
-    set constraints(newConstraints) {
+    set constraints(newConstraints: ConstraintValue[]) {
         this._constraints = new ArrayWithIds(newConstraints);
     }
 
+    getConstraintAsArray() {
+        return this._constraints;
+    }
+
     get AtomicConstraints() {
-        return AtomicConstraints.fromArray(this.constraints.array);
+        return AtomicConstraints.fromArray(this.constraints);
     }
 
     /**
@@ -48,22 +62,21 @@ export class ConstrainedBasis extends Basis {
             ]
          }
      */
-    toJSON() {
+    toJSON(): ConstrainedBasisJSON {
         return {
             ...super.toJSON(),
-            constraints: this.constraints.toJSON(),
+            constraints: this._constraints.toJSON(),
         };
     }
 
-    getConstraintByIndex(idx) {
+    getConstraintByIndex(idx: number): ConstraintValue {
         return this._constraints.getArrayElementByIndex(idx) || [];
     }
 
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
-     * @return {Array[]}
      */
-    get elementsCoordinatesConstraintsArray() {
+    get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue][] {
         const clsInstance = this;
         return this._elements.array.map((element, idx) => {
             const coordinates = clsInstance.getCoordinateByIndex(idx);
@@ -75,9 +88,8 @@ export class ConstrainedBasis extends Basis {
     /**
      * Returns an array with atomic positions (with constraints) per atom stored as strings.
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
-     * @return {String[]}
      */
-    get atomicPositionsWithConstraints() {
+    get atomicPositionsWithConstraints(): string[] {
         return this.elementsCoordinatesConstraintsArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];

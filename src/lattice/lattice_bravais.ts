@@ -104,8 +104,11 @@ export class LatticeBravais implements RequiredBravaisConfig {
         const roundValue = skipRounding ? (x: number) => x : this._roundValue;
 
         return new (this.prototype.constructor as typeof LatticeBravais)({
+            // @ts-ignore
             a: roundValue(math.vlen(a) * alat),
+            // @ts-ignore
             b: roundValue(math.vlen(b) * alat),
+            // @ts-ignore
             c: roundValue(math.vlen(c) * alat),
             alpha: roundValue(math.angle(b, c, "deg")),
             beta: roundValue(math.angle(a, c, "deg")),

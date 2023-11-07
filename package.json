@@ -27,7 +27,7 @@
         "node": ">=0.12"
     },
     "devDependencies": {
-        "@exabyte-io/code.js": "^2023.11.1-0",
+        "@exabyte-io/code.js": "git+https://github.com/Exabyte-io/code.js.git#update/SOF-6922",
         "@exabyte-io/eslint-config": "^2023.8.29-1",
         "chai": "^4.3.4",
         "chai-almost": "^1.0.1",
