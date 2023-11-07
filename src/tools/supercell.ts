@@ -1,20 +1,23 @@
-import { Basis, Coordinate } from "src/basis/basis";
+import { Basis } from "../basis/basis";
+import { Coordinate } from "../basis/types";
+import { Cell } from "../cell/cell";
 import { LatticeBravais } from "../lattice/lattice_bravais";
+// eslint-disable-next-line import/no-cycle
+import { Material } from "../material";
 import math from "../math";
 import cellTools from "./cell";
-import { Cell } from "src/cell/cell";
-import { Material } from "../material";
 
 const ADD = math.add;
 
 /**
  * @summary Generates new basis for a supercell. For each site from basis generates shifts that are within supercell.
- * @param basis {Basis}
- * @param cell {Cell}
- * @param supercell {Cell}
- * @return {Basis}
  */
-function generateNewBasisWithinSupercell(basis: Basis, cell: Cell, supercell: Cell, supercellMatrix: number[][]) {
+function generateNewBasisWithinSupercell(
+    basis: Basis,
+    cell: Cell,
+    supercell: Cell,
+    supercellMatrix: number[][],
+): Basis {
     const oldBasis = basis.clone();
     const newBasis = basis.clone({ isEmpty: true });
 
@@ -42,7 +45,7 @@ function generateNewBasisWithinSupercell(basis: Basis, cell: Cell, supercell: Ce
 
 /**
  * @summary Generates supercell config for the specified material.
- * @param material 
+ * @param material
  * @param supercellMatrix {Number[][]}
  */
 function generateConfig(material: Material, supercellMatrix: number[][]) {

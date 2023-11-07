@@ -2,8 +2,8 @@ import _ from "underscore";
 import s from "underscore.string";
 
 import { Lattice } from "../lattice/lattice";
+import { MaterialJSON } from "../types";
 import xyz from "./xyz";
-import {  MaterialJSON } from "../material";
 
 /**
  * Construct textual representation of a materialOrConfig according to Quantum ESPRESSO pw.x input format.

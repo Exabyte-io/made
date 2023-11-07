@@ -1,5 +1,5 @@
-import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 import { ArrayWithIds } from "../abstract/array_with_ids";
+import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 
 export interface ConstraintValue extends Array<boolean> {
     0: boolean;
@@ -8,7 +8,6 @@ export interface ConstraintValue extends Array<boolean> {
 }
 
 export type Constraint = ObjectWithIdAndValue<ConstraintValue>;
-
 
 export class AtomicConstraints {
     name: string;
@@ -24,7 +23,7 @@ export class AtomicConstraints {
      * @param {Object} config
      * @param {ArrayWithIds|Array} config.values
      */
-    constructor({ values }: {values?: ConstraintValue[]}) {
+    constructor({ values }: { values?: ConstraintValue[] }) {
         this.name = "atomic_constraints";
         this.values = new ArrayWithIds(values || []);
     }

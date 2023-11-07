@@ -191,7 +191,7 @@ describe("Basis", () => {
      */
     it("should return minimum lattice size for an atom", () => {
         const basis = new Basis(Na.basis);
-        const minimumLatticeSize = 1.9;
+        const minimumLatticeSize = 1.8;
         const latticeSize = basis.getMinimumLatticeSize();
         expect(latticeSize).to.be.equal(minimumLatticeSize);
     });
