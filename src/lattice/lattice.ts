@@ -11,7 +11,7 @@ import {
     LatticeVectors,
     RequiredLatticeVectorsConfig,
 } from "./lattice_vectors";
-import { LATTICE_TYPE, LATTICE_TYPE_CONFIGS, LATTICE_TYPE_EXTENDED } from "./types";
+import { LATTICE_TYPE_CONFIGS, LatticeType, LatticeTypeExtended } from "./types";
 import { UnitCell, UnitCellProps } from "./unit_cell";
 
 export interface RequiredBravaisConfigWithVectors extends RequiredBravaisConfig {
@@ -139,31 +139,31 @@ export class Lattice extends LatticeBravais implements LatticeJSON {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
 
         switch (type) {
-            case LATTICE_TYPE.BCT:
-                return c < a ? LATTICE_TYPE_EXTENDED.BCT_1 : LATTICE_TYPE_EXTENDED.BCT_2;
-            case LATTICE_TYPE.ORCF:
+            case LatticeType.BCT:
+                return c < a ? LatticeTypeExtended.BCT_1 : LatticeTypeExtended.BCT_2;
+            case LatticeType.ORCF:
                 if (1 / (a * a) >= 1 / (b * b) + 1 / (c * c)) {
-                    return LATTICE_TYPE_EXTENDED.ORCF_1;
+                    return LatticeTypeExtended.ORCF_1;
                 }
-                return LATTICE_TYPE_EXTENDED.ORCF_2;
-            case LATTICE_TYPE.RHL:
-                return cosAlpha > 0 ? LATTICE_TYPE_EXTENDED.RHL_1 : LATTICE_TYPE_EXTENDED.RHL_2;
-            case LATTICE_TYPE.MCLC:
+                return LatticeTypeExtended.ORCF_2;
+            case LatticeType.RHL:
+                return cosAlpha > 0 ? LatticeTypeExtended.RHL_1 : LatticeTypeExtended.RHL_2;
+            case LatticeType.MCLC:
                 if (gamma >= 90) {
                     // MCLC-1,2
-                    return LATTICE_TYPE_EXTENDED.MCLC_1;
+                    return LatticeTypeExtended.MCLC_1;
                 }
                 if ((b / c) * cosAlpha + ((b * b) / (a * a)) * (1 - cosAlpha * cosAlpha) <= 1) {
                     // MCLC-3,4
-                    return LATTICE_TYPE_EXTENDED.MCLC_3;
+                    return LatticeTypeExtended.MCLC_3;
                 }
-                return LATTICE_TYPE_EXTENDED.MCLC_5;
-            case LATTICE_TYPE.TRI:
+                return LatticeTypeExtended.MCLC_5;
+            case LatticeType.TRI:
                 if (alpha > 90 && beta > 90 && gamma >= 90) {
                     // TRI-1a,2a
-                    return LATTICE_TYPE_EXTENDED.TRI_1a;
+                    return LatticeTypeExtended.TRI_1a;
                 }
-                return LATTICE_TYPE_EXTENDED.TRI_1b;
+                return LatticeTypeExtended.TRI_1b;
             default:
                 return type;
         }

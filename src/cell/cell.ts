@@ -1,7 +1,7 @@
-import { Vector } from "src/lattice/types";
+import { Coordinate } from "../basis/types";
 import constants from "../constants";
+import { Vector } from "../lattice/types";
 import math from "../math";
-import { Coordinate } from "src/basis/basis";
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;
@@ -9,7 +9,7 @@ const INV = math.inv;
 // @ts-ignore
 const MATRIX_MULT = (...args) => MULT(...args.map((x) => MATRIX(x))).toArray();
 
-type Point =  Coordinate | math.Matrix | math.MathType;
+type Point = Coordinate | math.Matrix | math.MathType;
 
 /*
  * Cell represents a unit cell in geometrical form: 3x3 matrix where rows are cell vectors.
@@ -43,7 +43,11 @@ export class Cell {
             this.vector3,
             // assert that no near-zero artifacts are present (ie. 1.6 x 10^-16) before attempting inversion
             // @param tolerance {Number} Maximum tolerance to small numbers, used to avoid artifacts on matrix inversion
-        ].map((v) => v.map((c) => (math.abs(c) < constants.tolerance.lengthAngstrom ? 0 : c))) as [Vector, Vector, Vector];
+        ].map((v) => v.map((c) => (math.abs(c) < constants.tolerance.lengthAngstrom ? 0 : c))) as [
+            Vector,
+            Vector,
+            Vector,
+        ];
     }
 
     clone(): Cell {
@@ -76,10 +80,12 @@ export class Cell {
      * @param tolerance - numerical tolerance.
      */
     isPointInsideCell(point: Point, tolerance = constants.tolerance.length): boolean {
-        return this.convertPointToFractional(point)
-            .map((c: number) => math.isBetweenZeroInclusiveAndOne(c, tolerance))
-            // @ts-ignore
-            .reduce((a: boolean, b: boolean): boolean => a && b);
+        return (
+            this.convertPointToFractional(point)
+                .map((c: number) => math.isBetweenZeroInclusiveAndOne(c, tolerance))
+                // @ts-ignore
+                .reduce((a: boolean, b: boolean): boolean => a && b)
+        );
     }
 
     /**

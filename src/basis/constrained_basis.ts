@@ -1,16 +1,17 @@
 import s from "underscore.string";
 
 import { ArrayWithIds } from "../abstract/array_with_ids";
+import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 import { AtomicConstraints, Constraint, ConstraintValue } from "../constraints/constraints";
-import { Basis, BasisJSON, BasisProps, Coordinate } from "./basis";
-import { ObjectWithIdAndValue } from "src/abstract/scalar_with_id";
+import { Basis, BasisJSON, BasisProps } from "./basis";
+import { Coordinate } from "./types";
 
 export interface ConstrainedBasisProps extends BasisProps {
-    constraints: Constraint[]
+    constraints: Constraint[];
 }
 
 export interface ConstrainedBasisJSON extends BasisJSON {
-    constraints: ObjectWithIdAndValue<ConstraintValue>[]
+    constraints: ObjectWithIdAndValue<ConstraintValue>[];
 }
 
 /**
@@ -18,7 +19,8 @@ export interface ConstrainedBasisJSON extends BasisJSON {
  * @extends Basis
  */
 export class ConstrainedBasis extends Basis {
-    _constraints: ArrayWithIds<ConstraintValue>
+    _constraints: ArrayWithIds<ConstraintValue>;
+
     /**
      * Create a an array with ids.
      * @param {Object} config
@@ -77,10 +79,9 @@ export class ConstrainedBasis extends Basis {
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
     get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue][] {
-        const clsInstance = this;
         return this._elements.array.map((element, idx) => {
-            const coordinates = clsInstance.getCoordinateByIndex(idx);
-            const constraints = clsInstance.getConstraintByIndex(idx);
+            const coordinates = this.getCoordinateByIndex(idx);
+            const constraints = this.getConstraintByIndex(idx);
             return [element, coordinates, constraints];
         });
     }

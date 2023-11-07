@@ -3,13 +3,13 @@ import s from "underscore.string";
 
 import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
+import { Constraint } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
+import { Vector } from "../lattice/types";
 import math from "../math";
+import { MaterialJSON } from "../types";
 import { InvalidLineError } from "./errors";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
-import {  MaterialJSON } from "src/material";
-import { Vector } from "src/lattice/types";
-import { Constraint } from "src/constraints/constraints";
 
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
 // eslint-disable-next-line max-len
@@ -76,7 +76,7 @@ export interface BasisConfig {
     }[];
     coordinates: {
         id: number;
-        value: Vector
+        value: Vector;
     }[];
     units: string;
     cell: Vector[];
@@ -125,7 +125,11 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
  * @param skipRounding Whether to round the numbers (ie. to avoid negative zeros).
  * @return Basis string in XYZ format
  */
-function fromBasis(basisClsInstance: ConstrainedBasis, printFormat = "%9.5f", skipRounding = false) {
+function fromBasis(
+    basisClsInstance: ConstrainedBasis,
+    printFormat = "%9.5f",
+    skipRounding = false,
+) {
     const XYZArray: string[] = [];
     basisClsInstance._elements.array.forEach((item, idx) => {
         // assume that _elements and _coordinates are indexed equivalently

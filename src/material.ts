@@ -1,26 +1,25 @@
-import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
+import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
+import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
+import { MaterialSchema } from "@exabyte-io/code.js/src/types";
 import CryptoJS from "crypto-js";
 
-import {
-    MaterialSchema,
-} from "@exabyte-io/code.js/src/types"
-
-
-import { ConstrainedBasis, ConstrainedBasisJSON } from "./basis/constrained_basis";
+import { ConstrainedBasis } from "./basis/constrained_basis";
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
     PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS,
 } from "./cell/conventional_cell";
 import { ATOMIC_COORD_UNITS, units } from "./constants";
-import { Lattice, LatticeJSON } from "./lattice/lattice";
-import { BravaisConfigProps } from "./lattice/lattice_vectors";
-import { LATTICE_TYPE } from "./lattice/types";
-import parsers from "./parsers/parsers";
-import supercellTools from "./tools/supercell";
-import { BasisConfig } from "./parsers/xyz";
 import { Constraint } from "./constraints/constraints";
-import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
+import { Lattice } from "./lattice/lattice";
+import { BravaisConfigProps } from "./lattice/lattice_vectors";
+import { LatticeType } from "./lattice/types";
+import parsers from "./parsers/parsers";
+import { BasisConfig } from "./parsers/xyz";
+// TODO: fix dependency cycle below
+// eslint-disable-next-line import/no-cycle
+import supercellTools from "./tools/supercell";
+import { MaterialJSON } from "./types";
 
 export const defaultMaterialConfig = {
     name: "Silicon FCC",
@@ -49,7 +48,7 @@ export const defaultMaterialConfig = {
     },
     lattice: {
         // Primitive cell for Diamond FCC Silicon at ambient conditions
-        type: LATTICE_TYPE.FCC,
+        type: LatticeType.FCC,
         a: 3.867,
         b: 3.867,
         c: 3.867,
@@ -68,19 +67,16 @@ interface Property {
     value: string;
 }
 
-export interface MaterialJSON extends AnyObject {
-    lattice:LatticeJSON;
-    basis: ConstrainedBasisJSON;
+interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
+
+interface CheckResult {
+    key: string;
     name: string;
-    isNonPeriodic: boolean;
+    severity: string;
+    message: string;
 }
 
-interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
-
-}
-
-
-export abstract class Material extends HasMetadataNamedDefaultableInMemoryEntity {
+export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity {
     abstract src: {
         extension: string;
         text: string;
@@ -90,8 +86,8 @@ export abstract class Material extends HasMetadataNamedDefaultableInMemoryEntity
 
     constructor(config: MaterialSchemaJSON) {
         super(config);
-        this._json = {...config};
-        this.name = super.name || this.formula
+        this._json = { ...config };
+        this.name = super.name || this.formula;
     }
 
     toJSON(): MaterialJSON {
@@ -130,7 +126,7 @@ export abstract class Material extends HasMetadataNamedDefaultableInMemoryEntity
     /**
      * @summary Returns the specific derived property (as specified by name) for a material.
      */
-    getDerivedPropertyByName(name: string): Property| undefined {
+    getDerivedPropertyByName(name: string): Property | undefined {
         return this.getDerivedProperties().find((x) => x.name === name);
     }
 
@@ -186,7 +182,7 @@ export abstract class Material extends HasMetadataNamedDefaultableInMemoryEntity
         });
     }
 
-    /** 
+    /**
      * High-level access to unique elements from material instead of basis.
      */
     get uniqueElements() {
@@ -329,5 +325,53 @@ export abstract class Material extends HasMetadataNamedDefaultableInMemoryEntity
 
         // @ts-ignore
         return new this.constructor(config);
+    }
+
+    /**
+     * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
+     * @returns Array of checks results
+     */
+    getConsistencyChecks(): CheckResult[] {
+        const basisChecks = this.getBasisConsistencyChecks();
+
+        // any other Material checks can be added here
+
+        return basisChecks;
+    }
+
+    /**
+     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
+     * @returns Array of checks results
+     */
+    getBasisConsistencyChecks(): CheckResult[] {
+        const checks: CheckResult[] = [];
+        const limit = 1000;
+        const basis = this.Basis;
+
+        if (this.Basis.elements.length < limit) {
+            const overlappingAtomsGroups = basis.getOverlappingAtoms();
+            overlappingAtomsGroups.forEach(({ id1, id2, element1, element2 }) => {
+                checks.push(
+                    {
+                        key: `basis.coordinates.${id1}`,
+                        name: "atomsOverlap",
+                        severity: "warning",
+                        message: `Atom ${element1} is too close to ${element2} at position ${
+                            id2 + 1
+                        }`,
+                    },
+                    {
+                        key: `basis.coordinates.${id2}`,
+                        name: "atomsOverlap",
+                        severity: "warning",
+                        message: `Atom ${element2} is too close to ${element1} at position ${
+                            id1 + 1
+                        }`,
+                    },
+                );
+            });
+        }
+
+        return checks;
     }
 }

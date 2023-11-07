@@ -1,13 +1,13 @@
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
+import { Coordinate } from "../basis/types";
 import { ATOMIC_COORD_UNITS } from "../constants";
+import { Constraint, ConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
-import math from "../math";
 import { Vector } from "../lattice/types";
-import { Coordinate } from "src/basis/basis";
-import { ConstraintValue, Constraint } from "src/constraints/constraints";
-import { MaterialJSON } from "src/material";
+import math from "../math";
+import { MaterialJSON } from "../types";
 
 const _print = (x: number, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
 const _latticeVectorsToString = (vectors: Vector[]) =>

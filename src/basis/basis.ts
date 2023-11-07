@@ -9,6 +9,7 @@ import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import { Vector } from "../lattice/types";
 import math from "../math";
+import { Coordinate } from "./types";
 
 export interface BasisProps {
     elements: ValueOrObjectArray<string>; // chemical elements for atoms in basis.
@@ -24,12 +25,6 @@ export interface Atom {
     coordinate: Coordinate; // 3-dimensional coordinate
 }
 
-export interface Coordinate extends Array<number> {
-    0: number;
-    1: number;
-    2: number;
-}
-
 export interface ElementCount {
     count: number;
     value: string;
@@ -40,6 +35,13 @@ export interface BasisJSON {
     coordinates: ObjectWithIdAndValue<Coordinate>[];
     units: string;
     cell: Vector[];
+}
+
+interface Overlap {
+    id1: number;
+    id2: number;
+    element1: string;
+    element2: string;
 }
 
 /**
@@ -157,8 +159,8 @@ export class Basis {
      */
     clone(extraContext?: Partial<BasisProps>): Basis {
         return new (this.constructor as typeof Basis)({
-             ...this.toJSON(), 
-             ...extraContext 
+            ...this.toJSON(),
+            ...extraContext,
         });
     }
 
@@ -217,14 +219,18 @@ export class Basis {
     toCartesian() {
         const unitCell = this.cell;
         if (this.units === ATOMIC_COORD_UNITS.cartesian) return;
-        this._coordinates.mapArrayInPlace((point) => math.multiply(point, unitCell) as unknown as Coordinate);
+        this._coordinates.mapArrayInPlace(
+            (point) => math.multiply(point, unitCell) as unknown as Coordinate,
+        );
         this.units = ATOMIC_COORD_UNITS.cartesian;
     }
 
     toCrystal() {
         const unitCell = this.cell;
         if (this.units === ATOMIC_COORD_UNITS.crystal) return;
-        this._coordinates.mapArrayInPlace((point) => math.multiply(point, math.inv(unitCell))  as unknown as Coordinate);
+        this._coordinates.mapArrayInPlace(
+            (point) => math.multiply(point, math.inv(unitCell)) as unknown as Coordinate,
+        );
         this.units = ATOMIC_COORD_UNITS.crystal;
     }
 
@@ -444,6 +450,44 @@ export class Basis {
     }
 
     /**
+     * @summary function returns an array of overlapping atoms within specified tolerance.
+     */
+    getOverlappingAtoms(): Overlap[] {
+        // to simplify calculations, convert to cartesian coordinates
+        this.toCartesian();
+        const { coordinates, elements } = this;
+        const overlaps: Overlap[] = [];
+        // temporary value for overlap approximation, where atoms most certainly can't be located
+        const overlapCoefficient = 0.75;
+
+        coordinates.forEach((entry1, i) => {
+            for (let j = i + 1; j < coordinates.length; j++) {
+                const entry2 = coordinates[j];
+                const el1 = elements[i].value;
+                const el2 = elements[j].value;
+
+                const tolerance =
+                    overlapCoefficient *
+                    (getElementAtomicRadius(el1) + getElementAtomicRadius(el2)); // in angstroms
+
+                // @ts-ignore
+                const distance = math.vDist(entry1.value, entry2.value) as number;
+                if (distance < tolerance) {
+                    overlaps.push({
+                        id1: i,
+                        id2: j,
+                        element1: el1,
+                        element2: el2,
+                    });
+                }
+            }
+        });
+
+        this.toCrystal();
+        return overlaps;
+    }
+
+    /**
      * @summary function returns the max distance between pairs of basis coordinates by
      * calculating the distance between pairs of basis coordinates.
      * basis coordinates = [[x1, y1, z1], [x2, y2, z2], ... [xn, yn, zn]]
@@ -461,7 +505,7 @@ export class Basis {
     get maxPairwiseDistance(): number {
         const originalUnits = this.units;
         this.toCartesian();
-        let maxDistance: number = 0;
+        let maxDistance = 0;
         if (this._elements.array.length >= 2) {
             for (let i = 0; i < this._elements.array.length; i++) {
                 for (let j = i + 1; j < this._elements.array.length; j++) {
