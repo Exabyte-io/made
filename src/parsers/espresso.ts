@@ -3,13 +3,13 @@ import s from "underscore.string";
 
 import { Lattice } from "../lattice/lattice";
 import xyz from "./xyz";
+import {  MaterialJSON } from "../material";
 
 /**
  * Construct textual representation of a materialOrConfig according to Quantum ESPRESSO pw.x input format.
- * @param {Material|Object} materialOrConfig - material class instance or its config object
- * @return {String}
+ * @param materialOrConfig - material class instance or its config object
  */
-function toEspressoFormat(materialOrConfig) {
+function toEspressoFormat(materialOrConfig: MaterialJSON): string {
     const l = new Lattice(materialOrConfig.lattice);
     const vectors = l.vectorArrays;
     const vectorsAsString = _.map(vectors, (v) => {

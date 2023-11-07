@@ -1,20 +1,26 @@
 import { HasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
-import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
 import CryptoJS from "crypto-js";
-import lodash from "lodash";
 
-import { ConstrainedBasis } from "./basis/constrained_basis";
+import {
+    MaterialSchema,
+} from "@exabyte-io/code.js/src/types"
+
+
+import { ConstrainedBasis, ConstrainedBasisJSON } from "./basis/constrained_basis";
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
     PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS,
 } from "./cell/conventional_cell";
 import { ATOMIC_COORD_UNITS, units } from "./constants";
-import { Lattice } from "./lattice/lattice";
+import { Lattice, LatticeJSON } from "./lattice/lattice";
 import { BravaisConfigProps } from "./lattice/lattice_vectors";
 import { LATTICE_TYPE } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
+import { BasisConfig } from "./parsers/xyz";
+import { Constraint } from "./constraints/constraints";
+import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
 
 export const defaultMaterialConfig = {
     name: "Silicon FCC",
@@ -57,31 +63,44 @@ export const defaultMaterialConfig = {
     },
 };
 
-export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
-    constructor(config: AnyObject) {
+interface Property {
+    name: string;
+    value: string;
+}
+
+export interface MaterialJSON extends AnyObject {
+    lattice:LatticeJSON;
+    basis: ConstrainedBasisJSON;
+    name: string;
+    isNonPeriodic: boolean;
+}
+
+interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
+
+}
+
+
+export abstract class Material extends HasMetadataNamedDefaultableInMemoryEntity {
+    abstract src: {
+        extension: string;
+        text: string;
+    };
+
+    _json: MaterialSchemaJSON;
+
+    constructor(config: MaterialSchemaJSON) {
         super(config);
-        this._json = lodash.cloneDeep(config || {});
+        this._json = {...config};
+        this.name = super.name || this.formula
     }
 
-    toJSON() {
-        return this.toJSONDefault();
-    }
-
-    toJSONDefault() {
+    toJSON(): MaterialJSON {
         return {
             lattice: this.Lattice.toJSON(),
             basis: this.Basis.toJSON(),
-            name: this.name || this.formula,
-            isNonPeriodic: this.isNonPeriodic || false,
+            name: this.name,
+            isNonPeriodic: this.isNonPeriodic,
         };
-    }
-
-    get name(): string {
-        return super.name || this.formula;
-    }
-
-    set name(name) {
-        super.name = name;
     }
 
     static get defaultConfig() {
@@ -97,7 +116,7 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      * Gets Bolean value for whether or not a material is non-periodic vs periodic.
      * False = periodic, True = non-periodic
      */
-    get isNonPeriodic() {
+    get isNonPeriodic(): boolean {
         return this.prop("isNonPeriodic", false);
     }
 
@@ -110,29 +129,26 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
 
     /**
      * @summary Returns the specific derived property (as specified by name) for a material.
-     * @param {String} name
-     * @returns {Object}
      */
-    getDerivedPropertyByName(name: string) {
+    getDerivedPropertyByName(name: string): Property| undefined {
         return this.getDerivedProperties().find((x) => x.name === name);
     }
 
     /**
      * @summary Returns the derived properties array for a material.
-     * @returns {Array}
      */
-    getDerivedProperties() {
+    getDerivedProperties(): Property[] {
         return this.prop("derivedProperties", []);
     }
 
     /**
      * Gets material's formula
      */
-    get formula() {
+    get formula(): string {
         return this.prop("formula") || this.Basis.formula;
     }
 
-    get unitCellFormula() {
+    get unitCellFormula(): string {
         return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
     }
 
@@ -141,28 +157,25 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      * @param format Format (xyz, etc.)
      * @param unitz crystal/cartesian
      */
-    setBasis(textOrObject: string | object, format: string, unitz: string) {
-        let basis: object | undefined;
+    setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string) {
+        let basis: BasisConfig | undefined;
         switch (format) {
             case "xyz":
-                basis = parsers.xyz.toBasisConfig(textOrObject, unitz);
+                basis = parsers.xyz.toBasisConfig(textOrObject as string, unitz);
                 break;
             default:
-                basis = textOrObject;
+                basis = textOrObject as BasisConfig;
         }
         this.setProp("basis", basis);
         this.updateFormula();
     }
 
-    setBasisConstraints(constraints) {
-        this.setBasis({
-            ...this.basis,
-            constraints,
-        });
+    setBasisConstraints(constraints: Constraint[]) {
+        this.setBasis({ ...this.basis, constraints });
     }
 
-    get basis() {
-        return this.prop("basis", undefined);
+    get basis(): BasisConfig {
+        return this.prop<BasisConfig>("basis", undefined);
     }
 
     // returns the instance of {ConstrainedBasis} class
@@ -173,9 +186,8 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
         });
     }
 
-    /** High-level access to unique elements from material instead of basis.
-     *
-     * @return {String[]}
+    /** 
+     * High-level access to unique elements from material instead of basis.
      */
     get uniqueElements() {
         return this.Basis.uniqueElements;
@@ -198,7 +210,7 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      *  inchi cannot be found.
      *  @returns {String}
      */
-    getInchiStringForHash() {
+    getInchiStringForHash(): string {
         const inchi = this.getDerivedPropertyByName("inchi");
         if (inchi) {
             return inchi.value;
@@ -280,16 +292,15 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      *    Si       0.000000000   0.000000000  -0.000000000
      *    Si       0.250000000   0.250000000   0.250000000
      * ```
-     * @return {String}
      */
-    getAsQEFormat() {
+    getAsQEFormat(): string {
         return parsers.espresso.toEspressoFormat(this.toJSON());
     }
 
     /**
      * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
      */
-    getAsPOSCAR(ignoreOriginal = false, omitConstraints = false) {
+    getAsPOSCAR(ignoreOriginal = false, omitConstraints = false): string {
         const { src } = this;
         // By default return original source if exists
         if (src && src.extension === "poscar" && !ignoreOriginal) {
@@ -302,7 +313,7 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
      * Returns a copy of the material with conventional cell constructed instead of primitive.
      */
     getACopyWithConventionalCell() {
-        const material = this.clone();
+        const material = this.clone<Material>();
 
         // if conventional and primitive cells are the same => return a copy.
         if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type)) return material;
@@ -311,11 +322,12 @@ export class Material extends HasMetadataNamedDefaultableInMemoryEntity {
             PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[this.Lattice.type];
         const conventionalLatticeType =
             PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES[this.Lattice.type];
-        const config = supercellTools.generateConfig(material, conventionalSupercellMatrix, 1);
+        const config = supercellTools.generateConfig(material, conventionalSupercellMatrix);
 
         config.lattice.type = conventionalLatticeType;
         config.name = `${material.name} - conventional cell`;
 
+        // @ts-ignore
         return new this.constructor(config);
     }
 }

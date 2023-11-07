@@ -95,7 +95,7 @@ export class LatticeVectors implements LatticeVectorsConfig {
         });
     }
 
-    get vectorArrays() {
+    get vectorArrays(): [Vector, Vector, Vector] {
         return [this.a, this.b, this.c];
     }
 
