@@ -12,12 +12,7 @@ export type ValueOrObjectArray<T> = ObjectWithIdAndValue<T>[] | T[];
 export function isObjectWithIdAndValue<T>(
     valueOrObject: ValueOrObject<T>,
 ): valueOrObject is ObjectWithIdAndValue<T> {
-    return Boolean(
-        _.isObject(valueOrObject) &&
-            !_.isArray(valueOrObject) &&
-            valueOrObject.id &&
-            valueOrObject.value,
-    );
+    return Boolean(_.isObject(valueOrObject) && !_.isArray(valueOrObject) && valueOrObject.value);
 }
 
 /**

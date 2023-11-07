@@ -35,7 +35,7 @@ export class ArrayWithIds<T> {
         if (isArrayOfObjectsWithIdAndValue<T>(array)) {
             this.array = array.sort((a, b) => a.id - b.id).map((element) => element.value);
         } else {
-            this.array = array;
+            this.array = [...array];
         }
     }
 
