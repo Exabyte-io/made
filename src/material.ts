@@ -393,3 +393,5 @@ export function MaterialMixin<
 export const Material = MaterialMixin(
     HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity,
 );
+
+export type Material = InstanceType<typeof Material>;
