@@ -96,6 +96,7 @@ export function MaterialMixin<
 
         declare _json: MaterialSchemaJSON;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         constructor(...config: any[]) {
             super(...config);
             this.name = super.name || this.formula;
@@ -103,6 +104,7 @@ export function MaterialMixin<
 
         toJSON(): MaterialJSON {
             return {
+                ...super.toJSON(),
                 lattice: this.Lattice.toJSON(),
                 basis: this.Basis.toJSON(),
                 name: this.name,
