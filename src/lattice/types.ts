@@ -1,3 +1,5 @@
+import { ArrayOf3NumberElementsSchema, LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+
 export const DEFAULT_LATTICE_UNITS = {
     // by default lattice vectors shall be measured in angstrom, angles - in degrees
     length: {
@@ -13,7 +15,6 @@ export const DEFAULT_LATTICE_UNITS = {
  * Convention used is derived from:
  *   Setyawan, W., & Curtarolo, S. (2010). High-throughput electronic band structure calculations:
  *   Challenges and tools. Computational Materials Science, 49(2), 299-312. doi:10.1016/j.commatsci.2010.05.010
- * Lattice parameters a, b, c are stored for CONVENTIONAL lattice, however the default unit cell is calculated for
  */
 
 export enum LatticeType {
@@ -32,6 +33,8 @@ export enum LatticeType {
     MCLC = "MCLC",
     TRI = "TRI",
 }
+
+export type LatticeTypeSchema = LatticeImplicitSchema["type"];
 
 export enum LatticeTypeExtended {
     BCC = "BCC",
@@ -60,11 +63,7 @@ export enum LatticeTypeExtended {
     TRI_1b = "TRI_1b",
 }
 
-export interface Vector extends Array<number> {
-    0: number;
-    1: number;
-    2: number;
-}
+export type Vector = ArrayOf3NumberElementsSchema;
 
 export interface VectorsAsArray extends Array<Vector> {
     0: Vector;

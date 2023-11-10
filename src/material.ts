@@ -322,7 +322,7 @@ export function MaterialMixin<
          * Returns a copy of the material with conventional cell constructed instead of primitive.
          */
         getACopyWithConventionalCell(): MadeMaterial {
-            const material = this.clone<MadeMaterial>();
+            const material = this.clone();
 
             // if conventional and primitive cells are the same => return a copy.
             if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type)) return material;

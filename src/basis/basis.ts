@@ -1,3 +1,4 @@
+// import { BasisSchema } from "@exabyte-io/code.js/src/types";
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import _ from "underscore";
@@ -30,7 +31,7 @@ export interface ElementCount {
     value: string;
 }
 
-export interface BasisJSON {
+export interface BasisSchema {
     elements: ObjectWithIdAndValue<string>[];
     coordinates: ObjectWithIdAndValue<Coordinate>[];
     units: string;
@@ -142,8 +143,8 @@ export class Basis {
             ]
         }
      */
-    toJSON(): BasisJSON {
-        const json: BasisJSON = {
+    toJSON(): BasisSchema {
+        const json = {
             elements: this.elements,
             coordinates: this.coordinates,
             units: this.units,
@@ -243,7 +244,7 @@ export class Basis {
     }
 
     /** A representation where all coordinates are within 0 and 1 in crystal units */
-    get standardRepresentation(): BasisJSON {
+    get standardRepresentation(): BasisSchema {
         const originalUnits = this.units;
 
         this.toStandardRepresentation();

@@ -1,16 +1,17 @@
+// import { BasisSchema } from "@exabyte-io/code.js/src/types";
 import s from "underscore.string";
 
 import { ArrayWithIds } from "../abstract/array_with_ids";
 import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 import { AtomicConstraints, Constraint, ConstraintValue } from "../constraints/constraints";
-import { Basis, BasisJSON, BasisProps } from "./basis";
+import { Basis, BasisProps, BasisSchema } from "./basis";
 import { Coordinate } from "./types";
 
 export interface ConstrainedBasisProps extends BasisProps {
     constraints: Constraint[];
 }
 
-export interface ConstrainedBasisJSON extends BasisJSON {
+export interface ConstrainedBasisJSON extends BasisSchema {
     constraints: ObjectWithIdAndValue<ConstraintValue>[];
 }
 
