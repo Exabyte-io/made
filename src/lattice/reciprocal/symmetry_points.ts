@@ -4,8 +4,9 @@
  * This file contains information about the Brillouin zone symmetry points by lattice type.
  * [AFLOW](https://arxiv.org/abs/1004.2974) methodology is used for implementation.
  */
+import { LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+
 import { Lattice } from "../lattice";
-import { RequiredBravaisConfig } from "../lattice_bravais";
 import { LatticeType } from "../types";
 
 const POINTS = {
@@ -93,7 +94,7 @@ const POINTS = {
         ];
     },
 
-    [LatticeType.BCT]: ({ a, c }: RequiredBravaisConfig) => {
+    [LatticeType.BCT]: ({ a, c }: LatticeImplicitSchema) => {
         let n;
         if (c < a) {
             // BCT-1
@@ -197,7 +198,7 @@ const POINTS = {
         ];
     },
 
-    [LatticeType.ORCF]: ({ a, b, c }: RequiredBravaisConfig) => {
+    [LatticeType.ORCF]: ({ a, b, c }: LatticeImplicitSchema) => {
         let n;
         if (1 / (a * a) >= 1 / (b * b) + 1 / (c * c)) {
             // ORCF-1,3
@@ -286,7 +287,7 @@ const POINTS = {
         ];
     },
 
-    [LatticeType.ORCI]: ({ a, b, c }: RequiredBravaisConfig) => {
+    [LatticeType.ORCI]: ({ a, b, c }: LatticeImplicitSchema) => {
         const n = (1 + (a * a) / (c * c)) / 4;
         const e = (1 + (b * b) / (c * c)) / 4;
         const d = (b * b - a * a) / (4 * c * c);
@@ -343,7 +344,7 @@ const POINTS = {
         ];
     },
 
-    [LatticeType.ORCC]: ({ a, b }: RequiredBravaisConfig) => {
+    [LatticeType.ORCC]: ({ a, b }: LatticeImplicitSchema) => {
         const e = (1 + (a * a) / (b * b)) / 4;
         return [
             {
@@ -410,7 +411,7 @@ const POINTS = {
         ];
     },
 
-    [LatticeType.RHL]: ({ alpha }: RequiredBravaisConfig) => {
+    [LatticeType.RHL]: ({ alpha }: LatticeImplicitSchema) => {
         let n, v;
         const cosAlpha = Math.cos((alpha / 180) * Math.PI);
         if (cosAlpha > 0) {
@@ -499,7 +500,7 @@ const POINTS = {
         ];
     },
 
-    [LatticeType.MCL]: ({ b, c, alpha }: RequiredBravaisConfig) => {
+    [LatticeType.MCL]: ({ b, c, alpha }: LatticeImplicitSchema) => {
         const cosAlpha = Math.cos((alpha / 180) * Math.PI);
         const n = ((1 / 2) * (1 - (b * cosAlpha) / c)) / (1 - cosAlpha * cosAlpha);
         const v = 1 / 2 - (n * c * cosAlpha) / b;
@@ -567,7 +568,7 @@ const POINTS = {
         ];
     },
 
-    [LatticeType.MCLC]: ({ a, b, c, alpha, gamma }: RequiredBravaisConfig) => {
+    [LatticeType.MCLC]: ({ a, b, c, alpha, gamma }: LatticeImplicitSchema) => {
         const cosAlpha = Math.cos((alpha / 180) * Math.PI);
         let e, n, p, f, m, d, v;
         if (gamma >= 90) {
@@ -805,7 +806,7 @@ const POINTS = {
         ];
     },
 
-    [LatticeType.TRI]: ({ alpha, beta, gamma }: RequiredBravaisConfig) => {
+    [LatticeType.TRI]: ({ alpha, beta, gamma }: LatticeImplicitSchema) => {
         if (alpha > 90 && beta > 90 && gamma >= 90) {
             // TRI-1a,2a
             return [

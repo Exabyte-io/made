@@ -1,20 +1,13 @@
+import { LatticeExplicitUnit, LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+
 import { primitiveCell } from "../cell/primitive_cell";
 import constants from "../constants";
 import math from "../math";
-import { BravaisConfig } from "./lattice_bravais";
 import { LatticeType, Vector } from "./types";
 
-interface LatticeVectorsConfig {
-    a: Vector; // vector of the lattice.
-    b: Vector; // vector of the lattice.
-    c: Vector; // vector of the lattice.
-    alat: number; // scaling factor for the vector coordinates, defaults to 1.
-    units?: string; // units container.
-}
+export type RequiredLatticeExplicitUnit = Required<LatticeExplicitUnit>;
 
-export type RequiredLatticeVectorsConfig = Required<LatticeVectorsConfig>;
-
-export interface BravaisConfigProps extends BravaisConfig {
+export interface BravaisConfigProps extends Partial<LatticeImplicitSchema> {
     isConventional?: boolean;
 }
 
@@ -22,21 +15,21 @@ export interface BravaisConfigProps extends BravaisConfig {
  * @summary: class that holds parameters of a Bravais Lattice: a, b, c, alpha, beta, gamma + corresponding units.
  * When stored as class variables units for lengths are always "angstrom"s, angle - "degree"s
  */
-export class LatticeVectors implements LatticeVectorsConfig {
-    a: Vector;
+export class LatticeVectors implements RequiredLatticeExplicitUnit {
+    a: RequiredLatticeExplicitUnit["a"];
 
-    b: Vector;
+    b: RequiredLatticeExplicitUnit["b"];
 
-    c: Vector;
+    c: RequiredLatticeExplicitUnit["c"];
 
-    alat: number;
+    alat: RequiredLatticeExplicitUnit["alat"];
 
-    units: string;
+    units: RequiredLatticeExplicitUnit["units"];
 
     /**
      * Create a Bravais lattice.
      */
-    constructor(config: LatticeVectorsConfig) {
+    constructor(config: LatticeExplicitUnit) {
         const { a, b, c, alat = 1, units = "angstrom" } = config;
         const k = constants.units.bohr === units ? constants.coefficients.BOHR_TO_ANGSTROM : 1;
 
@@ -47,7 +40,7 @@ export class LatticeVectors implements LatticeVectorsConfig {
         this.units = "angstrom";
     }
 
-    static _roundValue(arr: number[]) {
+    static _roundValue(arr: number[]): number[] {
         return arr.map((el) => math.precise(math.roundToZero(el)));
     }
 
@@ -122,7 +115,7 @@ export class LatticeVectors implements LatticeVectorsConfig {
             "units" : "angstrom"
         }
      */
-    toJSON(): RequiredLatticeVectorsConfig {
+    toJSON(): RequiredLatticeExplicitUnit {
         return {
             ...this,
             a: LatticeVectors._roundValue(this.a),

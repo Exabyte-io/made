@@ -1,3 +1,4 @@
+import { LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
 import lodash from "lodash";
 import _ from "underscore";
 
@@ -5,17 +6,13 @@ import { Cell } from "../cell/cell";
 import { primitiveCell } from "../cell/primitive_cell";
 import { HASH_TOLERANCE } from "../constants";
 import math from "../math";
-import { FromVectorsProps, LatticeBravais, RequiredBravaisConfig } from "./lattice_bravais";
-import {
-    BravaisConfigProps,
-    LatticeVectors,
-    RequiredLatticeVectorsConfig,
-} from "./lattice_vectors";
+import { FromVectorsProps, LatticeBravais, RequiredLatticeImplicitSchema } from "./lattice_bravais";
+import { BravaisConfigProps, LatticeVectors, RequiredLatticeExplicitUnit } from "./lattice_vectors";
 import { LATTICE_TYPE_CONFIGS, LatticeType, LatticeTypeExtended } from "./types";
 import { UnitCell, UnitCellProps } from "./unit_cell";
 
-export interface RequiredBravaisConfigWithVectors extends RequiredBravaisConfig {
-    vectors: RequiredLatticeVectorsConfig;
+export interface RequiredBravaisConfigWithVectors extends RequiredLatticeImplicitSchema {
+    vectors: RequiredLatticeExplicitUnit;
 }
 
 export type LatticeJSON = RequiredBravaisConfigWithVectors;
@@ -38,7 +35,7 @@ export class Lattice extends LatticeBravais implements LatticeJSON {
      * Create a Lattice class from a config object.
      * @param {Object} config - Config object. See LatticeVectors.fromBravais.
      */
-    constructor(config: BravaisConfigProps = {}) {
+    constructor(config: Partial<LatticeImplicitSchema> = {}) {
         super(config);
         this.vectors = LatticeVectors.fromBravais(config);
     }
@@ -180,7 +177,7 @@ export class Lattice extends LatticeBravais implements LatticeJSON {
      * Returns a "default" primitive lattice by type, with lattice parameters scaled by the length of "a",
      * @param latticeConfig {Object} LatticeBravais config (see constructor)
      */
-    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: RequiredBravaisConfig) {
+    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: LatticeImplicitSchema) {
         const f_ = Lattice._roundValue;
         // construct new primitive cell using lattice parameters and skip rounding the vectors
         const pCell = primitiveCell(latticeConfig, true);

@@ -1,3 +1,5 @@
+import { ArrayOf3NumberElementsSchema, LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+
 export const DEFAULT_LATTICE_UNITS = {
     // by default lattice vectors shall be measured in angstrom, angles - in degrees
     length: {
@@ -33,6 +35,8 @@ export enum LatticeType {
     TRI = "TRI",
 }
 
+export type LatticeTypeSchema = LatticeImplicitSchema["type"];
+
 export enum LatticeTypeExtended {
     BCC = "BCC",
     BCT_1 = "BCT-1",
@@ -60,11 +64,7 @@ export enum LatticeTypeExtended {
     TRI_1b = "TRI_1b",
 }
 
-export interface Vector extends Array<number> {
-    0: number;
-    1: number;
-    2: number;
-}
+export type Vector = ArrayOf3NumberElementsSchema;
 
 export interface VectorsAsArray extends Array<Vector> {
     0: Vector;
