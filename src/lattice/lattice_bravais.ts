@@ -1,31 +1,19 @@
+import { LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+
 import constants from "../constants";
 import math from "../math";
-import { LATTICE_TYPE_CONFIGS, LatticeType, Vector, VectorsAsArray } from "./types";
+import { LATTICE_TYPE_CONFIGS, LatticeTypeSchema, Vector, VectorsAsArray } from "./types";
 
-export interface BravaisConfig {
-    a?: number; // lattice constant a.
-    b?: number; // lattice constant b.
-    c?: number; // lattice constant c.
-    alpha?: number; // lattice angle alpha.
-    beta?: number; // lattice angle beta.
-    gamma?: number; // lattice angle gamma.
-    units?: {
-        // units container
-        length: string; // units for length (eg. "angstrom", "crystal")
-        angle: string; // units for angles (eg. "degree", "radian")
-    };
-    type?: LatticeType;
-}
-
-export type RequiredBravaisConfig = Required<BravaisConfig>;
+export type RequiredLatticeImplicitSchema = Required<LatticeImplicitSchema>;
+export type Units = RequiredLatticeImplicitSchema["units"];
 
 export interface FromVectorsProps {
     a: Vector; // vector of the lattice.
     b: Vector; // vector of the lattice.
     c: Vector; // vector of the lattice.
     alat?: number; // scaling factor for the vector coordinates, defaults to 1.
-    units?: string; // units for the coordinates (eg. angstrom, crystal).
-    type?: LatticeType; // type of the lattice to be created, defaults to TRI when not provided.
+    units?: Units["length"]; // units for the coordinates (eg. angstrom, crystal).
+    type?: LatticeTypeSchema; // type of the lattice to be created, defaults to TRI when not provided.
     skipRounding?: boolean; // whether to skip rounding the resulting lattice values, defaults to `false`.
 }
 
@@ -33,7 +21,7 @@ export interface FromVectorsProps {
  * @summary: class that holds parameters of a Bravais Lattice: a, b, c, alpha, beta, gamma + corresponding units.
  * When stored as class variables units for lengths are always "angstrom"s, angle - "degree"s
  */
-export class LatticeBravais implements RequiredBravaisConfig {
+export class LatticeBravais implements LatticeImplicitSchema {
     a: number;
 
     b: number;
@@ -46,17 +34,14 @@ export class LatticeBravais implements RequiredBravaisConfig {
 
     gamma: number;
 
-    units: {
-        length: string;
-        angle: string;
-    };
+    units: Units;
 
-    type: LatticeType;
+    type: LatticeImplicitSchema["type"];
 
     /**
      * Create a Bravais lattice.
      */
-    constructor(config: BravaisConfig) {
+    constructor(config: Partial<LatticeImplicitSchema>) {
         const {
             a = 1, // default lattice is cubic with unity in edge sizes
             b = a,
@@ -65,7 +50,7 @@ export class LatticeBravais implements RequiredBravaisConfig {
             beta = alpha,
             gamma = alpha,
             // if we do not know what lattice type this is => set to TRI
-            type = LatticeType.TRI,
+            type = "TRI",
             units = {
                 length: "angstrom",
                 angle: "degree",
@@ -98,7 +83,7 @@ export class LatticeBravais implements RequiredBravaisConfig {
         c,
         alat = 1,
         units = "angstrom",
-        type = LatticeType.TRI,
+        type = "TRI",
         skipRounding = false,
     }: FromVectorsProps) {
         const roundValue = skipRounding ? (x: number) => x : this._roundValue;
@@ -125,7 +110,7 @@ export class LatticeBravais implements RequiredBravaisConfig {
     /**
      * See fromVectors above.
      */
-    static fromVectorArrays(array: VectorsAsArray, type: LatticeType, skipRounding = true) {
+    static fromVectorArrays(array: VectorsAsArray, type: LatticeTypeSchema, skipRounding = true) {
         return this.fromVectors({
             a: array[0],
             b: array[1],
@@ -174,7 +159,7 @@ export class LatticeBravais implements RequiredBravaisConfig {
             "type" : "FCC"
          }
      */
-    toJSON(): RequiredBravaisConfig {
+    toJSON(): RequiredLatticeImplicitSchema {
         return {
             ...this,
             units: {
