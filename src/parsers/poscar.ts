@@ -22,6 +22,7 @@ const atomicConstraintsCharFromBool = (bool: boolean): string => (bool ? "T" : "
 function toPoscar(materialOrConfig: MaterialJSON, omitConstraints = false): string {
     const lattice = new Lattice(materialOrConfig.lattice);
     const vectorsAsString = _latticeVectorsToString(lattice.vectorArrays);
+    // @ts-ignore
     const basis = new ConstrainedBasis({
         ...materialOrConfig.basis,
         cell: lattice.vectorArrays,

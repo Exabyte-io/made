@@ -1,5 +1,6 @@
 /* eslint no-unused-vars: 0 */
-import { RequiredBravaisConfig } from "../lattice/lattice_bravais";
+import { LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+
 import { LatticeType, VectorsAsArray } from "../lattice/types";
 import math from "../math";
 
@@ -8,7 +9,7 @@ import math from "../math";
  * Following Setyawan, W., & Curtarolo, S. (2010). doi:10.1016/j.commatsci.2010.05.010
  */
 const PRIMITIVE_CELLS = {
-    [LatticeType.CUB]: ({ a }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.CUB]: ({ a }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a, 0, 0],
             [0, a, 0],
@@ -16,7 +17,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.FCC]: ({ a }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.FCC]: ({ a }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [0.0, a / 2, a / 2],
             [a / 2, 0.0, a / 2],
@@ -24,7 +25,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.BCC]: ({ a }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.BCC]: ({ a }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [-a / 2, a / 2, a / 2],
             [a / 2, -a / 2, a / 2],
@@ -32,7 +33,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.TET]: ({ a, c }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.TET]: ({ a, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a, 0, 0],
             [0, a, 0],
@@ -40,7 +41,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.BCT]: ({ a, c }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.BCT]: ({ a, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [-a / 2, a / 2, c / 2],
             [a / 2, -a / 2, c / 2],
@@ -48,7 +49,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.ORC]: ({ a, b, c }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.ORC]: ({ a, b, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a, 0, 0],
             [0, b, 0],
@@ -56,7 +57,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.ORCF]: ({ a, b, c }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.ORCF]: ({ a, b, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [0, b / 2, c / 2],
             [a / 2, 0, c / 2],
@@ -64,7 +65,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.ORCI]: ({ a, b, c }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.ORCI]: ({ a, b, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [-a / 2, b / 2, c / 2],
             [a / 2, -b / 2, c / 2],
@@ -72,7 +73,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.ORCC]: ({ a, b, c }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.ORCC]: ({ a, b, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a / 2, b / 2, 0],
             [-a / 2, b / 2, 0],
@@ -80,7 +81,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.HEX]: ({ a, c }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.HEX]: ({ a, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a / 2, (-a * math.sqrt(3)) / 2, 0],
             [a / 2, (a * math.sqrt(3)) / 2, 0],
@@ -88,7 +89,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.RHL]: ({ a, alpha }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.RHL]: ({ a, alpha }: LatticeImplicitSchema): VectorsAsArray => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         const cosHalfAlpha = math.sqrt((1 / 2) * (1 + cosAlpha));
         const sinHalfAlpha = math.sqrt((1 / 2) * (1 - cosAlpha));
@@ -103,7 +104,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.MCL]: ({ a, b, c, alpha }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.MCL]: ({ a, b, c, alpha }: LatticeImplicitSchema): VectorsAsArray => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         return [
             [a, 0, 0],
@@ -112,7 +113,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LatticeType.MCLC]: ({ a, b, c, alpha }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.MCLC]: ({ a, b, c, alpha }: LatticeImplicitSchema): VectorsAsArray => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         return [
             [a / 2, b / 2, 0],
@@ -122,7 +123,7 @@ const PRIMITIVE_CELLS = {
     },
 
     // Algorithm from http://pymatgen.org/_modules/pymatgen/core/lattice.html (from_params)
-    [LatticeType.TRI]: ({ a, b, c, alpha, beta, gamma }: RequiredBravaisConfig): VectorsAsArray => {
+    [LatticeType.TRI]: ({ a, b, c, alpha, beta, gamma }: LatticeImplicitSchema): VectorsAsArray => {
         // convert angles to Radians
         // eslint-disable-next-line no-param-reassign
         [alpha, beta, gamma] = [alpha, beta, gamma].map(
@@ -151,7 +152,7 @@ const PRIMITIVE_CELLS = {
         alpha,
         beta,
         gamma,
-    }: RequiredBravaisConfig): VectorsAsArray => {
+    }: LatticeImplicitSchema): VectorsAsArray => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         const cosBeta = math.cos((beta / 180) * math.PI);
         const cosGamma = math.cos((gamma / 180) * math.PI);
@@ -181,7 +182,7 @@ const PRIMITIVE_CELLS = {
  * @return Cell.vectorsAsArray
  */
 export function primitiveCell(
-    lattice: RequiredBravaisConfig,
+    lattice: LatticeImplicitSchema,
     skipRounding = false,
 ): VectorsAsArray {
     const [vectorA, vectorB, vectorC] = PRIMITIVE_CELLS[lattice.type || LatticeType.TRI](lattice);

@@ -1,3 +1,4 @@
+import { LatticeImplicitSchema, LatticeSchema } from "@exabyte-io/code.js/src/types";
 import lodash from "lodash";
 import _ from "underscore";
 
@@ -5,20 +6,10 @@ import { Cell } from "../cell/cell";
 import { primitiveCell } from "../cell/primitive_cell";
 import { HASH_TOLERANCE } from "../constants";
 import math from "../math";
-import { FromVectorsProps, LatticeBravais, RequiredBravaisConfig } from "./lattice_bravais";
-import {
-    BravaisConfigProps,
-    LatticeVectors,
-    RequiredLatticeVectorsConfig,
-} from "./lattice_vectors";
+import { FromVectorsProps, LatticeBravais } from "./lattice_bravais";
+import { BravaisConfigProps, LatticeVectors } from "./lattice_vectors";
 import { LATTICE_TYPE_CONFIGS, LatticeType, LatticeTypeExtended } from "./types";
 import { UnitCell, UnitCellProps } from "./unit_cell";
-
-export interface RequiredBravaisConfigWithVectors extends RequiredBravaisConfig {
-    vectors: RequiredLatticeVectorsConfig;
-}
-
-export type LatticeJSON = RequiredBravaisConfigWithVectors;
 
 /**
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
@@ -31,14 +22,14 @@ export const nonPeriodicLatticeScalingFactor = 2.0;
  * Follows Bravais convention for lattice types and contains lattice vectors within.
  * Units for lattice vector coordinates are "angstroms", and "degrees" for the corresponding angles.
  */
-export class Lattice extends LatticeBravais implements LatticeJSON {
+export class Lattice extends LatticeBravais implements LatticeSchema {
     vectors: LatticeVectors;
 
     /**
      * Create a Lattice class from a config object.
      * @param {Object} config - Config object. See LatticeVectors.fromBravais.
      */
-    constructor(config: BravaisConfigProps = {}) {
+    constructor(config: Partial<LatticeImplicitSchema> = {}) {
         super(config);
         this.vectors = LatticeVectors.fromBravais(config);
     }
@@ -87,8 +78,9 @@ export class Lattice extends LatticeBravais implements LatticeJSON {
             }
         }
      */
-    toJSON(skipRounding = false): LatticeJSON {
+    toJSON(skipRounding = false): LatticeSchema {
         const round = skipRounding ? (x: number) => x : Lattice._roundValue; // round values by default
+
         return {
             a: round(this.a),
             b: round(this.b),
@@ -180,7 +172,7 @@ export class Lattice extends LatticeBravais implements LatticeJSON {
      * Returns a "default" primitive lattice by type, with lattice parameters scaled by the length of "a",
      * @param latticeConfig {Object} LatticeBravais config (see constructor)
      */
-    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: RequiredBravaisConfig) {
+    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: LatticeImplicitSchema) {
         const f_ = Lattice._roundValue;
         // construct new primitive cell using lattice parameters and skip rounding the vectors
         const pCell = primitiveCell(latticeConfig, true);

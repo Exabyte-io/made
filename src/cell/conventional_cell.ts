@@ -1,4 +1,4 @@
-import { LatticeType } from "../lattice/types";
+import { LatticeType, LatticeTypeSchema } from "../lattice/types";
 
 /**
  * Routines for calculating conventional cell vectors from primitive cell Bravais parameters.
@@ -79,7 +79,9 @@ export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES = {
     [`${LatticeType.TRI}alt`]: LatticeType.TRI,
 };
 
-export function isConventionalCellSameAsPrimitiveForLatticeType(latticeType: LatticeType): boolean {
+export function isConventionalCellSameAsPrimitiveForLatticeType(
+    latticeType: LatticeTypeSchema,
+): boolean {
     const multiplier = PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[latticeType || LatticeType.TRI];
     return multiplier === unitMatrix;
 }
