@@ -91,6 +91,7 @@ export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefau
 
     toJSON(): MaterialJSON {
         return {
+            ...super.toJSON(),
             lattice: this.Lattice.toJSON(),
             basis: this.Basis.toJSON(),
             name: this.name,
@@ -308,7 +309,7 @@ export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefau
      * Returns a copy of the material with conventional cell constructed instead of primitive.
      */
     getACopyWithConventionalCell() {
-        const material = this.clone<Material>();
+        const material: Material = this.clone();
 
         // if conventional and primitive cells are the same => return a copy.
         if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type)) return material;
