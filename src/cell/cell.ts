@@ -1,6 +1,6 @@
 import { Coordinate } from "../basis/types";
 import constants from "../constants";
-import { Vector } from "../lattice/types";
+import { Vector, VectorsAsArray } from "../lattice/types";
 import math from "../math";
 
 const MATRIX = math.matrix;
@@ -28,7 +28,7 @@ export class Cell {
      * Create a cell.
      * @param nestedArray {Number[][]} is an array of cell vectors in cartesian Angstrom units.
      */
-    constructor(nestedArray: [Vector, Vector, Vector]) {
+    constructor(nestedArray: VectorsAsArray) {
         [this.vector1, this.vector2, this.vector3] = nestedArray;
     }
 
@@ -36,7 +36,7 @@ export class Cell {
      * Get cell vectors as (a nested) array.
      * @example [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
      */
-    get vectorsAsArray(): [Vector, Vector, Vector] {
+    get vectorsAsArray(): VectorsAsArray {
         return [
             this.vector1,
             this.vector2,

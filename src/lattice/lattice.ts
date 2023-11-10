@@ -1,4 +1,4 @@
-import { LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+import { LatticeImplicitSchema, LatticeSchema } from "@exabyte-io/code.js/src/types";
 import lodash from "lodash";
 import _ from "underscore";
 
@@ -6,16 +6,10 @@ import { Cell } from "../cell/cell";
 import { primitiveCell } from "../cell/primitive_cell";
 import { HASH_TOLERANCE } from "../constants";
 import math from "../math";
-import { FromVectorsProps, LatticeBravais, RequiredLatticeImplicitSchema } from "./lattice_bravais";
-import { BravaisConfigProps, LatticeVectors, RequiredLatticeExplicitUnit } from "./lattice_vectors";
+import { FromVectorsProps, LatticeBravais } from "./lattice_bravais";
+import { BravaisConfigProps, LatticeVectors } from "./lattice_vectors";
 import { LATTICE_TYPE_CONFIGS, LatticeType, LatticeTypeExtended } from "./types";
 import { UnitCell, UnitCellProps } from "./unit_cell";
-
-export interface RequiredBravaisConfigWithVectors extends RequiredLatticeImplicitSchema {
-    vectors: RequiredLatticeExplicitUnit;
-}
-
-export type LatticeJSON = RequiredBravaisConfigWithVectors;
 
 /**
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
@@ -28,7 +22,7 @@ export const nonPeriodicLatticeScalingFactor = 2.0;
  * Follows Bravais convention for lattice types and contains lattice vectors within.
  * Units for lattice vector coordinates are "angstroms", and "degrees" for the corresponding angles.
  */
-export class Lattice extends LatticeBravais implements LatticeJSON {
+export class Lattice extends LatticeBravais implements LatticeSchema {
     vectors: LatticeVectors;
 
     /**
@@ -84,8 +78,9 @@ export class Lattice extends LatticeBravais implements LatticeJSON {
             }
         }
      */
-    toJSON(skipRounding = false): LatticeJSON {
+    toJSON(skipRounding = false): LatticeSchema {
         const round = skipRounding ? (x: number) => x : Lattice._roundValue; // round values by default
+
         return {
             a: round(this.a),
             b: round(this.b),
