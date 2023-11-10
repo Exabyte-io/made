@@ -1,3 +1,4 @@
+import { MaterialSchema } from "@exabyte-io/code.js/src/types";
 import _ from "underscore";
 import s from "underscore.string";
 
@@ -9,7 +10,7 @@ import xyz from "./xyz";
  * Construct textual representation of a materialOrConfig according to Quantum ESPRESSO pw.x input format.
  * @param materialOrConfig - material class instance or its config object
  */
-function toEspressoFormat(materialOrConfig: MaterialJSON): string {
+function toEspressoFormat(materialOrConfig: MaterialSchema): string {
     const l = new Lattice(materialOrConfig.lattice);
     const vectors = l.vectorArrays;
     const vectorsAsString = _.map(vectors, (v) => {

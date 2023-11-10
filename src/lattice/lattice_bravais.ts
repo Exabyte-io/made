@@ -4,8 +4,7 @@ import constants from "../constants";
 import math from "../math";
 import { LATTICE_TYPE_CONFIGS, LatticeTypeSchema, Vector, VectorsAsArray } from "./types";
 
-export type RequiredLatticeImplicitSchema = Required<LatticeImplicitSchema>;
-export type Units = RequiredLatticeImplicitSchema["units"];
+export type Units = Required<LatticeImplicitSchema>["units"];
 
 export interface FromVectorsProps {
     a: Vector; // vector of the lattice.
@@ -159,7 +158,7 @@ export class LatticeBravais implements LatticeImplicitSchema {
             "type" : "FCC"
          }
      */
-    toJSON(): RequiredLatticeImplicitSchema {
+    toJSON(): LatticeImplicitSchema {
         return {
             ...this,
             units: {

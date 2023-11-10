@@ -5,7 +5,7 @@ import constants from "../constants";
 import math from "../math";
 import { LatticeType, Vector } from "./types";
 
-export type RequiredLatticeExplicitUnit = Required<LatticeExplicitUnit>;
+type RequiredLatticeExplicitUnit = Required<LatticeExplicitUnit>;
 
 export interface BravaisConfigProps extends Partial<LatticeImplicitSchema> {
     isConventional?: boolean;

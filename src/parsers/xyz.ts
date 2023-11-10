@@ -1,3 +1,4 @@
+import { MaterialSchema } from "@exabyte-io/code.js/src/types";
 import _ from "underscore";
 import s from "underscore.string";
 
@@ -151,8 +152,9 @@ function fromBasis(
  * @param fractional Coordinate units as fractional.
  * @return Class Instance
  */
-function fromMaterial(materialOrConfig: MaterialJSON, fractional = false): string {
+function fromMaterial(materialOrConfig: MaterialSchema, fractional = false): string {
     const lattice = new Lattice(materialOrConfig.lattice);
+    // @ts-ignore
     const basis = new ConstrainedBasis({
         ...materialOrConfig.basis,
         cell: lattice.vectorArrays,
