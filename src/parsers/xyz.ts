@@ -8,7 +8,6 @@ import { Constraint } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
 import { Vector } from "../lattice/types";
 import math from "../math";
-import { MaterialJSON } from "../types";
 import { InvalidLineError } from "./errors";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 

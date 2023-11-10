@@ -3,7 +3,6 @@ import _ from "underscore";
 import s from "underscore.string";
 
 import { Lattice } from "../lattice/lattice";
-import { MaterialJSON } from "../types";
 import xyz from "./xyz";
 
 /**
