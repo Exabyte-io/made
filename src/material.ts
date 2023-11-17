@@ -1,5 +1,6 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
+import { FileSourceSchema } from "@exabyte-io/code.js/dist/types";
 import { MaterialSchema } from "@exabyte-io/code.js/src/types";
 import CryptoJS from "crypto-js";
 
@@ -89,10 +90,7 @@ export function MaterialMixin<
     T extends MaterialBaseEntityConstructor = MaterialBaseEntityConstructor,
 >(superclass: T) {
     abstract class MadeMaterial extends superclass {
-        abstract src: {
-            extension: string;
-            text: string;
-        };
+        abstract src: FileSourceSchema;
 
         declare _json: MaterialSchemaJSON;
 
