@@ -89,9 +89,7 @@ export type MaterialBaseEntityConstructor<T extends MaterialBaseEntity = Materia
 export function MaterialMixin<
     T extends MaterialBaseEntityConstructor = MaterialBaseEntityConstructor,
 >(superclass: T) {
-    abstract class MadeMaterial extends superclass {
-        abstract src: FileSourceSchema;
-
+    class MadeMaterial extends superclass {
         declare _json: MaterialSchemaJSON;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,6 +110,14 @@ export function MaterialMixin<
 
         static get defaultConfig() {
             return defaultMaterialConfig;
+        }
+
+        get src() {
+            return this.prop<FileSourceSchema>("src");
+        }
+
+        set src(src: FileSourceSchema) {
+            this.setProp("src", src);
         }
 
         updateFormula() {
