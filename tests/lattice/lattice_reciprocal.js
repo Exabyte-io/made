@@ -1,5 +1,7 @@
+import { expect } from "chai";
+
 import { ReciprocalLattice } from "../../src/lattice/reciprocal/lattice_reciprocal";
-import { Na4Cl4, Si } from "../enums";
+import { Na4Cl4, Si, SiSlab } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Lattice Reciprocal", () => {
@@ -64,5 +66,34 @@ describe("Lattice Reciprocal", () => {
             },
         ];
         assertDeepAlmostEqual(actualPoints, expectedPoints);
+    });
+
+    it("should calculate k-grid dimensions based on number of points", () => {
+        const lattice = new ReciprocalLattice(SiSlab.lattice);
+        const dimensions = lattice.getDimensionsFromPointsCount(500);
+        const expectedDimensions = [12, 12, 4];
+        assertDeepAlmostEqual(dimensions, expectedDimensions);
+    });
+
+    it("should calculate k-grid dimensions based on spacing in cartesian units", () => {
+        const lattice = new ReciprocalLattice(SiSlab.lattice);
+        const dimensions = lattice.getDimensionsFromSpacing(0.09);
+        const expectedDimensions = [12, 12, 4];
+        assertDeepAlmostEqual(dimensions, expectedDimensions);
+    });
+
+    it("should calculate k-grid dimensions based on spacing in 1/angstrom", () => {
+        const lattice = new ReciprocalLattice(SiSlab.lattice);
+        const dimensions = lattice.getDimensionsFromSpacing(0.11, "angstrom");
+        const expectedDimensions = [12, 12, 4];
+        assertDeepAlmostEqual(dimensions, expectedDimensions);
+    });
+
+    it("should calculate average spacing in 1/angstrom based on k-grid dimensions", () => {
+        const lattice = new ReciprocalLattice(SiSlab.lattice);
+        const dimensions = [12, 12, 4];
+        const expectedSpacing = 0.1047;
+        const spacing = lattice.getSpacingFromDimensions(dimensions, "angstrom");
+        expect(spacing).to.be.almost(expectedSpacing, 1e-4);
     });
 });

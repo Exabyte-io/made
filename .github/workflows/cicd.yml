@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 16.x]
+        node-version: [12.x, 14.x, 16.x]
 
     steps:
       - name: Checkout this repository
@@ -33,11 +33,17 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Validate JS Packages and Codebase
+        uses: ./actions/js/validate
+        with:
+          node-version: ${{ matrix.node-version }}
+          package-directory: ./
+
 
   publish:
     needs: run-tests
     runs-on: ubuntu-latest
-    if: github.ref_name == 'dev'
+    if: github.ref_name == 'main'
 
     steps:
       - name: Checkout this repository
