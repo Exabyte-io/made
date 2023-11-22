@@ -56,7 +56,7 @@
         "@babel/register": "^7.16.0",
         "@exabyte-io/periodic-table.js": "2022.5.28-0",
         "array-almost-equal": "^1.0.0",
-        "crypto-js": "^3.1.9-1",
+        "crypto-js": "^4.2.0",
         "lodash": "^4.17.4",
         "mathjs": "^3.9.0",
         "mixwith": "^0.1.1",
