@@ -46,7 +46,7 @@ npm install @exabyte-io/made.js
 From source to contribute to development:
 
 ```bash
-git clone git@github.com:Exabyte-io/made-js.git
+git clone git@github.com:Exabyte-io/made.js.git
 ```
 
 ## Contribution
@@ -124,8 +124,8 @@ in the `lint-staged` directive of the `package.json` file (by using a `husky` pr
 if you add extra whitespace to a file, stage it, and try to commit it, you will see the following:
 
 ```bash
-➜  made-js git:(feature/SOF-4398-TB) ✗ git add src/basis/constrained_basis.js
-➜  made-js git:(feature/SOF-4398-TB) ✗ git commit -m "Test commit non-linted code"
+➜  made.js git:(feature/SOF-4398-TB) ✗ git add src/basis/constrained_basis.js
+➜  made.js git:(feature/SOF-4398-TB) ✗ git commit -m "Test commit non-linted code"
 ✔ Preparing...
 ✔ Running tasks...
 ✖ Prevented an empty git commit!
