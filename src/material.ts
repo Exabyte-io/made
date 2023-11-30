@@ -4,6 +4,7 @@ import {
     ConsistencyCheck,
     DerivedPropertiesSchema,
     FileSourceSchema,
+    InChIRepresentationSchema,
     MaterialSchema,
 } from "@exabyte-io/code.js/dist/types";
 import CryptoJS from "crypto-js";
@@ -134,15 +135,14 @@ export function MaterialMixin<
         /**
          * @summary Returns the specific derived property (as specified by name) for a material.
          */
-        getDerivedPropertyByName(name: string): DerivedPropertiesSchema | undefined {
-            // @ts-ignore
+        getDerivedPropertyByName(name: string) {
             return this.getDerivedProperties().find((x) => x.name === name);
         }
 
         /**
          * @summary Returns the derived properties array for a material.
          */
-        getDerivedProperties(): DerivedPropertiesSchema[] {
+        getDerivedProperties(): DerivedPropertiesSchema {
             return this.prop("derivedProperties", []);
         }
 
@@ -218,8 +218,7 @@ export function MaterialMixin<
         getInchiStringForHash(): string {
             const inchi = this.getDerivedPropertyByName("inchi");
             if (inchi) {
-                // @ts-ignore
-                return inchi.value;
+                return (inchi as InChIRepresentationSchema).value;
             }
             throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
         }
