@@ -206,6 +206,7 @@ export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefau
     getInchiStringForHash(): string {
         const inchi = this.getDerivedPropertyByName("inchi");
         if (inchi) {
+            // @ts-ignore
             return inchi.value;
         }
         throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
