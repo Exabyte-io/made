@@ -1,6 +1,10 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
-import { MaterialSchema } from "@exabyte-io/code.js/src/types";
+import {
+    ConsistencyCheck,
+    DerivedPropertiesSchema,
+    MaterialSchema,
+} from "@exabyte-io/code.js/dist/types";
 import CryptoJS from "crypto-js";
 
 import { ConstrainedBasis } from "./basis/constrained_basis";
@@ -13,7 +17,6 @@ import { ATOMIC_COORD_UNITS, units } from "./constants";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import { BravaisConfigProps } from "./lattice/lattice_vectors";
-import { LatticeType } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import { BasisConfig } from "./parsers/xyz";
 // TODO: fix dependency cycle below
@@ -48,7 +51,7 @@ export const defaultMaterialConfig = {
     },
     lattice: {
         // Primitive cell for Diamond FCC Silicon at ambient conditions
-        type: LatticeType.FCC,
+        type: "FCC",
         a: 3.867,
         b: 3.867,
         c: 3.867,
@@ -68,13 +71,6 @@ interface Property {
 }
 
 interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
-
-interface CheckResult {
-    key: string;
-    name: string;
-    severity: string;
-    message: string;
-}
 
 export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity {
     abstract src: {
@@ -126,14 +122,15 @@ export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefau
     /**
      * @summary Returns the specific derived property (as specified by name) for a material.
      */
-    getDerivedPropertyByName(name: string): Property | undefined {
+    getDerivedPropertyByName(name: string): DerivedPropertiesSchema | undefined {
+        // @ts-ignore
         return this.getDerivedProperties().find((x) => x.name === name);
     }
 
     /**
      * @summary Returns the derived properties array for a material.
      */
-    getDerivedProperties(): Property[] {
+    getDerivedProperties(): DerivedPropertiesSchema[] {
         return this.prop("derivedProperties", []);
     }
 
@@ -331,7 +328,7 @@ export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefau
      * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
      * @returns Array of checks results
      */
-    getConsistencyChecks(): CheckResult[] {
+    getConsistencyChecks(): ConsistencyCheck[] {
         const basisChecks = this.getBasisConsistencyChecks();
 
         // any other Material checks can be added here
@@ -343,8 +340,8 @@ export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefau
      * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
      * @returns Array of checks results
      */
-    getBasisConsistencyChecks(): CheckResult[] {
-        const checks: CheckResult[] = [];
+    getBasisConsistencyChecks(): ConsistencyCheck[] {
+        const checks: ConsistencyCheck[] = [];
         const limit = 1000;
         const basis = this.Basis;
 

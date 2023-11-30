@@ -1,4 +1,4 @@
-import { LatticeType, LatticeTypeSchema } from "../lattice/types";
+import { LatticeTypeSchema } from "@exabyte-io/code.js/src/types";
 
 /**
  * Routines for calculating conventional cell vectors from primitive cell Bravais parameters.
@@ -14,74 +14,76 @@ const unitMatrix = [
 // (Conventional cellVectors) = (Primitive cellVectors) * (PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIER matrix)
 export const PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS = {
     // PRIMITIVE    =>  CONVENTIONAL
-    [LatticeType.CUB]: unitMatrix,
-    [LatticeType.FCC]: [
+    CUB: unitMatrix,
+    FCC: [
         [-1, 1, 1],
         [1, -1, 1],
         [1, 1, -1],
     ],
-    [LatticeType.BCC]: [
+    BCC: [
         [0, 1, 1],
         [1, 0, 1],
         [1, 1, 0],
     ],
-    [LatticeType.TET]: unitMatrix,
-    [LatticeType.BCT]: [
+    TET: unitMatrix,
+    BCT: [
         [0, 1, 1],
         [1, 0, 1],
         [1, 1, 0],
     ],
-    [LatticeType.ORC]: unitMatrix,
-    [LatticeType.ORCF]: [
+    ORC: unitMatrix,
+    ORCF: [
         [-1, 1, 1],
         [1, -1, 1],
         [1, 1, -1],
     ],
-    [LatticeType.ORCI]: [
+    ORCI: [
         [0, 1, 1],
         [1, 0, 1],
         [1, 1, 0],
     ],
-    [LatticeType.ORCC]: [
+    ORCC: [
         [1, -1, 0],
         [1, 1, 0],
         [0, 0, 1],
     ],
-    [LatticeType.HEX]: unitMatrix,
-    [LatticeType.RHL]: unitMatrix,
-    [LatticeType.MCL]: unitMatrix,
-    [LatticeType.MCLC]: [
+    HEX: unitMatrix,
+    RHL: unitMatrix,
+    MCL: unitMatrix,
+    MCLC: [
         [1, -1, 0],
         [1, 1, 0],
         [0, 0, 1],
     ],
-    [LatticeType.TRI]: unitMatrix,
-    [`${LatticeType.TRI}alt`]: unitMatrix,
+    TRI: unitMatrix,
+    TRIalt: unitMatrix,
 };
 
-export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES = {
+export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES: {
+    [key in LatticeTypeSchema | "TRIalt"]: LatticeTypeSchema;
+} = {
     // PRIMITIVE    =>  CONVENTIONAL
-    [LatticeType.CUB]: LatticeType.CUB,
-    [LatticeType.FCC]: LatticeType.CUB,
-    [LatticeType.BCC]: LatticeType.CUB,
-    [LatticeType.TET]: LatticeType.TET,
-    [LatticeType.BCT]: LatticeType.TET,
-    [LatticeType.ORC]: LatticeType.ORC,
-    [LatticeType.ORCF]: LatticeType.ORC,
-    [LatticeType.ORCI]: LatticeType.ORC,
-    [LatticeType.ORCC]: LatticeType.ORC,
-    [LatticeType.HEX]: LatticeType.HEX,
-    [LatticeType.RHL]: LatticeType.RHL,
-    [LatticeType.MCL]: LatticeType.MCL,
-    [LatticeType.MCLC]: LatticeType.MCL,
-    [LatticeType.TRI]: LatticeType.TRI,
+    CUB: "CUB",
+    FCC: "CUB",
+    BCC: "CUB",
+    TET: "TET",
+    BCT: "TET",
+    ORC: "ORC",
+    ORCF: "ORC",
+    ORCI: "ORC",
+    ORCC: "ORC",
+    HEX: "HEX",
+    RHL: "RHL",
+    MCL: "MCL",
+    MCLC: "MCL",
+    TRI: "TRI",
     // TODO: Legacy `TRI_alt` type, assert not used and remove
-    [`${LatticeType.TRI}alt`]: LatticeType.TRI,
+    TRIalt: "TRI",
 };
 
 export function isConventionalCellSameAsPrimitiveForLatticeType(
     latticeType: LatticeTypeSchema,
 ): boolean {
-    const multiplier = PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[latticeType || LatticeType.TRI];
+    const multiplier = PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[latticeType || "TRI"];
     return multiplier === unitMatrix;
 }
