@@ -1,4 +1,8 @@
-import { LatticeImplicitSchema, LatticeSchema } from "@exabyte-io/code.js/src/types";
+import {
+    LatticeImplicitSchema,
+    LatticeSchema,
+    LatticeTypeExtendedSchema,
+} from "@exabyte-io/code.js/src/types";
 import lodash from "lodash";
 import _ from "underscore";
 
@@ -8,7 +12,7 @@ import { HASH_TOLERANCE } from "../constants";
 import math from "../math";
 import { FromVectorsProps, LatticeBravais } from "./lattice_bravais";
 import { BravaisConfigProps, LatticeVectors } from "./lattice_vectors";
-import { LATTICE_TYPE_CONFIGS, LatticeType, LatticeTypeExtended } from "./types";
+import { LATTICE_TYPE_CONFIGS } from "./types";
 import { UnitCell, UnitCellProps } from "./unit_cell";
 
 /**
@@ -126,36 +130,36 @@ export class Lattice extends LatticeBravais implements LatticeSchema {
     /**
      * Get a short label for the extended type of the lattice, eg. "MCLC-5".
      */
-    get typeExtended(): string {
+    get typeExtended(): LatticeTypeExtendedSchema {
         const { a, b, c, alpha, beta, gamma, type } = this;
         const cosAlpha = math.cos((alpha / 180) * math.PI);
 
         switch (type) {
-            case LatticeType.BCT:
-                return c < a ? LatticeTypeExtended.BCT_1 : LatticeTypeExtended.BCT_2;
-            case LatticeType.ORCF:
+            case "BCT":
+                return c < a ? "BCT-1" : "BCT-2";
+            case "ORCF":
                 if (1 / (a * a) >= 1 / (b * b) + 1 / (c * c)) {
-                    return LatticeTypeExtended.ORCF_1;
+                    return "ORCF-1";
                 }
-                return LatticeTypeExtended.ORCF_2;
-            case LatticeType.RHL:
-                return cosAlpha > 0 ? LatticeTypeExtended.RHL_1 : LatticeTypeExtended.RHL_2;
-            case LatticeType.MCLC:
+                return "ORCF-2";
+            case "RHL":
+                return cosAlpha > 0 ? "RHL-1" : "RHL-2";
+            case "MCLC":
                 if (gamma >= 90) {
                     // MCLC-1,2
-                    return LatticeTypeExtended.MCLC_1;
+                    return "MCLC-1";
                 }
                 if ((b / c) * cosAlpha + ((b * b) / (a * a)) * (1 - cosAlpha * cosAlpha) <= 1) {
                     // MCLC-3,4
-                    return LatticeTypeExtended.MCLC_3;
+                    return "MCLC-3";
                 }
-                return LatticeTypeExtended.MCLC_5;
-            case LatticeType.TRI:
+                return "MCLC-5";
+            case "TRI":
                 if (alpha > 90 && beta > 90 && gamma >= 90) {
                     // TRI-1a,2a
-                    return LatticeTypeExtended.TRI_1a;
+                    return "TRI_1a";
                 }
-                return LatticeTypeExtended.TRI_1b;
+                return "TRI_1b";
             default:
                 return type;
         }

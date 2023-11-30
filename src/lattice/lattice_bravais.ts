@@ -1,8 +1,8 @@
-import { LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+import { LatticeImplicitSchema, LatticeTypeSchema } from "@exabyte-io/code.js/src/types";
 
 import constants from "../constants";
 import math from "../math";
-import { LATTICE_TYPE_CONFIGS, LatticeTypeSchema, Vector, VectorsAsArray } from "./types";
+import { LATTICE_TYPE_CONFIGS, Vector, VectorsAsArray } from "./types";
 
 export type Units = Required<LatticeImplicitSchema>["units"];
 

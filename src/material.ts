@@ -1,7 +1,11 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
-import { FileSourceSchema } from "@exabyte-io/code.js/dist/types";
-import { MaterialSchema } from "@exabyte-io/code.js/src/types";
+import {
+    ConsistencyCheck,
+    DerivedPropertiesSchema,
+    FileSourceSchema,
+    MaterialSchema,
+} from "@exabyte-io/code.js/dist/types";
 import CryptoJS from "crypto-js";
 
 import { ConstrainedBasis } from "./basis/constrained_basis";
@@ -14,7 +18,6 @@ import { ATOMIC_COORD_UNITS, units } from "./constants";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import { BravaisConfigProps } from "./lattice/lattice_vectors";
-import { LatticeType } from "./lattice/types";
 import parsers from "./parsers/parsers";
 import { BasisConfig } from "./parsers/xyz";
 // TODO: fix dependency cycle below
@@ -49,7 +52,7 @@ export const defaultMaterialConfig = {
     },
     lattice: {
         // Primitive cell for Diamond FCC Silicon at ambient conditions
-        type: LatticeType.FCC,
+        type: "FCC",
         a: 3.867,
         b: 3.867,
         c: 3.867,
@@ -63,19 +66,7 @@ export const defaultMaterialConfig = {
     },
 };
 
-export interface Property {
-    name: string;
-    value: string;
-}
-
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
-
-export interface CheckResult {
-    key: string;
-    name: string;
-    severity: string;
-    message: string;
-}
 
 type MaterialBaseEntity = InstanceType<
     typeof HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity
@@ -143,14 +134,15 @@ export function MaterialMixin<
         /**
          * @summary Returns the specific derived property (as specified by name) for a material.
          */
-        getDerivedPropertyByName(name: string): Property | undefined {
+        getDerivedPropertyByName(name: string): DerivedPropertiesSchema | undefined {
+            // @ts-ignore
             return this.getDerivedProperties().find((x) => x.name === name);
         }
 
         /**
          * @summary Returns the derived properties array for a material.
          */
-        getDerivedProperties(): Property[] {
+        getDerivedProperties(): DerivedPropertiesSchema[] {
             return this.prop("derivedProperties", []);
         }
 
@@ -226,6 +218,7 @@ export function MaterialMixin<
         getInchiStringForHash(): string {
             const inchi = this.getDerivedPropertyByName("inchi");
             if (inchi) {
+                // @ts-ignore
                 return inchi.value;
             }
             throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
@@ -348,7 +341,7 @@ export function MaterialMixin<
          * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
          * @returns Array of checks results
          */
-        getConsistencyChecks(): CheckResult[] {
+        getConsistencyChecks(): ConsistencyCheck[] {
             const basisChecks = this.getBasisConsistencyChecks();
 
             // any other Material checks can be added here
@@ -360,8 +353,8 @@ export function MaterialMixin<
          * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
          * @returns Array of checks results
          */
-        getBasisConsistencyChecks(): CheckResult[] {
-            const checks: CheckResult[] = [];
+        getBasisConsistencyChecks(): ConsistencyCheck[] {
+            const checks: ConsistencyCheck[] = [];
             const limit = 1000;
             const basis = this.Basis;
 

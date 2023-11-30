@@ -1,4 +1,4 @@
-import { ArrayOf3NumberElementsSchema, LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+import { ArrayOf3NumberElementsSchema, LatticeTypeSchema } from "@exabyte-io/code.js/src/types";
 
 export const DEFAULT_LATTICE_UNITS = {
     // by default lattice vectors shall be measured in angstrom, angles - in degrees
@@ -9,32 +9,6 @@ export const DEFAULT_LATTICE_UNITS = {
         degree: "degree",
     },
 };
-
-/**
- * Shortlist of lattice types (according to [AFLOW](https://arxiv.org/abs/1004.2974))
- * Convention used is derived from:
- *   Setyawan, W., & Curtarolo, S. (2010). High-throughput electronic band structure calculations:
- *   Challenges and tools. Computational Materials Science, 49(2), 299-312. doi:10.1016/j.commatsci.2010.05.010
- */
-
-export enum LatticeType {
-    CUB = "CUB",
-    FCC = "FCC",
-    BCC = "BCC",
-    TET = "TET",
-    BCT = "BCT",
-    ORC = "ORC",
-    ORCF = "ORCF",
-    ORCI = "ORCI",
-    ORCC = "ORCC",
-    HEX = "HEX",
-    RHL = "RHL",
-    MCL = "MCL",
-    MCLC = "MCLC",
-    TRI = "TRI",
-}
-
-export type LatticeTypeSchema = LatticeImplicitSchema["type"];
 
 export enum LatticeTypeExtended {
     BCC = "BCC",
@@ -73,7 +47,7 @@ export interface VectorsAsArray extends Array<Vector> {
 
 interface LatticeTypeConfig {
     label: string;
-    code: LatticeType;
+    code: LatticeTypeSchema;
     editables: string[];
     editablesConventional: string[];
 }
@@ -81,7 +55,7 @@ interface LatticeTypeConfig {
 export const LATTICE_TYPE_CONFIGS: LatticeTypeConfig[] = [
     {
         label: "Simple Cubic",
-        code: LatticeType.CUB,
+        code: "CUB",
         // editables for primitive cell => WARNING: not tested
         editables: ["a"],
         // editables for conventional cell, taken from the publication above
@@ -89,79 +63,79 @@ export const LATTICE_TYPE_CONFIGS: LatticeTypeConfig[] = [
     },
     {
         label: "Face-centered Cubic",
-        code: LatticeType.FCC,
+        code: "FCC",
         editables: ["a"],
         editablesConventional: ["a"],
     },
     {
         label: "Body-centered Cubic",
-        code: LatticeType.BCC,
+        code: "BCC",
         editables: ["a"],
         editablesConventional: ["a"],
     },
     {
         label: "Tetragonal",
-        code: LatticeType.TET,
+        code: "TET",
         editables: ["a", "c"],
         editablesConventional: ["a", "c"],
     },
     {
         label: "Body-centered Tetragonal",
-        code: LatticeType.BCT,
+        code: "BCT",
         editables: ["a"],
         editablesConventional: ["a", "c"],
     },
     {
         label: "Orthorombic",
-        code: LatticeType.ORC,
+        code: "ORC",
         editables: ["a", "b", "c"],
         editablesConventional: ["a", "b", "c"],
     },
     {
         label: "Orthorombic Face-centered",
-        code: LatticeType.ORCF,
+        code: "ORCF",
         editables: ["a", "b", "c"],
         editablesConventional: ["a", "b", "c"],
     },
     {
         label: "Orthorombic Body-centered",
-        code: LatticeType.ORCI,
+        code: "ORCI",
         editables: ["a", "alpha", "gamma"],
         editablesConventional: ["a", "b", "c"],
     },
     {
         label: "Orthorombic Base-centered",
-        code: LatticeType.ORCC,
+        code: "ORCC",
         editables: ["a", "c", "alpha"],
         editablesConventional: ["a", "b", "c"],
     },
     {
         label: "Hexagonal",
-        code: LatticeType.HEX,
+        code: "HEX",
         editables: ["a", "c"],
         editablesConventional: ["a", "c"],
     },
     {
         label: "Rhombohedral",
-        code: LatticeType.RHL,
+        code: "RHL",
         editables: ["a", "alpha"],
         editablesConventional: ["a", "alpha"],
     },
     {
         label: "Monoclinic",
-        code: LatticeType.MCL,
+        code: "MCL",
         editables: ["a", "b", "c", "alpha"],
         editablesConventional: ["a", "b", "c", "alpha"],
     },
     {
         label: "Monoclinic Base-centered",
-        code: LatticeType.MCLC,
+        code: "MCLC",
         editables: ["a", "c", "alpha", "gamma"],
         editablesConventional: ["a", "b", "c", "alpha"],
     },
     {
         label: "Triclinic",
-        code: LatticeType.TRI,
+        code: "TRI",
         editables: ["a", "b", "c", "alpha", "beta", "gamma"],
         editablesConventional: ["a", "b", "c", "alpha", "beta", "gamma"],
     },
