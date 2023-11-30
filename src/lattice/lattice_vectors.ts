@@ -3,7 +3,7 @@ import { LatticeExplicitUnit, LatticeImplicitSchema } from "@exabyte-io/code.js/
 import { primitiveCell } from "../cell/primitive_cell";
 import constants from "../constants";
 import math from "../math";
-import { LatticeType, Vector } from "./types";
+import { Vector } from "./types";
 
 type RequiredLatticeExplicitUnit = Required<LatticeExplicitUnit>;
 
@@ -61,12 +61,12 @@ export class LatticeVectors implements RequiredLatticeExplicitUnit {
             length: "angstrom",
             angle: "degree",
         },
-        type = LatticeType.TRI,
+        type = "TRI",
         isConventional = false,
     }: BravaisConfigProps) {
         // use "direct" lattice constructor for primitive lattice
         // eslint-disable-next-line no-param-reassign
-        if (!isConventional) type = LatticeType.TRI;
+        if (!isConventional) type = "TRI";
 
         // set precision and remove JS floating point artifacts
         const [vectorA, vectorB, vectorC] = primitiveCell({
