@@ -3,6 +3,7 @@ import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
 import {
     ConsistencyCheck,
     DerivedPropertiesSchema,
+    InChIRepresentationSchema,
     MaterialSchema,
 } from "@exabyte-io/code.js/dist/types";
 import CryptoJS from "crypto-js";
@@ -65,11 +66,6 @@ export const defaultMaterialConfig = {
     },
 };
 
-interface Property {
-    name: string;
-    value: string;
-}
-
 interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
 
 export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity {
@@ -122,15 +118,14 @@ export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefau
     /**
      * @summary Returns the specific derived property (as specified by name) for a material.
      */
-    getDerivedPropertyByName(name: string): DerivedPropertiesSchema | undefined {
-        // @ts-ignore
+    getDerivedPropertyByName(name: string) {
         return this.getDerivedProperties().find((x) => x.name === name);
     }
 
     /**
      * @summary Returns the derived properties array for a material.
      */
-    getDerivedProperties(): DerivedPropertiesSchema[] {
+    getDerivedProperties(): DerivedPropertiesSchema {
         return this.prop("derivedProperties", []);
     }
 
@@ -206,8 +201,7 @@ export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefau
     getInchiStringForHash(): string {
         const inchi = this.getDerivedPropertyByName("inchi");
         if (inchi) {
-            // @ts-ignore
-            return inchi.value;
+            return (inchi as InChIRepresentationSchema).value;
         }
         throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
     }
