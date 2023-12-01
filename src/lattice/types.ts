@@ -1,4 +1,4 @@
-import { ArrayOf3NumberElementsSchema, LatticeTypeSchema } from "@exabyte-io/code.js/src/types";
+import { ArrayOf3NumberElementsSchema, LatticeTypeSchema } from "@exabyte-io/code.js/dist/types";
 
 export const DEFAULT_LATTICE_UNITS = {
     // by default lattice vectors shall be measured in angstrom, angles - in degrees
