@@ -69,6 +69,7 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
     };
 }
 
+// TODO: reuse Basis Definition(s) from ESSE/Code.js instead
 export interface BasisConfig {
     elements: {
         id: number;
