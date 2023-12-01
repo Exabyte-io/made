@@ -1,6 +1,12 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
+import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
+import {
+    ConsistencyCheck,
+    DerivedPropertiesSchema,
+    InChIRepresentationSchema,
+    MaterialSchema,
+} from "@exabyte-io/code.js/dist/types";
 import CryptoJS from "crypto-js";
-import lodash from "lodash";
 
 import { ConstrainedBasis } from "./basis/constrained_basis";
 import {
@@ -9,10 +15,15 @@ import {
     PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS,
 } from "./cell/conventional_cell";
 import { ATOMIC_COORD_UNITS, units } from "./constants";
+import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-import { LATTICE_TYPE } from "./lattice/types";
+import { BravaisConfigProps } from "./lattice/lattice_vectors";
 import parsers from "./parsers/parsers";
+import { BasisConfig } from "./parsers/xyz";
+// TODO: fix dependency cycle below
+// eslint-disable-next-line import/no-cycle
 import supercellTools from "./tools/supercell";
+import { MaterialJSON } from "./types";
 
 export const defaultMaterialConfig = {
     name: "Silicon FCC",
@@ -41,7 +52,7 @@ export const defaultMaterialConfig = {
     },
     lattice: {
         // Primitive cell for Diamond FCC Silicon at ambient conditions
-        type: LATTICE_TYPE.FCC,
+        type: "FCC",
         a: 3.867,
         b: 3.867,
         c: 3.867,
@@ -55,31 +66,29 @@ export const defaultMaterialConfig = {
     },
 };
 
-export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity {
-    constructor(config) {
+interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
+
+export abstract class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity {
+    abstract src: {
+        extension: string;
+        text: string;
+    };
+
+    declare _json: MaterialSchemaJSON;
+
+    constructor(config: MaterialSchemaJSON) {
         super(config);
-        this._json = lodash.cloneDeep(config || {});
+        this.name = super.name || this.formula;
     }
 
-    toJSON() {
-        return this.toJSONDefault();
-    }
-
-    toJSONDefault() {
+    toJSON(): MaterialJSON {
         return {
+            ...super.toJSON(),
             lattice: this.Lattice.toJSON(),
             basis: this.Basis.toJSON(),
-            name: this.name || this.formula,
-            isNonPeriodic: this.isNonPeriodic || false,
+            name: this.name,
+            isNonPeriodic: this.isNonPeriodic,
         };
-    }
-
-    get name() {
-        return super.name || this.formula;
-    }
-
-    set name(name) {
-        super.name = name;
     }
 
     static get defaultConfig() {
@@ -95,73 +104,66 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
      * Gets Bolean value for whether or not a material is non-periodic vs periodic.
      * False = periodic, True = non-periodic
      */
-    get isNonPeriodic() {
-        return this.prop("isNonPeriodic", false, true);
+    get isNonPeriodic(): boolean {
+        return this.prop("isNonPeriodic", false);
     }
 
     /**
      * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
-     * @param {Boolean} bool
      */
-    set isNonPeriodic(bool) {
+    set isNonPeriodic(bool: boolean) {
         this.setProp("isNonPeriodic", bool);
     }
 
     /**
      * @summary Returns the specific derived property (as specified by name) for a material.
-     * @param {String} name
-     * @returns {Object}
      */
-    getDerivedPropertyByName(name) {
+    getDerivedPropertyByName(name: string) {
         return this.getDerivedProperties().find((x) => x.name === name);
     }
 
     /**
      * @summary Returns the derived properties array for a material.
-     * @returns {Array}
      */
-    getDerivedProperties() {
+    getDerivedProperties(): DerivedPropertiesSchema {
         return this.prop("derivedProperties", []);
     }
 
     /**
      * Gets material's formula
      */
-    get formula() {
+    get formula(): string {
         return this.prop("formula") || this.Basis.formula;
     }
 
-    get unitCellFormula() {
+    get unitCellFormula(): string {
         return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
     }
 
     /**
-     * @param textOrObject {String} Basis text or JSON object.
-     * @param format {String} Format (xyz, etc.)
-     * @param unitz {String} crystal/cartesian
+     * @param textOrObject Basis text or JSON object.
+     * @param format Format (xyz, etc.)
+     * @param unitz crystal/cartesian
      */
-    setBasis(textOrObject, format, unitz) {
-        let basis;
+    setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string) {
+        let basis: BasisConfig | undefined;
         switch (format) {
             case "xyz":
-                basis = parsers.xyz.toBasisConfig(textOrObject, unitz);
+                basis = parsers.xyz.toBasisConfig(textOrObject as string, unitz);
                 break;
             default:
-                basis = textOrObject;
+                basis = textOrObject as BasisConfig;
         }
         this.setProp("basis", basis);
         this.updateFormula();
     }
 
-    setBasisConstraints(constraints) {
-        this.setBasis({
-            ...this.basis,
-            constraints,
-        });
+    setBasisConstraints(constraints: Constraint[]) {
+        this.setBasis({ ...this.basis, constraints });
     }
 
-    get basis() {
-        return this.prop("basis", undefined, true);
+    get basis(): BasisConfig {
+        return this.prop<BasisConfig>("basis", undefined);
     }
 
     // returns the instance of {ConstrainedBasis} class
@@ -172,24 +174,22 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
         });
     }
 
-    /** High-level access to unique elements from material instead of basis.
-     *
-     * @return {String[]}
+    /**
+     * High-level access to unique elements from material instead of basis.
      */
     get uniqueElements() {
         return this.Basis.uniqueElements;
     }
 
-    get lattice() {
-        return this.prop("lattice", undefined, true);
+    get lattice(): BravaisConfigProps | undefined {
+        return this.prop("lattice", undefined);
     }
 
-    set lattice(config) {
+    set lattice(config: BravaisConfigProps | undefined) {
         this.setProp("lattice", config);
     }
 
-    // returns the instance of {Lattice} class
-    get Lattice() {
+    get Lattice(): Lattice {
         return new Lattice(this.lattice);
     }
 
@@ -198,10 +198,10 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
      *  inchi cannot be found.
      *  @returns {String}
      */
-    getInchiStringForHash() {
+    getInchiStringForHash(): string {
         const inchi = this.getDerivedPropertyByName("inchi");
         if (inchi) {
-            return inchi.value;
+            return (inchi as InChIRepresentationSchema).value;
         }
         throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
     }
@@ -213,10 +213,10 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
      * - asserts basis coordinates and lattice measurements are rounded to hash precision
      * - forms strings for lattice and basis
      * - creates MD5 hash from basisStr + latticeStr + salt
-     * @param salt {String} Salt for hashing, empty string by default.
-     * @param isScaled {Boolean} Whether to scale the lattice parameter 'a' to 1.
+     * @param salt Salt for hashing, empty string by default.
+     * @param isScaled Whether to scale the lattice parameter 'a' to 1.
      */
-    calculateHash(salt = "", isScaled = false, bypassNonPeriodicCheck = false) {
+    calculateHash(salt = "", isScaled = false, bypassNonPeriodicCheck = false): string {
         let message;
         if (!this.isNonPeriodic || bypassNonPeriodicCheck) {
             message =
@@ -227,18 +227,18 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
         return CryptoJS.MD5(message).toString();
     }
 
-    set hash(hash) {
+    set hash(hash: string) {
         this.setProp("hash", hash);
     }
 
-    get hash() {
+    get hash(): string {
         return this.prop("hash");
     }
 
     /**
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
-    get scaledHash() {
+    get scaledHash(): string {
         return this.calculateHash("", true);
     }
 
@@ -263,9 +263,8 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
 
     /**
      * Returns material's basis in XYZ format.
-     * @return {String}
      */
-    getBasisAsXyz(fractional = false) {
+    getBasisAsXyz(fractional = false): string {
         return parsers.xyz.fromMaterial(this.toJSON(), fractional);
     }
 
@@ -281,16 +280,15 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
      *    Si       0.000000000   0.000000000  -0.000000000
      *    Si       0.250000000   0.250000000   0.250000000
      * ```
-     * @return {String}
      */
-    getAsQEFormat() {
+    getAsQEFormat(): string {
         return parsers.espresso.toEspressoFormat(this.toJSON());
     }
 
     /**
      * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
      */
-    getAsPOSCAR(ignoreOriginal = false, omitConstraints = false) {
+    getAsPOSCAR(ignoreOriginal = false, omitConstraints = false): string {
         const { src } = this;
         // By default return original source if exists
         if (src && src.extension === "poscar" && !ignoreOriginal) {
@@ -303,7 +301,7 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
      * Returns a copy of the material with conventional cell constructed instead of primitive.
      */
     getACopyWithConventionalCell() {
-        const material = this.clone();
+        const material: Material = this.clone();
 
         // if conventional and primitive cells are the same => return a copy.
         if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type)) return material;
@@ -312,19 +310,20 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
             PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[this.Lattice.type];
         const conventionalLatticeType =
             PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES[this.Lattice.type];
-        const config = supercellTools.generateConfig(material, conventionalSupercellMatrix, 1);
+        const config = supercellTools.generateConfig(material, conventionalSupercellMatrix);
 
         config.lattice.type = conventionalLatticeType;
         config.name = `${material.name} - conventional cell`;
 
+        // @ts-ignore
         return new this.constructor(config);
     }
 
     /**
      * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
-     * @returns {*[]}} - Array of checks results
+     * @returns Array of checks results
      */
-    getConsistencyChecks() {
+    getConsistencyChecks(): ConsistencyCheck[] {
         const basisChecks = this.getBasisConsistencyChecks();
 
         // any other Material checks can be added here
@@ -334,10 +333,10 @@ export class Material extends HasConsistencyChecksHasMetadataNamedDefaultableInM
 
     /**
      * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
-     * @returns {*[]} - Array of checks results
+     * @returns Array of checks results
      */
-    getBasisConsistencyChecks() {
-        const checks = [];
+    getBasisConsistencyChecks(): ConsistencyCheck[] {
+        const checks: ConsistencyCheck[] = [];
         const limit = 1000;
         const basis = this.Basis;
 

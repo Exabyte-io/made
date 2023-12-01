@@ -1,34 +1,46 @@
+import { LatticeExplicitUnit, LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+
 import { primitiveCell } from "../cell/primitive_cell";
 import constants from "../constants";
 import math from "../math";
+import { Vector } from "./types";
+
+type RequiredLatticeExplicitUnit = Required<LatticeExplicitUnit>;
+
+export interface BravaisConfigProps extends Partial<LatticeImplicitSchema> {
+    isConventional?: boolean;
+}
 
 /*
  * @summary: class that holds parameters of a Bravais Lattice: a, b, c, alpha, beta, gamma + corresponding units.
  * When stored as class variables units for lengths are always "angstrom"s, angle - "degree"s
  */
-export class LatticeVectors {
+export class LatticeVectors implements RequiredLatticeExplicitUnit {
+    a: RequiredLatticeExplicitUnit["a"];
+
+    b: RequiredLatticeExplicitUnit["b"];
+
+    c: RequiredLatticeExplicitUnit["c"];
+
+    alat: RequiredLatticeExplicitUnit["alat"];
+
+    units: RequiredLatticeExplicitUnit["units"];
+
     /**
      * Create a Bravais lattice.
-     * @param {Object} config - Config object.
-     * @param {Array} config.a - vector of the lattice.
-     * @param {Array} config.b - vector of the lattice.
-     * @param {Array} config.c - vector of the lattice.
-     * @param {Number} config.alat - scaling factor for the vector coordinates, defaults to 1.
-     * @param {String} config.units - units container.
      */
-    constructor(config) {
+    constructor(config: LatticeExplicitUnit) {
         const { a, b, c, alat = 1, units = "angstrom" } = config;
         const k = constants.units.bohr === units ? constants.coefficients.BOHR_TO_ANGSTROM : 1;
-        Object.assign(this, {
-            a: a.map((x) => x * k),
-            b: b.map((x) => x * k),
-            c: c.map((x) => x * k),
-            alat,
-            units: "angstrom",
-        });
+
+        this.a = a.map((x) => x * k) as Vector;
+        this.b = b.map((x) => x * k) as Vector;
+        this.c = c.map((x) => x * k) as Vector;
+        this.alat = alat;
+        this.units = "angstrom";
     }
 
-    static _roundValue(arr) {
+    static _roundValue(arr: number[]): number[] {
         return arr.map((el) => math.precise(math.roundToZero(el)));
     }
 
@@ -49,9 +61,9 @@ export class LatticeVectors {
             length: "angstrom",
             angle: "degree",
         },
-        type,
+        type = "TRI",
         isConventional = false,
-    }) {
+    }: BravaisConfigProps) {
         // use "direct" lattice constructor for primitive lattice
         // eslint-disable-next-line no-param-reassign
         if (!isConventional) type = "TRI";
@@ -68,16 +80,15 @@ export class LatticeVectors {
             type,
         });
 
-        return new LatticeVectors.prototype.constructor({
+        return new LatticeVectors({
             a: vectorA,
             b: vectorB,
             c: vectorC,
             alat: 1,
-            unis: units.length,
         });
     }
 
-    get vectorArrays() {
+    get vectorArrays(): [Vector, Vector, Vector] {
         return [this.a, this.b, this.c];
     }
 
@@ -104,7 +115,7 @@ export class LatticeVectors {
             "units" : "angstrom"
         }
      */
-    toJSON() {
+    toJSON(): RequiredLatticeExplicitUnit {
         return {
             ...this,
             a: LatticeVectors._roundValue(this.a),

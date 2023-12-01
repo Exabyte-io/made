@@ -4,10 +4,12 @@
  * This file contains information about the Brillouin zone symmetry points by lattice type.
  * [AFLOW](https://arxiv.org/abs/1004.2974) methodology is used for implementation.
  */
-import { LATTICE_TYPE } from "../types";
+import { LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+
+import { Lattice } from "../lattice";
 
 const POINTS = {
-    [LATTICE_TYPE.CUB]: ({ a, b, c, alpha, beta, gamma }) => {
+    CUB: () => {
         return [
             {
                 point: "R",
@@ -24,7 +26,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.FCC]: ({ a, b, c, alpha, beta, gamma }) => {
+    FCC: () => {
         return [
             {
                 point: "K",
@@ -49,7 +51,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.BCC]: ({ a, b, c, alpha, beta, gamma }) => {
+    BCC: () => {
         return [
             {
                 point: "H",
@@ -66,7 +68,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.TET]: ({ a, b, c, alpha, beta, gamma }) => {
+    TET: () => {
         return [
             {
                 point: "A",
@@ -91,7 +93,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.BCT]: ({ a, b, c, alpha, beta, gamma }) => {
+    BCT: ({ a, c }: LatticeImplicitSchema) => {
         let n;
         if (c < a) {
             // BCT-1
@@ -162,7 +164,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.ORC]: ({ a, b, c, alpha, beta, gamma }) => {
+    ORC: () => {
         return [
             {
                 point: "R",
@@ -195,7 +197,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.ORCF]: ({ a, b, c, alpha, beta, gamma }) => {
+    ORCF: ({ a, b, c }: LatticeImplicitSchema) => {
         let n;
         if (1 / (a * a) >= 1 / (b * b) + 1 / (c * c)) {
             // ORCF-1,3
@@ -284,7 +286,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.ORCI]: ({ a, b, c, alpha, beta, gamma }) => {
+    ORCI: ({ a, b, c }: LatticeImplicitSchema) => {
         const n = (1 + (a * a) / (c * c)) / 4;
         const e = (1 + (b * b) / (c * c)) / 4;
         const d = (b * b - a * a) / (4 * c * c);
@@ -341,7 +343,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.ORCC]: ({ a, b, c, alpha, beta, gamma }) => {
+    ORCC: ({ a, b }: LatticeImplicitSchema) => {
         const e = (1 + (a * a) / (b * b)) / 4;
         return [
             {
@@ -383,7 +385,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.HEX]: ({ a, b, c, alpha, beta, gamma }) => {
+    HEX: () => {
         return [
             {
                 point: "A",
@@ -408,7 +410,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.RHL]: ({ a, b, c, alpha, beta, gamma }) => {
+    RHL: ({ alpha }: LatticeImplicitSchema) => {
         let n, v;
         const cosAlpha = Math.cos((alpha / 180) * Math.PI);
         if (cosAlpha > 0) {
@@ -497,7 +499,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.MCL]: ({ a, b, c, alpha, beta, gamma }) => {
+    MCL: ({ b, c, alpha }: LatticeImplicitSchema) => {
         const cosAlpha = Math.cos((alpha / 180) * Math.PI);
         const n = ((1 / 2) * (1 - (b * cosAlpha) / c)) / (1 - cosAlpha * cosAlpha);
         const v = 1 / 2 - (n * c * cosAlpha) / b;
@@ -565,7 +567,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.MCLC]: ({ a, b, c, alpha, beta, gamma }) => {
+    MCLC: ({ a, b, c, alpha, gamma }: LatticeImplicitSchema) => {
         const cosAlpha = Math.cos((alpha / 180) * Math.PI);
         let e, n, p, f, m, d, v;
         if (gamma >= 90) {
@@ -718,9 +720,10 @@ const POINTS = {
         }
         // MCLC-5
         e = (1 / 4) * ((b * b) / (a * a) + (1 - (b * cosAlpha) / c) / (1 - cosAlpha * cosAlpha));
+        // @ts-ignore
         m = n / 2 + (b * b) / (a * a) / 4 - (b * c * cosAlpha) / (2 * a * a);
         // eslint-disable-next-line max-len
-        const w =
+        const w = // @ts-ignore
             ((4 * v - 1 - (b * b * (1 - cosAlpha * cosAlpha)) / (a * a)) * c) / (2 * b * cosAlpha);
         n = 1 / 2 + (2 * e * c * cosAlpha) / b;
         d = ((e * c) / b) * cosAlpha + w / 2 - 1 / 4;
@@ -802,7 +805,7 @@ const POINTS = {
         ];
     },
 
-    [LATTICE_TYPE.TRI]: ({ a, b, c, alpha, beta, gamma }) => {
+    TRI: ({ alpha, beta, gamma }: LatticeImplicitSchema) => {
         if (alpha > 90 && beta > 90 && gamma >= 90) {
             // TRI-1a,2a
             return [
@@ -872,10 +875,8 @@ const POINTS = {
 
 /**
  * Returns a list of symmetry points for the specified lattice.
- * @param lattice {Lattice|Object}
- * @return {Object[]}
  */
-export function symmetryPoints(lattice) {
+export function symmetryPoints(lattice: Lattice) {
     return [
         {
             point: "Г",

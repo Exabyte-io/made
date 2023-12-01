@@ -1,49 +1,80 @@
+// import { BasisSchema } from "@exabyte-io/code.js/src/types";
+// @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import _ from "underscore";
 import s from "underscore.string";
 
 import { ArrayWithIds } from "../abstract/array_with_ids";
+import { ObjectWithIdAndValue, ValueOrObjectArray } from "../abstract/scalar_with_id";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
+import { Vector } from "../lattice/types";
 import math from "../math";
+import { Coordinate } from "./types";
+
+export interface BasisProps {
+    elements: ValueOrObjectArray<string>; // chemical elements for atoms in basis.
+    coordinates: ValueOrObjectArray<Coordinate>; // coordinates for the atoms in basis.
+    units: string; // units for the coordinates (eg. angstrom, crystal).
+    cell: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
+    isEmpty?: boolean; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
+}
+
+export interface Atom {
+    id?: number; // numeric id of the element (optional).
+    element: string; // Chemical element
+    coordinate: Coordinate; // 3-dimensional coordinate
+}
+
+export interface ElementCount {
+    count: number;
+    value: string;
+}
+
+export interface BasisSchema {
+    elements: ObjectWithIdAndValue<string>[];
+    coordinates: ObjectWithIdAndValue<Coordinate>[];
+    units: string;
+    cell: Vector[];
+}
+
+interface Overlap {
+    id1: number;
+    id2: number;
+    element1: string;
+    element2: string;
+}
 
 /**
  * A class representing a crystal basis.
  */
 export class Basis {
-    /**
-     * Create a Basis class.
-     * @param {Object} - Config object.
-     * @param {Array|ArrayWithIds} elements - chemical elements for atoms in basis.
-     * @param {Array|ArrayWithIds} coordinates - coordinates for the atoms in basis.
-     * @param {String} units - units for the coordinates (eg. angstrom, crystal).
-     * @param {Cell} cell - crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
-     * @param {Boolean} isEmpty - crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
-     */
+    _elements: ArrayWithIds<string>;
+
+    _coordinates: ArrayWithIds<Coordinate>;
+
+    units: string;
+
+    cell: Vector[];
+
     constructor({
         elements = ["Si"],
         coordinates = [[0, 0, 0]],
         units,
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
-    }) {
-        let _elements, _coordinates, _units;
+    }: BasisProps) {
+        const _elements = isEmpty ? [] : elements;
+        const _coordinates = isEmpty ? [] : coordinates;
+        const _units = units || Basis.unitsOptionsDefaultValue;
+
         if (!units) {
-            _units = Basis.unitsOptionsDefaultValue;
             console.warn("Basis.constructor: units are not provided => set to crystal");
-        } else {
-            _units = units;
         }
-        if (isEmpty) {
-            _elements = [];
-            _coordinates = [];
-        } else {
-            _elements = elements;
-            _coordinates = coordinates;
-        }
+
         // assert that elements and coordinates have ids if not already passed in config + store Array helper classes
-        this._elements = new ArrayWithIds(_elements);
-        this._coordinates = new ArrayWithIds(_coordinates);
+        this._elements = new ArrayWithIds<string>(_elements);
+        this._coordinates = new ArrayWithIds<Coordinate>(_coordinates);
         this.units = _units;
         this.cell = cell;
     }
@@ -112,45 +143,57 @@ export class Basis {
             ]
         }
      */
-    toJSON() {
-        return JSON.parse(
-            JSON.stringify(_.pick(this, ["elements", "coordinates", "units", "cell"])),
-        );
+    toJSON(): BasisSchema {
+        const json = {
+            elements: this.elements,
+            coordinates: this.coordinates,
+            units: this.units,
+            cell: this.cell,
+        };
+
+        return JSON.parse(JSON.stringify(json));
     }
 
     /**
      * Create an identical copy of the class instance.
-     * @param {Object} extraContext - Extra context to be passed to the new class instance on creation.
+     * @param extraContext - Extra context to be passed to the new class instance on creation.
      */
-    clone(extraContext) {
-        return new this.constructor({ ...this.toJSON(), ...extraContext });
+    clone(extraContext?: Partial<BasisProps>): Basis {
+        return new (this.constructor as typeof Basis)({
+            ...this.toJSON(),
+            ...extraContext,
+        });
     }
 
-    getElementByIndex(idx) {
+    getElementByIndex(idx: number): string {
         return this._elements.getArrayElementByIndex(idx);
     }
 
-    getCoordinateByIndex(idx) {
+    getCoordinateByIndex(idx: number): Coordinate {
         return this._coordinates.getArrayElementByIndex(idx);
     }
 
-    get elementsArray() {
+    get elementsArray(): string[] {
         return this._elements.array;
     }
 
-    get elements() {
+    get elements(): ObjectWithIdAndValue<string>[] {
         return this._elements.toJSON();
     }
 
     /**
      * Set basis elements to passed array.
-     * @param {Array|ArrayWithIds} elementsArray - New elements array.
+     * @param elementsArray - New elements array.
      */
-    set elements(elementsArray) {
-        this._elements = new ArrayWithIds(elementsArray);
+    set elements(elementsArray: string[] | ObjectWithIdAndValue<string>[]) {
+        this._elements = new ArrayWithIds<string>(elementsArray);
     }
 
-    get coordinates() {
+    getElementsAsObject(): ObjectWithIdAndValue<string>[] {
+        return this._elements.toJSON();
+    }
+
+    get coordinates(): ObjectWithIdAndValue<Coordinate>[] {
         return this._coordinates.toJSON();
     }
 
@@ -158,8 +201,8 @@ export class Basis {
      * Set basis elements to passed array.
      * @param {Array|ArrayWithIds} coordinatesNestedArray - New coordinates array.
      */
-    set coordinates(coordinatesNestedArray) {
-        this._coordinates = new ArrayWithIds(coordinatesNestedArray);
+    set coordinates(coordinatesNestedArray: Coordinate[] | ObjectWithIdAndValue<Coordinate>[]) {
+        this._coordinates = new ArrayWithIds<Coordinate>(coordinatesNestedArray);
     }
 
     get coordinatesAsArray() {
@@ -177,14 +220,18 @@ export class Basis {
     toCartesian() {
         const unitCell = this.cell;
         if (this.units === ATOMIC_COORD_UNITS.cartesian) return;
-        this._coordinates.mapArrayInPlace((point) => math.multiply(point, unitCell));
+        this._coordinates.mapArrayInPlace(
+            (point) => math.multiply(point, unitCell) as unknown as Coordinate,
+        );
         this.units = ATOMIC_COORD_UNITS.cartesian;
     }
 
     toCrystal() {
         const unitCell = this.cell;
         if (this.units === ATOMIC_COORD_UNITS.crystal) return;
-        this._coordinates.mapArrayInPlace((point) => math.multiply(point, math.inv(unitCell)));
+        this._coordinates.mapArrayInPlace(
+            (point) => math.multiply(point, math.inv(unitCell)) as unknown as Coordinate,
+        );
         this.units = ATOMIC_COORD_UNITS.crystal;
     }
 
@@ -193,11 +240,11 @@ export class Basis {
      */
     toStandardRepresentation() {
         this.toCrystal();
-        this._coordinates.mapArrayInPlace((point) => point.map((x) => math.mod(x)));
+        this._coordinates.mapArrayInPlace((point) => point.map((x) => math.mod(x)) as Coordinate);
     }
 
     /** A representation where all coordinates are within 0 and 1 in crystal units */
-    get standardRepresentation() {
+    get standardRepresentation(): BasisSchema {
         const originalUnits = this.units;
 
         this.toStandardRepresentation();
@@ -211,23 +258,16 @@ export class Basis {
 
     /**
      * Add atom with a chemical element at coordinate.
-     * @param {Object} config
-     * @param {String} element - Chemical element.
-     * @param {Array} coordinate - 3-dimensional coordinate.
      */
-    addAtom({ element = "Si", coordinate = [0.5, 0.5, 0.5] }) {
+    addAtom({ element = "Si", coordinate = [0.5, 0.5, 0.5] }: Atom) {
         this._elements.addElement(element);
         this._coordinates.addElement(coordinate);
     }
 
     /**
      * Remove atom with a chemical element at coordinate either by passing the (element AND coordinate) OR id.
-     * @param {Object} config
-     * @param {String} element - Chemical element.
-     * @param {Array} coordinate - 3-dimensional coordinate.
-     * @param {Number} id - numeric id of the element (optional).
      */
-    removeAtom({ element, coordinate, id }) {
+    removeAtom({ element, coordinate, id }: Atom) {
         if (element && coordinate.length > 0) {
             this._elements.removeElement(element, id);
             this._coordinates.removeElement(coordinate, id);
@@ -235,34 +275,15 @@ export class Basis {
     }
 
     /**
-     * Remove atom at a particular coordinate.
-     * @param {Object} config
-     * @param {Array} coordinate - 3-dimensional coordinate.
-     */
-    removeAtomAtCoordinate({ coordinate }) {
-        if (coordinate.length > 0) {
-            const index = this._coordinates.getArrayIndexByPredicate((arrayCoordinate) => {
-                return math.roundToZero(math.vDist(arrayCoordinate, coordinate)) === 0;
-            });
-            if (index > -1) {
-                this._elements.removeElement(null, index);
-                this._coordinates.removeElement(null, index);
-            }
-        }
-    }
-
-    /**
      * Unique names (symbols) of the chemical elements basis. E.g. `['Si', 'Li']`
-     * @return {Array}
      */
-    get uniqueElements() {
+    get uniqueElements(): string[] {
         return _.unique(this._elements.array);
     }
 
     /**
      * Returns unique chemical elements with their count sorted by electronegativity.
      * `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
-     * @return {Object}
      */
     get uniqueElementCountsSortedByElectronegativity() {
         return _.chain(this.elements)
@@ -276,12 +297,11 @@ export class Basis {
      * Returns chemical elements with their count wrt their original order in the basis.
      * Note: entries for the same element separated by another element are considered separately.
      * [{"count":1, "value":"Zr"}, {"count":23, "value":"H"}, {"count":11, "value":"Zr"}, {"count":1, "value":"H"}]
-     * @return {Object}
      */
-    get elementCounts() {
-        const elementCounts = [];
-        this.elements.forEach((element, index) => {
-            const previousElement = this.elements[index - 1];
+    get elementCounts(): ElementCount[] {
+        const elementCounts: ElementCount[] = [];
+        this.getElementsAsObject().forEach((element, index) => {
+            const previousElement = this.getElementsAsObject()[index - 1];
             if (previousElement && previousElement.value === element.value) {
                 const previousElementCount = elementCounts[elementCounts.length - 1];
                 previousElementCount.count += 1;
@@ -297,9 +317,8 @@ export class Basis {
 
     /**
      * Reduced formula in IUPAC format. E.g., Na2SO4
-     * @return {String}
      */
-    get formula() {
+    get formula(): string {
         const counts = this.uniqueElementCountsSortedByElectronegativity;
         const countsValues = _.values(counts);
         const gcd = countsValues.length > 1 ? math.gcd(...countsValues) : countsValues[0];
@@ -312,9 +331,8 @@ export class Basis {
 
     /**
      * Returns the unit cell formula as object `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`
-     * @return {Array}
      */
-    get unitCellFormula() {
+    get unitCellFormula(): string {
         const counts = this.uniqueElementCountsSortedByElectronegativity;
         return _.pairs(counts)
             .map((x) => x[0] + (x[1] === 1 ? "" : x[1]))
@@ -326,12 +344,10 @@ export class Basis {
     /**
      * Returns a nested array with elements and their corresponding coordinates
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
-     * @return {Array}
      */
-    get elementsAndCoordinatesArray() {
-        const clsInstance = this;
+    get elementsAndCoordinatesArray(): [string, Coordinate][] {
         return this._elements.array.map((element, idx) => {
-            const coordinates = clsInstance.getCoordinateByIndex(idx);
+            const coordinates = this.getCoordinateByIndex(idx);
             return [element, coordinates];
         });
     }
@@ -346,9 +362,8 @@ export class Basis {
      *     result: "Si 0,1,0;Si 1,0,0"
      * ```
      * This guarantees the independence from the order in the elements array.
-     * @return {String}
      */
-    getAsSortedString() {
+    getAsSortedString(): string {
         // make a copy to prevent modifying class values
         const clsInstance = new Basis(this.toJSON());
         clsInstance.toStandardRepresentation();
@@ -363,9 +378,8 @@ export class Basis {
 
     /**
      * Returns a string for hash calculation (in crystal units)
-     * @return {String}
      */
-    get hashString() {
+    get hashString(): string {
         const originallyInCartesianUnits = this.isInCartesianUnits;
 
         this.toCrystal();
@@ -380,9 +394,8 @@ export class Basis {
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
-     * @return {String[]}
      */
-    get atomicPositions() {
+    get atomicPositions(): string[] {
         return this.elementsAndCoordinatesArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
@@ -393,7 +406,7 @@ export class Basis {
     /**
      * @summary Returns number of atoms in material
      */
-    get nAtoms() {
+    get nAtoms(): number {
         return this._elements.array.length;
     }
 
@@ -402,18 +415,16 @@ export class Basis {
     /**
      * @summary Returns true if bases are equal, otherwise - false.
      * @param anotherBasisClsInstance {Basis} Another Basis.
-     * @return {Boolean}
      */
-    isEqualTo(anotherBasisClsInstance) {
+    isEqualTo(anotherBasisClsInstance: Basis): boolean {
         return this.hashString === anotherBasisClsInstance.hashString;
     }
 
     /**
      * @summary Returns true if basis cells are equal, otherwise - false.
      * @param anotherBasisClsInstance {Basis} Another Basis.
-     * @return {Boolean}
      */
-    hasEquivalentCellTo(anotherBasisClsInstance) {
+    hasEquivalentCellTo(anotherBasisClsInstance: Basis): boolean {
         // this.cell {Array} - Cell Vectors 1, eg. [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         // prettier-ignore
         return !this.cell
@@ -427,9 +438,8 @@ export class Basis {
      * @summary function returns the minimum basis lattice size for a structure.
      * The lattice size is based on the atomic radius of an element if the basis contains a single atom.
      * The lattice size is based on the maximum pairwise distance across a structure if the basis contains > 2 atoms.
-     * @returns {Number}
      */
-    getMinimumLatticeSize(latticeScalingFactor = nonPeriodicLatticeScalingFactor) {
+    getMinimumLatticeSize(latticeScalingFactor = nonPeriodicLatticeScalingFactor): number {
         let latticeSizeAdditiveContribution = 0;
         if (this._elements.array.length === 1) {
             const elementSymbol = this._elements.getArrayElementByIndex(0);
@@ -442,13 +452,12 @@ export class Basis {
 
     /**
      * @summary function returns an array of overlapping atoms within specified tolerance.
-     * @returns {{element: String, id: Number}[]}
      */
-    getOverlappingAtoms() {
+    getOverlappingAtoms(): Overlap[] {
         // to simplify calculations, convert to cartesian coordinates
         this.toCartesian();
         const { coordinates, elements } = this;
-        const overlaps = [];
+        const overlaps: Overlap[] = [];
         // temporary value for overlap approximation, where atoms most certainly can't be located
         const overlapCoefficient = 0.75;
 
@@ -462,7 +471,8 @@ export class Basis {
                     overlapCoefficient *
                     (getElementAtomicRadius(el1) + getElementAtomicRadius(el2)); // in angstroms
 
-                const distance = math.vDist(entry1.value, entry2.value);
+                // @ts-ignore
+                const distance = math.vDist(entry1.value, entry2.value) as number;
                 if (distance < tolerance) {
                     overlaps.push({
                         id1: i,
@@ -492,9 +502,8 @@ export class Basis {
      *      -     -    -         ...      ...
      *      -     -    -         ...      ... pair n-1, n
      *
-     * @returns {Number}
      */
-    get maxPairwiseDistance() {
+    get maxPairwiseDistance(): number {
         const originalUnits = this.units;
         this.toCartesian();
         let maxDistance = 0;
@@ -505,7 +514,9 @@ export class Basis {
                         this._coordinates.getArrayElementByIndex(i),
                         this._coordinates.getArrayElementByIndex(j),
                     );
+                    // @ts-ignore
                     if (distance > maxDistance) {
+                        // @ts-ignore
                         maxDistance = distance;
                     }
                 }
@@ -532,13 +543,12 @@ export class Basis {
      *  [z1, z2, ...zn]]
      *
      * Returns an array = [xCenter, yCenter, zCenter]
-     * @returns {Array}
      */
-    get centerOfCoordinatesPoint() {
+    get centerOfCoordinatesPoint(): number[] {
         const transposedBasisCoordinates = math.transpose(this._coordinates.array);
         const centerOfCoordinatesVectors = [];
         for (let i = 0; i < 3; i++) {
-            const center =
+            const center = // @ts-ignore
                 transposedBasisCoordinates[i].reduce((a, b) => a + b) / this._elements.array.length;
             centerOfCoordinatesVectors.push(math.precise(center, 4));
         }
@@ -547,10 +557,9 @@ export class Basis {
 
     /**
      * @summary Function translates coordinates by the vector passed as an argument.
-     * @param {Array} translationVector
-
      */
-    translateByVector(translationVector) {
+    translateByVector(translationVector: number[]) {
+        // @ts-ignore
         this._coordinates.mapArrayInPlace((x) => math.add(x, translationVector));
     }
 }

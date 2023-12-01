@@ -1,5 +1,7 @@
 /* eslint no-unused-vars: 0 */
-import { LATTICE_TYPE } from "../lattice/types";
+import { LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+
+import { VectorsAsArray } from "../lattice/types";
 import math from "../math";
 
 /**
@@ -7,7 +9,7 @@ import math from "../math";
  * Following Setyawan, W., & Curtarolo, S. (2010). doi:10.1016/j.commatsci.2010.05.010
  */
 const PRIMITIVE_CELLS = {
-    [LATTICE_TYPE.CUB]: ({ a, b, c, alpha, beta, gamma }) => {
+    CUB: ({ a }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a, 0, 0],
             [0, a, 0],
@@ -15,7 +17,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.FCC]: ({ a, b, c, alpha, beta, gamma }) => {
+    FCC: ({ a }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [0.0, a / 2, a / 2],
             [a / 2, 0.0, a / 2],
@@ -23,7 +25,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.BCC]: ({ a, b, c, alpha, beta, gamma }) => {
+    BCC: ({ a }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [-a / 2, a / 2, a / 2],
             [a / 2, -a / 2, a / 2],
@@ -31,7 +33,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.TET]: ({ a, b, c, alpha, beta, gamma }) => {
+    TET: ({ a, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a, 0, 0],
             [0, a, 0],
@@ -39,7 +41,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.BCT]: ({ a, b, c, alpha, beta, gamma }) => {
+    BCT: ({ a, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [-a / 2, a / 2, c / 2],
             [a / 2, -a / 2, c / 2],
@@ -47,7 +49,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.ORC]: ({ a, b, c, alpha, beta, gamma }) => {
+    ORC: ({ a, b, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a, 0, 0],
             [0, b, 0],
@@ -55,7 +57,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.ORCF]: ({ a, b, c, alpha, beta, gamma }) => {
+    ORCF: ({ a, b, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [0, b / 2, c / 2],
             [a / 2, 0, c / 2],
@@ -63,7 +65,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.ORCI]: ({ a, b, c, alpha, beta, gamma }) => {
+    ORCI: ({ a, b, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [-a / 2, b / 2, c / 2],
             [a / 2, -b / 2, c / 2],
@@ -71,7 +73,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.ORCC]: ({ a, b, c, alpha, beta, gamma }) => {
+    ORCC: ({ a, b, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a / 2, b / 2, 0],
             [-a / 2, b / 2, 0],
@@ -79,7 +81,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.HEX]: ({ a, b, c, alpha, beta, gamma }) => {
+    HEX: ({ a, c }: LatticeImplicitSchema): VectorsAsArray => {
         return [
             [a / 2, (-a * math.sqrt(3)) / 2, 0],
             [a / 2, (a * math.sqrt(3)) / 2, 0],
@@ -87,7 +89,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.RHL]: ({ a, b, c, alpha, beta, gamma }) => {
+    RHL: ({ a, alpha }: LatticeImplicitSchema): VectorsAsArray => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         const cosHalfAlpha = math.sqrt((1 / 2) * (1 + cosAlpha));
         const sinHalfAlpha = math.sqrt((1 / 2) * (1 - cosAlpha));
@@ -102,7 +104,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.MCL]: ({ a, b, c, alpha, beta, gamma }) => {
+    MCL: ({ a, b, c, alpha }: LatticeImplicitSchema): VectorsAsArray => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         return [
             [a, 0, 0],
@@ -111,7 +113,7 @@ const PRIMITIVE_CELLS = {
         ];
     },
 
-    [LATTICE_TYPE.MCLC]: ({ a, b, c, alpha, beta, gamma }) => {
+    MCLC: ({ a, b, c, alpha }: LatticeImplicitSchema): VectorsAsArray => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         return [
             [a / 2, b / 2, 0],
@@ -121,15 +123,16 @@ const PRIMITIVE_CELLS = {
     },
 
     // Algorithm from http://pymatgen.org/_modules/pymatgen/core/lattice.html (from_params)
-    [LATTICE_TYPE.TRI]: ({ a, b, c, alpha, beta, gamma }) => {
+    TRI: ({ a, b, c, alpha, beta, gamma }: LatticeImplicitSchema): VectorsAsArray => {
         // convert angles to Radians
         // eslint-disable-next-line no-param-reassign
         [alpha, beta, gamma] = [alpha, beta, gamma].map(
+            // @ts-ignore
             (x) => math.unit(x, "degree").to("rad").value,
         );
 
         const [cosAlpha, cosBeta, cosGamma] = [alpha, beta, gamma].map((x) => math.cos(x));
-        const [sinAlpha, sinBeta, sinGamma] = [alpha, beta, gamma].map((x) => math.sin(x));
+        const [sinAlpha, sinBeta] = [alpha, beta].map((x) => math.sin(x));
         const gammaStar = math.acos((cosAlpha * cosBeta - cosGamma) / (sinAlpha * sinBeta));
         const cosGammaStar = math.cos(gammaStar);
         const sinGammaStar = math.sin(gammaStar);
@@ -142,7 +145,7 @@ const PRIMITIVE_CELLS = {
     },
 
     // alternative implementation
-    [`${LATTICE_TYPE.TRI}alt`]: ({ a, b, c, alpha, beta, gamma }) => {
+    TRIalt: ({ a, b, c, alpha, beta, gamma }: LatticeImplicitSchema): VectorsAsArray => {
         const cosAlpha = math.cos((alpha / 180) * math.PI);
         const cosBeta = math.cos((beta / 180) * math.PI);
         const cosGamma = math.cos((gamma / 180) * math.PI);
@@ -167,12 +170,15 @@ const PRIMITIVE_CELLS = {
 
 /**
  * Returns lattice vectors for a primitive cell for a lattice.
- * @param {Lattice} lattice - Lattice instance.
- * @param {Boolean[]} skipRounding - whether to skip rounding the lattice vectors.
- * @return {Array[]} Cell.vectorsAsArray
+ * @param lattice - Lattice instance.
+ * @param  skipRounding - whether to skip rounding the lattice vectors.
+ * @return Cell.vectorsAsArray
  */
-export function primitiveCell(lattice, skipRounding = false) {
-    const [vectorA, vectorB, vectorC] = PRIMITIVE_CELLS[lattice.type || LATTICE_TYPE.TRI](lattice);
+export function primitiveCell(
+    lattice: LatticeImplicitSchema,
+    skipRounding = false,
+): VectorsAsArray {
+    const [vectorA, vectorB, vectorC] = PRIMITIVE_CELLS[lattice.type || "TRI"](lattice);
     // set precision and remove JS floating point artifacts
     if (!skipRounding) {
         [vectorA, vectorB, vectorC].map((vec) =>
