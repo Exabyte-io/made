@@ -168,7 +168,7 @@ function isPoscar(text) {
 
     // Check the lattice vectors (three lines, each with three floating point numbers)
     for (let i = 2; i <= 4; i++) {
-        if (!/^[+-]?[\d.\s]+$/.test(lines[i].trim())) {
+        if (!/^[-+]?\d*\.\d+\s+[-+]?\d*\.\d+\s+[-+]?\d*\.\d+$/.test(lines[i].trim())) {
             return false;
         }
     }
