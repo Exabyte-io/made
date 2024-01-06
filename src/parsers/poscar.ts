@@ -1,29 +1,33 @@
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
+import { Coordinate } from "../basis/types";
 import { ATOMIC_COORD_UNITS } from "../constants";
+import { Constraint, ConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
+import { Vector } from "../lattice/types";
 import math from "../math";
+import { MaterialJSON } from "../types";
 
-const _print = (x, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
-const _latticeVectorsToString = (vectors) =>
+const _print = (x: number, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
+const _latticeVectorsToString = (vectors: Vector[]) =>
     vectors.map((v) => v.map((c) => _print(c)).join("\t")).join("\n");
-const atomicConstraintsCharFromBool = (bool) => (bool ? "T" : "F");
+const atomicConstraintsCharFromBool = (bool: boolean): string => (bool ? "T" : "F");
 
 /**
  * Obtain a textual representation of a material in POSCAR format.
- * @param {Material|Object} materialOrConfig - material class instance or config object.
- * @param {Boolean} omitConstraints - whether to discard constraints passed with material.
- * @return {string}
+ * @param materialOrConfig - material class instance or config object.
+ * @param omitConstraints - whether to discard constraints passed with material.
  */
-function toPoscar(materialOrConfig, omitConstraints = false) {
+function toPoscar(materialOrConfig: MaterialJSON, omitConstraints = false): string {
     const lattice = new Lattice(materialOrConfig.lattice);
     const vectorsAsString = _latticeVectorsToString(lattice.vectorArrays);
+    // @ts-ignore
     const basis = new ConstrainedBasis({
         ...materialOrConfig.basis,
         cell: lattice.vectorArrays,
     });
-    const BasisLines = [];
+    const BasisLines: string[] = [];
     let addSelectiveDynamics = false;
     basis._elements.array.forEach((item, idx) => {
         const coord = basis.getCoordinateByIndex(idx).map((x) => _print(x));
@@ -35,7 +39,7 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
     });
     const basisContent = BasisLines.join("\n");
     const elementsLine = basis.elementCounts.map((e) => e.value).join(" ");
-    const countsLine = basis.elementCounts.map((e) => parseInt(e.count, 10)).join(" ");
+    const countsLine = basis.elementCounts.map((e) => parseInt(`${e.count}`, 10)).join(" ");
     const coordsType =
         materialOrConfig.basis.units === ATOMIC_COORD_UNITS.cartesian ? "cartesian" : "direct";
 
@@ -55,20 +59,18 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
 /**
  * @summary calculates the number of atoms in a poscar file based on the summation of the numbers in line 7 of the file.
  * Poscar file formatting: https://www.vasp.at/wiki/index.php/POSCAR
- * @param poscarFileContent
- * @returns {Number}
  */
-export function atomsCount(poscarFileContent) {
+export function atomsCount(poscarFileContent: string): number {
     const atomsLine = poscarFileContent.split("\n")[6].split(/\s+/);
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
 
 /**
  * Parses POSCAR file into a Material config object.
- * @param {string} fileContent - POSCAR file content.
- * @return {Object} Material config.
+ * @param fileContent - POSCAR file content.
+ * @return Material config.
  */
-function fromPoscar(fileContent) {
+function fromPoscar(fileContent: string): object {
     const lines = fileContent.split("\n");
 
     const comment = lines[0];
@@ -91,18 +93,18 @@ function fromPoscar(fileContent) {
         startLine = 8;
     }
 
-    const elements = atomSymbols
-        .map((symbol, i) => Array(atomCounts[i]).fill(symbol))
+    const elements: string[] = atomSymbols
+        .map((symbol: string, i: number): string[] => Array(atomCounts[i]).fill(symbol))
         .reduce((a, b) => a.concat(b), []);
 
     // Atom coordinates and constraints
-    const coordinates = [];
-    const constraints = [];
+    const coordinates: Coordinate[] = [];
+    const constraints: Constraint[] = [];
     let atomIndex = 0;
     for (let i = 0; i < atomSymbols.length; i++) {
         for (let j = 0; j < atomCounts[i]; j++) {
             const lineComponents = lines[startLine + atomIndex].trim().split(/\s+/);
-            const coordinate = [
+            const coordinate: Coordinate = [
                 parseFloat(lineComponents[0]),
                 parseFloat(lineComponents[1]),
                 parseFloat(lineComponents[2]),
@@ -111,7 +113,7 @@ function fromPoscar(fileContent) {
 
             // Add constraints if selective dynamics is used
             if (selectiveDynamics) {
-                const constraint = [
+                const constraint: ConstraintValue = [
                     lineComponents[3] === "T",
                     lineComponents[4] === "T",
                     lineComponents[5] === "T",
@@ -123,9 +125,9 @@ function fromPoscar(fileContent) {
     }
 
     const lattice = Lattice.fromVectors({
-        a: lines[2].trim().split(/\s+/).map(Number),
-        b: lines[3].trim().split(/\s+/).map(Number),
-        c: lines[4].trim().split(/\s+/).map(Number),
+        a: lines[2].trim().split(/\s+/).map(Number) as Vector,
+        b: lines[3].trim().split(/\s+/).map(Number) as Vector,
+        c: lines[4].trim().split(/\s+/).map(Number) as Vector,
         alat: latticeConstant,
         units: "angstrom",
     });
@@ -150,10 +152,9 @@ function fromPoscar(fileContent) {
 
 /**
  * @summary Checks if a string has a POSCAR format (first 8 lines are read)
- * @param {string} text - string to check
- * @returns {boolean}
+ * @param text - string to check
  */
-function isPoscar(text) {
+function isPoscar(text: string): boolean {
     const lines = text.split("\n");
 
     // Checking number of lines, minimum requirement for POSCAR

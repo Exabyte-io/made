@@ -7,7 +7,7 @@ import { AsGeBasis, FeLiSiBasis, Ge2Basis, OSiBasis, Si2Basis } from "../enums";
 describe("Parsers:CombinatorialBasis", () => {
     it("toBasisConfig", () => {
         // eslint-disable-next-line new-cap
-        const basisConfig2 = new CombinatorialBasis.toBasisConfig([
+        const basisConfig2 = CombinatorialBasis.toBasisConfig([
             {
                 element: "Si",
                 coordinates: [0, 0, 0],
