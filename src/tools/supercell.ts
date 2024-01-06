@@ -1,4 +1,9 @@
+import { Basis } from "../basis/basis";
+import { Coordinate } from "../basis/types";
+import { Cell } from "../cell/cell";
 import { LatticeBravais } from "../lattice/lattice_bravais";
+// eslint-disable-next-line import/no-cycle
+import { Material } from "../material";
 import math from "../math";
 import cellTools from "./cell";
 
@@ -6,12 +11,13 @@ const ADD = math.add;
 
 /**
  * @summary Generates new basis for a supercell. For each site from basis generates shifts that are within supercell.
- * @param basis {Basis}
- * @param cell {Cell}
- * @param supercell {Cell}
- * @return {Basis}
  */
-function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix) {
+function generateNewBasisWithinSupercell(
+    basis: Basis,
+    cell: Cell,
+    supercell: Cell,
+    supercellMatrix: number[][],
+): Basis {
     const oldBasis = basis.clone();
     const newBasis = basis.clone({ isEmpty: true });
 
@@ -28,7 +34,7 @@ function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix
             if (supercell.isPointInsideCell(newPoint)) {
                 newBasis.addAtom({
                     element: element.value,
-                    coordinate: supercell.convertPointToFractional(newPoint),
+                    coordinate: supercell.convertPointToFractional(newPoint) as Coordinate,
                 });
             }
         });
@@ -39,10 +45,10 @@ function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix
 
 /**
  * @summary Generates supercell config for the specified material.
- * @param material {Object}
+ * @param material
  * @param supercellMatrix {Number[][]}
  */
-function generateConfig(material, supercellMatrix) {
+function generateConfig(material: Material, supercellMatrix: number[][]) {
     const det = math.det(supercellMatrix);
     if (det === 0) {
         throw new Error("Scaling matrix is degenerate.");
