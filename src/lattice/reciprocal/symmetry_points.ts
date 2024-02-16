@@ -4,7 +4,7 @@
  * This file contains information about the Brillouin zone symmetry points by lattice type.
  * [AFLOW](https://arxiv.org/abs/1004.2974) methodology is used for implementation.
  */
-import { LatticeImplicitSchema } from "@exabyte-io/code.js/src/types";
+import { LatticeImplicitSchema } from "@mat3ra/esse/lib/js/types";
 
 import { Lattice } from "../lattice";
 

@@ -1,4 +1,4 @@
-import { MaterialSchema } from "@exabyte-io/code.js/src/types";
+import { MaterialSchema } from "@mat3ra/esse/lib/js/types";
 import _ from "underscore";
 import s from "underscore.string";
 

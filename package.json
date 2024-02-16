@@ -33,8 +33,9 @@
         "@babel/preset-react": "^7.16.7",
         "@babel/register": "^7.22.15",
         "@babel/runtime-corejs3": "^7.16.8",
-        "@exabyte-io/code.js": "2023.12.1-0",
+        "@exabyte-io/code.js": "git+https://github.com/Exabyte-io/code.js.git#8a63988e1d1b59b9deff3f328a7021046f3ac72d",
         "@exabyte-io/eslint-config": "^2023.8.29-1",
+        "@mat3ra/esse": "git+https://github.com/Exabyte-io/esse.git#fa660c7668fd48414dfee53ecccc3625b5ed28c6",
         "@typescript-eslint/eslint-plugin": "^5.9.1",
         "@typescript-eslint/parser": "^5.9.1",
         "chai": "^4.3.4",
@@ -74,7 +75,8 @@
         "underscore.string": "^3.3.4"
     },
     "peerDependencies": {
-        "@exabyte-io/code.js": "*"
+        "@exabyte-io/code.js": "*",
+        "@mat3ra/esse": "*"
     },
     "lint-staged": {
         "*.js": "eslint --cache --fix",
