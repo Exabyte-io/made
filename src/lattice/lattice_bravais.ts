@@ -1,4 +1,4 @@
-import { LatticeImplicitSchema, LatticeTypeSchema } from "@mat3ra/esse/lib/js/types";
+import { LatticeImplicitSchema, LatticeTypeSchema } from "@exabyte-io/code.js/dist/esse/types";
 
 import constants from "../constants";
 import math from "../math";

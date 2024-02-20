@@ -33,7 +33,7 @@
         "@babel/preset-react": "^7.16.7",
         "@babel/register": "^7.22.15",
         "@babel/runtime-corejs3": "^7.16.8",
-        "@exabyte-io/code.js": "git+https://github.com/Exabyte-io/code.js.git#8a63988e1d1b59b9deff3f328a7021046f3ac72d",
+        "@exabyte-io/code.js": "git+https://github.com/Exabyte-io/code.js.git#update/SOF-7161",
         "@exabyte-io/eslint-config": "^2023.8.29-1",
         "@typescript-eslint/eslint-plugin": "^5.9.1",
         "@typescript-eslint/parser": "^5.9.1",
@@ -60,7 +60,6 @@
     "dependencies": {
         "@babel/core": "^7.16.0",
         "@exabyte-io/periodic-table.js": "2022.5.28-0",
-        "@mat3ra/esse": ">=2024.2.19-0",
         "@types/chai": "^4.3.5",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.4.2",
