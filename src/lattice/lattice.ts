@@ -2,7 +2,7 @@ import {
     LatticeImplicitSchema,
     LatticeSchema,
     LatticeTypeExtendedSchema,
-} from "@mat3ra/esse/lib/js/types";
+} from "@exabyte-io/code.js/dist/esse/types";
 import lodash from "lodash";
 import _ from "underscore";
 

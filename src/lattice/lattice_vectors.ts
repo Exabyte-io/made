@@ -1,4 +1,4 @@
-import { LatticeExplicitUnit, LatticeImplicitSchema } from "@mat3ra/esse/lib/js/types";
+import { LatticeExplicitUnit, LatticeImplicitSchema } from "@exabyte-io/code.js/dist/esse/types";
 
 import { primitiveCell } from "../cell/primitive_cell";
 import constants from "../constants";
