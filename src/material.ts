@@ -6,7 +6,7 @@ import {
     FileSourceSchema,
     InChIRepresentationSchema,
     MaterialSchema,
-} from "@exabyte-io/code.js/dist/esse/types";
+} from "@mat3ra/esse/lib/js/types";
 import CryptoJS from "crypto-js";
 
 import { ConstrainedBasis } from "./basis/constrained_basis";
