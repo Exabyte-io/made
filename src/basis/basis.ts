@@ -1,4 +1,3 @@
-// import { BasisSchema } from "@exabyte-io/code.js/src/types";
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import _ from "underscore";
