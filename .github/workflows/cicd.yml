@@ -15,8 +15,7 @@ jobs:
       matrix:
         node-version: 
           - 14.x 
-          - 16.x
-          - 18.x
+          - 20.x
 
     steps:
       - name: Checkout this repository
@@ -64,6 +63,5 @@ jobs:
       - name: Publish release
         uses: ./actions/js/publish
         with:
-          node-version: 12.21.x
           npm-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
