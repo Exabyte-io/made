@@ -5,7 +5,6 @@
     "scripts": {
         "prepublishOnly": "rm -rf lib; npm run transpile",
         "transpile": "tsc",
-        "postinstall": "npm run transpile",
         "test": "mocha",
         "lint": "eslint src tests && prettier --write src tests",
         "lint:fix": "eslint --fix --cache src tests && prettier --write src tests",
