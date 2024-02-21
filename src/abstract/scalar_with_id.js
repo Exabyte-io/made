@@ -9,7 +9,7 @@ export class ScalarWithId {
      * @param {Any} valueOrObject - a ScalarWithID, or any other type.
      * @param {Number} id - numerical id (Integer).
      */
-    constructor(valueOrObject, id = 0) {
+    constructor(valueOrObject, id = 1) {
         let _id, _value;
         // if already passing a ScalarWithId => preserve original
         if (_.isObject(valueOrObject) && !_.isArray(valueOrObject)) {
