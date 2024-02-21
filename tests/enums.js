@@ -37,3 +37,18 @@ export const GraphenePoscar = readFile(path.join(FIXTURES_DIR, "Graphene.poscar"
 export const NiHex = readJSONFile(path.join(FIXTURES_DIR, "Ni-hex.json"));
 export const NiHexPoscar = readFile(path.join(FIXTURES_DIR, "Ni-hex.poscar"));
 export const SiHex = readJSONFile(path.join(FIXTURES_DIR, "Si-hex.json"));
+
+export const FortranFile1 = readFile(path.join(FIXTURES_DIR, "/parsers/utils/fortran-file-1.in"));
+export const FortranFile1JSON = readJSONFile(
+    path.join(FIXTURES_DIR, "/parsers/utils/fortran-file-1.json"),
+);
+export const BNHexIbravPWSCFInput = readFile(
+    path.join(FIXTURES_DIR, "/parsers/espresso/BN-hex-ibrav-pwscf.in"),
+);
+export const BNHexPWSCF = readFile(path.join(FIXTURES_DIR, "/parsers/espresso/BN-hex-pwscf.in"));
+export const BNHex = readJSONFile(path.join(FIXTURES_DIR, "/parsers/espresso/BN-hex.json"));
+
+export const NiCubIbravAPWSCFInput = readFile(
+    path.join(FIXTURES_DIR, "/parsers/espresso/Ni-cub-ibrav-a-pwscf.in"),
+);
+export const NiCub = readJSONFile(path.join(FIXTURES_DIR, "/parsers/espresso/Ni-cub.json"));

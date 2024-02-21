@@ -1,26 +1,20 @@
+import { STRUCTURAL_INFORMATION_FORMATS } from "./enums";
+import { ESPRESSOMaterialParser } from "./espresso/parser";
 import Poscar from "./poscar";
-
-const NATIVE_FORMAT = {
-    JSON: "json",
-    POSCAR: "poscar",
-    CIF: "cif",
-    PWX: "pwx",
-    XYZ: "xyz",
-    UNKNOWN: "unknown",
-};
-
 /**
  * @summary Detects the format of the input string
  * @throws {Error} - If the input string is unknown format
  * @param {string} text -  input string to detect format
- * @returns {NATIVE_FORMAT} - Format of the input string
+ * @returns {string} - Format of the input string
  */
 function detectFormat(text) {
+    // TODO: replace with actual detection function
     const jsonRegex = /^\s*\{/;
-    if (jsonRegex.test(text)) return NATIVE_FORMAT.JSON;
-    if (Poscar.isPoscar(text)) return NATIVE_FORMAT.POSCAR;
-
-    return NATIVE_FORMAT.UNKNOWN;
+    const espressoRegex = /^\s*ATOMIC_SPECIES/m;
+    if (jsonRegex.test(text)) return STRUCTURAL_INFORMATION_FORMATS.JSON;
+    if (Poscar.isPoscar(text)) return STRUCTURAL_INFORMATION_FORMATS.POSCAR;
+    if (espressoRegex.test(text)) return STRUCTURAL_INFORMATION_FORMATS.QE;
+    return STRUCTURAL_INFORMATION_FORMATS.UNKNOWN;
 }
 
 /**
@@ -32,12 +26,17 @@ function detectFormat(text) {
 function convertFromNativeFormat(text) {
     const format = detectFormat(text);
 
+    // TODO: replace with parsers factory
     switch (format) {
-        case NATIVE_FORMAT.JSON:
+        case STRUCTURAL_INFORMATION_FORMATS.JSON:
             return JSON.parse(text);
-        case NATIVE_FORMAT.POSCAR:
+        case STRUCTURAL_INFORMATION_FORMATS.POSCAR:
             return Poscar.fromPoscar(text);
-        case NATIVE_FORMAT.UNKNOWN:
+        case STRUCTURAL_INFORMATION_FORMATS.QE:
+            // eslint-disable-next-line no-case-declarations
+            const parser = new ESPRESSOMaterialParser();
+            return parser.parse(text, "material");
+        case STRUCTURAL_INFORMATION_FORMATS.UNKNOWN:
             throw new Error(`Unknown format`);
         // TODO:  add more formats
         default:
