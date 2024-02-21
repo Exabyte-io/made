@@ -5,7 +5,7 @@ import { AtomicConstraints } from "./constraints/constraints";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "./lattice/lattice";
 import { ReciprocalLattice } from "./lattice/reciprocal/lattice_reciprocal";
 import { DEFAULT_LATTICE_UNITS, LATTICE_TYPE_CONFIGS } from "./lattice/types";
-import { defaultMaterialConfig, Material } from "./material";
+import { defaultMaterialConfig, Material, MaterialMixin } from "./material";
 import MadeMath from "./math";
 import parsers from "./parsers/parsers";
 import tools from "./tools/index";
@@ -18,6 +18,7 @@ export const Made = {
     math: MadeMath,
 
     Material,
+    MaterialMixin,
     defaultMaterialConfig,
     Lattice,
     nonPeriodicLatticeScalingFactor,
