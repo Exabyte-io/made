@@ -1,4 +1,3 @@
-// import { BasisSchema } from "@exabyte-io/code.js/src/types";
 import s from "underscore.string";
 
 import { ArrayWithIds } from "../abstract/array_with_ids";

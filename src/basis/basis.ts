@@ -1,4 +1,3 @@
-// import { BasisSchema } from "@exabyte-io/code.js/src/types";
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import _ from "underscore";
@@ -356,8 +355,8 @@ export class Basis {
      * @summary Concatenates elements and sorts them in alphanumeric order.
      * E.g.,
      * ```
-     *     elements: [{id: 1, value: 'Si'}, {id: 2, value: 'Si'}]
-     *     coordinates: [{id: 1, value: [1,0,0]}, {id: 2, value: [0, 1, 0]}]
+     *     elements: [{id: 0, value: 'Si'}, {id: 1, value: 'Si'}]
+     *     coordinates: [{id: 0, value: [1,0,0]}, {id: 1, value: [0, 1, 0]}]
      *
      *     result: "Si 0,1,0;Si 1,0,0"
      * ```
