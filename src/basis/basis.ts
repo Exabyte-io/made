@@ -54,7 +54,7 @@ export class Basis {
 
     _coordinates: ArrayWithIds<Coordinate>;
 
-    labels?: { id: number; value: number }[];
+    labels?: ValueOrObjectArray<number>;
 
     units: string;
 
@@ -66,6 +66,7 @@ export class Basis {
         units,
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
+        labels = [], // [{ id: 0; value: 1 }]
     }: BasisProps) {
         const _elements = isEmpty ? [] : elements;
         const _coordinates = isEmpty ? [] : coordinates;
@@ -80,6 +81,10 @@ export class Basis {
         this._coordinates = new ArrayWithIds<Coordinate>(_coordinates);
         this.units = _units;
         this.cell = cell;
+
+        if (!_.isEmpty(labels)) {
+            this.labels = labels;
+        }
     }
 
     static get unitsOptionsConfig() {
@@ -153,6 +158,15 @@ export class Basis {
             units: this.units,
             cell: this.cell,
         };
+
+        if (!_.isEmpty(this.labels)) {
+            JSON.parse(
+                JSON.stringify({
+                    ...json,
+                    labels: this.labels,
+                }),
+            );
+        }
 
         return JSON.parse(JSON.stringify(json));
     }
