@@ -13,6 +13,7 @@ import { Coordinate } from "./types";
 
 export interface BasisProps {
     elements: ValueOrObjectArray<string>; // chemical elements for atoms in basis.
+    labels?: ValueOrObjectArray<number>;
     coordinates: ValueOrObjectArray<Coordinate>; // coordinates for the atoms in basis.
     units: string; // units for the coordinates (eg. angstrom, crystal).
     cell: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
@@ -32,6 +33,7 @@ export interface ElementCount {
 
 export interface BasisSchema {
     elements: ObjectWithIdAndValue<string>[];
+    labels?: ValueOrObjectArray<number>;
     coordinates: ObjectWithIdAndValue<Coordinate>[];
     units: string;
     cell: Vector[];
@@ -51,6 +53,8 @@ export class Basis {
     _elements: ArrayWithIds<string>;
 
     _coordinates: ArrayWithIds<Coordinate>;
+
+    labels?: { id: number; value: number }[];
 
     units: string;
 

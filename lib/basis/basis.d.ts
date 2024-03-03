@@ -6,6 +6,7 @@ import { Vector } from "../lattice/types";
 import { Coordinate } from "./types";
 export interface BasisProps {
     elements: ValueOrObjectArray<string>;
+    labels?: ValueOrObjectArray<number>;
     coordinates: ValueOrObjectArray<Coordinate>;
     units: string;
     cell: Vector[];
@@ -22,6 +23,7 @@ export interface ElementCount {
 }
 export interface BasisSchema {
     elements: ObjectWithIdAndValue<string>[];
+    labels?: ValueOrObjectArray<number>;
     coordinates: ObjectWithIdAndValue<Coordinate>[];
     units: string;
     cell: Vector[];
@@ -38,6 +40,10 @@ interface Overlap {
 export declare class Basis {
     _elements: ArrayWithIds<string>;
     _coordinates: ArrayWithIds<Coordinate>;
+    labels?: {
+        id: number;
+        value: number;
+    }[];
     units: string;
     cell: Vector[];
     constructor({ elements, coordinates, units, cell, // by default, assume a cubic unary cell
