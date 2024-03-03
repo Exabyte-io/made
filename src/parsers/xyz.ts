@@ -65,7 +65,7 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
     const constraint = (n: number) => parseInt(`${n}`, 10) !== 0;
 
     const basisObj: ParsedObject = {
-        element: element,
+        element,
         coordinates: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
         constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
