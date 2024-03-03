@@ -14,7 +14,7 @@ import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
 // eslint-disable-next-line max-len
 const XYZ_LINE_REGEX =
-    /[A-Z][a-z]?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
+    /[A-Z][a-z]?(\d)?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
 
 /**
  * Validates XYZ file's line. Line should be in following format "Si 0.5 0.5 0.5".
@@ -52,6 +52,7 @@ export interface ParsedObject {
     element: string;
     coordinates: Vector;
     constraints: [boolean, boolean, boolean];
+    label?: number;
 }
 
 /**
@@ -60,13 +61,24 @@ export interface ParsedObject {
  */
 function _parseXYZLineAsWords(line: string): ParsedObject {
     const words = s.words(line);
+    const element: string = words[0].replace(/\d$/, ""); // Fe1 => Fe
     const constraint = (n: number) => parseInt(`${n}`, 10) !== 0;
-    return {
-        element: words[0],
+
+    const basisObj: ParsedObject = {
+        element: element,
         coordinates: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
         constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
     };
+
+    if (element !== words[0]) {
+        return {
+            ...basisObj,
+            label: parseInt(words[0][words[0].length - 1], 10),
+        };
+    }
+
+    return basisObj;
 }
 
 // TODO: reuse Basis Definition(s) from ESSE/Code.js instead
@@ -74,6 +86,10 @@ export interface BasisConfig {
     elements: {
         id: number;
         value: string;
+    }[];
+    labels?: {
+        id: number;
+        value: number;
     }[];
     coordinates: {
         id: number;
@@ -95,7 +111,7 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
     const lines: string[] = s(txt).trim().lines();
     const listOfObjects = _.map(lines, _parseXYZLineAsWords);
 
-    return {
+    const basisConfig = {
         elements: listOfObjects.map((elm, idx) => {
             return {
                 id: idx,
@@ -117,6 +133,29 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
             };
         }),
     };
+
+    const labels: {
+        id: number;
+        value: number;
+    }[] = [];
+
+    listOfObjects.forEach((elm, idx) => {
+        if (elm.label) {
+            labels.push({
+                id: idx,
+                value: elm.label,
+            });
+        }
+    });
+
+    if (!_.isEmpty(labels)) {
+        return {
+            ...basisConfig,
+            labels,
+        };
+    }
+
+    return basisConfig;
 }
 
 /**
