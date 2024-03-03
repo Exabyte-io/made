@@ -40,14 +40,12 @@ interface Overlap {
 export declare class Basis {
     _elements: ArrayWithIds<string>;
     _coordinates: ArrayWithIds<Coordinate>;
-    labels?: {
-        id: number;
-        value: number;
-    }[];
+    labels?: ValueOrObjectArray<number>;
     units: string;
     cell: Vector[];
     constructor({ elements, coordinates, units, cell, // by default, assume a cubic unary cell
-    isEmpty, }: BasisProps);
+    isEmpty, // whether to generate an empty Basis
+    labels, }: BasisProps);
     static get unitsOptionsConfig(): typeof ATOMIC_COORD_UNITS;
     static get unitsOptionsDefaultValue(): string;
     static get defaultCell(): [import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema];
