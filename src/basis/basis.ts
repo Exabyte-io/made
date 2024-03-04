@@ -14,6 +14,7 @@ import { Coordinate } from "./types";
 export interface BasisProps {
     elements: ValueOrObjectArray<string>; // chemical elements for atoms in basis.
     coordinates: ValueOrObjectArray<Coordinate>; // coordinates for the atoms in basis.
+    labels?: { id: number; value: number }[];
     units: string; // units for the coordinates (eg. angstrom, crystal).
     cell: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
     isEmpty?: boolean; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
@@ -65,6 +66,7 @@ export class Basis {
         units,
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
+        labels = [],
     }: BasisProps) {
         const _elements = isEmpty ? [] : elements;
         const _coordinates = isEmpty ? [] : coordinates;
@@ -79,6 +81,10 @@ export class Basis {
         this._coordinates = new ArrayWithIds<Coordinate>(_coordinates);
         this.units = _units;
         this.cell = cell;
+
+        if (!_.isEmpty(labels)) {
+            this.labels = labels;
+        }
     }
 
     static get unitsOptionsConfig() {
