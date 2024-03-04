@@ -6,7 +6,6 @@ import { Vector } from "../lattice/types";
 import { Coordinate } from "./types";
 export interface BasisProps {
     elements: ValueOrObjectArray<string>;
-    labels?: ValueOrObjectArray<number>;
     coordinates: ValueOrObjectArray<Coordinate>;
     units: string;
     cell: Vector[];
@@ -23,7 +22,10 @@ export interface ElementCount {
 }
 export interface BasisSchema {
     elements: ObjectWithIdAndValue<string>[];
-    labels?: ValueOrObjectArray<number>;
+    labels?: {
+        id: number;
+        value: number;
+    }[];
     coordinates: ObjectWithIdAndValue<Coordinate>[];
     units: string;
     cell: Vector[];
@@ -44,8 +46,7 @@ export declare class Basis {
     units: string;
     cell: Vector[];
     constructor({ elements, coordinates, units, cell, // by default, assume a cubic unary cell
-    isEmpty, // whether to generate an empty Basis
-    labels, }: BasisProps);
+    isEmpty, }: BasisProps);
     static get unitsOptionsConfig(): typeof ATOMIC_COORD_UNITS;
     static get unitsOptionsDefaultValue(): string;
     static get defaultCell(): [import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema];
