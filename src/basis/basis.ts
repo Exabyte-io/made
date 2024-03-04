@@ -13,7 +13,6 @@ import { Coordinate } from "./types";
 
 export interface BasisProps {
     elements: ValueOrObjectArray<string>; // chemical elements for atoms in basis.
-    labels?: ValueOrObjectArray<number>;
     coordinates: ValueOrObjectArray<Coordinate>; // coordinates for the atoms in basis.
     units: string; // units for the coordinates (eg. angstrom, crystal).
     cell: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
@@ -33,7 +32,7 @@ export interface ElementCount {
 
 export interface BasisSchema {
     elements: ObjectWithIdAndValue<string>[];
-    labels?: ValueOrObjectArray<number>;
+    labels?: { id: number; value: number }[];
     coordinates: ObjectWithIdAndValue<Coordinate>[];
     units: string;
     cell: Vector[];
@@ -66,7 +65,6 @@ export class Basis {
         units,
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
-        labels = [], // [{ id: 0; value: 1 }]
     }: BasisProps) {
         const _elements = isEmpty ? [] : elements;
         const _coordinates = isEmpty ? [] : coordinates;
@@ -81,10 +79,6 @@ export class Basis {
         this._coordinates = new ArrayWithIds<Coordinate>(_coordinates);
         this.units = _units;
         this.cell = cell;
-
-        if (!_.isEmpty(labels)) {
-            this.labels = labels;
-        }
     }
 
     static get unitsOptionsConfig() {
@@ -160,7 +154,7 @@ export class Basis {
         };
 
         if (!_.isEmpty(this.labels)) {
-            JSON.parse(
+            return JSON.parse(
                 JSON.stringify({
                     ...json,
                     labels: this.labels,
