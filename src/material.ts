@@ -105,7 +105,7 @@ export function MaterialMixin<
         }
 
         get src() {
-            return this.prop<FileSourceSchema>("src");
+            return this.prop<FileSourceSchema>("src") as FileSourceSchema;
         }
 
         set src(src: FileSourceSchema) {
@@ -180,7 +180,7 @@ export function MaterialMixin<
         }
 
         get basis(): BasisConfig {
-            return this.prop<BasisConfig>("basis", undefined);
+            return this.prop<BasisConfig>("basis") as BasisConfig;
         }
 
         // returns the instance of {ConstrainedBasis} class
@@ -249,7 +249,7 @@ export function MaterialMixin<
         }
 
         get hash(): string {
-            return this.prop("hash");
+            return this.prop("hash") as string;
         }
 
         /**
