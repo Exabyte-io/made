@@ -54,7 +54,7 @@ export class Basis {
 
     _coordinates: ArrayWithIds<Coordinate>;
 
-    labels?: ValueOrObjectArray<number>;
+    labels?: { id: number; value: number }[];
 
     units: string;
 
@@ -408,15 +408,28 @@ export class Basis {
         return hashString;
     }
 
+    get atomic_label_arr(): string[] {
+        const label_arr = [];
+        for (let i = 0; i < this.elements.length; i++) {
+            const label_obj = this.labels?.find((item) => item.id === i);
+            const atomic_label = label_obj ? label_obj.value.toString() : "";
+            label_arr.push(atomic_label);
+        }
+        return label_arr;
+    }
+
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
      */
     get atomicPositions(): string[] {
-        return this.elementsAndCoordinatesArray.map((entry) => {
+        return this.elementsAndCoordinatesArray.map((entry, idx) => {
             const element = entry[0];
             const coordinate = entry[1];
-            return `${element} ${coordinate.map((x) => s.sprintf("%14.9f", x).trim()).join(" ")}`;
+            const atomic_label = this.atomic_label_arr[idx];
+            return `${element}${atomic_label} ${coordinate
+                .map((x) => s.sprintf("%14.9f", x).trim())
+                .join(" ")}`;
         });
     }
 
