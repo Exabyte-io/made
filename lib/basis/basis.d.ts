@@ -46,7 +46,10 @@ interface Overlap {
 export declare class Basis {
     _elements: ArrayWithIds<string>;
     _coordinates: ArrayWithIds<Coordinate>;
-    labels?: ValueOrObjectArray<number>;
+    labels?: {
+        id: number;
+        value: number;
+    }[];
     units: string;
     cell: Vector[];
     constructor({ elements, coordinates, units, cell, // by default, assume a cubic unary cell
@@ -192,6 +195,7 @@ export declare class Basis {
      * Returns a string for hash calculation (in crystal units)
      */
     get hashString(): string;
+    get atomic_label_arr(): string[];
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
