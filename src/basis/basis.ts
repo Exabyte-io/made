@@ -408,7 +408,8 @@ export class Basis {
         return hashString;
     }
 
-    get atomic_label_arr(): string[] {
+    /* Returns array of atomic labels E.g., ["1", "2", "", ""] */
+    get atomicLabelsArray(): string[] {
         const label_arr = [];
         for (let i = 0; i < this.elements.length; i++) {
             const label_obj = this.labels?.find((item) => item.id === i);
@@ -426,7 +427,7 @@ export class Basis {
         return this.elementsAndCoordinatesArray.map((entry, idx) => {
             const element = entry[0];
             const coordinate = entry[1];
-            const atomic_label = this.atomic_label_arr[idx];
+            const atomic_label = this.atomicLabelsArray[idx];
             return `${element}${atomic_label} ${coordinate
                 .map((x) => s.sprintf("%14.9f", x).trim())
                 .join(" ")}`;

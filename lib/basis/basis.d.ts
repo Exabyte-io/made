@@ -195,7 +195,7 @@ export declare class Basis {
      * Returns a string for hash calculation (in crystal units)
      */
     get hashString(): string;
-    get atomic_label_arr(): string[];
+    get atomicLabelsArray(): string[];
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
