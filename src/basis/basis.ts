@@ -362,10 +362,11 @@ export class Basis {
      * Returns a nested array with elements and their corresponding coordinates
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
      */
-    get elementsAndCoordinatesArray(): [string, Coordinate][] {
+    get elementsAndCoordinatesArray(): [string, Coordinate, string][] {
         return this._elements.array.map((element, idx) => {
             const coordinates = this.getCoordinateByIndex(idx);
-            return [element, coordinates];
+            const atomicLabel = this.atomicLabelsArray[idx];
+            return [element, coordinates, atomicLabel];
         });
     }
 
@@ -387,8 +388,9 @@ export class Basis {
         const standardRep = clsInstance.elementsAndCoordinatesArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
+            const atomicLabel = entry[2];
             const toleratedCoordinates = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
-            return `${element} ${toleratedCoordinates.join()}`;
+            return `${element}${atomicLabel} ${toleratedCoordinates.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
     }
