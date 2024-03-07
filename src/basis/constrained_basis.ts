@@ -78,11 +78,12 @@ export class ConstrainedBasis extends Basis {
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
-    get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue][] {
+    get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue, string][] {
         return this._elements.array.map((element, idx) => {
             const coordinates = this.getCoordinateByIndex(idx);
             const constraints = this.getConstraintByIndex(idx);
-            return [element, coordinates, constraints];
+            const atomicLabel = this.atomicLabelsArray[idx];
+            return [element, coordinates, constraints, atomicLabel];
         });
     }
 
@@ -92,7 +93,7 @@ export class ConstrainedBasis extends Basis {
      */
     get atomicPositionsWithConstraints(): string[] {
         return this.elementsCoordinatesConstraintsArray.map((entry) => {
-            const element = entry[0];
+            const element = entry[0] + entry[3]; // element with label, Fe1
             const coordinate = entry[1];
             const constraint = entry[2];
             return (
