@@ -173,7 +173,9 @@ function fromBasis(
     const XYZArray: string[] = [];
     basisClsInstance._elements.array.forEach((item, idx) => {
         // assume that _elements and _coordinates are indexed equivalently
-        const element = s.sprintf("%-3s", item);
+        const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
+        const elementWithLabel = item + atomicLabel;
+        const element = s.sprintf("%-3s", elementWithLabel);
         const coordinates = basisClsInstance.getCoordinateByIndex(idx).map((x) => {
             return s.sprintf(printFormat, skipRounding ? x : math.precise(math.roundToZero(x)));
         });

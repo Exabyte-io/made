@@ -415,8 +415,8 @@ export class Basis {
         const label_arr = [];
         for (let i = 0; i < this.elements.length; i++) {
             const label_obj = this.labels?.find((item) => item.id === i);
-            const atomic_label = label_obj ? label_obj.value.toString() : "";
-            label_arr.push(atomic_label);
+            const atomicLabel = label_obj ? label_obj.value.toString() : "";
+            label_arr.push(atomicLabel);
         }
         return label_arr;
     }
@@ -429,8 +429,8 @@ export class Basis {
         return this.elementsAndCoordinatesArray.map((entry, idx) => {
             const element = entry[0];
             const coordinate = entry[1];
-            const atomic_label = this.atomicLabelsArray[idx];
-            return `${element}${atomic_label} ${coordinate
+            const atomicLabel = this.atomicLabelsArray[idx];
+            return `${element}${atomicLabel} ${coordinate
                 .map((x) => s.sprintf("%14.9f", x).trim())
                 .join(" ")}`;
         });
