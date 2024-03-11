@@ -90,8 +90,13 @@ export class Basis {
         return new Lattice().vectorArrays;
     }
 
+    static _roundValue(x: number) {
+        return math.precise(math.roundToZero(x));
+    }
+
     /**
      * Serialize class instance to JSON.
+     * @param skipRounding - Whether to skip rounding the resulting lattice values, defaults to `false`.
      * @example As below:
      {
             "elements" : [
@@ -127,12 +132,12 @@ export class Basis {
                 [
                     1,
                     0,
-                    6.12323399573677e-17
+                    0
                 ],
                 [
-                    1.60812264967664e-16,
+                    0,
                     1,
-                    6.12323399573677e-17
+                    0
                 ],
                 [
                     0,
@@ -142,12 +147,19 @@ export class Basis {
             ]
         }
      */
-    toJSON(): BasisSchema {
+    toJSON(skipRounding = false): BasisSchema {
+        const round = skipRounding ? (x: number) => x : Basis._roundValue;
+        // round values by default
         const json = {
             elements: this.elements,
-            coordinates: this.coordinates,
+            coordinates: this.coordinates.map((coordinate) => {
+                return {
+                    id: coordinate.id,
+                    value: coordinate.value.map(round),
+                };
+            }),
             units: this.units,
-            cell: this.cell,
+            cell: this.cell.map((vector) => vector.map(round)),
         };
 
         return JSON.parse(JSON.stringify(json));
