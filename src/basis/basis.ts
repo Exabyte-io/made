@@ -149,7 +149,6 @@ export class Basis {
      */
     toJSON(skipRounding = false): BasisSchema {
         const round = skipRounding ? (x: number) => x : Basis._roundValue;
-        // round values by default
         const json = {
             elements: this.elements,
             coordinates: this.coordinates.map((coordinate) => {
