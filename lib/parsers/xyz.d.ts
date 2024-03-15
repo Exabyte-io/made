@@ -1,9 +1,9 @@
 import { MaterialSchema } from "@mat3ra/esse/lib/js/types";
 import { ConstrainedBasis } from "../basis/constrained_basis";
+import { Statistics } from "../codemirrorApi";
 import { Constraint } from "../constraints/constraints";
 import { Vector } from "../lattice/types";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
-import { Statistics } from "src/codemirrorApi";
 /**
  * Validates that passed string is well-formed XYZ file.
  */

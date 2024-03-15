@@ -1,5 +1,5 @@
-import { assert } from "console";
 import { expect } from "chai";
+import { assert } from "console";
 
 import { Statistics } from "../../src/codemirrorApi";
 import xyz from "../../src/parsers/xyz";
@@ -35,8 +35,8 @@ H       -0.180226841     -1.796059882     -0.917077970
         const b2 = xyz.selectionToBasis(basis, selectionJson as unknown as Statistics);
 
         // selected all carbon atoms
-        expect(b2.elements.filter(e => e.selection).length).to.equal(5);
-        expect(b2.elements.filter(e => e.value === "C").length).to.equal(5);
-        expect(b2.elements.filter(e => e.value === "C" && e.selection).length).to.equal(5);
+        expect(b2.elements.filter((e) => e.selection).length).to.equal(5);
+        expect(b2.elements.filter((e) => e.value === "C").length).to.equal(5);
+        expect(b2.elements.filter((e) => e.value === "C" && e.selection).length).to.equal(5);
     });
 });

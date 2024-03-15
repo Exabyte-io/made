@@ -4,13 +4,13 @@ import s from "underscore.string";
 
 import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
+import { Statistics } from "../codemirrorApi";
 import { Constraint } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
 import { Vector } from "../lattice/types";
 import math from "../math";
 import { InvalidLineError } from "./errors";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
-import { Statistics } from "src/codemirrorApi";
 
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
 // eslint-disable-next-line max-len
@@ -77,7 +77,7 @@ export interface BasisConfig {
         value: string;
         selection?: number; // positive number > 0 for multiple selections use as a bit combination
         from?: number; // position in source text
-        to?: number;  // position in source text
+        to?: number; // position in source text
     }[];
     coordinates: {
         id: number;
@@ -100,8 +100,9 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
     const listOfObjects = _.map(lines, _parseXYZLineAsWords);
 
     const linePosition = (lineNumber: number) =>
-        lines.filter((l: string, i: number) => i < lineNumber)
-            .map(l => l.length + 1)
+        lines
+            .filter((l: string, i: number) => i < lineNumber)
+            .map((l) => l.length + 1)
             .reduce((sum, len) => sum + len, 0);
     return {
         elements: listOfObjects.map((elm, idx) => {
@@ -109,7 +110,7 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
                 id: idx,
                 value: elm.element,
                 from: linePosition(idx),
-                to: linePosition(idx + 1)
+                to: linePosition(idx + 1),
             };
         }),
         coordinates: listOfObjects.map((elm, idx) => {
@@ -131,8 +132,13 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
 
 function selectionToBasis(basis: BasisConfig, selection: Statistics) {
     const aBetween = (a: number, b: number, c: number) => b <= a && a < c;
-    basis.elements.forEach(e => {
-        e.selection = selection.ranges.some(r => aBetween(r.from, e.from!, e.to!) || aBetween(r.to, e.from!, e.to!)) ? 1 : 0;
+    basis.elements.forEach((e) => {
+        e.selection = selection.ranges.some(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            (r) => aBetween(r.from, e.from!, e.to!) || aBetween(r.to, e.from!, e.to!),
+        )
+            ? 1
+            : 0;
     });
     return basis;
 }
