@@ -10,7 +10,7 @@
         "lint:fix": "eslint --fix --cache src tests && prettier --write src tests",
         "prettier": "prettier --check src tests",
         "prepare": "husky install",
-        "postinstall": "postinstall.sh"
+        "postinstall": "./postinstall.sh"
     },
     "repository": {
         "type": "git",
