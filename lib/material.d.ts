@@ -2,6 +2,7 @@ import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@
 import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
 import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, MaterialSchema } from "@mat3ra/esse/lib/js/types";
 import { ConstrainedBasis } from "./basis/constrained_basis";
+import { Statistics as CodeMirrorSelection } from "./codemirrorApi";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import { BravaisConfigProps } from "./lattice/lattice_vectors";
@@ -98,6 +99,10 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
          * @param unitz crystal/cartesian
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
+        /**
+         * @param selection from @codemirror text editor
+         */
+        setSelection(selection: CodeMirrorSelection): void;
         setBasisConstraints(constraints: Constraint[]): void;
         readonly basis: BasisConfig;
         readonly Basis: ConstrainedBasis;
@@ -301,6 +306,10 @@ export declare const Material: {
          * @param unitz crystal/cartesian
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
+        /**
+         * @param selection from @codemirror text editor
+         */
+        setSelection(selection: CodeMirrorSelection): void;
         setBasisConstraints(constraints: Constraint[]): void;
         readonly basis: BasisConfig;
         readonly Basis: ConstrainedBasis;
@@ -450,24 +459,10 @@ export declare const Material: {
     prop<T = undefined>(name: string, defaultValue: T): T;
     prop<T_1 = undefined>(name: string): T_1 | undefined;
     setProp(name: string, value: unknown): void;
-    unsetProp(name: string): void; /**
-     * Returns material's basis in XYZ format.
-     */
+    unsetProp(name: string): void;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
-    toJSONQuick(exclude?: string[] | undefined): AnyObject; /**
-     * Returns material in Quantum Espresso output format:
-     * ```
-     *    CELL_PARAMETERS (angstroms)
-     *    -0.543131284  -0.000000000   0.543131284
-     *    -0.000000000   0.543131284   0.543131284
-     *    -0.543131284   0.543131284   0.000000000
-     *
-     *    ATOMIC_POSITIONS (crystal)
-     *    Si       0.000000000   0.000000000  -0.000000000
-     *    Si       0.250000000   0.250000000   0.250000000
-     * ```
-     */
+    toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
     clean(config: AnyObject): AnyObject;
@@ -497,7 +492,9 @@ export declare const Material: {
     id: string;
     readonly cls: string;
     getClsName(): string;
-    readonly slug: string;
+    readonly slug: string; /**
+     * Returns a copy of the material with conventional cell constructed instead of primitive.
+     */
     readonly isSystemEntity: boolean;
     getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/lib/js/types").EntityReferenceSchema;
     getEntityByName(entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string): import("@exabyte-io/code.js/dist/entity").InMemoryEntity;

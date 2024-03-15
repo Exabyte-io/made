@@ -3,6 +3,7 @@ import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Constraint } from "../constraints/constraints";
 import { Vector } from "../lattice/types";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
+import { Statistics } from "src/codemirrorApi";
 /**
  * Validates that passed string is well-formed XYZ file.
  */
@@ -16,6 +17,9 @@ export interface BasisConfig {
     elements: {
         id: number;
         value: string;
+        selection?: number;
+        from?: number;
+        to?: number;
     }[];
     coordinates: {
         id: number;
@@ -26,12 +30,13 @@ export interface BasisConfig {
     constraints: Constraint[];
 }
 /**
- * Parse XYZ text for basis.
+ * Parse XYZ text for basis. Assuming only xyz lines without blank or comment lines inbetween.
  * @param txt Text
  * @param units Coordinate units
  * @param cell Basis Cell
  */
 declare function toBasisConfig(txt: string, units?: string, cell?: [import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema]): BasisConfig;
+declare function selectionToBasis(basis: BasisConfig, selection: Statistics): BasisConfig;
 /**
  * Create XYZ from Basis class instance.
  * @param basisClsInstance Basis class instance.
@@ -51,6 +56,7 @@ declare const _default: {
     validate: typeof validate;
     fromMaterial: typeof fromMaterial;
     toBasisConfig: typeof toBasisConfig;
+    selectionToBasis: typeof selectionToBasis;
     fromBasis: typeof fromBasis;
     CombinatorialBasis: typeof CombinatorialBasis;
 };
