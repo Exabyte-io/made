@@ -1,5 +1,6 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
+import JSONSchemaObject from "@mat3ra/esse/lib/js/schema/material.json";
 import {
     ConsistencyCheck,
     DerivedPropertiesSchema,
@@ -83,6 +84,8 @@ export function MaterialMixin<
 >(superclass: T) {
     class MadeMaterial extends superclass {
         declare _json: MaterialSchemaJSON;
+
+        static readonly jsonSchema = JSONSchemaObject;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         constructor(...config: any[]) {
