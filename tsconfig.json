@@ -16,7 +16,8 @@
     "skipLibCheck": true,
     "types": ["mocha", "node"],
     "rootDir": "./src",
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "resolveJsonModule": true
   },
   "include": [
       "./src"
