@@ -61,24 +61,25 @@ export interface ParsedObject {
  */
 function _parseXYZLineAsWords(line: string): ParsedObject {
     const words = s.words(line);
-    const element: string = words[0].replace(/\d$/, ""); // Fe1 => Fe
+    const elementWithOptionalLabel: string = words[0];
+    const element: string = elementWithOptionalLabel.replace(/\d$/, ""); // Fe1 => Fe
     const constraint = (n: number) => parseInt(`${n}`, 10) !== 0;
 
-    const basisObj: ParsedObject = {
+    const basisLineConfig: ParsedObject = {
         element,
         coordinates: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
         constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
     };
 
-    if (element !== words[0]) {
+    if (elementWithOptionalLabel !== element) {
         return {
-            ...basisObj,
-            label: parseInt(words[0][words[0].length - 1], 10),
+            ...basisLineConfig,
+            label: parseInt(elementWithOptionalLabel[elementWithOptionalLabel.length - 1], 10),
         };
     }
 
-    return basisObj;
+    return basisLineConfig;
 }
 
 // TODO: reuse Basis Definition(s) from ESSE/Code.js instead
