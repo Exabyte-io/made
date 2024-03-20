@@ -1,4 +1,4 @@
-import { numberToPrecision } from "@exabyte-io/code.js/dist/math";
+import { math as codeJSMAth } from "@exabyte-io/code.js/dist/math";
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import _ from "underscore";
@@ -149,27 +149,31 @@ export class Basis {
     toJSON(skipRounding = false): BasisSchema {
         const json = {
             elements: this.elements,
-            coordinates: skipRounding ? this.coordinates : this.coordinatesRounded,
+            coordinates: skipRounding ? this.coordinates : this.roundCoordinates(),
             units: this.units,
-            cell: skipRounding ? this.cell : this.cellRounded,
+            cell: skipRounding ? this.cell : this.roundCell(),
         };
 
         return JSON.parse(JSON.stringify(json));
     }
 
     /** Round coordinates to the specified precision */
-    coordinatesRounded() {
+    roundCoordinates() {
         this.coordinates.map((coordinate) => {
             return {
                 id: coordinate.id,
-                value: coordinate.value.map((x) => numberToPrecision(x, this.precision)),
+                value: coordinate.value.map((x) =>
+                    codeJSMAth.roundValueToNDecimals(x, this.precision),
+                ),
             };
         });
     }
 
     /** Round cell values to the specified precision */
-    cellRounded() {
-        this.cell.map((vector) => vector.map((x) => numberToPrecision(x, this.precision)));
+    roundCell() {
+        this.cell.map((vector) =>
+            vector.map((x) => codeJSMAth.roundValueToNDecimals(x, this.precision)),
+        );
     }
 
     /**
