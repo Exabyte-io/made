@@ -40,7 +40,6 @@ export declare class Basis {
     _coordinates: ArrayWithIds<Coordinate>;
     units: string;
     cell: Vector[];
-    precision: number;
     constructor({ elements, coordinates, units, cell, // by default, assume a cubic unary cell
     isEmpty, }: BasisProps);
     static get unitsOptionsConfig(): typeof ATOMIC_COORD_UNITS;

@@ -1,4 +1,4 @@
-import { math as codeJSMAth } from "@exabyte-io/code.js/dist/math";
+import { math as mathCodeJS } from "@exabyte-io/code.js/dist/math";
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import _ from "underscore";
@@ -6,7 +6,7 @@ import s from "underscore.string";
 
 import { ArrayWithIds } from "../abstract/array_with_ids";
 import { ObjectWithIdAndValue, ValueOrObjectArray } from "../abstract/scalar_with_id";
-import { ATOMIC_COORD_UNITS, HASH_TOLERANCE, tolerance } from "../constants";
+import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import { Vector } from "../lattice/types";
 import math from "../math";
@@ -56,8 +56,6 @@ export class Basis {
     units: string;
 
     cell: Vector[];
-
-    precision = tolerance.lengthAngstrom;
 
     constructor({
         elements = ["Si"],
@@ -162,18 +160,14 @@ export class Basis {
         return this.coordinates.map((coordinate) => {
             return {
                 id: coordinate.id,
-                value: coordinate.value.map((x) =>
-                    codeJSMAth.roundValueToNDecimals(x, this.precision),
-                ),
+                value: coordinate.value.map((x) => mathCodeJS.roundToZero(x)),
             };
         });
     }
 
     /** Round cell values to the specified precision */
     roundCell() {
-        return this.cell.map((vector) =>
-            vector.map((x) => codeJSMAth.roundValueToNDecimals(x, this.precision)),
-        );
+        return this.cell.map((vector) => vector.map((x) => mathCodeJS.roundToZero(x)));
     }
 
     /**
