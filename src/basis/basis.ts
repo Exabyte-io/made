@@ -414,11 +414,20 @@ export class Basis {
     get atomicLabelsArray(): string[] {
         const labelsArray = [];
         for (let i = 0; i < this.elements.length; i++) {
-            const label_obj = this.labels?.find((item) => item.id === i);
-            const atomicLabel = label_obj ? label_obj.value.toString() : "";
+            const labelObj = this.labels?.find((item) => item.id === i);
+            const atomicLabel = labelObj ? labelObj.value.toString() : "";
             labelsArray.push(atomicLabel);
         }
         return labelsArray;
+    }
+
+    /* Returns array of elements with labels E.g., ["Fe1", "Fe2", "O", "O"] */
+    get elementsWithLabelsArray(): string[] {
+        const elements = this.elementsArray;
+        const labels = this.atomicLabelsArray;
+        const elementsWithLabels: string[] = [];
+        elements.forEach((symbol, idx) => elementsWithLabels.push(symbol + labels[idx]));
+        return elementsWithLabels;
     }
 
     /**
