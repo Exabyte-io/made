@@ -1,4 +1,3 @@
-import { math as mathCodeJS } from "@exabyte-io/code.js/dist/math";
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import _ from "underscore";
@@ -160,14 +159,14 @@ export class Basis {
         return this.coordinates.map((coordinate) => {
             return {
                 id: coordinate.id,
-                value: coordinate.value.map((x) => mathCodeJS.roundToZero(x)),
+                value: coordinate.value.map((x) => math.precise(math.roundToZero(x))),
             };
         });
     }
 
     /** Round cell values to the specified precision */
     roundCell() {
-        return this.cell.map((vector) => vector.map((x) => mathCodeJS.roundToZero(x)));
+        return this.cell.map((vector) => vector.map((x) => math.precise(math.roundToZero(x))));
     }
 
     /**
