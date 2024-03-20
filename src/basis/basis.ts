@@ -412,13 +412,13 @@ export class Basis {
 
     /* Returns array of atomic labels E.g., ["1", "2", "", ""] */
     get atomicLabelsArray(): string[] {
-        const label_arr = [];
+        const labelsArray = [];
         for (let i = 0; i < this.elements.length; i++) {
             const label_obj = this.labels?.find((item) => item.id === i);
             const atomicLabel = label_obj ? label_obj.value.toString() : "";
-            label_arr.push(atomicLabel);
+            labelsArray.push(atomicLabel);
         }
-        return label_arr;
+        return labelsArray;
     }
 
     /**
