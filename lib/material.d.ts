@@ -176,7 +176,22 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
         getBasisConsistencyChecks(): ConsistencyCheck[];
         consistencyChecks: object[];
         addConsistencyChecks(array: object[]): void;
-        prop: (<T_1 = null>(name: string, defaultValue?: T_1 | undefined) => T_1) & (<T_2 = null>(name: string, defaultValue?: T_2 | undefined) => T_2) & (<T_3 = null>(name: string, defaultValue?: T_3 | undefined) => T_3) & (<T_4 = null>(name: string, defaultValue?: T_4 | undefined) => T_4) & (<T_5 = null>(name: string, defaultValue?: T_5 | undefined) => T_5);
+        prop: {
+            <T_1 = undefined>(name: string, defaultValue: T_1): T_1;
+            <T_1 = undefined>(name: string): T_1 | undefined;
+        } & {
+            <T_2 = undefined>(name: string, defaultValue: T_2): T_2;
+            <T_1_1 = undefined>(name: string): T_1_1 | undefined;
+        } & {
+            <T_3 = undefined>(name: string, defaultValue: T_3): T_3;
+            <T_1_2 = undefined>(name: string): T_1_2 | undefined;
+        } & {
+            <T_4 = undefined>(name: string, defaultValue: T_4): T_4;
+            <T_1_3 = undefined>(name: string): T_1_3 | undefined;
+        } & {
+            <T_5 = undefined>(name: string, defaultValue: T_5): T_5;
+            <T_6 = undefined>(name: string): T_6 | undefined;
+        };
         setProp: ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void);
         unsetProp: ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void);
         toJSONSafe: ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject);
@@ -364,7 +379,22 @@ export declare const Material: {
         getBasisConsistencyChecks(): ConsistencyCheck[];
         consistencyChecks: object[];
         addConsistencyChecks(array: object[]): void;
-        prop: (<T = null>(name: string, defaultValue?: T | undefined) => T) & (<T_1 = null>(name: string, defaultValue?: T_1 | undefined) => T_1) & (<T_2 = null>(name: string, defaultValue?: T_2 | undefined) => T_2) & (<T_3 = null>(name: string, defaultValue?: T_3 | undefined) => T_3) & (<T_4 = null>(name: string, defaultValue?: T_4 | undefined) => T_4);
+        prop: {
+            <T = undefined>(name: string, defaultValue: T): T;
+            <T_1 = undefined>(name: string): T_1 | undefined;
+        } & {
+            <T_2 = undefined>(name: string, defaultValue: T_2): T_2;
+            <T_1_1 = undefined>(name: string): T_1_1 | undefined;
+        } & {
+            <T_3 = undefined>(name: string, defaultValue: T_3): T_3;
+            <T_1_2 = undefined>(name: string): T_1_2 | undefined;
+        } & {
+            <T_4 = undefined>(name: string, defaultValue: T_4): T_4;
+            <T_1_3 = undefined>(name: string): T_1_3 | undefined;
+        } & {
+            <T_5 = undefined>(name: string, defaultValue: T_5): T_5;
+            <T_6 = undefined>(name: string): T_6 | undefined;
+        };
         setProp: ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void);
         unsetProp: ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void);
         toJSONSafe: ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject);
@@ -417,12 +447,27 @@ export declare const Material: {
     consistencyChecks: object[];
     addConsistencyChecks(array: object[]): void;
     _json: AnyObject;
-    prop<T = null>(name: string, defaultValue?: T | undefined): T;
+    prop<T = undefined>(name: string, defaultValue: T): T;
+    prop<T_1 = undefined>(name: string): T_1 | undefined;
     setProp(name: string, value: unknown): void;
-    unsetProp(name: string): void;
+    unsetProp(name: string): void; /**
+     * Returns material's basis in XYZ format.
+     */
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
-    toJSONQuick(exclude?: string[] | undefined): AnyObject;
+    toJSONQuick(exclude?: string[] | undefined): AnyObject; /**
+     * Returns material in Quantum Espresso output format:
+     * ```
+     *    CELL_PARAMETERS (angstroms)
+     *    -0.543131284  -0.000000000   0.543131284
+     *    -0.000000000   0.543131284   0.543131284
+     *    -0.543131284   0.543131284   0.000000000
+     *
+     *    ATOMIC_POSITIONS (crystal)
+     *    Si       0.000000000   0.000000000  -0.000000000
+     *    Si       0.250000000   0.250000000   0.250000000
+     * ```
+     */
     clone(extraContext?: object | undefined): any;
     validate(): void;
     clean(config: AnyObject): AnyObject;
@@ -438,7 +483,8 @@ export declare const Material: {
     metadata: object;
     updateMetadata(object: object): void;
     _json: AnyObject;
-    prop<T_1 = null>(name: string, defaultValue?: T_1 | undefined): T_1;
+    prop<T_2 = undefined>(name: string, defaultValue: T_2): T_2;
+    prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
     toJSON(exclude?: string[] | undefined): AnyObject;
@@ -459,7 +505,8 @@ export declare const Material: {
     name: string;
     setName(name: string): void;
     _json: AnyObject;
-    prop<T_2 = null>(name: string, defaultValue?: T_2 | undefined): T_2;
+    prop<T_3 = undefined>(name: string, defaultValue: T_3): T_3;
+    prop<T_1_2 = undefined>(name: string): T_1_2 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
     toJSON(exclude?: string[] | undefined): AnyObject;
@@ -472,10 +519,7 @@ export declare const Material: {
     id: string;
     readonly cls: string;
     getClsName(): string;
-    readonly slug: string; /**
-     * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
-     * @returns Array of checks results
-     */
+    readonly slug: string;
     readonly isSystemEntity: boolean;
     getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/lib/js/types").EntityReferenceSchema;
     getEntityByName(entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string): import("@exabyte-io/code.js/dist/entity").InMemoryEntity;
@@ -483,7 +527,8 @@ export declare const Material: {
     new (...args: any[]): {
         readonly isDefault: boolean;
         _json: AnyObject;
-        prop<T_3 = null>(name: string, defaultValue?: T_3 | undefined): T_3;
+        prop<T_4 = undefined>(name: string, defaultValue: T_4): T_4;
+        prop<T_1_3 = undefined>(name: string): T_1_3 | undefined;
         setProp(name: string, value: unknown): void;
         unsetProp(name: string): void;
         toJSON(exclude?: string[] | undefined): AnyObject;
