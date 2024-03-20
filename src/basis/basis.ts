@@ -1,11 +1,12 @@
 // @ts-ignore
+import { numberToPrecision } from "@exabyte-io/code.js/dist/math";
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import _ from "underscore";
 import s from "underscore.string";
 
 import { ArrayWithIds } from "../abstract/array_with_ids";
 import { ObjectWithIdAndValue, ValueOrObjectArray } from "../abstract/scalar_with_id";
-import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
+import { ATOMIC_COORD_UNITS, HASH_TOLERANCE, tolerance } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import { Vector } from "../lattice/types";
 import math from "../math";
@@ -56,6 +57,8 @@ export class Basis {
 
     cell: Vector[];
 
+    precision = tolerance.lengthAngstrom;
+
     constructor({
         elements = ["Si"],
         coordinates = [[0, 0, 0]],
@@ -88,10 +91,6 @@ export class Basis {
 
     static get defaultCell() {
         return new Lattice().vectorArrays;
-    }
-
-    static _roundValue(x: number) {
-        return math.precise(math.roundToZero(x));
     }
 
     /**
@@ -148,20 +147,29 @@ export class Basis {
         }
      */
     toJSON(skipRounding = false): BasisSchema {
-        const round = skipRounding ? (x: number) => x : Basis._roundValue;
         const json = {
             elements: this.elements,
-            coordinates: this.coordinates.map((coordinate) => {
-                return {
-                    id: coordinate.id,
-                    value: coordinate.value.map(round),
-                };
-            }),
+            coordinates: skipRounding ? this.coordinates : this.coordinatesRounded,
             units: this.units,
-            cell: this.cell.map((vector) => vector.map(round)),
+            cell: skipRounding ? this.cell : this.cellRounded,
         };
 
         return JSON.parse(JSON.stringify(json));
+    }
+
+    /** Round coordinates to the specified precision */
+    coordinatesRounded() {
+        this.coordinates.map((coordinate) => {
+            return {
+                id: coordinate.id,
+                value: coordinate.value.map((x) => numberToPrecision(x, this.precision)),
+            };
+        });
+    }
+
+    /** Round cell values to the specified precision */
+    cellRounded() {
+        this.cell.map((vector) => vector.map((x) => numberToPrecision(x, this.precision)));
     }
 
     /**
