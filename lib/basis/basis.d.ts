@@ -101,9 +101,12 @@ export declare class Basis {
      */
     toJSON(skipRounding?: boolean): BasisSchema;
     /** Round coordinates to the specified precision */
-    roundCoordinates(): void;
+    roundCoordinates(): {
+        id: number;
+        value: number[];
+    }[];
     /** Round cell values to the specified precision */
-    roundCell(): void;
+    roundCell(): number[][];
     /**
      * Create an identical copy of the class instance.
      * @param extraContext - Extra context to be passed to the new class instance on creation.
