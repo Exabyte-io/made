@@ -40,12 +40,12 @@ export declare class Basis {
     _coordinates: ArrayWithIds<Coordinate>;
     units: string;
     cell: Vector[];
+    precision: number;
     constructor({ elements, coordinates, units, cell, // by default, assume a cubic unary cell
     isEmpty, }: BasisProps);
     static get unitsOptionsConfig(): typeof ATOMIC_COORD_UNITS;
     static get unitsOptionsDefaultValue(): string;
     static get defaultCell(): [import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema];
-    static _roundValue(x: number): number;
     /**
      * Serialize class instance to JSON.
      * @param skipRounding - Whether to skip rounding the resulting lattice values, defaults to `false`.
@@ -100,6 +100,10 @@ export declare class Basis {
         }
      */
     toJSON(skipRounding?: boolean): BasisSchema;
+    /** Round coordinates to the specified precision */
+    coordinatesRounded(): void;
+    /** Round cell values to the specified precision */
+    cellRounded(): void;
     /**
      * Create an identical copy of the class instance.
      * @param extraContext - Extra context to be passed to the new class instance on creation.
