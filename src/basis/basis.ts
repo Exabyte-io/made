@@ -1,5 +1,5 @@
-// @ts-ignore
 import { numberToPrecision } from "@exabyte-io/code.js/dist/math";
+// @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import _ from "underscore";
 import s from "underscore.string";
