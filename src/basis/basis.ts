@@ -159,7 +159,7 @@ export class Basis {
 
     /** Round coordinates to the specified precision */
     roundCoordinates() {
-        this.coordinates.map((coordinate) => {
+        return this.coordinates.map((coordinate) => {
             return {
                 id: coordinate.id,
                 value: coordinate.value.map((x) =>
@@ -171,7 +171,7 @@ export class Basis {
 
     /** Round cell values to the specified precision */
     roundCell() {
-        this.cell.map((vector) =>
+        return this.cell.map((vector) =>
             vector.map((x) => codeJSMAth.roundValueToNDecimals(x, this.precision)),
         );
     }
