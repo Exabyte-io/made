@@ -47,7 +47,7 @@ export declare class ConstrainedBasis extends Basis {
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
-    get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue][];
+    get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue, string][];
     /**
      * Returns an array with atomic positions (with constraints) per atom stored as strings.
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
