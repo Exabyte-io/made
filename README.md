@@ -1,9 +1,9 @@
-[![npm version](https://badge.fury.io/js/%40exabyte-io%2Fmade.js.svg)](https://badge.fury.io/js/%40exabyte-io%2Fmade.js)
+[![npm version](https://badge.fury.io/js/%40mat3ra%2Fmade.svg)](https://badge.fury.io/js/%40mat3ra%2Fmade)
 [![License: Apache](https://img.shields.io/badge/License-Apache-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-# Made.js
+# Made
 
-Made.js is a library for **MA**terials **DE**sign in **J**ava**S**cript allowing for the creation and manipulation of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript, both on the client (web browser) and server (eg. Node.js) side.
+Made is a library for **MA**terials **DE**sign in JavaScript/TypeScript and Python. It allows for the creation and manipulation of material structures from atoms up on the web. The library is aimed to be used for the development of web applications, both on the client (web browser) and server (eg. Node.js) side.
 
 The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. For example, [this page](https://platform.exabyte.io/demo/materials/n3HSzCmyoctgJFGGE) representing a crystal of Silicon online uses Made.js.
 
@@ -39,14 +39,14 @@ The package is written in a modular way easy to extend. Contributions can be in 
 From NPM for use within a software project:
 
 ```bash
-npm install @exabyte-io/made.js
+npm install @mat3ra/made
 
 ```
 
 From source to contribute to development:
 
 ```bash
-git clone git@github.com:Exabyte-io/made.js.git
+git clone git@github.com:Exabyte-io/made
 ```
 
 ## Contribution
@@ -55,7 +55,7 @@ This repository is an [open-source](LICENSE.md) work-in-progress and we welcome 
 
 ### Why contribute?
 
-We regularly deploy the latest code containing all accepted contributions online as part of the [Exabyte.io](https://exabyte.io) platform, so contributors will see their code in action there.
+We regularly deploy the latest code containing all accepted contributions online as part of the [Mat3ra.com](https://mat3ra.com) platform, so contributors will see their code in action there.
 
 ### Adding new functionality
 
@@ -124,8 +124,8 @@ in the `lint-staged` directive of the `package.json` file (by using a `husky` pr
 if you add extra whitespace to a file, stage it, and try to commit it, you will see the following:
 
 ```bash
-➜  made.js git:(feature/SOF-4398-TB) ✗ git add src/basis/constrained_basis.js
-➜  made.js git:(feature/SOF-4398-TB) ✗ git commit -m "Test commit non-linted code"
+➜  made git:(feature/SOF-4398-TB) ✗ git add src/basis/constrained_basis.js
+➜  made git:(feature/SOF-4398-TB) ✗ git commit -m "Test commit non-linted code"
 ✔ Preparing...
 ✔ Running tasks...
 ✖ Prevented an empty git commit!
