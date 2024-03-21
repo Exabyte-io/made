@@ -1,6 +1,6 @@
 {
     "extends": ["@exabyte-io/eslint-config"],
-    "ignorePatterns": ["lib/"],
+    "ignorePatterns": ["dist/"],
     "settings": {
         "import/resolver": {
             "node": {
