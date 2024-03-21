@@ -7,6 +7,10 @@ import { Coordinate } from "./types";
 export interface BasisProps {
     elements: ValueOrObjectArray<string>;
     coordinates: ValueOrObjectArray<Coordinate>;
+    labels?: {
+        id: number;
+        value: number;
+    }[];
     units: string;
     cell: Vector[];
     isEmpty?: boolean;
@@ -22,6 +26,10 @@ export interface ElementCount {
 }
 export interface BasisSchema {
     elements: ObjectWithIdAndValue<string>[];
+    labels?: {
+        id: number;
+        value: number;
+    }[];
     coordinates: ObjectWithIdAndValue<Coordinate>[];
     units: string;
     cell: Vector[];
@@ -38,10 +46,15 @@ interface Overlap {
 export declare class Basis {
     _elements: ArrayWithIds<string>;
     _coordinates: ArrayWithIds<Coordinate>;
+    labels?: {
+        id: number;
+        value: number;
+    }[];
     units: string;
     cell: Vector[];
     constructor({ elements, coordinates, units, cell, // by default, assume a cubic unary cell
-    isEmpty, }: BasisProps);
+    isEmpty, // whether to generate an empty Basis
+    labels, }: BasisProps);
     static get unitsOptionsConfig(): typeof ATOMIC_COORD_UNITS;
     static get unitsOptionsDefaultValue(): string;
     static get defaultCell(): [import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema];
@@ -165,7 +178,7 @@ export declare class Basis {
      * Returns a nested array with elements and their corresponding coordinates
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
      */
-    get elementsAndCoordinatesArray(): [string, Coordinate][];
+    get elementsAndCoordinatesArray(): [string, Coordinate, string][];
     /**
      * @summary Concatenates elements and sorts them in alphanumeric order.
      * E.g.,
@@ -182,6 +195,8 @@ export declare class Basis {
      * Returns a string for hash calculation (in crystal units)
      */
     get hashString(): string;
+    get atomicLabelsArray(): string[];
+    get elementsWithLabelsArray(): string[];
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```

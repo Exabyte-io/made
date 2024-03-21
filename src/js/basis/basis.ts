@@ -14,6 +14,7 @@ import { Coordinate } from "./types";
 export interface BasisProps {
     elements: ValueOrObjectArray<string>; // chemical elements for atoms in basis.
     coordinates: ValueOrObjectArray<Coordinate>; // coordinates for the atoms in basis.
+    labels?: { id: number; value: number }[];
     units: string; // units for the coordinates (eg. angstrom, crystal).
     cell: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
     isEmpty?: boolean; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
@@ -32,6 +33,7 @@ export interface ElementCount {
 
 export interface BasisSchema {
     elements: ObjectWithIdAndValue<string>[];
+    labels?: { id: number; value: number }[];
     coordinates: ObjectWithIdAndValue<Coordinate>[];
     units: string;
     cell: Vector[];
@@ -52,6 +54,8 @@ export class Basis {
 
     _coordinates: ArrayWithIds<Coordinate>;
 
+    labels?: { id: number; value: number }[];
+
     units: string;
 
     cell: Vector[];
@@ -62,6 +66,7 @@ export class Basis {
         units,
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
+        labels = [],
     }: BasisProps) {
         const _elements = isEmpty ? [] : elements;
         const _coordinates = isEmpty ? [] : coordinates;
@@ -76,6 +81,10 @@ export class Basis {
         this._coordinates = new ArrayWithIds<Coordinate>(_coordinates);
         this.units = _units;
         this.cell = cell;
+
+        if (!_.isEmpty(labels)) {
+            this.labels = labels;
+        }
     }
 
     static get unitsOptionsConfig() {
@@ -149,6 +158,15 @@ export class Basis {
             units: this.units,
             cell: this.cell,
         };
+
+        if (!_.isEmpty(this.labels)) {
+            return JSON.parse(
+                JSON.stringify({
+                    ...json,
+                    labels: this.labels,
+                }),
+            );
+        }
 
         return JSON.parse(JSON.stringify(json));
     }
@@ -344,10 +362,11 @@ export class Basis {
      * Returns a nested array with elements and their corresponding coordinates
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
      */
-    get elementsAndCoordinatesArray(): [string, Coordinate][] {
+    get elementsAndCoordinatesArray(): [string, Coordinate, string][] {
         return this._elements.array.map((element, idx) => {
             const coordinates = this.getCoordinateByIndex(idx);
-            return [element, coordinates];
+            const atomicLabel = this.atomicLabelsArray[idx];
+            return [element, coordinates, atomicLabel];
         });
     }
 
@@ -369,8 +388,9 @@ export class Basis {
         const standardRep = clsInstance.elementsAndCoordinatesArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
+            const atomicLabel = entry[2];
             const toleratedCoordinates = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
-            return `${element} ${toleratedCoordinates.join()}`;
+            return `${element}${atomicLabel} ${toleratedCoordinates.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
     }
@@ -390,15 +410,38 @@ export class Basis {
         return hashString;
     }
 
+    /* Returns array of atomic labels E.g., ["1", "2", "", ""] */
+    get atomicLabelsArray(): string[] {
+        const labelsArray = [];
+        for (let i = 0; i < this.elements.length; i++) {
+            const labelObj = this.labels?.find((item) => item.id === i);
+            const atomicLabel = labelObj ? labelObj.value.toString() : "";
+            labelsArray.push(atomicLabel);
+        }
+        return labelsArray;
+    }
+
+    /* Returns array of elements with labels E.g., ["Fe1", "Fe2", "O", "O"] */
+    get elementsWithLabelsArray(): string[] {
+        const elements = this.elementsArray;
+        const labels = this.atomicLabelsArray;
+        const elementsWithLabels: string[] = [];
+        elements.forEach((symbol, idx) => elementsWithLabels.push(symbol + labels[idx]));
+        return elementsWithLabels;
+    }
+
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
      */
     get atomicPositions(): string[] {
-        return this.elementsAndCoordinatesArray.map((entry) => {
+        return this.elementsAndCoordinatesArray.map((entry, idx) => {
             const element = entry[0];
             const coordinate = entry[1];
-            return `${element} ${coordinate.map((x) => s.sprintf("%14.9f", x).trim()).join(" ")}`;
+            const atomicLabel = this.atomicLabelsArray[idx];
+            return `${element}${atomicLabel} ${coordinate
+                .map((x) => s.sprintf("%14.9f", x).trim())
+                .join(" ")}`;
         });
     }
 

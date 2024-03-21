@@ -18,7 +18,7 @@ const math_1 = __importDefault(require("../math"));
 class Basis {
     constructor({ elements = ["Si"], coordinates = [[0, 0, 0]], units, cell = Basis.defaultCell, // by default, assume a cubic unary cell
     isEmpty = false, // whether to generate an empty Basis
-     }) {
+    labels = [], }) {
         const _elements = isEmpty ? [] : elements;
         const _coordinates = isEmpty ? [] : coordinates;
         const _units = units || Basis.unitsOptionsDefaultValue;
@@ -30,6 +30,9 @@ class Basis {
         this._coordinates = new array_with_ids_1.ArrayWithIds(_coordinates);
         this.units = _units;
         this.cell = cell;
+        if (!underscore_1.default.isEmpty(labels)) {
+            this.labels = labels;
+        }
     }
     static get unitsOptionsConfig() {
         return constants_1.ATOMIC_COORD_UNITS;
@@ -99,6 +102,12 @@ class Basis {
             units: this.units,
             cell: this.cell,
         };
+        if (!underscore_1.default.isEmpty(this.labels)) {
+            return JSON.parse(JSON.stringify({
+                ...json,
+                labels: this.labels,
+            }));
+        }
         return JSON.parse(JSON.stringify(json));
     }
     /**
@@ -269,7 +278,8 @@ class Basis {
     get elementsAndCoordinatesArray() {
         return this._elements.array.map((element, idx) => {
             const coordinates = this.getCoordinateByIndex(idx);
-            return [element, coordinates];
+            const atomicLabel = this.atomicLabelsArray[idx];
+            return [element, coordinates, atomicLabel];
         });
     }
     /**
@@ -290,8 +300,9 @@ class Basis {
         const standardRep = clsInstance.elementsAndCoordinatesArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
+            const atomicLabel = entry[2];
             const toleratedCoordinates = coordinate.map((x) => math_1.default.round(x, constants_1.HASH_TOLERANCE));
-            return `${element} ${toleratedCoordinates.join()}`;
+            return `${element}${atomicLabel} ${toleratedCoordinates.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
     }
@@ -307,15 +318,37 @@ class Basis {
             this.toCartesian();
         return hashString;
     }
+    /* Returns array of atomic labels E.g., ["1", "2", "", ""] */
+    get atomicLabelsArray() {
+        var _a;
+        const labelsArray = [];
+        for (let i = 0; i < this.elements.length; i++) {
+            const labelObj = (_a = this.labels) === null || _a === void 0 ? void 0 : _a.find((item) => item.id === i);
+            const atomicLabel = labelObj ? labelObj.value.toString() : "";
+            labelsArray.push(atomicLabel);
+        }
+        return labelsArray;
+    }
+    /* Returns array of elements with labels E.g., ["Fe1", "Fe2", "O", "O"] */
+    get elementsWithLabelsArray() {
+        const elements = this.elementsArray;
+        const labels = this.atomicLabelsArray;
+        const elementsWithLabels = [];
+        elements.forEach((symbol, idx) => elementsWithLabels.push(symbol + labels[idx]));
+        return elementsWithLabels;
+    }
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
      */
     get atomicPositions() {
-        return this.elementsAndCoordinatesArray.map((entry) => {
+        return this.elementsAndCoordinatesArray.map((entry, idx) => {
             const element = entry[0];
             const coordinate = entry[1];
-            return `${element} ${coordinate.map((x) => underscore_string_1.default.sprintf("%14.9f", x).trim()).join(" ")}`;
+            const atomicLabel = this.atomicLabelsArray[idx];
+            return `${element}${atomicLabel} ${coordinate
+                .map((x) => underscore_string_1.default.sprintf("%14.9f", x).trim())
+                .join(" ")}`;
         });
     }
     /**

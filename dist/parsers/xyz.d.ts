@@ -11,11 +11,16 @@ export interface ParsedObject {
     element: string;
     coordinates: Vector;
     constraints: [boolean, boolean, boolean];
+    label?: number;
 }
 export interface BasisConfig {
     elements: {
         id: number;
         value: string;
+    }[];
+    labels?: {
+        id: number;
+        value: number;
     }[];
     coordinates: {
         id: number;
