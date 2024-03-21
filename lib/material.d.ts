@@ -284,7 +284,9 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                                         maxItems: number;
                                     }[];
                                 };
-                            };
+                            }; /**
+                             * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
+                             */
                         };
                     };
                     name: {
@@ -292,9 +294,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                     };
                     units: {
                         type: string;
-                    }; /**
-                     * @summary Returns the specific derived property (as specified by name) for a material.
-                     */
+                    };
                     bonds: {
                         $schema: string;
                         title: string;
@@ -328,9 +328,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                         };
                     };
                 };
-            }; /**
-             * High-level access to unique elements from material instead of basis.
-             */
+            };
             lattice: {
                 $schema: string;
                 title: string;
@@ -349,6 +347,16 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                             alat: {
                                 description: string;
                                 type: string;
+                                /**
+                                 * Calculates hash from basis and lattice. Algorithm expects the following:
+                                 * - asserts lattice units to be angstrom
+                                 * - asserts basis units to be crystal
+                                 * - asserts basis coordinates and lattice measurements are rounded to hash precision
+                                 * - forms strings for lattice and basis
+                                 * - creates MD5 hash from basisStr + latticeStr + salt
+                                 * @param salt Salt for hashing, empty string by default.
+                                 * @param isScaled Whether to scale the lattice parameter 'a' to 1.
+                                 */
                                 default: number;
                             };
                             units: {
@@ -369,7 +377,9 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                                 title: string;
                                 type: string;
                                 minItems: number;
-                                maxItems: number;
+                                maxItems: number; /**
+                                 * Converts basis to crystal/fractional coordinates.
+                                 */
                                 items: {
                                     type: string;
                                 };
@@ -388,6 +398,19 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                     };
                     type: {
                         $schema: string;
+                        /**
+                         * Returns material in Quantum Espresso output format:
+                         * ```
+                         *    CELL_PARAMETERS (angstroms)
+                         *    -0.543131284  -0.000000000   0.543131284
+                         *    -0.000000000   0.543131284   0.543131284
+                         *    -0.543131284   0.543131284   0.000000000
+                         *
+                         *    ATOMIC_POSITIONS (crystal)
+                         *    Si       0.000000000   0.000000000  -0.000000000
+                         *    Si       0.250000000   0.250000000   0.250000000
+                         * ```
+                         */
                         title: string;
                         type: string;
                         enum: string[];
@@ -981,7 +1004,9 @@ export declare const Material: {
                                         maxItems: number;
                                     }[];
                                 };
-                            };
+                            }; /**
+                             * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
+                             */
                         };
                     };
                     name: {
@@ -989,9 +1014,7 @@ export declare const Material: {
                     };
                     units: {
                         type: string;
-                    }; /**
-                     * @summary Returns the specific derived property (as specified by name) for a material.
-                     */
+                    };
                     bonds: {
                         $schema: string;
                         title: string;
@@ -1025,9 +1048,7 @@ export declare const Material: {
                         };
                     };
                 };
-            }; /**
-             * High-level access to unique elements from material instead of basis.
-             */
+            };
             lattice: {
                 $schema: string;
                 title: string;
@@ -1046,6 +1067,16 @@ export declare const Material: {
                             alat: {
                                 description: string;
                                 type: string;
+                                /**
+                                 * Calculates hash from basis and lattice. Algorithm expects the following:
+                                 * - asserts lattice units to be angstrom
+                                 * - asserts basis units to be crystal
+                                 * - asserts basis coordinates and lattice measurements are rounded to hash precision
+                                 * - forms strings for lattice and basis
+                                 * - creates MD5 hash from basisStr + latticeStr + salt
+                                 * @param salt Salt for hashing, empty string by default.
+                                 * @param isScaled Whether to scale the lattice parameter 'a' to 1.
+                                 */
                                 default: number;
                             };
                             units: {
@@ -1066,7 +1097,9 @@ export declare const Material: {
                                 title: string;
                                 type: string;
                                 minItems: number;
-                                maxItems: number;
+                                maxItems: number; /**
+                                 * Converts basis to crystal/fractional coordinates.
+                                 */
                                 items: {
                                     type: string;
                                 };
@@ -1085,6 +1118,19 @@ export declare const Material: {
                     };
                     type: {
                         $schema: string;
+                        /**
+                         * Returns material in Quantum Espresso output format:
+                         * ```
+                         *    CELL_PARAMETERS (angstroms)
+                         *    -0.543131284  -0.000000000   0.543131284
+                         *    -0.000000000   0.543131284   0.543131284
+                         *    -0.543131284   0.543131284   0.000000000
+                         *
+                         *    ATOMIC_POSITIONS (crystal)
+                         *    Si       0.000000000   0.000000000  -0.000000000
+                         *    Si       0.250000000   0.250000000   0.250000000
+                         * ```
+                         */
                         title: string;
                         type: string;
                         enum: string[];
@@ -1441,6 +1487,9 @@ export declare const Material: {
     unsetProp(name: string): void;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
+    /**
+     * Returns material's basis in XYZ format.
+     */
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
@@ -1495,6 +1544,10 @@ export declare const Material: {
     getClsName(): string;
     readonly slug: string;
     readonly isSystemEntity: boolean;
+    /**
+     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
+     * @returns Array of checks results
+     */
     getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/lib/js/types").EntityReferenceSchema;
     getEntityByName(entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string): import("@exabyte-io/code.js/dist/entity").InMemoryEntity;
 }) & {
