@@ -213,6 +213,523 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
         setName(name: string): void;
         readonly isDefault: boolean;
     };
+    readonly jsonSchema: {
+        $id: string;
+        $schema: string;
+        title: string;
+        type: string;
+        required: string[];
+        properties: {
+            formula: {
+                description: string;
+                type: string;
+            };
+            unitCellFormula: {
+                description: string;
+                type: string;
+            };
+            basis: {
+                $schema: string;
+                title: string;
+                type: string;
+                required: string[];
+                properties: {
+                    elements: {
+                        type: string;
+                        items: {
+                            $schema: string;
+                            title: string;
+                            description: string;
+                            type: string;
+                            required: string[];
+                            properties: {
+                                id: {
+                                    type: string;
+                                };
+                                value: {
+                                    type: string;
+                                };
+                                occurrence: {
+                                    description: string;
+                                    type: string;
+                                };
+                                oxidationState: {
+                                    type: string;
+                                };
+                            };
+                        };
+                    };
+                    coordinates: {
+                        type: string;
+                        items: {
+                            $schema: string;
+                            title: string;
+                            description: string;
+                            type: string;
+                            properties: {
+                                id: {
+                                    type: string;
+                                };
+                                value: {
+                                    $schema: string;
+                                    title: string;
+                                    oneOf: {
+                                        $schema: string;
+                                        title: string;
+                                        type: string;
+                                        items: {
+                                            type: string;
+                                        };
+                                        minItems: number;
+                                        maxItems: number;
+                                    }[];
+                                };
+                            }; /**
+                             * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
+                             */
+                        };
+                    };
+                    name: {
+                        type: string;
+                    };
+                    units: {
+                        type: string;
+                    };
+                    bonds: {
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        uniqueItems: boolean;
+                        items: {
+                            type: string;
+                            properties: {
+                                atomPair: {
+                                    description: string;
+                                    type: string;
+                                    minItems: number;
+                                    maxItems: number;
+                                    $schema: string;
+                                    title: string;
+                                    items: {
+                                        type: string;
+                                        properties: {
+                                            id: {
+                                                description: string;
+                                                type: string;
+                                            };
+                                        };
+                                    };
+                                };
+                                bondType: {
+                                    type: string;
+                                    enum: string[];
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+            lattice: {
+                $schema: string;
+                title: string;
+                type: string;
+                required: string[];
+                properties: {
+                    name: {
+                        enum: string[];
+                    };
+                    vectors: {
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            alat: {
+                                description: string;
+                                type: string;
+                                /**
+                                 * Calculates hash from basis and lattice. Algorithm expects the following:
+                                 * - asserts lattice units to be angstrom
+                                 * - asserts basis units to be crystal
+                                 * - asserts basis coordinates and lattice measurements are rounded to hash precision
+                                 * - forms strings for lattice and basis
+                                 * - creates MD5 hash from basisStr + latticeStr + salt
+                                 * @param salt Salt for hashing, empty string by default.
+                                 * @param isScaled Whether to scale the lattice parameter 'a' to 1.
+                                 */
+                                default: number;
+                            };
+                            units: {
+                                enum: string[];
+                            };
+                            a: {
+                                $schema: string;
+                                title: string;
+                                type: string;
+                                minItems: number;
+                                maxItems: number;
+                                items: {
+                                    type: string;
+                                };
+                            };
+                            b: {
+                                $schema: string;
+                                title: string;
+                                type: string;
+                                minItems: number;
+                                maxItems: number; /**
+                                 * Converts basis to crystal/fractional coordinates.
+                                 */
+                                items: {
+                                    type: string;
+                                };
+                            };
+                            c: {
+                                $schema: string;
+                                title: string;
+                                type: string;
+                                minItems: number;
+                                maxItems: number;
+                                items: {
+                                    type: string;
+                                };
+                            };
+                        };
+                    };
+                    type: {
+                        $schema: string;
+                        /**
+                         * Returns material in Quantum Espresso output format:
+                         * ```
+                         *    CELL_PARAMETERS (angstroms)
+                         *    -0.543131284  -0.000000000   0.543131284
+                         *    -0.000000000   0.543131284   0.543131284
+                         *    -0.543131284   0.543131284   0.000000000
+                         *
+                         *    ATOMIC_POSITIONS (crystal)
+                         *    Si       0.000000000   0.000000000  -0.000000000
+                         *    Si       0.250000000   0.250000000   0.250000000
+                         * ```
+                         */
+                        title: string;
+                        type: string;
+                        enum: string[];
+                    };
+                    units: {
+                        type: string;
+                        properties: {
+                            length: {
+                                type: string;
+                                enum: string[];
+                            };
+                            angle: {
+                                type: string;
+                                enum: string[];
+                            };
+                        };
+                    };
+                    a: {
+                        description: string;
+                        type: string;
+                    };
+                    b: {
+                        description: string;
+                        type: string;
+                    };
+                    c: {
+                        description: string;
+                        type: string;
+                    };
+                    alpha: {
+                        description: string;
+                        type: string;
+                    };
+                    beta: {
+                        description: string;
+                        type: string;
+                    };
+                    gamma: {
+                        description: string;
+                        type: string;
+                    };
+                };
+            };
+            derivedProperties: {
+                $schema: string;
+                title: string;
+                type: string;
+                items: {
+                    oneOf: ({
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            name: {
+                                enum: string[];
+                            };
+                            units: {
+                                enum: string[];
+                            };
+                            value: {
+                                type: string;
+                                minimum?: undefined;
+                                maximum?: undefined;
+                            };
+                            pointGroupSymbol?: undefined;
+                            spaceGroupSymbol?: undefined;
+                            tolerance?: undefined;
+                            element?: undefined;
+                            degree?: undefined;
+                        };
+                        description?: undefined;
+                    } | {
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        properties: {
+                            pointGroupSymbol: {
+                                description: string;
+                                type: string;
+                            };
+                            spaceGroupSymbol: {
+                                description: string;
+                                type: string;
+                            };
+                            tolerance: {
+                                type: string;
+                                description: string;
+                                $schema: string;
+                                title: string;
+                                required: string[];
+                                properties: {
+                                    units: {
+                                        enum: string[];
+                                    };
+                                    value: {
+                                        type: string;
+                                    };
+                                };
+                            };
+                            name: {
+                                enum: string[];
+                            };
+                            units?: undefined;
+                            value?: undefined;
+                            element?: undefined;
+                            degree?: undefined;
+                        };
+                        required?: undefined;
+                        description?: undefined;
+                    } | {
+                        $schema: string;
+                        title: string;
+                        description: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            name: {
+                                enum: string[];
+                            };
+                            value: {
+                                type: string;
+                                minimum: number;
+                                maximum: number;
+                            };
+                            element: {
+                                type: string;
+                                description: string;
+                            };
+                            units?: undefined;
+                            pointGroupSymbol?: undefined;
+                            spaceGroupSymbol?: undefined;
+                            tolerance?: undefined;
+                            degree?: undefined;
+                        };
+                    } | {
+                        $schema: string;
+                        title: string;
+                        description: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            name: {
+                                enum: string[];
+                            };
+                            degree: {
+                                type: string;
+                                description: string;
+                            };
+                            value: {
+                                type: string;
+                                minimum?: undefined;
+                                maximum?: undefined;
+                            };
+                            units?: undefined;
+                            pointGroupSymbol?: undefined;
+                            spaceGroupSymbol?: undefined;
+                            tolerance?: undefined;
+                            element?: undefined;
+                        };
+                    } | {
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            name: {
+                                enum: string[];
+                            };
+                            value: {
+                                type: string;
+                                minimum?: undefined;
+                                maximum?: undefined;
+                            };
+                            units?: undefined;
+                            pointGroupSymbol?: undefined;
+                            spaceGroupSymbol?: undefined;
+                            tolerance?: undefined;
+                            element?: undefined;
+                            degree?: undefined;
+                        };
+                        description?: undefined;
+                    })[];
+                    discriminator: {
+                        propertyName: string;
+                    };
+                    required: string[];
+                };
+            };
+            external: {
+                $schema: string;
+                title: string;
+                description: string;
+                type: string;
+                required: string[];
+                properties: {
+                    id: {
+                        description: string;
+                        oneOf: {
+                            type: string;
+                        }[];
+                    };
+                    source: {
+                        description: string;
+                        type: string;
+                    };
+                    origin: {
+                        description: string;
+                        type: string;
+                    };
+                    data: {
+                        description: string;
+                        type: string;
+                    };
+                    doi: {
+                        description: string;
+                        type: string;
+                    };
+                    url: {
+                        description: string;
+                        type: string;
+                    };
+                };
+            };
+            src: {
+                $schema: string;
+                title: string;
+                description: string;
+                type: string;
+                required: string[];
+                properties: {
+                    extension: {
+                        description: string;
+                        type: string;
+                    };
+                    filename: {
+                        description: string;
+                        type: string;
+                    };
+                    text: {
+                        description: string;
+                        type: string;
+                    };
+                    hash: {
+                        description: string;
+                        type: string;
+                    };
+                };
+            };
+            scaledHash: {
+                description: string;
+                type: string;
+            };
+            icsdId: {
+                description: string;
+                type: string;
+            };
+            isNonPeriodic: {
+                description: string;
+                type: string;
+            };
+            _id: {
+                description: string;
+                type: string;
+            };
+            slug: {
+                description: string;
+                type: string;
+            };
+            systemName: {
+                type: string;
+            };
+            consistencyChecks: {
+                type: string;
+                items: {
+                    $schema: string;
+                    title: string;
+                    type: string;
+                    description: string;
+                    required: string[];
+                    properties: {
+                        key: {
+                            type: string;
+                            description: string;
+                        };
+                        name: {
+                            enum: string[];
+                            description: string;
+                        };
+                        severity: {
+                            enum: string[];
+                            description: string;
+                        };
+                        message: {
+                            type: string;
+                            description: string;
+                        };
+                    };
+                };
+            };
+            schemaVersion: {
+                description: string;
+                type: string;
+                default: string;
+            };
+            name: {
+                description: string;
+                type: string;
+            };
+            isDefault: {
+                description: string;
+                type: string;
+                default: boolean;
+            };
+            metadata: {
+                type: string;
+            };
+        };
+    };
     readonly defaultConfig: {
         name: string;
         basis: {
@@ -416,6 +933,523 @@ export declare const Material: {
         setName(name: string): void;
         readonly isDefault: boolean;
     };
+    readonly jsonSchema: {
+        $id: string;
+        $schema: string;
+        title: string;
+        type: string;
+        required: string[];
+        properties: {
+            formula: {
+                description: string;
+                type: string;
+            };
+            unitCellFormula: {
+                description: string;
+                type: string;
+            };
+            basis: {
+                $schema: string;
+                title: string;
+                type: string;
+                required: string[];
+                properties: {
+                    elements: {
+                        type: string;
+                        items: {
+                            $schema: string;
+                            title: string;
+                            description: string;
+                            type: string;
+                            required: string[];
+                            properties: {
+                                id: {
+                                    type: string;
+                                };
+                                value: {
+                                    type: string;
+                                };
+                                occurrence: {
+                                    description: string;
+                                    type: string;
+                                };
+                                oxidationState: {
+                                    type: string;
+                                };
+                            };
+                        };
+                    };
+                    coordinates: {
+                        type: string;
+                        items: {
+                            $schema: string;
+                            title: string;
+                            description: string;
+                            type: string;
+                            properties: {
+                                id: {
+                                    type: string;
+                                };
+                                value: {
+                                    $schema: string;
+                                    title: string;
+                                    oneOf: {
+                                        $schema: string;
+                                        title: string;
+                                        type: string;
+                                        items: {
+                                            type: string;
+                                        };
+                                        minItems: number;
+                                        maxItems: number;
+                                    }[];
+                                };
+                            }; /**
+                             * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
+                             */
+                        };
+                    };
+                    name: {
+                        type: string;
+                    };
+                    units: {
+                        type: string;
+                    };
+                    bonds: {
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        uniqueItems: boolean;
+                        items: {
+                            type: string;
+                            properties: {
+                                atomPair: {
+                                    description: string;
+                                    type: string;
+                                    minItems: number;
+                                    maxItems: number;
+                                    $schema: string;
+                                    title: string;
+                                    items: {
+                                        type: string;
+                                        properties: {
+                                            id: {
+                                                description: string;
+                                                type: string;
+                                            };
+                                        };
+                                    };
+                                };
+                                bondType: {
+                                    type: string;
+                                    enum: string[];
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+            lattice: {
+                $schema: string;
+                title: string;
+                type: string;
+                required: string[];
+                properties: {
+                    name: {
+                        enum: string[];
+                    };
+                    vectors: {
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            alat: {
+                                description: string;
+                                type: string;
+                                /**
+                                 * Calculates hash from basis and lattice. Algorithm expects the following:
+                                 * - asserts lattice units to be angstrom
+                                 * - asserts basis units to be crystal
+                                 * - asserts basis coordinates and lattice measurements are rounded to hash precision
+                                 * - forms strings for lattice and basis
+                                 * - creates MD5 hash from basisStr + latticeStr + salt
+                                 * @param salt Salt for hashing, empty string by default.
+                                 * @param isScaled Whether to scale the lattice parameter 'a' to 1.
+                                 */
+                                default: number;
+                            };
+                            units: {
+                                enum: string[];
+                            };
+                            a: {
+                                $schema: string;
+                                title: string;
+                                type: string;
+                                minItems: number;
+                                maxItems: number;
+                                items: {
+                                    type: string;
+                                };
+                            };
+                            b: {
+                                $schema: string;
+                                title: string;
+                                type: string;
+                                minItems: number;
+                                maxItems: number; /**
+                                 * Converts basis to crystal/fractional coordinates.
+                                 */
+                                items: {
+                                    type: string;
+                                };
+                            };
+                            c: {
+                                $schema: string;
+                                title: string;
+                                type: string;
+                                minItems: number;
+                                maxItems: number;
+                                items: {
+                                    type: string;
+                                };
+                            };
+                        };
+                    };
+                    type: {
+                        $schema: string;
+                        /**
+                         * Returns material in Quantum Espresso output format:
+                         * ```
+                         *    CELL_PARAMETERS (angstroms)
+                         *    -0.543131284  -0.000000000   0.543131284
+                         *    -0.000000000   0.543131284   0.543131284
+                         *    -0.543131284   0.543131284   0.000000000
+                         *
+                         *    ATOMIC_POSITIONS (crystal)
+                         *    Si       0.000000000   0.000000000  -0.000000000
+                         *    Si       0.250000000   0.250000000   0.250000000
+                         * ```
+                         */
+                        title: string;
+                        type: string;
+                        enum: string[];
+                    };
+                    units: {
+                        type: string;
+                        properties: {
+                            length: {
+                                type: string;
+                                enum: string[];
+                            };
+                            angle: {
+                                type: string;
+                                enum: string[];
+                            };
+                        };
+                    };
+                    a: {
+                        description: string;
+                        type: string;
+                    };
+                    b: {
+                        description: string;
+                        type: string;
+                    };
+                    c: {
+                        description: string;
+                        type: string;
+                    };
+                    alpha: {
+                        description: string;
+                        type: string;
+                    };
+                    beta: {
+                        description: string;
+                        type: string;
+                    };
+                    gamma: {
+                        description: string;
+                        type: string;
+                    };
+                };
+            };
+            derivedProperties: {
+                $schema: string;
+                title: string;
+                type: string;
+                items: {
+                    oneOf: ({
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            name: {
+                                enum: string[];
+                            };
+                            units: {
+                                enum: string[];
+                            };
+                            value: {
+                                type: string;
+                                minimum?: undefined;
+                                maximum?: undefined;
+                            };
+                            pointGroupSymbol?: undefined;
+                            spaceGroupSymbol?: undefined;
+                            tolerance?: undefined;
+                            element?: undefined;
+                            degree?: undefined;
+                        };
+                        description?: undefined;
+                    } | {
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        properties: {
+                            pointGroupSymbol: {
+                                description: string;
+                                type: string;
+                            };
+                            spaceGroupSymbol: {
+                                description: string;
+                                type: string;
+                            };
+                            tolerance: {
+                                type: string;
+                                description: string;
+                                $schema: string;
+                                title: string;
+                                required: string[];
+                                properties: {
+                                    units: {
+                                        enum: string[];
+                                    };
+                                    value: {
+                                        type: string;
+                                    };
+                                };
+                            };
+                            name: {
+                                enum: string[];
+                            };
+                            units?: undefined;
+                            value?: undefined;
+                            element?: undefined;
+                            degree?: undefined;
+                        };
+                        required?: undefined;
+                        description?: undefined;
+                    } | {
+                        $schema: string;
+                        title: string;
+                        description: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            name: {
+                                enum: string[];
+                            };
+                            value: {
+                                type: string;
+                                minimum: number;
+                                maximum: number;
+                            };
+                            element: {
+                                type: string;
+                                description: string;
+                            };
+                            units?: undefined;
+                            pointGroupSymbol?: undefined;
+                            spaceGroupSymbol?: undefined;
+                            tolerance?: undefined;
+                            degree?: undefined;
+                        };
+                    } | {
+                        $schema: string;
+                        title: string;
+                        description: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            name: {
+                                enum: string[];
+                            };
+                            degree: {
+                                type: string;
+                                description: string;
+                            };
+                            value: {
+                                type: string;
+                                minimum?: undefined;
+                                maximum?: undefined;
+                            };
+                            units?: undefined;
+                            pointGroupSymbol?: undefined;
+                            spaceGroupSymbol?: undefined;
+                            tolerance?: undefined;
+                            element?: undefined;
+                        };
+                    } | {
+                        $schema: string;
+                        title: string;
+                        type: string;
+                        required: string[];
+                        properties: {
+                            name: {
+                                enum: string[];
+                            };
+                            value: {
+                                type: string;
+                                minimum?: undefined;
+                                maximum?: undefined;
+                            };
+                            units?: undefined;
+                            pointGroupSymbol?: undefined;
+                            spaceGroupSymbol?: undefined;
+                            tolerance?: undefined;
+                            element?: undefined;
+                            degree?: undefined;
+                        };
+                        description?: undefined;
+                    })[];
+                    discriminator: {
+                        propertyName: string;
+                    };
+                    required: string[];
+                };
+            };
+            external: {
+                $schema: string;
+                title: string;
+                description: string;
+                type: string;
+                required: string[];
+                properties: {
+                    id: {
+                        description: string;
+                        oneOf: {
+                            type: string;
+                        }[];
+                    };
+                    source: {
+                        description: string;
+                        type: string;
+                    };
+                    origin: {
+                        description: string;
+                        type: string;
+                    };
+                    data: {
+                        description: string;
+                        type: string;
+                    };
+                    doi: {
+                        description: string;
+                        type: string;
+                    };
+                    url: {
+                        description: string;
+                        type: string;
+                    };
+                };
+            };
+            src: {
+                $schema: string;
+                title: string;
+                description: string;
+                type: string;
+                required: string[];
+                properties: {
+                    extension: {
+                        description: string;
+                        type: string;
+                    };
+                    filename: {
+                        description: string;
+                        type: string;
+                    };
+                    text: {
+                        description: string;
+                        type: string;
+                    };
+                    hash: {
+                        description: string;
+                        type: string;
+                    };
+                };
+            };
+            scaledHash: {
+                description: string;
+                type: string;
+            };
+            icsdId: {
+                description: string;
+                type: string;
+            };
+            isNonPeriodic: {
+                description: string;
+                type: string;
+            };
+            _id: {
+                description: string;
+                type: string;
+            };
+            slug: {
+                description: string;
+                type: string;
+            };
+            systemName: {
+                type: string;
+            };
+            consistencyChecks: {
+                type: string;
+                items: {
+                    $schema: string;
+                    title: string;
+                    type: string;
+                    description: string;
+                    required: string[];
+                    properties: {
+                        key: {
+                            type: string;
+                            description: string;
+                        };
+                        name: {
+                            enum: string[];
+                            description: string;
+                        };
+                        severity: {
+                            enum: string[];
+                            description: string;
+                        };
+                        message: {
+                            type: string;
+                            description: string;
+                        };
+                    };
+                };
+            };
+            schemaVersion: {
+                description: string;
+                type: string;
+                default: string;
+            };
+            name: {
+                description: string;
+                type: string;
+            };
+            isDefault: {
+                description: string;
+                type: string;
+                default: boolean;
+            };
+            metadata: {
+                type: string;
+            };
+        };
+    };
     readonly defaultConfig: {
         name: string;
         basis: {
@@ -450,24 +1484,13 @@ export declare const Material: {
     prop<T = undefined>(name: string, defaultValue: T): T;
     prop<T_1 = undefined>(name: string): T_1 | undefined;
     setProp(name: string, value: unknown): void;
-    unsetProp(name: string): void; /**
-     * Returns material's basis in XYZ format.
-     */
+    unsetProp(name: string): void;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
-    toJSONQuick(exclude?: string[] | undefined): AnyObject; /**
-     * Returns material in Quantum Espresso output format:
-     * ```
-     *    CELL_PARAMETERS (angstroms)
-     *    -0.543131284  -0.000000000   0.543131284
-     *    -0.000000000   0.543131284   0.543131284
-     *    -0.543131284   0.543131284   0.000000000
-     *
-     *    ATOMIC_POSITIONS (crystal)
-     *    Si       0.000000000   0.000000000  -0.000000000
-     *    Si       0.250000000   0.250000000   0.250000000
-     * ```
+    /**
+     * Returns material's basis in XYZ format.
      */
+    toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
     clean(config: AnyObject): AnyObject;
@@ -521,6 +1544,10 @@ export declare const Material: {
     getClsName(): string;
     readonly slug: string;
     readonly isSystemEntity: boolean;
+    /**
+     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
+     * @returns Array of checks results
+     */
     getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/lib/js/types").EntityReferenceSchema;
     getEntityByName(entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string): import("@exabyte-io/code.js/dist/entity").InMemoryEntity;
 }) & {
