@@ -1,7 +1,8 @@
+import { math } from "@exabyte-io/code.js/dist/math";
+
 import { Coordinate } from "../basis/types";
 import constants from "../constants";
 import { Vector, VectorsAsArray } from "../lattice/types";
-import math from "../math";
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;

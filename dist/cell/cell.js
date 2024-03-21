@@ -4,11 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cell = void 0;
+const math_1 = require("@exabyte-io/code.js/dist/math");
 const constants_1 = __importDefault(require("../constants"));
-const math_1 = __importDefault(require("../math"));
-const MATRIX = math_1.default.matrix;
-const MULT = math_1.default.multiply;
-const INV = math_1.default.inv;
+const MATRIX = math_1.math.matrix;
+const MULT = math_1.math.multiply;
+const INV = math_1.math.inv;
 // @ts-ignore
 const MATRIX_MULT = (...args) => MULT(...args.map((x) => MATRIX(x))).toArray();
 /*
@@ -35,7 +35,7 @@ class Cell {
             this.vector3,
             // assert that no near-zero artifacts are present (ie. 1.6 x 10^-16) before attempting inversion
             // @param tolerance {Number} Maximum tolerance to small numbers, used to avoid artifacts on matrix inversion
-        ].map((v) => v.map((c) => (math_1.default.abs(c) < constants_1.default.tolerance.lengthAngstrom ? 0 : c)));
+        ].map((v) => v.map((c) => (math_1.math.abs(c) < constants_1.default.tolerance.lengthAngstrom ? 0 : c)));
     }
     clone() {
         return new this.constructor(this.vectorsAsArray);
@@ -64,7 +64,7 @@ class Cell {
      */
     isPointInsideCell(point, tolerance = constants_1.default.tolerance.length) {
         return (this.convertPointToFractional(point)
-            .map((c) => math_1.default.isBetweenZeroInclusiveAndOne(c, tolerance))
+            .map((c) => math_1.math.isBetweenZeroInclusiveAndOne(c, tolerance))
             // @ts-ignore
             .reduce((a, b) => a && b));
     }
@@ -74,8 +74,8 @@ class Cell {
      */
     getMostCollinearVectorIndex(testVector) {
         // @ts-ignore
-        const angles = this.vectorsAsArray.map((v) => math_1.default.angleUpTo90(v, testVector));
-        return angles.findIndex((el) => el === math_1.default.min(angles));
+        const angles = this.vectorsAsArray.map((v) => math_1.math.angleUpTo90(v, testVector));
+        return angles.findIndex((el) => el === math_1.math.min(angles));
     }
     /**
      * Scale this cell by right-multiplying it to a matrix (nested array)
