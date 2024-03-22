@@ -119,12 +119,15 @@ jobs:
           node-version: 14.x
           npm-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          verify-tests: 'false'
 
   publish-py-package:
     needs:
       - run-js-tests
       - run-py-tests
       - run-py-linter
+      # Wait for JS publish step to publish the new tag
+      - publish-js-package
     runs-on: ubuntu-latest
     if: (github.repository != 'Exabyte-io/template-definitions-js-py') && (github.ref_name == 'main')
 
