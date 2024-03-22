@@ -259,6 +259,20 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                             };
                         };
                     };
+                    labels: {
+                        description: string;
+                        type: string;
+                        items: {
+                            properties: {
+                                id: {
+                                    type: string;
+                                };
+                                value: {
+                                    type: string;
+                                };
+                            };
+                        };
+                    };
                     coordinates: {
                         type: string;
                         items: {
@@ -284,9 +298,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                                         maxItems: number;
                                     }[];
                                 };
-                            }; /**
-                             * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
-                             */
+                            };
                         };
                     };
                     name: {
@@ -324,7 +336,11 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                                     type: string;
                                     enum: string[];
                                 };
-                            };
+                            }; /**
+                             * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
+                             *  inchi cannot be found.
+                             *  @returns {String}
+                             */
                         };
                     };
                 };
@@ -347,16 +363,6 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                             alat: {
                                 description: string;
                                 type: string;
-                                /**
-                                 * Calculates hash from basis and lattice. Algorithm expects the following:
-                                 * - asserts lattice units to be angstrom
-                                 * - asserts basis units to be crystal
-                                 * - asserts basis coordinates and lattice measurements are rounded to hash precision
-                                 * - forms strings for lattice and basis
-                                 * - creates MD5 hash from basisStr + latticeStr + salt
-                                 * @param salt Salt for hashing, empty string by default.
-                                 * @param isScaled Whether to scale the lattice parameter 'a' to 1.
-                                 */
                                 default: number;
                             };
                             units: {
@@ -377,9 +383,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                                 title: string;
                                 type: string;
                                 minItems: number;
-                                maxItems: number; /**
-                                 * Converts basis to crystal/fractional coordinates.
-                                 */
+                                maxItems: number;
                                 items: {
                                     type: string;
                                 };
@@ -398,19 +402,6 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
                     };
                     type: {
                         $schema: string;
-                        /**
-                         * Returns material in Quantum Espresso output format:
-                         * ```
-                         *    CELL_PARAMETERS (angstroms)
-                         *    -0.543131284  -0.000000000   0.543131284
-                         *    -0.000000000   0.543131284   0.543131284
-                         *    -0.543131284   0.543131284   0.000000000
-                         *
-                         *    ATOMIC_POSITIONS (crystal)
-                         *    Si       0.000000000   0.000000000  -0.000000000
-                         *    Si       0.250000000   0.250000000   0.250000000
-                         * ```
-                         */
                         title: string;
                         type: string;
                         enum: string[];
@@ -979,6 +970,20 @@ export declare const Material: {
                             };
                         };
                     };
+                    labels: {
+                        description: string;
+                        type: string;
+                        items: {
+                            properties: {
+                                id: {
+                                    type: string;
+                                };
+                                value: {
+                                    type: string;
+                                };
+                            };
+                        };
+                    };
                     coordinates: {
                         type: string;
                         items: {
@@ -1004,9 +1009,7 @@ export declare const Material: {
                                         maxItems: number;
                                     }[];
                                 };
-                            }; /**
-                             * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
-                             */
+                            };
                         };
                     };
                     name: {
@@ -1044,7 +1047,11 @@ export declare const Material: {
                                     type: string;
                                     enum: string[];
                                 };
-                            };
+                            }; /**
+                             * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
+                             *  inchi cannot be found.
+                             *  @returns {String}
+                             */
                         };
                     };
                 };
@@ -1067,16 +1074,6 @@ export declare const Material: {
                             alat: {
                                 description: string;
                                 type: string;
-                                /**
-                                 * Calculates hash from basis and lattice. Algorithm expects the following:
-                                 * - asserts lattice units to be angstrom
-                                 * - asserts basis units to be crystal
-                                 * - asserts basis coordinates and lattice measurements are rounded to hash precision
-                                 * - forms strings for lattice and basis
-                                 * - creates MD5 hash from basisStr + latticeStr + salt
-                                 * @param salt Salt for hashing, empty string by default.
-                                 * @param isScaled Whether to scale the lattice parameter 'a' to 1.
-                                 */
                                 default: number;
                             };
                             units: {
@@ -1097,9 +1094,7 @@ export declare const Material: {
                                 title: string;
                                 type: string;
                                 minItems: number;
-                                maxItems: number; /**
-                                 * Converts basis to crystal/fractional coordinates.
-                                 */
+                                maxItems: number;
                                 items: {
                                     type: string;
                                 };
@@ -1118,19 +1113,6 @@ export declare const Material: {
                     };
                     type: {
                         $schema: string;
-                        /**
-                         * Returns material in Quantum Espresso output format:
-                         * ```
-                         *    CELL_PARAMETERS (angstroms)
-                         *    -0.543131284  -0.000000000   0.543131284
-                         *    -0.000000000   0.543131284   0.543131284
-                         *    -0.543131284   0.543131284   0.000000000
-                         *
-                         *    ATOMIC_POSITIONS (crystal)
-                         *    Si       0.000000000   0.000000000  -0.000000000
-                         *    Si       0.250000000   0.250000000   0.250000000
-                         * ```
-                         */
                         title: string;
                         type: string;
                         enum: string[];
