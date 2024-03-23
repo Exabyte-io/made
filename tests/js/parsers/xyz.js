@@ -11,9 +11,7 @@ describe("Parsers:XYZ", () => {
             "units",
         ]);
     });
-});
 
-describe("Parsers:XYZ", () => {
     it("should extract basis from XYZ text with atomic labels", () => {
         const text =
             "Fe1  0.00  0.00  0.00  1 1 1\n" +
