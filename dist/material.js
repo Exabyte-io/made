@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Material = exports.MaterialMixin = exports.defaultMaterialConfig = void 0;
 const entity_1 = require("@exabyte-io/code.js/dist/entity");
-const material_json_1 = __importDefault(require("@mat3ra/esse/lib/js/schema/material.json"));
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const constrained_basis_1 = require("./basis/constrained_basis");
 const conventional_cell_1 = require("./cell/conventional_cell");
@@ -57,6 +56,9 @@ exports.defaultMaterialConfig = {
 };
 function MaterialMixin(superclass) {
     class MadeMaterial extends superclass {
+        // TODO: add constraints (and other properties if needed) to ESSE MaterialSchema, then uncomment the line below to allow validation
+        // During validation of the Material entity, properties absent in ESSE schema get deleted.
+        // static readonly jsonSchema = MaterialJSONSchemaObject;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         constructor(...config) {
             super(...config);
@@ -310,7 +312,6 @@ function MaterialMixin(superclass) {
             return checks;
         }
     }
-    MadeMaterial.jsonSchema = material_json_1.default;
     return MadeMaterial;
 }
 exports.MaterialMixin = MaterialMixin;
