@@ -1,6 +1,6 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
 import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
-import MaterialJSONSchemaObject from "@mat3ra/esse/lib/js/schema/material.json";
+// import MaterialJSONSchemaObject from "@mat3ra/esse/lib/js/schema/material.json";
 import {
     ConsistencyCheck,
     DerivedPropertiesSchema,
@@ -85,7 +85,9 @@ export function MaterialMixin<
     class MadeMaterial extends superclass {
         declare _json: MaterialSchemaJSON;
 
-        static readonly jsonSchema = MaterialJSONSchemaObject;
+        // TODO: add constraints (and other properties if needed) to ESSE MaterialSchema, then uncomment the line below to allow validation
+        // During validation of the Material entity, properties absent in ESSE schema get deleted.
+        // static readonly jsonSchema = MaterialJSONSchemaObject;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         constructor(...config: any[]) {
