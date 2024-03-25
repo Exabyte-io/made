@@ -1,4 +1,4 @@
-import { LatticeExplicitUnit, LatticeImplicitSchema } from "@mat3ra/esse/lib/js/types";
+import { LatticeExplicitUnit, LatticeImplicitSchema } from "@mat3ra/esse/dist/js/types";
 import { Vector } from "./types";
 type RequiredLatticeExplicitUnit = Required<LatticeExplicitUnit>;
 export interface BravaisConfigProps extends Partial<LatticeImplicitSchema> {

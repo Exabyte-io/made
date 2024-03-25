@@ -1,4 +1,4 @@
-import { LatticeTypeSchema } from "@mat3ra/esse/lib/js/types";
+import { LatticeTypeSchema } from "@mat3ra/esse/dist/js/types";
 
 /**
  * Routines for calculating conventional cell vectors from primitive cell Bravais parameters.
