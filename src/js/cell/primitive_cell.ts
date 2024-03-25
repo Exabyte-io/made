@@ -1,5 +1,5 @@
 /* eslint no-unused-vars: 0 */
-import { LatticeImplicitSchema } from "@mat3ra/esse/lib/js/types";
+import { LatticeImplicitSchema } from "@mat3ra/esse/dist/js/types";
 
 import { VectorsAsArray } from "../lattice/types";
 import math from "../math";
