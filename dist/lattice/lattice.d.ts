@@ -1,4 +1,4 @@
-import { LatticeImplicitSchema, LatticeSchema, LatticeTypeExtendedSchema } from "@mat3ra/esse/lib/js/types";
+import { LatticeImplicitSchema, LatticeSchema, LatticeTypeExtendedSchema } from "@mat3ra/esse/dist/js/types";
 import { Cell } from "../cell/cell";
 import { FromVectorsProps, LatticeBravais } from "./lattice_bravais";
 import { BravaisConfigProps, LatticeVectors } from "./lattice_vectors";
@@ -61,7 +61,7 @@ export declare class Lattice extends LatticeBravais implements LatticeSchema {
     /**
      * Get lattice vectors as a nested array
      */
-    get vectorArrays(): [import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema];
+    get vectorArrays(): [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema];
     get Cell(): Cell;
     /**
      * Get a short label for the type of the lattice, eg. "MCLC".

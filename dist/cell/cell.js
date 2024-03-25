@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cell = void 0;
-const math_1 = require("@exabyte-io/code.js/dist/math");
+const math_1 = require("@mat3ra/code/dist/js/math");
 const constants_1 = __importDefault(require("../constants"));
 const MATRIX = math_1.math.matrix;
 const MULT = math_1.math.multiply;

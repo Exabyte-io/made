@@ -1,2 +1,2 @@
-export * from "@exabyte-io/code.js/dist/constants";
-export { default } from "@exabyte-io/code.js/dist/constants";
+export * from "@mat3ra/code/dist/js/constants";
+export { default } from "@mat3ra/code/dist/js/constants";

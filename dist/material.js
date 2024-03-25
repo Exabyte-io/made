@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Material = exports.MaterialMixin = exports.defaultMaterialConfig = void 0;
-const entity_1 = require("@exabyte-io/code.js/dist/entity");
+const entity_1 = require("@mat3ra/code/dist/js/entity");
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const constrained_basis_1 = require("./basis/constrained_basis");
 const conventional_cell_1 = require("./cell/conventional_cell");

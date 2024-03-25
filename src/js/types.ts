@@ -1,4 +1,4 @@
-import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
-import { MaterialSchema } from "@mat3ra/esse/lib/js/types";
+import { AnyObject } from "@mat3ra/code/dist/js/entity/in_memory";
+import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 
 export type MaterialJSON = MaterialSchema & AnyObject;
