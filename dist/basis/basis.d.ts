@@ -178,7 +178,12 @@ export declare class Basis {
      * Returns a nested array with elements and their corresponding coordinates
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
      */
-    get elementsAndCoordinatesArray(): [string, Coordinate, string][];
+    get elementsAndCoordinatesArray(): [string, Coordinate][];
+    /**
+     * Returns a nested array with elements and their corresponding coordinates with labels
+     * @example Output: [ ["Si", [0,0,0], ['1']], ["Si", [0.5,0.5,0.5]] , ['2']]
+     */
+    get elementsAndCoordinatesAndLabelsArray(): [string, Coordinate, string][];
     /**
      * @summary Concatenates elements and sorts them in alphanumeric order.
      * E.g.,

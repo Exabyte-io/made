@@ -278,6 +278,16 @@ class Basis {
     get elementsAndCoordinatesArray() {
         return this._elements.array.map((element, idx) => {
             const coordinates = this.getCoordinateByIndex(idx);
+            return [element, coordinates];
+        });
+    }
+    /**
+     * Returns a nested array with elements and their corresponding coordinates with labels
+     * @example Output: [ ["Si", [0,0,0], ['1']], ["Si", [0.5,0.5,0.5]] , ['2']]
+     */
+    get elementsAndCoordinatesAndLabelsArray() {
+        return this._elements.array.map((element, idx) => {
+            const coordinates = this.getCoordinateByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
             return [element, coordinates, atomicLabel];
         });
@@ -297,7 +307,7 @@ class Basis {
         // make a copy to prevent modifying class values
         const clsInstance = new Basis(this.toJSON());
         clsInstance.toStandardRepresentation();
-        const standardRep = clsInstance.elementsAndCoordinatesArray.map((entry) => {
+        const standardRep = clsInstance.elementsAndCoordinatesAndLabelsArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
@@ -342,7 +352,7 @@ class Basis {
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
      */
     get atomicPositions() {
-        return this.elementsAndCoordinatesArray.map((entry, idx) => {
+        return this.elementsAndCoordinatesAndLabelsArray.map((entry, idx) => {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = this.atomicLabelsArray[idx];
