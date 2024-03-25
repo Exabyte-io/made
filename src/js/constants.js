@@ -1,4 +1,4 @@
 // TODO: adjust the imports and remove the need for re-exporting
-export * from "@exabyte-io/code.js/dist/constants";
+export * from "@mat3ra/code/dist/js/constants";
 // eslint-disable-next-line no-restricted-exports
-export { default } from "@exabyte-io/code.js/dist/constants";
+export { default } from "@mat3ra/code/dist/js/constants";

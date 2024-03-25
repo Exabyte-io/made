@@ -1,4 +1,4 @@
-import { MaterialSchema } from "@mat3ra/esse/lib/js/types";
+import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import _ from "underscore";
 import s from "underscore.string";
 
