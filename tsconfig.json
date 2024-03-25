@@ -1,3 +1,3 @@
 {
-    "extends": "@mat3ra/tsconfig/tsconfig.json"
+    "extends": "@mat3ra/tsconfig/tsconfig-js-py-dev.json"
 }
