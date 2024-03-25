@@ -1,4 +1,4 @@
-import { LatticeTypeSchema } from "@mat3ra/esse/lib/js/types";
+import { LatticeTypeSchema } from "@mat3ra/esse/dist/js/types";
 export declare const PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS: {
     CUB: number[][];
     FCC: number[][];

@@ -1,4 +1,4 @@
-import { MaterialSchema } from "@mat3ra/esse/lib/js/types";
+import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Constraint } from "../constraints/constraints";
 import { Vector } from "../lattice/types";
@@ -36,7 +36,7 @@ export interface BasisConfig {
  * @param units Coordinate units
  * @param cell Basis Cell
  */
-declare function toBasisConfig(txt: string, units?: string, cell?: [import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema]): BasisConfig;
+declare function toBasisConfig(txt: string, units?: string, cell?: [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema]): BasisConfig;
 /**
  * Create XYZ from Basis class instance.
  * @param basisClsInstance Basis class instance.

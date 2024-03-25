@@ -1,4 +1,4 @@
-import { ArrayOf3NumberElementsSchema, LatticeTypeSchema } from "@mat3ra/esse/lib/js/types";
+import { ArrayOf3NumberElementsSchema, LatticeTypeSchema } from "@mat3ra/esse/dist/js/types";
 export declare const DEFAULT_LATTICE_UNITS: {
     length: {
         angstrom: string;
