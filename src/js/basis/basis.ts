@@ -362,7 +362,18 @@ export class Basis {
      * Returns a nested array with elements and their corresponding coordinates
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
      */
-    get elementsAndCoordinatesArray(): [string, Coordinate, string][] {
+    get elementsAndCoordinatesArray(): [string, Coordinate][] {
+        return this._elements.array.map((element, idx) => {
+            const coordinates = this.getCoordinateByIndex(idx);
+            return [element, coordinates];
+        });
+    }
+
+    /**
+     * Returns a nested array with elements and their corresponding coordinates with labels
+     * @example Output: [ ["Si", [0,0,0], ['1']], ["Si", [0.5,0.5,0.5]] , ['2']]
+     */
+    get elementsAndCoordinatesAndLabelsArray(): [string, Coordinate, string][] {
         return this._elements.array.map((element, idx) => {
             const coordinates = this.getCoordinateByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
@@ -385,7 +396,7 @@ export class Basis {
         // make a copy to prevent modifying class values
         const clsInstance = new Basis(this.toJSON());
         clsInstance.toStandardRepresentation();
-        const standardRep = clsInstance.elementsAndCoordinatesArray.map((entry) => {
+        const standardRep = clsInstance.elementsAndCoordinatesAndLabelsArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
@@ -435,7 +446,7 @@ export class Basis {
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
      */
     get atomicPositions(): string[] {
-        return this.elementsAndCoordinatesArray.map((entry, idx) => {
+        return this.elementsAndCoordinatesAndLabelsArray.map((entry, idx) => {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = this.atomicLabelsArray[idx];
