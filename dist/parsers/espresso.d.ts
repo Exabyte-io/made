@@ -1,4 +1,4 @@
-import { MaterialSchema } from "@mat3ra/esse/lib/js/types";
+import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 /**
  * Construct textual representation of a materialOrConfig according to Quantum ESPRESSO pw.x input format.
  * @param materialOrConfig - material class instance or its config object

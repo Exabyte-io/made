@@ -1,4 +1,4 @@
-import { LatticeImplicitSchema, LatticeTypeSchema } from "@mat3ra/esse/lib/js/types";
+import { LatticeImplicitSchema, LatticeTypeSchema } from "@mat3ra/esse/dist/js/types";
 import { Vector, VectorsAsArray } from "./types";
 export type Units = Required<LatticeImplicitSchema>["units"];
 export interface FromVectorsProps {
