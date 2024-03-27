@@ -331,12 +331,10 @@ class Basis {
     /* Returns array of atomic labels E.g., ["1", "2", "", ""] */
     get atomicLabelsArray() {
         var _a;
-        const labelsArray = [];
-        for (let i = 0; i < this.elements.length; i++) {
-            const labelObj = (_a = this.labels) === null || _a === void 0 ? void 0 : _a.find((item) => item.id === i);
-            const atomicLabel = labelObj ? labelObj.value.toString() : "";
-            labelsArray.push(atomicLabel);
-        }
+        const labelsArray = Array.from({ length: this.elements.length }, (_) => "");
+        (_a = this.labels) === null || _a === void 0 ? void 0 : _a.map((item) => {
+            labelsArray[item.id] = item.value.toString();
+        });
         return labelsArray;
     }
     /* Returns array of elements with labels E.g., ["Fe1", "Fe2", "O", "O"] */
