@@ -1,6 +1,6 @@
-import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
-import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
-import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, MaterialSchema } from "@mat3ra/esse/lib/js/types";
+import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { AnyObject } from "@mat3ra/code/dist/js/entity/in_memory";
+import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { ConstrainedBasis } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
@@ -194,6 +194,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
         };
         setProp: ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void);
         unsetProp: ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void);
+        setProps: ((json?: AnyObject | undefined) => any) & ((json?: AnyObject | undefined) => any) & ((json?: AnyObject | undefined) => any) & ((json?: AnyObject | undefined) => any) & ((json?: AnyObject | undefined) => any);
         toJSONSafe: ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject);
         toJSONQuick: ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject);
         clone: ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any);
@@ -205,8 +206,8 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
         getClsName: (() => string) & (() => string) & (() => string) & (() => string) & (() => string);
         readonly slug: string;
         readonly isSystemEntity: boolean;
-        getAsEntityReference: ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema);
-        getEntityByName: ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity) & ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity) & ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity) & ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity) & ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity);
+        getAsEntityReference: ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema);
+        getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity);
         metadata: object;
         updateMetadata(object: object): void;
         name: string;
@@ -397,6 +398,7 @@ export declare const Material: {
         };
         setProp: ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void);
         unsetProp: ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void);
+        setProps: ((json?: AnyObject | undefined) => any) & ((json?: AnyObject | undefined) => any) & ((json?: AnyObject | undefined) => any) & ((json?: AnyObject | undefined) => any) & ((json?: AnyObject | undefined) => any);
         toJSONSafe: ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject);
         toJSONQuick: ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject) & ((exclude?: string[] | undefined) => AnyObject);
         clone: ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any);
@@ -408,8 +410,8 @@ export declare const Material: {
         getClsName: (() => string) & (() => string) & (() => string) & (() => string) & (() => string);
         readonly slug: string;
         readonly isSystemEntity: boolean;
-        getAsEntityReference: ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/lib/js/types").EntityReferenceSchema);
-        getEntityByName: ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity) & ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity) & ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity) & ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity) & ((entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string) => import("@exabyte-io/code.js/dist/entity").InMemoryEntity);
+        getAsEntityReference: ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema);
+        getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity);
         metadata: object;
         updateMetadata(object: object): void;
         name: string;
@@ -447,14 +449,11 @@ export declare const Material: {
     consistencyChecks: object[];
     addConsistencyChecks(array: object[]): void;
     _json: AnyObject;
-    prop<T = undefined>(name: string, defaultValue: T): T; /**
-     * Converts basis to crystal/fractional coordinates.
-     */
-    prop<T_1 = undefined>(name: string): T_1 | undefined; /**
-     * Converts basis to crystal/fractional coordinates.
-     */
+    prop<T = undefined>(name: string, defaultValue: T): T;
+    prop<T_1 = undefined>(name: string): T_1 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
+    setProps(json?: AnyObject | undefined): any;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
@@ -467,8 +466,8 @@ export declare const Material: {
     getClsName(): string;
     readonly slug: string;
     readonly isSystemEntity: boolean;
-    getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/lib/js/types").EntityReferenceSchema;
-    getEntityByName(entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string): import("@exabyte-io/code.js/dist/entity").InMemoryEntity;
+    getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
+    getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 }) & (new (...args: any[]) => {
     metadata: object;
     updateMetadata(object: object): void;
@@ -477,9 +476,10 @@ export declare const Material: {
     prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
-    toJSON(exclude?: string[] | undefined): AnyObject; /**
-     * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
+    setProps(json?: AnyObject | undefined): any; /**
+     * Returns a copy of the material with conventional cell constructed instead of primitive.
      */
+    toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
@@ -491,8 +491,8 @@ export declare const Material: {
     getClsName(): string;
     readonly slug: string;
     readonly isSystemEntity: boolean;
-    getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/lib/js/types").EntityReferenceSchema;
-    getEntityByName(entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string): import("@exabyte-io/code.js/dist/entity").InMemoryEntity;
+    getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
+    getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 }) & (new (...args: any[]) => {
     name: string;
     setName(name: string): void;
@@ -501,23 +501,21 @@ export declare const Material: {
     prop<T_1_2 = undefined>(name: string): T_1_2 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
+    setProps(json?: AnyObject | undefined): any;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
     clean(config: AnyObject): AnyObject;
-    isValid(): boolean; /**
-     * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
-     * @returns Array of checks results
-     */
+    isValid(): boolean;
     id: string;
     readonly cls: string;
     getClsName(): string;
     readonly slug: string;
     readonly isSystemEntity: boolean;
-    getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/lib/js/types").EntityReferenceSchema;
-    getEntityByName(entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string): import("@exabyte-io/code.js/dist/entity").InMemoryEntity;
+    getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
+    getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 }) & {
     new (...args: any[]): {
         readonly isDefault: boolean;
@@ -526,6 +524,7 @@ export declare const Material: {
         prop<T_1_3 = undefined>(name: string): T_1_3 | undefined;
         setProp(name: string, value: unknown): void;
         unsetProp(name: string): void;
+        setProps(json?: AnyObject | undefined): any;
         toJSON(exclude?: string[] | undefined): AnyObject;
         toJSONSafe(exclude?: string[] | undefined): AnyObject;
         toJSONQuick(exclude?: string[] | undefined): AnyObject;
@@ -538,11 +537,11 @@ export declare const Material: {
         getClsName(): string;
         readonly slug: string;
         readonly isSystemEntity: boolean;
-        getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/lib/js/types").EntityReferenceSchema;
-        getEntityByName(entities: import("@exabyte-io/code.js/dist/entity").InMemoryEntity[], entity: string, name: string): import("@exabyte-io/code.js/dist/entity").InMemoryEntity;
+        getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
+        getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
     };
     readonly defaultConfig: object | null;
     createDefault(): any;
-} & typeof import("@exabyte-io/code.js/dist/entity").InMemoryEntity;
+} & typeof import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 export type Material = InstanceType<typeof Material>;
 export {};

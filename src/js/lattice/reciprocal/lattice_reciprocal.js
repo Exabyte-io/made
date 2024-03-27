@@ -1,4 +1,4 @@
-import { ATOMIC_COORD_UNITS, units as UNITS } from "@exabyte-io/code.js/dist/constants";
+import { ATOMIC_COORD_UNITS, units as UNITS } from "@mat3ra/code/dist/js/constants";
 import almostEqual from "array-almost-equal";
 import lodash from "lodash";
 
