@@ -101,6 +101,7 @@ export class Basis {
 
     /**
      * Serialize class instance to JSON.
+     * @param skipRounding - Whether to skip rounding the resulting lattice values, defaults to `false`.
      * @example As below:
      {
             "elements" : [
@@ -136,12 +137,12 @@ export class Basis {
                 [
                     1,
                     0,
-                    6.12323399573677e-17
+                    0
                 ],
                 [
-                    1.60812264967664e-16,
+                    0,
                     1,
-                    6.12323399573677e-17
+                    0
                 ],
                 [
                     0,
@@ -151,12 +152,12 @@ export class Basis {
             ]
         }
      */
-    toJSON(): BasisSchema {
+    toJSON(skipRounding = false): BasisSchema {
         const json = {
             elements: this.elements,
-            coordinates: this.coordinates,
+            coordinates: skipRounding ? this.coordinates : this.coordinatesRounded,
             units: this.units,
-            cell: this.cell,
+            cell: skipRounding ? this.cell : this.cellRounded,
         };
 
         if (!_.isEmpty(this.labels)) {
@@ -169,6 +170,21 @@ export class Basis {
         }
 
         return JSON.parse(JSON.stringify(json));
+    }
+
+    /** Return coordinates rounded to default precision */
+    get coordinatesRounded() {
+        return this.coordinates.map((coordinate) => {
+            return {
+                id: coordinate.id,
+                value: coordinate.value.map((x) => math.precise(math.roundToZero(x))),
+            };
+        });
+    }
+
+    /** Return cell with vectors values rounded to default precision */
+    get cellRounded() {
+        return this.cell.map((vector) => vector.map((x) => math.precise(math.roundToZero(x))));
     }
 
     /**

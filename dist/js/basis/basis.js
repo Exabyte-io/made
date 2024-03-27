@@ -45,6 +45,7 @@ class Basis {
     }
     /**
      * Serialize class instance to JSON.
+     * @param skipRounding - Whether to skip rounding the resulting lattice values, defaults to `false`.
      * @example As below:
      {
             "elements" : [
@@ -80,12 +81,12 @@ class Basis {
                 [
                     1,
                     0,
-                    6.12323399573677e-17
+                    0
                 ],
                 [
-                    1.60812264967664e-16,
+                    0,
                     1,
-                    6.12323399573677e-17
+                    0
                 ],
                 [
                     0,
@@ -95,12 +96,12 @@ class Basis {
             ]
         }
      */
-    toJSON() {
+    toJSON(skipRounding = false) {
         const json = {
             elements: this.elements,
-            coordinates: this.coordinates,
+            coordinates: skipRounding ? this.coordinates : this.coordinatesRounded,
             units: this.units,
-            cell: this.cell,
+            cell: skipRounding ? this.cell : this.cellRounded,
         };
         if (!underscore_1.default.isEmpty(this.labels)) {
             return JSON.parse(JSON.stringify({
@@ -109,6 +110,19 @@ class Basis {
             }));
         }
         return JSON.parse(JSON.stringify(json));
+    }
+    /** Return coordinates rounded to default precision */
+    get coordinatesRounded() {
+        return this.coordinates.map((coordinate) => {
+            return {
+                id: coordinate.id,
+                value: coordinate.value.map((x) => math_1.default.precise(math_1.default.roundToZero(x))),
+            };
+        });
+    }
+    /** Return cell with vectors values rounded to default precision */
+    get cellRounded() {
+        return this.cell.map((vector) => vector.map((x) => math_1.default.precise(math_1.default.roundToZero(x))));
     }
     /**
      * Create an identical copy of the class instance.
