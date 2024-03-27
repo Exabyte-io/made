@@ -154,7 +154,7 @@ export class Basis {
         return JSON.parse(JSON.stringify(json));
     }
 
-    /** Return coordinates rounded to the specified precision */
+    /** Return coordinates rounded to default precision */
     get coordinatesRounded() {
         return this.coordinates.map((coordinate) => {
             return {
@@ -164,7 +164,7 @@ export class Basis {
         });
     }
 
-    /** Return cell values rounded to the specified precision */
+    /** Return cell with vectors values rounded to default precision */
     get cellRounded() {
         return this.cell.map((vector) => vector.map((x) => math.precise(math.roundToZero(x))));
     }
