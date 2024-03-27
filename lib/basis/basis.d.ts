@@ -99,12 +99,12 @@ export declare class Basis {
         }
      */
     toJSON(skipRounding?: boolean): BasisSchema;
-    /** Return coordinates rounded to the specified precision */
+    /** Return coordinates rounded to default precision */
     get coordinatesRounded(): {
         id: number;
         value: number[];
     }[];
-    /** Return cell values rounded to the specified precision */
+    /** Return cell with vectors values rounded to default precision */
     get cellRounded(): number[][];
     /**
      * Create an identical copy of the class instance.
