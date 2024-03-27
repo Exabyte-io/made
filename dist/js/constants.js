@@ -19,7 +19,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = void 0;
 // TODO: adjust the imports and remove the need for re-exporting
-__exportStar(require("@exabyte-io/code.js/dist/constants"), exports);
+__exportStar(require("@mat3ra/code/dist/js/constants"), exports);
 // eslint-disable-next-line no-restricted-exports
-var constants_1 = require("@exabyte-io/code.js/dist/constants");
+var constants_1 = require("@mat3ra/code/dist/js/constants");
 Object.defineProperty(exports, "default", { enumerable: true, get: function () { return __importDefault(constants_1).default; } });

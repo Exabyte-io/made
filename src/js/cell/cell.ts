@@ -1,4 +1,4 @@
-import { math } from "@exabyte-io/code.js/dist/math";
+import { math } from "@mat3ra/code/dist/js/math";
 
 import { Coordinate } from "../basis/types";
 import constants from "../constants";

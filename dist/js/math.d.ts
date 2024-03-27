@@ -17,7 +17,7 @@ declare const _default: {
     combinationsFromIntervals: (arrA: number[], arrB: number[], arrC: number[]) => number[][];
     calculateSegmentsBetweenPoints3D: (point1: (string | number)[], point2: (string | number)[], n: string | number) => number[][];
     roundValueToNDecimals: (value: number, decimals?: number | undefined) => number;
-    numberToPrecision: typeof import("@exabyte-io/code.js/dist/math").numberToPrecision;
+    numberToPrecision: typeof import("@mat3ra/code/dist/js/math").numberToPrecision;
     e: number;
     pi: number;
     i: number;

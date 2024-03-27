@@ -1,13 +1,13 @@
-import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@exabyte-io/code.js/dist/entity";
-import { AnyObject } from "@exabyte-io/code.js/dist/entity/in_memory";
-// import MaterialJSONSchemaObject from "@mat3ra/esse/lib/js/schema/material.json";
+import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { AnyObject } from "@mat3ra/code/dist/js/entity/in_memory";
+// import MaterialJSONSchemaObject from "@mat3ra/esse/dist/js/schema/material.json";
 import {
     ConsistencyCheck,
     DerivedPropertiesSchema,
     FileSourceSchema,
     InChIRepresentationSchema,
     MaterialSchema,
-} from "@mat3ra/esse/lib/js/types";
+} from "@mat3ra/esse/dist/js/types";
 import CryptoJS from "crypto-js";
 
 import { ConstrainedBasis } from "./basis/constrained_basis";

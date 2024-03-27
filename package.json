@@ -9,13 +9,13 @@
         "prepare": "husky install",
         "prettier": "prettier --check src/js tests/js",
         "test": "nyc --reporter=text mocha --recursive --bail tests/js",
-        "transpile": "tsc"
+        "transpile": "tsc -p tsconfig-transpile.json"
     },
     "repository": {
         "type": "git",
         "url": "https://github.com/Exabyte-io/made.git"
     },
-    "main": "dist/made.js",
+    "main": "dist/js/made.js",
     "author": "Exabyte Inc.",
     "bugs": {
         "url": "https://github.com/Exabyte-io/made/issues"
@@ -32,10 +32,10 @@
         "@babel/preset-react": "^7.16.7",
         "@babel/register": "^7.22.15",
         "@babel/runtime-corejs3": "^7.16.8",
-        "@exabyte-io/code.js": "2024.2.29-0",
         "@exabyte-io/eslint-config": "^2023.8.29-1",
-        "@mat3ra/esse": "2024.3.20-0",
-        "@mat3ra/tsconfig": "^2024.3.21-5",
+        "@mat3ra/code": "2024.3.25-3",
+        "@mat3ra/esse": "2024.3.25-6",
+        "@mat3ra/tsconfig": "^2024.3.25-5",
         "@types/crypto-js": "^4.2.2",
         "@types/mathjs": "^3.21.1",
         "@typescript-eslint/eslint-plugin": "^5.9.1",
@@ -73,12 +73,13 @@
         "crypto-js": "4.2.0",
         "lodash": "^4.17.*",
         "mathjs": "12.4.1",
+        "ts-node": "^10.9.1",
         "typescript": "^4.5.5",
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4"
     },
     "peerDependencies": {
-        "@exabyte-io/code.js": "*",
+        "@mat3ra/code": "*",
         "@mat3ra/esse": "*"
     },
     "lint-staged": {

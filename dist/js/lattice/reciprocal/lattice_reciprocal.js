@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReciprocalLattice = void 0;
-const constants_1 = require("@exabyte-io/code.js/dist/constants");
+const constants_1 = require("@mat3ra/code/dist/js/constants");
 const array_almost_equal_1 = __importDefault(require("array-almost-equal"));
 const lodash_1 = __importDefault(require("lodash"));
 const math_1 = __importDefault(require("../../math"));
