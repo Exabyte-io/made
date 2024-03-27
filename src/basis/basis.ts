@@ -146,16 +146,16 @@ export class Basis {
     toJSON(skipRounding = false): BasisSchema {
         const json = {
             elements: this.elements,
-            coordinates: skipRounding ? this.coordinates : this.roundCoordinates(),
+            coordinates: skipRounding ? this.coordinates : this.coordinatesRounded,
             units: this.units,
-            cell: skipRounding ? this.cell : this.roundCell(),
+            cell: skipRounding ? this.cell : this.cellRounded,
         };
 
         return JSON.parse(JSON.stringify(json));
     }
 
-    /** Round coordinates to the specified precision */
-    roundCoordinates() {
+    /** Return coordinates rounded to the specified precision */
+    get coordinatesRounded() {
         return this.coordinates.map((coordinate) => {
             return {
                 id: coordinate.id,
@@ -164,8 +164,8 @@ export class Basis {
         });
     }
 
-    /** Round cell values to the specified precision */
-    roundCell() {
+    /** Return cell values rounded to the specified precision */
+    get cellRounded() {
         return this.cell.map((vector) => vector.map((x) => math.precise(math.roundToZero(x))));
     }
 
