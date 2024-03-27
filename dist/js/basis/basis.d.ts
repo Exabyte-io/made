@@ -60,6 +60,7 @@ export declare class Basis {
     static get defaultCell(): [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema];
     /**
      * Serialize class instance to JSON.
+     * @param skipRounding - Whether to skip rounding the resulting lattice values, defaults to `false`.
      * @example As below:
      {
             "elements" : [
@@ -95,12 +96,12 @@ export declare class Basis {
                 [
                     1,
                     0,
-                    6.12323399573677e-17
+                    0
                 ],
                 [
-                    1.60812264967664e-16,
+                    0,
                     1,
-                    6.12323399573677e-17
+                    0
                 ],
                 [
                     0,
@@ -110,7 +111,14 @@ export declare class Basis {
             ]
         }
      */
-    toJSON(): BasisSchema;
+    toJSON(skipRounding?: boolean): BasisSchema;
+    /** Return coordinates rounded to default precision */
+    get coordinatesRounded(): {
+        id: number;
+        value: number[];
+    }[];
+    /** Return cell with vectors values rounded to default precision */
+    get cellRounded(): number[][];
     /**
      * Create an identical copy of the class instance.
      * @param extraContext - Extra context to be passed to the new class instance on creation.
