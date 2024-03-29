@@ -440,7 +440,7 @@ export class Basis {
     /* Returns array of atomic labels E.g., ["1", "2", "", ""] */
     get atomicLabelsArray(): string[] {
         const labelsArray = Array.from({ length: this.elements.length }, (_) => "");
-        this.labels?.map((item: { id: number; value: number }) => {
+        this.labels?.forEach((item: { id: number; value: number }) => {
             labelsArray[item.id] = item.value.toString();
         });
 

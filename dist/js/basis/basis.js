@@ -346,7 +346,7 @@ class Basis {
     get atomicLabelsArray() {
         var _a;
         const labelsArray = Array.from({ length: this.elements.length }, (_) => "");
-        (_a = this.labels) === null || _a === void 0 ? void 0 : _a.map((item) => {
+        (_a = this.labels) === null || _a === void 0 ? void 0 : _a.forEach((item) => {
             labelsArray[item.id] = item.value.toString();
         });
         return labelsArray;
