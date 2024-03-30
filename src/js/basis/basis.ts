@@ -440,10 +440,12 @@ export class Basis {
     /* Returns array of atomic labels E.g., ["1", "2", "", ""] */
     get atomicLabelsArray(): string[] {
         const labelsArray = Array.from({ length: this.elements.length }, (_) => "");
-        this.labels?.map((item: { id: number; value: number }) => {
-            labelsArray[item.id] = item.value.toString();
-        });
-
+        // https://dev.to/maafaishal/benchmarking-for-while-forof-and-arrayforeach-using-performancenow-1jjg
+        if (this.labels?.length) {
+            for (let i = 0; i < this.labels.length; i++) {
+                labelsArray[this.labels[i].id] = this.labels[i].value.toString();
+            }
+        }
         return labelsArray;
     }
 
