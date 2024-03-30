@@ -346,9 +346,12 @@ class Basis {
     get atomicLabelsArray() {
         var _a;
         const labelsArray = Array.from({ length: this.elements.length }, (_) => "");
-        (_a = this.labels) === null || _a === void 0 ? void 0 : _a.forEach((item) => {
-            labelsArray[item.id] = item.value.toString();
-        });
+        // https://dev.to/maafaishal/benchmarking-for-while-forof-and-arrayforeach-using-performancenow-1jjg
+        if ((_a = this.labels) === null || _a === void 0 ? void 0 : _a.length) {
+            for (let i = 0; i < this.labels.length; i++) {
+                labelsArray[this.labels[i].id] = this.labels[i].value.toString();
+            }
+        }
         return labelsArray;
     }
     /* Returns array of elements with labels E.g., ["Fe1", "Fe2", "O", "O"] */
