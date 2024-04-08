@@ -16,7 +16,9 @@ classifiers = [
 ]
 dependencies = [
     # add requirements here
-    "numpy"
+    "numpy",
+    "mat3ra-esse",
+    "mat3ra-code",
 ]
 
 [project.optional-dependencies]
