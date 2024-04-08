@@ -3,12 +3,19 @@ repos:
     rev: 2023.6.28
     hooks:
       - id: ruff
+        exclude: ^tests/fixtures*
       - id: black
+        exclude: ^tests/fixtures*
       - id: isort
+        exclude: ^tests/fixtures*
       - id: mypy
+        exclude: ^tests/fixtures*
       - id: check-yaml
+        exclude: ^tests/fixtures*
       - id: end-of-file-fixer
+        exclude: ^tests/fixtures*
       - id: trailing-whitespace
+        exclude: ^tests/fixtures*
   - repo: local
     hooks:
       - id: lint-staged
