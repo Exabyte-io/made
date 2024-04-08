@@ -17,6 +17,7 @@ classifiers = [
 dependencies = [
     # add requirements here
     "numpy",
+    "pymatgen",
     "mat3ra-esse",
     "mat3ra-code",
 ]
@@ -30,7 +31,8 @@ tests = [
     "isort",
     "mypy",
     "pip-tools",
-    "pytest"
+    "pytest",
+    "pytest-cov",
 ]
 # required to use the tools module
 tools = [
