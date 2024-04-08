@@ -18,6 +18,7 @@ dependencies = [
     # add requirements here
     "numpy",
     "pymatgen",
+    "ase",
     "mat3ra-esse",
     "mat3ra-code",
 ]
@@ -33,6 +34,8 @@ tests = [
     "pip-tools",
     "pytest",
     "pytest-cov",
+    "pydantic",
+    "gradio",
 ]
 # required to use the tools module
 tools = [
