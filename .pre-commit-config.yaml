@@ -1,0 +1,19 @@
+repos:
+  - repo: https://github.com/Exabyte-io/pre-commit-hooks
+    rev: 2023.6.28
+    hooks:
+      - id: ruff
+      - id: black
+      - id: isort
+      - id: mypy
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: lint-staged
+        name: lint-staged
+        language: node
+        entry: npx lint-staged
+        verbose: true # to see familiar lint-staged output
+        pass_filenames: false # lint-staged has its own glob expression
