@@ -56,7 +56,7 @@ jobs:
           path: actions
 
       - name: Run python unit tests
-        uses: ./actions/py/test
+        uses: ./actions/py/pytest
         with:
           python-version: ${{ matrix.python-version }}
           unit-test-directory: tests/py/unit
