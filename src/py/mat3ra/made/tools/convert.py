@@ -1,4 +1,5 @@
-from typing import Any, Dict, Union
+from functools import wraps
+from typing import Any, Callable, Dict, Union
 
 from ase import Atoms
 from mat3ra.made.material import Material
@@ -35,11 +36,12 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> S
     basis = material_data["basis"]
     elements = [element["value"] for element in basis["elements"]]
     coordinates = [coord["value"] for coord in basis["coordinates"]]
+    labels = [label["value"] for label in basis.get("labels", [])]
 
     # Assuming that the basis units are fractional since it's a crystal basis
     coords_are_cartesian = "units" in basis and basis["units"].lower() == "angstrom"
 
-    structure = Structure(lattice, elements, coordinates, coords_are_cartesian=coords_are_cartesian)
+    structure = Structure(lattice, elements, coordinates, labels=labels, coords_are_cartesian=coords_are_cartesian)
 
     return structure
 
@@ -151,3 +153,22 @@ def from_ase(ase_atoms: Atoms) -> Dict[str, Any]:
     """
     structure = AseAtomsAdaptor.get_structure(ase_atoms)
     return from_pymatgen(structure)
+
+
+def convert_material_args_kwargs_to_atoms(func: Callable) -> Callable:
+    """
+    Decorator that converts ESSE Material objects to ASE Atoms objects.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Convert args if they are of type ESSE Material
+        new_args = [to_ase(arg) if isinstance(arg, Material) else arg for arg in args]
+
+        # Convert kwargs if they are of type ESSE Material
+        new_kwargs = {k: to_ase(v) if isinstance(v, Material) else v for k, v in kwargs.items()}
+
+        # Call the original function with the converted arguments
+        return func(*new_args, **new_kwargs)
+
+    return wrapper
