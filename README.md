@@ -5,15 +5,40 @@
 
 Made is a library for **MA**terials **DE**sign in JavaScript/TypeScript and Python. It allows for the creation and manipulation of material structures from atoms up on the web. The library is aimed to be used for the development of web applications, both on the client (web browser) and server (eg. Node.js) side.
 
-The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. For example, [this page](https://platform.exabyte.io/demo/materials/n3HSzCmyoctgJFGGE) representing a crystal of Silicon online uses Made.js.
+## 1. Overview
 
-Exabyte.io believe in a collaborative future of materials design on the web.
+The package provides a software environment for interacting with Materials-related data structures from ESSE Data Convention [[1]](#links) for use on the web.
 
-## Functionality
+## 2. Installation
 
-As below:
+### 2.1. JavaScript/TypeScript
 
-- the package provides a software environment for interacting with Materials-related data structures from ESSE Data Convention [[1]](#links) and is written in ECMAScript 2015 for use on the web
+From NPM for use within a software project:
+
+```bash
+npm install @mat3ra/made
+
+```
+
+### 2.2. Python
+
+From PyPI for use within a software project:
+
+```bash
+pip install mat3ra-made
+```
+
+When willing to use the optional `tools` module, install the package with the following command:
+
+```bash
+pip install "mat3ra-made[tools]"
+```
+
+
+## 3. Functionality
+
+As below
+
 - High-level classes for the representation of the [Material](src/material.js) and the corresponding structural information, ie:
     - [Basis](src/basis/basis.js),
     - [Lattice](src/lattice/lattice.js),
@@ -32,38 +57,18 @@ As below:
     - [combinatorial sets](src/parsers/xyz_combinatorial_basis.js)
     - [interpolated sets for chemical reactions](src/tools/basis.js)
 
-The package is written in a modular way easy to extend. Contributions can be in the form of additional tools or modules you develop, or feature requests and [bug/issue reports](https://help.github.com/articles/creating-an-issue/).
 
-## Installation
-
-From NPM for use within a software project:
-
-```bash
-npm install @mat3ra/made
-
-```
-
-From source to contribute to development:
-
-```bash
-git clone git@github.com:Exabyte-io/made
-```
-
-## Contribution
+## 4. Contribution
 
 This repository is an [open-source](LICENSE.md) work-in-progress and we welcome contributions.
 
-### Why contribute?
-
 We regularly deploy the latest code containing all accepted contributions online as part of the [Mat3ra.com](https://mat3ra.com) platform, so contributors will see their code in action there.
-
-### Adding new functionality
 
 We suggest forking this repository and introducing the adjustments there to be considered for merging into this repository as explained in more details [here](https://gist.github.com/Chaser324/ce0505fbed06b947d962), for example.
 
-### Source code conventions
+### 4.1. Source code conventions
 
-Made.js is written in EcmaScript 6th edition [[2]](#links) with the application of object-oriented design patterns encapsulating key concepts following the conventions below.
+Object-oriented design patterns encapsulate key concepts following the conventions below.
 
 1. Classes follow the Exabyte Data Convention and data structures defined in ESSE [[1]](#links)
 
@@ -71,12 +76,12 @@ Made.js is written in EcmaScript 6th edition [[2]](#links) with the application 
 
 3. `tools` directory contains helper functions that act on one or more classes and include an external parameter. Functions that use class data without any external parameters should be implemented inside the class. For example, `basis.clone()` is implemented in `Basis`, but basis repetition is implemented as a tool in the correspondingly named function ([tools/basis.js#repeat](src/tools/basis.js)) because the repetion requires a parameter external to basis - number of repetitions in 3 spatial dimensions.
 
-4. `parsers` directory contains the parsers to- and from- ESSE format mentioned in 1. All functionality related to external data conversion is contained in this directory.
+4. [Deprecated, use mat3ra-parsers or @mat3ra/parsers] `parsers` directory contains the parsers to- and from- ESSE format mentioned in 1. All functionality related to external data conversion is contained in this directory.
 
 
-### TODO list
+### 4.2. TODO list
 
-Desirable features for implementation:
+[Outdated] Desirable features for implementation:
 
 - identify primitive / conventional structures
 - support for molecular geometries
@@ -90,7 +95,11 @@ Desirable features for implementation:
     - a combination of the above
     - arbitrary atomic arrangement
 
-## Tests
+## 5. Development
+
+### 5.1. JavaScript/TypeScript
+
+#### 5.1.1. Tests
 
 Made tests are written based on Mocha [6](#links) testing framework and can be executed as follows.
 
@@ -105,7 +114,7 @@ npm install
 npm test
 ```
 
-### Tests Important Notes
+#### 5.1.2. Important Notes
 
 1. Keep the tests directory structure similar to the main codebase directory structure. Every JS module in the main codebase should have a corresponding module in tests directory which implements the tests for provided functionality.
 
@@ -115,7 +124,7 @@ npm test
 
 4. [Tests setup module](./tests/setup.js) can be used to implement the hooks that are used to prepare the tests environment.
 
-## Using Linter
+#### 5.1.3. Using Linter
 
 Linter setup will prevent committing files that don't adhere to the code standard. It will
 attempt to fix what it can automatically prior to the commit in order to reduce diff noise. This can lead to "unexpected" behavior where a
@@ -149,7 +158,7 @@ npm run lint:fix
 In which case, you may need to then add the linter edits to your staging, which in the example above, puts the
 file back to identical with the base branch, resulting in no staged changes whatsoever.
 
-## Configuring WebStorm for use with Linter
+#### 5.1.4. Configuring WebStorm for use with Linter
 
 In order for the WebStorm IDE to take full advantage of the linting configuration, it can be configured in the project:
 
