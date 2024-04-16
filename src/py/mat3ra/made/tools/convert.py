@@ -41,9 +41,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> S
     # Assuming that the basis units are fractional since it's a crystal basis
     coords_are_cartesian = "units" in basis and basis["units"].lower() == "angstrom"
 
-    # TODO: figure out how to pass labels appropriately
-    print("Labels:", labels)
-    structure = Structure(lattice, elements, coordinates, coords_are_cartesian=coords_are_cartesian)
+    structure = Structure(lattice, elements, coordinates, labels=labels, coords_are_cartesian=coords_are_cartesian)
 
     return structure
 

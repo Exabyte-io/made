@@ -17,8 +17,6 @@ classifiers = [
 dependencies = [
     # add requirements here
     "numpy",
-    "pymatgen",
-    "ase",
     "mat3ra-esse",
     "mat3ra-code",
 ]
@@ -35,7 +33,7 @@ tests = [
     "pytest",
     "pytest-cov",
     # B/c of https://github.com/binary-husky/gpt_academic/issues/1237
-    "gradio==4.26.0",
+    "gradio",
     "pydantic",
 ]
 # required to use the tools module
