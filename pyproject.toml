@@ -34,8 +34,9 @@ tests = [
     "pip-tools",
     "pytest",
     "pytest-cov",
+    # B/c of https://github.com/binary-husky/gpt_academic/issues/1237
+    "gradio==4.26.0",
     "pydantic",
-    "gradio",
 ]
 # required to use the tools module
 tools = [
