@@ -17,34 +17,36 @@ classifiers = [
 dependencies = [
     # add requirements here
     "numpy",
-    "pymatgen",
-    "ase",
     "mat3ra-esse",
     "mat3ra-code",
 ]
 
 [project.optional-dependencies]
-tests = [
-    "coverage[toml]>=5.3",
+# tracking separately the deps required to use the tools module
+tools = [
+    "pymatgen",
+    "ase",
+]
+dev = [
     "pre-commit",
     "black",
     "ruff",
     "isort",
     "mypy",
     "pip-tools",
+]
+tests = [
+    "coverage[toml]>=5.3",
     "pytest",
     "pytest-cov",
-    "pydantic",
+    # B/c of https://github.com/binary-husky/gpt_academic/issues/1237
     "gradio",
-]
-# required to use the tools module
-tools = [
-    "pymatgen",
-    "ase",
+    "pydantic",
+    "mat3ra-made[tools]",
 ]
 all = [
     "mat3ra-made[tests]",
-    "mat3ra-made[tools]",
+    "mat3ra-made[dev]",
 ]
 
 # Entrypoint scripts can be defined here, see examples below.
