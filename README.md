@@ -165,6 +165,37 @@ In order for the WebStorm IDE to take full advantage of the linting configuratio
 - `Preferences -> Languages & Frameworks -> JavaScript -> Code Quality Tools -> ESLint`
 - Check `Automatic ESLint configuration` which should infer all the configurations from the project directory
 
+### 5.2. Python
+
+#### 5.2.1. Tests
+
+Python 3.8+ is required to run the tests. We recommend using PyEnv to manage Python versions. Tests are written based on PyTest and can be executed as follows.
+
+```bash
+virtualenv .venv
+source .venv/bin/activate
+pip install ".[tests]"
+pytest tests/py
+```
+
+#### 5.2.2. Important Notes
+
+Conventions:
+
+- The "tools" module has external dependencies on "pymatgen" and "ase" packages and so is meant as optional. When implementing new functionality, the use of ASE is recommended over pymatgen for compatibility purposes.
+
+### 5.3. Known Issues
+
+#### 5.3.1. JavaScript/TypeScript
+
+To be added.
+
+#### 5.3.2. Python
+
+As below:
+
+- Python 3.8 tests are failing on Apple Silicon due to https://github.com/materialsproject/pymatgen/issues/3521
+
 ## Links
 
 1. [Exabyte Source of Schemas and Examples (ESSE), Github Repository](https://github.com/exabyte-io/exabyte-esse)
