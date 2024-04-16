@@ -1,3 +1,4 @@
+import inspect
 from functools import wraps
 from typing import Any, Callable, Dict, Union
 
@@ -41,7 +42,12 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> S
     # Assuming that the basis units are fractional since it's a crystal basis
     coords_are_cartesian = "units" in basis and basis["units"].lower() == "angstrom"
 
-    structure = Structure(lattice, elements, coordinates, labels=labels, coords_are_cartesian=coords_are_cartesian)
+    if "labels" in inspect.signature(Structure.__init__).parameters:
+        structure = Structure(lattice, elements, coordinates, coords_are_cartesian=coords_are_cartesian, labels=labels)
+    else:
+        # Passing labels does not work for pymatgen `2023.6.23` supporting py3.8
+        print(f"labels: {labels}. Not passing labels to pymatgen.")
+        structure = Structure(lattice, elements, coordinates, coords_are_cartesian=coords_are_cartesian)
 
     return structure
 
@@ -110,6 +116,10 @@ def to_poscar(material_or_material_data: Union[Material, Dict[str, Any]]) -> str
     """
     structure = to_pymatgen(material_or_material_data)
     poscar = Poscar(structure)
+    # For pymatgen `2023.6.23` supporting py3.8 the method name is "get_string"
+    # TODO: cleanup the if statement when dropping support for py3.8
+    if hasattr(poscar, "get_string"):
+        return poscar.get_string()
     return poscar.get_str()
 
 
@@ -137,6 +147,7 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> Atoms:
     Returns:
         Any: An ASE Atoms object.
     """
+    # TODO: check that atomic labels are properly handled
     structure = to_pymatgen(material_or_material_data)
     return AseAtomsAdaptor.get_atoms(structure)
 
@@ -151,6 +162,7 @@ def from_ase(ase_atoms: Atoms) -> Dict[str, Any]:
     Returns:
         dict: A dictionary containing the material information in ESSE format.
     """
+    # TODO: check that atomic labels/tags are properly handled
     structure = AseAtomsAdaptor.get_structure(ase_atoms)
     return from_pymatgen(structure)
 
