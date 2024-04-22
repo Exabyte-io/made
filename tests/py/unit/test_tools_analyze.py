@@ -1,5 +1,5 @@
 import numpy as np
-from ase.build import bulk, surface
+from ase.build import bulk
 from mat3ra.made.tools.analyze import calculate_average_interlayer_distance
 from mat3ra.made.tools.analyze import calculate_surface_area
 
