@@ -39,3 +39,19 @@ def calculate_average_interlayer_distance(
     # Calculate the average distance between the top layer of substrate and the bottom layer of film
     average_interlayer_distance = avg_z_bottom_film - avg_z_top_substrate
     return abs(average_interlayer_distance)
+
+
+@convert_material_args_kwargs_to_atoms
+def calculate_surface_area(atoms: Atoms):
+    """
+    Calculate the area of the surface perpendicular to the z-axis of the atoms structure.
+
+    Args:
+        atoms (ase.Atoms): The Atoms object to calculate the surface area of.
+
+    Returns:
+        float: The surface area of the atoms.
+    """
+    matrix = atoms.cell
+    cross_product = np.cross(matrix[0], matrix[1])
+    return np.linalg.norm(cross_product)
