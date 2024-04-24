@@ -57,7 +57,7 @@ def calculate_surface_energy(slab: Atoms, bulk: Atoms, calculator: Calculator):
 
 
 @convert_material_args_kwargs_to_atoms
-def get_adhesion_energy(interface: Atoms, substrate_slab: Atoms, layer_slab: Atoms, calculator: Calculator):
+def calculate_adhesion_energy(interface: Atoms, substrate_slab: Atoms, layer_slab: Atoms, calculator: Calculator):
     """
     Calculate the adhesion energy.
     The adhesion energy is the difference between the energy of the interface and
@@ -81,7 +81,7 @@ def get_adhesion_energy(interface: Atoms, substrate_slab: Atoms, layer_slab: Ato
 
 
 @convert_material_args_kwargs_to_atoms
-def get_interfacial_energy(
+def calculate_interfacial_energy(
     interface: Atoms,
     substrate_slab: Atoms,
     substrate_bulk: Atoms,
@@ -108,5 +108,5 @@ def get_interfacial_energy(
 
     surface_energy_substrate = calculate_surface_energy(substrate_slab, substrate_bulk, calculator)
     surface_energy_layer = calculate_surface_energy(layer_slab, layer_bulk, calculator)
-    adhesion_energy = get_adhesion_energy(interface, substrate_slab, layer_slab, calculator)
+    adhesion_energy = calculate_adhesion_energy(interface, substrate_slab, layer_slab, calculator)
     return surface_energy_layer + surface_energy_substrate - adhesion_energy
