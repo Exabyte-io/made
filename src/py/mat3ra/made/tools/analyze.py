@@ -5,7 +5,7 @@ from .convert import convert_material_args_kwargs_to_atoms
 
 
 @convert_material_args_kwargs_to_atoms
-def calculate_average_interlayer_distance(
+def get_average_interlayer_distance(
     interface_atoms: Atoms, tag_substrate: str, tag_film: str, threshold: float = 0.5
 ) -> float:
     """
@@ -42,7 +42,7 @@ def calculate_average_interlayer_distance(
 
 
 @convert_material_args_kwargs_to_atoms
-def calculate_surface_area(atoms: Atoms):
+def get_surface_area(atoms: Atoms):
     """
     Calculate the area of the surface perpendicular to the z-axis of the atoms structure.
 
