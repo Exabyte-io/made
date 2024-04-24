@@ -21,6 +21,7 @@ def calculate_total_energy(atoms: Atoms, calculator: Calculator):
     return atoms.get_total_energy()
 
 
+@convert_material_args_kwargs_to_atoms
 def calculate_total_energy_per_atom(atoms: Atoms, calculator: Calculator):
     """
     Set calculator for ASE Atoms and calculate the total energy per atom.
@@ -35,6 +36,7 @@ def calculate_total_energy_per_atom(atoms: Atoms, calculator: Calculator):
     return calculate_total_energy(atoms, calculator) / atoms.get_global_number_of_atoms()
 
 
+@convert_material_args_kwargs_to_atoms
 def calculate_surface_energy(slab: Atoms, bulk: Atoms, calculator: Calculator):
     """
     Calculate the surface energy by subtracting the weighted bulk energy from the slab energy.
@@ -54,6 +56,7 @@ def calculate_surface_energy(slab: Atoms, bulk: Atoms, calculator: Calculator):
     ) / (2 * area)
 
 
+@convert_material_args_kwargs_to_atoms
 def get_adhesion_energy(interface: Atoms, substrate_slab: Atoms, layer_slab: Atoms, calculator: Calculator):
     """
     Calculate the adhesion energy.
@@ -76,6 +79,7 @@ def get_adhesion_energy(interface: Atoms, substrate_slab: Atoms, layer_slab: Ato
     return (energy_substrate_slab + energy_layer_slab - energy_interface) / area
 
 
+@convert_material_args_kwargs_to_atoms
 def get_interfacial_energy(
     interface: Atoms,
     substrate_slab: Atoms,
