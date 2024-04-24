@@ -60,7 +60,8 @@ def calculate_surface_energy(slab: Atoms, bulk: Atoms, calculator: Calculator):
 def get_adhesion_energy(interface: Atoms, substrate_slab: Atoms, layer_slab: Atoms, calculator: Calculator):
     """
     Calculate the adhesion energy.
-    The adhesion energy is the difference between the energy of the interface and the sum of the energies of the substrate and layer.
+    The adhesion energy is the difference between the energy of the interface and
+    the sum of the energies of the substrate and layer.
     According to: 10.1088/0953-8984/27/30/305004
 
     Args:
