@@ -1,5 +1,6 @@
 from typing import Tuple, Dict, Union
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
+from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 import numpy as np
 
@@ -13,7 +14,7 @@ strain_modes_map = {
 }
 
 
-class Settings:
+class InterfaceSettings:
     SUBSTRATE_PARAMETERS: Dict[str, Union[int, Tuple[int, int, int], int]] = {
         "MATERIAL_INDEX": 1,  # the index of the material in the materials_in list
         "MILLER_INDICES": (1, 1, 1),  # the miller indices of the interfacial plane
@@ -39,9 +40,14 @@ class Settings:
 
 
 @convert_material_args_kwargs_to_structure
-def create_interfaces(substrate: Structure, layer: Structure, settings):
+def create_interfaces(substrate: Structure, layer: Structure, settings: InterfaceSettings):
     substrate = translate_to_bottom_pymatgen_structure(substrate)
     layer = translate_to_bottom_pymatgen_structure(layer)
+
+    if settings["USE_CONVENTIONAL_CELL"]:
+        substrate = SpacegroupAnalyzer(substrate).get_conventional_standard_structure()
+        layer = SpacegroupAnalyzer(layer).get_conventional_standard_structure()
+
     print("Creating interfaces...")
     zsl: ZSLGenerator = ZSLGenerator(
         max_area_ratio_tol=settings["ZSL_PARAMETERS"]["MAX_AREA_TOL"],
