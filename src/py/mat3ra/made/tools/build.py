@@ -2,6 +2,7 @@ from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBu
 from pymatgen.core.structure import Structure
 import numpy as np
 
+from .modify import translate_to_bottom
 
 strain_modes_map = {
     "strain": "strain",
@@ -12,6 +13,8 @@ strain_modes_map = {
 
 # TODO: add decorator to convert ESSE Material to Pymatgen
 def create_interfaces(substrate: Structure, layer: Structure, settings):
+    translate_to_bottom(substrate)
+    translate_to_bottom(layer)
     print("Creating interfaces...")
     zsl: ZSLGenerator = ZSLGenerator(
         max_area_ratio_tol=settings["ZSL_PARAMETERS"]["MAX_AREA_TOL"],
