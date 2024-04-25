@@ -2,7 +2,7 @@ from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBu
 from pymatgen.core.structure import Structure
 import numpy as np
 
-from .modify import translate_to_bottom
+from .utils import translate_to_bottom_pymatgen_structure
 
 strain_modes_map = {
     "strain": "strain",
@@ -13,8 +13,8 @@ strain_modes_map = {
 
 # TODO: add decorator to convert ESSE Material to Pymatgen
 def create_interfaces(substrate: Structure, layer: Structure, settings):
-    translate_to_bottom(substrate)
-    translate_to_bottom(layer)
+    substrate = translate_to_bottom_pymatgen_structure(substrate)
+    layer = translate_to_bottom_pymatgen_structure(layer)
     print("Creating interfaces...")
     zsl: ZSLGenerator = ZSLGenerator(
         max_area_ratio_tol=settings["ZSL_PARAMETERS"]["MAX_AREA_TOL"],
@@ -51,8 +51,8 @@ def create_interfaces(substrate: Structure, layer: Structure, settings):
             # Wrap atoms to unit cell
             interface.make_supercell((1, 1, 1), to_unit_cell=True)
             mean_abs_strain = round(
-                np.mean(np.abs(interface.interface_properties["strain"])) / settings["INTERFACE_PARAMETERS"]["STRAIN_TOLERANCE"]
-            ) * settings["INTERFACE_PARAMETERS"]["STRAIN_TOLERANCE"]
+                np.mean(np.abs(interface.interface_properties["strain"])) / settings["ZSL_PARAMETERS"]["STRAIN_TOL"]
+            ) * settings["ZSL_PARAMETERS"]["STRAIN_TOL"]
             interface_struct = {
                 "interface": interface,
                 "strain": interface.interface_properties["strain"],
