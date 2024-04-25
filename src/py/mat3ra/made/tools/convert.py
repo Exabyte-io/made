@@ -184,3 +184,22 @@ def convert_material_args_kwargs_to_atoms(func: Callable) -> Callable:
         return func(*new_args, **new_kwargs)
 
     return wrapper
+
+
+def convert_material_args_kwargs_to_structure(func: Callable) -> Callable:
+    """
+    Decorator that converts ESSE Material objects to pymatgen Structure objects.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Convert args if they are of type ESSE Material
+        new_args = [to_pymatgen(arg) if isinstance(arg, Material) else arg for arg in args]
+
+        # Convert kwargs if they are of type ESSE Material
+        new_kwargs = {k: to_pymatgen(v) if isinstance(v, Material) else v for k, v in kwargs.items()}
+
+        # Call the original function with the converted arguments
+        return func(*new_args, **new_kwargs)
+
+    return wrapper
