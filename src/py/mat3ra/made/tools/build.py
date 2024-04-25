@@ -1,23 +1,25 @@
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
+import numpy as np
+
 from pymatgen.core.interface import Interface
 
-yield {
-    "interface": Interface.from_slabs(
-        substrate_slab=sub_sl_slab,
-        film_slab=film_sl_slab,
-        gap=gap,
-        vacuum_over_film=vacuum_over_film,
-        interface_properties=interface_properties,
-        center_slab=False,  # False -- positions interface at the most bottom of the cell, solving the issue of second iteration not working properly
-    ),
-    "strain": strain,
-    "von_mises_strain": strain.von_mises_strain,
-    "mean_abs_strain": round(np.mean(np.abs(strain)) / self.strain_tol) * self.strain_tol,
-    "film_sl_vectors": match.film_sl_vectors,
-    "substrate_sl_vectors": match.substrate_sl_vectors,
-    "film_transform": super_film_transform,
-    "substrate_transform": super_sub_transform,
-}
+# yield {
+#     "interface": Interface.from_slabs(
+#         substrate_slab=sub_sl_slab,
+#         film_slab=film_sl_slab,
+#         gap=gap,
+#         vacuum_over_film=vacuum_over_film,
+#         interface_properties=interface_properties,
+#         center_slab=False,  # False -- positions interface at the most bottom of the cell, solving the issue of second iteration not working properly
+#     ),
+#     "strain": strain,
+#     "von_mises_strain": strain.von_mises_strain,
+#     "mean_abs_strain": round(np.mean(np.abs(strain)) / self.strain_tol) * self.strain_tol,
+#     "film_sl_vectors": match.film_sl_vectors,
+#     "substrate_sl_vectors": match.substrate_sl_vectors,
+#     "film_transform": super_film_transform,
+#     "substrate_transform": super_sub_transform,
+# }
 
 
 def create_interfaces(pymatgen_materials, settings):
@@ -35,7 +37,6 @@ def create_interfaces(pymatgen_materials, settings):
         substrate_miller=settings["SUBSTRATE_PARAMETERS"]["MILLER_INDICES"],
         film_miller=settings["LAYER_PARAMETERS"]["MILLER_INDICES"],
         zslgen=zsl,
-        strain_tol=settings["ZSL_PARAMETERS"]["STRAIN_TOL"],
     )
 
     # Find terminations
@@ -56,8 +57,17 @@ def create_interfaces(pymatgen_materials, settings):
 
         for interface in all_interfaces_for_termination:
             # Wrap atoms to unit cell
-            interface["interface"].make_supercell((1, 1, 1), to_unit_cell=True)
-            interfaces[termination].append(interface)
+            interface.make_supercell((1, 1, 1), to_unit_cell=True)
+            mean_abs_strain = round(
+                np.mean(np.abs(interface.interface_properties["strain"])) / settings["INTERFACE_PARAMETERS"]["STRAIN_TOLERANCE"]
+            ) * settings["INTERFACE_PARAMETERS"]["STRAIN_TOLERANCE"]
+            interface_struct = {
+                "interface": interface,
+                "strain": interface.interface_properties["strain"],
+                "von_mises_strain": interface.interface_properties["strain"].von_mises_strain,
+                "mean_abs_strain": mean_abs_strain
+            }
+            interfaces[termination].append(interface_struct)
     return interfaces, terminations
 
 
