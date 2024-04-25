@@ -1,39 +1,28 @@
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
+from pymatgen.core.structure import Structure
 import numpy as np
 
-from pymatgen.core.interface import Interface
 
-# yield {
-#     "interface": Interface.from_slabs(
-#         substrate_slab=sub_sl_slab,
-#         film_slab=film_sl_slab,
-#         gap=gap,
-#         vacuum_over_film=vacuum_over_film,
-#         interface_properties=interface_properties,
-#         center_slab=False,  # False -- positions interface at the most bottom of the cell, solving the issue of second iteration not working properly
-#     ),
-#     "strain": strain,
-#     "von_mises_strain": strain.von_mises_strain,
-#     "mean_abs_strain": round(np.mean(np.abs(strain)) / self.strain_tol) * self.strain_tol,
-#     "film_sl_vectors": match.film_sl_vectors,
-#     "substrate_sl_vectors": match.substrate_sl_vectors,
-#     "film_transform": super_film_transform,
-#     "substrate_transform": super_sub_transform,
-# }
+strain_modes_map = {
+    "strain": "strain",
+    "von_mises_strain": "von_mises_strain",
+    "mean_abs_strain": "mean_abs_strain",
+}
 
 
-def create_interfaces(pymatgen_materials, settings):
+# TODO: add decorator to convert ESSE Material to Pymatgen
+def create_interfaces(substrate: Structure, layer: Structure, settings):
     print("Creating interfaces...")
-    zsl = ZSLGenerator(
+    zsl: ZSLGenerator = ZSLGenerator(
         max_area_ratio_tol=settings["ZSL_PARAMETERS"]["MAX_AREA_TOL"],
         max_area=settings["ZSL_PARAMETERS"]["MAX_AREA"],
         max_length_tol=settings["ZSL_PARAMETERS"]["MAX_LENGTH_TOL"],
         max_angle_tol=settings["ZSL_PARAMETERS"]["MAX_ANGLE_TOL"],
     )
 
-    cib = CoherentInterfaceBuilder(
-        substrate_structure=pymatgen_materials[settings["SUBSTRATE_PARAMETERS"]["MATERIAL_INDEX"]],
-        film_structure=pymatgen_materials[settings["LAYER_PARAMETERS"]["MATERIAL_INDEX"]],
+    cib: CoherentInterfaceBuilder = CoherentInterfaceBuilder(
+        substrate_structure=substrate,
+        film_structure=layer,
         substrate_miller=settings["SUBSTRATE_PARAMETERS"]["MILLER_INDICES"],
         film_miller=settings["LAYER_PARAMETERS"]["MILLER_INDICES"],
         zslgen=zsl,
@@ -71,7 +60,28 @@ def create_interfaces(pymatgen_materials, settings):
     return interfaces, terminations
 
 
-def sort_interfaces(interfaces, terminations, strain_mode="von_mises_strain"):
+def get_terminations(pymatgen_materials, settings):
+    zsl: ZSLGenerator = ZSLGenerator(
+        max_area_ratio_tol=settings["ZSL_PARAMETERS"]["MAX_AREA_TOL"],
+        max_area=settings["ZSL_PARAMETERS"]["MAX_AREA"],
+        max_length_tol=settings["ZSL_PARAMETERS"]["MAX_LENGTH_TOL"],
+        max_angle_tol=settings["ZSL_PARAMETERS"]["MAX_ANGLE_TOL"],
+    )
+
+    cib = CoherentInterfaceBuilder(
+        substrate_structure=pymatgen_materials[settings["SUBSTRATE_PARAMETERS"]["MATERIAL_INDEX"]],
+        film_structure=pymatgen_materials[settings["LAYER_PARAMETERS"]["MATERIAL_INDEX"]],
+        substrate_miller=settings["SUBSTRATE_PARAMETERS"]["MILLER_INDICES"],
+        film_miller=settings["LAYER_PARAMETERS"]["MILLER_INDICES"],
+        zslgen=zsl,
+    )
+
+    # Find terminations
+    cib._find_terminations()
+    terminations = cib.terminations
+    return terminations
+
+def sort_interfaces(interfaces, terminations, strain_mode=strain_modes_map["mean_abs_strain"]):
     sorted_interfaces = {}
     for termination in terminations:
         sorted_interfaces[termination] = sorted(
