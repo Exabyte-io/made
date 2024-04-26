@@ -15,13 +15,11 @@ strain_modes_map = {
 
 
 class InterfaceSettings:
-    SUBSTRATE_PARAMETERS: Dict[str, Union[int, Tuple[int, int, int], int]] = {
-        "MATERIAL_INDEX": 1,  # the index of the material in the materials_in list
+    SUBSTRATE_PARAMETERS: Dict[str, Union[Tuple[int, int, int], int]] = {
         "MILLER_INDICES": (1, 1, 1),  # the miller indices of the interfacial plane
         "THICKNESS": 3,  # in layers
     }
-    LAYER_PARAMETERS: Dict[str, Union[int, Tuple[int, int, int], int]] = {
-        "MATERIAL_INDEX": 0,  # the index of the material in the materials_in list
+    LAYER_PARAMETERS: Dict[str, Union[Tuple[int, int, int], int]] = {
         "MILLER_INDICES": (0, 0, 1),  # the miller indices of the interfacial plane
         "THICKNESS": 1,  # in layers
     }
@@ -41,12 +39,19 @@ class InterfaceSettings:
 
 @convert_material_args_kwargs_to_structure
 def create_interfaces(substrate: Structure, layer: Structure, settings: InterfaceSettings):
-    substrate = translate_to_bottom_pymatgen_structure(substrate)
-    layer = translate_to_bottom_pymatgen_structure(layer)
+    """
+    Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
+    Args:
+        substrate (Structure): The substrate structure.
+        layer (Structure): The layer structure.
+        settings (InterfaceSettings): The settings for the interface generation.
 
-    if settings["USE_CONVENTIONAL_CELL"]:
-        substrate = SpacegroupAnalyzer(substrate).get_conventional_standard_structure()
-        layer = SpacegroupAnalyzer(layer).get_conventional_standard_structure()
+    Returns:
+        Tuple[Dict[str, List[Dict[str, Union[Structure, np.ndarray]]]], List[str]]: A dictionary of interfaces for each
+        termination and a list of terminations.
+    """
+    substrate = normalize_structure(substrate, settings["USE_CONVENTIONAL_CELL"])
+    layer = normalize_structure(layer, settings["USE_CONVENTIONAL_CELL"])
 
     print("Creating interfaces...")
     zsl: ZSLGenerator = ZSLGenerator(
@@ -64,10 +69,10 @@ def create_interfaces(substrate: Structure, layer: Structure, settings: Interfac
         zslgen=zsl,
     )
 
-    # Find terminations
-    cib._find_terminations()
     terminations = cib.terminations
+    print(terminations)
 
+    # Function: create interfaces for terminations
     # Create interfaces for each termination
     interfaces = {}
     for termination in terminations:
@@ -81,6 +86,7 @@ def create_interfaces(substrate: Structure, layer: Structure, settings: Interfac
         )
 
         for interface in all_interfaces_for_termination:
+            # Function: add data to interface
             # Wrap atoms to unit cell
             interface.make_supercell((1, 1, 1), to_unit_cell=True)
             mean_abs_strain = (
@@ -97,6 +103,22 @@ def create_interfaces(substrate: Structure, layer: Structure, settings: Interfac
             }
             interfaces[termination].append(interface_struct)
     return interfaces, terminations
+
+
+def normalize_structure(structure: Structure, conventional_cell: bool = True):
+    """
+    Normalize the structure to the conventional cell.
+    And translate the structure to the bottom of the cell to allow for the correct consecutive interface generation.
+    Args:
+        structure (Structure): The pymatgen Structure object to normalize.
+        conventional_cell: Whether to convert to the conventional cell.
+    Returns:
+        Structure: The normalized pymatgen Structure object.
+    """
+    structure = translate_to_bottom_pymatgen_structure(structure)
+    if conventional_cell:
+        structure = SpacegroupAnalyzer(structure).get_conventional_standard_structure()
+    return structure
 
 
 def get_terminations(pymatgen_materials, settings):
