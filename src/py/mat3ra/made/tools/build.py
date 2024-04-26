@@ -92,7 +92,7 @@ def create_interfaces(substrate: Structure, layer: Structure, settings: Interfac
             interface_struct = {
                 "interface": interface,
                 "strain": interface.interface_properties["strain"],
-                "von_mises_strain": interface.interface_properties["strain"].von_mises_strain,
+                "von_mises_strain": interface.interface_properties["von_mises_strain"],
                 "mean_abs_strain": mean_abs_strain,
             }
             interfaces[termination].append(interface_struct)
