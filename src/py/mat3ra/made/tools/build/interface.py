@@ -1,6 +1,6 @@
 import functools
 import numpy as np
-from typing import Tuple, Dict, Union, List
+from typing import Union, List
 from enum import Enum
 from pymatgen.analysis.interfaces.coherent_interfaces import Interface as PymatgenInterface
 

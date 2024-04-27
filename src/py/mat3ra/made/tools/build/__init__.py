@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Union, List
+from typing import Dict, Union, List
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
