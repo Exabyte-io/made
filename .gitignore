@@ -178,3 +178,7 @@ node_modules/
 *.DS_Store
 
 tsconfig.tsbuildinfo
+
+
+# Do not ignore actual source folder
+!/src/py/mat3ra/made/tools/build/
