@@ -1,19 +1,20 @@
 import functools
+import types
 import numpy as np
 from typing import Union, List
 from enum import Enum
-from pymatgen.analysis.interfaces.coherent_interfaces import Interface as PymatgenInterface
+from pymatgen.analysis.interfaces.coherent_interfaces import Interface
 
 
-class Interface(PymatgenInterface):
-    __mean_abs_strain_tolerance__ = 1e-6
+def patch_interface_with_mean_abs_strain(target: Interface, tolerance: float = 10e-6):
+    def get_mean_abs_strain(target):
+        return target.interface_properties[StrainModes.mean_abs_strain]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.interface_properties["mean_abs_strain"] = (
-            round(np.mean(np.abs(self.interface_properties["strain"])) / self.__mean_abs_strain_tolerance__)
-            * self.__mean_abs_strain_tolerance__
-        )
+    target.get_mean_abs_strain = types.MethodType(get_mean_abs_strain, target)
+    target.interface_properties[StrainModes.mean_abs_strain] = (
+        round(np.mean(np.abs(target.interface_properties["strain"])) / tolerance) * tolerance
+    )
+    return target
 
 
 class StrainModes(Enum):
@@ -52,15 +53,14 @@ class InterfaceDataHolder(object):
 
     def add_interfaces_for_termination(self, termination: str, interfaces: Union[List[Interface], Interface]):
         self.add_termination(termination)
-        self.set_interfaces_for_termination(self.get_interfaces_for_termination(termination) + interfaces)
+        self.set_interfaces_for_termination(termination, self.get_interfaces_for_termination(termination) + interfaces)
 
     def add_data_entries(
         self, entries=[], sort_interfaces_for_all_terminations_by_strain_and_size=True, add_mean_abs_strain=True
     ):
-        terminations = functools.reduce(
-            lambda a, b: a.interface_properties["termination"] + b.interface_properties["termination"], entries
-        )
-        for termination in terminations:
+        all_terminations = [e.interface_properties["termination"] for e in entries]
+        unique_terminations = list(set(all_terminations))
+        for termination in unique_terminations:
             entries_for_termination = [
                 entry for entry in entries if entry.interface_properties["termination"] == termination
             ]
