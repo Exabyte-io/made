@@ -4,7 +4,7 @@ from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 import numpy as np
 
-from .interface import InterfaceDataHolder, StrainModes
+from .interface import InterfaceDataHolder, StrainModes, patch_interface_with_mean_abs_strain
 from ..utils import translate_to_bottom_pymatgen_structure
 from ..convert import convert_material_args_kwargs_to_structure
 
@@ -38,11 +38,17 @@ def create_interfaces(substrate: Structure, layer: Structure, settings):
             in_layers=True,
         )
 
-        for interface in all_interfaces_for_termination:
+        all_interfaces_for_termination_patched = list(
+            map(patch_interface_with_mean_abs_strain, all_interfaces_for_termination)
+        )
+
+        interfaces = []
+        for interface in all_interfaces_for_termination_patched:
             # Wrap atoms to unit cell
             interface.make_supercell((1, 1, 1), to_unit_cell=True)
             print(interface)
-            interfaces_data.add_data_entries(interface)
+            interfaces.append(interface)
+        interfaces_data.add_data_entries(interfaces)
     return interfaces_data
 
 
