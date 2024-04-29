@@ -10,7 +10,7 @@ from ..convert import convert_material_args_kwargs_to_structure
 
 
 @convert_material_args_kwargs_to_structure
-def create_interfaces(substrate: Structure, layer: Structure, settings):
+def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs):
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
     Args:
@@ -18,10 +18,17 @@ def create_interfaces(substrate: Structure, layer: Structure, settings):
         layer (Structure): The layer structure.
         settings: The settings for the interface generation.
 
+    Keyword Args:
+        sort_by_strain_and_size (bool): Whether to sort the interfaces by strain and size.
+        remove_duplicates (bool): Whether to remove duplicate interfaces.
     Returns:
         Dict[str, List[Dict[str, Union[Structure, np.ndarray]]]]: A dictionary of interfaces for each
         termination.
     """
+
+    sort_by_strain_and_size = kwargs.get("sort_by_strain_and_size", True)
+    remove_duplicates = kwargs.get("remove_duplicates", True)
+
     substrate = normalize_structure(substrate, settings["USE_CONVENTIONAL_CELL"])
     layer = normalize_structure(layer, settings["USE_CONVENTIONAL_CELL"])
 
@@ -47,7 +54,11 @@ def create_interfaces(substrate: Structure, layer: Structure, settings):
             # Wrap atoms to unit cell
             interface.make_supercell((1, 1, 1), to_unit_cell=True)
             interfaces.append(interface)
-        interfaces_data.add_data_entries(interfaces)
+        interfaces_data.add_data_entries(
+            interfaces,
+            sort_interfaces_for_all_terminations_by_strain_and_size=sort_by_strain_and_size,
+            remove_duplicates=remove_duplicates,
+        )
     return interfaces_data
 
 
