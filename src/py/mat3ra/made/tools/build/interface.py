@@ -56,8 +56,10 @@ class InterfaceDataHolder(object):
         self.set_interfaces_for_termination(termination, self.get_interfaces_for_termination(termination) + interfaces)
 
     def add_data_entries(
-        self, entries=[], sort_interfaces_for_all_terminations_by_strain_and_size=True, add_mean_abs_strain=True
+        self, entries=[], sort_interfaces_for_all_terminations_by_strain_and_size=True, remove_duplicates=True
     ):
+        if isinstance(entries, Interface):
+            entries = [entries]
         all_terminations = [e.interface_properties["termination"] for e in entries]
         unique_terminations = list(set(all_terminations))
         for termination in unique_terminations:
@@ -67,12 +69,18 @@ class InterfaceDataHolder(object):
             self.add_interfaces_for_termination(termination, entries_for_termination)
         if sort_interfaces_for_all_terminations_by_strain_and_size:
             self.sort_interfaces_for_all_terminations_by_strain_and_size()
+        if remove_duplicates:
+            self.remove_duplicate_interfaces()
 
     def set_interfaces_for_termination(self, termination, interfaces):
         self.data[termination] = interfaces
 
     def get_interfaces_for_termination(self, termination):
         return self.data.get(termination, [])
+
+    def remove_duplicate_interfaces(self, strain_mode=StrainModes.mean_abs_strain):
+        for termination in self.terminations:
+            self.remove_duplicate_interfaces_for_termination(termination, strain_mode)
 
     def remove_duplicate_interfaces_for_termination(self, termination, strain_mode=StrainModes.mean_abs_strain):
         def are_interfaces_duplicate(interface1, interface2):
@@ -81,7 +89,7 @@ class InterfaceDataHolder(object):
             )
 
         sorted_interfaces = self.get_interfaces_for_termination_sorted_by_size(termination)
-        enumerated_sorted_interfaces = enumerate(sorted_interfaces)[:-1]
+        enumerated_sorted_interfaces = list(enumerate(sorted_interfaces))[:-1]
         filtered_interfaces = [
             obj
             for i, obj in enumerated_sorted_interfaces
