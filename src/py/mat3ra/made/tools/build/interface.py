@@ -4,7 +4,6 @@ import numpy as np
 from typing import Union, List
 from enum import Enum
 from pymatgen.analysis.interfaces.coherent_interfaces import Interface
-from pymatgen.core.structure import Structure
 
 
 def patch_interface_with_mean_abs_strain(target: Interface, tolerance: float = 10e-6):
@@ -44,8 +43,21 @@ class InterfaceDataHolder(object):
     """
 
     def __init__(self) -> None:
-        self.data = {}
+        self.interfaces = {}
         self.terminations = []
+
+    def __str__(self):
+        terminations_list = f"Found {len(self.terminations)} terminations:" + ", ".join(
+            f"\n{idx}: ({a}, {b})" for idx, (a, b) in enumerate(self.terminations)
+        )
+        interfaces_list = "\n".join(
+            [
+                f"Found {len(self.interfaces[termination])} interfaces for termination {termination}:\n{idx}: "
+                + f"{self.interfaces[termination]}"
+                for idx, termination in enumerate(self.terminations)
+            ]
+        )
+        return f"{terminations_list}\n{interfaces_list}"
 
     def add_termination(self, termination: str):
         if termination not in self.terminations:
@@ -74,12 +86,12 @@ class InterfaceDataHolder(object):
             self.remove_duplicate_interfaces()
 
     def set_interfaces_for_termination(self, termination, interfaces):
-        self.data[termination] = interfaces
+        self.interfaces[termination] = interfaces
 
     def get_interfaces_for_termination(self, termination):
         if isinstance(termination, int):
             termination = self.terminations[termination]
-        return self.data.get(termination, [])
+        return self.interfaces.get(termination, [])
 
     def remove_duplicate_interfaces(self, strain_mode=StrainModes.mean_abs_strain):
         for termination in self.terminations:
@@ -129,7 +141,7 @@ class InterfaceDataHolder(object):
             )
 
     def get_all_interfaces(self):
-        return functools.reduce(lambda a, b: a + b, self.data.values())
+        return functools.reduce(lambda a, b: a + b, self.interfaces.values())
 
     def get_mean_abs_strain_for_interface(self, interface: Interface, tolerance: float = 10e-6) -> float:
         return round(np.mean(np.abs(interface.interface_properties["strain"])) / tolerance) * tolerance
