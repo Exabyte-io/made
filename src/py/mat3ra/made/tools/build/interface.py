@@ -90,14 +90,15 @@ class InterfaceDataHolder(object):
             )
 
         sorted_interfaces = self.get_interfaces_for_termination_sorted_by_size(termination)
-
         filtered_interfaces = [sorted_interfaces[0]] if sorted_interfaces else []
 
-        for interface in sorted_interfaces[1:]:
+        filtered_interfaces += [
+            interface
+            for interface in sorted_interfaces[1:]
             if not any(
                 are_interfaces_duplicate(interface, unique_interface) for unique_interface in filtered_interfaces
-            ):
-                filtered_interfaces.append(interface)
+            )
+        ]
 
         self.set_interfaces_for_termination(termination, filtered_interfaces)
 
