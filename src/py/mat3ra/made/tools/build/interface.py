@@ -4,6 +4,7 @@ import numpy as np
 from typing import Union, List
 from enum import Enum
 from pymatgen.analysis.interfaces.coherent_interfaces import Interface
+from pymatgen.core.structure import Structure
 
 
 def patch_interface_with_mean_abs_strain(target: Interface, tolerance: float = 10e-6):
@@ -85,16 +86,19 @@ class InterfaceDataHolder(object):
     def remove_duplicate_interfaces_for_termination(self, termination, strain_mode=StrainModes.mean_abs_strain):
         def are_interfaces_duplicate(interface1, interface2):
             return interface1.num_sites == interface2.num_sites and np.allclose(
-                interface1.interface_properties[strain_mode], interface1.interface_properties[strain_mode]
+                interface1.interface_properties[strain_mode], interface2.interface_properties[strain_mode]
             )
 
         sorted_interfaces = self.get_interfaces_for_termination_sorted_by_size(termination)
-        enumerated_sorted_interfaces = list(enumerate(sorted_interfaces))[:-1]
-        filtered_interfaces = [
-            obj
-            for i, obj in enumerated_sorted_interfaces
-            if not are_interfaces_duplicate(obj, sorted_interfaces[i + 1])
-        ]
+
+        filtered_interfaces = [sorted_interfaces[0]] if sorted_interfaces else []
+
+        for interface in sorted_interfaces[1:]:
+            if not any(
+                are_interfaces_duplicate(interface, unique_interface) for unique_interface in filtered_interfaces
+            ):
+                filtered_interfaces.append(interface)
+
         self.set_interfaces_for_termination(termination, filtered_interfaces)
 
     def get_interfaces_for_termination_sorted_by_strain(self, termination, strain_mode=StrainModes.mean_abs_strain):
