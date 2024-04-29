@@ -46,7 +46,6 @@ def create_interfaces(substrate: Structure, layer: Structure, settings):
         for interface in all_interfaces_for_termination_patched:
             # Wrap atoms to unit cell
             interface.make_supercell((1, 1, 1), to_unit_cell=True)
-            print(interface)
             interfaces.append(interface)
         interfaces_data.add_data_entries(interfaces)
     return interfaces_data
