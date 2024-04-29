@@ -77,6 +77,8 @@ class InterfaceDataHolder(object):
         self.data[termination] = interfaces
 
     def get_interfaces_for_termination(self, termination):
+        if isinstance(termination, int):
+            termination = self.terminations[termination]
         return self.data.get(termination, [])
 
     def remove_duplicate_interfaces(self, strain_mode=StrainModes.mean_abs_strain):
@@ -92,13 +94,11 @@ class InterfaceDataHolder(object):
         sorted_interfaces = self.get_interfaces_for_termination_sorted_by_size(termination)
         filtered_interfaces = [sorted_interfaces[0]] if sorted_interfaces else []
 
-        filtered_interfaces += [
-            interface
-            for interface in sorted_interfaces[1:]
+        for interface in sorted_interfaces[1:]:
             if not any(
                 are_interfaces_duplicate(interface, unique_interface) for unique_interface in filtered_interfaces
-            )
-        ]
+            ):
+                filtered_interfaces.append(interface)
 
         self.set_interfaces_for_termination(termination, filtered_interfaces)
 
