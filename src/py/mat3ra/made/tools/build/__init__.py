@@ -59,7 +59,8 @@ def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs
             sort_interfaces_for_all_terminations_by_strain_and_size=sort_by_strain_and_size,
             remove_duplicates=remove_duplicates,
         )
-    print(f"Found {len(interfaces_data.get_interfaces_for_termination(0))} interfaces.")
+    unique_str = "unique" if remove_duplicates else ""
+    print(f"Found {len(interfaces_data.get_interfaces_for_termination(0))} {unique_str} interfaces.")
     return interfaces_data
 
 
@@ -73,9 +74,9 @@ def normalize_structure(structure: Structure, conventional_cell: bool = True):
     Returns:
         Structure: The normalized pymatgen Structure object.
     """
-    structure = translate_to_bottom_pymatgen_structure(structure)
     if conventional_cell:
         structure = SpacegroupAnalyzer(structure).get_conventional_standard_structure()
+    structure = translate_to_bottom_pymatgen_structure(structure)
     return structure
 
 
