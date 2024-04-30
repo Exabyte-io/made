@@ -1,6 +1,6 @@
-from mat3ra.made.tools.build.interface import InterfaceDataHolder, StrainModes, patch_interface_with_mean_abs_strain
+from mat3ra.made.tools.build.interface import InterfaceDataHolder, patch_interface_with_mean_abs_strain
 from pymatgen.core import Lattice, Structure
-from pymatgen.core.surface import Slab, SlabGenerator
+from pymatgen.core.surface import SlabGenerator
 from pymatgen.core.interface import Interface
 
 
@@ -31,9 +31,7 @@ patch_interface_with_mean_abs_strain(interface_structure)
 
 def test_add_data_entries():
     interfaces_data = InterfaceDataHolder()
-    print(interfaces_data.interfaces)
     interfaces_data.add_data_entries([interface_structure])
-    print(interfaces_data.interfaces)
     assert len(interfaces_data.get_interfaces_for_termination(0)) == 1
 
 
