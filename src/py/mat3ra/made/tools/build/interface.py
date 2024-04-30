@@ -68,9 +68,7 @@ class InterfaceDataHolder(object):
         self.add_termination(termination)
         self.set_interfaces_for_termination(termination, self.get_interfaces_for_termination(termination) + interfaces)
 
-    def add_data_entries(
-        self, entries=[], sort_interfaces_for_all_terminations_by_strain_and_size=True, remove_duplicates=True
-    ):
+    def add_data_entries(self, entries=[], sort_interfaces_by_strain_and_size=True, remove_duplicates=True):
         if isinstance(entries, Interface):
             entries = [entries]
         all_terminations = [e.interface_properties["termination"] for e in entries]
@@ -80,7 +78,7 @@ class InterfaceDataHolder(object):
                 entry for entry in entries if entry.interface_properties["termination"] == termination
             ]
             self.add_interfaces_for_termination(termination, entries_for_termination)
-        if sort_interfaces_for_all_terminations_by_strain_and_size:
+        if sort_interfaces_by_strain_and_size:
             self.sort_interfaces_for_all_terminations_by_strain_and_size()
         if remove_duplicates:
             self.remove_duplicate_interfaces()

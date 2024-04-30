@@ -56,7 +56,7 @@ def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs
             interfaces.append(interface)
         interfaces_data.add_data_entries(
             interfaces,
-            sort_interfaces_for_all_terminations_by_strain_and_size=sort_by_strain_and_size,
+            sort_interfaces_by_strain_and_size=sort_by_strain_and_size,
             remove_duplicates=remove_duplicates,
         )
     unique_str = "unique" if remove_duplicates else ""
