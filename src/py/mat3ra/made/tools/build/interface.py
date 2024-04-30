@@ -88,10 +88,27 @@ class InterfaceDataHolder(object):
     def set_interfaces_for_termination(self, termination, interfaces):
         self.interfaces[termination] = interfaces
 
-    def get_interfaces_for_termination(self, termination):
+    def get_interfaces_for_termination(self, termination, slice_range=None):
+        """
+        Get interfaces for a given termination. If a slice_range is provided,
+        return a sublist of interfaces; otherwise, return all interfaces.
+
+        Args:
+            termination (Union[int, tuple]): Termination index or tuple.
+            slice_range (slice): A slice object to specify the range of interfaces to return.
+
+        Returns:
+            List[Interface]: List of interfaces for the termination.
+        """
         if isinstance(termination, int):
             termination = self.terminations[termination]
-        return self.interfaces.get(termination, [])
+
+        interfaces = self.interfaces.get(termination, [])
+
+        if slice_range is not None:
+            return interfaces[slice_range]
+
+        return interfaces
 
     def remove_duplicate_interfaces(self, strain_mode=StrainModes.mean_abs_strain):
         for termination in self.terminations:

@@ -59,6 +59,7 @@ def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs
             sort_interfaces_for_all_terminations_by_strain_and_size=sort_by_strain_and_size,
             remove_duplicates=remove_duplicates,
         )
+    print(f"Found {len(interfaces_data.get_interfaces_for_termination(0))} interfaces.")
     return interfaces_data
 
 
