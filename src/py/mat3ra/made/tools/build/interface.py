@@ -6,21 +6,21 @@ from enum import Enum
 from pymatgen.analysis.interfaces.coherent_interfaces import Interface
 
 
+class StrainModes(Enum):
+    strain = "strain"
+    von_mises_strain = "von_mises_strain"
+    mean_abs_strain = "mean_abs_strain"
+
+
 def patch_interface_with_mean_abs_strain(target: Interface, tolerance: float = 10e-6):
     def get_mean_abs_strain(target):
         return target.interface_properties[StrainModes.mean_abs_strain]
 
     target.get_mean_abs_strain = types.MethodType(get_mean_abs_strain, target)
     target.interface_properties[StrainModes.mean_abs_strain] = (
-        round(np.mean(np.abs(target.interface_properties["strain"])) / tolerance) * tolerance
+        round(np.mean(np.abs(target.interface_properties[StrainModes.strain])) / tolerance) * tolerance
     )
     return target
-
-
-class StrainModes(Enum):
-    strain = "strain"
-    von_mises_strain = "von_mises_strain"
-    mean_abs_strain = "mean_abs_strain"
 
 
 class InterfaceDataHolder(object):
