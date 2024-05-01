@@ -4,6 +4,7 @@ import numpy as np
 from typing import Union, List
 from enum import Enum
 from pymatgen.analysis.interfaces.coherent_interfaces import Interface
+from ..convert import convert_result_to_material
 
 
 class StrainModes(Enum):
@@ -18,7 +19,7 @@ def patch_interface_with_mean_abs_strain(target: Interface, tolerance: float = 1
 
     target.get_mean_abs_strain = types.MethodType(get_mean_abs_strain, target)
     target.interface_properties[StrainModes.mean_abs_strain] = (
-        round(np.mean(np.abs(target.interface_properties[StrainModes.strain])) / tolerance) * tolerance
+        round(np.mean(np.abs(target.interface_properties["strain"])) / tolerance) * tolerance
     )
     return target
 
@@ -157,6 +158,12 @@ class InterfaceDataHolder(object):
 
     def get_all_interfaces(self):
         return functools.reduce(lambda a, b: a + b, self.interfaces.values())
+
+    @convert_result_to_material
+    def get_interfaces_for_termination_at_index(
+        self, termination, index: Union[int, slice]
+    ) -> Union[Interface, List[Interface]]:
+        return self.get_interfaces_for_termination(termination)[index]
 
     def get_mean_abs_strain_for_interface(self, interface: Interface, tolerance: float = 10e-6) -> float:
         return round(np.mean(np.abs(interface.interface_properties["strain"])) / tolerance) * tolerance
