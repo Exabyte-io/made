@@ -203,3 +203,25 @@ def convert_material_args_kwargs_to_structure(func: Callable) -> Callable:
         return func(*new_args, **new_kwargs)
 
     return wrapper
+
+
+def convert_result_to_material(func):
+    """Decorator to convert function result from Pymatgen Structure or ASE Atoms to ESSE format."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+
+        def convert(item):
+            if isinstance(item, Structure):
+                return from_pymatgen(item)
+            elif isinstance(item, Atoms):
+                return from_ase(item)
+            return item
+
+        if isinstance(result, list):
+            return [convert(item) for item in result]
+        else:
+            return convert(result)
+
+    return wrapper

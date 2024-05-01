@@ -98,12 +98,3 @@ def interface_init_zsl_builder(substrate: Structure, layer: Structure, settings)
     )
 
     return builder
-
-
-def sort_interfaces(interfaces, terminations, strain_mode=StrainModes.mean_abs_strain):
-    sorted_interfaces = {}
-    for termination in terminations:
-        sorted_interfaces[termination] = sorted(
-            interfaces[termination], key=lambda x: (x[strain_mode], x["interface"].num_sites)
-        )
-    return sorted_interfaces
