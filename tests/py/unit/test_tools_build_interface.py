@@ -1,11 +1,5 @@
 from mat3ra.made.tools.build.interface import InterfaceDataHolder
-from mat3ra.made.tools.build.interface import patch_interface_with_mean_abs_strain, StrainModes
-
-from .utils import INTERFACE_STRUCTURE
-
-INTERFACE_STRUCTURE.interface_properties["termination"] = ("Si_termination", "Cu_termination")
-INTERFACE_STRUCTURE.interface_properties[StrainModes.strain] = 0.1
-INTERFACE_STRUCTURE = patch_interface_with_mean_abs_strain(INTERFACE_STRUCTURE)
+from .fixtures import INTERFACE_STRUCTURE
 
 
 def test_add_data_entries():
