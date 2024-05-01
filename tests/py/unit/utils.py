@@ -1,13 +1,13 @@
 from typing import Dict
 
 from pymatgen.io.ase import AseAtomsAdaptor
-from pymatgen.core.interface import Interface
+from pymatgen.core.structure import Structure
 
 tags_to_labels: Dict = {1: "substrate", 2: "film"}
 labels_to_tags: Dict = {v: k for k, v in tags_to_labels.items()}
 
 
-def atoms_to_interface_structure(atoms):
+def atoms_to_interface_structure(atoms) -> Structure:
     """
     Converts ASE Atoms object to pymatgen Interface object.
     Args:
