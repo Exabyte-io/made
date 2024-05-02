@@ -1,4 +1,4 @@
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Tuple, TypedDict
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
@@ -9,8 +9,23 @@ from ..utils import translate_to_bottom_pymatgen_structure
 from ..convert import decorator_convert_material_args_kwargs_to_structure
 
 
+# TODO: Refactor later when Interface Settings defined in ESSE
+class Settings(TypedDict):
+    SUBSTRATE_PARAMETERS: TypedDict[Tuple[int, int, int], int]
+    LAYER_PARAMETERS: TypedDict[Tuple[int, int, int], int]
+    USE_CONVENTIONAL_CELL: bool
+    ZSL_PARAMETERS: TypedDict[float, float, float, float]
+    INTERFACE_PARAMETERS: TypedDict[str, Union[str, int, float, tuple]]
+
+
 @decorator_convert_material_args_kwargs_to_structure
-def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs):
+def create_interfaces(
+    substrate: Structure,
+    layer: Structure,
+    settings: Settings,
+    sort_by_strain_and_size: bool = True,
+    remove_duplicates: bool = True,
+) -> InterfaceDataHolder:
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
 
@@ -18,16 +33,12 @@ def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs
         substrate (Structure): The substrate structure.
         layer (Structure): The layer structure.
         settings: The settings for the interface generation.
-    Keyword Args:
         sort_by_strain_and_size (bool): Whether to sort the interfaces by strain and size.
         remove_duplicates (bool): Whether to remove duplicate interfaces.
     Returns:
         Dict[str, List[Dict[str, Union[Structure, np.ndarray]]]]: A dictionary of interfaces for each
         termination.
     """
-    sort_by_strain_and_size = kwargs.get("sort_by_strain_and_size", True)
-    remove_duplicates = kwargs.get("remove_duplicates", True)
-
     substrate = normalize_structure(substrate, settings["USE_CONVENTIONAL_CELL"])
     layer = normalize_structure(layer, settings["USE_CONVENTIONAL_CELL"])
 
@@ -81,7 +92,7 @@ def normalize_structure(structure: Structure, use_conventional_cell: bool = True
 
 
 @decorator_convert_material_args_kwargs_to_structure
-def interface_init_zsl_builder(substrate: Structure, layer: Structure, settings) -> CoherentInterfaceBuilder:
+def interface_init_zsl_builder(substrate: Structure, layer: Structure, settings: Settings) -> CoherentInterfaceBuilder:
     generator: ZSLGenerator = ZSLGenerator(
         max_area_ratio_tol=settings["ZSL_PARAMETERS"]["MAX_AREA_TOL"],
         max_area=settings["ZSL_PARAMETERS"]["MAX_AREA"],
