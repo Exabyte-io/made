@@ -3,8 +3,8 @@ from typing import Dict
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.core.structure import Structure
 
-tags_to_labels: Dict = {1: "substrate", 2: "film"}
-labels_to_tags: Dict = {v: k for k, v in tags_to_labels.items()}
+ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS: Dict = {1: "substrate", 2: "film"}
+INTERFACE_STRUCTURE_LABELS_TO_ATOMS_TAGS: Dict = {v: k for k, v in ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS.items()}
 
 
 def atoms_to_interface_structure(atoms) -> Structure:
@@ -19,6 +19,7 @@ def atoms_to_interface_structure(atoms) -> Structure:
     adaptor = AseAtomsAdaptor()
     interface_structure = adaptor.get_structure(atoms)
     interface_structure.add_site_property(
-        "interface_label", [tags_to_labels[tag] for tag in interface_structure.site_properties["tags"]]
+        "interface_label",
+        [ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS[tag] for tag in interface_structure.site_properties["tags"]],
     )
     return interface_structure
