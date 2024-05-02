@@ -1,8 +1,9 @@
+import json
+import os
+
+from mat3ra.made.material import Material
 from mat3ra.made.tools.build import create_interfaces
 from mat3ra.made.tools.build.interface import InterfaceSettings
-from mat3ra.made.material import Material
-import os
-import json
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
