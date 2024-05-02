@@ -1,10 +1,10 @@
 from typing import Tuple
 
 from ase.build import bulk
+from mat3ra.made.material import Material
 from mat3ra.made.tools.build.interface import interface_patch_with_mean_abs_strain
 from mat3ra.made.tools.convert import from_ase
 from pymatgen.core.interface import Interface
-from mat3ra.made.material import Material
 
 from .utils import atoms_to_interface_structure
 
