@@ -1,21 +1,7 @@
-import json
-import os
-
-from mat3ra.made.material import Material
 from mat3ra.made.tools.build import create_interfaces
 from mat3ra.made.tools.build.interface import InterfaceSettings
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-
-substrate_path = os.path.join(dir_path, "../../fixtures/Ni-hex.json")
-layer_path = os.path.join(dir_path, "../../fixtures/Graphene.json")
-
-with open(substrate_path) as file:
-    substrate_material = Material(json.load(file))
-
-with open(layer_path) as file:
-    layer_material = Material(json.load(file))
-
+from .fixtures import LAYER_MATERIAL, SUBSTRATE_MATERIAL
 
 MAX_AREA = 200
 EXPECTED_NUMBER_OF_INTERFACES = 8
@@ -29,5 +15,5 @@ settings = InterfaceSettings(
 
 
 def test_create_interfaces():
-    interfaces = create_interfaces(substrate_material, layer_material, settings)
+    interfaces = create_interfaces(substrate=SUBSTRATE_MATERIAL, layer=LAYER_MATERIAL, settings=settings)
     assert len(interfaces.get_interfaces_for_termination(0)) == EXPECTED_NUMBER_OF_INTERFACES
