@@ -9,7 +9,6 @@ from ..utils import translate_to_bottom_pymatgen_structure
 from ..convert import decorator_convert_material_args_kwargs_to_structure
 
 
-# TODO: Refactor typing later when Interface Settings defined in ESSE
 class SubstrateParameters(TypedDict):
     MILLER_INDICES: Tuple[int, int, int]
     THICKNESS: int
