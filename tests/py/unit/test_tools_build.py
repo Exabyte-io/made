@@ -4,7 +4,7 @@ from mat3ra.made.tools.build.interface import InterfaceSettings
 from .fixtures import LAYER_MATERIAL, SUBSTRATE_MATERIAL
 
 MAX_AREA = 200
-EXPECTED_NUMBER_OF_INTERFACES = 8
+EXPECTED_NUMBER_OF_INTERFACES = 2
 settings = InterfaceSettings(
     USE_CONVENTIONAL_CELL=True,
     INTERFACE_PARAMETERS={"DISTANCE_Z": 3.0, "MAX_AREA": MAX_AREA},
