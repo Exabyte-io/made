@@ -6,10 +6,10 @@ import numpy as np
 
 from .interface import InterfaceDataHolder, StrainModes, patch_interface_with_mean_abs_strain
 from ..utils import translate_to_bottom_pymatgen_structure
-from ..convert import convert_material_args_kwargs_to_structure
+from ..convert import decorator_convert_material_args_kwargs_to_structure
 
 
-@convert_material_args_kwargs_to_structure
+@decorator_convert_material_args_kwargs_to_structure
 def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs):
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
@@ -80,7 +80,7 @@ def normalize_structure(structure: Structure, conventional_cell: bool = True):
     return structure
 
 
-@convert_material_args_kwargs_to_structure
+@decorator_convert_material_args_kwargs_to_structure
 def interface_init_zsl_builder(substrate: Structure, layer: Structure, settings) -> CoherentInterfaceBuilder:
     generator: ZSLGenerator = ZSLGenerator(
         max_area_ratio_tol=settings["ZSL_PARAMETERS"]["MAX_AREA_TOL"],

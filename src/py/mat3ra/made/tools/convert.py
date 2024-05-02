@@ -167,7 +167,7 @@ def from_ase(ase_atoms: Atoms) -> Dict[str, Any]:
     return from_pymatgen(structure)
 
 
-def convert_material_args_kwargs_to_atoms(func: Callable) -> Callable:
+def decorator_convert_material_args_kwargs_to_atoms(func: Callable) -> Callable:
     """
     Decorator that converts ESSE Material objects to ASE Atoms objects.
     """
@@ -186,7 +186,7 @@ def convert_material_args_kwargs_to_atoms(func: Callable) -> Callable:
     return wrapper
 
 
-def convert_material_args_kwargs_to_structure(func: Callable) -> Callable:
+def decorator_convert_material_args_kwargs_to_structure(func: Callable) -> Callable:
     """
     Decorator that converts ESSE Material objects to pymatgen Structure objects.
     """
@@ -205,23 +205,9 @@ def convert_material_args_kwargs_to_structure(func: Callable) -> Callable:
     return wrapper
 
 
-def convert_result_to_material(func):
-    """Decorator to convert function result from Pymatgen Structure or ASE Atoms to ESSE format."""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-
-        def convert(item):
-            if isinstance(item, Structure):
-                return from_pymatgen(item)
-            elif isinstance(item, Atoms):
-                return from_ase(item)
-            return item
-
-        if isinstance(result, list):
-            return [convert(item) for item in result]
-        else:
-            return convert(result)
-
-    return wrapper
+def convert_atoms_or_structure_to_material(item):
+    if isinstance(item, Structure):
+        return from_pymatgen(item)
+    elif isinstance(item, Atoms):
+        return from_ase(item)
+    return item
