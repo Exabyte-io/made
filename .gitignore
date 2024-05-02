@@ -16,7 +16,7 @@ __pycache__/
 # "dist" folder is not ignored on purpose to be able to install intermediate changes from github commits
 # dist
 .Python
-build/
+./build/
 develop-eggs/
 downloads/
 eggs/
@@ -179,7 +179,3 @@ node_modules/
 *.DS_Store
 
 tsconfig.tsbuildinfo
-
-
-# Do not ignore actual source folder
-!/src/py/mat3ra/made/tools/build/
