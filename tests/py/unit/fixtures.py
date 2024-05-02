@@ -4,6 +4,7 @@ from ase.build import bulk
 from mat3ra.made.tools.build.interface import interface_patch_with_mean_abs_strain
 from mat3ra.made.tools.convert import from_ase
 from pymatgen.core.interface import Interface
+from mat3ra.made.material import Material
 
 from .utils import atoms_to_interface_structure
 
@@ -14,8 +15,8 @@ INTERFACE_ATOMS = substrate + film
 INTERFACE_ATOMS.set_tags([1] * len(substrate) + [2] * len(film))
 
 # Material fixtures
-SUBSTRATE_MATERIAL = from_ase(substrate)
-LAYER_MATERIAL = from_ase(film)
+SUBSTRATE_MATERIAL = Material(from_ase(substrate))
+LAYER_MATERIAL = Material(from_ase(film))
 
 # Pymatgen Interface fixtures
 INTERFACE_TERMINATION: Tuple = ("Si_termination", "Cu_termination")
