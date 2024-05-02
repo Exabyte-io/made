@@ -1,8 +1,8 @@
 from ase import Atoms
 from ase.calculators.calculator import Calculator
 
-from .convert import decorator_convert_material_args_kwargs_to_atoms
 from .analyze import get_surface_area
+from .convert import decorator_convert_material_args_kwargs_to_atoms
 
 
 @decorator_convert_material_args_kwargs_to_atoms

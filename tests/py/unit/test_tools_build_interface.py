@@ -1,4 +1,5 @@
 from mat3ra.made.tools.build.interface import InterfaceDataHolder
+
 from .fixtures import INTERFACE_STRUCTURE, INTERFACE_TERMINATION
 
 
