@@ -24,7 +24,7 @@ class ZSLParameters(TypedDict):
 
 class InterfaceParameters(TypedDict):
     DISTANCE_Z: float
-    MAX_AREA_TOL: float
+    MAX_AREA: float
 
 
 class InterfaceSettings(TypedDict):
