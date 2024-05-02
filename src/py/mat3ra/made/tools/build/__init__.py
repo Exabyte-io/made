@@ -9,13 +9,36 @@ from ..utils import translate_to_bottom_pymatgen_structure
 from ..convert import decorator_convert_material_args_kwargs_to_structure
 
 
-# TODO: Refactor later when Interface Settings defined in ESSE
+# TODO: Refactor typing later when Interface Settings defined in ESSE
+class SubstrateParameters(TypedDict):
+    MILLER_INDICES: Tuple[int, int, int]
+    THICKNESS: int
+
+
+class LayerParameters(TypedDict):
+    MILLER_INDICES: Tuple[int, int, int]
+    THICKNESS: int
+
+
+class ZSLParameters(TypedDict):
+    MAX_AREA_TOL: float
+    MAX_AREA: int
+    MAX_LENGTH_TOL: float
+    MAX_ANGLE_TOL: float
+    STRAIN_TOL: float
+
+
+class InterfaceParameters(TypedDict):
+    DISTANCE_Z: float
+    MAX_AREA: int
+
+
 class Settings(TypedDict):
-    SUBSTRATE_PARAMETERS: TypedDict[Tuple[int, int, int], int]
-    LAYER_PARAMETERS: TypedDict[Tuple[int, int, int], int]
+    SUBSTRATE_PARAMETERS: SubstrateParameters
+    LAYER_PARAMETERS: LayerParameters
     USE_CONVENTIONAL_CELL: bool
-    ZSL_PARAMETERS: TypedDict[float, float, float, float]
-    INTERFACE_PARAMETERS: TypedDict[str, Union[str, int, float, tuple]]
+    ZSL_PARAMETERS: ZSLParameters
+    INTERFACE_PARAMETERS: InterfaceParameters
 
 
 @decorator_convert_material_args_kwargs_to_structure
