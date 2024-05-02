@@ -13,11 +13,11 @@ from ..convert import decorator_convert_material_args_kwargs_to_structure
 def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs):
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
+
     Args:
         substrate (Structure): The substrate structure.
         layer (Structure): The layer structure.
         settings: The settings for the interface generation.
-
     Keyword Args:
         sort_by_strain_and_size (bool): Whether to sort the interfaces by strain and size.
         remove_duplicates (bool): Whether to remove duplicate interfaces.
@@ -25,7 +25,6 @@ def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs
         Dict[str, List[Dict[str, Union[Structure, np.ndarray]]]]: A dictionary of interfaces for each
         termination.
     """
-
     sort_by_strain_and_size = kwargs.get("sort_by_strain_and_size", True)
     remove_duplicates = kwargs.get("remove_duplicates", True)
 
@@ -64,17 +63,18 @@ def create_interfaces(substrate: Structure, layer: Structure, settings, **kwargs
     return interfaces_data
 
 
-def normalize_structure(structure: Structure, conventional_cell: bool = True):
+def normalize_structure(structure: Structure, use_conventional_cell: bool = True):
     """
-    Normalize the structure to the conventional cell.
-    And translate the structure to the bottom of the cell to allow for the correct consecutive interface generation.
+    Translate atoms to the bottom of the cell (vacuum on top) to allow for the correct consecutive interface generation.
+    If use_conventional_cell is passed, conventional cell is used.
+
     Args:
         structure (Structure): The pymatgen Structure object to normalize.
-        conventional_cell: Whether to convert to the conventional cell.
+        use_conventional_cell: Whether to convert to the conventional cell.
     Returns:
         Structure: The normalized pymatgen Structure object.
     """
-    if conventional_cell:
+    if use_conventional_cell:
         structure = SpacegroupAnalyzer(structure).get_conventional_standard_structure()
     structure = translate_to_bottom_pymatgen_structure(structure)
     return structure
