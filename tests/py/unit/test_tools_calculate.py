@@ -1,12 +1,12 @@
 import numpy as np
-from ase.build import bulk, surface, fcc111, graphene, add_adsorbate
+from ase.build import add_adsorbate, bulk, fcc111, graphene, surface
 from ase.calculators import emt
 from mat3ra.made.tools.calculate import (
-    calculate_total_energy,
-    calculate_total_energy_per_atom,
-    calculate_surface_energy,
     calculate_adhesion_energy,
     calculate_interfacial_energy,
+    calculate_surface_energy,
+    calculate_total_energy,
+    calculate_total_energy_per_atom,
 )
 
 # Interface and its constituents structures setup
