@@ -1,7 +1,7 @@
 from typing import Dict
 
-from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.core.structure import Structure
+from pymatgen.io.ase import AseAtomsAdaptor
 
 ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS: Dict = {1: "substrate", 2: "film"}
 INTERFACE_STRUCTURE_LABELS_TO_ATOMS_TAGS: Dict = {v: k for k, v in ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS.items()}
