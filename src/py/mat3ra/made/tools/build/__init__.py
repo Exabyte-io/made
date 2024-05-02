@@ -1,7 +1,7 @@
 from ...material import Material
-from .__init__.interface import InterfaceDataHolder
-from .__init__.interface import InterfaceSettings as Settings
-from .__init__.interface import interface_init_zsl_builder, interface_patch_with_mean_abs_strain
+from .interface import InterfaceDataHolder
+from .interface import InterfaceSettings as Settings
+from .interface import interface_init_zsl_builder, interface_patch_with_mean_abs_strain
 from ..convert import decorator_convert_material_args_kwargs_to_structure
 from ..modify import translate_to_bottom
 
