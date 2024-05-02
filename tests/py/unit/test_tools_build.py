@@ -1,10 +1,13 @@
+import platform
+
 from mat3ra.made.tools.build import create_interfaces
 from mat3ra.made.tools.build.interface import InterfaceSettings
 
 from .fixtures import LAYER_MATERIAL, SUBSTRATE_MATERIAL
 
 MAX_AREA = 200
-EXPECTED_NUMBER_OF_INTERFACES = 2
+# pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2
+EXPECTED_NUMBER_OF_INTERFACES = 1 if platform.python_version().startswith("3.8") else 2
 settings = InterfaceSettings(
     USE_CONVENTIONAL_CELL=True,
     INTERFACE_PARAMETERS={"DISTANCE_Z": 3.0, "MAX_AREA": MAX_AREA},
