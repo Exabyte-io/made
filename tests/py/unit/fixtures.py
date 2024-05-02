@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from ase.build import bulk
-from mat3ra.made.tools.build.interface import patch_interface_with_mean_abs_strain
+from mat3ra.made.tools.build.interface import interface_patch_with_mean_abs_strain
 from pymatgen.core.interface import Interface
 
 from .utils import atoms_to_interface_structure
@@ -22,4 +22,4 @@ INTERFACE_STRUCTURE = Interface.from_dict(dict)
 # Add properties that are assigned during interface creation in ZSL algorithm
 INTERFACE_STRUCTURE.interface_properties["termination"] = INTERFACE_TERMINATION
 INTERFACE_STRUCTURE.interface_properties["strain"] = 0.1
-INTERFACE_STRUCTURE = patch_interface_with_mean_abs_strain(INTERFACE_STRUCTURE)
+INTERFACE_STRUCTURE = interface_patch_with_mean_abs_strain(INTERFACE_STRUCTURE)
