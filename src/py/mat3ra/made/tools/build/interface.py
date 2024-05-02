@@ -1,10 +1,11 @@
 import functools
 import types
 import numpy as np
-from typing import Union, List
+from typing import Union, List, Tuple
 from enum import Enum
+from mat3ra.utils import array as array_utils
 from pymatgen.analysis.interfaces.coherent_interfaces import Interface
-from ..convert import convert_result_to_material
+from ..convert import convert_atoms_or_structure_to_material
 
 
 class StrainModes(Enum):
@@ -43,35 +44,44 @@ class InterfaceDataHolder(object):
         }
     """
 
-    def __init__(self) -> None:
+    def __init__(self, entries: Union[List[Interface], None] = None) -> None:
+        if entries is None:
+            entries = []
         self.interfaces = {}
         self.terminations = []
+        self.add_data_entries(entries)
 
     def __str__(self):
-        terminations_list = f"Found {len(self.terminations)} terminations:" + ", ".join(
+        terminations_list = f"There are {len(self.terminations)} terminations:" + ", ".join(
             f"\n{idx}: ({a}, {b})" for idx, (a, b) in enumerate(self.terminations)
         )
         interfaces_list = "\n".join(
             [
-                f"Found {len(self.interfaces[termination])} interfaces for termination {termination}:\n{idx}: "
+                f"There are {len(self.interfaces[termination])} interfaces for termination {termination}:\n{idx}: "
                 + f"{self.interfaces[termination]}"
                 for idx, termination in enumerate(self.terminations)
             ]
         )
         return f"{terminations_list}\n{interfaces_list}"
 
-    def add_termination(self, termination: str):
+    def add_termination(self, termination: Tuple[str, str]):
         if termination not in self.terminations:
             self.terminations.append(termination)
             self.set_interfaces_for_termination(termination, [])
 
-    def add_interfaces_for_termination(self, termination: str, interfaces: Union[List[Interface], Interface]):
+    def add_interfaces_for_termination(
+        self, termination: Tuple[str, str], interfaces: Union[List[Interface], Interface]
+    ):
         self.add_termination(termination)
         self.set_interfaces_for_termination(termination, self.get_interfaces_for_termination(termination) + interfaces)
 
-    def add_data_entries(self, entries=[], sort_interfaces_by_strain_and_size=True, remove_duplicates=True):
-        if isinstance(entries, Interface):
-            entries = [entries]
+    def add_data_entries(
+        self,
+        entries: List[Interface] = [],
+        sort_interfaces_by_strain_and_size: bool = True,
+        remove_duplicates: bool = True,
+    ):
+        entries = array_utils.convert_to_array_if_not(entries)
         all_terminations = [e.interface_properties["termination"] for e in entries]
         unique_terminations = list(set(all_terminations))
         for termination in unique_terminations:
@@ -84,37 +94,36 @@ class InterfaceDataHolder(object):
         if remove_duplicates:
             self.remove_duplicate_interfaces()
 
-    def set_interfaces_for_termination(self, termination, interfaces):
+    def set_interfaces_for_termination(self, termination: Tuple[str, str], interfaces: List[Interface]):
         self.interfaces[termination] = interfaces
 
-    def get_interfaces_for_termination(self, termination, slice_range=None):
-        """
-        Get interfaces for a given termination. If a slice_range is provided,
-        return a sublist of interfaces; otherwise, return all interfaces.
-
-        Args:
-            termination (Union[int, tuple]): Termination index or tuple.
-            slice_range (slice): A slice object to specify the range of interfaces to return.
-
-        Returns:
-            List[Interface]: List of interfaces for the termination.
-        """
+    def get_termination(self, termination: Union[int, Tuple[str, str]]) -> Tuple[str, str]:
         if isinstance(termination, int):
             termination = self.terminations[termination]
+        return termination
 
-        interfaces = self.interfaces.get(termination, [])
+    def get_interfaces_for_termination_or_its_index(
+        self, termination_or_its_index: Union[int, Tuple[str, str]]
+    ) -> List[Interface]:
+        termination = self.get_termination(termination_or_its_index)
+        return self.interfaces[termination]
 
-        if slice_range is not None:
-            return interfaces[slice_range]
+    def get_interfaces_for_termination(
+        self,
+        termination_or_its_index: Union[int, Tuple[str, str]],
+        slice_or_index_or_indices: Union[int, slice, List[int]] = None,
+    ) -> List[Interface]:
+        interfaces = self.get_interfaces_for_termination_or_its_index(termination_or_its_index)
+        return array_utils.filter_by_slice_or_index_or_indices(interfaces, slice_or_index_or_indices)
 
-        return interfaces
-
-    def remove_duplicate_interfaces(self, strain_mode=StrainModes.mean_abs_strain):
+    def remove_duplicate_interfaces(self, strain_mode: StrainModes = StrainModes.mean_abs_strain):
         for termination in self.terminations:
             self.remove_duplicate_interfaces_for_termination(termination, strain_mode)
 
-    def remove_duplicate_interfaces_for_termination(self, termination, strain_mode=StrainModes.mean_abs_strain):
-        def are_interfaces_duplicate(interface1, interface2):
+    def remove_duplicate_interfaces_for_termination(
+        self, termination, strain_mode: StrainModes = StrainModes.mean_abs_strain
+    ):
+        def are_interfaces_duplicate(interface1: Interface, interface2: Interface):
             return interface1.num_sites == interface2.num_sites and np.allclose(
                 interface1.interface_properties[strain_mode], interface2.interface_properties[strain_mode]
             )
@@ -130,21 +139,25 @@ class InterfaceDataHolder(object):
 
         self.set_interfaces_for_termination(termination, filtered_interfaces)
 
-    def get_interfaces_for_termination_sorted_by_strain(self, termination, strain_mode=StrainModes.mean_abs_strain):
+    def get_interfaces_for_termination_sorted_by_strain(
+        self, termination: Union[int, Tuple[str, str]], strain_mode: StrainModes = StrainModes.mean_abs_strain
+    ) -> List[Interface]:
         return sorted(
             self.get_interfaces_for_termination(termination),
             key=lambda x: np.mean(np.abs(x.interface_properties[strain_mode])),
         )
 
-    def get_interfaces_for_termination_sorted_by_size(self, termination):
+    def get_interfaces_for_termination_sorted_by_size(
+        self, termination: Union[int, Tuple[str, str]]
+    ) -> List[Interface]:
         return sorted(
             self.get_interfaces_for_termination(termination),
             key=lambda x: x.num_sites,
         )
 
     def get_interfaces_for_termination_sorted_by_strain_and_size(
-        self, termination, strain_mode=StrainModes.mean_abs_strain
-    ):
+        self, termination: Union[int, Tuple[str, str]], strain_mode: StrainModes = StrainModes.mean_abs_strain
+    ) -> List[Interface]:
         return sorted(
             self.get_interfaces_for_termination_sorted_by_strain(termination, strain_mode),
             key=lambda x: x.num_sites,
@@ -156,14 +169,15 @@ class InterfaceDataHolder(object):
                 termination, self.get_interfaces_for_termination_sorted_by_strain_and_size(termination)
             )
 
-    def get_all_interfaces(self):
+    def get_all_interfaces(self) -> List[Interface]:
         return functools.reduce(lambda a, b: a + b, self.interfaces.values())
 
-    @convert_result_to_material
-    def get_interfaces_for_termination_at_index(
-        self, termination, index: Union[int, slice]
-    ) -> Union[Interface, List[Interface]]:
-        return self.get_interfaces_for_termination(termination)[index]
-
-    def get_mean_abs_strain_for_interface(self, interface: Interface, tolerance: float = 10e-6) -> float:
-        return round(np.mean(np.abs(interface.interface_properties["strain"])) / tolerance) * tolerance
+    def get_interfaces_as_materials(
+        self, termination: Union[int, Tuple[str, str]], slice_range_or_index: Union[int, slice]
+    ) -> List[Interface]:
+        return list(
+            map(
+                convert_atoms_or_structure_to_material,
+                self.get_interfaces_for_termination(termination, slice_range_or_index),
+            )
+        )
