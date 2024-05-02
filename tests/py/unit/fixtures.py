@@ -1,9 +1,10 @@
 from typing import Tuple
 
 from ase.build import bulk
-from pymatgen.core.interface import Interface
-from .utils import atoms_to_interface_structure
 from mat3ra.made.tools.build.interface import patch_interface_with_mean_abs_strain
+from pymatgen.core.interface import Interface
+
+from .utils import atoms_to_interface_structure
 
 # ASE Atoms fixtures
 substrate = bulk("Si", cubic=True)
