@@ -1,10 +1,10 @@
 import numpy as np
 from ase import Atoms
 
-from .convert import convert_material_args_kwargs_to_atoms
+from .convert import decorator_convert_material_args_kwargs_to_atoms
 
 
-@convert_material_args_kwargs_to_atoms
+@decorator_convert_material_args_kwargs_to_atoms
 def get_average_interlayer_distance(
     interface_atoms: Atoms, tag_substrate: str, tag_film: str, threshold: float = 0.5
 ) -> float:
@@ -41,7 +41,7 @@ def get_average_interlayer_distance(
     return abs(average_interlayer_distance)
 
 
-@convert_material_args_kwargs_to_atoms
+@decorator_convert_material_args_kwargs_to_atoms
 def get_surface_area(atoms: Atoms):
     """
     Calculate the area of the surface perpendicular to the z-axis of the atoms structure.

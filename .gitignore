@@ -16,7 +16,7 @@ __pycache__/
 # "dist" folder is not ignored on purpose to be able to install intermediate changes from github commits
 # dist
 .Python
-build/
+./build/
 develop-eggs/
 downloads/
 eggs/
@@ -131,6 +131,7 @@ celerybeat.pid
 .venv
 env/
 venv/
+.venv*
 ENV/
 env.bak/
 venv.bak/
