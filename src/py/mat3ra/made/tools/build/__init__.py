@@ -13,6 +13,7 @@ def create_interfaces(
     settings: Settings,
     sort_by_strain_and_size: bool = True,
     remove_duplicates: bool = True,
+    is_logging_enabled: bool = True,
 ) -> InterfaceDataHolder:
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
@@ -23,16 +24,19 @@ def create_interfaces(
         settings: The settings for the interface generation.
         sort_by_strain_and_size (bool): Whether to sort the interfaces by strain and size.
         remove_duplicates (bool): Whether to remove duplicate interfaces.
+        is_logging_enabled (bool): Whether to enable debug print.
     Returns:
         InterfaceDataHolder.
     """
     substrate = translate_to_bottom(substrate, settings["USE_CONVENTIONAL_CELL"])
     layer = translate_to_bottom(layer, settings["USE_CONVENTIONAL_CELL"])
 
-    print("Creating interfaces...")
-    builder = interface_init_zsl_builder(substrate, layer, settings)
+    if is_logging_enabled:
+        print("Creating interfaces...")
 
+    builder = interface_init_zsl_builder(substrate, layer, settings)
     interfaces_data = InterfaceDataHolder()
+
     for termination in builder.terminations:
         all_interfaces_for_termination = builder.get_interfaces(
             termination,
@@ -54,6 +58,9 @@ def create_interfaces(
             sort_interfaces_by_strain_and_size=sort_by_strain_and_size,
             remove_duplicates=remove_duplicates,
         )
-    unique_str = "unique" if remove_duplicates else ""
-    print(f"Found {len(interfaces_data.get_interfaces_for_termination(0))} {unique_str} interfaces.")
+
+    if is_logging_enabled:
+        unique_str = "unique" if remove_duplicates else ""
+        print(f"Found {len(interfaces_data.get_interfaces_for_termination(0))} {unique_str} interfaces.")
+
     return interfaces_data
