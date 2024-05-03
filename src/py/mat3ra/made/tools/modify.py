@@ -42,3 +42,17 @@ def translate_to_bottom(structure: Structure, use_conventional_cell: bool = True
         structure = SpacegroupAnalyzer(structure).get_conventional_standard_structure()
     structure = translate_to_bottom_pymatgen_structure(structure)
     return structure
+
+
+@decorator_convert_material_args_kwargs_to_structure
+def wrap_to_unit_cell(structure: Structure):
+    """
+    Wrap atoms to the cell
+
+    Args:
+        structure (Structure): The pymatgen Structure object to normalize.
+    Returns:
+        Structure: The wrapped pymatgen Structure object.
+    """
+    structure.make_supercell((1, 1, 1), to_unit_cell=True)
+    return structure
