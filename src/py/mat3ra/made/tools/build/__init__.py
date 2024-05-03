@@ -46,13 +46,15 @@ def create_interfaces(
             map(interface_patch_with_mean_abs_strain, all_interfaces_for_termination)
         )
 
-        interfaces = []
-        for interface in all_interfaces_for_termination_patched:
-            # Wrap atoms to unit cell
-            interface.make_supercell((1, 1, 1), to_unit_cell=True)
-            interfaces.append(interface)
+        all_interfaces_for_termination_patched_wrapped = list(
+            map(
+                lambda interface: interface.make_supercell((1, 1, 1), to_unit_cell=True),
+                all_interfaces_for_termination_patched,
+            )
+        )
+
         interfaces_data.add_data_entries(
-            interfaces,
+            all_interfaces_for_termination_patched_wrapped,
             sort_interfaces_by_strain_and_size=sort_by_strain_and_size,
             remove_duplicates=remove_duplicates,
         )
