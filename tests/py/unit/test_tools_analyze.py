@@ -1,15 +1,12 @@
 import numpy as np
 from ase.build import bulk
-from mat3ra.made.tools.analyze import get_average_interlayer_distance
-from mat3ra.made.tools.analyze import get_surface_area
+from mat3ra.made.tools.analyze import get_average_interlayer_distance, get_surface_area
+
+from .fixtures import INTERFACE_ATOMS
 
 
 def test_calculate_average_interlayer_distance():
-    substrate = bulk("Si", cubic=True)
-    film = bulk("Cu", cubic=True)
-    interface_atoms = substrate + film
-    interface_atoms.set_tags([1] * len(substrate) + [2] * len(film))
-    distance = get_average_interlayer_distance(interface_atoms, 1, 2)
+    distance = get_average_interlayer_distance(INTERFACE_ATOMS, 1, 2)
     assert np.isclose(distance, 4.0725)
 
 
