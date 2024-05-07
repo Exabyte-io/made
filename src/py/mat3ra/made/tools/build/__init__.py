@@ -39,6 +39,9 @@ def create_interfaces(
     builder = interface_builder or interface_init_zsl_builder(substrate, layer, settings)
     interfaces_data = InterfaceDataHolder()
 
+    if termination is not None:
+        builder.terminations = [termination]
+
     for termination in builder.terminations:
         all_interfaces_for_termination = builder.get_interfaces(
             termination,
