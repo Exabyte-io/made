@@ -1,5 +1,5 @@
 from ...material import Material
-from .interface import InterfaceDataHolder
+from .interface import InterfaceDataHolder, CoherentInterfaceBuilder, TerminationType
 from .interface import InterfaceSettings as Settings
 from .interface import interface_init_zsl_builder, interface_patch_with_mean_abs_strain
 from ..convert import decorator_convert_material_args_kwargs_to_structure
@@ -14,6 +14,8 @@ def create_interfaces(
     sort_by_strain_and_size: bool = True,
     remove_duplicates: bool = True,
     is_logging_enabled: bool = True,
+    interface_builder: CoherentInterfaceBuilder = None,
+    termination: TerminationType = None,
 ) -> InterfaceDataHolder:
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
@@ -34,7 +36,7 @@ def create_interfaces(
     if is_logging_enabled:
         print("Creating interfaces...")
 
-    builder = interface_init_zsl_builder(substrate, layer, settings)
+    builder = interface_builder or interface_init_zsl_builder(substrate, layer, settings)
     interfaces_data = InterfaceDataHolder()
 
     for termination in builder.terminations:
@@ -64,3 +66,11 @@ def create_interfaces(
         print(f"Found {len(interfaces_data.get_interfaces_for_termination(0))} {unique_str} interfaces.")
 
     return interfaces_data
+
+
+def init_interface_builder(
+    substrate: Material,
+    layer: Material,
+    settings: Settings,
+) -> CoherentInterfaceBuilder:
+    return interface_init_zsl_builder(substrate, layer, settings)
