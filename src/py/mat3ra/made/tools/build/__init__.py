@@ -33,13 +33,7 @@ def create_interfaces(
     if is_logging_enabled:
         print("Creating interfaces...")
 
-    if interface_builder is None:
-        substrate = translate_to_bottom(substrate, settings["USE_CONVENTIONAL_CELL"])
-        layer = translate_to_bottom(layer, settings["USE_CONVENTIONAL_CELL"])
-        builder = interface_init_zsl_builder(substrate, layer, settings)
-    else:
-        builder = interface_builder
-
+    builder = interface_builder or init_interface_builder(substrate, layer, settings)
     interfaces_data = InterfaceDataHolder()
 
     if termination is not None:
