@@ -8,9 +8,9 @@ from ..modify import translate_to_bottom, wrap_to_unit_cell
 
 @decorator_convert_material_args_kwargs_to_structure
 def create_interfaces(
-    substrate: Material,
-    layer: Material,
-    settings: Settings,
+    substrate: Material = None,
+    layer: Material = None,
+    settings: Settings = None,
     sort_by_strain_and_size: bool = True,
     remove_duplicates: bool = True,
     is_logging_enabled: bool = True,
@@ -30,13 +30,16 @@ def create_interfaces(
     Returns:
         InterfaceDataHolder.
     """
-    substrate = translate_to_bottom(substrate, settings["USE_CONVENTIONAL_CELL"])
-    layer = translate_to_bottom(layer, settings["USE_CONVENTIONAL_CELL"])
-
     if is_logging_enabled:
         print("Creating interfaces...")
 
-    builder = interface_builder or interface_init_zsl_builder(substrate, layer, settings)
+    if interface_builder is None:
+        substrate = translate_to_bottom(substrate, settings["USE_CONVENTIONAL_CELL"])
+        layer = translate_to_bottom(layer, settings["USE_CONVENTIONAL_CELL"])
+        builder = interface_init_zsl_builder(substrate, layer, settings)
+    else:
+        builder = interface_builder
+
     interfaces_data = InterfaceDataHolder()
 
     if termination is not None:
@@ -71,9 +74,12 @@ def create_interfaces(
     return interfaces_data
 
 
+@decorator_convert_material_args_kwargs_to_structure
 def init_interface_builder(
     substrate: Material,
     layer: Material,
     settings: Settings,
 ) -> CoherentInterfaceBuilder:
+    substrate = translate_to_bottom(substrate, settings["USE_CONVENTIONAL_CELL"])
+    layer = translate_to_bottom(layer, settings["USE_CONVENTIONAL_CELL"])
     return interface_init_zsl_builder(substrate, layer, settings)
