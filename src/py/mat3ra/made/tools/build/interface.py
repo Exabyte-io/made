@@ -1,8 +1,8 @@
 import functools
 import types
 import numpy as np
-from typing import Union, List, Tuple, Dict, TypedDict
-from dataclasses import dataclass
+from typing import Union, List, Tuple, Dict
+from dataclasses import dataclass, field
 from enum import Enum
 from mat3ra.utils import array as array_utils
 from pymatgen.core.structure import Structure
@@ -26,18 +26,17 @@ class ZSLParameters:
 
 
 @dataclass
-class InterfaceParameters:
-    distance_z: float = 3.0
-    max_area: float = 400.0
-
-
-@dataclass
 class InterfaceSettings:
-    SubstrateParameters: SlabParameters = SlabParameters(miller_indices=(1, 1, 1), thickness=3)
-    LayerParameters: SlabParameters = SlabParameters(miller_indices=(0, 0, 1), thickness=1)
+    SubstrateParameters: SlabParameters = field(
+        default_factory=lambda: SlabParameters(miller_indices=(0, 0, 1), thickness=3)
+    )
+    LayerParameters: SlabParameters = field(
+        default_factory=lambda: SlabParameters(miller_indices=(0, 0, 1), thickness=1)
+    )
+    max_area: float = 400.0
+    distance_z: float = 3.0
     use_conventional_cell: bool = True
-    InterfaceParameters: InterfaceParameters = InterfaceParameters()
-    ZSLParameters: ZSLParameters = ZSLParameters(max_area=InterfaceParameters.max_area)
+    ZSLParameters: ZSLParameters = field(default_factory=lambda: ZSLParameters(max_area=InterfaceSettings.max_area))
 
 
 class StrainModes(Enum):
