@@ -11,6 +11,9 @@ from pymatgen.analysis.interfaces.coherent_interfaces import Interface
 from ..convert import convert_atoms_or_structure_to_material, decorator_convert_material_args_kwargs_to_structure
 
 
+DEFAULT_MAX_AREA = 400.0
+
+
 @dataclass
 class SlabParameters:
     miller_indices: Tuple[int, int, int] = (0, 0, 1)
@@ -33,10 +36,14 @@ class InterfaceSettings:
     LayerParameters: SlabParameters = field(
         default_factory=lambda: SlabParameters(miller_indices=(0, 0, 1), thickness=1)
     )
-    max_area: float = 400.0
+    max_area: float = DEFAULT_MAX_AREA
     distance_z: float = 3.0
     use_conventional_cell: bool = True
-    ZSLParameters: ZSLParameters = field(default_factory=lambda: ZSLParameters(max_area=InterfaceSettings.max_area))
+    ZSLParameters: ZSLParameters = field(default_factory=ZSLParameters)
+
+    def __post_init__(self):
+        if self.max_area != DEFAULT_MAX_AREA:
+            self.ZSLParameters.max_area = self.max_area
 
 
 class StrainModes(Enum):
