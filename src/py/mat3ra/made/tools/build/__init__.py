@@ -1,5 +1,5 @@
 from ...material import Material
-from .interface import InterfaceDataHolder
+from .interface import InterfaceDataHolder, CoherentInterfaceBuilder, TerminationType
 from .interface import InterfaceSettings as Settings
 from .interface import interface_init_zsl_builder, interface_patch_with_mean_abs_strain
 from ..convert import decorator_convert_material_args_kwargs_to_structure
@@ -8,12 +8,14 @@ from ..modify import translate_to_bottom, wrap_to_unit_cell
 
 @decorator_convert_material_args_kwargs_to_structure
 def create_interfaces(
-    substrate: Material,
-    layer: Material,
-    settings: Settings,
+    substrate: Material = None,
+    layer: Material = None,
+    settings: Settings = None,
     sort_by_strain_and_size: bool = True,
     remove_duplicates: bool = True,
     is_logging_enabled: bool = True,
+    interface_builder: CoherentInterfaceBuilder = None,
+    termination: TerminationType = None,
 ) -> InterfaceDataHolder:
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
@@ -28,14 +30,14 @@ def create_interfaces(
     Returns:
         InterfaceDataHolder.
     """
-    substrate = translate_to_bottom(substrate, settings["USE_CONVENTIONAL_CELL"])
-    layer = translate_to_bottom(layer, settings["USE_CONVENTIONAL_CELL"])
-
     if is_logging_enabled:
         print("Creating interfaces...")
 
-    builder = interface_init_zsl_builder(substrate, layer, settings)
+    builder = interface_builder or init_interface_builder(substrate, layer, settings)
     interfaces_data = InterfaceDataHolder()
+
+    if termination is not None:
+        builder.terminations = [termination]
 
     for termination in builder.terminations:
         all_interfaces_for_termination = builder.get_interfaces(
@@ -64,3 +66,14 @@ def create_interfaces(
         print(f"Found {len(interfaces_data.get_interfaces_for_termination(0))} {unique_str} interfaces.")
 
     return interfaces_data
+
+
+@decorator_convert_material_args_kwargs_to_structure
+def init_interface_builder(
+    substrate: Material,
+    layer: Material,
+    settings: Settings,
+) -> CoherentInterfaceBuilder:
+    substrate = translate_to_bottom(substrate, settings["USE_CONVENTIONAL_CELL"])
+    layer = translate_to_bottom(layer, settings["USE_CONVENTIONAL_CELL"])
+    return interface_init_zsl_builder(substrate, layer, settings)
