@@ -42,9 +42,9 @@ def create_interfaces(
     for termination in builder.terminations:
         all_interfaces_for_termination = builder.get_interfaces(
             termination,
-            gap=settings["INTERFACE_PARAMETERS"]["DISTANCE_Z"],
-            film_thickness=settings["LAYER_PARAMETERS"]["THICKNESS"],
-            substrate_thickness=settings["SUBSTRATE_PARAMETERS"]["THICKNESS"],
+            gap=settings.distance_z,
+            film_thickness=settings.LayerParameters.thickness,
+            substrate_thickness=settings.SubstrateParameters.thickness,
             in_layers=True,
         )
 
@@ -74,6 +74,6 @@ def init_interface_builder(
     layer: Material,
     settings: Settings,
 ) -> CoherentInterfaceBuilder:
-    substrate = translate_to_bottom(substrate, settings["USE_CONVENTIONAL_CELL"])
-    layer = translate_to_bottom(layer, settings["USE_CONVENTIONAL_CELL"])
+    substrate = translate_to_bottom(substrate, settings.use_conventional_cell)
+    layer = translate_to_bottom(layer, settings.use_conventional_cell)
     return interface_init_zsl_builder(substrate, layer, settings)
