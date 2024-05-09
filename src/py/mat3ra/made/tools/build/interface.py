@@ -2,6 +2,7 @@ import functools
 import types
 import numpy as np
 from typing import Union, List, Tuple, Dict, TypedDict
+from dataclasses import dataclass
 from enum import Enum
 from mat3ra.utils import array as array_utils
 from pymatgen.core.structure import Structure
@@ -10,29 +11,33 @@ from pymatgen.analysis.interfaces.coherent_interfaces import Interface
 from ..convert import convert_atoms_or_structure_to_material, decorator_convert_material_args_kwargs_to_structure
 
 
-class SlabParameters(TypedDict):
-    MILLER_INDICES: Tuple[int, int, int]
-    THICKNESS: int
+@dataclass
+class SlabParameters:
+    miller_indices: Tuple[int, int, int] = (0, 0, 1)
+    thickness: int = 3
 
 
-class ZSLParameters(TypedDict):
-    MAX_AREA_TOL: float
-    MAX_AREA: float
-    MAX_LENGTH_TOL: float
-    MAX_ANGLE_TOL: float
+@dataclass
+class ZSLParameters:
+    max_area: float = 400.0
+    max_area_tol: float = 0.09
+    max_length_tol: float = 0.03
+    max_angle_tol: float = 0.01
 
 
-class InterfaceParameters(TypedDict):
-    DISTANCE_Z: float
-    MAX_AREA: float
+@dataclass
+class InterfaceParameters:
+    distance_z: float = 3.0
+    max_area: float = 400.0
 
 
-class InterfaceSettings(TypedDict):
-    SUBSTRATE_PARAMETERS: SlabParameters
-    LAYER_PARAMETERS: SlabParameters
-    USE_CONVENTIONAL_CELL: bool
-    ZSL_PARAMETERS: ZSLParameters
-    INTERFACE_PARAMETERS: InterfaceParameters
+@dataclass
+class InterfaceSettings:
+    SubstrateParameters: SlabParameters = SlabParameters(miller_indices=(1, 1, 1), thickness=3)
+    LayerParameters: SlabParameters = SlabParameters(miller_indices=(0, 0, 1), thickness=1)
+    use_conventional_cell: bool = True
+    InterfaceParameters: InterfaceParameters = InterfaceParameters()
+    ZSLParameters: ZSLParameters = ZSLParameters(max_area=InterfaceParameters.max_area)
 
 
 class StrainModes(Enum):
@@ -57,17 +62,17 @@ def interface_init_zsl_builder(
     substrate: Structure, layer: Structure, settings: InterfaceSettings
 ) -> CoherentInterfaceBuilder:
     generator: ZSLGenerator = ZSLGenerator(
-        max_area_ratio_tol=settings["ZSL_PARAMETERS"]["MAX_AREA_TOL"],
-        max_area=settings["ZSL_PARAMETERS"]["MAX_AREA"],
-        max_length_tol=settings["ZSL_PARAMETERS"]["MAX_LENGTH_TOL"],
-        max_angle_tol=settings["ZSL_PARAMETERS"]["MAX_ANGLE_TOL"],
+        max_area_ratio_tol=settings.ZSLParameters.max_area_tol,
+        max_area=settings.ZSLParameters.max_area,
+        max_length_tol=settings.ZSLParameters.max_length_tol,
+        max_angle_tol=settings.ZSLParameters.max_angle_tol,
     )
 
     builder = CoherentInterfaceBuilder(
         substrate_structure=substrate,
         film_structure=layer,
-        substrate_miller=settings["SUBSTRATE_PARAMETERS"]["MILLER_INDICES"],
-        film_miller=settings["LAYER_PARAMETERS"]["MILLER_INDICES"],
+        substrate_miller=settings.SubstrateParameters.miller_indices,
+        film_miller=settings.LayerParameters.miller_indices,
         zslgen=generator,
     )
 
