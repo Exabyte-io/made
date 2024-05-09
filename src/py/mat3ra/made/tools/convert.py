@@ -1,11 +1,13 @@
 import inspect
 from functools import wraps
 from typing import Any, Callable, Dict, Union
+from enum import Enum
 
 from ase import Atoms
 from mat3ra.made.material import Material
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pymatgen.core.structure import Lattice, Structure
+from pymatgen.core.interface import Interface
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
 
@@ -52,7 +54,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> S
     return structure
 
 
-def from_pymatgen(structure: Structure):
+def from_pymatgen(structure: Structure or Interface):
     """
     Converts a pymatgen Structure object to a material object in ESSE format.
 
@@ -91,13 +93,22 @@ def from_pymatgen(structure: Structure):
         },
     }
 
+    metadata = {"boundaryConditions": {"type": "pbc", "offset": 0}}
+
+    if "interface_properties" in structure.__dict__:
+        interface_props = {
+            convert_key(k): v.tolist() if hasattr(v, "tolist") else v for k, v in structure.interface_properties.items()
+        }
+        metadata["interface_properties"] = interface_props
+        print(metadata)
+
     material_data = {
         "name": structure.formula,
         "basis": basis,
         "lattice": lattice,
         "isNonPeriodic": not structure.is_ordered,
         "_id": "",
-        "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+        "metadata": metadata,
         "isUpdated": True,
     }
 
@@ -211,3 +222,12 @@ def convert_atoms_or_structure_to_material(item):
     elif isinstance(item, Atoms):
         return from_ase(item)
     return item
+
+
+def convert_key(key):
+    """
+    Convert enum keys to strings for JSON serialization.
+    """
+    if isinstance(key, Enum):
+        return key.value
+    return key
