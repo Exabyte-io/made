@@ -1,6 +1,7 @@
 import platform
+
 from mat3ra.made.tools.build import create_interfaces
-from mat3ra.made.tools.build.interface import InterfaceSettings, ZSLParameters, SlabParameters
+from mat3ra.made.tools.build.interface import InterfaceSettings, SlabParameters, ZSLParameters
 
 from .fixtures import LAYER_MATERIAL, SUBSTRATE_MATERIAL
 
@@ -9,8 +10,8 @@ MAX_AREA = 200
 EXPECTED_NUMBER_OF_INTERFACES = 1 if platform.python_version().startswith("3.8") else 2
 settings = InterfaceSettings(
     use_conventional_cell=True,
-    SubstrateParameters=SlabParameters(miller_indices=(1, 1, 1)),
-    ZSLParameters=ZSLParameters(max_area=MAX_AREA),
+    substrate_parameters=SlabParameters(miller_indices=(1, 1, 1)),
+    max_area=MAX_AREA,
 )
 
 

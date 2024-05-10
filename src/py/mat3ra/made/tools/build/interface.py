@@ -36,22 +36,23 @@ class ZSLParameters:
 class InterfaceSettings:
     def __init__(
         self,
-        SubstrateParameters=SlabParameters(miller_indices=(0, 0, 1), thickness=3),
-        LayerParameters=SlabParameters(miller_indices=(0, 0, 1), thickness=1),
+        substrate_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=3),
+        layer_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=1),
         max_area=DEFAULT_MAX_AREA,
         distance_z=3.0,
         use_conventional_cell=True,
-        ZSLParameters=ZSLParameters(),
+        zsl_parameters=ZSLParameters(),
     ):
-        self.SubstrateParameters = SubstrateParameters
-        self.LayerParameters = LayerParameters
+        self.SubstrateParameters = substrate_parameters
+        self.LayerParameters = layer_parameters
 
         self.max_area = max_area
         self.distance_z = distance_z
         self.use_conventional_cell = use_conventional_cell
 
-        self.ZSLParameters = ZSLParameters
-        if self.max_area != DEFAULT_MAX_AREA:
+        self.ZSLParameters = zsl_parameters
+        # If max_area in ZSLParameters isn't set directly, use the one in the settings
+        if self.ZSLParameters.max_area == DEFAULT_MAX_AREA:
             self.ZSLParameters.max_area = self.max_area
 
 
