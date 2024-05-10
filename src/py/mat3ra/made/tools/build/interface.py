@@ -2,7 +2,7 @@ import functools
 import types
 import numpy as np
 from typing import Union, List, Tuple, Dict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from mat3ra.utils import array as array_utils
 from pymatgen.core.structure import Structure
@@ -14,18 +14,24 @@ from ..convert import convert_atoms_or_structure_to_material, decorator_convert_
 DEFAULT_MAX_AREA = 400.0
 
 
-@dataclass
 class SlabParameters:
-    miller_indices: Tuple[int, int, int] = (0, 0, 1)
-    thickness: int = 3
+    def __init__(self, miller_indices: Tuple[int, int, int] = (0, 0, 1), thickness: int = 3):
+        self.miller_indices = miller_indices
+        self.thickness = thickness
 
 
-@dataclass
 class ZSLParameters:
-    max_area: float = DEFAULT_MAX_AREA
-    max_area_tol: float = 0.09
-    max_length_tol: float = 0.03
-    max_angle_tol: float = 0.01
+    def __init__(
+        self,
+        max_area: float = DEFAULT_MAX_AREA,
+        max_area_tol: float = 0.09,
+        max_length_tol: float = 0.03,
+        max_angle_tol: float = 0.01,
+    ):
+        self.max_area = max_area
+        self.max_area_tol = max_area_tol
+        self.max_length_tol = max_length_tol
+        self.max_angle_tol = max_angle_tol
 
 
 class InterfaceSettings:
