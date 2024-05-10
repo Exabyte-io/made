@@ -1,13 +1,13 @@
 import inspect
+from enum import Enum
 from functools import wraps
 from typing import Any, Callable, Dict, Union
-from enum import Enum
 
 from ase import Atoms
 from mat3ra.made.material import Material
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pymatgen.core.structure import Lattice, Structure
 from pymatgen.core.interface import Interface
+from pymatgen.core.structure import Lattice, Structure
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
 
@@ -54,7 +54,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> S
     return structure
 
 
-def from_pymatgen(structure: Structure or Interface):
+def from_pymatgen(structure: Union[Structure, Interface]):
     """
     Converts a pymatgen Structure object to a material object in ESSE format.
 

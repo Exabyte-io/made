@@ -4,18 +4,19 @@ from .interface import InterfaceSettings as Settings
 from .interface import interface_init_zsl_builder, interface_patch_with_mean_abs_strain
 from ..convert import decorator_convert_material_args_kwargs_to_structure
 from ..modify import translate_to_bottom, wrap_to_unit_cell
+from typing import Optional
 
 
 @decorator_convert_material_args_kwargs_to_structure
 def create_interfaces(
-    substrate: Material = None,
-    layer: Material = None,
-    settings: Settings = None,
+    substrate: Optional[Material] = None,
+    layer: Optional[Material] = None,
+    settings: Settings = Settings(),
     sort_by_strain_and_size: bool = True,
     remove_duplicates: bool = True,
     is_logging_enabled: bool = True,
-    interface_builder: CoherentInterfaceBuilder = None,
-    termination: TerminationType = None,
+    interface_builder: Optional[CoherentInterfaceBuilder] = None,
+    termination: Optional[TerminationType] = None,
 ) -> InterfaceDataHolder:
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.

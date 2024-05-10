@@ -1,7 +1,7 @@
 import platform
 
 from mat3ra.made.tools.build import create_interfaces
-from mat3ra.made.tools.build.interface import InterfaceSettings, SlabParameters, ZSLParameters
+from mat3ra.made.tools.build.interface import InterfaceSettings, SlabParameters
 
 from .fixtures import LAYER_MATERIAL, SUBSTRATE_MATERIAL
 
