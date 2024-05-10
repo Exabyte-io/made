@@ -2,7 +2,6 @@ import functools
 import types
 import numpy as np
 from typing import Union, List, Tuple, Dict
-from dataclasses import dataclass
 from enum import Enum
 from mat3ra.utils import array as array_utils
 from pymatgen.core.structure import Structure
