@@ -1,14 +1,13 @@
 import functools
 import types
+import json
 import numpy as np
 from typing import Union, List, Tuple, Dict
 from enum import Enum
 from mat3ra.utils import array as array_utils
 from pymatgen.core.structure import Structure
-from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
-from pymatgen.analysis.interfaces.coherent_interfaces import Interface
+from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
 from ..convert import convert_atoms_or_structure_to_material, decorator_convert_material_args_kwargs_to_structure
-
 
 DEFAULT_MAX_AREA = 400.0
 
@@ -17,6 +16,9 @@ class SlabParameters:
     def __init__(self, miller_indices: Tuple[int, int, int] = (0, 0, 1), thickness: int = 3):
         self.miller_indices = miller_indices
         self.thickness = thickness
+
+    def __repr__(self):
+        return json.dumps(self.__dict__)
 
 
 class ZSLParameters:
@@ -31,6 +33,9 @@ class ZSLParameters:
         self.max_area_tol = max_area_tol
         self.max_length_tol = max_length_tol
         self.max_angle_tol = max_angle_tol
+
+    def __repr__(self):
+        return json.dumps(self.__dict__)
 
 
 class InterfaceSettings:
@@ -54,6 +59,19 @@ class InterfaceSettings:
         # If max_area in ZSLParameters isn't set directly, use the one in the settings
         if self.ZSLParameters.max_area == DEFAULT_MAX_AREA:
             self.ZSLParameters.max_area = self.max_area
+
+    def __str__(self):
+        return json.dumps(
+            {
+                "substrate_parameters": self.SubstrateParameters.__dict__,
+                "layer_parameters": self.LayerParameters.__dict__,
+                "max_area": self.max_area,
+                "distance_z": self.distance_z,
+                "use_conventional_cell": self.use_conventional_cell,
+                "zsl_parameters": self.ZSLParameters.__dict__,
+            },
+            indent=4,
+        )
 
 
 class StrainModes(Enum):
