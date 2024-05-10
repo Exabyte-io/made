@@ -95,12 +95,13 @@ def from_pymatgen(structure: Union[Structure, Interface]):
 
     metadata = {"boundaryConditions": {"type": "pbc", "offset": 0}}
 
+    # TODO: consider using Interface JSONSchema from ESSE when such created and adapt interface_properties accordingly.
+    # Add interface properties to metadata according to pymatgen Interface as a JSON object
     if "interface_properties" in structure.__dict__:
         interface_props = {
             convert_key(k): v.tolist() if hasattr(v, "tolist") else v for k, v in structure.interface_properties.items()
         }
         metadata["interface_properties"] = interface_props
-        print(metadata)
 
     material_data = {
         "name": structure.formula,
