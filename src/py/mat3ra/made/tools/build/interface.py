@@ -22,26 +22,30 @@ class SlabParameters:
 
 @dataclass
 class ZSLParameters:
-    max_area: float = 400.0
+    max_area: float = DEFAULT_MAX_AREA
     max_area_tol: float = 0.09
     max_length_tol: float = 0.03
     max_angle_tol: float = 0.01
 
 
-@dataclass
 class InterfaceSettings:
-    SubstrateParameters: SlabParameters = field(
-        default_factory=lambda: SlabParameters(miller_indices=(0, 0, 1), thickness=3)
-    )
-    LayerParameters: SlabParameters = field(
-        default_factory=lambda: SlabParameters(miller_indices=(0, 0, 1), thickness=1)
-    )
-    max_area: float = DEFAULT_MAX_AREA
-    distance_z: float = 3.0
-    use_conventional_cell: bool = True
-    ZSLParameters: ZSLParameters = field(default_factory=ZSLParameters)
+    def __init__(
+        self,
+        SubstrateParameters=SlabParameters(miller_indices=(0, 0, 1), thickness=3),
+        LayerParameters=SlabParameters(miller_indices=(0, 0, 1), thickness=1),
+        max_area=DEFAULT_MAX_AREA,
+        distance_z=3.0,
+        use_conventional_cell=True,
+        ZSLParameters=ZSLParameters(),
+    ):
+        self.SubstrateParameters = SubstrateParameters
+        self.LayerParameters = LayerParameters
 
-    def __post_init__(self):
+        self.max_area = max_area
+        self.distance_z = distance_z
+        self.use_conventional_cell = use_conventional_cell
+
+        self.ZSLParameters = ZSLParameters
         if self.max_area != DEFAULT_MAX_AREA:
             self.ZSLParameters.max_area = self.max_area
 
