@@ -38,7 +38,7 @@ class RelaxationSettings:
         self.kwargs = kwargs
 
     def __repr__(self):
-        return f"RelaxationSettings(calculator={self.calculator}, optimizer={self.optimizer}, fmax={self.fmax}, kwargs={self.kwargs})"
+        return json.dumps(self.__dict__)
 
     def __str__(self):
         return json.dumps(
