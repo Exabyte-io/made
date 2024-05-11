@@ -1,8 +1,20 @@
+from enum import Enum
+
 from ase import Atoms
 from ase.calculators.calculator import Calculator
+from ase.calculators.emt import EMT
 
 from .analyze import get_surface_area
 from .convert import decorator_convert_material_args_kwargs_to_atoms
+
+# TODO: ASE related enums and maps should be placed close to each other
+
+
+class CalculatorEnum(Enum):
+    EMT = "emt"
+
+
+calculator_by_name_map = {"emt": EMT}
 
 
 @decorator_convert_material_args_kwargs_to_atoms
