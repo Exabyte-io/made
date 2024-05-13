@@ -38,6 +38,11 @@ export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
 }
 type MaterialBaseEntity = InstanceType<typeof HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity>;
 export type MaterialBaseEntityConstructor<T extends MaterialBaseEntity = MaterialBaseEntity> = new (...args: any[]) => T;
+export interface MaterialFileConfig {
+    src: Required<MaterialSchema>["src"];
+    icsdId?: Required<MaterialSchema>["icsdId"];
+    external?: Required<MaterialSchema>["external"];
+}
 export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = MaterialBaseEntityConstructor>(superclass: T): {
     new (...config: any[]): {
         _json: MaterialSchemaJSON;
@@ -241,6 +246,10 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
             };
         };
     };
+    /**
+     * @summary Returns a config to create a material from a CIF or POSCAR file.
+     */
+    getMaterialFileConfig(fileName: string, fileContent: string, fileExtension: string): MaterialFileConfig;
 } & T;
 export declare const Material: {
     new (...config: any[]): {
@@ -445,6 +454,10 @@ export declare const Material: {
             };
         };
     };
+    /**
+     * @summary Returns a config to create a material from a CIF or POSCAR file.
+     */
+    getMaterialFileConfig(fileName: string, fileContent: string, fileExtension: string): MaterialFileConfig;
 } & (new (...args: any[]) => {
     consistencyChecks: object[];
     addConsistencyChecks(array: object[]): void;
@@ -476,9 +489,7 @@ export declare const Material: {
     prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
-    setProps(json?: AnyObject | undefined): any; /**
-     * Returns a copy of the material with conventional cell constructed instead of primitive.
-     */
+    setProps(json?: AnyObject | undefined): any;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
     toJSONQuick(exclude?: string[] | undefined): AnyObject;

@@ -68,6 +68,11 @@ export const defaultMaterialConfig = {
     },
 };
 
+const EXTERNAL_SOURCES = {
+    materials_project: "MaterialsProject",
+    icsd: "ICSD",
+};
+
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
 
 type MaterialBaseEntity = InstanceType<
@@ -78,6 +83,12 @@ export type MaterialBaseEntityConstructor<T extends MaterialBaseEntity = Materia
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any[]
 ) => T;
+
+export interface MaterialFileConfig {
+    src: Required<MaterialSchema>["src"];
+    icsdId?: Required<MaterialSchema>["icsdId"];
+    external?: Required<MaterialSchema>["external"];
+}
 
 export function MaterialMixin<
     T extends MaterialBaseEntityConstructor = MaterialBaseEntityConstructor,
@@ -387,6 +398,37 @@ export function MaterialMixin<
             }
 
             return checks;
+        }
+
+        /**
+         * @summary Returns a config to create a material from a CIF or POSCAR file.
+         */
+        static getMaterialFileConfig(
+            fileName: string,
+            fileContent: string,
+            fileExtension: string,
+        ): MaterialFileConfig {
+            const config: MaterialFileConfig = {
+                src: {
+                    extension: fileExtension,
+                    filename: fileName,
+                    text: fileContent,
+                    hash: CryptoJS.MD5(fileContent).toString(),
+                },
+            };
+            // add ICSD ID if present
+            if (fileExtension === "cif") {
+                const cifMeta = parsers.cif.parseMeta(fileContent);
+                if (cifMeta.icsdId) {
+                    config.icsdId = cifMeta.icsdId;
+                    config.external = {
+                        id: cifMeta.icsdId,
+                        source: EXTERNAL_SOURCES.icsd,
+                        origin: true,
+                    };
+                }
+            }
+            return config;
         }
     }
 
