@@ -1,13 +1,16 @@
+export interface Meta {
+    icsdId?: number;
+}
+
 /**
  * Extracts meta information from a CIF file
- * @param {String} txt - CIF file text.
- * @return {Object}
+ * @param txt - CIF file text.
  */
-function parseMeta(txt) {
+function parseMeta(txt: string): Meta {
     const REGEX = {
         ICSD_ID: /_database_code_ICSD\s+(\d+)/,
     };
-    const meta = {};
+    const meta: Meta = {};
     const groups = txt.match(REGEX.ICSD_ID);
 
     if (groups) {
