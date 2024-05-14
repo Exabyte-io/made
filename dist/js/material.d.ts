@@ -34,6 +34,7 @@ export declare const defaultMaterialConfig: {
         };
     };
 };
+export type MaterialFileSrc = Required<MaterialSchema>["src"];
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
 }
 type MaterialBaseEntity = InstanceType<typeof HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity>;
@@ -255,7 +256,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
     /**
      * @summary Returns a config to create a material from a CIF or POSCAR file.
      */
-    getMaterialFileConfig(fileName: string, fileContent: string, fileExtension: string): MaterialFileConfig;
+    constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): MaterialFileSrc;
 } & T;
 export declare const Material: {
     new (...config: any[]): {
@@ -469,7 +470,7 @@ export declare const Material: {
     /**
      * @summary Returns a config to create a material from a CIF or POSCAR file.
      */
-    getMaterialFileConfig(fileName: string, fileContent: string, fileExtension: string): MaterialFileConfig;
+    constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): MaterialFileSrc;
 } & (new (...args: any[]) => {
     consistencyChecks: object[];
     addConsistencyChecks(array: object[]): void;
@@ -479,10 +480,7 @@ export declare const Material: {
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
     setProps(json?: AnyObject | undefined): any;
-    toJSON(exclude?: string[] | undefined): AnyObject; /**
-     * Converts current material's basis coordinates to cartesian.
-     * No changes if coordinates already cartesian.
-     */
+    toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
@@ -512,10 +510,10 @@ export declare const Material: {
     validate(): void;
     clean(config: AnyObject): AnyObject;
     isValid(): boolean;
-    id: string;
-    readonly cls: string; /**
+    id: string; /**
      * Returns a copy of the material with conventional cell constructed instead of primitive.
      */
+    readonly cls: string;
     getClsName(): string;
     readonly slug: string;
     readonly isSystemEntity: boolean;
