@@ -319,9 +319,6 @@ function MaterialMixin(superclass) {
             }
             return checks;
         }
-        /**
-         * @summary Returns a config to create a material from a CIF or POSCAR file.
-         */
         static constructMaterialFileSource(fileName, fileContent, fileExtension) {
             return {
                 extension: fileExtension,
