@@ -54,10 +54,6 @@ exports.defaultMaterialConfig = {
         },
     },
 };
-const EXTERNAL_SOURCES = {
-    materials_project: "MaterialsProject",
-    icsd: "ICSD",
-};
 function MaterialMixin(superclass) {
     class MadeMaterial extends superclass {
         // TODO: add constraints (and other properties if needed) to ESSE MaterialSchema, then uncomment the line below to allow validation
@@ -326,28 +322,13 @@ function MaterialMixin(superclass) {
         /**
          * @summary Returns a config to create a material from a CIF or POSCAR file.
          */
-        static getMaterialFileConfig(fileName, fileContent, fileExtension) {
-            const config = {
-                src: {
-                    extension: fileExtension,
-                    filename: fileName,
-                    text: fileContent,
-                    hash: crypto_js_1.default.MD5(fileContent).toString(),
-                },
+        static constructMaterialFileSource(fileName, fileContent, fileExtension) {
+            return {
+                extension: fileExtension,
+                filename: fileName,
+                text: fileContent,
+                hash: crypto_js_1.default.MD5(fileContent).toString(),
             };
-            // add ICSD ID if present
-            if (fileExtension === "cif") {
-                const cifMeta = parsers_1.default.cif.parseMeta(fileContent);
-                if (cifMeta.icsdId) {
-                    config.icsdId = cifMeta.icsdId;
-                    config.external = {
-                        id: cifMeta.icsdId,
-                        source: EXTERNAL_SOURCES.icsd,
-                        origin: true,
-                    };
-                }
-            }
-            return config;
         }
     }
     return MadeMaterial;

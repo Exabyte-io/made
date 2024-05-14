@@ -66,10 +66,7 @@ export const defaultMaterialConfig = {
     },
 };
 
-const EXTERNAL_SOURCES = {
-    materials_project: "MaterialsProject",
-    icsd: "ICSD",
-};
+export type MaterialFileSrc = Required<MaterialSchema>["src"];
 
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
 
@@ -409,32 +406,17 @@ export function MaterialMixin<
         /**
          * @summary Returns a config to create a material from a CIF or POSCAR file.
          */
-        static getMaterialFileConfig(
+        static constructMaterialFileSource(
             fileName: string,
             fileContent: string,
             fileExtension: string,
-        ): MaterialFileConfig {
-            const config: MaterialFileConfig = {
-                src: {
-                    extension: fileExtension,
-                    filename: fileName,
-                    text: fileContent,
-                    hash: CryptoJS.MD5(fileContent).toString(),
-                },
+        ): MaterialFileSrc {
+            return {
+                extension: fileExtension,
+                filename: fileName,
+                text: fileContent,
+                hash: CryptoJS.MD5(fileContent).toString(),
             };
-            // add ICSD ID if present
-            if (fileExtension === "cif") {
-                const cifMeta = parsers.cif.parseMeta(fileContent);
-                if (cifMeta.icsdId) {
-                    config.icsdId = cifMeta.icsdId;
-                    config.external = {
-                        id: cifMeta.icsdId,
-                        source: EXTERNAL_SOURCES.icsd,
-                        origin: true,
-                    };
-                }
-            }
-            return config;
         }
     }
 
