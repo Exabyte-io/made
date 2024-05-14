@@ -1,10 +1,8 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/code/dist/js/entity/in_memory";
-// import MaterialJSONSchemaObject from "@mat3ra/esse/dist/js/schema/material.json";
 import {
     ConsistencyCheck,
     DerivedPropertiesSchema,
-    FileSourceSchema,
     InChIRepresentationSchema,
     MaterialSchema,
 } from "@mat3ra/esse/dist/js/types";
@@ -121,10 +119,10 @@ export function MaterialMixin<
         }
 
         get src() {
-            return this.prop<FileSourceSchema>("src") as FileSourceSchema;
+            return this.prop("src");
         }
 
-        set src(src: FileSourceSchema) {
+        set src(src: MaterialSchema["src"]) {
             this.setProp("src", src);
         }
 
@@ -173,6 +171,13 @@ export function MaterialMixin<
             return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
         }
 
+        // should be private, but TS throws error "Property 'unsetFileProps' of exported class expression may not be private or protected"
+        unsetFileProps() {
+            this.unsetProp("src");
+            this.unsetProp("icsdId");
+            this.unsetProp("external");
+        }
+
         /**
          * @param textOrObject Basis text or JSON object.
          * @param format Format (xyz, etc.)
@@ -188,6 +193,7 @@ export function MaterialMixin<
                     basis = textOrObject as BasisConfig;
             }
             this.setProp("basis", basis);
+            this.unsetFileProps();
             this.updateFormula();
         }
 
@@ -220,6 +226,7 @@ export function MaterialMixin<
 
         set lattice(config: BravaisConfigProps | undefined) {
             this.setProp("lattice", config);
+            this.unsetFileProps();
         }
 
         get Lattice(): Lattice {
@@ -322,9 +329,8 @@ export function MaterialMixin<
          * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
          */
         getAsPOSCAR(ignoreOriginal = false, omitConstraints = false): string {
-            const { src } = this;
             // By default return original source if exists
-            if (src && src.extension === "poscar" && !ignoreOriginal) {
+            if (this.src?.extension === "poscar" && !ignoreOriginal) {
                 return this.src.text;
             }
             return parsers.poscar.toPoscar(this.toJSON(), omitConstraints);

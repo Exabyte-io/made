@@ -124,6 +124,12 @@ function MaterialMixin(superclass) {
         get unitCellFormula() {
             return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
         }
+        // should be private, but TS throws error "Property 'unsetFileProps' of exported class expression may not be private or protected"
+        unsetFileProps() {
+            this.unsetProp("src");
+            this.unsetProp("icsdId");
+            this.unsetProp("external");
+        }
         /**
          * @param textOrObject Basis text or JSON object.
          * @param format Format (xyz, etc.)
@@ -139,6 +145,7 @@ function MaterialMixin(superclass) {
                     basis = textOrObject;
             }
             this.setProp("basis", basis);
+            this.unsetFileProps();
             this.updateFormula();
         }
         setBasisConstraints(constraints) {
@@ -165,6 +172,7 @@ function MaterialMixin(superclass) {
         }
         set lattice(config) {
             this.setProp("lattice", config);
+            this.unsetFileProps();
         }
         get Lattice() {
             return new lattice_1.Lattice(this.lattice);
@@ -257,9 +265,9 @@ function MaterialMixin(superclass) {
          * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
          */
         getAsPOSCAR(ignoreOriginal = false, omitConstraints = false) {
-            const { src } = this;
+            var _a;
             // By default return original source if exists
-            if (src && src.extension === "poscar" && !ignoreOriginal) {
+            if (((_a = this.src) === null || _a === void 0 ? void 0 : _a.extension) === "poscar" && !ignoreOriginal) {
                 return this.src.text;
             }
             return parsers_1.default.poscar.toPoscar(this.toJSON(), omitConstraints);
