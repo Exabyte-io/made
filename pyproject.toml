@@ -18,7 +18,7 @@ dependencies = [
     # add requirements here
     "numpy",
 #    "mat3ra-utils",
-    "mat3ra-utils@git+ssh://git@github.com/Exabyte-io/utils.git@7f5da61b1db6fbfa7f29f75f5ef5e1a48e9c40ab",
+    "mat3ra-utils@git+https://github.com/Exabyte-io/utils.git@7f5da61b1db6fbfa7f29f75f5ef5e1a48e9c40ab",
     "mat3ra-esse",
     "mat3ra-code",
 ]
