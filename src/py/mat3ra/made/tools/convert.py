@@ -6,6 +6,8 @@ from typing import Any, Callable, Dict, Union
 from ase import Atoms
 from mat3ra.made.material import Material
 from mat3ra.utils.mixins import RoundNumericValuesMixin
+from mat3ra.utils.object import convert_key_and_round
+
 from pymatgen.core.interface import Interface
 from pymatgen.core.structure import Lattice, Structure
 from pymatgen.io.ase import AseAtomsAdaptor
@@ -97,10 +99,12 @@ def from_pymatgen(structure: Union[Structure, Interface]):
 
     # TODO: consider using Interface JSONSchema from ESSE when such created and adapt interface_properties accordingly.
     # Add interface properties to metadata according to pymatgen Interface as a JSON object
-    if "interface_properties" in structure.__dict__:
-        interface_props = {
-            convert_key(k): v.tolist() if hasattr(v, "tolist") else v for k, v in structure.interface_properties.items()
-        }
+    if hasattr(structure, "interface_properties"):
+        interface_props = {}
+        for k, v in structure.interface_properties.items():
+            k, v = convert_key_and_round(k, v, __round__)
+            interface_props[k] = v
+        metadata["interface_properties"] = interface_props
         metadata["interface_properties"] = interface_props
 
     material_data = {

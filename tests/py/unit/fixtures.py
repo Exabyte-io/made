@@ -34,13 +34,7 @@ INTERFACE_PROPERTIES_MOCK = {
     "substrate_vectors": [[-3.5, 3.5, 0.0], [-3.5, 0.0, 3.5]],
     "film_transformation": [[2.0, 0.0], [0.0, 2.0]],
     "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
-    "strain": Strain(
-        [
-            [4.74636368e-03, -1.07111363e-16, -2.13208193e-17],
-            [-1.07111363e-16, 4.74636368e-03, 5.36172802e-18],
-            [-2.13208193e-17, 5.36172802e-18, -5.55111512e-17],
-        ]
-    ),
+    "strain": Strain([[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, 0.0], [-0.0, 0.0, -0.0]]),
     "von_mises_strain": 0.1,
     "termination": INTERFACE_TERMINATION,
     "film_thickness": 1,
@@ -53,16 +47,12 @@ INTERFACE_PROPERTIES_JSON = {
     "substrate_vectors": [[-3.5, 3.5, 0.0], [-3.5, 0.0, 3.5]],
     "film_transformation": [[2.0, 0.0], [0.0, 2.0]],
     "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
-    "strain": [
-        [0.0047463636820092026, -1.0711136330719372e-16, -2.132081932243309e-17],
-        [-1.0711136330719372e-16, 0.0047463636820092026, 5.3617280208039476e-18],
-        [-2.132081932243309e-17, 5.3617280208039476e-18, -5.551115123125783e-17],
-    ],
+    "strain": [[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, 0.0], [-0.0, 0.0, -0.0]],
     "von_mises_strain": 0.1,
     "termination": INTERFACE_TERMINATION,
     "film_thickness": 1,
     "substrate_thickness": 3,
-    "mean_abs_strain": 0.0010500000000000002,
+    "mean_abs_strain": 0.00105,
 }
 
 # Add properties to interface structure
