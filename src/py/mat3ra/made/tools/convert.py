@@ -7,7 +7,6 @@ from ase import Atoms
 from mat3ra.made.material import Material
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from mat3ra.utils.object import convert_key_and_round
-
 from pymatgen.core.interface import Interface
 from pymatgen.core.structure import Lattice, Structure
 from pymatgen.io.ase import AseAtomsAdaptor
