@@ -1,6 +1,6 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/code/dist/js/entity/in_memory";
-import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
+import { ConsistencyCheck, DerivedPropertiesSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { ConstrainedBasis } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
@@ -47,7 +47,12 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
     new (...config: any[]): {
         _json: MaterialSchemaJSON;
         toJSON(): MaterialJSON;
-        src: FileSourceSchema;
+        src: {
+            extension?: string | undefined;
+            filename: string;
+            text: string;
+            hash: string;
+        } | undefined;
         updateFormula(): void;
         /**
          * Gets Bolean value for whether or not a material is non-periodic vs periodic.
@@ -97,6 +102,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
          */
         readonly formula: string;
         readonly unitCellFormula: string;
+        unsetFileProps(): void;
         /**
          * @param textOrObject Basis text or JSON object.
          * @param format Format (xyz, etc.)
@@ -255,7 +261,12 @@ export declare const Material: {
     new (...config: any[]): {
         _json: MaterialSchemaJSON;
         toJSON(): MaterialJSON;
-        src: FileSourceSchema;
+        src: {
+            extension?: string | undefined;
+            filename: string;
+            text: string;
+            hash: string;
+        } | undefined;
         updateFormula(): void;
         /**
          * Gets Bolean value for whether or not a material is non-periodic vs periodic.
@@ -305,6 +316,7 @@ export declare const Material: {
          */
         readonly formula: string;
         readonly unitCellFormula: string;
+        unsetFileProps(): void;
         /**
          * @param textOrObject Basis text or JSON object.
          * @param format Format (xyz, etc.)
@@ -467,7 +479,10 @@ export declare const Material: {
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
     setProps(json?: AnyObject | undefined): any;
-    toJSON(exclude?: string[] | undefined): AnyObject;
+    toJSON(exclude?: string[] | undefined): AnyObject; /**
+     * Converts current material's basis coordinates to cartesian.
+     * No changes if coordinates already cartesian.
+     */
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
@@ -498,7 +513,9 @@ export declare const Material: {
     clean(config: AnyObject): AnyObject;
     isValid(): boolean;
     id: string;
-    readonly cls: string;
+    readonly cls: string; /**
+     * Returns a copy of the material with conventional cell constructed instead of primitive.
+     */
     getClsName(): string;
     readonly slug: string;
     readonly isSystemEntity: boolean;
