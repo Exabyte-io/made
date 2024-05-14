@@ -3,6 +3,7 @@ import { AnyObject } from "@mat3ra/code/dist/js/entity/in_memory";
 import {
     ConsistencyCheck,
     DerivedPropertiesSchema,
+    FileSourceSchema,
     InChIRepresentationSchema,
     MaterialSchema,
 } from "@mat3ra/esse/dist/js/types";
@@ -66,8 +67,6 @@ export const defaultMaterialConfig = {
     },
 };
 
-export type MaterialFileSrc = Required<MaterialSchema>["src"];
-
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
 
 type MaterialBaseEntity = InstanceType<
@@ -78,12 +77,6 @@ export type MaterialBaseEntityConstructor<T extends MaterialBaseEntity = Materia
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any[]
 ) => T;
-
-export interface MaterialFileConfig {
-    src: Required<MaterialSchema>["src"];
-    icsdId?: Required<MaterialSchema>["icsdId"];
-    external?: Required<MaterialSchema>["external"];
-}
 
 export function MaterialMixin<
     T extends MaterialBaseEntityConstructor = MaterialBaseEntityConstructor,
@@ -119,7 +112,7 @@ export function MaterialMixin<
             return this.prop("src");
         }
 
-        set src(src: MaterialSchema["src"]) {
+        set src(src: FileSourceSchema | undefined) {
             this.setProp("src", src);
         }
 
@@ -403,14 +396,11 @@ export function MaterialMixin<
             return checks;
         }
 
-        /**
-         * @summary Returns a config to create a material from a CIF or POSCAR file.
-         */
         static constructMaterialFileSource(
             fileName: string,
             fileContent: string,
             fileExtension: string,
-        ): MaterialFileSrc {
+        ): FileSourceSchema {
             return {
                 extension: fileExtension,
                 filename: fileName,

@@ -1,6 +1,6 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/code/dist/js/entity/in_memory";
-import { ConsistencyCheck, DerivedPropertiesSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
+import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { ConstrainedBasis } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
@@ -34,26 +34,15 @@ export declare const defaultMaterialConfig: {
         };
     };
 };
-export type MaterialFileSrc = Required<MaterialSchema>["src"];
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
 }
 type MaterialBaseEntity = InstanceType<typeof HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity>;
 export type MaterialBaseEntityConstructor<T extends MaterialBaseEntity = MaterialBaseEntity> = new (...args: any[]) => T;
-export interface MaterialFileConfig {
-    src: Required<MaterialSchema>["src"];
-    icsdId?: Required<MaterialSchema>["icsdId"];
-    external?: Required<MaterialSchema>["external"];
-}
 export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = MaterialBaseEntityConstructor>(superclass: T): {
     new (...config: any[]): {
         _json: MaterialSchemaJSON;
         toJSON(): MaterialJSON;
-        src: {
-            extension?: string | undefined;
-            filename: string;
-            text: string;
-            hash: string;
-        } | undefined;
+        src: FileSourceSchema | undefined;
         updateFormula(): void;
         /**
          * Gets Bolean value for whether or not a material is non-periodic vs periodic.
@@ -253,21 +242,13 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
             };
         };
     };
-    /**
-     * @summary Returns a config to create a material from a CIF or POSCAR file.
-     */
-    constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): MaterialFileSrc;
+    constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): FileSourceSchema;
 } & T;
 export declare const Material: {
     new (...config: any[]): {
         _json: MaterialSchemaJSON;
         toJSON(): MaterialJSON;
-        src: {
-            extension?: string | undefined;
-            filename: string;
-            text: string;
-            hash: string;
-        } | undefined;
+        src: FileSourceSchema | undefined;
         updateFormula(): void;
         /**
          * Gets Bolean value for whether or not a material is non-periodic vs periodic.
@@ -467,10 +448,7 @@ export declare const Material: {
             };
         };
     };
-    /**
-     * @summary Returns a config to create a material from a CIF or POSCAR file.
-     */
-    constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): MaterialFileSrc;
+    constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): FileSourceSchema;
 } & (new (...args: any[]) => {
     consistencyChecks: object[];
     addConsistencyChecks(array: object[]): void;
@@ -505,14 +483,14 @@ export declare const Material: {
     setProps(json?: AnyObject | undefined): any;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
-    toJSONQuick(exclude?: string[] | undefined): AnyObject;
+    toJSONQuick(exclude?: string[] | undefined): AnyObject; /**
+     * Returns a copy of the material with conventional cell constructed instead of primitive.
+     */
     clone(extraContext?: object | undefined): any;
     validate(): void;
     clean(config: AnyObject): AnyObject;
     isValid(): boolean;
-    id: string; /**
-     * Returns a copy of the material with conventional cell constructed instead of primitive.
-     */
+    id: string;
     readonly cls: string;
     getClsName(): string;
     readonly slug: string;
@@ -533,7 +511,10 @@ export declare const Material: {
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
-    clean(config: AnyObject): AnyObject;
+    clean(config: AnyObject): AnyObject; /**
+     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
+     * @returns Array of checks results
+     */
     isValid(): boolean;
     id: string;
     readonly cls: string;
