@@ -40,6 +40,9 @@ def test_from_pymatgen():
     assert material_data["lattice"]["alpha"] == 120
     interface_data = from_pymatgen(INTERFACE_STRUCTURE)
     actual_properties = interface_data["metadata"]["interface_properties"]
+
+    print(actual_properties)
+
     object_utils.assert_deep_almost_equal(INTERFACE_PROPERTIES_JSON, actual_properties)
 
 
