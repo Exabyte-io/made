@@ -2,6 +2,7 @@ import inspect
 import json
 from functools import wraps
 from typing import Any, Callable, Dict, Union, Tuple
+
 from ase import Atoms
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
@@ -9,7 +10,6 @@ from pymatgen.core.interface import Interface
 from pymatgen.core.structure import Lattice, Structure
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
-from pymatgen.analysis.elasticity.strain import Strain
 
 from ..material import Material
 
@@ -101,24 +101,12 @@ def from_pymatgen(structure: Union[Structure, Interface]):
     # Add interface properties to metadata according to pymatgen Interface as a JSON object
     if hasattr(structure, "interface_properties"):
         interface_props = structure.interface_properties
-        # for k, v in structure.interface_properties.items():
-        # print(type(v), v)
-        # if isinstance(v, np.ndarray):
-        #     v = __round__(v.tolist())
-        # if isinstance(v, Strain):
-        #     v = __round__(v.tolist())
-        # if isinstance(v, (int, float)):
-        #     v = __round__(v)
-        # interface_props[k] = v
-
-        class MyEncoder(NumpyNDArrayRoundEncoder):
-            def default(self, obj):
-                print(type(obj), obj)
-                if isinstance(obj, Tuple):
-                    return super().default(str(obj))
-                return super().default(obj)
-
-        metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=MyEncoder))
+        # TODO: figure out how to round the values and stringify terminations tuple in the interface properties with Encoder
+        for key, value in interface_props.items():
+            if isinstance(value, Tuple):
+                interface_props[key] = str(value)
+        print(f"interface_props: {interface_props}")
+        metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=NumpyNDArrayRoundEncoder))
         print(f"metadata: {metadata}")
 
     material_data = {
