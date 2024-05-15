@@ -21,6 +21,8 @@ LAYER_MATERIAL = Material(from_ase(film))
 
 # Pymatgen Interface fixtures
 INTERFACE_TERMINATION: Tuple = ("Si_termination", "Cu_termination")
+INTERFACE_TERMINATION_AS_STR = str(INTERFACE_TERMINATION)
+print("termiantion string", INTERFACE_TERMINATION_AS_STR)
 
 interface_structure = atoms_to_interface_structure(INTERFACE_ATOMS)
 dict = interface_structure.as_dict()
@@ -28,32 +30,21 @@ dict = interface_structure.as_dict()
 INTERFACE_STRUCTURE = Interface.from_dict(dict)
 # Create properties that are assigned during interface creation in ZSL algorithm as dict and json
 INTERFACE_PROPERTIES_MOCK = {
-    "film_sl_vectors": [[2.0, -4.0, 0.0], [-2.0, -4.0, 0.0]],
-    "substrate_sl_vectors": [[-3.5, 3.5, 0.0], [-3.5, 0.0, 3.5]],
-    "film_vectors": [[1.234, -2.345, 0.0], [1.234, 2.345, 0.0]],
-    "substrate_vectors": [[-3.5, 3.5, 0.0], [-3.5, 0.0, 3.5]],
     "film_transformation": [[2.0, 0.0], [0.0, 2.0]],
     "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
     "strain": Strain([[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, 0.0], [-0.0, 0.0, -0.0]]),
-    "von_mises_strain": 0.1,
+    "von_mises_strain": 0.001,
     "termination": INTERFACE_TERMINATION,
-    "film_thickness": 1,
-    "substrate_thickness": 3,
 }
 INTERFACE_PROPERTIES_JSON = {
-    "film_sl_vectors": [[2.0, -4.0, 0.0], [-2.0, -4.0, 0.0]],
-    "substrate_sl_vectors": [[-3.5, 3.5, 0.0], [-3.5, 0.0, 3.5]],
-    "film_vectors": [[1.234, -2.345, 0.0], [1.234, 2.345, 0.0]],
-    "substrate_vectors": [[-3.5, 3.5, 0.0], [-3.5, 0.0, 3.5]],
     "film_transformation": [[2.0, 0.0], [0.0, 2.0]],
     "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
     "strain": [[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, 0.0], [-0.0, 0.0, -0.0]],
     "von_mises_strain": 0.1,
     "termination": INTERFACE_TERMINATION,
-    "film_thickness": 1,
-    "substrate_thickness": 3,
     "mean_abs_strain": 0.00105,
 }
+
 
 # Add properties to interface structure
 INTERFACE_STRUCTURE.interface_properties = INTERFACE_PROPERTIES_MOCK
