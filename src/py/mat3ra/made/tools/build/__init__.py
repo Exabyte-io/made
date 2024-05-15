@@ -4,18 +4,19 @@ from .interface import InterfaceSettings as Settings
 from .interface import interface_init_zsl_builder, interface_patch_with_mean_abs_strain
 from ..convert import decorator_convert_material_args_kwargs_to_structure
 from ..modify import translate_to_bottom, wrap_to_unit_cell
+from typing import Optional
 
 
 @decorator_convert_material_args_kwargs_to_structure
 def create_interfaces(
-    substrate: Material = None,
-    layer: Material = None,
-    settings: Settings = None,
+    substrate: Optional[Material] = None,
+    layer: Optional[Material] = None,
+    settings: Settings = Settings(),
     sort_by_strain_and_size: bool = True,
     remove_duplicates: bool = True,
     is_logging_enabled: bool = True,
-    interface_builder: CoherentInterfaceBuilder = None,
-    termination: TerminationType = None,
+    interface_builder: Optional[CoherentInterfaceBuilder] = None,
+    termination: Optional[TerminationType] = None,
 ) -> InterfaceDataHolder:
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
@@ -42,9 +43,9 @@ def create_interfaces(
     for termination in builder.terminations:
         all_interfaces_for_termination = builder.get_interfaces(
             termination,
-            gap=settings["INTERFACE_PARAMETERS"]["DISTANCE_Z"],
-            film_thickness=settings["LAYER_PARAMETERS"]["THICKNESS"],
-            substrate_thickness=settings["SUBSTRATE_PARAMETERS"]["THICKNESS"],
+            gap=settings.distance_z,
+            film_thickness=settings.LayerParameters.thickness,
+            substrate_thickness=settings.SubstrateParameters.thickness,
             in_layers=True,
         )
 
@@ -74,6 +75,6 @@ def init_interface_builder(
     layer: Material,
     settings: Settings,
 ) -> CoherentInterfaceBuilder:
-    substrate = translate_to_bottom(substrate, settings["USE_CONVENTIONAL_CELL"])
-    layer = translate_to_bottom(layer, settings["USE_CONVENTIONAL_CELL"])
+    substrate = translate_to_bottom(substrate, settings.use_conventional_cell)
+    layer = translate_to_bottom(layer, settings.use_conventional_cell)
     return interface_init_zsl_builder(substrate, layer, settings)

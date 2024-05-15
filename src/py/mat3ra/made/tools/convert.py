@@ -1,13 +1,17 @@
 import inspect
+import json
 from functools import wraps
 from typing import Any, Callable, Dict, Union
 
 from ase import Atoms
-from mat3ra.made.material import Material
 from mat3ra.utils.mixins import RoundNumericValuesMixin
+from mat3ra.utils.object import NumpyNDArrayRoundEncoder
+from pymatgen.core.interface import Interface
 from pymatgen.core.structure import Lattice, Structure
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
+
+from ..material import Material
 
 
 def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> Structure:
@@ -52,7 +56,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> S
     return structure
 
 
-def from_pymatgen(structure: Structure):
+def from_pymatgen(structure: Union[Structure, Interface]):
     """
     Converts a pymatgen Structure object to a material object in ESSE format.
 
@@ -91,13 +95,28 @@ def from_pymatgen(structure: Structure):
         },
     }
 
+    metadata = {"boundaryConditions": {"type": "pbc", "offset": 0}}
+
+    # TODO: consider using Interface JSONSchema from ESSE when such created and adapt interface_properties accordingly.
+    # Add interface properties to metadata according to pymatgen Interface as a JSON object
+    if hasattr(structure, "interface_properties"):
+        interface_props = structure.interface_properties
+        # TODO: figure out how to round the values and stringify terminations tuple
+        #  in the interface properties with Encoder
+        for key, value in interface_props.items():
+            if isinstance(value, tuple):
+                interface_props[key] = str(value)
+        print(f"interface_props: {interface_props}")
+        metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=NumpyNDArrayRoundEncoder))
+        print(f"metadata: {metadata}")
+
     material_data = {
         "name": structure.formula,
         "basis": basis,
         "lattice": lattice,
         "isNonPeriodic": not structure.is_ordered,
         "_id": "",
-        "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+        "metadata": metadata,
         "isUpdated": True,
     }
 
