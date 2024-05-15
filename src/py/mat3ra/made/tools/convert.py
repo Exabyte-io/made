@@ -106,9 +106,7 @@ def from_pymatgen(structure: Union[Structure, Interface]):
         for key, value in interface_props.items():
             if isinstance(value, tuple):
                 interface_props[key] = str(value)
-        print(f"interface_props: {interface_props}")
         metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=NumpyNDArrayRoundEncoder))
-        print(f"metadata: {metadata}")
 
     material_data = {
         "name": structure.formula,
