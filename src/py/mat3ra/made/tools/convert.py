@@ -1,16 +1,17 @@
 import inspect
-from enum import Enum
+import json
 from functools import wraps
-from typing import Any, Callable, Dict, Union
-
+from typing import Any, Callable, Dict, Union, Tuple
 from ase import Atoms
-from mat3ra.made.material import Material
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from mat3ra.utils.object import convert_key_and_round
+from mat3ra.utils.object import NumpyNDArrayRoundEncoder
 from pymatgen.core.interface import Interface
 from pymatgen.core.structure import Lattice, Structure
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
+from pymatgen.analysis.elasticity.strain import Strain
+
+from ..material import Material
 
 
 def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> Structure:
@@ -99,12 +100,26 @@ def from_pymatgen(structure: Union[Structure, Interface]):
     # TODO: consider using Interface JSONSchema from ESSE when such created and adapt interface_properties accordingly.
     # Add interface properties to metadata according to pymatgen Interface as a JSON object
     if hasattr(structure, "interface_properties"):
-        interface_props = {}
-        for k, v in structure.interface_properties.items():
-            k, v = convert_key_and_round(k, v, __round__)
-            interface_props[k] = v
-        metadata["interface_properties"] = interface_props
-        metadata["interface_properties"] = interface_props
+        interface_props = structure.interface_properties
+        # for k, v in structure.interface_properties.items():
+        # print(type(v), v)
+        # if isinstance(v, np.ndarray):
+        #     v = __round__(v.tolist())
+        # if isinstance(v, Strain):
+        #     v = __round__(v.tolist())
+        # if isinstance(v, (int, float)):
+        #     v = __round__(v)
+        # interface_props[k] = v
+
+        class MyEncoder(NumpyNDArrayRoundEncoder):
+            def default(self, obj):
+                print(type(obj), obj)
+                if isinstance(obj, Tuple):
+                    return super().default(str(obj))
+                return super().default(obj)
+
+        metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=MyEncoder))
+        print(f"metadata: {metadata}")
 
     material_data = {
         "name": structure.formula,
@@ -226,12 +241,3 @@ def convert_atoms_or_structure_to_material(item):
     elif isinstance(item, Atoms):
         return from_ase(item)
     return item
-
-
-def convert_key(key):
-    """
-    Convert enum keys to strings for JSON serialization.
-    """
-    if isinstance(key, Enum):
-        return key.value
-    return key
