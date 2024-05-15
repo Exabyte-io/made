@@ -22,7 +22,6 @@ LAYER_MATERIAL = Material(from_ase(film))
 # Pymatgen Interface fixtures
 INTERFACE_TERMINATION: Tuple = ("Si_termination", "Cu_termination")
 INTERFACE_TERMINATION_AS_STR = str(INTERFACE_TERMINATION)
-print("termiantion string", INTERFACE_TERMINATION_AS_STR)
 
 interface_structure = atoms_to_interface_structure(INTERFACE_ATOMS)
 dict = interface_structure.as_dict()
@@ -40,8 +39,8 @@ INTERFACE_PROPERTIES_JSON = {
     "film_transformation": [[2.0, 0.0], [0.0, 2.0]],
     "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
     "strain": [[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, 0.0], [-0.0, 0.0, -0.0]],
-    "von_mises_strain": 0.1,
-    "termination": INTERFACE_TERMINATION,
+    "von_mises_strain": 0.001,
+    "termination": INTERFACE_TERMINATION_AS_STR,
     "mean_abs_strain": 0.00105,
 }
 

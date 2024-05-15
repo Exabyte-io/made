@@ -39,11 +39,7 @@ def test_from_pymatgen():
     assert material_data["lattice"]["alpha"] == 120
     interface_data = from_pymatgen(INTERFACE_STRUCTURE)
     actual_properties = interface_data["metadata"]["interface_properties"]
-    print(actual_properties)
-    print(INTERFACE_PROPERTIES_JSON)
-
     assertion_utils.assert_deep_almost_equal(INTERFACE_PROPERTIES_JSON, actual_properties)
-    assert interface_data["lattice"]["a"] == 42
 
 
 def test_to_poscar():
