@@ -97,7 +97,6 @@ def interface_patch_with_mean_abs_strain(target: Interface, tolerance: float = 1
 def interface_init_zsl_builder(
     substrate: Structure, layer: Structure, settings: InterfaceBuilderSettings
 ) -> CoherentInterfaceBuilder:
-
     if settings.StrainMatchingParameters.algorithm == StrainMatchingAlgorithms.ZSL:
         generator: ZSLGenerator = ZSLGenerator(
             max_area_ratio_tol=settings.StrainMatchingParameters.max_area_tol,
