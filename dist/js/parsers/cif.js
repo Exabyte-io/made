@@ -2,8 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Extracts meta information from a CIF file
- * @param {String} txt - CIF file text.
- * @return {Object}
+ * @param txt - CIF file text.
  */
 function parseMeta(txt) {
     const REGEX = {
