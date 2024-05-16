@@ -9,6 +9,20 @@ from pymatgen.core.structure import Structure
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
 from ..convert import convert_atoms_or_structure_to_material, decorator_convert_material_args_kwargs_to_structure
 
+TerminationType = Tuple[str, str]
+InterfacesType = List[Interface]
+InterfacesDataType = Dict[Tuple, List[Interface]]
+
+
+class StrainMatchingAlgorithms(str, Enum):
+    ZSL = "ZSL"
+
+
+class StrainModes(str, Enum):
+    strain = "strain"
+    von_mises_strain = "von_mises_strain"
+    mean_abs_strain = "mean_abs_strain"
+
 
 class SlabParameters:
     def __init__(self, miller_indices: Tuple[int, int, int] = (0, 0, 1), thickness: int = 3):
@@ -22,11 +36,13 @@ class SlabParameters:
 class StrainMatchingParameters:
     def __init__(
         self,
+        algorithm: str = StrainMatchingAlgorithms.ZSL,
         max_area: float = 400.0,
         max_area_tol: float = 0.09,
         max_length_tol: float = 0.03,
         max_angle_tol: float = 0.01,
     ):
+        self.algorithm = algorithm
         self.max_area = max_area
         self.max_area_tol = max_area_tol
         self.max_length_tol = max_length_tol
@@ -66,12 +82,6 @@ class InterfaceBuilderSettings:
         )
 
 
-class StrainModes(str, Enum):
-    strain = "strain"
-    von_mises_strain = "von_mises_strain"
-    mean_abs_strain = "mean_abs_strain"
-
-
 def interface_patch_with_mean_abs_strain(target: Interface, tolerance: float = 10e-6):
     def get_mean_abs_strain(target):
         return target.interface_properties[StrainModes.mean_abs_strain]
@@ -103,11 +113,6 @@ def interface_init_zsl_builder(
     )
 
     return builder
-
-
-TerminationType = Tuple[str, str]
-InterfacesType = List[Interface]
-InterfacesDataType = Dict[Tuple, List[Interface]]
 
 
 class InterfaceDataHolder(object):
