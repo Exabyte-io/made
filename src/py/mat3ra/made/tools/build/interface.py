@@ -19,7 +19,7 @@ class SlabParameters:
         return json.dumps(self.__dict__)
 
 
-class ZSLParameters:
+class StrainMatchingParameters:
     def __init__(
         self,
         max_area: float = 400.0,
@@ -36,14 +36,14 @@ class ZSLParameters:
         return json.dumps(self.__dict__)
 
 
-class InterfaceSettings:
+class InterfaceBuilderSettings:
     def __init__(
         self,
         substrate_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=3),
         layer_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=1),
         distance_z=3.0,
         use_conventional_cell=True,
-        zsl_parameters=ZSLParameters(),
+        strain_matching_parameters=StrainMatchingParameters(),
     ):
         self.SubstrateParameters = substrate_parameters
         self.LayerParameters = layer_parameters
@@ -51,7 +51,7 @@ class InterfaceSettings:
         self.distance_z = distance_z
         self.use_conventional_cell = use_conventional_cell
 
-        self.ZSLParameters = zsl_parameters
+        self.StrainMatchingParameters = strain_matching_parameters
 
     def __str__(self):
         return json.dumps(
@@ -60,7 +60,7 @@ class InterfaceSettings:
                 "layer_parameters": self.LayerParameters.__dict__,
                 "distance_z": self.distance_z,
                 "use_conventional_cell": self.use_conventional_cell,
-                "zsl_parameters": self.ZSLParameters.__dict__,
+                "strain_matching_parameters": self.StrainMatchingParameters.__dict__,
             },
             indent=4,
         )
@@ -85,13 +85,13 @@ def interface_patch_with_mean_abs_strain(target: Interface, tolerance: float = 1
 
 @decorator_convert_material_args_kwargs_to_structure
 def interface_init_zsl_builder(
-    substrate: Structure, layer: Structure, settings: InterfaceSettings
+    substrate: Structure, layer: Structure, settings: InterfaceBuilderSettings
 ) -> CoherentInterfaceBuilder:
     generator: ZSLGenerator = ZSLGenerator(
-        max_area_ratio_tol=settings.ZSLParameters.max_area_tol,
-        max_area=settings.ZSLParameters.max_area,
-        max_length_tol=settings.ZSLParameters.max_length_tol,
-        max_angle_tol=settings.ZSLParameters.max_angle_tol,
+        max_area_ratio_tol=settings.StrainMatchingParameters.max_area_tol,
+        max_area=settings.StrainMatchingParameters.max_area,
+        max_length_tol=settings.StrainMatchingParameters.max_length_tol,
+        max_angle_tol=settings.StrainMatchingParameters.max_angle_tol,
     )
 
     builder = CoherentInterfaceBuilder(
