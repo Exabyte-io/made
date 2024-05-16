@@ -55,7 +55,7 @@ class StrainMatchingParameters:
 class InterfaceBuilderSettings:
     def __init__(
         self,
-        substrate_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=3),
+        substrate_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=1),
         layer_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=1),
         distance_z=3.0,
         use_conventional_cell=True,
@@ -97,7 +97,12 @@ def interface_patch_with_mean_abs_strain(target: Interface, tolerance: float = 1
 def interface_init_zsl_builder(
     substrate: Structure, layer: Structure, settings: InterfaceBuilderSettings
 ) -> CoherentInterfaceBuilder:
-    if settings.StrainMatchingParameters.algorithm == StrainMatchingAlgorithms.ZSL:
+    # TODO: more elegant solution to treat both "ZSL", "zsl" and StrainMatchingAlgorithms.ZSL as the same valid input
+    algorithm = settings.StrainMatchingParameters.algorithm
+    if isinstance(algorithm, StrainMatchingAlgorithms):
+        algorithm = algorithm.value
+    algorithm = algorithm.upper()
+    if algorithm == StrainMatchingAlgorithms.ZSL:
         generator: ZSLGenerator = ZSLGenerator(
             max_area_ratio_tol=settings.StrainMatchingParameters.max_area_tol,
             max_area=settings.StrainMatchingParameters.max_area,
