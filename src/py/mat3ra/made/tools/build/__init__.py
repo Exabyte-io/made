@@ -1,6 +1,6 @@
 from ...material import Material
 from .interface import InterfaceDataHolder, CoherentInterfaceBuilder, TerminationType
-from .interface import InterfaceSettings as Settings
+from .interface import InterfaceBuilderSettings as Settings
 from .interface import interface_init_zsl_builder, interface_patch_with_mean_abs_strain
 from ..convert import decorator_convert_material_args_kwargs_to_structure
 from ..modify import translate_to_bottom, wrap_to_unit_cell
