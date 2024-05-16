@@ -9,8 +9,6 @@ from pymatgen.core.structure import Structure
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
 from ..convert import convert_atoms_or_structure_to_material, decorator_convert_material_args_kwargs_to_structure
 
-DEFAULT_MAX_AREA = 400.0
-
 
 class SlabParameters:
     def __init__(self, miller_indices: Tuple[int, int, int] = (0, 0, 1), thickness: int = 3):
@@ -24,7 +22,7 @@ class SlabParameters:
 class ZSLParameters:
     def __init__(
         self,
-        max_area: float = DEFAULT_MAX_AREA,
+        max_area: float = 400.0,
         max_area_tol: float = 0.09,
         max_length_tol: float = 0.03,
         max_angle_tol: float = 0.01,
@@ -43,7 +41,6 @@ class InterfaceSettings:
         self,
         substrate_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=3),
         layer_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=1),
-        max_area=DEFAULT_MAX_AREA,
         distance_z=3.0,
         use_conventional_cell=True,
         zsl_parameters=ZSLParameters(),
@@ -51,21 +48,16 @@ class InterfaceSettings:
         self.SubstrateParameters = substrate_parameters
         self.LayerParameters = layer_parameters
 
-        self.max_area = max_area
         self.distance_z = distance_z
         self.use_conventional_cell = use_conventional_cell
 
         self.ZSLParameters = zsl_parameters
-        # If max_area in ZSLParameters isn't set directly, use the one in the settings
-        if self.ZSLParameters.max_area == DEFAULT_MAX_AREA:
-            self.ZSLParameters.max_area = self.max_area
 
     def __str__(self):
         return json.dumps(
             {
                 "substrate_parameters": self.SubstrateParameters.__dict__,
                 "layer_parameters": self.LayerParameters.__dict__,
-                "max_area": self.max_area,
                 "distance_z": self.distance_z,
                 "use_conventional_cell": self.use_conventional_cell,
                 "zsl_parameters": self.ZSLParameters.__dict__,
@@ -74,7 +66,7 @@ class InterfaceSettings:
         )
 
 
-class StrainModes(Enum):
+class StrainModes(str, Enum):
     strain = "strain"
     von_mises_strain = "von_mises_strain"
     mean_abs_strain = "mean_abs_strain"
