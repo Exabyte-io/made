@@ -2,12 +2,13 @@ import functools
 import types
 import json
 import numpy as np
-from typing import Union, List, Tuple, Dict
+from typing import Union, List, Tuple, Dict, Any, Optional
 from enum import Enum
 from mat3ra.utils import array as array_utils
 from pymatgen.core.structure import Structure
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
 from ..convert import convert_atoms_or_structure_to_material, decorator_convert_material_args_kwargs_to_structure
+from ...material import Material
 
 TerminationType = Tuple[str, str]
 InterfacesType = List[Interface]
@@ -24,50 +25,79 @@ class StrainModes(str, Enum):
     mean_abs_strain = "mean_abs_strain"
 
 
-class SlabParameters:
-    def __init__(self, miller_indices: Tuple[int, int, int] = (0, 0, 1), thickness: int = 3):
+class Slab(Material):
+    def __init__(
+        self,
+        config: Any,
+        miller_indices: Tuple[int, int, int] = (0, 0, 1),
+        thickness: int = 3,
+        xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]],
+    ):
+        super().__init__(config)
         self.miller_indices = miller_indices
         self.thickness = thickness
+        self.xy_supercell_matrix = xy_supercell_matrix
 
     def __repr__(self):
         return json.dumps(self.__dict__)
 
 
-class StrainMatchingParameters:
+class ZSLStrainMatchingParameters:
     def __init__(
         self,
-        algorithm: str = StrainMatchingAlgorithms.ZSL,
-        max_area: float = 400.0,
+        max_area: float = 50.0,
         max_area_tol: float = 0.09,
         max_length_tol: float = 0.03,
         max_angle_tol: float = 0.01,
     ):
-        self.algorithm = algorithm
         self.max_area = max_area
         self.max_area_tol = max_area_tol
         self.max_length_tol = max_length_tol
         self.max_angle_tol = max_angle_tol
 
-    def __repr__(self):
-        return json.dumps(self.__dict__)
 
-
-class InterfaceBuilderSettings:
+class InterfaceBuilder:
     def __init__(
         self,
-        substrate_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=1),
-        layer_parameters=SlabParameters(miller_indices=(0, 0, 1), thickness=1),
+        substrate_slab: Slab,
+        layer_slab: Slab,
         distance_z=3.0,
-        use_conventional_cell=True,
-        strain_matching_parameters=StrainMatchingParameters(),
+        shift_x: float = 0.0,
+        shift_y: float = 0.0,
+        use_conventional_cell: bool = True,
+        use_strain_matching: bool = False,
+        strain_matching_algorithm: StrainMatchingAlgorithms = StrainMatchingAlgorithms.ZSL,
+        strain_matching_parameters: Optional[ZSLStrainMatchingParameters] = ZSLStrainMatchingParameters(),
     ):
-        self.SubstrateParameters = substrate_parameters
-        self.LayerParameters = layer_parameters
+        self.substrate_slab = substrate_slab
+        self.film_slab = layer_slab
 
         self.distance_z = distance_z
         self.use_conventional_cell = use_conventional_cell
+        self.use_strain_matching = use_strain_matching
 
-        self.StrainMatchingParameters = strain_matching_parameters
+        self.strain_matching_algorithm = strain_matching_algorithm
+        self.strain_matching_parameters = strain_matching_parameters
+
+    def __builder(self):
+        if self.use_strain_matching:
+            return self.__strain_matching_builder()
+        else:
+            return self
+
+    def __strain_matching_builder(self):
+        if self.strain_matching_algorithm == StrainMatchingAlgorithms.ZSL:
+            zsl_parameters = ZSLStrainMatchingParameters(**self.strain_matching_parameters.__dict__)
+            generator: ZSLGenerator = ZSLGenerator(**zsl_parameters)
+            return CoherentInterfaceBuilder(
+                substrate_structure=self.substrate_slab.bulk,
+                film_structure=self.film_slab.bulk,
+                substrate_miller=self.substrate_slab.miller_indices,
+                film_miller=self.film_slab.miller_indices,
+                zslgen=generator,
+            )
+        else:
+            raise ValueError(f"Unsupported strain matching algorithm: {self.strain_matching_algorithm}")
 
     def __str__(self):
         return json.dumps(
@@ -81,6 +111,14 @@ class InterfaceBuilderSettings:
             indent=4,
         )
 
+    def get_interfaces(self):
+        # ToDo - implement this method
+        return self.substrate_slab + self.layer_slab
+
+    @property
+    def terminations(self):
+        return self.__strain_matching_builder().terminations
+
 
 def interface_patch_with_mean_abs_strain(target: Interface, tolerance: float = 10e-6):
     def get_mean_abs_strain(target):
@@ -91,36 +129,6 @@ def interface_patch_with_mean_abs_strain(target: Interface, tolerance: float = 1
         round(np.mean(np.abs(target.interface_properties["strain"])) / tolerance) * tolerance
     )
     return target
-
-
-@decorator_convert_material_args_kwargs_to_structure
-def interface_init_zsl_builder(
-    substrate: Structure, layer: Structure, settings: InterfaceBuilderSettings
-) -> CoherentInterfaceBuilder:
-    # TODO: more elegant solution to treat both "ZSL", "zsl" and StrainMatchingAlgorithms.ZSL as the same valid input
-    algorithm = settings.StrainMatchingParameters.algorithm
-    if isinstance(algorithm, StrainMatchingAlgorithms):
-        algorithm = algorithm.value
-    algorithm = algorithm.upper()
-    if algorithm == StrainMatchingAlgorithms.ZSL:
-        generator: ZSLGenerator = ZSLGenerator(
-            max_area_ratio_tol=settings.StrainMatchingParameters.max_area_tol,
-            max_area=settings.StrainMatchingParameters.max_area,
-            max_length_tol=settings.StrainMatchingParameters.max_length_tol,
-            max_angle_tol=settings.StrainMatchingParameters.max_angle_tol,
-        )
-
-        builder = CoherentInterfaceBuilder(
-            substrate_structure=substrate,
-            film_structure=layer,
-            substrate_miller=settings.SubstrateParameters.miller_indices,
-            film_miller=settings.LayerParameters.miller_indices,
-            zslgen=generator,
-        )
-
-        return builder
-    else:
-        raise ValueError(f"Unsupported strain matching algorithm: {settings.StrainMatchingParameters.algorithm}")
 
 
 class InterfaceDataHolder(object):
