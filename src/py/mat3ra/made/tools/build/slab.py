@@ -2,7 +2,7 @@ from pymatgen.core.structure import Structure
 from pymatgen.core.surface import SlabGenerator as PymatgenSlabGenerator
 from pymatgen.core.interface import label_termination
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Dict
 import json
 
 from .supercell import create_supercell
@@ -14,14 +14,26 @@ from ...material import Material
 class SlabGenerator:
     """Class to generate slabs and manage different terminations."""
 
-    def __init__(self, bulk, miller_indices, thickness, vacuum, xy_supercell_matrix, use_conventional_cell=True):
+    def __init__(
+        self,
+        bulk: Structure,
+        miller_indices: tuple[int, int, int] = (0, 0, 1),
+        thickness: int = 3,
+        vacuum: float = 3,
+        xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]],
+        use_conventional_cell: bool = True,
+    ):
         self.bulk = bulk
         self.miller_indices = miller_indices
         self.thickness = thickness
         self.vacuum = vacuum
         self.xy_supercell_matrix = xy_supercell_matrix
         self.generator = PymatgenSlabGenerator(
-            SpacegroupAnalyzer(self.bulk).get_conventional_standard_structure() if use_conventional_cell else self.bulk,
+            initial_structure=(
+                SpacegroupAnalyzer(self.bulk).get_conventional_standard_structure()
+                if use_conventional_cell
+                else self.bulk
+            ),
             miller_index=self.miller_indices,
             min_slab_size=self.thickness,
             min_vacuum_size=self.vacuum,
@@ -51,25 +63,29 @@ class SlabGenerator:
 class Slab(Material):
     def __init__(
         self,
-        config: Any,
-        termination: str,
+        config: Dict[str, Any],
+        termination: str = None,
         miller_indices: Tuple[int, int, int] = (0, 0, 1),
         thickness: int = 10,
         vacuum: float = 10.0,
         xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]],
     ):
-        super().__init__(config)
-        self.structure = Structure.from_dict(config)
+        self.bulk = super().__init__(config)
         self.miller_indices = miller_indices
         self.thickness = thickness
         self.vacuum = vacuum
         self.xy_supercell_matrix = xy_supercell_matrix
         self.termination = termination
-        self.slab = self.generate_slab()
 
-    # def generate_slab(self):
-    #     slab_generator = SlabGenerator(self.structure, self.miller_indices, self.thickness, self.vacuum)
-    #     return slab_generator.generate_slab(self.termination)
+        slab_structure = self._generate_slab()
+        super().__init__(from_pymatgen(slab_structure))
+
+    def _generate_slab(self):
+        slab_generator = SlabGenerator(self.bulk, self.miller_indices, self.thickness, self.vacuum)
+        if self.termination:
+            return slab_generator.generate_slab(self.termination)
+        else:
+            return slab_generator.generate_slab()
 
     def __repr__(self):
         return json.dumps(self.__dict__)
