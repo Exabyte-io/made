@@ -9,6 +9,7 @@ from mat3ra.utils import array as array_utils
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
 from ..convert import convert_atoms_or_structure_to_material
 from .slab import Slab
+from ...material import Material
 
 TerminationType = Tuple[str, str]
 InterfacesType = List[Interface]
@@ -46,11 +47,11 @@ class InterfaceBuilder:
     def __init__(
         self,
         substrate_slab: Slab,
-        layer_slab: Slab,
+        film_slab: Slab,
         settings: InterfaceBuilderSettings,
     ):
         self.substrate_slab = substrate_slab
-        self.film_slab = layer_slab
+        self.film_slab = film_slab
 
         self.distance_z = settings.distance_z
         self.use_conventional_cell = settings.use_conventional_cell
@@ -63,7 +64,7 @@ class InterfaceBuilder:
         if self.use_strain_matching:
             return self.__strain_matching_builder()
         else:
-            return self
+            return self.__simple_builder()
 
     def __strain_matching_builder(self):
         if self.strain_matching_algorithm == StrainMatchingAlgorithms.ZSL:
@@ -79,6 +80,13 @@ class InterfaceBuilder:
         else:
             raise ValueError(f"Unsupported strain matching algorithm: {self.strain_matching_algorithm}")
 
+    def __simple_builder(self):
+        """
+        Create a simple interface builder that returns interface between the substrate and film slabs.
+        Returns:
+
+        """
+
     def __str__(self):
         return json.dumps(
             {
@@ -92,10 +100,6 @@ class InterfaceBuilder:
             },
             indent=4,
         )
-
-    # def get_interfaces(self):
-    #     # ToDo - implement this method
-    #     return self.substrate_slab + self.layer_slab
 
     @property
     def terminations(self):
