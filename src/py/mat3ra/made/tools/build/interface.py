@@ -2,13 +2,13 @@ import functools
 import types
 import json
 import numpy as np
-from typing import Union, List, Tuple, Dict, Any, Optional
+from typing import Union, List, Tuple, Dict, Optional
 from enum import Enum
+from pydantic import BaseModel
 from mat3ra.utils import array as array_utils
-from pymatgen.core.structure import Structure
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
-from ..convert import convert_atoms_or_structure_to_material, decorator_convert_material_args_kwargs_to_structure
-from ...material import Material
+from ..convert import convert_atoms_or_structure_to_material
+from .slab import Slab
 
 TerminationType = Tuple[str, str]
 InterfacesType = List[Interface]
@@ -25,35 +25,21 @@ class StrainModes(str, Enum):
     mean_abs_strain = "mean_abs_strain"
 
 
-class Slab(Material):
-    def __init__(
-        self,
-        config: Any,
-        miller_indices: Tuple[int, int, int] = (0, 0, 1),
-        thickness: int = 3,
-        xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]],
-    ):
-        super().__init__(config)
-        self.miller_indices = miller_indices
-        self.thickness = thickness
-        self.xy_supercell_matrix = xy_supercell_matrix
-
-    def __repr__(self):
-        return json.dumps(self.__dict__)
+class ZSLStrainMatchingParameters(BaseModel):
+    max_area: float = 50.0
+    max_area_tol: float = 0.09
+    max_length_tol: float = 0.03
+    max_angle_tol: float = 0.01
 
 
-class ZSLStrainMatchingParameters:
-    def __init__(
-        self,
-        max_area: float = 50.0,
-        max_area_tol: float = 0.09,
-        max_length_tol: float = 0.03,
-        max_angle_tol: float = 0.01,
-    ):
-        self.max_area = max_area
-        self.max_area_tol = max_area_tol
-        self.max_length_tol = max_length_tol
-        self.max_angle_tol = max_angle_tol
+class InterfaceBuilderSettings(BaseModel):
+    distance_z: float = 3.0
+    shift_x: float = 0.0
+    shift_y: float = 0.0
+    use_conventional_cell: bool = True
+    use_strain_matching: bool = False
+    strain_matching_algorithm: Optional[StrainMatchingAlgorithms] = None
+    strain_matching_parameters: Optional[ZSLStrainMatchingParameters] = None
 
 
 class InterfaceBuilder:
@@ -61,23 +47,17 @@ class InterfaceBuilder:
         self,
         substrate_slab: Slab,
         layer_slab: Slab,
-        distance_z=3.0,
-        shift_x: float = 0.0,
-        shift_y: float = 0.0,
-        use_conventional_cell: bool = True,
-        use_strain_matching: bool = False,
-        strain_matching_algorithm: StrainMatchingAlgorithms = StrainMatchingAlgorithms.ZSL,
-        strain_matching_parameters: Optional[ZSLStrainMatchingParameters] = ZSLStrainMatchingParameters(),
+        settings: InterfaceBuilderSettings,
     ):
         self.substrate_slab = substrate_slab
         self.film_slab = layer_slab
 
-        self.distance_z = distance_z
-        self.use_conventional_cell = use_conventional_cell
-        self.use_strain_matching = use_strain_matching
+        self.distance_z = settings.distance_z
+        self.use_conventional_cell = settings.use_conventional_cell
+        self.use_strain_matching = settings.use_strain_matching
 
-        self.strain_matching_algorithm = strain_matching_algorithm
-        self.strain_matching_parameters = strain_matching_parameters
+        self.strain_matching_algorithm = settings.strain_matching_algorithm
+        self.strain_matching_parameters = settings.strain_matching_parameters
 
     def __builder(self):
         if self.use_strain_matching:
@@ -102,18 +82,20 @@ class InterfaceBuilder:
     def __str__(self):
         return json.dumps(
             {
-                "substrate_parameters": self.SubstrateParameters.__dict__,
-                "layer_parameters": self.LayerParameters.__dict__,
+                "substrate_parameters": self.substrate_slab.__dict__,
+                "film_parameters": self.film_slab.__dict__,
                 "distance_z": self.distance_z,
                 "use_conventional_cell": self.use_conventional_cell,
-                "strain_matching_parameters": self.StrainMatchingParameters.__dict__,
+                "use_strain_matching": self.use_strain_matching,
+                "strain_matching_algorithm": self.strain_matching_algorithm,
+                "strain_matching_parameters": self.strain_matching_parameters.__dict__,
             },
             indent=4,
         )
 
-    def get_interfaces(self):
-        # ToDo - implement this method
-        return self.substrate_slab + self.layer_slab
+    # def get_interfaces(self):
+    #     # ToDo - implement this method
+    #     return self.substrate_slab + self.layer_slab
 
     @property
     def terminations(self):
