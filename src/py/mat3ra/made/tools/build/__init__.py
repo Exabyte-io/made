@@ -1,14 +1,20 @@
-from typing import Optional
+from typing import Optional, Union, TypeVar
+
+
 from ...material import Material
 from .interface import (
     InterfaceDataHolder,
-    CoherentInterfaceBuilder,
     TerminationType,
+    InterfaceBuilder,
     InterfaceBuilderSettings as Settings,
-    interface_init_zsl_builder,
     interface_patch_with_mean_abs_strain,
 )
-from ..convert import decorator_convert_material_args_kwargs_to_structure
+from ..convert import (
+    decorator_convert_material_args_kwargs_to_structure,
+    decorator_convert_material_args_kwargs_to_atoms,
+    from_ase,
+    to_ase,
+)
 from ..modify import translate_to_bottom, wrap_to_unit_cell
 
 
@@ -20,7 +26,7 @@ def create_interfaces(
     sort_by_strain_and_size: bool = True,
     remove_duplicates: bool = True,
     is_logging_enabled: bool = True,
-    interface_builder: Optional[CoherentInterfaceBuilder] = None,
+    interface_builder: Optional[InterfaceBuilder] = None,
     termination: Optional[TerminationType] = None,
 ) -> InterfaceDataHolder:
     """
@@ -77,9 +83,13 @@ def create_interfaces(
 @decorator_convert_material_args_kwargs_to_structure
 def init_interface_builder(
     substrate: Material,
-    layer: Material,
+    film: Material,
     settings: Settings,
-) -> CoherentInterfaceBuilder:
+) -> InterfaceBuilder:
     substrate = translate_to_bottom(substrate, settings.use_conventional_cell)
-    layer = translate_to_bottom(layer, settings.use_conventional_cell)
-    return interface_init_zsl_builder(substrate, layer, settings)
+    film = translate_to_bottom(film, settings.use_conventional_cell)
+    return InterfaceBuilder(
+        substrate_slab=substrate,
+        film_slab=film,
+        settings=settings,
+    )
