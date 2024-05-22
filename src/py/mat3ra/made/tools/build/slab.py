@@ -22,25 +22,25 @@ class SlabGenerator:
         vacuum: float = 3,
         xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]],
         use_conventional_cell: bool = True,
+        is_c_orthogonal: bool = False,
     ):
-        self.bulk = bulk
+        self.bulk = SpacegroupAnalyzer(bulk).get_conventional_standard_structure() if use_conventional_cell else bulk
         self.miller_indices = miller_indices
         self.thickness = thickness
         self.vacuum = vacuum
         self.xy_supercell_matrix = xy_supercell_matrix
+        self.is_c_orthogonal = is_c_orthogonal
         self.generator = PymatgenSlabGenerator(
-            initial_structure=(
-                SpacegroupAnalyzer(self.bulk).get_conventional_standard_structure()
-                if use_conventional_cell
-                else self.bulk
-            ),
+            initial_structure=self.bulk,
             miller_index=self.miller_indices,
             min_slab_size=self.thickness,
             min_vacuum_size=self.vacuum,
             in_unit_planes=True,
             reorient_lattice=True,
         )
-        self._slab_structures = self.generator.get_slabs()
+        self._slab_structures = [
+            _slab.get_orthogonal_c_slab() if self.is_c_orthogonal else _slab for _slab in self.generator.get_slabs()
+        ]
         self.slabs = [
             create_supercell(Material(from_pymatgen(slab_structure)), xy_supercell_matrix)
             for slab_structure in self._slab_structures
