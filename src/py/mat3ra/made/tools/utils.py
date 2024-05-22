@@ -1,4 +1,5 @@
 from pymatgen.core.structure import Structure
+from mat3ra.utils.matrix import convert_2x2_to_3x3
 
 
 # TODO: convert to accept ASE Atoms object
@@ -17,3 +18,19 @@ def translate_to_bottom_pymatgen_structure(structure: Structure):
     for site in translated_structure:
         site.coords += translation_vector
     return translated_structure
+
+
+def decorator_convert_2x2_to_3x3(func):
+    """
+    Decorator to convert a 2x2 matrix to a 3x3 matrix.
+    Args:
+        func: The function to decorate.
+
+    Returns:
+        The decorated function.
+    """
+
+    def wrapper(matrix):
+        return convert_2x2_to_3x3(matrix) if len(matrix) == 2 else matrix
+
+    return wrapper
