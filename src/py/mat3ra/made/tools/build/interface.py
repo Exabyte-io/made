@@ -43,67 +43,117 @@ class InterfaceBuilderSettings(BaseModel):
     strain_matching_parameters: Optional[ZSLStrainMatchingParameters] = None
 
 
-class InterfaceBuilder:
+class InterfaceConfiguration(BaseSlabConfiguration):
+    substrate_configuration: SlabConfiguration
+    film_configuration: SlabConfiguration
+    distance_z: float = 3.0
+    shift_x: float = 0.0
+    shift_y: float = 0.0
+
+    @property
+    def bulk(self):
+        # Return the bulk structure of the interface configuration, with no vacuum
+
+    @property
+    def miller_indices(self):
+        # Return the bulk structure of the interface configuration, with no vacuum
+        # Thickness should be one
+
+    def get_material(
+        self,
+        substrate_termination: str,
+        film_termination: str,
+        substrate_xy_supercell_matrix: List[List[int]],
+        film_xy_supercell_matrix: List[List[int]],
+        substrate_thickness: int,
+        film_thickness: int,
+        vacuum: float,
+    ):
+        pass
+    @property
+    def interface_properties(self):
+        # Strain
+        pass
+
+    def termination_pairs(self):
+        # TODO
+        pass
+
+
+class InterfaceConfigurationStrainMatcher:
     def __init__(
         self,
-        substrate_slab: Slab,
-        film_slab: Slab,
-        settings: InterfaceBuilderSettings,
+        interface_configuration: InterfaceConfiguration,
+        strain_matching_algorithm: StrainMatchingAlgorithms,
+        strain_matching_parameters: StrainMatchingParameters,
+        termination_pair: TerminationPair,
     ):
-        self.substrate_slab = substrate_slab
-        self.film_slab = film_slab
+        self.terminatIon_pair = termination_pair
+        self.interface_configuration = interface_configuration
+        self.strain_matching_algorithm = strain_matching_algorithm
+        self.strain_matching_parameters = strain_matching_parameters
 
-        self.distance_z = settings.distance_z
-        self.use_conventional_cell = settings.use_conventional_cell
-        self.use_strain_matching = settings.use_strain_matching
-
-        self.strain_matching_algorithm = settings.strain_matching_algorithm
-        self.strain_matching_parameters = settings.strain_matching_parameters
-
-    def __builder(self):
-        if self.use_strain_matching:
-            return self.__strain_matching_builder()
-        else:
-            return self.__simple_builder()
-
-    def __strain_matching_builder(self):
+    @property
+    def generator(self):
         if self.strain_matching_algorithm == StrainMatchingAlgorithms.ZSL:
             zsl_parameters = ZSLStrainMatchingParameters(**self.strain_matching_parameters.__dict__)
             generator: ZSLGenerator = ZSLGenerator(**zsl_parameters)
             return CoherentInterfaceBuilder(
-                substrate_structure=self.substrate_slab.bulk,
-                film_structure=self.film_slab.bulk,
-                substrate_miller=self.substrate_slab.miller_indices,
-                film_miller=self.film_slab.miller_indices,
+                substrate_structure=self.interface_configuration.substrate_configuration.bulk,
+                film_structure=self.interface_configuration.film_configuration.bulk,
+                substrate_miller=self.interface_configuration.substrate_configuration.miller_indices,
+                film_miller=self.interface_configuration.film_configuration.miller_indices,
                 zslgen=generator,
             )
+        else if self.strain_matching_algorithm == StrainMatchingAlgorithms.SCALE:
+            class ScaleInterfaceBuilder:
+                def __init__(self, interface_configuration: InterfaceConfiguration):
+                    super().__init__(
+                        interface_configuration=interface_configuration,
+                        film_structure=film_structure,
+                        substrate_miller=substrate_miller,
+                        film_miller=film_miller,
+                    )
+
+                def get_interfaces(self):
+                    interface = ....
+                    return [interface]
+            return ScaleInterfaceBuilder(self.interface_configuration)
         else:
             raise ValueError(f"Unsupported strain matching algorithm: {self.strain_matching_algorithm}")
 
-    def __simple_builder(self):
-        """
-        Create a simple interface builder that returns interface between the substrate and film slabs.
-        Returns:
+    def builder(self):
+        return CoherentInterfaceBuilder(
+            substrate_structure=self.interface_configuration.substrate_configuration.bulk,
+            film_structure=self.interface_configuration.film_configuration.bulk,
+            substrate_miller=self.interface_configuration.substrate_configuration.miller_indices,
+            film_miller=self.interface_configuration.film_configuration.miller_indices,
+            zslgen=self.generator,
+        )
+    def get_interface_data_holder(self):
+        builder = self.builder
+        interfaces_data = InterfaceDataHolder()
 
-        """
-
-    def __str__(self):
-        return json.dumps(
-            {
-                "substrate_parameters": self.substrate_slab.__dict__,
-                "film_parameters": self.film_slab.__dict__,
-                "distance_z": self.distance_z,
-                "use_conventional_cell": self.use_conventional_cell,
-                "use_strain_matching": self.use_strain_matching,
-                "strain_matching_algorithm": self.strain_matching_algorithm,
-                "strain_matching_parameters": self.strain_matching_parameters.__dict__,
-            },
-            indent=4,
+        all_interfaces_for_termination = builder.get_interfaces(
+            termination=self.termination_pair,
+            gap=self.interface_confguration.distance_z,
+            film_thickness=settings.LayerParameters.thickness,
+            substrate_thickness=settings.SubstrateParameters.thickness,
+            in_layers=True,
         )
 
-    @property
-    def terminations(self):
-        return self.__strain_matching_builder().terminations
+            all_interfaces_for_termination_patched_wrapped = list(
+                map(
+                    lambda i: wrap_to_unit_cell(interface_patch_with_mean_abs_strain(i)),
+                    all_interfaces_for_termination,
+                )
+            )
+
+            interfaces_data.add_data_entries(
+                all_interfaces_for_termination_patched_wrapped,
+                sort_interfaces_by_strain_and_size=sort_by_strain_and_size,
+                remove_duplicates=remove_duplicates,
+            )
 
 
 def interface_patch_with_mean_abs_strain(target: Interface, tolerance: float = 10e-6):
