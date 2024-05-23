@@ -1,17 +1,17 @@
 import functools
 import types
-import json
 import numpy as np
 from typing import Union, List, Tuple, Dict, Optional
 from enum import Enum
 from pydantic import BaseModel
 from mat3ra.utils import array as array_utils
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
-from ..convert import convert_atoms_or_structure_to_material
-from .slab import Slab
-from ...material import Material
 
-TerminationType = Tuple[str, str]
+from ..modify import wrap_to_unit_cell
+from ..convert import convert_atoms_or_structure_to_material
+from .slab import BaseSlabConfiguration, SlabConfiguration
+
+TerminationPair = Tuple[str, str]
 InterfacesType = List[Interface]
 InterfacesDataType = Dict[Tuple, List[Interface]]
 
@@ -52,12 +52,14 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 
     @property
     def bulk(self):
-        # Return the bulk structure of the interface configuration, with no vacuum
+        # TODO: Return the bulk structure of the interface configuration, with no vacuum
+        return self.__bulk
 
     @property
     def miller_indices(self):
         # Return the bulk structure of the interface configuration, with no vacuum
         # Thickness should be one
+        return self.__miller_indices
 
     def get_material(
         self,
@@ -70,6 +72,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         vacuum: float,
     ):
         pass
+
     @property
     def interface_properties(self):
         # Strain
@@ -85,7 +88,7 @@ class InterfaceConfigurationStrainMatcher:
         self,
         interface_configuration: InterfaceConfiguration,
         strain_matching_algorithm: StrainMatchingAlgorithms,
-        strain_matching_parameters: StrainMatchingParameters,
+        strain_matching_parameters: Optional[ZSLStrainMatchingParameters],
         termination_pair: TerminationPair,
     ):
         self.terminatIon_pair = termination_pair
@@ -95,7 +98,7 @@ class InterfaceConfigurationStrainMatcher:
 
     @property
     def generator(self):
-        if self.strain_matching_algorithm == StrainMatchingAlgorithms.ZSL:
+        if isinstance(self.strain_matching_parameters, ZSLStrainMatchingParameters):
             zsl_parameters = ZSLStrainMatchingParameters(**self.strain_matching_parameters.__dict__)
             generator: ZSLGenerator = ZSLGenerator(**zsl_parameters)
             return CoherentInterfaceBuilder(
@@ -105,55 +108,58 @@ class InterfaceConfigurationStrainMatcher:
                 film_miller=self.interface_configuration.film_configuration.miller_indices,
                 zslgen=generator,
             )
-        else if self.strain_matching_algorithm == StrainMatchingAlgorithms.SCALE:
+        elif self.strain_matching_parameters is None:
+
             class ScaleInterfaceBuilder:
                 def __init__(self, interface_configuration: InterfaceConfiguration):
                     super().__init__(
                         interface_configuration=interface_configuration,
-                        film_structure=film_structure,
-                        substrate_miller=substrate_miller,
-                        film_miller=film_miller,
+                        film_structure=interface_configuration.film_configuration.bulk,
+                        substrate_miller=interface_configuration.substrate_configuration.miller_indices,
+                        film_miller=interface_configuration.film_configuration.miller_indices,
                     )
 
                 def get_interfaces(self):
-                    interface = ....
+                    interface = ...
                     return [interface]
+
             return ScaleInterfaceBuilder(self.interface_configuration)
         else:
             raise ValueError(f"Unsupported strain matching algorithm: {self.strain_matching_algorithm}")
 
-    def builder(self):
-        return CoherentInterfaceBuilder(
-            substrate_structure=self.interface_configuration.substrate_configuration.bulk,
-            film_structure=self.interface_configuration.film_configuration.bulk,
-            substrate_miller=self.interface_configuration.substrate_configuration.miller_indices,
-            film_miller=self.interface_configuration.film_configuration.miller_indices,
-            zslgen=self.generator,
-        )
+    # def builder(self):
+    #     return CoherentInterfaceBuilder(
+    #         substrate_structure=self.interface_configuration.substrate_configuration.bulk,
+    #         film_structure=self.interface_configuration.film_configuration.bulk,
+    #         substrate_miller=self.interface_configuration.substrate_configuration.miller_indices,
+    #         film_miller=self.interface_configuration.film_configuration.miller_indices,
+    #         zslgen=self.generator,
+    #     )
+
     def get_interface_data_holder(self):
-        builder = self.builder
+        builder = self.generator
         interfaces_data = InterfaceDataHolder()
 
         all_interfaces_for_termination = builder.get_interfaces(
-            termination=self.termination_pair,
-            gap=self.interface_confguration.distance_z,
-            film_thickness=settings.LayerParameters.thickness,
-            substrate_thickness=settings.SubstrateParameters.thickness,
+            termination=self.terminatIon_pair,
+            gap=self.interface_configuration.distance_z,
+            film_thickness=self.interface_configuration.film_configuration.thickness,
+            substrate_thickness=self.interface_configuration.substrate_configuration.thickness,
             in_layers=True,
         )
 
-            all_interfaces_for_termination_patched_wrapped = list(
-                map(
-                    lambda i: wrap_to_unit_cell(interface_patch_with_mean_abs_strain(i)),
-                    all_interfaces_for_termination,
-                )
+        all_interfaces_for_termination_patched_wrapped = list(
+            map(
+                lambda i: wrap_to_unit_cell(interface_patch_with_mean_abs_strain(i)),
+                all_interfaces_for_termination,
             )
+        )
 
-            interfaces_data.add_data_entries(
-                all_interfaces_for_termination_patched_wrapped,
-                sort_interfaces_by_strain_and_size=sort_by_strain_and_size,
-                remove_duplicates=remove_duplicates,
-            )
+        interfaces_data.add_data_entries(
+            all_interfaces_for_termination_patched_wrapped,
+            sort_interfaces_by_strain_and_size=True,
+            remove_duplicates=True,
+        )
 
 
 def interface_patch_with_mean_abs_strain(target: Interface, tolerance: float = 10e-6):
@@ -190,7 +196,7 @@ class InterfaceDataHolder(object):
         if entries is None:
             entries = []
         self.data: InterfacesDataType = {}
-        self.terminations: List[TerminationType] = []
+        self.terminations: List[TerminationPair] = []
         self.add_data_entries(entries)
 
     def __str__(self):
@@ -212,7 +218,7 @@ class InterfaceDataHolder(object):
             self.set_interfaces_for_termination(termination, [])
 
     def add_interfaces_for_termination(
-        self, termination: TerminationType, interfaces: Union[InterfacesType, Interface]
+        self, termination: TerminationPair, interfaces: Union[InterfacesType, Interface]
     ):
         self.add_termination(termination)
         self.set_interfaces_for_termination(termination, self.get_interfaces_for_termination(termination) + interfaces)
@@ -236,23 +242,23 @@ class InterfaceDataHolder(object):
         if remove_duplicates:
             self.remove_duplicate_interfaces()
 
-    def set_interfaces_for_termination(self, termination: TerminationType, interfaces: List[Interface]):
+    def set_interfaces_for_termination(self, termination: TerminationPair, interfaces: List[Interface]):
         self.data[termination] = interfaces
 
-    def get_termination(self, termination: Union[int, TerminationType]) -> TerminationType:
+    def get_termination(self, termination: Union[int, TerminationPair]) -> TerminationPair:
         if isinstance(termination, int):
             termination = self.terminations[termination]
         return termination
 
     def get_interfaces_for_termination_or_its_index(
-        self, termination_or_its_index: Union[int, TerminationType]
+        self, termination_or_its_index: Union[int, TerminationPair]
     ) -> List[Interface]:
         termination = self.get_termination(termination_or_its_index)
         return self.data[termination]
 
     def get_interfaces_for_termination(
         self,
-        termination_or_its_index: Union[int, TerminationType],
+        termination_or_its_index: Union[int, TerminationPair],
         slice_or_index_or_indices: Union[int, slice, List[int], None] = None,
     ) -> List[Interface]:
         interfaces = self.get_interfaces_for_termination_or_its_index(termination_or_its_index)
@@ -282,7 +288,7 @@ class InterfaceDataHolder(object):
         self.set_interfaces_for_termination(termination, filtered_interfaces)
 
     def get_interfaces_for_termination_sorted_by_strain(
-        self, termination: Union[int, TerminationType], strain_mode: StrainModes = StrainModes.mean_abs_strain
+        self, termination: Union[int, TerminationPair], strain_mode: StrainModes = StrainModes.mean_abs_strain
     ) -> List[Interface]:
         return sorted(
             self.get_interfaces_for_termination(termination),
@@ -290,7 +296,7 @@ class InterfaceDataHolder(object):
         )
 
     def get_interfaces_for_termination_sorted_by_size(
-        self, termination: Union[int, TerminationType]
+        self, termination: Union[int, TerminationPair]
     ) -> List[Interface]:
         return sorted(
             self.get_interfaces_for_termination(termination),
@@ -298,7 +304,7 @@ class InterfaceDataHolder(object):
         )
 
     def get_interfaces_for_termination_sorted_by_strain_and_size(
-        self, termination: Union[int, TerminationType], strain_mode: StrainModes = StrainModes.mean_abs_strain
+        self, termination: Union[int, TerminationPair], strain_mode: StrainModes = StrainModes.mean_abs_strain
     ) -> List[Interface]:
         return sorted(
             self.get_interfaces_for_termination_sorted_by_strain(termination, strain_mode),
@@ -315,7 +321,7 @@ class InterfaceDataHolder(object):
         return functools.reduce(lambda a, b: a + b, self.data.values())
 
     def get_interfaces_as_materials(
-        self, termination: Union[int, TerminationType], slice_range_or_index: Union[int, slice]
+        self, termination: Union[int, TerminationPair], slice_range_or_index: Union[int, slice]
     ) -> List[Interface]:
         return list(
             map(

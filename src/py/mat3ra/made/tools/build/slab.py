@@ -27,6 +27,11 @@ class BaseSlabConfiguration(BaseModel):
 class SlabConfiguration(BaseSlabConfiguration):
     """Class to generate slabs and manage different terminations."""
 
+    thickness: int = 1
+    vacuum: float = 0.5
+    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
+    use_conventional_cell: bool = True
+
     @decorator_convert_material_args_kwargs_to_structure
     def __init__(
         self,

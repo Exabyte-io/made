@@ -4,8 +4,9 @@ from typing import Optional, Union, TypeVar
 from ...material import Material
 from .interface import (
     InterfaceDataHolder,
-    TerminationType,
-    InterfaceBuilder,
+    TerminationPair,
+    InterfaceConfiguration,
+    InterfaceConfigurationStrainMatcher,
     InterfaceBuilderSettings as Settings,
     interface_patch_with_mean_abs_strain,
 )
@@ -26,8 +27,8 @@ def create_interfaces(
     sort_by_strain_and_size: bool = True,
     remove_duplicates: bool = True,
     is_logging_enabled: bool = True,
-    interface_builder: Optional[InterfaceBuilder] = None,
-    termination: Optional[TerminationType] = None,
+    interface_builder: Optional[InterfaceConfiguration] = None,
+    termination: Optional[TerminationPair] = None,
 ) -> InterfaceDataHolder:
     """
     Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
@@ -85,10 +86,10 @@ def init_interface_builder(
     substrate: Material,
     film: Material,
     settings: Settings,
-) -> InterfaceBuilder:
+) -> InterfaceConfiguration:
     substrate = translate_to_bottom(substrate, settings.use_conventional_cell)
     film = translate_to_bottom(film, settings.use_conventional_cell)
-    return InterfaceBuilder(
+    return InterfaceConfiguration(
         substrate_slab=substrate,
         film_slab=film,
         settings=settings,
