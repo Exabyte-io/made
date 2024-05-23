@@ -1,5 +1,8 @@
-from pymatgen.core.structure import Structure
+from functools import wraps
+from typing import Callable
+
 from mat3ra.utils.matrix import convert_2x2_to_3x3
+from pymatgen.core.structure import Structure
 
 
 # TODO: convert to accept ASE Atoms object
@@ -20,17 +23,14 @@ def translate_to_bottom_pymatgen_structure(structure: Structure):
     return translated_structure
 
 
-def decorator_convert_2x2_to_3x3(func):
+def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
     """
     Decorator to convert a 2x2 matrix to a 3x3 matrix.
-    Args:
-        func: The function to decorate.
-
-    Returns:
-        The decorated function.
     """
 
-    def wrapper(matrix):
-        return convert_2x2_to_3x3(matrix) if len(matrix) == 2 else matrix
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        new_args = [convert_2x2_to_3x3(arg) if isinstance(arg, list) and len(arg) == 2 else arg for arg in args]
+        return func(*new_args, **kwargs)
 
     return wrapper
