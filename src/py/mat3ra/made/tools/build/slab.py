@@ -1,33 +1,33 @@
 from pymatgen.core.structure import Structure
 from pymatgen.core.surface import SlabGenerator as PymatgenSlabGenerator
 from pymatgen.core.interface import label_termination
-from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from typing import Any, List, Tuple, Dict, Optional
 import json
-
+from pydantic import BaseModel
 from .supercell import create_supercell
 from ..convert import decorator_convert_material_args_kwargs_to_structure, from_pymatgen
 from ...material import Material
 
 
-@decorator_convert_material_args_kwargs_to_structure
+# @decorator_convert_material_args_kwargs_to_structure
 class BaseSlabConfiguration(BaseModel):
     bulk: Structure
-    miller_indices: Tuple[int, int, int] = ((0, 0, 1),)
+    miller_indices: Tuple[int, int, int] = (0, 0, 1)
 
     @property
     def bulk(self):
-        pass
+        return self.__bulk
 
     @property
     def miller_indices(self):
-        pass
+        return self.__miller_indices
 
 
-@decorator_convert_material_args_kwargs_to_structure
 class SlabConfiguration(BaseSlabConfiguration):
     """Class to generate slabs and manage different terminations."""
 
+    @decorator_convert_material_args_kwargs_to_structure
     def __init__(
         self,
         bulk: Structure,
@@ -37,8 +37,9 @@ class SlabConfiguration(BaseSlabConfiguration):
         xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]],
         use_conventional_cell: bool = True,
     ):
+        super().__init__(bulk=bulk, miller_indices=miller_indices)
         self.__bulk = bulk
-        self.miller_indices = miller_indices
+        self.__miller_indices = miller_indices
         self.thickness = thickness
         self.vacuum = vacuum
         self.xy_supercell_matrix = xy_supercell_matrix
@@ -65,11 +66,14 @@ class SlabConfiguration(BaseSlabConfiguration):
 
     @property
     def __slabs_with_unique_terminations(self):
-        pass
+        return self.generator.get_slabs()
 
     @property
     def terminations(self):
         return list(set(label_termination(slab) for slab in self.__slabs_with_unique_terminations))
 
-    def get_material(self, termination, xy_supercell_matrix, thickness, vacuum):
-        pass
+    def get_material(self, termination: str) -> Material:
+        for slab in self.__slabs_with_unique_terminations:
+            if label_termination(slab) == termination:
+                return create_supercell(Material(from_pymatgen(slab)), self.xy_supercell_matrix)
+        return None
