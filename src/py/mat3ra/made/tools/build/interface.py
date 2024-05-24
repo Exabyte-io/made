@@ -8,16 +8,12 @@ from mat3ra.utils import array as array_utils
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
 
 from ..modify import wrap_to_unit_cell
-from ..convert import convert_atoms_or_structure_to_material
+from ..convert import convert_atoms_or_structure_to_material, to_ase, from_ase
 from .slab import BaseSlabConfiguration, SlabConfiguration
 
 TerminationPair = Tuple[str, str]
 InterfacesType = List[Interface]
 InterfacesDataType = Dict[Tuple, List[Interface]]
-
-
-class StrainMatchingAlgorithms(str, Enum):
-    ZSL = "ZSL"
 
 
 class StrainModes(str, Enum):
@@ -33,27 +29,35 @@ class ZSLStrainMatchingParameters(BaseModel):
     max_angle_tol: float = 0.01
 
 
-class InterfaceBuilderSettings(BaseModel):
-    distance_z: float = 3.0
-    shift_x: float = 0.0
-    shift_y: float = 0.0
-    use_conventional_cell: bool = True
-    use_strain_matching: bool = False
-    strain_matching_algorithm: Optional[StrainMatchingAlgorithms] = None
-    strain_matching_parameters: Optional[ZSLStrainMatchingParameters] = None
-
-
 class InterfaceConfiguration(BaseSlabConfiguration):
-    substrate_configuration: SlabConfiguration
-    film_configuration: SlabConfiguration
-    distance_z: float = 3.0
-    shift_x: float = 0.0
-    shift_y: float = 0.0
+    # substrate_configuration: SlabConfiguration
+    # film_configuration: SlabConfiguration
+    # distance_z: float = 3.0
+    # shift_x: float = 0.0
+    # shift_y: float = 0.0
+
+    def __init__(
+        self,
+        substrate_configuration: SlabConfiguration,
+        film_configuration: SlabConfiguration,
+        termination_pair: TerminationPair,
+        distance_z: float = 3.0,
+        shift_x: float = 0.0,
+        shift_y: float = 0.0,
+    ):
+        super().__init__()
+        self.substrate_configuration = substrate_configuration
+        self.film_configuration = film_configuration
+        self.termination_pair = termination_pair
+        self.distance_z: float = distance_z
+        self.shift_x: float = shift_x
+        self.shift_y: float = shift_y
 
     @property
     def bulk(self):
         # TODO: Return the bulk structure of the interface configuration, with no vacuum
-        return self.__bulk
+        # Slab with vacuum=0 and thickness=1 ?
+        return self.get_material()
 
     @property
     def miller_indices(self):
@@ -61,17 +65,19 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         # Thickness should be one
         return self.__miller_indices
 
-    def get_material(
-        self,
-        substrate_termination: str,
-        film_termination: str,
-        substrate_xy_supercell_matrix: List[List[int]],
-        film_xy_supercell_matrix: List[List[int]],
-        substrate_thickness: int,
-        film_thickness: int,
-        vacuum: float,
-    ):
-        pass
+    def get_material(self):
+
+        # Create substrate slab with the selected termination
+        substrate_slab = self.substrate_configuration.get_material(termination=self.termination_pair[0])
+        # Create film slab with the selected termination
+        film_slab = self.film_configuration.get_material(termination=self.termination_pair[1])
+        substrate_slab_ase = to_ase(substrate_slab)
+        film_slab_ase = to_ase(film_slab)
+        film_slab_ase.cell = substrate_slab_ase.cell
+        interface_ase = substrate_slab_ase + film_slab_ase
+        # interface_ase.wrap()
+
+        return from_ase(interface_ase)
 
     @property
     def interface_properties(self):
@@ -87,13 +93,11 @@ class InterfaceConfigurationStrainMatcher:
     def __init__(
         self,
         interface_configuration: InterfaceConfiguration,
-        strain_matching_algorithm: StrainMatchingAlgorithms,
         strain_matching_parameters: Optional[ZSLStrainMatchingParameters],
         termination_pair: TerminationPair,
     ):
-        self.terminatIon_pair = termination_pair
+        self.termination_pair = termination_pair
         self.interface_configuration = interface_configuration
-        self.strain_matching_algorithm = strain_matching_algorithm
         self.strain_matching_parameters = strain_matching_parameters
 
     @property
@@ -141,7 +145,7 @@ class InterfaceConfigurationStrainMatcher:
         interfaces_data = InterfaceDataHolder()
 
         all_interfaces_for_termination = builder.get_interfaces(
-            termination=self.terminatIon_pair,
+            termination=self.termination_pair,
             gap=self.interface_configuration.distance_z,
             film_thickness=self.interface_configuration.film_configuration.thickness,
             substrate_thickness=self.interface_configuration.substrate_configuration.thickness,
