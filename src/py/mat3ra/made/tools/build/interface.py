@@ -8,7 +8,7 @@ from mat3ra.utils import array as array_utils
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
 
 from ..modify import wrap_to_unit_cell
-from ..convert import convert_atoms_or_structure_to_material, to_ase, from_ase
+from ..convert import convert_atoms_or_structure_to_material, to_ase, from_ase, to_pymatgen
 from .slab import BaseSlabConfiguration, SlabConfiguration
 
 TerminationPair = Tuple[str, str]
@@ -37,8 +37,8 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         termination_pair: TerminationPair,
         distance_z: float = 3.0,
         vacuum: float = 5.0,
-        shift_x: float = 0.0,
-        shift_y: float = 0.0,
+        shift_a: float = 0.0,
+        shift_b: float = 0.0,
     ):
         super().__init__()
         self.substrate_configuration = substrate_configuration
@@ -46,8 +46,8 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         self.termination_pair = termination_pair
         self.vacuum: float = vacuum
         self.distance_z: float = distance_z
-        self.shift_x: float = shift_x
-        self.shift_y: float = shift_y
+        self.shift_a: float = shift_a
+        self.shift_b: float = shift_b
 
     @property
     def bulk(self):
@@ -71,24 +71,30 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         # Calculate z-shift
         max_z_substrate = max(substrate_slab_ase.positions[:, 2])
         min_z_film = min(film_slab_ase.positions[:, 2])
-        z_shift = max_z_substrate - min_z_film + self.distance_z
+        shift_z = max_z_substrate - min_z_film + self.distance_z
 
-        # Apply z-shift to the film
-        film_slab_ase.translate((0, 0, z_shift))
+        # Calculate shifts in Cartesian coordinates based on crystal coordinates
+        a_vector = substrate_slab_ase.cell[0]
+        b_vector = substrate_slab_ase.cell[1]
 
-        # TODO: add x,y shift: in cartesian and crystal coordinates
+        shift_along_a = a_vector * self.shift_a
+        shift_along_b = b_vector * self.shift_b
 
-        # Combine the substrate and film into one Atoms object
+        # Apply shifts
+        total_shift = shift_along_a + shift_along_b + np.array([0, 0, shift_z])
+        film_slab_ase.translate(total_shift)
+
         interface_ase = substrate_slab_ase + film_slab_ase
 
-        new_cell_height = max(interface_ase.positions[:, 2]) + self.vacuum
-        interface_ase.cell[2, 2] = new_cell_height
+        # Adjust the cell height to include the vacuum space above the film
+        cell_c_with_vacuum = max(interface_ase.positions[:, 2]) + self.vacuum
+        interface_ase.cell[2, 2] = cell_c_with_vacuum
 
         return from_ase(interface_ase)
 
     @property
     def interface_properties(self):
-        # Strain
+        # TODO: Strain
         pass
 
     def termination_pairs(self):
@@ -101,20 +107,18 @@ class InterfaceConfigurationStrainMatcher:
         self,
         interface_configuration: InterfaceConfiguration,
         strain_matching_parameters: Optional[ZSLStrainMatchingParameters],
-        termination_pair: TerminationPair,
     ):
-        self.termination_pair = termination_pair
         self.interface_configuration = interface_configuration
         self.strain_matching_parameters = strain_matching_parameters
 
     @property
-    def generator(self):
+    def builder(self):
         if isinstance(self.strain_matching_parameters, ZSLStrainMatchingParameters):
             zsl_parameters = ZSLStrainMatchingParameters(**self.strain_matching_parameters.__dict__)
             generator: ZSLGenerator = ZSLGenerator(**zsl_parameters)
             return CoherentInterfaceBuilder(
-                substrate_structure=self.interface_configuration.substrate_configuration.bulk,
-                film_structure=self.interface_configuration.film_configuration.bulk,
+                substrate_structure=to_pymatgen(self.interface_configuration.substrate_configuration.bulk),
+                film_structure=to_pymatgen(self.interface_configuration.film_configuration.bulk),
                 substrate_miller=self.interface_configuration.substrate_configuration.miller_indices,
                 film_miller=self.interface_configuration.film_configuration.miller_indices,
                 zslgen=generator,
@@ -122,37 +126,33 @@ class InterfaceConfigurationStrainMatcher:
         elif self.strain_matching_parameters is None:
 
             class ScaleInterfaceBuilder:
+                """
+                Creates matching interface between substrate and film by straining the film to match the substrate.
+                """
+
                 def __init__(self, interface_configuration: InterfaceConfiguration):
-                    super().__init__(
-                        interface_configuration=interface_configuration,
-                        film_structure=interface_configuration.film_configuration.bulk,
-                        substrate_miller=interface_configuration.substrate_configuration.miller_indices,
-                        film_miller=interface_configuration.film_configuration.miller_indices,
-                    )
+                    self.interface_configuration = interface_configuration
 
                 def get_interfaces(self):
-                    interface = ...
+                    # TODO: add straining to the film to match the substrate (by giving the correct matrix?)
+                    interface = self.interface_configuration.get_material()
                     return [interface]
 
             return ScaleInterfaceBuilder(self.interface_configuration)
         else:
-            raise ValueError(f"Unsupported strain matching algorithm: {self.strain_matching_algorithm}")
+            raise ValueError(f"Unknown strain matching parameters: {self.strain_matching_parameters}.")
 
-    # def builder(self):
-    #     return CoherentInterfaceBuilder(
-    #         substrate_structure=self.interface_configuration.substrate_configuration.bulk,
-    #         film_structure=self.interface_configuration.film_configuration.bulk,
-    #         substrate_miller=self.interface_configuration.substrate_configuration.miller_indices,
-    #         film_miller=self.interface_configuration.film_configuration.miller_indices,
-    #         zslgen=self.generator,
-    #     )
+    def get_interfaces(self):
+        builder = self.builder
+        interfaces = builder.get_interfaces()
+        return interfaces
 
     def get_interface_data_holder(self):
-        builder = self.generator
+        builder = self.builder
         interfaces_data = InterfaceDataHolder()
 
         all_interfaces_for_termination = builder.get_interfaces(
-            termination=self.termination_pair,
+            termination=self.interface_configuration.termination_pair,
             gap=self.interface_configuration.distance_z,
             film_thickness=self.interface_configuration.film_configuration.thickness,
             substrate_thickness=self.interface_configuration.substrate_configuration.thickness,
