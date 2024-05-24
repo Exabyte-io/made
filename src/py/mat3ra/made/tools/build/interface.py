@@ -42,6 +42,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         film_configuration: SlabConfiguration,
         termination_pair: TerminationPair,
         distance_z: float = 3.0,
+        vacuum: float = 5.0,
         shift_x: float = 0.0,
         shift_y: float = 0.0,
     ):
@@ -49,6 +50,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         self.substrate_configuration = substrate_configuration
         self.film_configuration = film_configuration
         self.termination_pair = termination_pair
+        self.vacuum: float = vacuum
         self.distance_z: float = distance_z
         self.shift_x: float = shift_x
         self.shift_y: float = shift_y
@@ -66,16 +68,27 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         return self.__miller_indices
 
     def get_material(self):
-
-        # Create substrate slab with the selected termination
+        # Create substrate and film slabs with the selected terminations
         substrate_slab = self.substrate_configuration.get_material(termination=self.termination_pair[0])
-        # Create film slab with the selected termination
         film_slab = self.film_configuration.get_material(termination=self.termination_pair[1])
+
+        # Convert to ASE Atoms objects
         substrate_slab_ase = to_ase(substrate_slab)
         film_slab_ase = to_ase(film_slab)
-        film_slab_ase.cell = substrate_slab_ase.cell
+
+        # Calculate z-shift
+        max_z_substrate = max(substrate_slab_ase.positions[:, 2])
+        min_z_film = min(film_slab_ase.positions[:, 2])
+        z_shift = max_z_substrate - min_z_film + self.distance_z
+
+        # Apply z-shift to the film
+        film_slab_ase.translate((0, 0, z_shift))
+
+        # Combine the substrate and film into one Atoms object
         interface_ase = substrate_slab_ase + film_slab_ase
-        # interface_ase.wrap()
+
+        new_cell_height = max(interface_ase.positions[:, 2]) + self.vacuum
+        interface_ase.cell[2, 2] = new_cell_height
 
         return from_ase(interface_ase)
 
