@@ -30,12 +30,6 @@ class ZSLStrainMatchingParameters(BaseModel):
 
 
 class InterfaceConfiguration(BaseSlabConfiguration):
-    # substrate_configuration: SlabConfiguration
-    # film_configuration: SlabConfiguration
-    # distance_z: float = 3.0
-    # shift_x: float = 0.0
-    # shift_y: float = 0.0
-
     def __init__(
         self,
         substrate_configuration: SlabConfiguration,
@@ -68,11 +62,9 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         return self.__miller_indices
 
     def get_material(self):
-        # Create substrate and film slabs with the selected terminations
         substrate_slab = self.substrate_configuration.get_material(termination=self.termination_pair[0])
         film_slab = self.film_configuration.get_material(termination=self.termination_pair[1])
 
-        # Convert to ASE Atoms objects
         substrate_slab_ase = to_ase(substrate_slab)
         film_slab_ase = to_ase(film_slab)
 
@@ -83,6 +75,8 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 
         # Apply z-shift to the film
         film_slab_ase.translate((0, 0, z_shift))
+
+        # TODO: add x,y shift: in cartesian and crystal coordinates
 
         # Combine the substrate and film into one Atoms object
         interface_ase = substrate_slab_ase + film_slab_ase
