@@ -6,6 +6,7 @@ from enum import Enum
 from pydantic import BaseModel
 from mat3ra.utils import array as array_utils
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
+from ase.build.tools import niggli_reduce
 
 from ..modify import wrap_to_unit_cell
 from ..convert import convert_atoms_or_structure_to_material, to_ase, from_ase, to_pymatgen
@@ -61,14 +62,22 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         # Thickness should be one
         return self.__miller_indices
 
-    def get_material(self):
+    def get_material(self, scale_film_to_fit: bool = False):
         substrate_slab = self.substrate_configuration.get_material(termination=self.termination_pair[0])
         film_slab = self.film_configuration.get_material(termination=self.termination_pair[1])
 
         substrate_slab_ase = to_ase(substrate_slab)
         film_slab_ase = to_ase(film_slab)
 
-        # Calculate z-shift
+        # Reduce the cell to Niggli form if desired
+        niggli_reduce(substrate_slab_ase)
+        niggli_reduce(film_slab_ase)
+
+        if scale_film_to_fit:
+            film_slab_ase.set_cell(substrate_slab_ase.cell, scale_atoms=True)
+            film_slab_ase.wrap()
+
+        # Calculate z-shift based on the new positions after scaling
         max_z_substrate = max(substrate_slab_ase.positions[:, 2])
         min_z_film = min(film_slab_ase.positions[:, 2])
         shift_z = max_z_substrate - min_z_film + self.distance_z
@@ -76,11 +85,9 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         # Calculate shifts in Cartesian coordinates based on crystal coordinates
         a_vector = substrate_slab_ase.cell[0]
         b_vector = substrate_slab_ase.cell[1]
-
         shift_along_a = a_vector * self.shift_a
         shift_along_b = b_vector * self.shift_b
 
-        # Apply shifts
         total_shift = shift_along_a + shift_along_b + np.array([0, 0, shift_z])
         film_slab_ase.translate(total_shift)
 
@@ -135,7 +142,7 @@ class InterfaceConfigurationStrainMatcher:
 
                 def get_interfaces(self):
                     # TODO: add straining to the film to match the substrate (by giving the correct matrix?)
-                    interface = self.interface_configuration.get_material()
+                    interface = self.interface_configuration.get_material(scale_film_to_fit=True)
                     return [interface]
 
             return ScaleInterfaceBuilder(self.interface_configuration)

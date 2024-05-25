@@ -39,7 +39,9 @@ class SlabConfiguration(BaseSlabConfiguration):
         use_orthogonal_z: bool = False,
     ):
         super().__init__()
-        self.__bulk = bulk
+        self.__bulk = (
+            SpacegroupAnalyzer(bulk).get_conventional_standard_structure() if self.use_conventional_cell else bulk
+        )
         self.__miller_indices = miller_indices
         self.thickness = thickness
         self.vacuum = vacuum
@@ -49,11 +51,7 @@ class SlabConfiguration(BaseSlabConfiguration):
 
     @property
     def bulk(self):
-        return from_pymatgen(
-            SpacegroupAnalyzer(self.__bulk).get_conventional_standard_structure()
-            if self.use_conventional_cell
-            else self.__bulk
-        )
+        return from_pymatgen(self.__bulk)
 
     @property
     def miller_indices(self):
@@ -72,7 +70,7 @@ class SlabConfiguration(BaseSlabConfiguration):
 
     @property
     def __slabs_with_unique_terminations(self):
-        return self.generator.get_slabs()
+        return [slab.get_orthogonal_c_slab() if self.use_orthogonal_z else slab for slab in self.generator.get_slabs()]
 
     @property
     def terminations(self):
@@ -82,7 +80,7 @@ class SlabConfiguration(BaseSlabConfiguration):
         for slab in self.__slabs_with_unique_terminations:
             if label_termination(slab) == termination:
                 return create_supercell(
-                    Material(from_pymatgen(slab.get_orthogonal_c_slab() if self.use_orthogonal_z else slab)),
+                    Material(from_pymatgen(slab)),
                     self.xy_supercell_matrix,
                 )
         raise ValueError(f"Termination {termination} not found in slabs.")
