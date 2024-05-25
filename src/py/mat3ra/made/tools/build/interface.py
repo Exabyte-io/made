@@ -99,12 +99,15 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 
     @property
     def interface_properties(self):
-        # TODO: Strain
-        pass
-
-    def termination_pairs(self):
-        # TODO
-        pass
+        return {
+            "substrate_configuration": self.substrate_configuration,
+            "film_configuration": self.film_configuration,
+            "termination_pair": self.termination_pair,
+            "distance_z": self.distance_z,
+            "vacuum": self.vacuum,
+            "shift_a": self.shift_a,
+            "shift_b": self.shift_b,
+        }
 
 
 class ScaleInterfaceBuilder:
