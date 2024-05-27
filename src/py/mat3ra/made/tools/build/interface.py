@@ -38,8 +38,6 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         termination_pair: TerminationPair,
         distance_z: float = 3.0,
         vacuum: float = 5.0,
-        shift_a: float = 0.0,
-        shift_b: float = 0.0,
     ):
         super().__init__()
         self.substrate_configuration = substrate_configuration
@@ -47,8 +45,6 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         self.termination_pair = termination_pair
         self.vacuum: float = vacuum
         self.distance_z: float = distance_z
-        self.shift_a: float = shift_a
-        self.shift_b: float = shift_b
 
     @property
     def bulk(self):
@@ -59,10 +55,10 @@ class InterfaceConfiguration(BaseSlabConfiguration):
     def miller_indices(self):
         return self.__miller_indices
 
-    def get_material(self, vacuum, scale_film_to_fit: bool = False):
+    def get_material(self, vacuum=None, scale_film_to_fit: bool = False):
         vacuum = self.vacuum if vacuum is None else vacuum
-        substrate_slab = self.substrate_configuration.get_material(termination=self.termination_pair[0])
-        film_slab = self.film_configuration.get_material(termination=self.termination_pair[1])
+        substrate_slab = self.substrate_configuration.get_material(termination=self.termination_pair[1])
+        film_slab = self.film_configuration.get_material(termination=self.termination_pair[0])
 
         substrate_slab_ase = to_ase(substrate_slab)
         film_slab_ase = to_ase(film_slab)
@@ -80,14 +76,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         min_z_film = min(film_slab_ase.positions[:, 2])
         shift_z = max_z_substrate - min_z_film + self.distance_z
 
-        # Calculate shifts in Cartesian coordinates based on crystal coordinates
-        a_vector = substrate_slab_ase.cell[0]
-        b_vector = substrate_slab_ase.cell[1]
-        shift_along_a = a_vector * self.shift_a
-        shift_along_b = b_vector * self.shift_b
-
-        total_shift = shift_along_a + shift_along_b + np.array([0, 0, shift_z])
-        film_slab_ase.translate(total_shift)
+        film_slab_ase.translate([0, 0, shift_z])
 
         interface_ase = substrate_slab_ase + film_slab_ase
 
@@ -105,8 +94,6 @@ class InterfaceConfiguration(BaseSlabConfiguration):
             "termination_pair": self.termination_pair,
             "distance_z": self.distance_z,
             "vacuum": self.vacuum,
-            "shift_a": self.shift_a,
-            "shift_b": self.shift_b,
         }
 
 
