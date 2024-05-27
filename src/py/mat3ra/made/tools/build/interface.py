@@ -25,7 +25,7 @@ class StrainModes(str, Enum):
 
 class ZSLStrainMatchingParameters(BaseModel):
     max_area: float = 50.0
-    max_area_tol: float = 0.09
+    max_area_ratio_tol: float = 0.09
     max_length_tol: float = 0.03
     max_angle_tol: float = 0.01
 
@@ -123,6 +123,36 @@ class ScaleInterfaceBuilder:
         return [interface]
 
 
+class ZSLInterfaceBuilder:
+    """
+    Creates matching interface between substrate and film using the ZSL algorithm.
+
+    """
+
+    def __init__(self, interface_configuration: InterfaceConfiguration, zsl_parameters: ZSLStrainMatchingParameters):
+        self.interface_configuration = interface_configuration
+        zsl_parameters = zsl_parameters.dict()
+        generator = ZSLGenerator(**zsl_parameters)
+
+        self.cib = CoherentInterfaceBuilder(
+            substrate_structure=to_pymatgen(self.interface_configuration.substrate_configuration.bulk),
+            film_structure=to_pymatgen(self.interface_configuration.film_configuration.bulk),
+            substrate_miller=self.interface_configuration.substrate_configuration.miller_indices,
+            film_miller=self.interface_configuration.film_configuration.miller_indices,
+            zslgen=generator,
+        )
+
+    def get_interfaces(self):
+        interfaces = self.cib.get_interfaces(
+            termination=self.interface_configuration.termination_pair,
+            gap=self.interface_configuration.distance_z,
+            film_thickness=self.interface_configuration.film_configuration.thickness,
+            substrate_thickness=self.interface_configuration.substrate_configuration.thickness,
+            in_layers=True,
+        )
+        return interfaces
+
+
 class InterfaceConfigurationStrainMatcher:
     def __init__(
         self,
@@ -135,15 +165,8 @@ class InterfaceConfigurationStrainMatcher:
     @property
     def builder(self):
         if isinstance(self.strain_matching_parameters, ZSLStrainMatchingParameters):
-            zsl_parameters = ZSLStrainMatchingParameters(**self.strain_matching_parameters.__dict__)
-            generator: ZSLGenerator = ZSLGenerator(**zsl_parameters)
-            return CoherentInterfaceBuilder(
-                substrate_structure=to_pymatgen(self.interface_configuration.substrate_configuration.bulk),
-                film_structure=to_pymatgen(self.interface_configuration.film_configuration.bulk),
-                substrate_miller=self.interface_configuration.substrate_configuration.miller_indices,
-                film_miller=self.interface_configuration.film_configuration.miller_indices,
-                zslgen=generator,
-            )
+            zsl_parameters = self.strain_matching_parameters
+            return ZSLInterfaceBuilder(self.interface_configuration, zsl_parameters)
         elif self.strain_matching_parameters is None:
             return ScaleInterfaceBuilder(self.interface_configuration)
         else:
