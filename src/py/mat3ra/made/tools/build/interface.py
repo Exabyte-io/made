@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Optional, Union
 from enum import Enum
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
@@ -54,7 +54,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 
     def get_material(self, scale_film_to_fit: bool = False):
         interface_builder = SimpleInterfaceBuilder(
-            self, strain_matching_parameters=NoStrainMatchingParameters(scale_film_to_fit=scale_film_to_fit)
+            strain_matching_parameters=NoStrainMatchingParameters(scale_film_to_fit=scale_film_to_fit)
         )
         return interface_builder.get_material(self)
 
@@ -64,7 +64,10 @@ class NoStrainMatchingParameters(BaseModel):
 
 
 class BaseInterfaceBuilder:
-    def __init__(self, strain_matching_parameters: Any = None):
+    def __init__(
+        self,
+        strain_matching_parameters: Optional[Union[NoStrainMatchingParameters, ZSLStrainMatchingParameters]] = None,
+    ):
         self.strain_matching_parameters = strain_matching_parameters
         pass
 
@@ -80,7 +83,7 @@ class SimpleInterfaceBuilder(BaseInterfaceBuilder):
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
 
-    def __init__(self, strain_matching_parameters: Any = None):
+    def __init__(self, strain_matching_parameters: Optional[NoStrainMatchingParameters] = None):
         super().__init__(strain_matching_parameters=strain_matching_parameters)
 
     def get_material(self, interface_configuration: InterfaceConfiguration) -> Material:
