@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Union, List, Tuple, Dict, Optional, Any
+from typing import List, Tuple, Dict, Any
 from enum import Enum
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
@@ -50,7 +50,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 
     @property
     def miller_indices(self):
-        return self.__miller_indices
+        return (0, 0, 1)
 
     def get_material(self, scale_film_to_fit: bool = False):
         interface_builder = SimpleInterfaceBuilder(
@@ -64,7 +64,7 @@ class NoStrainMatchingParameters(BaseModel):
 
 
 class BaseInterfaceBuilder:
-    def __init__(self, strain_matching_parameters=None):
+    def __init__(self, strain_matching_parameters: Any = None):
         self.strain_matching_parameters = strain_matching_parameters
         pass
 
@@ -80,9 +80,8 @@ class SimpleInterfaceBuilder(BaseInterfaceBuilder):
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
 
-    def __init__(self, interface_configuration: InterfaceConfiguration, strain_matching_parameters: Any = None):
+    def __init__(self, strain_matching_parameters: Any = None):
         super().__init__(strain_matching_parameters=strain_matching_parameters)
-        self.interface_configuration = interface_configuration
 
     def get_material(self, interface_configuration: InterfaceConfiguration) -> Material:
         vacuum = interface_configuration.vacuum
@@ -126,21 +125,9 @@ class ZSLInterfaceBuilder(BaseInterfaceBuilder):
     Creates matching interface between substrate and film using the ZSL algorithm.
     """
 
-    def __init__(
-        self, interface_configuration: InterfaceConfiguration, strain_matching_parameters: ZSLStrainMatchingParameters
-    ):
+    def __init__(self, strain_matching_parameters: ZSLStrainMatchingParameters):
         super().__init__(strain_matching_parameters=strain_matching_parameters)
-        self.interface_configuration = interface_configuration
-        strain_matching_parameters = strain_matching_parameters.dict()
-        generator = ZSLGenerator(**strain_matching_parameters)
-
-        self.cib = CoherentInterfaceBuilder(
-            substrate_structure=to_pymatgen(self.interface_configuration.substrate_configuration.bulk),
-            film_structure=to_pymatgen(self.interface_configuration.film_configuration.bulk),
-            substrate_miller=self.interface_configuration.substrate_configuration.miller_indices,
-            film_miller=self.interface_configuration.film_configuration.miller_indices,
-            zslgen=generator,
-        )
+        self.strain_matching_parameters = strain_matching_parameters.dict()
 
     def get_material(self, interface_configuration: InterfaceConfiguration) -> Material:
         interface = self.get_sorted_interfaces()[0]
@@ -153,12 +140,22 @@ class ZSLInterfaceBuilder(BaseInterfaceBuilder):
         interfaces = sorted(interfaces, key=lambda x: np.mean(np.abs(x.interface_properties["strain"])))
         return [Material(from_pymatgen(interface)) for interface in interfaces]
 
-    def get_interface_structures(self):
-        interfaces = self.cib.get_interfaces(
-            termination=self.interface_configuration.termination_pair,
-            gap=self.interface_configuration.distance_z,
-            film_thickness=self.interface_configuration.film_configuration.thickness,
-            substrate_thickness=self.interface_configuration.substrate_configuration.thickness,
+    def get_interface_structures(self, interface_configuration: InterfaceConfiguration) -> InterfacesType:
+        interfaces = self.generator(interface_configuration).get_interfaces(
+            termination=interface_configuration.termination_pair,
+            gap=interface_configuration.distance_z,
+            film_thickness=interface_configuration.film_configuration.thickness,
+            substrate_thickness=interface_configuration.substrate_configuration.thickness,
             in_layers=True,
         )
-        return interfaces
+        return list(interfaces)
+
+    def generator(self, interface_configuration: InterfaceConfiguration) -> CoherentInterfaceBuilder:
+        generator = ZSLGenerator(**self.strain_matching_parameters)
+        return CoherentInterfaceBuilder(
+            substrate_structure=to_pymatgen(interface_configuration.substrate_configuration.bulk),
+            film_structure=to_pymatgen(interface_configuration.film_configuration.bulk),
+            substrate_miller=interface_configuration.substrate_configuration.miller_indices,
+            film_miller=interface_configuration.film_configuration.miller_indices,
+            zslgen=generator,
+        )
