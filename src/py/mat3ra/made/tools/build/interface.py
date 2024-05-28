@@ -11,6 +11,7 @@ from ase.build.tools import niggli_reduce
 from ..modify import wrap_to_unit_cell
 from ..convert import convert_atoms_or_structure_to_material, to_ase, from_ase, to_pymatgen
 from .slab import BaseSlabConfiguration, SlabConfiguration
+from ...material import Material
 
 TerminationPair = Tuple[str, str]
 InterfacesType = List[Interface]
@@ -84,7 +85,8 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         cell_c_with_vacuum = max(interface_ase.positions[:, 2]) + vacuum
         interface_ase.cell[2, 2] = cell_c_with_vacuum
 
-        return from_ase(interface_ase)
+        material_dict = from_ase(interface_ase)
+        return Material(material_dict)
 
     @property
     def interface_properties(self):
