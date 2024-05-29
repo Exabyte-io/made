@@ -126,7 +126,7 @@ class ZSLInterfaceBuilder(StrainMatchingInterfaceBuilder):
     Creates matching interface between substrate and film using the ZSL algorithm.
     """
 
-    def __init__(self, strain_matching_parameters: ZSLStrainMatchingParameters):
+    def __init__(self, strain_matching_parameters: ZSLStrainMatchingParameters = ZSLStrainMatchingParameters()):
         super().__init__(strain_matching_parameters=strain_matching_parameters)
         self.strain_matching_parameters = strain_matching_parameters.dict()
 
