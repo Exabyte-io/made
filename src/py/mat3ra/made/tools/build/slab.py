@@ -46,7 +46,6 @@ class SlabConfiguration(BaseSlabConfiguration):
             else to_pymatgen(bulk)
         )
         self.__miller_indices = miller_indices
-        self.__builder = SlabBuilder()
         self.thickness = thickness
         self.vacuum = vacuum
         self.xy_supercell_matrix = xy_supercell_matrix
@@ -63,15 +62,15 @@ class SlabConfiguration(BaseSlabConfiguration):
 
     @property
     def terminations(self):
-        return self.__builder.terminations(self)
+        return SlabBuilder().terminations(self)
 
     def get_material(self, termination: Optional[str]):
-        return self.__builder.get_material(self, termination)
+        return SlabBuilder().get_material(self, termination)
 
 
 class SlabBuilder(BaseBuilder):
     def __init__(self):
-        pass
+        super().__init__()
 
     def get_material(
         self, configuration: SlabConfiguration = SlabConfiguration(), termination: Optional[str] = "", **kwargs
