@@ -2,7 +2,7 @@ from pymatgen.core.structure import Structure
 from pymatgen.core.surface import SlabGenerator as PymatgenSlabGenerator
 from pymatgen.core.interface import label_termination
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from . import BaseBuilder
 from .supercell import create_supercell
@@ -19,9 +19,6 @@ class BaseSlabConfiguration(object):
     def miller_indices(self) -> Tuple[int, int, int]:
         raise NotImplementedError
 
-    def get_material(self, **kwargs) -> Material:
-        raise NotImplementedError
-
 
 class SlabConfiguration(BaseSlabConfiguration):
     """Class to generate slabs and manage different terminations."""
@@ -34,7 +31,7 @@ class SlabConfiguration(BaseSlabConfiguration):
 
     def __init__(
         self,
-        bulk: Material,
+        bulk: Material = Material(Material.default_config),
         miller_indices: Tuple[int, int, int] = (0, 0, 1),
         thickness: int = 1,
         vacuum: float = 0.5,
@@ -68,7 +65,7 @@ class SlabConfiguration(BaseSlabConfiguration):
     def terminations(self):
         return self.__builder.terminations(self)
 
-    def get_material(self, termination: str) -> Material:
+    def get_material(self, termination: Optional[str]):
         return self.__builder.get_material(self, termination)
 
 
@@ -76,12 +73,14 @@ class SlabBuilder(BaseBuilder):
     def __init__(self):
         pass
 
-    def get_material(self, slab_configuration: SlabConfiguration = None, termination: str = None) -> Material:
-        for slab in SlabBuilder.__slabs_with_unique_terminations(self, slab_configuration):
+    def get_material(
+        self, configuration: SlabConfiguration = SlabConfiguration(), termination: Optional[str] = "", **kwargs
+    ) -> Material:
+        for slab in SlabBuilder.__slabs_with_unique_terminations(self, configuration):
             if label_termination(slab) == termination:
                 return create_supercell(
                     Material(from_pymatgen(slab)),
-                    slab_configuration.xy_supercell_matrix,
+                    configuration.xy_supercell_matrix,
                 )
         raise ValueError(f"Termination {termination} not found in slabs.")
 
@@ -95,10 +94,10 @@ class SlabBuilder(BaseBuilder):
             reorient_lattice=True,
         )
 
-    def __slabs_with_unique_terminations(self, slab_configuration: SlabConfiguration):
+    def __slabs_with_unique_terminations(self, configuration: SlabConfiguration):
         return [
-            slab.get_orthogonal_c_slab() if slab_configuration.use_orthogonal_z else slab
-            for slab in self.__generator(slab_configuration).get_slabs()
+            slab.get_orthogonal_c_slab() if configuration.use_orthogonal_z else slab
+            for slab in self.__generator(configuration).get_slabs()
         ]
 
     def terminations(self, slab_configuration: SlabConfiguration) -> List[str]:
