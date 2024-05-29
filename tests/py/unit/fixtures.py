@@ -53,3 +53,54 @@ INTERFACE_PROPERTIES_JSON = {
 
 # Add properties to interface structure
 INTERFACE_STRUCTURE.interface_properties = INTERFACE_PROPERTIES_MOCK
+
+
+SI_SUPERCELL_2X2X1 = {
+    "name": "Si8",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+            {"id": 4, "value": "Si"},
+            {"id": 5, "value": "Si"},
+            {"id": 6, "value": "Si"},
+            {"id": 7, "value": "Si"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0, 0, 0]},
+            {"id": 1, "value": [0, 0.5, 0]},
+            {"id": 2, "value": [0.5, 0, 0]},
+            {"id": 3, "value": [0.5, 0.5, 0]},
+            {"id": 4, "value": [0.125, 0.125, 0.25]},
+            {"id": 5, "value": [0.125, 0.625, 0.25]},
+            {"id": 6, "value": [0.625, 0.125, 0.25]},
+            {"id": 7, "value": [0.625, 0.625, 0.25]},
+        ],
+        "units": "crystal",
+        "cell": [[6.69784, 0, 3.867], [2.232613, 6.314785, 3.867], [0, 0, 3.867]],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 7.734,
+        "b": 7.734,
+        "c": 3.867,
+        "alpha": 60,
+        "beta": 60,
+        "gamma": 60,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+        "vectors": {
+            "a": [6.69784, 0, 3.867],
+            "b": [2.232613, 6.314785, 3.867],
+            "c": [0, 0, 3.867],
+            "alat": 1,
+            "units": "angstrom",
+        },
+    },
+    "isNonPeriodic": False,
+    "_id": "",
+    "metadata": {},
+    "isUpdated": True,
+}
