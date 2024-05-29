@@ -61,7 +61,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
     def miller_indices(self):
         return (0, 0, 1)
 
-    def get_material(self, scale_film_to_fit: bool = False):
+    def get_material(self, scale_film_to_fit: bool = False, **kwargs) -> Material:
         interface_builder = SimpleInterfaceBuilder(
             build_parameters=SimpleInterfaceBuilderParameters(scale_film_to_fit=scale_film_to_fit)
         )
@@ -77,14 +77,12 @@ class SimpleInterfaceBuilder(BaseBuilder):
         super().__init__()
         self.build_parameters = build_parameters
 
-    def get_material(self, interface_configuration: InterfaceConfiguration, **kwargs) -> Material:
-        vacuum = interface_configuration.vacuum
-        substrate_slab = interface_configuration.substrate_configuration.get_material(
-            termination=interface_configuration.termination_pair[1]
+    def get_material(self, configuration: InterfaceConfiguration, **kwargs) -> Material:
+        vacuum = configuration.vacuum
+        substrate_slab = configuration.substrate_configuration.get_material(
+            termination=configuration.termination_pair[1]
         )
-        film_slab = interface_configuration.film_configuration.get_material(
-            termination=interface_configuration.termination_pair[0]
-        )
+        film_slab = configuration.film_configuration.get_material(termination=configuration.termination_pair[0])
 
         substrate_slab_ase = to_ase(substrate_slab)
         film_slab_ase = to_ase(film_slab)
@@ -93,14 +91,14 @@ class SimpleInterfaceBuilder(BaseBuilder):
         niggli_reduce(substrate_slab_ase)
         niggli_reduce(film_slab_ase)
 
-        if self.build_parameters.scale_film:
+        if isinstance(self.build_parameters, SimpleInterfaceBuilderParameters) and self.build_parameters.scale_film:
             film_slab_ase.set_cell(substrate_slab_ase.cell, scale_atoms=True)
             film_slab_ase.wrap()
 
         # Calculate z-shift based on the new positions after scaling
         max_z_substrate = max(substrate_slab_ase.positions[:, 2])
         min_z_film = min(film_slab_ase.positions[:, 2])
-        shift_z = max_z_substrate - min_z_film + interface_configuration.distance_z
+        shift_z = max_z_substrate - min_z_film + configuration.distance_z
 
         film_slab_ase.translate([0, 0, shift_z])
 
