@@ -1,47 +1,53 @@
-from typing import List, Any, Optional, Dict
+from typing import List, Optional, TypeVar, Generic
 
 from ...material import Material
 
 
-class BaseBuilder:
-    __ConfigurationType: Any = Any
-    __GeneratedItemType: Any = Any
-    __BuildParametersType: Optional[Any] = Optional[Any]
-    __SelectorParametersType: Optional[Dict] = Optional[Dict]
-    __PostProcessParametersType: Optional[Dict] = Optional[Dict]
+ConfigurationType = TypeVar("ConfigurationType")
+BuildParametersType = TypeVar("BuildParametersType")
+GeneratedItemType = TypeVar("GeneratedItemType")
+SelectorParametersType = TypeVar("SelectorParametersType")
+PostProcessParametersType = TypeVar("PostProcessParametersType")
 
-    def __init__(self, build_parameters: __BuildParametersType = None) -> None:
+
+class BaseBuilder(
+    Generic[
+        ConfigurationType, BuildParametersType, GeneratedItemType, SelectorParametersType, PostProcessParametersType
+    ]
+):
+
+    def __init__(self, build_parameters: BuildParametersType) -> None:
         self.build_parameters = build_parameters
-        self.__generated_items: List[List[Any]] = []
-        self.__configurations: List[Any] = []
+        self.__generated_items: List[List[GeneratedItemType]] = []
+        self.__configurations: List[ConfigurationType] = []
 
-    def __generate_or_get_from_cache(self, configuration: __ConfigurationType) -> List[Any]:
+    def __generate(self, configuration: ConfigurationType) -> List[GeneratedItemType]:
+        return []
+
+    def __generate_or_get_from_cache(self, configuration: ConfigurationType) -> List[GeneratedItemType]:
         if configuration not in self.__configurations:
             self.__configurations.append(configuration)
             self.__generated_items.append(self.__generate(configuration))
         return self.__generated_items[self.__configurations.index(configuration)]
 
-    def __generate(self, configuration: __ConfigurationType) -> List[__GeneratedItemType]:
-        return []
-
-    def __sort(self, items: List[__GeneratedItemType]) -> List[__GeneratedItemType]:
+    def __sort(self, items: List[GeneratedItemType]) -> List[GeneratedItemType]:
         return items
 
     def __select(
-        self, items: List[__GeneratedItemType], selector_parameters: __SelectorParametersType
-    ) -> List[__GeneratedItemType]:
+        self, items: List[GeneratedItemType], selector_parameters: Optional[SelectorParametersType] = None
+    ) -> List[GeneratedItemType]:
         return items
 
     def __post_process(
-        self, items: List[__GeneratedItemType], post_process_parameters: __PostProcessParametersType
+        self, items: List[GeneratedItemType], post_process_parameters: Optional[PostProcessParametersType] = None
     ) -> List[Material]:
-        return items
+        return [Material(item) for item in items]
 
     def get_materials(
         self,
-        configuration: __ConfigurationType,
-        selector_parameters: __SelectorParametersType = None,
-        post_process_parameters: __PostProcessParametersType = None,
+        configuration: ConfigurationType,
+        selector_parameters: Optional[SelectorParametersType] = None,
+        post_process_parameters: Optional[PostProcessParametersType] = None,
     ) -> List[Material]:
         generated_items = self.__generate_or_get_from_cache(configuration)
         sorted_items = self.__sort(generated_items)
@@ -50,8 +56,8 @@ class BaseBuilder:
 
     def get_material(
         self,
-        configuration: __ConfigurationType,
-        selector_parameters: __SelectorParametersType = None,
-        post_process_parameters: __PostProcessParametersType = None,
+        configuration: ConfigurationType,
+        selector_parameters: Optional[SelectorParametersType] = None,
+        post_process_parameters: Optional[PostProcessParametersType] = None,
     ) -> Material:
         return self.get_materials(configuration, selector_parameters, post_process_parameters)[0]
