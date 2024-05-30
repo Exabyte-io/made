@@ -56,7 +56,6 @@ class CSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilder
 
 
 class InterfaceConfiguration(BaseSlabConfiguration):
-
     film_configuration: SlabConfiguration
     substrate_configuration: SlabConfiguration
     film_termination: str
@@ -162,7 +161,7 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
     _GeneratedItemType = PymatgenInterface
 
     def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
-        generator = ZSLGenerator(**self.build_parameters.dict())
+        generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.dict())
         builder = CoherentInterfaceBuilder(
             substrate_structure=to_pymatgen(configuration.substrate_configuration.bulk),
             film_structure=to_pymatgen(configuration.film_configuration.bulk),
@@ -186,8 +185,14 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
         return sorted(items, key=lambda x: np.mean(np.abs(x.interface_properties[StrainModes.mean_abs_strain])))
 
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
-        # TODO: add metadata, and change name
-        return [Material(from_pymatgen(interface)) for interface in items]
+        materials = [Material(from_pymatgen(interface)) for interface in items]
+        strains = [interface.interface_properties[StrainModes.mean_abs_strain] for interface in items]
+
+        for material, strain in zip(materials, strains):
+            material.metadata = {"mean_abs_strain": strain}
+            material.name = f'{material.name}, Interface, Strain:{material.metadata["mean_abs_strain"] * 100:.3f}%'
+
+        return materials
 
 
 def interface_patch_with_mean_abs_strain(target: PymatgenInterface, tolerance: float = 10e-6):
