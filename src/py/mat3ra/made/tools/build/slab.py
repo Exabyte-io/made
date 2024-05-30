@@ -11,7 +11,7 @@ from ..convert import from_pymatgen, to_pymatgen
 from ...material import Material
 
 
-class BaseSlabConfiguration(BaseModel):
+class BaseSlabConfiguration(object):
     @property
     def bulk(self) -> Material:
         raise NotImplementedError
