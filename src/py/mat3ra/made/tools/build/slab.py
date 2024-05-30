@@ -1,16 +1,16 @@
-from pymatgen.core.structure import Structure
+from pymatgen.core.structure import Structure as PymatgenStructure
 from pymatgen.core.surface import SlabGenerator as PymatgenSlabGenerator
 from pymatgen.core.interface import label_termination
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from typing import List, Tuple, Optional
-
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer as PymatgenSpacegroupAnalyzer
+from typing import List, Tuple
+from pydantic import BaseModel
 from . import BaseBuilder
 from .supercell import create_supercell
 from ..convert import from_pymatgen, to_pymatgen
 from ...material import Material
 
 
-class BaseSlabConfiguration(object):
+class BaseSlabConfiguration(BaseModel):
     @property
     def bulk(self) -> Material:
         raise NotImplementedError
@@ -18,6 +18,14 @@ class BaseSlabConfiguration(object):
     @property
     def miller_indices(self) -> Tuple[int, int, int]:
         raise NotImplementedError
+
+
+class SlabBuildParameters(object):
+    use_orthogonal_z: bool = True
+
+
+class SlabSelectorParameters(object):
+    termination: str = ""
 
 
 class SlabConfiguration(BaseSlabConfiguration):
@@ -40,8 +48,8 @@ class SlabConfiguration(BaseSlabConfiguration):
         use_orthogonal_z: bool = False,
     ):
         super().__init__()
-        self.__bulk: Structure = (
-            SpacegroupAnalyzer(to_pymatgen(bulk)).get_conventional_standard_structure()
+        self.__bulk: PymatgenStructure = (
+            PymatgenSpacegroupAnalyzer(to_pymatgen(bulk)).get_conventional_standard_structure()
             if self.use_conventional_cell
             else to_pymatgen(bulk)
         )
@@ -51,6 +59,7 @@ class SlabConfiguration(BaseSlabConfiguration):
         self.xy_supercell_matrix = xy_supercell_matrix
         self.use_conventional_cell = use_conventional_cell
         self.use_orthogonal_z = use_orthogonal_z
+        self.__builder = SlabBuilder()
 
     @property
     def bulk(self):
@@ -60,44 +69,43 @@ class SlabConfiguration(BaseSlabConfiguration):
     def miller_indices(self):
         return self.__miller_indices
 
+    def get_slab(self, termination) -> Material:
+        return self.__builder.get_material(self, selector_parameters={"termination": termination})
+
     @property
     def terminations(self):
-        return SlabBuilder().terminations(self)
-
-    def get_material(self, termination: Optional[str]):
-        return SlabBuilder().get_material(self, termination)
+        return self.__builder.terminations(self)
 
 
 class SlabBuilder(BaseBuilder):
-    def __init__(self):
-        super().__init__()
+    __ConfigurationType = SlabConfiguration
+    __GeneratedItemType = PymatgenStructure
+    __BuildParametersType = SlabBuildParameters
+    __SelectorParametersType = SlabSelectorParameters
 
-    def get_material(
-        self, configuration: SlabConfiguration = SlabConfiguration(), termination: Optional[str] = "", **kwargs
-    ) -> Material:
-        for slab in SlabBuilder.__slabs_with_unique_terminations(self, configuration):
-            if label_termination(slab) == termination:
-                return create_supercell(
-                    Material(from_pymatgen(slab)),
-                    configuration.xy_supercell_matrix,
-                )
-        raise ValueError(f"Termination {termination} not found in slabs.")
-
-    def __generator(self, slab_configuration: SlabConfiguration) -> PymatgenSlabGenerator:
-        return PymatgenSlabGenerator(
-            initial_structure=to_pymatgen(slab_configuration.bulk),
-            miller_index=slab_configuration.miller_indices,
-            min_slab_size=slab_configuration.thickness,
-            min_vacuum_size=slab_configuration.vacuum,
+    def __generate(self, configuration: __ConfigurationType) -> List[__GeneratedItemType]:
+        generator = PymatgenSlabGenerator(
+            initial_structure=to_pymatgen(configuration.bulk),
+            miller_index=configuration.miller_indices,
+            min_slab_size=configuration.thickness,
+            min_vacuum_size=configuration.vacuum,
             in_unit_planes=True,
             reorient_lattice=True,
         )
+        raw_slabs = generator.get_slabs()
 
-    def __slabs_with_unique_terminations(self, configuration: SlabConfiguration):
-        return [
-            slab.get_orthogonal_c_slab() if configuration.use_orthogonal_z else slab
-            for slab in self.__generator(configuration).get_slabs()
-        ]
+        slabs = [slab.get_orthogonal_c_slab() if self.build_parameters.use_orthogonal_z else slab for slab in raw_slabs]
 
-    def terminations(self, slab_configuration: SlabConfiguration) -> List[str]:
-        return list(set(label_termination(slab) for slab in self.__slabs_with_unique_terminations(slab_configuration)))
+        return slabs
+
+    def __select(
+        self, items: List[__GeneratedItemType], selector_parameters: SlabSelectorParameters
+    ) -> List[__GeneratedItemType]:
+        return [slab for slab in items if label_termination(slab) == selector_parameters.termination]
+
+    def __post_process(self, items: List[__GeneratedItemType], post_process_parameters=None) -> List[Material]:
+        materials = [Material(from_pymatgen(slab)) for slab in items]
+        return [create_supercell(material, self.build_parameters.xy_supercell_matrix) for material in materials]
+
+    def terminations(self, configuration: __ConfigurationType) -> List[str]:
+        return list(set(label_termination(slab) for slab in self.__generate_or_get_from_cache(configuration)))
