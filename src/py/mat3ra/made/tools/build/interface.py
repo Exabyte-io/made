@@ -1,18 +1,25 @@
+import types
+
 import numpy as np
-from typing import List, Tuple, Dict, Optional, Union
+from typing import List, Tuple, Dict, Optional, Union, Any
 from enum import Enum
 from pydantic import BaseModel
-from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator, Interface
+from pymatgen.analysis.interfaces.coherent_interfaces import (
+    CoherentInterfaceBuilder,
+    ZSLGenerator,
+    Interface as PymatgenInterface,
+)
 from ase.build.tools import niggli_reduce
+from ase import Atoms as ASEAtoms
 
 from . import BaseBuilder
 from ..convert import to_ase, from_ase, to_pymatgen, from_pymatgen
-from .slab import BaseSlabConfiguration, SlabConfiguration
+from .slab import BaseSlabConfiguration, SlabConfiguration, SlabBuilder
 from ...material import Material
 
 TerminationPair = Tuple[str, str]
-InterfacesType = List[Interface]
-InterfacesDataType = Dict[Tuple, List[Interface]]
+InterfacesType = List[PymatgenInterface]
+InterfacesDataType = Dict[Tuple, List[PymatgenInterface]]
 
 
 class StrainModes(str, Enum):
@@ -25,6 +32,10 @@ class SimpleInterfaceBuilderParameters(BaseModel):
     scale_film: bool = True
 
 
+class StrainMatchingInterfaceBuilderParameters(BaseModel):
+    strain_matching_parameters: Optional[Any] = None
+
+
 class ZSLStrainMatchingParameters(BaseModel):
     max_area: float = 50.0
     max_area_ratio_tol: float = 0.09
@@ -32,134 +43,145 @@ class ZSLStrainMatchingParameters(BaseModel):
     max_angle_tol: float = 0.01
 
 
+class ZSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilderParameters):
+    strain_matching_parameters: ZSLStrainMatchingParameters
+
+
 class CSLStrainMatchingParameters(BaseModel):
     pass
+
+
+class CSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilderParameters):
+    strain_matching_parameters: CSLStrainMatchingParameters
 
 
 class InterfaceConfiguration(BaseSlabConfiguration):
     def __init__(
         self,
-        substrate_configuration: SlabConfiguration,
         film_configuration: SlabConfiguration,
-        termination_pair: TerminationPair,
+        substrate_configuration: SlabConfiguration,
+        film_termination: str,
+        substrate_termination: str,
         distance_z: float = 3.0,
         vacuum: float = 5.0,
     ):
         super().__init__()
-        self.substrate_configuration = substrate_configuration
         self.film_configuration = film_configuration
-        self.termination_pair = termination_pair
+        self.substrate_configuration = substrate_configuration
+        self.termination_pair = (film_termination, substrate_termination)
         self.vacuum: float = vacuum
         self.distance_z: float = distance_z
+        self.__builder = SimpleInterfaceBuilder(build_parameters={"scale_film": False})
 
     @property
     def bulk(self):
-        # TODO: Return the bulk structure of the interface configuration, with no vacuum
-        return self.get_material()
+        # TODO: implemetn utils to remove vacuum
+        return self.get_interface()
 
-    @property
-    def miller_indices(self):
-        return (0, 0, 1)
-
-    def get_material(self, scale_film_to_fit: bool = False, **kwargs) -> Material:
-        interface_builder = SimpleInterfaceBuilder(
-            build_parameters=SimpleInterfaceBuilderParameters(scale_film_to_fit=scale_film_to_fit)
-        )
-        return interface_builder.get_material(self)
+    def get_interface(self) -> Material:
+        return self.__builder.get_material(self)
 
 
-class SimpleInterfaceBuilder(BaseBuilder):
+class InterfaceBuilder(BaseBuilder):
+    __ConfigurationType = InterfaceConfiguration
+
+
+class SimpleInterfaceBuilder(InterfaceBuilder):
     """
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
 
-    def __init__(self, build_parameters: Optional[SimpleInterfaceBuilderParameters] = None):
-        super().__init__()
-        self.build_parameters = build_parameters
+    __BuildParametersType = Optional[SimpleInterfaceBuilderParameters]
+    __GeneratedItemType = ASEAtoms
 
-    def get_material(self, configuration: InterfaceConfiguration, **kwargs) -> Material:
-        vacuum = configuration.vacuum
-        substrate_slab = configuration.substrate_configuration.get_material(
-            termination=configuration.termination_pair[1]
+    @staticmethod
+    def __preprocess_slab_configuration(configuration: SlabConfiguration, termination: str):
+        slab = configuration.get_slab(termination=termination)
+        return niggli_reduce(to_ase(slab))
+
+    def __combine_two_slabs_ase(
+        self, substrate_slab_ase: ASEAtoms, film_slab_ase: ASEAtoms, distance_z: float
+    ) -> ASEAtoms:
+        max_z_substrate = max(substrate_slab_ase.positions[:, 2])
+        min_z_film = min(film_slab_ase.positions[:, 2])
+        shift_z = max_z_substrate - min_z_film + distance_z
+
+        film_slab_ase.translate([0, 0, shift_z])
+        return substrate_slab_ase + film_slab_ase
+
+    def __add_vacuum_along_c_ase(self, interface_ase: ASEAtoms, vacuum: float) -> ASEAtoms:
+        cell_c_with_vacuum = max(interface_ase.positions[:, 2]) + vacuum
+        interface_ase.cell[2, 2] = cell_c_with_vacuum
+        return interface_ase
+
+    def __generate(self, configuration: InterfaceBuilder.__ConfigurationType) -> List[__GeneratedItemType]:
+        film_slab_ase = self.__preprocess_slab_configuration(
+            configuration.film_configuration, configuration.film_termination
         )
-        film_slab = configuration.film_configuration.get_material(termination=configuration.termination_pair[0])
+        substrate_slab_ase = self.__preprocess_slab_configuration(
+            configuration.substrate_configuration, configuration.substrate_termination
+        )
 
-        substrate_slab_ase = to_ase(substrate_slab)
-        film_slab_ase = to_ase(film_slab)
-
-        # Reduce the cell to Niggli form for correct alignment
-        niggli_reduce(substrate_slab_ase)
-        niggli_reduce(film_slab_ase)
-
-        if isinstance(self.build_parameters, SimpleInterfaceBuilderParameters) and self.build_parameters.scale_film:
+        if self.build_parameters.scale_film:
             film_slab_ase.set_cell(substrate_slab_ase.cell, scale_atoms=True)
             film_slab_ase.wrap()
 
-        # Calculate z-shift based on the new positions after scaling
-        max_z_substrate = max(substrate_slab_ase.positions[:, 2])
-        min_z_film = min(film_slab_ase.positions[:, 2])
-        shift_z = max_z_substrate - min_z_film + configuration.distance_z
+        interface_ase = self.__combine_two_slabs_ase(substrate_slab_ase, film_slab_ase, configuration.distance_z)
+        interface_ase_with_vacuum = self.__add_vacuum_along_c_ase(interface_ase, configuration.vacuum)
 
-        film_slab_ase.translate([0, 0, shift_z])
+        return [interface_ase_with_vacuum]
 
-        interface_ase = substrate_slab_ase + film_slab_ase
-
-        # Adjust the cell height to include the vacuum space above the film
-        cell_c_with_vacuum = max(interface_ase.positions[:, 2]) + vacuum
-        interface_ase.cell[2, 2] = cell_c_with_vacuum
-
-        material_dict = from_ase(interface_ase)
-        return Material(material_dict)
+    def __post_process(self, items: List[__GeneratedItemType], post_process_parameters=None) -> List[Material]:
+        return [Material(from_ase(slab)) for slab in items]
 
 
-class StrainMatchingInterfaceBuilder(BaseBuilder):
-    def __init__(
-        self,
-        strain_matching_parameters: Optional[Union[CSLStrainMatchingParameters, ZSLStrainMatchingParameters]] = None,
-    ):
-        self.strain_matching_parameters = strain_matching_parameters
-        pass
+class StrainMatchingInterfaceBuilder(InterfaceBuilder):
+    __BuildParametersType = StrainMatchingInterfaceBuilderParameters
 
 
-class ZSLInterfaceBuilder(StrainMatchingInterfaceBuilder):
+class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
     """
     Creates matching interface between substrate and film using the ZSL algorithm.
     """
 
-    def __init__(self, strain_matching_parameters: ZSLStrainMatchingParameters = ZSLStrainMatchingParameters()):
-        super().__init__(strain_matching_parameters=strain_matching_parameters)
-        self.strain_matching_parameters = strain_matching_parameters.dict()
+    __BuildParametersType = ZSLStrainMatchingInterfaceBuilderParameters
+    __GeneratedItemType = PymatgenInterface
 
-    def get_material(self, configuration: InterfaceConfiguration, **kwargs):
-        interface = self.get_sorted_interfaces(configuration)[0]
-
-        return Material(from_pymatgen(interface))
-
-    def get_materials(self, configuration: InterfaceConfiguration, **kwargs):
-        interfaces = self.get_sorted_interfaces(configuration)
-        return [Material(from_pymatgen(interface)) for interface in interfaces]
-
-    def get_sorted_interfaces(self, configuration: InterfaceConfiguration):
-        interfaces = self.get_interface_structures(configuration)
-        interfaces = sorted(interfaces, key=lambda x: np.mean(np.abs(x.interface_properties["strain"])))
-        return interfaces
-
-    def get_interface_structures(self, configuration: InterfaceConfiguration) -> InterfacesType:
-        interfaces = self.__generator(configuration).get_interfaces(
-            termination=configuration.termination_pair,
-            gap=configuration.distance_z,
-            film_thickness=configuration.film_configuration.thickness,
-            substrate_thickness=configuration.substrate_configuration.thickness,
-            in_layers=True,
-        )
-        return list(interfaces)
-
-    def __generator(self, configuration: InterfaceConfiguration) -> CoherentInterfaceBuilder:
-        generator = ZSLGenerator(**self.strain_matching_parameters)
-        return CoherentInterfaceBuilder(
+    def __generate(self, configuration: InterfaceConfiguration) -> List[__GeneratedItemType]:
+        generator = ZSLGenerator(**self.build_parameters.dict())
+        builder = CoherentInterfaceBuilder(
             substrate_structure=to_pymatgen(configuration.substrate_configuration.bulk),
             film_structure=to_pymatgen(configuration.film_configuration.bulk),
             substrate_miller=configuration.substrate_configuration.miller_indices,
             film_miller=configuration.film_configuration.miller_indices,
             zslgen=generator,
         )
+
+        interfaces = builder.get_interfaces(
+            termination=configuration.termination_pair,
+            gap=configuration.distance_z,
+            film_thickness=configuration.film_configuration.thickness,
+            substrate_thickness=configuration.substrate_configuration.thickness,
+            in_layers=True,
+        )
+
+        return list([interface_patch_with_mean_abs_strain(interface) for interface in interfaces])
+
+    def __sort(self, items: List[__GeneratedItemType]):
+        # TODO: sort by number of atoms
+        return sorted(items, key=lambda x: np.mean(np.abs(x.interface_properties[StrainModes.mean_abs_strain])))
+
+    def __post_process(self, items: List[__GeneratedItemType], post_process_parameters=None) -> List[Material]:
+        # TODO: add metadata, and change name
+        return [Material(from_pymatgen(interface)) for interface in items]
+
+
+def interface_patch_with_mean_abs_strain(target: PymatgenInterface, tolerance: float = 10e-6):
+    def get_mean_abs_strain(target):
+        return target.interface_properties[StrainModes.mean_abs_strain]
+
+    target.get_mean_abs_strain = types.MethodType(get_mean_abs_strain, target)
+    target.interface_properties[StrainModes.mean_abs_strain] = (
+        round(np.mean(np.abs(target.interface_properties["strain"])) / tolerance) * tolerance
+    )
+    return target
