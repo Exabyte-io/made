@@ -4,6 +4,7 @@ from pymatgen.core.interface import label_termination
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer as PymatgenSpacegroupAnalyzer
 from typing import List, Tuple
 from pydantic import BaseModel
+
 from . import BaseBuilder
 from .supercell import create_supercell
 from ..convert import from_pymatgen, to_pymatgen
@@ -20,11 +21,12 @@ class BaseSlabConfiguration(BaseModel):
         raise NotImplementedError
 
 
-class SlabBuildParameters(object):
+class SlabBuildParameters(BaseModel):
     use_orthogonal_z: bool = True
+    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
 
 
-class SlabSelectorParameters(object):
+class SlabSelectorParameters(BaseModel):
     termination: str = ""
 
 
@@ -33,9 +35,6 @@ class SlabConfiguration(BaseSlabConfiguration):
 
     thickness: int = 1
     vacuum: float = 0.5
-    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
-    use_orthogonal_z: bool = False
-    use_conventional_cell: bool = True
 
     def __init__(
         self,
@@ -50,16 +49,17 @@ class SlabConfiguration(BaseSlabConfiguration):
         super().__init__()
         self.__bulk: PymatgenStructure = (
             PymatgenSpacegroupAnalyzer(to_pymatgen(bulk)).get_conventional_standard_structure()
-            if self.use_conventional_cell
+            if use_conventional_cell
             else to_pymatgen(bulk)
         )
         self.__miller_indices = miller_indices
         self.thickness = thickness
         self.vacuum = vacuum
-        self.xy_supercell_matrix = xy_supercell_matrix
-        self.use_conventional_cell = use_conventional_cell
-        self.use_orthogonal_z = use_orthogonal_z
-        self.__builder = SlabBuilder()
+        self.__builder = SlabBuilder(
+            build_parameters=SlabBuildParameters(
+                use_orthogonal_z=use_orthogonal_z, xy_supercell_matrix=xy_supercell_matrix
+            )
+        )
 
     @property
     def bulk(self):
@@ -70,20 +70,16 @@ class SlabConfiguration(BaseSlabConfiguration):
         return self.__miller_indices
 
     def get_slab(self, termination) -> Material:
-        return self.__builder.get_material(self, selector_parameters={"termination": termination})
+        return self.__builder.get_material(self, selector_parameters=SlabSelectorParameters(termination=termination))
 
     @property
     def terminations(self):
         return self.__builder.terminations(self)
 
 
-class SlabBuilder(BaseBuilder):
-    __ConfigurationType = SlabConfiguration
-    __GeneratedItemType = PymatgenStructure
-    __BuildParametersType = SlabBuildParameters
-    __SelectorParametersType = SlabSelectorParameters
+class SlabBuilder(BaseBuilder[SlabConfiguration, SlabBuildParameters, PymatgenStructure, SlabSelectorParameters, None]):
 
-    def __generate(self, configuration: __ConfigurationType) -> List[__GeneratedItemType]:
+    def __generate(self, configuration: SlabConfiguration) -> List[PymatgenStructure]:
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,
@@ -99,13 +95,16 @@ class SlabBuilder(BaseBuilder):
         return slabs
 
     def __select(
-        self, items: List[__GeneratedItemType], selector_parameters: SlabSelectorParameters
-    ) -> List[__GeneratedItemType]:
+        self,
+        items: List[PymatgenStructure],
+        selector_parameters: SlabSelectorParameters = SlabSelectorParameters(),
+    ) -> List[PymatgenStructure]:
         return [slab for slab in items if label_termination(slab) == selector_parameters.termination]
 
-    def __post_process(self, items: List[__GeneratedItemType], post_process_parameters=None) -> List[Material]:
+    def __post_process(self, items: List[PymatgenStructure], post_process_parameters=None) -> List[Material]:
         materials = [Material(from_pymatgen(slab)) for slab in items]
         return [create_supercell(material, self.build_parameters.xy_supercell_matrix) for material in materials]
 
-    def terminations(self, configuration: __ConfigurationType) -> List[str]:
-        return list(set(label_termination(slab) for slab in self.__generate_or_get_from_cache(configuration)))
+    def terminations(self, configuration: SlabConfiguration) -> List[str]:
+        # TODO: use __generate_or_get_from_cache()
+        return list(set(label_termination(slab) for slab in self.__generate(configuration)))
