@@ -77,9 +77,14 @@ class SlabConfiguration(BaseSlabConfiguration):
         return self.__builder.terminations(self)
 
 
-class SlabBuilder(BaseBuilder[SlabConfiguration, SlabBuildParameters, PymatgenStructure, SlabSelectorParameters, None]):
+class SlabBuilder(BaseBuilder):
 
-    def __generate(self, configuration: SlabConfiguration) -> List[PymatgenStructure]:
+    _ConfigurationType = SlabConfiguration
+    _BuildParametersType = SlabBuildParameters
+    _GeneratedItemType = PymatgenStructure
+    _SelectorParametersType = SlabSelectorParameters
+
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,
@@ -94,17 +99,17 @@ class SlabBuilder(BaseBuilder[SlabConfiguration, SlabBuildParameters, PymatgenSt
 
         return slabs
 
-    def __select(
+    def _select(
         self,
-        items: List[PymatgenStructure],
-        selector_parameters: SlabSelectorParameters = SlabSelectorParameters(),
-    ) -> List[PymatgenStructure]:
+        items: List[_GeneratedItemType],
+        selector_parameters: _SelectorParametersType = SlabSelectorParameters(),
+    ) -> List[_GeneratedItemType]:
         return [slab for slab in items if label_termination(slab) == selector_parameters.termination]
 
-    def __post_process(self, items: List[PymatgenStructure], post_process_parameters=None) -> List[Material]:
+    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = [Material(from_pymatgen(slab)) for slab in items]
         return [create_supercell(material, self.build_parameters.xy_supercell_matrix) for material in materials]
 
-    def terminations(self, configuration: SlabConfiguration) -> List[str]:
+    def terminations(self, configuration: _ConfigurationType) -> List[str]:
         # TODO: use __generate_or_get_from_cache()
-        return list(set(label_termination(slab) for slab in self.__generate(configuration)))
+        return list(set(label_termination(slab) for slab in self._generate(configuration)))
