@@ -1,7 +1,7 @@
 import types
 
 import numpy as np
-from typing import List, Tuple, Dict, Optional, Union, Any
+from typing import List, Tuple, Dict, Optional, Any
 from enum import Enum
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
@@ -14,7 +14,7 @@ from ase import Atoms as ASEAtoms
 
 from . import BaseBuilder
 from ..convert import to_ase, from_ase, to_pymatgen, from_pymatgen
-from .slab import BaseSlabConfiguration, SlabConfiguration, SlabBuilder
+from .slab import BaseSlabConfiguration, SlabConfiguration
 from ...material import Material
 
 TerminationPair = Tuple[str, str]
@@ -56,6 +56,15 @@ class CSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilder
 
 
 class InterfaceConfiguration(BaseSlabConfiguration):
+
+    film_configuration: SlabConfiguration
+    substrate_configuration: SlabConfiguration
+    film_termination: str
+    substrate_termination: str
+    termination_pair: TerminationPair
+    distance_z: float = 3.0
+    vacuum: float = 5.0
+
     def __init__(
         self,
         film_configuration: SlabConfiguration,
@@ -68,10 +77,12 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         super().__init__()
         self.film_configuration = film_configuration
         self.substrate_configuration = substrate_configuration
+        self.film_termination = film_termination
+        self.substrate_termination = substrate_termination
         self.termination_pair = (film_termination, substrate_termination)
-        self.vacuum: float = vacuum
         self.distance_z: float = distance_z
-        self.__builder = SimpleInterfaceBuilder(build_parameters={"scale_film": False})
+        self.vacuum: float = vacuum
+        self.__builder = SimpleInterfaceBuilder(build_parameters=SimpleInterfaceBuilderParameters(scale_film=False))
 
     @property
     def bulk(self):
@@ -83,7 +94,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 
 
 class InterfaceBuilder(BaseBuilder):
-    __ConfigurationType = InterfaceConfiguration
+    _ConfigurationType = InterfaceConfiguration
 
 
 class SimpleInterfaceBuilder(InterfaceBuilder):
@@ -91,30 +102,33 @@ class SimpleInterfaceBuilder(InterfaceBuilder):
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
 
-    __BuildParametersType = Optional[SimpleInterfaceBuilderParameters]
-    __GeneratedItemType = ASEAtoms
+    _BuildParametersType = Optional[SimpleInterfaceBuilderParameters]
+    _GeneratedItemType: ASEAtoms = ASEAtoms
 
     @staticmethod
     def __preprocess_slab_configuration(configuration: SlabConfiguration, termination: str):
         slab = configuration.get_slab(termination=termination)
-        return niggli_reduce(to_ase(slab))
+        ase_slab = to_ase(slab)
+        niggli_reduce(ase_slab)
+        return ase_slab
 
-    def __combine_two_slabs_ase(
-        self, substrate_slab_ase: ASEAtoms, film_slab_ase: ASEAtoms, distance_z: float
-    ) -> ASEAtoms:
+    @staticmethod
+    def __combine_two_slabs_ase(substrate_slab_ase: ASEAtoms, film_slab_ase: ASEAtoms, distance_z: float) -> ASEAtoms:
         max_z_substrate = max(substrate_slab_ase.positions[:, 2])
         min_z_film = min(film_slab_ase.positions[:, 2])
         shift_z = max_z_substrate - min_z_film + distance_z
 
         film_slab_ase.translate([0, 0, shift_z])
+
         return substrate_slab_ase + film_slab_ase
 
-    def __add_vacuum_along_c_ase(self, interface_ase: ASEAtoms, vacuum: float) -> ASEAtoms:
+    @staticmethod
+    def __add_vacuum_along_c_ase(interface_ase: ASEAtoms, vacuum: float) -> ASEAtoms:
         cell_c_with_vacuum = max(interface_ase.positions[:, 2]) + vacuum
         interface_ase.cell[2, 2] = cell_c_with_vacuum
         return interface_ase
 
-    def __generate(self, configuration: InterfaceBuilder.__ConfigurationType) -> List[__GeneratedItemType]:
+    def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         film_slab_ase = self.__preprocess_slab_configuration(
             configuration.film_configuration, configuration.film_termination
         )
@@ -131,12 +145,12 @@ class SimpleInterfaceBuilder(InterfaceBuilder):
 
         return [interface_ase_with_vacuum]
 
-    def __post_process(self, items: List[__GeneratedItemType], post_process_parameters=None) -> List[Material]:
+    def _post_process(self, items: List[ASEAtoms], post_process_parameters=None) -> List[Material]:
         return [Material(from_ase(slab)) for slab in items]
 
 
 class StrainMatchingInterfaceBuilder(InterfaceBuilder):
-    __BuildParametersType = StrainMatchingInterfaceBuilderParameters
+    _BuildParametersType = StrainMatchingInterfaceBuilderParameters
 
 
 class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
@@ -144,10 +158,10 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
     Creates matching interface between substrate and film using the ZSL algorithm.
     """
 
-    __BuildParametersType = ZSLStrainMatchingInterfaceBuilderParameters
-    __GeneratedItemType = PymatgenInterface
+    _BuildParametersType = ZSLStrainMatchingInterfaceBuilderParameters
+    _GeneratedItemType = PymatgenInterface
 
-    def __generate(self, configuration: InterfaceConfiguration) -> List[__GeneratedItemType]:
+    def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
         generator = ZSLGenerator(**self.build_parameters.dict())
         builder = CoherentInterfaceBuilder(
             substrate_structure=to_pymatgen(configuration.substrate_configuration.bulk),
@@ -167,11 +181,11 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
 
         return list([interface_patch_with_mean_abs_strain(interface) for interface in interfaces])
 
-    def __sort(self, items: List[__GeneratedItemType]):
+    def _sort(self, items: List[_GeneratedItemType]):
         # TODO: sort by number of atoms
         return sorted(items, key=lambda x: np.mean(np.abs(x.interface_properties[StrainModes.mean_abs_strain])))
 
-    def __post_process(self, items: List[__GeneratedItemType], post_process_parameters=None) -> List[Material]:
+    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         # TODO: add metadata, and change name
         return [Material(from_pymatgen(interface)) for interface in items]
 
