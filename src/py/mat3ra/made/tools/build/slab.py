@@ -78,7 +78,6 @@ class SlabConfiguration(BaseSlabConfiguration):
 
 
 class SlabBuilder(BaseBuilder):
-
     _ConfigurationType = SlabConfiguration
     _BuildParametersType = SlabBuildParameters
     _GeneratedItemType = PymatgenStructure
@@ -111,5 +110,4 @@ class SlabBuilder(BaseBuilder):
         return [create_supercell(material, self.build_parameters.xy_supercell_matrix) for material in materials]
 
     def terminations(self, configuration: _ConfigurationType) -> List[str]:
-        # TODO: use __generate_or_get_from_cache()
-        return list(set(label_termination(slab) for slab in self._generate(configuration)))
+        return list(set(label_termination(slab) for slab in self._generate_or_get_from_cache(configuration)))
