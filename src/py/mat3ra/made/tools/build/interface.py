@@ -212,22 +212,25 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
         # Workaround: compare provided and generated terminations to find complete match,
         # if full match between terminations isn't found, get terminations with first part the same, before `_`
 
-        generated_terminations = builder.terminations
+        generated_terminations = [
+            TerminationPair(pymatgen_termination) for pymatgen_termination in builder.terminations
+        ]
         provided_termination_pair = configuration.termination_pair
         hotfix_termination_pair = configuration.termination_pair
 
         if provided_termination_pair not in generated_terminations:
             for termination_pair in generated_terminations:
                 if (
-                    termination_pair[0].split("_")[0] == provided_termination_pair.film_termination.split("_")[0]
-                    and termination_pair[1].split("_")[0]
+                    termination_pair.film_termination.split("_")[0]
+                    == provided_termination_pair.film_termination.split("_")[0]
+                    and termination_pair.substrate_termination.split("_")[0]
                     == provided_termination_pair.substrate_termination.split("_")[0]
                 ):
                     hotfix_termination_pair = termination_pair
                     print("Interface will be built with terminations: ", hotfix_termination_pair)
 
         interfaces = builder.get_interfaces(
-            termination=hotfix_termination_pair,
+            termination=hotfix_termination_pair.self,
             gap=configuration.distance_z,
             film_thickness=configuration.film_configuration.thickness,
             substrate_thickness=configuration.substrate_configuration.thickness,
