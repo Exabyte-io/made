@@ -13,6 +13,10 @@ from pymatgen.io.vasp.inputs import Poscar
 
 from ..material import Material
 
+PymatgenStructure = Structure
+PymatgenInterface = Interface
+ASEAtoms = Atoms
+
 
 def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> Structure:
     """
@@ -56,7 +60,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> S
     return structure
 
 
-def from_pymatgen(structure: Union[Structure, Interface]):
+def from_pymatgen(structure: Union[Structure, Interface]) -> Dict[str, Any]:
     """
     Converts a pymatgen Structure object to a material object in ESSE format.
 

@@ -1,113 +1,33 @@
-import types
+from typing import Any, List, Optional
 
 import numpy as np
-from typing import List, Tuple, Dict, Optional, Any
-from enum import Enum
 from pydantic import BaseModel
+from ase.build.tools import niggli_reduce
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
-    Interface as PymatgenInterface,
 )
-from ase.build.tools import niggli_reduce
-from ase import Atoms as ASEAtoms
 
-from ...material import Material
-from ..convert import to_ase, from_ase, to_pymatgen, from_pymatgen
-from ..build import BaseBuilder
-from .slab import BaseSlabConfiguration, SlabConfiguration
-
-
-class TerminationPair(BaseModel):
-    self: Tuple[str, str]
-
-    def __init__(self, termination_pair: Tuple[str, str]):
-        super().__init__(self=termination_pair)
-
-    @property
-    def film_termination(self) -> str:
-        return self.self[0]
-
-    @property
-    def substrate_termination(self) -> str:
-        return self.self[1]
+from src.py.mat3ra.made.material import Material
+from .enums import StrainModes
+from .configuration import InterfaceConfiguration
+from .termination_pair import TerminationPair
+from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
+from ..mixins import (
+    ConvertGeneratedItemsASEAtomsMixin,
+    ConvertGeneratedItemsPymatgenStructureMixin,
+)
+from ..slab.configuration import SlabConfiguration
+from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
+from ...build import BaseBuilder
 
 
-InterfacesType = List[PymatgenInterface]
-InterfacesDataType = Dict[Tuple, List[PymatgenInterface]]
-
-
-class StrainModes(str, Enum):
-    strain = "strain"
-    von_mises_strain = "von_mises_strain"
-    mean_abs_strain = "mean_abs_strain"
-
-
-class SimpleInterfaceBuilderParameters(BaseModel):
-    scale_film: bool = True
-
-
-class StrainMatchingInterfaceBuilderParameters(BaseModel):
-    strain_matching_parameters: Optional[Any] = None
-
-
-class ZSLStrainMatchingParameters(BaseModel):
-    max_area: float = 50.0
-    max_area_ratio_tol: float = 0.09
-    max_length_tol: float = 0.03
-    max_angle_tol: float = 0.01
-
-
-class ZSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilderParameters):
-    strain_matching_parameters: ZSLStrainMatchingParameters
-
-
-class CSLStrainMatchingParameters(BaseModel):
+class InterfaceBuilderParameters(BaseModel):
     pass
 
 
-class CSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilderParameters):
-    strain_matching_parameters: CSLStrainMatchingParameters
-
-
-class InterfaceConfiguration(BaseSlabConfiguration):
-    film_configuration: SlabConfiguration
-    substrate_configuration: SlabConfiguration
-    film_termination: str
-    substrate_termination: str
-    termination_pair: TerminationPair
-    distance_z: float = 3.0
-    vacuum: float = 5.0
-
-    def __init__(
-        self,
-        film_configuration: SlabConfiguration,
-        substrate_configuration: SlabConfiguration,
-        film_termination: str,
-        substrate_termination: str,
-        distance_z: float = 3.0,
-        vacuum: float = 5.0,
-    ):
-        super().__init__()
-        self.film_configuration = film_configuration
-        self.substrate_configuration = substrate_configuration
-        self.film_termination = film_termination
-        self.substrate_termination = substrate_termination
-        self.termination_pair = TerminationPair((film_termination, substrate_termination))
-        self.distance_z: float = distance_z
-        self.vacuum: float = vacuum
-        self.__builder = SimpleInterfaceBuilder(build_parameters=SimpleInterfaceBuilderParameters(scale_film=False))
-
-    @property
-    def bulk(self):
-        # TODO: implement utils to remove vacuum
-        return self.get_interface()
-
-    def get_interface(self) -> Material:
-        return self.__builder.get_material(self)
-
-
 class InterfaceBuilder(BaseBuilder):
+    _BuildParametersType = InterfaceBuilderParameters
     _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
 
     def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
@@ -123,7 +43,11 @@ class InterfaceBuilder(BaseBuilder):
         return material
 
 
-class SimpleInterfaceBuilder(InterfaceBuilder):
+class SimpleInterfaceBuilderParameters(InterfaceBuilderParameters):
+    scale_film: bool = True
+
+
+class SimpleInterfaceBuilder(InterfaceBuilder, ConvertGeneratedItemsASEAtomsMixin):
     """
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
@@ -171,8 +95,12 @@ class SimpleInterfaceBuilder(InterfaceBuilder):
 
         return [interface_ase_with_vacuum]
 
-    def _post_process(self, items: List[ASEAtoms], post_process_parameters=None) -> List[Material]:
+    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         return [Material(from_ase(slab)) for slab in items]
+
+
+class StrainMatchingInterfaceBuilderParameters(BaseModel):
+    strain_matching_parameters: Optional[Any] = None
 
 
 class StrainMatchingInterfaceBuilder(InterfaceBuilder):
@@ -187,7 +115,18 @@ class StrainMatchingInterfaceBuilder(InterfaceBuilder):
         return material
 
 
-class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
+class ZSLStrainMatchingParameters(BaseModel):
+    max_area: float = 50.0
+    max_area_ratio_tol: float = 0.09
+    max_length_tol: float = 0.03
+    max_angle_tol: float = 0.01
+
+
+class ZSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilderParameters):
+    strain_matching_parameters: ZSLStrainMatchingParameters
+
+
+class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder, ConvertGeneratedItemsPymatgenStructureMixin):
     """
     Creates matching interface between substrate and film using the ZSL algorithm.
     """
@@ -249,40 +188,9 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
         return unique_sorted_interfaces
 
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
-        materials = [Material(from_pymatgen(interface)) for interface in items]
+        materials = super()._post_process(items, post_process_parameters)
         strains = [interface.interface_properties[StrainModes.mean_abs_strain] for interface in items]
 
         for material, strain in zip(materials, strains):
             material.metadata["mean_abs_strain"] = strain
         return materials
-
-
-def interface_patch_with_mean_abs_strain(target: PymatgenInterface, tolerance: float = 10e-6):
-    def get_mean_abs_strain(target):
-        return target.interface_properties[StrainModes.mean_abs_strain]
-
-    target.get_mean_abs_strain = types.MethodType(get_mean_abs_strain, target)
-    target.interface_properties[StrainModes.mean_abs_strain] = (
-        round(np.mean(np.abs(target.interface_properties["strain"])) / tolerance) * tolerance
-    )
-    return target
-
-
-def remove_duplicate_interfaces(
-    interfaces: List[PymatgenInterface], strain_mode: StrainModes = StrainModes.mean_abs_strain
-):
-    def are_interfaces_duplicate(interface1: PymatgenInterface, interface2: PymatgenInterface):
-        are_sizes_equivalent = interface1.num_sites == interface2.num_sites and np.allclose(
-            interface1.interface_properties[strain_mode], interface2.interface_properties[strain_mode]
-        )
-        are_strains_equivalent = np.allclose(
-            interface1.interface_properties[strain_mode], interface2.interface_properties[strain_mode]
-        )
-        return are_sizes_equivalent and are_strains_equivalent
-
-    filtered_interfaces = [interfaces[0]] if interfaces else []
-
-    for interface in interfaces[1:]:
-        if not any(are_interfaces_duplicate(interface, unique_interface) for unique_interface in filtered_interfaces):
-            filtered_interfaces.append(interface)
-    return filtered_interfaces
