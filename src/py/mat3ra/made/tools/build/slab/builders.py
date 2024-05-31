@@ -7,9 +7,9 @@ from pymatgen.core.interface import label_termination
 from mat3ra.made.material import Material
 from ...convert import to_pymatgen, PymatgenStructure
 from ...build import BaseBuilder
-from .configuration import SlabConfiguration
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from ..supercell import create_supercell
+from .configuration import SlabConfiguration
 
 
 class SlabSelectorParameters(BaseModel):

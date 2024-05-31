@@ -8,7 +8,7 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
     ZSLGenerator,
 )
 
-from src.py.mat3ra.made.material import Material
+from mat3ra.made.material import Material
 from .enums import StrainModes
 from .configuration import InterfaceConfiguration
 from .termination_pair import TerminationPair
