@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 
 from ...material import Material
 
@@ -35,8 +35,12 @@ class BaseBuilder:
     def _post_process(
         self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType] = None
     ) -> List[Material]:
-        # TODO: convert from _GeneratedItemType to Material
-        return [Material(item) for item in items]
+        return [Material(self._convert_generated_item(item)) for item in items]
+
+    @staticmethod
+    def _convert_generated_item(item: _GeneratedItemType):
+        material_config = item
+        return material_config
 
     def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
         return materials
