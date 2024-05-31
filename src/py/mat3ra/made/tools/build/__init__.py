@@ -38,8 +38,8 @@ class BaseBuilder:
         # TODO: convert from _GeneratedItemType to Material
         return [Material(item) for item in items]
 
-    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
-        return material
+    def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
+        return materials
 
     def get_materials(
         self,
@@ -51,8 +51,8 @@ class BaseBuilder:
         sorted_items = self._sort(generated_items)
         selected_items = self._select(sorted_items, selector_parameters)
         materials = self._post_process(selected_items, post_process_parameters)
-        materials_with_name = [self._update_material_name(material, configuration) for material in materials]
-        return materials_with_name
+        finalized_materials = self._finalize(materials, configuration)
+        return finalized_materials
 
     def get_material(
         self,
