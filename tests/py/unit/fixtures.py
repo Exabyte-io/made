@@ -1,7 +1,6 @@
-from typing import Tuple
-
 from ase.build import bulk
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.interface.termination_pair import TerminationPair
 from mat3ra.made.tools.build.slab import SlabConfiguration
 from mat3ra.made.tools.convert import from_ase
 from pymatgen.analysis.elasticity.strain import Strain
@@ -23,9 +22,11 @@ SUBSTRATE_CONFIGURATION = SlabConfiguration(bulk=SUBSTRATE_MATERIAL, thickness=3
 LAYER_CONFIGURATION = SlabConfiguration(bulk=LAYER_MATERIAL)
 
 # Pymatgen Interface fixtures
-INTERFACE_TERMINATION_PAIR: Tuple[str, str] = (
-    LAYER_CONFIGURATION.terminations[0],
-    SUBSTRATE_CONFIGURATION.terminations[0],
+INTERFACE_TERMINATION_PAIR: TerminationPair = TerminationPair(
+    (
+        LAYER_CONFIGURATION.terminations[0],
+        SUBSTRATE_CONFIGURATION.terminations[0],
+    )
 )
 INTERFACE_TERMINATION_AS_STR = str(INTERFACE_TERMINATION_PAIR)
 
@@ -39,7 +40,7 @@ INTERFACE_PROPERTIES_MOCK = {
     "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
     "strain": Strain([[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, 0.0], [-0.0, 0.0, -0.0]]),
     "von_mises_strain": 0.001,
-    "termination": INTERFACE_TERMINATION_PAIR,
+    "termination": (INTERFACE_TERMINATION_PAIR.film_termination, INTERFACE_TERMINATION_PAIR.substrate_termination),
 }
 INTERFACE_PROPERTIES_JSON = {
     "film_transformation": [[2.0, 0.0], [0.0, 2.0]],
