@@ -10,7 +10,7 @@ class BaseBuilder:
     _SelectorParametersType: Any = Any
     _PostProcessParametersType: Any = Any
 
-    def __init__(self, build_parameters: _BuildParametersType) -> None:
+    def __init__(self, build_parameters: _BuildParametersType = None) -> None:
         self.build_parameters = build_parameters
         self.__generated_items: List[List[BaseBuilder._GeneratedItemType]] = []
         self.__configurations: List[BaseBuilder._ConfigurationType] = []
