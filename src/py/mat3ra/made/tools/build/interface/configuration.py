@@ -1,4 +1,4 @@
-from src.py.mat3ra.made.material import Material
+from mat3ra.made.material import Material
 from .termination_pair import TerminationPair
 from ..slab.configuration import BaseSlabConfiguration, SlabConfiguration
 from .builders import SimpleInterfaceBuilder, SimpleInterfaceBuilderParameters
