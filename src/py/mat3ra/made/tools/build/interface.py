@@ -197,13 +197,38 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
             zslgen=generator,
         )
 
+        # TODO: REMOVE when found the correct solution
+        # Workaround: compare provided and generated terminations to find complete match,
+        # if full match between terminations isn't found, get terminations with first part the same, before `_`
+
+        generated_terminations = builder.terminations
+        provided_termination_pair = configuration.termination_pair
+        hotfix_termination_pair = None
+
+        for termination_pair in generated_terminations:
+            if termination_pair == provided_termination_pair:
+                hotfix_termination_pair = termination_pair
+                break
+            elif (
+                termination_pair[0].split("_")[0] == provided_termination_pair[0].split("_")[0]
+                and termination_pair[1].split("_")[0] == provided_termination_pair[1].split("_")[0]
+            ):
+                hotfix_termination_pair = termination_pair
+                print("Interface will be built with terminations: ", hotfix_termination_pair)
+
+        if hotfix_termination_pair is None:
+            raise ValueError("Internal error: cannot create interface with provided terminations")
+
         interfaces = builder.get_interfaces(
-            termination=configuration.termination_pair,
+            # TODO: change to configuration.termination_pairs
+            termination=hotfix_termination_pair,
             gap=configuration.distance_z,
             film_thickness=configuration.film_configuration.thickness,
             substrate_thickness=configuration.substrate_configuration.thickness,
             in_layers=True,
         )
+
+        list(interfaces)
 
         return list([interface_patch_with_mean_abs_strain(interface) for interface in interfaces])
 
