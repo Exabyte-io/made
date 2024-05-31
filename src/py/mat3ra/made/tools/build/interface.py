@@ -98,9 +98,9 @@ class InterfaceBuilder(BaseBuilder):
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
         film_formula = configuration.film_configuration.bulk["name"]
         substrate_formula = configuration.substrate_configuration.bulk["name"]
-        film_miller_indices = configuration.film_configuration.miller_indices
-        substrate_miller_indices = configuration.substrate_configuration.miller_indices
-        new_name = f"{film_formula}{film_miller_indices}-{substrate_formula}{substrate_miller_indices} Interface"
+        film_miller_indices = "".join([str(i) for i in configuration.film_configuration.miller_indices])
+        substrate_miller_indices = "".join([str(i) for i in configuration.substrate_configuration.miller_indices])
+        new_name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}) Interface"
         if StrainModes.mean_abs_strain in material.metadata:
             strain = material.metadata[StrainModes.mean_abs_strain]
             material.name = f"{new_name}, Strain:{strain * 100:.3f}%"
