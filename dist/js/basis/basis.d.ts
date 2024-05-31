@@ -57,7 +57,7 @@ export declare class Basis {
     labels, }: BasisProps);
     static get unitsOptionsConfig(): typeof ATOMIC_COORD_UNITS;
     static get unitsOptionsDefaultValue(): string;
-    static get defaultCell(): [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema];
+    static get defaultCell(): [import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema];
     /**
      * Serialize class instance to JSON.
      * @param skipRounding - Whether to skip rounding the resulting lattice values, defaults to `false`.

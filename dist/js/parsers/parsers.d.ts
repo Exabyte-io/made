@@ -1,8 +1,8 @@
 declare const _default: {
     xyz: {
         validate: typeof import("./xyz").validate;
-        fromMaterial: (materialOrConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema, fractional?: boolean) => string;
-        toBasisConfig: (txt: string, units?: string, cell?: [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema]) => import("./xyz").BasisConfig;
+        fromMaterial: (materialOrConfig: import("@mat3ra/esse/lib/js/types").MaterialSchema, fractional?: boolean) => string;
+        toBasisConfig: (txt: string, units?: string, cell?: [import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/lib/js/types").ArrayOf3NumberElementsSchema]) => import("./xyz").BasisConfig;
         fromBasis: (basisClsInstance: import("../basis/constrained_basis").ConstrainedBasis, printFormat?: string, skipRounding?: boolean) => string;
         CombinatorialBasis: typeof import("./xyz_combinatorial_basis").CombinatorialBasis;
     };
@@ -17,7 +17,7 @@ declare const _default: {
         parseMeta: (txt: string) => import("./cif").Meta;
     };
     espresso: {
-        toEspressoFormat: (materialOrConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema) => string;
+        toEspressoFormat: (materialOrConfig: import("@mat3ra/esse/lib/js/types").MaterialSchema) => string;
     };
     nativeFormatParsers: {
         detectFormat: (text: string) => {
