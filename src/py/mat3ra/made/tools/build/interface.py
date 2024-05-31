@@ -203,7 +203,7 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
 
         generated_terminations = builder.terminations
         provided_termination_pair = configuration.termination_pair
-        hotfix_termination_pair = None
+        hotfix_termination_pair = configuration.termination_pair
 
         for termination_pair in generated_terminations:
             if termination_pair == provided_termination_pair:
@@ -227,8 +227,6 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
             substrate_thickness=configuration.substrate_configuration.thickness,
             in_layers=True,
         )
-
-        list(interfaces)
 
         return list([interface_patch_with_mean_abs_strain(interface) for interface in interfaces])
 
