@@ -12,10 +12,10 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 from ase.build.tools import niggli_reduce
 from ase import Atoms as ASEAtoms
 
-from . import BaseBuilder
-from ..convert import to_ase, from_ase, to_pymatgen, from_pymatgen
-from .slab import BaseSlabConfiguration, SlabConfiguration
 from ...material import Material
+from ..convert import to_ase, from_ase, to_pymatgen, from_pymatgen
+from ..build import BaseBuilder
+from .slab import BaseSlabConfiguration, SlabConfiguration
 
 TerminationPair = Tuple[str, str]
 InterfacesType = List[PymatgenInterface]
@@ -196,8 +196,14 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
         return list([interface_patch_with_mean_abs_strain(interface) for interface in interfaces])
 
     def _sort(self, items: List[_GeneratedItemType]):
-        # TODO: sort by number of atoms
-        return sorted(items, key=lambda x: np.mean(np.abs(x.interface_properties[StrainModes.mean_abs_strain])))
+        sorted_by_num_sites = sorted(items, key=lambda x: x.num_sites)
+        sorted_by_num_sites_and_strain = sorted(
+            sorted_by_num_sites, key=lambda x: np.mean(x.interface_properties[StrainModes.mean_abs_strain])
+        )
+        unique_sorted_interfaces = remove_duplicate_interfaces(
+            sorted_by_num_sites_and_strain, strain_mode=StrainModes.mean_abs_strain
+        )
+        return unique_sorted_interfaces
 
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = [Material(from_pymatgen(interface)) for interface in items]
@@ -217,3 +223,23 @@ def interface_patch_with_mean_abs_strain(target: PymatgenInterface, tolerance: f
         round(np.mean(np.abs(target.interface_properties["strain"])) / tolerance) * tolerance
     )
     return target
+
+
+def remove_duplicate_interfaces(
+    interfaces: List[PymatgenInterface], strain_mode: StrainModes = StrainModes.mean_abs_strain
+):
+    def are_interfaces_duplicate(interface1: PymatgenInterface, interface2: PymatgenInterface):
+        size_the_same = interface1.num_sites == interface2.num_sites and np.allclose(
+            interface1.interface_properties[strain_mode], interface2.interface_properties[strain_mode]
+        )
+        strain_the_same = np.allclose(
+            interface1.interface_properties[strain_mode], interface2.interface_properties[strain_mode]
+        )
+        return size_the_same and strain_the_same
+
+    filtered_interfaces = [interfaces[0]] if interfaces else []
+
+    for interface in interfaces[1:]:
+        if not any(are_interfaces_duplicate(interface, unique_interface) for unique_interface in filtered_interfaces):
+            filtered_interfaces.append(interface)
+    return filtered_interfaces
