@@ -104,3 +104,45 @@ SI_SUPERCELL_2X2X1 = {
     "metadata": {},
     "isUpdated": True,
 }
+
+SI_SLAB = {
+    "name": "Si4",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.5, 0.5625]},
+            {"id": 1, "value": [0.5, 0.0, 0.6875]},
+            {"id": 2, "value": [0.0, 0.0, 0.8125]},
+            {"id": 3, "value": [-0.0, 0.5, 0.9375]},
+        ],
+        "units": "crystal",
+        "cell": [[3.867, 0.0, 0.0], [0.0, 3.867, 0.0], [0.0, 0.0, 10.937527692]],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 3.867,
+        "b": 3.867,
+        "c": 10.937527692,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+        "vectors": {
+            "a": [3.867, 0.0, 0.0],
+            "b": [0.0, 3.867, 0.0],
+            "c": [0.0, 0.0, 10.937527692],
+            "alat": 1,
+            "units": "angstrom",
+        },
+    },
+    "isNonPeriodic": False,
+    "_id": "",
+    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+    "isUpdated": True,
+}
