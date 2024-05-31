@@ -85,7 +85,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 
     @property
     def bulk(self):
-        # TODO: implemetn utils to remove vacuum
+        # TODO: implement utils to remove vacuum
         return self.get_interface()
 
     def get_interface(self) -> Material:
@@ -95,17 +95,16 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 class InterfaceBuilder(BaseBuilder):
     _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
 
+    def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
+        return [self._update_material_name(material, configuration) for material in materials]
+
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
         film_formula = configuration.film_configuration.bulk["name"]
         substrate_formula = configuration.substrate_configuration.bulk["name"]
         film_miller_indices = "".join([str(i) for i in configuration.film_configuration.miller_indices])
         substrate_miller_indices = "".join([str(i) for i in configuration.substrate_configuration.miller_indices])
         new_name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}) Interface"
-        if StrainModes.mean_abs_strain in material.metadata:
-            strain = material.metadata[StrainModes.mean_abs_strain]
-            material.name = f"{new_name}, Strain:{strain * 100:.3f}%"
-        else:
-            material.name = new_name
+        material.name = new_name
         return material
 
 
@@ -163,6 +162,19 @@ class SimpleInterfaceBuilder(InterfaceBuilder):
 
 class StrainMatchingInterfaceBuilder(InterfaceBuilder):
     _BuildParametersType = StrainMatchingInterfaceBuilderParameters
+
+    def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
+        updated_material = super()._update_material_name(material, configuration)
+        if StrainModes.mean_abs_strain in material.metadata:
+            strain = material.metadata[StrainModes.mean_abs_strain]
+            new_name = f"{updated_material.name}, Strain (mean_abs_strain={strain:.3f}%)"
+            updated_material.name = new_name
+        return material
+
+    def _finalize(
+        self, materials: List[Material], configuration: InterfaceBuilder._ConfigurationType
+    ) -> List[Material]:
+        return [self._update_material_name(material, configuration) for material in materials]
 
 
 class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
