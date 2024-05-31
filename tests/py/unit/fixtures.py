@@ -54,7 +54,7 @@ INTERFACE_PROPERTIES_JSON = {
 # Add properties to interface structure
 INTERFACE_STRUCTURE.interface_properties = INTERFACE_PROPERTIES_MOCK
 
-
+# TODO: Use fixtures package when available
 SI_SUPERCELL_2X2X1 = {
     "name": "Si8",
     "basis": {
