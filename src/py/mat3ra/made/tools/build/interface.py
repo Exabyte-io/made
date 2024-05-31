@@ -22,16 +22,15 @@ class TerminationPair(BaseModel):
     self: Tuple[str, str]
 
     def __init__(self, termination_pair: Tuple[str, str]):
-        super().__init__()
-        self.self = termination_pair
+        super().__init__(self=termination_pair)
 
     @property
-    def film_termination(self):
-        return self[0]
+    def film_termination(self) -> str:
+        return self.self[0]
 
     @property
-    def substrate_termination(self):
-        return self[1]
+    def substrate_termination(self) -> str:
+        return self.self[1]
 
 
 InterfacesType = List[PymatgenInterface]
