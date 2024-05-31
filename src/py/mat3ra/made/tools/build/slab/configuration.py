@@ -1,13 +1,12 @@
 from typing import List, Tuple
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer as PymatgenSpacegroupAnalyzer
+from pydantic import BaseModel
 
 from mat3ra.made.material import Material
 from ...convert import from_pymatgen, to_pymatgen, PymatgenStructure
-from .builders import SlabBuildParameters
-from .builders import SlabBuilder, SlabSelectorParameters
 
 
-class BaseSlabConfiguration(object):
+class BaseSlabConfiguration(BaseModel):
     @property
     def bulk(self) -> Material:
         raise NotImplementedError
@@ -42,11 +41,8 @@ class SlabConfiguration(BaseSlabConfiguration):
         self.__miller_indices = miller_indices
         self.thickness = thickness
         self.vacuum = vacuum
-        self.__builder = SlabBuilder(
-            build_parameters=SlabBuildParameters(
-                use_orthogonal_z=use_orthogonal_z, xy_supercell_matrix=xy_supercell_matrix
-            )
-        )
+        self.xy_supercell_matrix = xy_supercell_matrix
+        self.use_orthogonal_z = use_orthogonal_z
 
     @property
     def bulk(self):
@@ -55,10 +51,3 @@ class SlabConfiguration(BaseSlabConfiguration):
     @property
     def miller_indices(self):
         return self.__miller_indices
-
-    def get_slab(self, termination) -> Material:
-        return self.__builder.get_material(self, selector_parameters=SlabSelectorParameters(termination=termination))
-
-    @property
-    def terminations(self):
-        return self.__builder.terminations(self)

@@ -1,8 +1,9 @@
 from typing import List
 from ase import Atoms
-from ..utils import decorator_convert_2x2_to_3x3
+from ase.build.supercells import make_supercell
 
-from ...material import Material
+from mat3ra.made.material import Material
+from ..utils import decorator_convert_2x2_to_3x3
 from ..convert import from_ase, decorator_convert_material_args_kwargs_to_atoms
 
 
@@ -19,7 +20,6 @@ def create_supercell(atoms: Atoms, supercell_matrix: List[List[int]]) -> Materia
     Returns:
         Material: The supercell of the atoms.
     """
-    from ase.build.supercells import make_supercell
 
     supercell_atoms = make_supercell(atoms, supercell_matrix)
     return Material(from_ase(supercell_atoms))

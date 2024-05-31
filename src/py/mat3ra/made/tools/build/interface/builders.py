@@ -17,6 +17,7 @@ from ..mixins import (
     ConvertGeneratedItemsASEAtomsMixin,
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
+from ..slab import create_slab
 from ..slab.configuration import SlabConfiguration
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
 from ...build import BaseBuilder
@@ -57,7 +58,7 @@ class SimpleInterfaceBuilder(InterfaceBuilder, ConvertGeneratedItemsASEAtomsMixi
 
     @staticmethod
     def __preprocess_slab_configuration(configuration: SlabConfiguration, termination: str):
-        slab = configuration.get_slab(termination=termination)
+        slab = create_slab(configuration, termination)
         ase_slab = to_ase(slab)
         niggli_reduce(ase_slab)
         return ase_slab
@@ -104,7 +105,7 @@ class StrainMatchingInterfaceBuilderParameters(BaseModel):
 
 
 class StrainMatchingInterfaceBuilder(InterfaceBuilder):
-    _BuildParametersType = StrainMatchingInterfaceBuilderParameters
+    _BuildParametersType = StrainMatchingInterfaceBuilderParameters  # type: ignore
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
         updated_material = super()._update_material_name(material, configuration)

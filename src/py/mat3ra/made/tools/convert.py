@@ -8,12 +8,14 @@ from mat3ra.utils.mixins import RoundNumericValuesMixin
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
 from pymatgen.core.interface import Interface
 from pymatgen.core.structure import Lattice, Structure
+from pymatgen.core.surface import Slab
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
 
 from ..material import Material
 
 PymatgenStructure = Structure
+PymatgenSlab = Slab
 PymatgenInterface = Interface
 ASEAtoms = Atoms
 
