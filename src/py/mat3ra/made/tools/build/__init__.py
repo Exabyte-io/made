@@ -38,6 +38,9 @@ class BaseBuilder:
         # TODO: convert from _GeneratedItemType to Material
         return [Material(item) for item in items]
 
+    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
+        return material
+
     def get_materials(
         self,
         configuration: _ConfigurationType,
@@ -47,7 +50,9 @@ class BaseBuilder:
         generated_items = self._generate_or_get_from_cache(configuration)
         sorted_items = self._sort(generated_items)
         selected_items = self._select(sorted_items, selector_parameters)
-        return self._post_process(selected_items, post_process_parameters)
+        materials = self._post_process(selected_items, post_process_parameters)
+        materials_with_name = [self._update_material_name(material, configuration) for material in materials]
+        return materials_with_name
 
     def get_material(
         self,
