@@ -78,12 +78,12 @@ class SlabConfiguration(BaseSlabConfiguration):
 
 
 class SlabBuilder(BaseBuilder):
-    _ConfigurationType = SlabConfiguration
-    _BuildParametersType = SlabBuildParameters
-    _GeneratedItemType = PymatgenStructure
-    _SelectorParametersType = SlabSelectorParameters
+    _ConfigurationType: type(SlabConfiguration) = SlabConfiguration  # type: ignore
+    _BuildParametersType: type(SlabBuildParameters) = SlabBuildParameters  # type: ignore
+    _GeneratedItemType: PymatgenStructure = PymatgenStructure  # type: ignore
+    _SelectorParametersType: type(SlabSelectorParameters) = SlabSelectorParameters  # type: ignore
 
-    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,

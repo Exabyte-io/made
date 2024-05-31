@@ -93,7 +93,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 
 
 class InterfaceBuilder(BaseBuilder):
-    _ConfigurationType = InterfaceConfiguration
+    _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
         film_formula = configuration.film_configuration.bulk["name"]
@@ -170,8 +170,10 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
     Creates matching interface between substrate and film using the ZSL algorithm.
     """
 
-    _BuildParametersType = ZSLStrainMatchingInterfaceBuilderParameters
-    _GeneratedItemType = PymatgenInterface
+    _BuildParametersType: type(  # type: ignore
+        ZSLStrainMatchingInterfaceBuilderParameters
+    ) = ZSLStrainMatchingInterfaceBuilderParameters  # type: ignore
+    _GeneratedItemType: PymatgenInterface = PymatgenInterface  # type: ignore
 
     def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
         generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.dict())
@@ -197,7 +199,7 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
         # TODO: sort by number of atoms
         return sorted(items, key=lambda x: np.mean(np.abs(x.interface_properties[StrainModes.mean_abs_strain])))
 
-    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:  # type: ignore
+    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = [Material(from_pymatgen(interface)) for interface in items]
         strains = [interface.interface_properties[StrainModes.mean_abs_strain] for interface in items]
 
