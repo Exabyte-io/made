@@ -12,8 +12,8 @@ class BaseBuilder:
 
     def __init__(self, build_parameters: _BuildParametersType) -> None:
         self.build_parameters = build_parameters
-        self.__generated_items: List[List[_GeneratedItemType]] = []
-        self.__configurations: List[_ConfigurationType] = []
+        self.__generated_items: List[List[BaseBuilder._GeneratedItemType]] = []
+        self.__configurations: List[BaseBuilder._ConfigurationType] = []
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return []
