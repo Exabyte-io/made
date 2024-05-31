@@ -171,11 +171,6 @@ class StrainMatchingInterfaceBuilder(InterfaceBuilder):
             updated_material.name = new_name
         return material
 
-    def _finalize(
-        self, materials: List[Material], configuration: InterfaceBuilder._ConfigurationType
-    ) -> List[Material]:
-        return [self._update_material_name(material, configuration) for material in materials]
-
 
 class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
     """
@@ -205,22 +200,16 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
         provided_termination_pair = configuration.termination_pair
         hotfix_termination_pair = configuration.termination_pair
 
-        for termination_pair in generated_terminations:
-            if termination_pair == provided_termination_pair:
-                hotfix_termination_pair = termination_pair
-                break
-            elif (
-                termination_pair[0].split("_")[0] == provided_termination_pair[0].split("_")[0]
-                and termination_pair[1].split("_")[0] == provided_termination_pair[1].split("_")[0]
-            ):
-                hotfix_termination_pair = termination_pair
-                print("Interface will be built with terminations: ", hotfix_termination_pair)
-
-        if hotfix_termination_pair is None:
-            raise ValueError("Internal error: cannot create interface with provided terminations")
+        if provided_termination_pair not in generated_terminations:
+            for termination_pair in generated_terminations:
+                if (
+                        termination_pair[0].split("_")[0] == provided_termination_pair[0].split("_")[0]
+                        and termination_pair[1].split("_")[0] == provided_termination_pair[1].split("_")[0]
+                    ):
+                        hotfix_termination_pair = termination_pair
+                        print("Interface will be built with terminations: ", hotfix_termination_pair)
 
         interfaces = builder.get_interfaces(
-            # TODO: change to configuration.termination_pairs
             termination=hotfix_termination_pair,
             gap=configuration.distance_z,
             film_thickness=configuration.film_configuration.thickness,
@@ -264,13 +253,13 @@ def remove_duplicate_interfaces(
     interfaces: List[PymatgenInterface], strain_mode: StrainModes = StrainModes.mean_abs_strain
 ):
     def are_interfaces_duplicate(interface1: PymatgenInterface, interface2: PymatgenInterface):
-        size_the_same = interface1.num_sites == interface2.num_sites and np.allclose(
+        are_sizes_equivalent = interface1.num_sites == interface2.num_sites and np.allclose(
             interface1.interface_properties[strain_mode], interface2.interface_properties[strain_mode]
         )
-        strain_the_same = np.allclose(
+        are_strains_equivalent = np.allclose(
             interface1.interface_properties[strain_mode], interface2.interface_properties[strain_mode]
         )
-        return size_the_same and strain_the_same
+        return are_sizes_equivalent and are_strains_equivalent
 
     filtered_interfaces = [interfaces[0]] if interfaces else []
 
