@@ -95,6 +95,19 @@ class InterfaceConfiguration(BaseSlabConfiguration):
 class InterfaceBuilder(BaseBuilder):
     _ConfigurationType = InterfaceConfiguration
 
+    def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
+        film_formula = configuration.film_configuration.bulk["name"]
+        substrate_formula = configuration.substrate_configuration.bulk["name"]
+        film_miller_indices = configuration.film_configuration.miller_indices
+        substrate_miller_indices = configuration.substrate_configuration.miller_indices
+        new_name = f"{film_formula}{film_miller_indices}-{substrate_formula}{substrate_miller_indices} Interface"
+        if StrainModes.mean_abs_strain in material.metadata:
+            strain = material.metadata[StrainModes.mean_abs_strain]
+            material.name = f"{new_name}, Strain:{strain * 100:.3f}%"
+        else:
+            material.name = new_name
+        return material
+
 
 class SimpleInterfaceBuilder(InterfaceBuilder):
     """
@@ -184,14 +197,12 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
         # TODO: sort by number of atoms
         return sorted(items, key=lambda x: np.mean(np.abs(x.interface_properties[StrainModes.mean_abs_strain])))
 
-    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
+    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:  # type: ignore
         materials = [Material(from_pymatgen(interface)) for interface in items]
         strains = [interface.interface_properties[StrainModes.mean_abs_strain] for interface in items]
 
         for material, strain in zip(materials, strains):
-            material.metadata = {"mean_abs_strain": strain}
-            material.name = f'{material.name}, Interface, Strain:{material.metadata["mean_abs_strain"] * 100:.3f}%'
-
+            material.metadata["mean_abs_strain"] = strain
         return materials
 
 
