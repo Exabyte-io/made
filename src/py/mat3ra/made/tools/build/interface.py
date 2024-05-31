@@ -17,7 +17,23 @@ from ..convert import to_ase, from_ase, to_pymatgen, from_pymatgen
 from ..build import BaseBuilder
 from .slab import BaseSlabConfiguration, SlabConfiguration
 
-TerminationPair = Tuple[str, str]
+
+class TerminationPair(BaseModel):
+    self: Tuple[str, str]
+
+    def __init__(self, termination_pair: Tuple[str, str]):
+        super().__init__()
+        self.self = termination_pair
+
+    @property
+    def film_termination(self):
+        return self[0]
+
+    @property
+    def substrate_termination(self):
+        return self[1]
+
+
 InterfacesType = List[PymatgenInterface]
 InterfacesDataType = Dict[Tuple, List[PymatgenInterface]]
 
@@ -78,7 +94,7 @@ class InterfaceConfiguration(BaseSlabConfiguration):
         self.substrate_configuration = substrate_configuration
         self.film_termination = film_termination
         self.substrate_termination = substrate_termination
-        self.termination_pair = (film_termination, substrate_termination)
+        self.termination_pair = TerminationPair((film_termination, substrate_termination))
         self.distance_z: float = distance_z
         self.vacuum: float = vacuum
         self.__builder = SimpleInterfaceBuilder(build_parameters=SimpleInterfaceBuilderParameters(scale_film=False))
@@ -203,11 +219,12 @@ class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder):
         if provided_termination_pair not in generated_terminations:
             for termination_pair in generated_terminations:
                 if (
-                        termination_pair[0].split("_")[0] == provided_termination_pair[0].split("_")[0]
-                        and termination_pair[1].split("_")[0] == provided_termination_pair[1].split("_")[0]
-                    ):
-                        hotfix_termination_pair = termination_pair
-                        print("Interface will be built with terminations: ", hotfix_termination_pair)
+                    termination_pair[0].split("_")[0] == provided_termination_pair.film_termination.split("_")[0]
+                    and termination_pair[1].split("_")[0]
+                    == provided_termination_pair.substrate_termination.split("_")[0]
+                ):
+                    hotfix_termination_pair = termination_pair
+                    print("Interface will be built with terminations: ", hotfix_termination_pair)
 
         interfaces = builder.get_interfaces(
             termination=hotfix_termination_pair,
