@@ -110,7 +110,7 @@ SI_SUPERCELL_2X2X1 = {
 }
 
 SI_SLAB = {
-    "name": "Si4",
+    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -147,6 +147,9 @@ SI_SLAB = {
     },
     "isNonPeriodic": False,
     "_id": "",
-    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+    "metadata": {
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "termination": "Si_P4/mmm_1",
+    },
     "isUpdated": True,
 }
