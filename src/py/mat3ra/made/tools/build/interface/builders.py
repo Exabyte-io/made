@@ -48,7 +48,7 @@ class SimpleInterfaceBuilderParameters(InterfaceBuilderParameters):
     scale_film: bool = True
 
 
-class SimpleInterfaceBuilder(InterfaceBuilder, ConvertGeneratedItemsASEAtomsMixin):
+class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilder):
     """
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
@@ -127,7 +127,7 @@ class ZSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilder
     strain_matching_parameters: ZSLStrainMatchingParameters
 
 
-class ZSLStrainMatchingInterfaceBuilder(StrainMatchingInterfaceBuilder, ConvertGeneratedItemsPymatgenStructureMixin):
+class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMixin, StrainMatchingInterfaceBuilder):
     """
     Creates matching interface between substrate and film using the ZSL algorithm.
     """

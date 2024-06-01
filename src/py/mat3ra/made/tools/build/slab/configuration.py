@@ -21,6 +21,8 @@ class SlabConfiguration(BaseSlabConfiguration):
 
     thickness: int = 1
     vacuum: float = 0.5
+    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
+    use_orthogonal_z: bool = False
 
     def __init__(
         self,
