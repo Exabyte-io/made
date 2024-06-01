@@ -1,5 +1,5 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab import SlabConfiguration
+from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
 from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures import SI_SLAB
@@ -16,7 +16,6 @@ def test_build_slab():
         xy_supercell_matrix=[[1, 0], [0, 1]],
         use_orthogonal_z=True,
     )
-
-    slab_termination = slab_config.terminations[0]
-    slab = slab_config.get_slab(slab_termination)
+    termination = get_terminations(slab_config)[0]
+    slab = create_slab(slab_config, termination)
     assertion_utils.assert_deep_almost_equal(slab.to_json(), SI_SLAB)
