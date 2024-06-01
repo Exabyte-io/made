@@ -5,6 +5,7 @@ from mat3ra.made.tools.build.interface import (
     ZSLStrainMatchingInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilderParameters,
     ZSLStrainMatchingParameters,
+    create_interfaces,
 )
 
 from .fixtures import INTERFACE_TERMINATION_PAIR, LAYER_CONFIGURATION, SUBSTRATE_CONFIGURATION
@@ -15,8 +16,8 @@ EXPECTED_NUMBER_OF_INTERFACES = 1 if platform.python_version().startswith("3.8")
 interface_configuration = InterfaceConfiguration(
     film_configuration=LAYER_CONFIGURATION,
     substrate_configuration=SUBSTRATE_CONFIGURATION,
-    film_termination=INTERFACE_TERMINATION_PAIR[0],
-    substrate_termination=INTERFACE_TERMINATION_PAIR[1],
+    film_termination=INTERFACE_TERMINATION_PAIR.film_termination,
+    substrate_termination=INTERFACE_TERMINATION_PAIR.substrate_termination,
     distance_z=3.0,
     vacuum=5.0,
 )
@@ -30,6 +31,6 @@ matched_interfaces_builder = ZSLStrainMatchingInterfaceBuilder(
 
 
 def test_create_interfaces():
-    interfaces = matched_interfaces_builder.get_materials(configuration=interface_configuration)
+    interfaces = create_interfaces(matched_interfaces_builder, interface_configuration)
 
     assert len(interfaces) == EXPECTED_NUMBER_OF_INTERFACES

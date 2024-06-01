@@ -1,7 +1,7 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.interface.termination_pair import TerminationPair
-from mat3ra.made.tools.build.slab import SlabConfiguration
+from mat3ra.made.tools.build.slab import SlabConfiguration, get_terminations
 from mat3ra.made.tools.convert import from_ase
 from pymatgen.analysis.elasticity.strain import Strain
 from pymatgen.core.interface import Interface
@@ -21,14 +21,17 @@ LAYER_MATERIAL = Material(from_ase(film))
 SUBSTRATE_CONFIGURATION = SlabConfiguration(bulk=SUBSTRATE_MATERIAL, thickness=3)
 LAYER_CONFIGURATION = SlabConfiguration(bulk=LAYER_MATERIAL)
 
+layer_terminations = get_terminations(LAYER_CONFIGURATION)
+substrate_terminations = get_terminations(SUBSTRATE_CONFIGURATION)
+
 # Pymatgen Interface fixtures
 INTERFACE_TERMINATION_PAIR: TerminationPair = TerminationPair(
     (
-        LAYER_CONFIGURATION.terminations[0],
-        SUBSTRATE_CONFIGURATION.terminations[0],
+        layer_terminations[0],
+        substrate_terminations[0],
     )
 )
-INTERFACE_TERMINATION_AS_STR = str(INTERFACE_TERMINATION_PAIR)
+INTERFACE_TERMINATION_AS_STR = str(INTERFACE_TERMINATION_PAIR.self)
 
 interface_structure = atoms_to_interface_structure(INTERFACE_ATOMS)
 dict = interface_structure.as_dict()
