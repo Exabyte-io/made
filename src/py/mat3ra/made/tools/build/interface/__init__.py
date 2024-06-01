@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Optional
 
 from mat3ra.made.material import Material
 from .builders import (
@@ -18,7 +18,9 @@ def create_interfaces(
 
 
 def create_interface(
-    builder: Union[SimpleInterfaceBuilder, ZSLStrainMatchingInterfaceBuilder],
     configuration: InterfaceConfiguration,
+    builder: Optional[Union[SimpleInterfaceBuilder, ZSLStrainMatchingInterfaceBuilder]] = None,
 ) -> Material:
+    if builder is None:
+        builder = SimpleInterfaceBuilder(build_parameters=SimpleInterfaceBuilderParameters())
     return builder.get_material(configuration)

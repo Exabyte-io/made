@@ -19,6 +19,7 @@ from ..mixins import (
 )
 from ..slab import create_slab
 from ..slab.configuration import SlabConfiguration
+from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
 from ...build import BaseBuilder
 
@@ -31,15 +32,12 @@ class InterfaceBuilder(BaseBuilder):
     _BuildParametersType = InterfaceBuilderParameters
     _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
 
-    def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
-        return [self._update_material_name(material, configuration) for material in materials]
-
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        film_formula = configuration.film_configuration.bulk["name"]
-        substrate_formula = configuration.substrate_configuration.bulk["name"]
+        film_formula = get_chemical_formula(configuration.film_configuration.bulk)
+        substrate_formula = get_chemical_formula(configuration.substrate_configuration.bulk)
         film_miller_indices = "".join([str(i) for i in configuration.film_configuration.miller_indices])
         substrate_miller_indices = "".join([str(i) for i in configuration.substrate_configuration.miller_indices])
-        new_name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}) Interface"
+        new_name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
         material.name = new_name
         return material
 
@@ -54,7 +52,8 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     """
 
     _BuildParametersType = Optional[SimpleInterfaceBuilderParameters]
-    _GeneratedItemType: ASEAtoms = ASEAtoms
+    _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
+    _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 
     @staticmethod
     def __preprocess_slab_configuration(configuration: SlabConfiguration, termination: str):
@@ -111,7 +110,7 @@ class StrainMatchingInterfaceBuilder(InterfaceBuilder):
         updated_material = super()._update_material_name(material, configuration)
         if StrainModes.mean_abs_strain in material.metadata:
             strain = material.metadata[StrainModes.mean_abs_strain]
-            new_name = f"{updated_material.name}, Strain (mean_abs_strain={strain:.3f}%)"
+            new_name = f"{updated_material.name}, Strain {strain:.3f}%"
             updated_material.name = new_name
         return material
 
