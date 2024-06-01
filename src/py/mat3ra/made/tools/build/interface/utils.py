@@ -1,7 +1,7 @@
 import types
 from typing import List
 import numpy as np
-from enums import StrainModes
+from .enums import StrainModes
 from ...convert import PymatgenInterface
 
 

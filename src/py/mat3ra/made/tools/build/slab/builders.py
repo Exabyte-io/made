@@ -16,7 +16,7 @@ class SlabSelectorParameters(BaseModel):
     termination: str = ""
 
 
-class SlabBuilder(BaseBuilder, ConvertGeneratedItemsPymatgenStructureMixin):
+class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     _ConfigurationType: type(SlabConfiguration) = SlabConfiguration  # type: ignore
     _GeneratedItemType: PymatgenStructure = PymatgenStructure  # type: ignore
     _SelectorParametersType: type(SlabSelectorParameters) = SlabSelectorParameters  # type: ignore
@@ -47,7 +47,7 @@ class SlabBuilder(BaseBuilder, ConvertGeneratedItemsPymatgenStructureMixin):
         materials = super()._post_process(items, post_process_parameters)
         return [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
 
-    def terminations(self, configuration: _ConfigurationType) -> List[str]:
+    def get_terminations(self, configuration: _ConfigurationType) -> List[str]:
         return list(set(label_termination(slab) for slab in self._generate_or_get_from_cache(configuration)))
 
     def __conditionally_convert_slab_to_orthogonal_pymatgen(self, slab: PymatgenSlab) -> PymatgenStructure:

@@ -6,7 +6,7 @@ from .configuration import SlabConfiguration
 
 
 def get_terminations(configuration: SlabConfiguration) -> List[str]:
-    return SlabBuilder().terminations(configuration)
+    return SlabBuilder().get_terminations(configuration)
 
 
 def create_slab(configuration: SlabConfiguration, termination: str) -> Material:
