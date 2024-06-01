@@ -6,12 +6,13 @@ from ...material import Material
 class BaseBuilder:
     _ConfigurationType: Any = Any
     _BuildParametersType: Any = Any
+    _DefaultBuildParameters: Any = None
     _GeneratedItemType: Any = Any
     _SelectorParametersType: Any = Any
     _PostProcessParametersType: Any = Any
 
     def __init__(self, build_parameters: _BuildParametersType = None) -> None:
-        self.build_parameters = build_parameters
+        self.build_parameters = build_parameters or self._DefaultBuildParameters
         self.__generated_items: List[List[BaseBuilder._GeneratedItemType]] = []
         self.__configurations: List[BaseBuilder._ConfigurationType] = []
 
@@ -43,7 +44,7 @@ class BaseBuilder:
         return material_config
 
     def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
-        return materials
+        return [self._update_material_name(material, configuration) for material in materials]
 
     def get_materials(
         self,
@@ -65,3 +66,7 @@ class BaseBuilder:
         post_process_parameters: Optional[_PostProcessParametersType] = None,
     ) -> Material:
         return self.get_materials(configuration, selector_parameters, post_process_parameters)[0]
+
+    def _update_material_name(self, material, configuration):
+        # Do nothing by default
+        return material

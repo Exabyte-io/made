@@ -48,7 +48,7 @@ class SlabConfiguration(BaseSlabConfiguration):
 
     @property
     def bulk(self):
-        return from_pymatgen(self.__bulk)
+        return Material(from_pymatgen(self.__bulk))
 
     @property
     def miller_indices(self):
