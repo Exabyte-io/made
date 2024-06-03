@@ -6,12 +6,19 @@ from typing import Any, Callable, Dict, Union
 from ase import Atoms
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
-from pymatgen.core.interface import Interface
+from pymatgen.core.interface import Interface, label_termination
 from pymatgen.core.structure import Lattice, Structure
+from pymatgen.core.surface import Slab
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
 
 from ..material import Material
+
+PymatgenStructure = Structure
+PymatgenSlab = Slab
+PymatgenInterface = Interface
+ASEAtoms = Atoms
+label_pymatgen_slab_termination = label_termination
 
 
 def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> Structure:
@@ -56,7 +63,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> S
     return structure
 
 
-def from_pymatgen(structure: Union[Structure, Interface]):
+def from_pymatgen(structure: Union[Structure, Interface]) -> Dict[str, Any]:
     """
     Converts a pymatgen Structure object to a material object in ESSE format.
 
