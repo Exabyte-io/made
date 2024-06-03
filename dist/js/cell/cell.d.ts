@@ -1,7 +1,7 @@
-import MathModule from "@mat3ra/code/dist/js/math";
+import CodeMath from "@mat3ra/code/dist/js/math";
 import { Coordinate } from "../basis/types";
 import { Vector, VectorsAsArray } from "../lattice/types";
-type Point = Coordinate | MathModule.Matrix | MathModule.MathType;
+type Point = Coordinate | CodeMath.Matrix | CodeMath.MathType;
 export declare class Cell {
     tolerance: number;
     vector1: Vector;
@@ -22,7 +22,7 @@ export declare class Cell {
     /**
      * Convert a point (in crystal coordinates) to cartesian.
      */
-    convertPointToCartesian(point: Point): MathModule.MathType;
+    convertPointToCartesian(point: Point): CodeMath.MathType;
     /**
      * Convert a point (in cartesian coordinates) to crystal (fractional).
      */
