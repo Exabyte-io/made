@@ -26,17 +26,15 @@ film_terminations = get_terminations(FILM_CONFIGURATION)
 
 # Pymatgen Interface fixtures
 INTERFACE_TERMINATION_PAIR: TerminationPair = TerminationPair(
-    (
-        film_terminations[0],
-        substrate_terminations[0],
-    )
+    film_terminations[0],
+    substrate_terminations[0],
 )
-INTERFACE_TERMINATION_AS_STR = str(INTERFACE_TERMINATION_PAIR.self)
+INTERFACE_TERMINATION_AS_STR = str(INTERFACE_TERMINATION_PAIR)
 
 interface_structure = atoms_to_interface_structure(INTERFACE_ATOMS)
-dct = interface_structure.as_dict()
+interface_dict = interface_structure.as_dict()
 
-INTERFACE_STRUCTURE = Interface.from_dict(dct)
+INTERFACE_STRUCTURE = Interface.from_dict(interface_dict)
 # Create properties that are assigned during interface creation in ZSL algorithm as dict and json
 INTERFACE_PROPERTIES_MOCK = {
     "film_transformation": [[2.0, 0.0], [0.0, 2.0]],

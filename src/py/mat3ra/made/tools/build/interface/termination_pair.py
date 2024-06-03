@@ -1,17 +1,58 @@
-from typing import Tuple
+from typing import Tuple, List
 from pydantic import BaseModel
+
+from ..slab.termination import Termination
 
 
 class TerminationPair(BaseModel):
-    self: Tuple[str, str]
+    film_termination: Termination
+    substrate_termination: Termination
 
-    def __init__(self, termination_pair: Tuple[str, str]):
-        super().__init__(self=termination_pair)
+    def __str__(self):
+        return f"({self.film_termination}, {self.substrate_termination})"
 
-    @property
-    def film_termination(self) -> str:
-        return self.self[0]
+    def __repr__(self):
+        return self.__str__()
 
-    @property
-    def substrate_termination(self) -> str:
-        return self.self[1]
+    def __init__(self, film_termination: Termination, substrate_termination: Termination):
+        super().__init__(film_termination=film_termination, substrate_termination=substrate_termination)
+
+    @classmethod
+    def from_tuple_of_str(cls, termination_pair: Tuple[str, str]):
+        film_termination = Termination.from_string(termination_pair[0])
+        substrate_termination = Termination.from_string(termination_pair[1])
+        return cls(film_termination=film_termination, substrate_termination=substrate_termination)
+
+    def to_tuple_of_str(self) -> Tuple[str, str]:
+        return f"{self.film_termination}", f"{self.substrate_termination}"
+
+    @classmethod
+    def from_pymatgen(cls, termination_pair: Tuple[str, str]):
+        return cls.from_tuple_of_str(termination_pair)
+
+    def to_pymatgen(self) -> Tuple[str, str]:
+        return self.to_tuple_of_str()
+
+
+def safely_select_termination_pair(
+    provided_termination_pair: TerminationPair, generated_termination_pairs: List[TerminationPair]
+) -> TerminationPair:
+    """
+    Attempt finding provided in generated terminations to find a complete match,
+    if match isn't found, get terminations with equivalent chemical elements.
+    """
+    provided_film_termination = provided_termination_pair.film_termination
+    provided_substrate_termination = provided_termination_pair.substrate_termination
+    hotfix_termination_pair = provided_termination_pair
+    if provided_termination_pair not in generated_termination_pairs:
+        for termination_pair in generated_termination_pairs:
+            generated_film_termination = termination_pair.film_termination
+            generated_substrate_termination = termination_pair.substrate_termination
+            if (
+                generated_film_termination.chemical_elements == provided_film_termination.chemical_elements
+                and generated_substrate_termination.chemical_elements
+                == provided_substrate_termination.chemical_elements
+            ):
+                hotfix_termination_pair = termination_pair
+                print("Interface will be built with terminations: ", hotfix_termination_pair)
+    return hotfix_termination_pair

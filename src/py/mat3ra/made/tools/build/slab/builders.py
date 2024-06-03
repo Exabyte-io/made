@@ -1,13 +1,14 @@
 from pymatgen.core.surface import SlabGenerator as PymatgenSlabGenerator
-from pymatgen.core.interface import label_termination
+from ...convert import label_pymatgen_slab_termination
 from typing import List
 from pydantic import BaseModel
 
 
 from mat3ra.made.material import Material
 
+from .termination import Termination
 from ...analyze import get_chemical_formula
-from ...convert import to_pymatgen, PymatgenStructure, PymatgenSlab
+from ...convert import to_pymatgen, PymatgenSlab
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from ..supercell import create_supercell
@@ -15,12 +16,12 @@ from .configuration import SlabConfiguration
 
 
 class SlabSelectorParameters(BaseModel):
-    termination: str = ""
+    termination: Termination
 
 
 class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     _ConfigurationType: type(SlabConfiguration) = SlabConfiguration  # type: ignore
-    _GeneratedItemType: PymatgenStructure = PymatgenStructure  # type: ignore
+    _GeneratedItemType: PymatgenSlab = PymatgenSlab  # type: ignore
     _SelectorParametersType: type(SlabSelectorParameters) = SlabSelectorParameters  # type: ignore
     __configuration: SlabConfiguration
 
@@ -39,25 +40,30 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         return [self.__conditionally_convert_slab_to_orthogonal_pymatgen(slab) for slab in raw_slabs]
 
     def _select(
-        self,
-        items: List[_GeneratedItemType],
-        selector_parameters: _SelectorParametersType = SlabSelectorParameters(),
+        self, items: List[_GeneratedItemType], selector_parameters: _SelectorParametersType
     ) -> List[_GeneratedItemType]:
-        return [slab for slab in items if label_termination(slab) == selector_parameters.termination]
+        termination = selector_parameters.termination
+        return [slab for slab in items if self.__create_termination_from_slab_pymatgen(slab) == termination]
 
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = super()._post_process(items, post_process_parameters)
         materials = [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
         for idx, material in enumerate(materials):
-            material.metadata["termination"] = label_termination(items[idx])
+            material.metadata["termination"] = label_pymatgen_slab_termination(items[idx])
 
         return materials
 
-    def get_terminations(self, configuration: _ConfigurationType) -> List[str]:
-        return list(set(label_termination(slab) for slab in self._generate_or_get_from_cache(configuration)))
+    def get_terminations(self, configuration: _ConfigurationType) -> List[Termination]:
+        return [
+            self.__create_termination_from_slab_pymatgen(slab)
+            for slab in self._generate_or_get_from_cache(configuration)
+        ]
 
-    def __conditionally_convert_slab_to_orthogonal_pymatgen(self, slab: PymatgenSlab) -> PymatgenStructure:
+    def __conditionally_convert_slab_to_orthogonal_pymatgen(self, slab: PymatgenSlab) -> PymatgenSlab:
         return slab.get_orthogonal_c_slab() if self.__configuration.use_orthogonal_z else slab
+
+    def __create_termination_from_slab_pymatgen(self, slab: PymatgenSlab) -> Termination:
+        return Termination.from_string(label_pymatgen_slab_termination(slab))
 
     def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
         formula = get_chemical_formula(configuration.bulk)

@@ -11,13 +11,13 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 from mat3ra.made.material import Material
 from .enums import StrainModes
 from .configuration import InterfaceConfiguration
-from .termination_pair import TerminationPair
+from .termination_pair import TerminationPair, safely_select_termination_pair
 from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
 from ..mixins import (
     ConvertGeneratedItemsASEAtomsMixin,
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
-from ..slab import create_slab
+from ..slab import create_slab, Termination
 from ..slab.configuration import SlabConfiguration
 from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
@@ -42,6 +42,9 @@ class InterfaceBuilder(BaseBuilder):
         return material
 
 
+########################################################################################
+#                           Simple Interface Builder                                   #
+########################################################################################
 class SimpleInterfaceBuilderParameters(InterfaceBuilderParameters):
     scale_film: bool = True
 
@@ -56,7 +59,7 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 
     @staticmethod
-    def __preprocess_slab_configuration(configuration: SlabConfiguration, termination: str):
+    def __preprocess_slab_configuration(configuration: SlabConfiguration, termination: Termination):
         slab = create_slab(configuration, termination)
         ase_slab = to_ase(slab)
         niggli_reduce(ase_slab)
@@ -99,6 +102,9 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
         return [Material(from_ase(slab)) for slab in items]
 
 
+########################################################################################
+#                       Strain Matching Interface Builders                             #
+########################################################################################
 class StrainMatchingInterfaceBuilderParameters(BaseModel):
     strain_matching_parameters: Optional[Any] = None
 
@@ -110,7 +116,7 @@ class StrainMatchingInterfaceBuilder(InterfaceBuilder):
         updated_material = super()._update_material_name(material, configuration)
         if StrainModes.mean_abs_strain in material.metadata:
             strain = material.metadata[StrainModes.mean_abs_strain]
-            new_name = f"{updated_material.name}, Strain {strain:.3f}%"
+            new_name = f"{updated_material.name}, Strain {strain*100:.3f}%"
             updated_material.name = new_name
         return material
 
@@ -146,29 +152,12 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
             zslgen=generator,
         )
 
-        # TODO: REMOVE when found the correct solution
-        # Workaround: compare provided and generated terminations to find complete match,
-        # if full match between terminations isn't found, get terminations with first part the same, before `_`
-
-        generated_terminations = [
-            TerminationPair(pymatgen_termination) for pymatgen_termination in builder.terminations
+        generated_termination_pairs = [
+            TerminationPair.from_pymatgen(pymatgen_termination) for pymatgen_termination in builder.terminations
         ]
-        provided_termination_pair = configuration.termination_pair
-        hotfix_termination_pair = configuration.termination_pair
-
-        if provided_termination_pair not in generated_terminations:
-            for termination_pair in generated_terminations:
-                if (
-                    termination_pair.film_termination.split("_")[0]
-                    == provided_termination_pair.film_termination.split("_")[0]
-                    and termination_pair.substrate_termination.split("_")[0]
-                    == provided_termination_pair.substrate_termination.split("_")[0]
-                ):
-                    hotfix_termination_pair = termination_pair
-                    print("Interface will be built with terminations: ", hotfix_termination_pair)
-
+        termination_pair = safely_select_termination_pair(configuration.termination_pair, generated_termination_pairs)
         interfaces = builder.get_interfaces(
-            termination=hotfix_termination_pair.self,
+            termination=termination_pair.to_pymatgen(),
             gap=configuration.distance_z,
             film_thickness=configuration.film_configuration.thickness,
             substrate_thickness=configuration.substrate_configuration.thickness,
