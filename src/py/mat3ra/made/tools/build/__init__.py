@@ -6,6 +6,30 @@ from ...material import Material
 
 
 class BaseBuilder(BaseModel):
+    """
+    Base class for material builders.
+    This class provides an interface for generating materials and getter functions.
+    The builder is meant as a description of the process, while its functions require a
+    "Configuration" class instance to perform the generation.
+
+    The class is designed to be subclassed and the subclass should implement the following methods:
+
+    - `_generate`: Generate the material items, possibly using third-party tools/implementation for items.
+    - `_sort`: Sort the items.
+    - `_select`: Select a subset of the items.
+    - `_post_process`: Post-process the items to convert them to materials (Material class).
+    - `_finalize`: Finalize the materials.
+
+    The subclass should also define the following attributes:
+
+    - `_BuildParametersType`: The data structure model for the build parameters.
+    - `_DefaultBuildParameters`: The default build parameters.
+    - `_ConfigurationType`: The data structure model for the Configuration used during the build.
+    - `_GeneratedItemType`: The type of the generated item.
+    - `_SelectorParametersType`: The data structure model for the selector parameters.
+    - `_PostProcessParametersType`: The data structure model for the post-process parameters.
+    """
+
     build_parameters: Any = None
     _BuildParametersType: Any = None
     _DefaultBuildParameters: Any = None
