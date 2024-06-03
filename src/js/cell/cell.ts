@@ -1,10 +1,8 @@
-import CodeMath from "@mat3ra/code/dist/js/math";
+import CodeMath, { math } from "@mat3ra/code/dist/js/math";
 
 import { Coordinate } from "../basis/types";
 import constants from "../constants";
 import { Vector, VectorsAsArray } from "../lattice/types";
-
-const { math } = CodeMath;
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;
