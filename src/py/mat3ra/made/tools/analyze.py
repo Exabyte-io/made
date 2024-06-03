@@ -55,3 +55,17 @@ def get_surface_area(atoms: Atoms):
     matrix = atoms.cell
     cross_product = np.cross(matrix[0], matrix[1])
     return np.linalg.norm(cross_product)
+
+
+@decorator_convert_material_args_kwargs_to_atoms
+def get_chemical_formula(atoms: Atoms):
+    """
+    Calculate the formula of the atoms structure.
+
+    Args:
+        atoms (ase.Atoms): The Atoms object to calculate the formula of.
+
+    Returns:
+        str: The formula of the atoms.
+    """
+    return atoms.get_chemical_formula()
