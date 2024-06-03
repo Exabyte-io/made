@@ -1,5 +1,5 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { AnyObject } from "@mat3ra/code/entity/in_memory";
+import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { ConstrainedBasis } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
@@ -208,7 +208,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
         readonly slug: string;
         readonly isSystemEntity: boolean;
         getAsEntityReference: ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema);
-        getEntityByName: ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity);
+        getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity);
         metadata: object;
         updateMetadata(object: object): void;
         name: string;
@@ -414,7 +414,7 @@ export declare const Material: {
         readonly slug: string;
         readonly isSystemEntity: boolean;
         getAsEntityReference: ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema);
-        getEntityByName: ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/entity/in_memory").InMemoryEntity);
+        getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity);
         metadata: object;
         updateMetadata(object: object): void;
         name: string;
@@ -471,18 +471,12 @@ export declare const Material: {
     readonly slug: string;
     readonly isSystemEntity: boolean;
     getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
-    getEntityByName(entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/entity/in_memory").InMemoryEntity;
+    getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 }) & (new (...args: any[]) => {
     metadata: object;
     updateMetadata(object: object): void;
     _json: AnyObject;
-    /**
-     * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
-     */
     prop<T_2 = undefined>(name: string, defaultValue: T_2): T_2;
-    /**
-     * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
-     */
     prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
@@ -500,7 +494,7 @@ export declare const Material: {
     readonly slug: string;
     readonly isSystemEntity: boolean;
     getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
-    getEntityByName(entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/entity/in_memory").InMemoryEntity;
+    getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 }) & (new (...args: any[]) => {
     name: string;
     setName(name: string): void;
@@ -523,7 +517,7 @@ export declare const Material: {
     readonly slug: string;
     readonly isSystemEntity: boolean;
     getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
-    getEntityByName(entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/entity/in_memory").InMemoryEntity;
+    getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 }) & {
     new (...args: any[]): {
         readonly isDefault: boolean;
@@ -546,10 +540,10 @@ export declare const Material: {
         readonly slug: string;
         readonly isSystemEntity: boolean;
         getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
-        getEntityByName(entities: import("@mat3ra/code/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/entity/in_memory").InMemoryEntity;
+        getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
     };
     readonly defaultConfig: object | null;
     createDefault(): any;
-} & typeof import("@mat3ra/code/entity/in_memory").InMemoryEntity;
+} & typeof import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 export type Material = InstanceType<typeof Material>;
 export {};
