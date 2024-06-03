@@ -9,6 +9,7 @@ class TerminationPair(BaseModel):
     substrate_termination: Termination
 
     def __str__(self):
+        # return str(self.to_tuple_of_str())
         return f"({self.film_termination}, {self.substrate_termination})"
 
     def __repr__(self):
@@ -24,7 +25,7 @@ class TerminationPair(BaseModel):
         return cls(film_termination=film_termination, substrate_termination=substrate_termination)
 
     def to_tuple_of_str(self) -> Tuple[str, str]:
-        return f"{self.film_termination}", f"{self.substrate_termination}"
+        return str(self.film_termination), str(self.substrate_termination)
 
     @classmethod
     def from_pymatgen(cls, termination_pair: Tuple[str, str]):
