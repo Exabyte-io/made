@@ -1,9 +1,7 @@
 "use strict";
-var __importDefault =
-    (this && this.__importDefault) ||
-    function (mod) {
-        return mod && mod.__esModule ? mod : { default: mod };
-    };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LatticeBravais = void 0;
 const constants_1 = __importDefault(require("../constants"));
@@ -18,24 +16,14 @@ class LatticeBravais {
      * Create a Bravais lattice.
      */
     constructor(config) {
-        const {
-            a = 1, // default lattice is cubic with unity in edge sizes
-            b = a,
-            c = a,
-            alpha = 90,
-            beta = alpha,
-            gamma = alpha,
-            // if we do not know what lattice type this is => set to TRI
-            type = "TRI",
-            units = {
-                length: "angstrom",
-                angle: "degree",
-            },
-        } = config;
-        const k =
-            constants_1.default.units.bohr === units.length
-                ? constants_1.default.coefficients.BOHR_TO_ANGSTROM
-                : 1;
+        const { a = 1, // default lattice is cubic with unity in edge sizes
+        b = a, c = a, alpha = 90, beta = alpha, gamma = alpha, 
+        // if we do not know what lattice type this is => set to TRI
+        type = "TRI", units = {
+            length: "angstrom",
+            angle: "degree",
+        }, } = config;
+        const k = constants_1.default.units.bohr === units.length ? constants_1.default.coefficients.BOHR_TO_ANGSTROM : 1;
         this.a = a * k;
         this.b = b * k;
         this.c = c * k;
@@ -51,15 +39,7 @@ class LatticeBravais {
     /**
      * Create a Bravais lattice from vectors.
      */
-    static fromVectors({
-        a,
-        b,
-        c,
-        alat = 1,
-        units = "angstrom",
-        type = "TRI",
-        skipRounding = false,
-    }) {
+    static fromVectors({ a, b, c, alat = 1, units = "angstrom", type = "TRI", skipRounding = false, }) {
         const roundValue = skipRounding ? (x) => x : this._roundValue;
         return new this.prototype.constructor({
             // @ts-ignore
@@ -99,11 +79,7 @@ class LatticeBravais {
     get editables() {
         var _a;
         const object = {};
-        const editablesList =
-            (_a = types_1.LATTICE_TYPE_CONFIGS.find((entry) => entry.code === this.type)) ===
-                null || _a === void 0
-                ? void 0
-                : _a.editables;
+        const editablesList = (_a = types_1.LATTICE_TYPE_CONFIGS.find((entry) => entry.code === this.type)) === null || _a === void 0 ? void 0 : _a.editables;
         // ["a", "gamma"] => {a: true, gamma: true}
         if (editablesList) {
             editablesList.forEach((element) => {

@@ -42,7 +42,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
     new (...config: any[]): {
         _json: MaterialSchemaJSON;
         toJSON(): MaterialJSON;
-        src: FileSourceSchema;
+        src: FileSourceSchema | undefined;
         updateFormula(): void;
         /**
          * Gets Bolean value for whether or not a material is non-periodic vs periodic.
@@ -92,6 +92,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
          */
         readonly formula: string;
         readonly unitCellFormula: string;
+        unsetFileProps(): void;
         /**
          * @param textOrObject Basis text or JSON object.
          * @param format Format (xyz, etc.)
@@ -241,12 +242,13 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
             };
         };
     };
+    constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): FileSourceSchema;
 } & T;
 export declare const Material: {
     new (...config: any[]): {
         _json: MaterialSchemaJSON;
         toJSON(): MaterialJSON;
-        src: FileSourceSchema;
+        src: FileSourceSchema | undefined;
         updateFormula(): void;
         /**
          * Gets Bolean value for whether or not a material is non-periodic vs periodic.
@@ -296,6 +298,7 @@ export declare const Material: {
          */
         readonly formula: string;
         readonly unitCellFormula: string;
+        unsetFileProps(): void;
         /**
          * @param textOrObject Basis text or JSON object.
          * @param format Format (xyz, etc.)
@@ -445,6 +448,7 @@ export declare const Material: {
             };
         };
     };
+    constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): FileSourceSchema;
 } & (new (...args: any[]) => {
     consistencyChecks: object[];
     addConsistencyChecks(array: object[]): void;
@@ -476,12 +480,12 @@ export declare const Material: {
     prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
-    setProps(json?: AnyObject | undefined): any; /**
-     * Returns a copy of the material with conventional cell constructed instead of primitive.
-     */
+    setProps(json?: AnyObject | undefined): any;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
-    toJSONQuick(exclude?: string[] | undefined): AnyObject;
+    toJSONQuick(exclude?: string[] | undefined): AnyObject; /**
+     * Returns a copy of the material with conventional cell constructed instead of primitive.
+     */
     clone(extraContext?: object | undefined): any;
     validate(): void;
     clean(config: AnyObject): AnyObject;
@@ -507,7 +511,10 @@ export declare const Material: {
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
-    clean(config: AnyObject): AnyObject;
+    clean(config: AnyObject): AnyObject; /**
+     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
+     * @returns Array of checks results
+     */
     isValid(): boolean;
     id: string;
     readonly cls: string;
