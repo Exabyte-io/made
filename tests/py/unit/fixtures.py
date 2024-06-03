@@ -41,6 +41,7 @@ INTERFACE_PROPERTIES_MOCK = {
     "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
     "strain": Strain([[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, 0.0], [-0.0, 0.0, -0.0]]),
     "von_mises_strain": 0.001,
+    "mean_abs_strain": 0.00105,
     "termination": (INTERFACE_TERMINATION_PAIR.film_termination, INTERFACE_TERMINATION_PAIR.substrate_termination),
 }
 INTERFACE_PROPERTIES_JSON = {
@@ -49,12 +50,13 @@ INTERFACE_PROPERTIES_JSON = {
     "strain": [[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, 0.0], [-0.0, 0.0, -0.0]],
     "von_mises_strain": 0.001,
     "termination": INTERFACE_TERMINATION_AS_STR,
-    # "mean_abs_strain": 0.00105,
+    "mean_abs_strain": 0.00105,
 }
 
 
 # Add properties to interface structure
 INTERFACE_STRUCTURE.interface_properties = INTERFACE_PROPERTIES_MOCK
+INTERFACE_NAME = "Cu4(001)-Si8(001), Interface, Strain 0.062%"
 
 # TODO: Use fixtures package when available
 SI_SUPERCELL_2X2X1 = {
