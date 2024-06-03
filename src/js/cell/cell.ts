@@ -1,8 +1,10 @@
-import MathModule, { math } from "@mat3ra/code/dist/js/math";
+import CodeMath from "@mat3ra/code/dist/js/math";
 
 import { Coordinate } from "../basis/types";
 import constants from "../constants";
 import { Vector, VectorsAsArray } from "../lattice/types";
+
+const { math } = CodeMath;
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;
@@ -10,7 +12,7 @@ const INV = math.inv;
 // @ts-ignore
 const MATRIX_MULT = (...args) => MULT(...args.map((x) => MATRIX(x))).toArray();
 
-type Point = Coordinate | MathModule.Matrix | MathModule.MathType;
+type Point = Coordinate | CodeMath.Matrix | CodeMath.MathType;
 
 /*
  * Cell represents a unit cell in geometrical form: 3x3 matrix where rows are cell vectors.
@@ -64,7 +66,7 @@ export class Cell {
     /**
      * Convert a point (in crystal coordinates) to cartesian.
      */
-    convertPointToCartesian(point: Point): MathModule.MathType {
+    convertPointToCartesian(point: Point): CodeMath.MathType {
         return MULT(point, this.vectorsAsArray);
     }
 
