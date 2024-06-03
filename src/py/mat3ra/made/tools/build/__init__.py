@@ -1,17 +1,22 @@
 from typing import List, Optional, Any
 
+from pydantic import BaseModel
+
 from ...material import Material
 
 
-class BaseBuilder:
-    _ConfigurationType: Any = Any
-    _BuildParametersType: Any = Any
+class BaseBuilder(BaseModel):
+    build_parameters: Any = None
+    _BuildParametersType: Any = None
     _DefaultBuildParameters: Any = None
-    _GeneratedItemType: Any = Any
-    _SelectorParametersType: Any = Any
-    _PostProcessParametersType: Any = Any
 
-    def __init__(self, build_parameters: _BuildParametersType = None) -> None:
+    _ConfigurationType: Any = Any
+    _GeneratedItemType: Any = Any
+    _SelectorParametersType: Any = None
+    _PostProcessParametersType: Any = None
+
+    def __init__(self, build_parameters: _BuildParametersType = None):
+        super().__init__(build_parameters=build_parameters)
         self.build_parameters = build_parameters or self._DefaultBuildParameters
         self.__generated_items: List[List[BaseBuilder._GeneratedItemType]] = []
         self.__configurations: List[BaseBuilder._ConfigurationType] = []
@@ -29,12 +34,12 @@ class BaseBuilder:
         return items
 
     def _select(
-        self, items: List[_GeneratedItemType], selector_parameters: Optional[_SelectorParametersType] = None
+        self, items: List[_GeneratedItemType], selector_parameters: Optional[_SelectorParametersType]
     ) -> List[_GeneratedItemType]:
         return items
 
     def _post_process(
-        self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType] = None
+        self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType]
     ) -> List[Material]:
         return [Material(self._convert_generated_item(item)) for item in items]
 
