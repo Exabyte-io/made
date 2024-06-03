@@ -20,10 +20,10 @@ export namespace Made {
         export { ArrayWithIds };
     }
 }
-import { coefficients } from "@mat3ra/code/constants";
-import { tolerance } from "@mat3ra/code/constants";
-import { units } from "@mat3ra/code/constants";
-import { ATOMIC_COORD_UNITS } from "@mat3ra/code/constants";
+import { coefficients } from "@mat3ra/code/dist/js/constants";
+import { tolerance } from "@mat3ra/code/dist/js/constants";
+import { units } from "@mat3ra/code/dist/js/constants";
+import { ATOMIC_COORD_UNITS } from "@mat3ra/code/dist/js/constants";
 import MadeMath from "./math";
 import { Material } from "./material";
 import { MaterialMixin } from "./material";
