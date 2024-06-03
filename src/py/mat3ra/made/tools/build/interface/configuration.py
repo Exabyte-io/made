@@ -1,9 +1,11 @@
+from pydantic import BaseModel
+
 from .termination_pair import TerminationPair
 from ..slab import Termination
-from ..slab.configuration import BaseSlabConfiguration, SlabConfiguration
+from ..slab.configuration import SlabConfiguration
 
 
-class InterfaceConfiguration(BaseSlabConfiguration):
+class InterfaceConfiguration(BaseModel):
     film_configuration: SlabConfiguration
     substrate_configuration: SlabConfiguration
     film_termination: Termination
