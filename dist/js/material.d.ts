@@ -476,16 +476,20 @@ export declare const Material: {
     metadata: object;
     updateMetadata(object: object): void;
     _json: AnyObject;
+    /**
+     * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
+     */
     prop<T_2 = undefined>(name: string, defaultValue: T_2): T_2;
+    /**
+     * Returns material in POSCAR format. Pass `true` to ignore original poscar source and re-serialize.
+     */
     prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
     setProps(json?: AnyObject | undefined): any;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
-    toJSONQuick(exclude?: string[] | undefined): AnyObject; /**
-     * Returns a copy of the material with conventional cell constructed instead of primitive.
-     */
+    toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
     clean(config: AnyObject): AnyObject;
@@ -511,10 +515,7 @@ export declare const Material: {
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
-    clean(config: AnyObject): AnyObject; /**
-     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
-     * @returns Array of checks results
-     */
+    clean(config: AnyObject): AnyObject;
     isValid(): boolean;
     id: string;
     readonly cls: string;
