@@ -17,8 +17,6 @@ class BaseSlabConfiguration(BaseModel):
 
 
 class SlabConfiguration(BaseSlabConfiguration):
-    """Class to generate slabs and manage different terminations."""
-
     thickness: int = 1
     vacuum: float = 0.5
     xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
