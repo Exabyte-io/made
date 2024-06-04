@@ -61,7 +61,7 @@ def filter_by_label(material: Material, label: Union[int, str]):
     """
     labels = material.basis["labels"]
 
-    indices = [idx for idx, l in enumerate(labels) if l["value"] == label]
+    indices = [idx for idx, label in enumerate(labels) if label["value"] == label]
     material.basis["coordinates"] = [coord for idx, coord in enumerate(material.basis["coordinates"]) if idx in indices]
     material.basis["elements"] = [element for idx, element in enumerate(material.basis["elements"]) if idx in indices]
 

@@ -49,7 +49,6 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> P
     elements = [element["value"] for element in basis["elements"]]
     coordinates = [coord["value"] for coord in basis["coordinates"]]
     labels = [label["value"] for label in basis.get("labels", [])]
-    print("labels", labels)
     # Assuming that the basis units are fractional since it's a crystal basis
     coords_are_cartesian = "units" in basis and basis["units"].lower() == "angstrom"
 
