@@ -1,5 +1,5 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { AnyObject } from "@mat3ra/code/dist/js/entity/in_memory";
+import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { ConstrainedBasis } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
@@ -483,9 +483,7 @@ export declare const Material: {
     setProps(json?: AnyObject | undefined): any;
     toJSON(exclude?: string[] | undefined): AnyObject;
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
-    toJSONQuick(exclude?: string[] | undefined): AnyObject; /**
-     * Returns a copy of the material with conventional cell constructed instead of primitive.
-     */
+    toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
     clean(config: AnyObject): AnyObject;
@@ -511,10 +509,7 @@ export declare const Material: {
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
     validate(): void;
-    clean(config: AnyObject): AnyObject; /**
-     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
-     * @returns Array of checks results
-     */
+    clean(config: AnyObject): AnyObject;
     isValid(): boolean;
     id: string;
     readonly cls: string;

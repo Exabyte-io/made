@@ -35,7 +35,7 @@ declare const _default: {
     uninitialized: any;
     version: string;
     expression: import("mathjs").MathNode;
-    json: mathjs.MathJsJson;
+    json: import("mathjs").MathJsJson;
     config: (options: any) => void;
     lsolve(L: import("mathjs").Matrix | import("mathjs").MathArray, b: import("mathjs").Matrix | import("mathjs").MathArray): import("mathjs").Matrix | import("mathjs").MathArray;
     lup(A?: import("mathjs").Matrix | import("mathjs").MathArray | undefined): import("mathjs").MathArray;
@@ -184,7 +184,7 @@ declare const _default: {
     re(x: number | import("mathjs").Matrix | import("mathjs").BigNumber | import("mathjs").Complex | import("mathjs").MathArray): number | import("mathjs").Matrix | import("mathjs").BigNumber | import("mathjs").MathArray;
     bignumber(x?: string | number | boolean | import("mathjs").Matrix | import("mathjs").MathArray | undefined): import("mathjs").BigNumber;
     boolean(x: string | number | boolean | import("mathjs").Matrix | import("mathjs").MathArray): boolean | import("mathjs").Matrix | import("mathjs").MathArray;
-    chain(value?: any): any;
+    chain(value?: any): import("mathjs").MathJsChain;
     complex(arg?: string | import("mathjs").Complex | import("mathjs").MathArray | import("mathjs").PolarCoordinates | undefined): import("mathjs").Complex;
     complex(re: number, im: number): import("mathjs").Complex;
     fraction(numerator: string | number | import("mathjs").Matrix | import("mathjs").MathArray, denominator?: string | number | import("mathjs").Matrix | import("mathjs").MathArray | undefined): import("mathjs").Matrix | import("mathjs").Fraction | import("mathjs").MathArray;
