@@ -56,6 +56,7 @@ def test_from_poscar():
 
 def test_to_ase():
     material = Material.create(Material.default_config)
+    material.basis["labels"] = [{"id": 0, "value": 0}, {"id": 1, "value": 1}]
     ase_atoms = to_ase(material)
     assert isinstance(ase_atoms, Atoms)
     assert np.allclose(
@@ -68,10 +69,13 @@ def test_to_ase():
     )
     assert ase_atoms.get_chemical_symbols() == ["Si", "Si"]
     assert np.allclose(ase_atoms.get_scaled_positions().tolist(), [[0.0, 0.0, 0.0], [0.25, 0.25, 0.25]])
+    assert ase_atoms.get_tags().tolist() == [0, 1]
 
 
 def test_from_ase():
     ase_atoms = bulk("Si")
+    ase_atoms.set_tags([0, 1])
     material_data = from_ase(ase_atoms)
     assert material_data["lattice"]["a"] == 3.839589822
     assert material_data["lattice"]["alpha"] == 60
+    assert material_data["basis"]["labels"] == [{"id": 0, "value": 0}, {"id": 1, "value": 1}]
