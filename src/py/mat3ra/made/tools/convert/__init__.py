@@ -117,7 +117,6 @@ def from_pymatgen(structure: Union[PymatgenStructure, PymatgenInterface]) -> Dic
         metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=NumpyNDArrayRoundEncoder))
 
         interface_labels = extract_interface_labels_from_pymatgen(structure)
-        print(f"interface_labels: {interface_labels}")
         basis["labels"] = interface_labels if interface_labels is not None else []
 
     material_data = {
