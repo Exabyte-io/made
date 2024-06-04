@@ -205,7 +205,11 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     """
     # TODO: check that atomic labels/tags are properly handled
     structure = AseAtomsAdaptor.get_structure(ase_atoms)
-    return from_pymatgen(structure)
+    material = from_pymatgen(structure)
+
+    if ase_atoms.get_tags().any():
+        material["basis"]["labels"] = [{"id": i, "value": tag} for i, tag in enumerate(ase_atoms.get_tags())]
+    return material
 
 
 def decorator_convert_material_args_kwargs_to_atoms(func: Callable) -> Callable:
