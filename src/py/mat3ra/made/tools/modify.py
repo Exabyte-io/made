@@ -4,10 +4,10 @@ from typing import Union
 
 from ase import Atoms
 from ase.optimize import BFGS
+from mat3ra.made.material import Material
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
-from mat3ra.made.material import Material
 from .calculate import CalculatorEnum, calculator_by_name_map
 from .convert import (
     decorator_convert_material_args_kwargs_to_atoms,

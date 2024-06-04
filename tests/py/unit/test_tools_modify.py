@@ -1,8 +1,7 @@
 from ase.build import bulk
-from mat3ra.made.tools.modify import filter_by_label
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase
+from mat3ra.made.tools.modify import filter_by_label
 
 
 def test_filter_by_label():

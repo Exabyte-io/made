@@ -2,23 +2,22 @@ import inspect
 import json
 from functools import wraps
 from typing import Any, Callable, Dict, Union
-from pymatgen.io.ase import AseAtomsAdaptor
-from pymatgen.io.vasp.inputs import Poscar
 
 from mat3ra.made.material import Material
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
-
+from pymatgen.io.ase import AseAtomsAdaptor
+from pymatgen.io.vasp.inputs import Poscar
 
 from .utils import (
-    PymatgenLattice,
-    PymatgenStructure,
-    PymatgenInterface,
-    PymatgenSlab,
-    ASEAtoms,
-    label_pymatgen_slab_termination,
-    extract_interface_labels_from_pymatgen,
     INTERFACE_LABELS_MAP,
+    ASEAtoms,
+    PymatgenInterface,
+    PymatgenLattice,
+    PymatgenSlab,
+    PymatgenStructure,
+    extract_interface_labels_from_pymatgen,
+    label_pymatgen_slab_termination,
 )
 
 
