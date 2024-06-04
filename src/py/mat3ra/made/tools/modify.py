@@ -7,6 +7,7 @@ from ase.optimize import BFGS
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
+from mat3ra.made.material import Material
 from .calculate import CalculatorEnum, calculator_by_name_map
 from .convert import (
     decorator_convert_material_args_kwargs_to_atoms,
@@ -47,19 +48,24 @@ class RelaxationSettings:
         )
 
 
-@decorator_convert_material_args_kwargs_to_atoms
-def filter_by_label(atoms: Atoms, label: Union[int, str]):
+def filter_by_label(material: Material, label: Union[int, str]):
     """
-    Filter out only atoms corresponding to the label/tag.
+    Filter out only atoms corresponding to the label.
 
     Args:
-        atoms (ase.Atoms): The Atoms object to filter.
+        material (Material): The material object to filter.
         label (int|str): The tag/label to filter by.
 
     Returns:
-        ase.Atoms: The filtered Atoms object.
+        Material: The filtered material object.
     """
-    return atoms[atoms.get_tags() == label]
+    labels = material.basis["labels"]
+
+    indices = [idx for idx, l in enumerate(labels) if l["value"] == label]
+    material.basis["coordinates"] = [coord for idx, coord in enumerate(material.basis["coordinates"]) if idx in indices]
+    material.basis["elements"] = [element for idx, element in enumerate(material.basis["elements"]) if idx in indices]
+
+    return material
 
 
 @decorator_convert_material_args_kwargs_to_structure
