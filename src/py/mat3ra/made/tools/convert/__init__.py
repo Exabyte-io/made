@@ -2,26 +2,27 @@ import inspect
 import json
 from functools import wraps
 from typing import Any, Callable, Dict, Union
-
-from ase import Atoms
-from mat3ra.utils.mixins import RoundNumericValuesMixin
-from mat3ra.utils.object import NumpyNDArrayRoundEncoder
-from pymatgen.core.interface import Interface, label_termination
-from pymatgen.core.structure import Lattice, Structure
-from pymatgen.core.surface import Slab
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
 
-from ..material import Material
-
-PymatgenStructure = Structure
-PymatgenSlab = Slab
-PymatgenInterface = Interface
-ASEAtoms = Atoms
-label_pymatgen_slab_termination = label_termination
+from mat3ra.made.material import Material
+from mat3ra.utils.mixins import RoundNumericValuesMixin
+from mat3ra.utils.object import NumpyNDArrayRoundEncoder
 
 
-def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> Structure:
+from .utils import (
+    PymatgenLattice,
+    PymatgenStructure,
+    PymatgenInterface,
+    PymatgenSlab,
+    ASEAtoms,
+    label_pymatgen_slab_termination,
+    extract_interface_labels_from_pymatgen,
+    INTERFACE_LABELS_MAP,
+)
+
+
+def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> PymatgenStructure:
     """
     Converts material object in ESSE format to a pymatgen Structure object.
 
@@ -43,27 +44,29 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> S
     alpha = lattice_params["alpha"]
     beta = lattice_params["beta"]
     gamma = lattice_params["gamma"]
-    lattice = Lattice.from_parameters(a, b, c, alpha, beta, gamma)
+    lattice = PymatgenLattice.from_parameters(a, b, c, alpha, beta, gamma)
 
     basis = material_data["basis"]
     elements = [element["value"] for element in basis["elements"]]
     coordinates = [coord["value"] for coord in basis["coordinates"]]
     labels = [label["value"] for label in basis.get("labels", [])]
-
+    print("labels", labels)
     # Assuming that the basis units are fractional since it's a crystal basis
     coords_are_cartesian = "units" in basis and basis["units"].lower() == "angstrom"
 
-    if "labels" in inspect.signature(Structure.__init__).parameters:
-        structure = Structure(lattice, elements, coordinates, coords_are_cartesian=coords_are_cartesian, labels=labels)
+    if "labels" in inspect.signature(PymatgenStructure.__init__).parameters:
+        structure = PymatgenStructure(
+            lattice, elements, coordinates, coords_are_cartesian=coords_are_cartesian, labels=labels
+        )
     else:
         # Passing labels does not work for pymatgen `2023.6.23` supporting py3.8
         print(f"labels: {labels}. Not passing labels to pymatgen.")
-        structure = Structure(lattice, elements, coordinates, coords_are_cartesian=coords_are_cartesian)
+        structure = PymatgenStructure(lattice, elements, coordinates, coords_are_cartesian=coords_are_cartesian)
 
     return structure
 
 
-def from_pymatgen(structure: Union[Structure, Interface]) -> Dict[str, Any]:
+def from_pymatgen(structure: Union[PymatgenStructure, PymatgenInterface]) -> Dict[str, Any]:
     """
     Converts a pymatgen Structure object to a material object in ESSE format.
 
@@ -115,6 +118,10 @@ def from_pymatgen(structure: Union[Structure, Interface]) -> Dict[str, Any]:
                 interface_props[key] = str(value)
         metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=NumpyNDArrayRoundEncoder))
 
+        interface_labels = extract_interface_labels_from_pymatgen(structure)
+        print(f"interface_labels: {interface_labels}")
+        basis["labels"] = interface_labels if interface_labels is not None else []
+
     material_data = {
         "name": structure.formula,
         "basis": basis,
@@ -157,11 +164,11 @@ def from_poscar(poscar: str) -> Dict[str, Any]:
     Returns:
         dict: A dictionary containing the material information in ESSE format.
     """
-    structure = Structure.from_str(poscar, "poscar")
+    structure = PymatgenStructure.from_str(poscar, "poscar")
     return from_pymatgen(structure)
 
 
-def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> Atoms:
+def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAtoms:
     """
     Converts material object in ESSE format to an ASE Atoms object.
 
@@ -171,12 +178,22 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> Atoms:
     Returns:
         Any: An ASE Atoms object.
     """
-    # TODO: check that atomic labels are properly handled
-    structure = to_pymatgen(material_or_material_data)
-    return AseAtomsAdaptor.get_atoms(structure)
+    if isinstance(material_or_material_data, Material):
+        material_config = material_or_material_data.to_json()
+    else:
+        material_config = material_or_material_data
+    structure = to_pymatgen(material_config)
+    atoms = AseAtomsAdaptor.get_atoms(structure)
+
+    if "labels" in material_config["basis"]:
+        labels = material_config["basis"]["labels"]
+        labels_list = [label["value"] for label in labels if "value" in label]
+        atoms.set_tags(labels_list)
+
+    return atoms
 
 
-def from_ase(ase_atoms: Atoms) -> Dict[str, Any]:
+def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     """
     Converts an ASE Atoms object to a material object in ESSE format.
 
@@ -230,8 +247,8 @@ def decorator_convert_material_args_kwargs_to_structure(func: Callable) -> Calla
 
 
 def convert_atoms_or_structure_to_material(item):
-    if isinstance(item, Structure):
+    if isinstance(item, PymatgenStructure):
         return from_pymatgen(item)
-    elif isinstance(item, Atoms):
+    elif isinstance(item, ASEAtoms):
         return from_ase(item)
     return item
