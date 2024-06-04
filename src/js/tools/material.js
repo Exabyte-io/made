@@ -1,4 +1,4 @@
-import math from "mathjs";
+import { math } from "@mat3ra/code/dist/js/math";
 
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { Lattice } from "../lattice/lattice";

@@ -1,5 +1,5 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { AnyObject } from "@mat3ra/code/dist/js/entity/in_memory";
+import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import {
     ConsistencyCheck,
     DerivedPropertiesSchema,

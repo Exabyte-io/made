@@ -83,7 +83,7 @@ export declare class Lattice extends LatticeBravais implements LatticeSchema {
         beta: number;
         gamma: number;
         units: {
-            length?: "bohr" | "angstrom" | undefined;
+            length?: "angstrom" | "bohr" | undefined;
             angle?: "degree" | "radian" | undefined;
         };
         type: "CUB" | "BCC" | "FCC" | "TET" | "MCL" | "ORC" | "ORCC" | "ORCF" | "ORCI" | "HEX" | "BCT" | "TRI" | "MCLC" | "RHL";
