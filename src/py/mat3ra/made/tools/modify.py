@@ -22,13 +22,8 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
     labels = material.basis["labels"]
     new_material = material.clone()
     indices = [idx for idx, _label in enumerate(labels) if _label["value"] == label]
-    new_material.basis["coordinates"] = [
-        coord for idx, coord in enumerate(material.basis["coordinates"]) if idx in indices
-    ]
-    new_material.basis["elements"] = [
-        element for idx, element in enumerate(material.basis["elements"]) if idx in indices
-    ]
-    new_material.basis["labels"] = [label for idx, label in enumerate(labels) if idx in indices]
+    for key in ["coordinates", "elements", "labels"]:
+        new_material.basis[key] = [item for idx, item in enumerate(material.basis[key]) if idx in indices]
     return new_material
 
 
