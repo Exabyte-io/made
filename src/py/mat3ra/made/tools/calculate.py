@@ -1,8 +1,11 @@
 from ase import Atoms
 from ase.calculators.calculator import Calculator
+from ase.calculators.emt import EMT
 
 from .analyze import get_surface_area
-from .convert import decorator_convert_material_args_kwargs_to_atoms
+from .convert import decorator_convert_material_args_kwargs_to_atoms, from_ase, to_ase
+from .modify import filter_by_label
+from ..material import Material
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -83,11 +86,11 @@ def calculate_adhesion_energy(interface: Atoms, substrate_slab: Atoms, film_slab
 @decorator_convert_material_args_kwargs_to_atoms
 def calculate_interfacial_energy(
     interface: Atoms,
-    substrate_slab: Atoms,
-    substrate_bulk: Atoms,
-    film_slab: Atoms,
-    film_bulk: Atoms,
-    calculator: Calculator,
+    substrate_slab: Atoms = None,
+    substrate_bulk: Atoms = None,
+    film_slab: Atoms = None,
+    film_bulk: Atoms = None,
+    calculator: Calculator = EMT(),
 ):
     """
     Calculate the interfacial energy.
@@ -105,6 +108,12 @@ def calculate_interfacial_energy(
     Returns:
         float: The interfacial energy of the interface.
     """
+    interface_material = Material(from_ase(interface))
+    substrate_slab = to_ase(filter_by_label(interface_material, 0)) if substrate_slab is None else substrate_slab
+    film_slab = to_ase(filter_by_label(interface_material, 1)) if film_slab is None else film_slab
+
+    substrate_bulk = substrate_slab.copy() if substrate_bulk is None else substrate_bulk
+    film_bulk = film_slab.copy() if film_bulk is None else film_bulk
 
     surface_energy_substrate = calculate_surface_energy(substrate_slab, substrate_bulk, calculator)
     surface_energy_film = calculate_surface_energy(film_slab, film_bulk, calculator)
