@@ -205,7 +205,7 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     material = from_pymatgen(structure)
 
     if ase_atoms.get_tags().any():
-        material["basis"]["labels"] = [{"id": i, "value": tag} for i, tag in enumerate(ase_atoms.get_tags())]
+        material["basis"]["labels"] = [{"id": i, "value": int(tag)} for i, tag in enumerate(ase_atoms.get_tags())]
     return material
 
 
