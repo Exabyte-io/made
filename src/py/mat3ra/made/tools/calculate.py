@@ -2,10 +2,10 @@ from ase import Atoms
 from ase.calculators.calculator import Calculator
 from ase.calculators.emt import EMT
 
+from ..material import Material
 from .analyze import get_surface_area
 from .convert import decorator_convert_material_args_kwargs_to_atoms, from_ase, to_ase
 from .modify import filter_by_label
-from ..material import Material
 
 
 @decorator_convert_material_args_kwargs_to_atoms

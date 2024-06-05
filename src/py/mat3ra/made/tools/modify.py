@@ -1,12 +1,10 @@
 from typing import Union
 
+from mat3ra.made.material import Material
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
-from mat3ra.made.material import Material
-from .convert import (
-    decorator_convert_material_args_kwargs_to_structure,
-)
+from .convert import decorator_convert_material_args_kwargs_to_structure
 from .utils import translate_to_bottom_pymatgen_structure
 
 
