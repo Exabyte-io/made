@@ -16,8 +16,9 @@ from .utils import (
     PymatgenLattice,
     PymatgenSlab,
     PymatgenStructure,
-    extract_interface_labels_from_pymatgen,
     label_pymatgen_slab_termination,
+    map_array_to_array_with_id_value,
+    map_array_with_id_value_to_array,
 )
 
 
@@ -116,8 +117,8 @@ def from_pymatgen(structure: Union[PymatgenStructure, PymatgenInterface]) -> Dic
                 interface_props[key] = str(value)
         metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=NumpyNDArrayRoundEncoder))
 
-        interface_labels = extract_interface_labels_from_pymatgen(structure)
-        basis["labels"] = interface_labels if interface_labels is not None else []
+        interface_labels = list(map(lambda s: s.get("interface_label"), structure.sites))
+        basis["labels"] = map_array_to_array_with_id_value(interface_labels, remove_none=True)
 
     material_data = {
         "name": structure.formula,
@@ -182,10 +183,9 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAto
     structure = to_pymatgen(material_config)
     atoms = AseAtomsAdaptor.get_atoms(structure)
 
-    if "labels" in material_config["basis"]:
-        labels = material_config["basis"]["labels"]
-        labels_list = [label["value"] for label in labels if "value" in label]
-        atoms.set_tags(labels_list)
+    atomic_labels = material_config["basis"].get("labels", [])
+    tags = map_array_with_id_value_to_array(atomic_labels)
+    atoms.set_tags(tags)
 
     return atoms
 
@@ -203,9 +203,7 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     # TODO: check that atomic labels/tags are properly handled
     structure = AseAtomsAdaptor.get_structure(ase_atoms)
     material = from_pymatgen(structure)
-
-    if ase_atoms.get_tags().any():
-        material["basis"]["labels"] = [{"id": i, "value": int(tag)} for i, tag in enumerate(ase_atoms.get_tags())]
+    material["basis"]["labels"] = map_array_to_array_with_id_value(ase_atoms.get_tags(), remove_none=True)
     return material
 
 
