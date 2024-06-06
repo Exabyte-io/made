@@ -49,6 +49,7 @@ class PointDefectBuilder(BaseBuilder):
         site_index = self.build_parameters.target_site
         pymatgen_structure = to_pymatgen(configuration.material)
         pymatgen_site = pymatgen_structure[site_index]
+        # TODO: create material with the substituting element and the site
         pymatgen_periodic_site = PeriodicSite(
             species=pymatgen_structure.species[site_index],
             coords=pymatgen_site.frac_coords,
@@ -60,6 +61,7 @@ class PointDefectBuilder(BaseBuilder):
         elif configuration.defect_type == PointDefectTypeEnum.SUBSTITUTION:
             defect = Substitution(pymatgen_structure, pymatgen_periodic_site, configuration.specie)
         elif configuration.defect_type == PointDefectTypeEnum.INTERSTITIAL:
+            # TODO: add direct position placement for interstitial
             defect = Interstitial(pymatgen_structure, pymatgen_periodic_site)
         else:
             raise ValueError(f"Unknown defect type: {configuration.defect_type}")
