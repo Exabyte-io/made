@@ -3,6 +3,7 @@ from typing import Optional, List, Literal, Union
 
 from pydantic import BaseModel
 
+from src.py.mat3ra.made.material import Material
 from ...build import BaseBuilder
 
 
@@ -12,8 +13,13 @@ class PointDefectTypeEnum(str, Enum):
     INTERSTITIAL = "interstitial"
 
 
-class PointDefectConfiguration(BaseModel):
-    # material: Material ?
+class BaseDefectConfiguration(BaseModel):
+    material: Material
+    # defect_type type can be an Enum for a specific defect class (for point defect, 2d defect, etc.)
+    defect_type: Union[PointDefectTypeEnum, None] = None
+
+
+class PointDefectConfiguration(BaseDefectConfiguration):
     defect_type: PointDefectTypeEnum = PointDefectTypeEnum.VACANCY
     # TODO: should come from Enum of elements
     specie: Optional[str] = None
