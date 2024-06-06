@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Any, Dict, List
 
 from ase import Atoms
 from pymatgen.core.interface import Interface, label_termination
@@ -15,13 +15,13 @@ label_pymatgen_slab_termination = label_termination
 INTERFACE_LABELS_MAP = {"substrate": 0, "film": 1}
 
 
-def extract_interface_labels_from_pymatgen(
-    structure: type(PymatgenInterface),  # type: ignore
-) -> Union[List[Dict[str, int]], None]:
-    interface_labels = None
-    if any("interface_label" in site.properties for site in structure.sites):
-        interface_labels = [
-            {"id": idx, "value": INTERFACE_LABELS_MAP[site.properties["interface_label"]]}
-            for idx, site in enumerate(structure.sites)
-        ]
-    return interface_labels
+# TODO: move to a more general location
+def map_array_to_array_with_id_value(array: List[Any], remove_none: bool = False) -> List[Any]:
+    full_array = [{"id": i, "value": item} for i, item in enumerate(array)]
+    if remove_none:
+        return list(filter(lambda x: x["value"] is not None, full_array))
+    return full_array
+
+
+def map_array_with_id_value_to_array(array: List[Dict[str, Any]]) -> List[Any]:
+    return [item["value"] for item in array]
