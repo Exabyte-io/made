@@ -5,6 +5,7 @@ from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
 from .convert import decorator_convert_material_args_kwargs_to_structure
+from .convert.utils import filter_array_with_id_value_by_ids, filter_array_with_id_value_by_values
 from .utils import translate_to_bottom_pymatgen_structure
 
 
@@ -19,11 +20,12 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
     Returns:
         Material: The filtered material object.
     """
-    labels = material.basis["labels"]
     new_material = material.clone()
-    indices = [idx for idx, _label in enumerate(labels) if _label["value"] == label]
+    labels = material.basis["labels"]
+    filtered_labels = filter_array_with_id_value_by_values(labels, label)
+    filtered_label_ids = [item["id"] for item in filtered_labels]
     for key in ["coordinates", "elements", "labels"]:
-        new_material.basis[key] = [item for idx, item in enumerate(material.basis[key]) if idx in indices]
+        new_material.basis[key] = filter_array_with_id_value_by_ids(new_material.basis[key], filtered_label_ids)
     return new_material
 
 
