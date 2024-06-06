@@ -1,13 +1,12 @@
 from enum import Enum
-from typing import Optional, List, Literal, Union
+from typing import Optional, List, Union, Any
 
 from pydantic import BaseModel
 
-from src.py.mat3ra.made.material import Material
 from ...build import BaseBuilder
-from ...convert import PymatgenStructure, to_pymatgen
+from ...convert import PymatgenStructure, to_pymatgen, from_pymatgen
 from pymatgen.analysis.defects.core import Substitution, Vacancy, Interstitial
-from pymatgen.core import PeriodicSite, Species, Structure
+from pymatgen.core import PeriodicSite
 
 
 class PointDefectTypeEnum(str, Enum):
@@ -17,7 +16,8 @@ class PointDefectTypeEnum(str, Enum):
 
 
 class BaseDefectConfiguration(BaseModel):
-    material: Material
+    # TODO: fix arbitrary_types_allowed error and set Material class type
+    material: Any
     # defect_type type can be an Enum for a specific defect class (for point defect, 2d defect, etc.)
     defect_type: Union[PointDefectTypeEnum, None] = None
 
@@ -26,7 +26,6 @@ class PointDefectConfiguration(BaseDefectConfiguration):
     defect_type: PointDefectTypeEnum = PointDefectTypeEnum.VACANCY
     # TODO: should come from Enum of elements
     specie: Optional[str] = None
-    min_distance: Optional[float] = 0.0
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -34,7 +33,6 @@ class PointDefectBuilderParameters(BaseModel):
     # TODO: import coordinate type from ESSE
     position: Optional[List[int]] = None
     center_defect: bool = False
-    resize_cell_matrix: Union[List[int], Literal["auto"]] = "auto"
 
 
 class PointDefectBuilder(BaseBuilder):
@@ -44,10 +42,8 @@ class PointDefectBuilder(BaseBuilder):
 
     _BuildParametersType = PointDefectBuilderParameters
     _DefaultBuildParameters = PointDefectBuilderParameters()
-    _GeneratedItemType = PymatgenStructure
+    _GeneratedItemType: PymatgenStructure = PymatgenStructure
     _ConfigurationType = PointDefectConfiguration
-    _SelectorParametersType = None
-    _PostProcessParametersType = None
 
     def _generate(self, configuration: PointDefectConfiguration) -> List[_GeneratedItemType]:
         site_index = self.build_parameters.target_site
@@ -68,4 +64,8 @@ class PointDefectBuilder(BaseBuilder):
         else:
             raise ValueError(f"Unknown defect type: {configuration.defect_type}")
 
-        return [defect.defect_structure]
+        return [defect.centered_defect_structure if self.build_parameters.center_defect else defect.defect_structure]
+
+    @staticmethod
+    def _convert_generated_item(item: _GeneratedItemType):
+        return from_pymatgen(item)
