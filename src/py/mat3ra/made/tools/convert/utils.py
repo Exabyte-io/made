@@ -44,3 +44,7 @@ def filter_array_with_id_value_by_ids(
     return [item for item in array if item["id"] in int_ids]
     # Alternative implementation:
     # return list(filter(lambda x: x["id"] in ids, array))
+
+
+def are_arrays_equal_by_id_value(array1: List[Dict[str, Any]], array2: List[Dict[str, Any]]) -> bool:
+    return map_array_with_id_value_to_array(array1) == map_array_with_id_value_to_array(array2)
