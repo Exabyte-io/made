@@ -105,7 +105,7 @@ def from_pymatgen(structure: Union[PymatgenStructure, PymatgenInterface]) -> Dic
     }
 
     metadata = {"boundaryConditions": {"type": "pbc", "offset": 0}}
-
+    interface_labels = []
     # TODO: consider using Interface JSONSchema from ESSE when such created and adapt interface_properties accordingly.
     # Add interface properties to metadata according to pymatgen Interface as a JSON object
     if hasattr(structure, "interface_properties"):
@@ -117,8 +117,9 @@ def from_pymatgen(structure: Union[PymatgenStructure, PymatgenInterface]) -> Dic
                 interface_props[key] = str(value)
         metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=NumpyNDArrayRoundEncoder))
 
-        interface_labels = list(map(lambda s: s.get("interface_label"), structure.sites))
-        basis["labels"] = map_array_to_array_with_id_value(interface_labels, remove_none=True)
+        interface_labels = list(map(lambda s: INTERFACE_LABELS_MAP[s.properties["interface_label"]], structure.sites))
+
+    basis["labels"] = map_array_to_array_with_id_value(interface_labels, remove_none=True) if interface_labels else []
 
     material_data = {
         "name": structure.formula,
@@ -183,9 +184,10 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAto
     structure = to_pymatgen(material_config)
     atoms = AseAtomsAdaptor.get_atoms(structure)
 
-    atomic_labels = material_config["basis"].get("labels", [])
-    tags = map_array_with_id_value_to_array(atomic_labels)
-    atoms.set_tags(tags)
+    atomic_labels = material_config["basis"].get("labels") or None
+    if atomic_labels:
+        tags = map_array_with_id_value_to_array(atomic_labels)
+        atoms.set_tags(tags)
 
     return atoms
 
@@ -204,8 +206,8 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     structure = AseAtomsAdaptor.get_structure(ase_atoms)
     material = from_pymatgen(structure)
     ase_tags = map_array_to_array_with_id_value(ase_atoms.get_tags(), remove_none=True)
-    if ase_tags:
-        material["basis"]["labels"] = ase_tags
+
+    material["basis"]["labels"] = ase_tags if ase_tags else []
     return material
 
 
