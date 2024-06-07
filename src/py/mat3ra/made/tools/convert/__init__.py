@@ -205,9 +205,13 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     # TODO: check that atomic labels/tags are properly handled
     structure = AseAtomsAdaptor.get_structure(ase_atoms)
     material = from_pymatgen(structure)
-    ase_tags = map_array_to_array_with_id_value(ase_atoms.get_tags(), remove_none=True)
+    ase_tags = (
+        map_array_to_array_with_id_value(ase_atoms.arrays["tags"].copy(), remove_none=True)
+        if "tags" in ase_atoms.arrays
+        else []
+    )
 
-    material["basis"]["labels"] = ase_tags if ase_tags else []
+    material["basis"]["labels"] = ase_tags
     return material
 
 
