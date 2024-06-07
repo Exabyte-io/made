@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel
 from pymatgen.analysis.defects.core import Substitution, Vacancy, Interstitial
 from pymatgen.core import PeriodicSite
@@ -5,6 +7,7 @@ from pymatgen.core import PeriodicSite
 from ...build import BaseBuilder
 from ...convert import PymatgenStructure, to_pymatgen, from_pymatgen
 from .enums import PointDefectTypeEnum
+from . import PointDefectConfiguration
 
 
 class PointDefectBuilderParameters(BaseModel):
