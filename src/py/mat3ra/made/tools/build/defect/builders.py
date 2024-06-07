@@ -7,7 +7,7 @@ from pymatgen.core import PeriodicSite
 from ...build import BaseBuilder
 from ...convert import PymatgenStructure, to_pymatgen, from_pymatgen
 from .enums import PointDefectTypeEnum
-from . import PointDefectConfiguration
+from .configuration import PointDefectConfiguration
 
 
 class PointDefectBuilderParameters(BaseModel):
