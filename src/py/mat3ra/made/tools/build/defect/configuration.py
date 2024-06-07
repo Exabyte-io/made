@@ -7,7 +7,7 @@ from .enums import PointDefectTypeEnum
 
 class BaseDefectConfiguration(BaseModel):
     # TODO: fix arbitrary_types_allowed error and set Material class type
-    material: Any
+    material: Any = None
     # defect_type type can be an Enum for a specific defect class (for point defect, 2d defect, etc.)
     defect_type: Union[PointDefectTypeEnum, None] = None
 
