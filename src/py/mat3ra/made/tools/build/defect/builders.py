@@ -1,8 +1,12 @@
 from typing import List
 
 from pydantic import BaseModel
-from pymatgen.analysis.defects.core import PymatgenSubstitution, PymatgenVacancy, PymatgenInterstitial
-from pymatgen.core import PymatgenPeriodicSite
+from pymatgen.analysis.defects.core import (
+    Substitution as PymatgenSubstitution,
+    Vacancy as PymatgenVacancy,
+    Interstitial as PymatgenInterstitial,
+)
+from pymatgen.core import PeriodicSite as PymatgenPeriodicSite
 
 from ...build import BaseBuilder
 from ...convert import PymatgenStructure, to_pymatgen
