@@ -2,11 +2,11 @@ from enum import Enum
 from typing import Optional, List, Union, Any
 
 from pydantic import BaseModel
+from pymatgen.analysis.defects.core import Substitution, Vacancy, Interstitial
+from pymatgen.core import PeriodicSite
 
 from ...build import BaseBuilder
 from ...convert import PymatgenStructure, to_pymatgen, from_pymatgen
-from pymatgen.analysis.defects.core import Substitution, Vacancy, Interstitial
-from pymatgen.core import PeriodicSite
 
 
 class PointDefectTypeEnum(str, Enum):
@@ -26,12 +26,13 @@ class PointDefectConfiguration(BaseDefectConfiguration):
     defect_type: PointDefectTypeEnum = PointDefectTypeEnum.VACANCY
     # TODO: should come from Enum of elements
     specie: Optional[str] = None
+    # TODO: import coordinate type from ESSE
+    # only for interstitials
+    position_shift: Optional[List[float]] = [0, 0, 0]
 
 
 class PointDefectBuilderParameters(BaseModel):
     target_site: int = 0
-    # TODO: import coordinate type from ESSE
-    position: Optional[List[int]] = None
     center_defect: bool = False
 
 
@@ -49,20 +50,19 @@ class PointDefectBuilder(BaseBuilder):
         site_index = self.build_parameters.target_site
         pymatgen_structure = to_pymatgen(configuration.material)
         pymatgen_site = pymatgen_structure[site_index]
-        # TODO: create material with the substituting element and the site
+        interstitial_coordinates = configuration.position_shift if configuration.position_shift else [0, 0, 0]
         pymatgen_periodic_site = PeriodicSite(
-            species=pymatgen_structure.species[site_index],
-            coords=pymatgen_site.frac_coords,
+            species=configuration.specie if configuration.specie else pymatgen_site.specie,
+            coords=pymatgen_site.frac_coords + interstitial_coordinates,
             lattice=pymatgen_structure.lattice,
         )
 
         if configuration.defect_type == PointDefectTypeEnum.VACANCY:
-            defect = Vacancy(pymatgen_structure, pymatgen_periodic_site)
+            defect = Vacancy(structure=pymatgen_structure, site=pymatgen_periodic_site)
         elif configuration.defect_type == PointDefectTypeEnum.SUBSTITUTION:
-            defect = Substitution(pymatgen_structure, pymatgen_periodic_site, configuration.specie)
+            defect = Substitution(structure=pymatgen_structure, site=pymatgen_periodic_site)
         elif configuration.defect_type == PointDefectTypeEnum.INTERSTITIAL:
-            # TODO: add direct position placement for interstitial
-            defect = Interstitial(pymatgen_structure, pymatgen_periodic_site)
+            defect = Interstitial(structure=pymatgen_structure, site=pymatgen_periodic_site)
         else:
             raise ValueError(f"Unknown defect type: {configuration.defect_type}")
 
