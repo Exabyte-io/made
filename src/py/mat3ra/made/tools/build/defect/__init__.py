@@ -5,7 +5,7 @@ from .configuration import PointDefectConfiguration
 
 def create_defect(material: Material, configuration: PointDefectConfiguration) -> Material:
     """
-    Add a defect to a material.
+    Return a material with a defect added.
 
     Args:
         material: The material to which the defect will be added.
@@ -16,5 +16,4 @@ def create_defect(material: Material, configuration: PointDefectConfiguration) -
     """
     builder = PointDefectBuilder(build_parameters=PointDefectBuilderParameters())
     configuration.material = material
-    material = builder.get_material(configuration)
-    return material
+    return builder.get_material(configuration)
