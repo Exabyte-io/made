@@ -1,50 +1,53 @@
+import json
 from typing import Any, Dict, List, Union
 
-from ase import Atoms
-from mat3ra.utils.array import convert_to_array_if_not
-from pymatgen.core.interface import Interface, label_termination
-from pymatgen.core.structure import Lattice, Structure
-from pymatgen.core.surface import Slab
+from ase import Atoms as ASEAtoms
+from mat3ra.made.utils import map_array_to_array_with_id_value
+from mat3ra.utils.object import NumpyNDArrayRoundEncoder
+from pymatgen.core.interface import Interface as PymatgenInterface
+from pymatgen.core.interface import label_termination
+from pymatgen.core.structure import Lattice as PymatgenLattice
+from pymatgen.core.structure import Structure as PymatgenStructure
+from pymatgen.core.surface import Slab as PymatgenSlab
 
-PymatgenLattice = Lattice
-PymatgenStructure = Structure
-PymatgenSlab = Slab
-PymatgenInterface = Interface
-ASEAtoms = Atoms
+# Re-exported imports to allow for both use in type hints and instantiation
+PymatgenLattice = PymatgenLattice
+PymatgenStructure = PymatgenStructure
+PymatgenSlab = PymatgenSlab
+PymatgenInterface = PymatgenInterface
+ASEAtoms = ASEAtoms
 label_pymatgen_slab_termination = label_termination
 
 INTERFACE_LABELS_MAP = {"substrate": 0, "film": 1}
 
 
-# TODO: move to a more general location
-def map_array_to_array_with_id_value(array: List[Any], remove_none: bool = False) -> List[Any]:
-    full_array = [{"id": i, "value": item} for i, item in enumerate(array)]
-    if remove_none:
-        return list(filter(lambda x: x["value"] is not None, full_array))
-    return full_array
+def extract_labels_from_pymatgen_structure(structure: PymatgenStructure) -> List[int]:
+    labels = []
+    if isinstance(structure, PymatgenInterface):
+        labels = list(map(lambda s: INTERFACE_LABELS_MAP[s.properties["interface_label"]], structure.sites))
+    else:
+        print("Warning: labels extraction from non-interface structure is not implemented yet.")
+    return labels
 
 
-def map_array_with_id_value_to_array(array: List[Dict[str, Any]]) -> List[Any]:
-    return [item["value"] for item in array]
+def extract_metadata_from_pymatgen_structure(structure: PymatgenStructure) -> Dict[str, Any]:
+    metadata = {}
+    # TODO: consider using Interface JSONSchema from ESSE when such created and adapt interface_properties accordingly.
+    # Add interface properties to metadata according to pymatgen Interface as a JSON object
+    if hasattr(structure, "interface_properties"):
+        interface_props = structure.interface_properties
+        # TODO: figure out how to round the values and stringify terminations tuple
+        #  in the interface properties with Encoder
+        for key, value in interface_props.items():
+            if isinstance(value, tuple):
+                interface_props[key] = str(value)
+        metadata["interface_properties"] = json.loads(json.dumps(interface_props, cls=NumpyNDArrayRoundEncoder))
+
+    return metadata
 
 
-def filter_array_with_id_value_by_values(
-    array: List[Dict[str, Any]], values: Union[List[Any], Any]
-) -> List[Dict[str, Any]]:
-    values = convert_to_array_if_not(values)
-    return [item for item in array if item["value"] in values]
-    # Alternative implementation:
-    # return list(filter(lambda x: x["value"] in values, array))
-
-
-def filter_array_with_id_value_by_ids(
-    array: List[Dict[str, Any]], ids: Union[List[int], List[str], int, str]
-) -> List[Dict[str, Any]]:
-    int_ids = list(map(lambda i: int(i), convert_to_array_if_not(ids)))
-    return [item for item in array if item["id"] in int_ids]
-    # Alternative implementation:
-    # return list(filter(lambda x: x["id"] in ids, array))
-
-
-def are_arrays_equal_by_id_value(array1: List[Dict[str, Any]], array2: List[Dict[str, Any]]) -> bool:
-    return map_array_with_id_value_to_array(array1) == map_array_with_id_value_to_array(array2)
+def extract_tags_from_ase_atoms(atoms: ASEAtoms) -> List[Union[str, int]]:
+    result = []
+    if "tags" in atoms.arrays:
+        result = map_array_to_array_with_id_value(atoms.arrays["tags"], remove_none=True)
+    return result
