@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 from pymatgen.analysis.defects.core import (
@@ -12,11 +12,15 @@ from ...build import BaseBuilder
 from ...convert import PymatgenStructure, to_pymatgen
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .enums import PointDefectTypeEnum
-from .configuration import PointDefectConfiguration
+from .configuration import (
+    BasePointDefectConfiguration,
+    VacancyConfiguration,
+    SubstitutionConfiguration,
+    InterstitialConfiguration,
+)
 
 
 class PointDefectBuilderParameters(BaseModel):
-    target_site: int = 0
     center_defect: bool = False
 
 
@@ -28,26 +32,46 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
     _BuildParametersType = PointDefectBuilderParameters
     _DefaultBuildParameters = PointDefectBuilderParameters()
     _GeneratedItemType: PymatgenStructure = PymatgenStructure
-    _ConfigurationType = PointDefectConfiguration
+    pymatgen_periodic_site: PymatgenPeriodicSite = None
+    #     return [defect.centered_defect_structure if self.build_parameters.center_defect else defect.defect_structure]
 
-    def _generate(self, configuration: PointDefectConfiguration) -> List[_GeneratedItemType]:
-        site_index = self.build_parameters.target_site
-        pymatgen_structure = to_pymatgen(configuration.material)
-        pymatgen_site = pymatgen_structure[site_index]
-        interstitial_frac_coords_shift = configuration.position_shift if configuration.position_shift else [0, 0, 0]
-        pymatgen_periodic_site = PymatgenPeriodicSite(
-            species=configuration.specie if configuration.specie else pymatgen_site.specie,
-            coords=pymatgen_site.frac_coords + interstitial_frac_coords_shift,
+
+class VacancyBuilder(PointDefectBuilder):
+    _ConfigurationType: type(VacancyConfiguration) = VacancyConfiguration  # type: ignore
+
+    def _generate(self, configuration: _ConfigurationType) -> List[PointDefectBuilder._GeneratedItemType]:
+        pymatgen_structure = to_pymatgen(configuration.crystal)
+        pymatgen_site = pymatgen_structure[configuration.site_id]
+        self.pymatgen_periodic_site = PymatgenPeriodicSite(
+            species=pymatgen_site.specie,
+            coords=pymatgen_site.frac_coords,
             lattice=pymatgen_structure.lattice,
         )
+        return [PymatgenVacancy(structure=pymatgen_structure, site=self.pymatgen_periodic_site).defect_structure]
 
-        if configuration.defect_type == PointDefectTypeEnum.VACANCY:
-            defect = PymatgenVacancy(structure=pymatgen_structure, site=pymatgen_periodic_site)
-        elif configuration.defect_type == PointDefectTypeEnum.SUBSTITUTION:
-            defect = PymatgenSubstitution(structure=pymatgen_structure, site=pymatgen_periodic_site)
-        elif configuration.defect_type == PointDefectTypeEnum.INTERSTITIAL:
-            defect = PymatgenInterstitial(structure=pymatgen_structure, site=pymatgen_periodic_site)
-        else:
-            raise ValueError(f"Unknown defect type: {configuration.defect_type}")
 
-        return [defect.centered_defect_structure if self.build_parameters.center_defect else defect.defect_structure]
+class SubstitutionBuilder(PointDefectBuilder):
+    _ConfigurationType: type(SubstitutionConfiguration) = SubstitutionConfiguration  # type: ignore
+
+    def _generate(self, configuration: _ConfigurationType) -> List[PointDefectBuilder._GeneratedItemType]:
+        pymatgen_structure = to_pymatgen(configuration.crystal)
+        pymatgen_site = pymatgen_structure[configuration.site_id]
+        self.pymatgen_periodic_site = PymatgenPeriodicSite(
+            species=configuration.element,
+            coords=pymatgen_site.frac_coords,
+            lattice=pymatgen_structure.lattice,
+        )
+        return [PymatgenSubstitution(structure=pymatgen_structure, site=self.pymatgen_periodic_site).defect_structure]
+
+
+class InterstitialBuilder(PointDefectBuilder):
+    _ConfigurationType: type(InterstitialConfiguration) = InterstitialConfiguration  # type: ignore
+
+    def _generate(self, configuration: _ConfigurationType) -> List[PointDefectBuilder._GeneratedItemType]:
+        pymatgen_structure = to_pymatgen(configuration.crystal)
+        self.pymatgen_periodic_site = PymatgenPeriodicSite(
+            species=configuration.element,
+            coords=configuration.position,
+            lattice=pymatgen_structure.lattice,
+        )
+        return [PymatgenInterstitial(structure=pymatgen_structure, site=self.pymatgen_periodic_site).defect_structure]
