@@ -1,11 +1,11 @@
 from typing import Union
 
 from mat3ra.made.material import Material
+from mat3ra.made.utils import filter_array_with_id_value_by_ids, filter_array_with_id_value_by_values
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
 from .convert import decorator_convert_material_args_kwargs_to_structure
-from .convert.utils import filter_array_with_id_value_by_ids, filter_array_with_id_value_by_values
 from .utils import translate_to_bottom_pymatgen_structure
 
 
