@@ -1,80 +1,101 @@
+from typing import List, Optional, Any
+
+from pydantic import BaseModel
+
 from ...material import Material
-from .interface import InterfaceDataHolder, CoherentInterfaceBuilder, TerminationType
-from .interface import InterfaceSettings as Settings
-from .interface import interface_init_zsl_builder, interface_patch_with_mean_abs_strain
-from ..convert import decorator_convert_material_args_kwargs_to_structure
-from ..modify import translate_to_bottom, wrap_to_unit_cell
-from typing import Optional
 
 
-@decorator_convert_material_args_kwargs_to_structure
-def create_interfaces(
-    substrate: Optional[Material] = None,
-    layer: Optional[Material] = None,
-    settings: Settings = Settings(),
-    sort_by_strain_and_size: bool = True,
-    remove_duplicates: bool = True,
-    is_logging_enabled: bool = True,
-    interface_builder: Optional[CoherentInterfaceBuilder] = None,
-    termination: Optional[TerminationType] = None,
-) -> InterfaceDataHolder:
+class BaseBuilder(BaseModel):
     """
-    Create all interfaces between the substrate and layer structures using ZSL algorithm provided by pymatgen.
+    Base class for material builders.
+    This class provides an interface for generating materials and getter functions.
+    The builder is meant as a description of the process, while its functions require a
+    "Configuration" class instance to perform the generation.
 
-    Args:
-        substrate (Material): The substrate structure.
-        layer (Material): The layer structure.
-        settings: The settings for the interface generation.
-        sort_by_strain_and_size (bool): Whether to sort the interfaces by strain and size.
-        remove_duplicates (bool): Whether to remove duplicate interfaces.
-        is_logging_enabled (bool): Whether to enable debug print.
-    Returns:
-        InterfaceDataHolder.
+    The class is designed to be subclassed and the subclass should implement the following methods:
+
+    - `_generate`: Generate the material items, possibly using third-party tools/implementation for items.
+    - `_sort`: Sort the items.
+    - `_select`: Select a subset of the items.
+    - `_post_process`: Post-process the items to convert them to materials (Material class).
+    - `_finalize`: Finalize the materials.
+
+    The subclass should also define the following attributes:
+
+    - `_BuildParametersType`: The data structure model for the build parameters.
+    - `_DefaultBuildParameters`: The default build parameters.
+    - `_ConfigurationType`: The data structure model for the Configuration used during the build.
+    - `_GeneratedItemType`: The type of the generated item.
+    - `_SelectorParametersType`: The data structure model for the selector parameters.
+    - `_PostProcessParametersType`: The data structure model for the post-process parameters.
     """
-    if is_logging_enabled:
-        print("Creating interfaces...")
 
-    builder = interface_builder or init_interface_builder(substrate, layer, settings)
-    interfaces_data = InterfaceDataHolder()
+    build_parameters: Any = None
+    _BuildParametersType: Any = None
+    _DefaultBuildParameters: Any = None
 
-    if termination is not None:
-        builder.terminations = [termination]
+    _ConfigurationType: Any = Any
+    _GeneratedItemType: Any = Any
+    _SelectorParametersType: Any = None
+    _PostProcessParametersType: Any = None
 
-    for termination in builder.terminations:
-        all_interfaces_for_termination = builder.get_interfaces(
-            termination,
-            gap=settings.distance_z,
-            film_thickness=settings.LayerParameters.thickness,
-            substrate_thickness=settings.SubstrateParameters.thickness,
-            in_layers=True,
-        )
+    def __init__(self, build_parameters: _BuildParametersType = None):
+        super().__init__(build_parameters=build_parameters)
+        self.build_parameters = build_parameters or self._DefaultBuildParameters
+        self.__generated_items: List[List[BaseBuilder._GeneratedItemType]] = []
+        self.__configurations: List[BaseBuilder._ConfigurationType] = []
 
-        all_interfaces_for_termination_patched_wrapped = list(
-            map(
-                lambda i: wrap_to_unit_cell(interface_patch_with_mean_abs_strain(i)),
-                all_interfaces_for_termination,
-            )
-        )
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        return []
 
-        interfaces_data.add_data_entries(
-            all_interfaces_for_termination_patched_wrapped,
-            sort_interfaces_by_strain_and_size=sort_by_strain_and_size,
-            remove_duplicates=remove_duplicates,
-        )
+    def _generate_or_get_from_cache(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        if configuration not in self.__configurations:
+            self.__configurations.append(configuration)
+            self.__generated_items.append(self._generate(configuration))
+        return self.__generated_items[self.__configurations.index(configuration)]
 
-    if is_logging_enabled:
-        unique_str = "unique" if remove_duplicates else ""
-        print(f"Found {len(interfaces_data.get_interfaces_for_termination(0))} {unique_str} interfaces.")
+    def _sort(self, items: List[_GeneratedItemType]) -> List[_GeneratedItemType]:
+        return items
 
-    return interfaces_data
+    def _select(
+        self, items: List[_GeneratedItemType], selector_parameters: Optional[_SelectorParametersType]
+    ) -> List[_GeneratedItemType]:
+        return items
 
+    def _post_process(
+        self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType]
+    ) -> List[Material]:
+        return [Material(self._convert_generated_item(item)) for item in items]
 
-@decorator_convert_material_args_kwargs_to_structure
-def init_interface_builder(
-    substrate: Material,
-    layer: Material,
-    settings: Settings,
-) -> CoherentInterfaceBuilder:
-    substrate = translate_to_bottom(substrate, settings.use_conventional_cell)
-    layer = translate_to_bottom(layer, settings.use_conventional_cell)
-    return interface_init_zsl_builder(substrate, layer, settings)
+    @staticmethod
+    def _convert_generated_item(item: _GeneratedItemType):
+        material_config = item
+        return material_config
+
+    def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
+        return [self._update_material_name(material, configuration) for material in materials]
+
+    def get_materials(
+        self,
+        configuration: _ConfigurationType,
+        selector_parameters: Optional[_SelectorParametersType] = None,
+        post_process_parameters: Optional[_PostProcessParametersType] = None,
+    ) -> List[Material]:
+        generated_items = self._generate_or_get_from_cache(configuration)
+        sorted_items = self._sort(generated_items)
+        selected_items = self._select(sorted_items, selector_parameters)
+        materials = self._post_process(selected_items, post_process_parameters)
+        finalized_materials = self._finalize(materials, configuration)
+        return finalized_materials
+
+    def get_material(
+        self,
+        configuration: _ConfigurationType,
+        selector_parameters: Optional[_SelectorParametersType] = None,
+        post_process_parameters: Optional[_PostProcessParametersType] = None,
+    ) -> Material:
+        return self.get_materials(configuration, selector_parameters, post_process_parameters)[0]
+
+    def _update_material_name(self, material, configuration):
+        # Do nothing by default
+        return material
