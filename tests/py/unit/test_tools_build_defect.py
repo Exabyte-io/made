@@ -23,9 +23,11 @@ def test_create_substitution():
     defect = create_defect(material, configuration)
 
     assert defect.basis["elements"] == [{"id": 0, "value": "Ge"}, {"id": 1, "value": "Si0+"}]
+    assert defect.basis["coordinates"][0] == {"id": 0, "value": [0.0, 0.0, 0.0]}
 
 
 def test_create_interstitial():
+    # Interstitial Ge at 0.5, 0.5, 0.5
     configuration = InterstitialConfiguration(element="Ge", position=[0.5, 0.5, 0.5])
     material = Material.create(Material.default_config)
     defect = create_defect(material, configuration)
