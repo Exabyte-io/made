@@ -54,7 +54,7 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
 
-    _BuildParametersType = Optional[SimpleInterfaceBuilderParameters]
+    _BuildParametersType = SimpleInterfaceBuilderParameters
     _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
     _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 

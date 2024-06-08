@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 from pymatgen.analysis.defects.core import (
@@ -11,9 +11,7 @@ from pymatgen.core import PeriodicSite as PymatgenPeriodicSite
 from ...build import BaseBuilder
 from ...convert import PymatgenStructure, to_pymatgen
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from .enums import PointDefectTypeEnum
 from .configuration import (
-    BasePointDefectConfiguration,
     VacancyConfiguration,
     SubstitutionConfiguration,
     InterstitialConfiguration,
