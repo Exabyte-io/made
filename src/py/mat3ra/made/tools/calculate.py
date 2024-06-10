@@ -112,11 +112,14 @@ def calculate_interfacial_energy(
     substrate_slab = filter_by_label(interface, 0) if substrate_slab is None else substrate_slab
     film_slab = filter_by_label(interface, 1) if film_slab is None else film_slab
 
-    substrate_bulk = (
-        interface.metadata["origin"]["substrate_slab"]["bulk"] if substrate_bulk is None else substrate_bulk
-    )
-    film_bulk = interface.metadata["origin"]["film_slab"]["bulk"] if film_bulk is None else film_bulk
-
+    build_configuration = interface.metadata["build"]["configuration"] if "build" in interface.metadata else {}
+    try:
+        substrate_bulk = (
+            build_configuration["substrate_configuration"]["bulk"] if substrate_bulk is None else substrate_bulk
+        )
+        film_bulk = build_configuration["film_configuration"]["bulk"] if film_bulk is None else film_bulk
+    except KeyError:
+        raise ValueError("The substrate and film bulk materials must be provided or defined in the interface metadata.")
     surface_energy_substrate = calculate_surface_energy(substrate_slab, substrate_bulk, calculator)
     surface_energy_film = calculate_surface_energy(film_slab, film_bulk, calculator)
     adhesion_energy = calculate_adhesion_energy(interface, substrate_slab, film_slab, calculator)
