@@ -6,8 +6,8 @@ from ase.calculators.emt import EMT
 
 from ..material import Material
 from .analyze import get_surface_area
+from .build.interface.utils import get_slab
 from .convert import decorator_convert_material_args_kwargs_to_atoms
-from .modify import filter_by_label
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -109,8 +109,8 @@ def calculate_interfacial_energy(
     Returns:
         float: The interfacial energy of the interface.
     """
-    substrate_slab = filter_by_label(interface, 0) if substrate_slab is None else substrate_slab
-    film_slab = filter_by_label(interface, 1) if film_slab is None else film_slab
+    substrate_slab = get_slab(interface, part="substrate") if substrate_slab is None else substrate_slab
+    film_slab = get_slab(interface, part="film") if film_slab is None else film_slab
 
     build_configuration = interface.metadata["build"]["configuration"] if "build" in interface.metadata else {}
     try:
