@@ -59,6 +59,57 @@ INTERFACE_STRUCTURE.interface_properties = INTERFACE_PROPERTIES_MOCK
 INTERFACE_NAME = "Cu4(001)-Si8(001), Interface, Strain 0.062%"
 
 # TODO: Use fixtures package when available
+SI_CONVENTIONAL_CELL = {
+    "name": "Si8",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+            {"id": 4, "value": "Si"},
+            {"id": 5, "value": "Si"},
+            {"id": 6, "value": "Si"},
+            {"id": 7, "value": "Si"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.0, 0.0]},
+            {"id": 1, "value": [0.25, 0.25, 0.75]},
+            {"id": 2, "value": [0.5, 0.5, 0.5]},
+            {"id": 3, "value": [0.25, 0.75, 0.25]},
+            {"id": 4, "value": [0.0, 0.0, 0.5]},
+            {"id": 5, "value": [0.75, 0.25, 0.25]},
+            {"id": 6, "value": [0.0, 0.5, 0.0]},
+            {"id": 7, "value": [0.75, 0.75, 0.75]},
+        ],
+        "units": "crystal",
+        "cell": [[5.468763846, 0.0, 0.0], [-0.0, 5.468763846, 0.0], [0.0, 0.0, 5.468763846]],
+        "constraints": [],
+        "labels": [],
+    },
+    "lattice": {
+        "a": 5.468763846,
+        "b": 5.468763846,
+        "c": 5.468763846,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+        "vectors": {
+            "a": [5.468763846, 0.0, 0.0],
+            "b": [-0.0, 5.468763846, 0.0],
+            "c": [0.0, 0.0, 5.468763846],
+            "alat": 1,
+            "units": "angstrom",
+        },
+    },
+    "isNonPeriodic": False,
+    "_id": "",
+    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+    "isUpdated": True,
+}
+
 SI_SUPERCELL_2X2X1 = {
     "name": "Si8",
     "basis": {
@@ -152,6 +203,7 @@ SI_SLAB = {
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "termination": "Si_P4/mmm_1",
+        "origin": {"bulk": SI_CONVENTIONAL_CELL},
     },
     "isUpdated": True,
 }
