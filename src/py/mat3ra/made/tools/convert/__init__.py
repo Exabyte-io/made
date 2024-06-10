@@ -180,7 +180,8 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAto
     atomic_labels = material_config["basis"].get("labels", [])
     if atomic_labels:
         atoms.set_tags(map_array_with_id_value_to_array(atomic_labels))
-
+    if "metadata" in material_config:
+        atoms.info.update({"metadata": material_config["metadata"]})
     return atoms
 
 
@@ -198,8 +199,10 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     structure = AseAtomsAdaptor.get_structure(ase_atoms)
     material = from_pymatgen(structure)
     ase_tags = extract_tags_from_ase_atoms(ase_atoms)
-
     material["basis"]["labels"] = ase_tags
+    ase_metadata = ase_atoms.info.get("metadata", {})
+    if ase_metadata:
+        material["metadata"].update(ase_metadata)
     return material
 
 

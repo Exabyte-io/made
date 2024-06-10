@@ -47,5 +47,6 @@ def extract_metadata_from_pymatgen_structure(structure: PymatgenStructure) -> Di
 def extract_tags_from_ase_atoms(atoms: ASEAtoms) -> List[Union[str, int]]:
     result = []
     if "tags" in atoms.arrays:
-        result = map_array_to_array_with_id_value(atoms.arrays["tags"], remove_none=True)
+        int_tags = [int(tag) for tag in atoms.arrays["tags"] if tag is not None]
+        result = map_array_to_array_with_id_value(int_tags, remove_none=True)
     return result
