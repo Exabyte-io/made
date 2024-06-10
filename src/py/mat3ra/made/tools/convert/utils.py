@@ -25,8 +25,6 @@ def extract_labels_from_pymatgen_structure(structure: PymatgenStructure) -> List
     labels = []
     if isinstance(structure, PymatgenInterface):
         labels = list(map(lambda s: INTERFACE_LABELS_MAP[s.properties["interface_label"]], structure.sites))
-    else:
-        print("Warning: labels extraction from non-interface structure is not implemented yet.")
     return labels
 
 
