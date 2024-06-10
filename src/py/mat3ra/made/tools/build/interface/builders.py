@@ -42,10 +42,7 @@ class InterfaceBuilder(BaseBuilder):
         return material
 
     def _update_material_metadata(self, material, configuration):
-        material.metadata["origin"] = {
-            "substrate_slab": {"bulk": configuration.substrate_configuration.bulk.to_json()},
-            "film_slab": {"bulk": configuration.film_configuration.bulk.to_json()},
-        }
+        material.metadata["build"] = {"configuration": configuration.to_json()}
         return material
 
 
