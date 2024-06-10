@@ -102,5 +102,5 @@ class BaseBuilder(BaseModel):
         return material
 
     def _update_material_metadata(self, material, configuration):
-        # Do nothing by default
+        material.metadata["build"] = {"configuration": configuration.to_json()}
         return material

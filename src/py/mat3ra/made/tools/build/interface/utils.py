@@ -1,6 +1,9 @@
 import types
 from typing import List
 import numpy as np
+from mat3ra.made.material import Material
+from mat3ra.made.tools.modify import filter_by_label
+
 from .enums import StrainModes
 from ...convert import PymatgenInterface
 
@@ -34,3 +37,15 @@ def remove_duplicate_interfaces(
         if not any(are_interfaces_duplicate(interface, unique_interface) for unique_interface in filtered_interfaces):
             filtered_interfaces.append(interface)
     return filtered_interfaces
+
+
+def get_slab(interface: Material, part: str = "film"):
+    try:
+        if part == "film":
+            return filter_by_label(interface, 1)
+        elif part == "substrate":
+            return filter_by_label(interface, 0)
+        else:
+            raise ValueError(f"Part {part} is not supported.")
+    except ValueError:
+        raise ValueError("Material does not contain labels for film and substrate.")
