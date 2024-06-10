@@ -73,7 +73,8 @@ class BaseBuilder(BaseModel):
         return material_config
 
     def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
-        return [self._update_material_name(material, configuration) for material in materials]
+        materials_with_metadata = [self._update_material_metadata(material, configuration) for material in materials]
+        return [self._update_material_name(material, configuration) for material in materials_with_metadata]
 
     def get_materials(
         self,
@@ -97,5 +98,9 @@ class BaseBuilder(BaseModel):
         return self.get_materials(configuration, selector_parameters, post_process_parameters)[0]
 
     def _update_material_name(self, material, configuration):
+        # Do nothing by default
+        return material
+
+    def _update_material_metadata(self, material, configuration):
         # Do nothing by default
         return material
