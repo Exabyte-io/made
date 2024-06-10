@@ -24,8 +24,8 @@ class InterfaceConfiguration(BaseModel, InMemoryEntity):
             "type": "InterfaceConfiguration",
             "film_configuration": self.film_configuration.to_json(),
             "substrate_configuration": self.substrate_configuration.to_json(),
-            "film_termination": self.film_termination,
-            "substrate_termination": self.substrate_termination,
+            "film_termination": str(self.film_termination),
+            "substrate_termination": str(self.substrate_termination),
             "distance_z": self.distance_z,
             "vacuum": self.vacuum,
         }
