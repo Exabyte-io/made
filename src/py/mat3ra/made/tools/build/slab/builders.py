@@ -73,3 +73,8 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         new_name = f"{formula}({miller_indices}), termination {termination}, Slab"
         material.name = new_name
         return material
+
+    def _update_material_metadata(self, material: Material, configuration: SlabConfiguration) -> Material:
+        material.metadata["origin"] = {"bulk": configuration.bulk.to_json()}
+        print(material.metadata["origin"])
+        return material
