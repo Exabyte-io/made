@@ -161,6 +161,19 @@ SI_SUPERCELL_2X2X1 = {
     "isUpdated": True,
 }
 
+
+SI_SLAB_CONFIGURATION = {
+    "type": "SlabConfiguration",
+    "bulk": SI_CONVENTIONAL_CELL,
+    "miller_indices": (0, 0, 1),
+    "thickness": 1,
+    "vacuum": 1,
+    "xy_supercell_matrix": [[1, 0], [0, 1]],
+    "use_conventional_cell": True,
+    "use_orthogonal_z": True,
+}
+
+
 SI_SLAB = {
     "name": "Si8(001), termination Si_P4/mmm_1, Slab",
     "basis": {
@@ -203,7 +216,7 @@ SI_SLAB = {
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "termination": "Si_P4/mmm_1",
-        "origin": {"bulk": SI_CONVENTIONAL_CELL},
+        "build": {"configuration": SI_SLAB_CONFIGURATION},
     },
     "isUpdated": True,
 }
