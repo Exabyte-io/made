@@ -1,8 +1,5 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect import (
-    PointDefectConfiguration,
-    create_defect,
-)
+from mat3ra.made.tools.build.defect import PointDefectConfiguration, create_defect
 
 
 def test_create_vacancy():

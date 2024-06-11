@@ -116,7 +116,7 @@ class StrainMatchingInterfaceBuilder(InterfaceBuilder):
         updated_material = super()._update_material_name(material, configuration)
         if StrainModes.mean_abs_strain in material.metadata:
             strain = material.metadata[StrainModes.mean_abs_strain]
-            new_name = f"{updated_material.name}, Strain {strain:.3f}"
+            new_name = f"{updated_material.name}, Strain {strain*100:.3f}pct"
             updated_material.name = new_name
         return material
 
