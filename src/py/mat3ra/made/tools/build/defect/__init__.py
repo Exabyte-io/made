@@ -1,8 +1,8 @@
-from typing import Union, Optional
+from typing import Optional
 
 from mat3ra.made.material import Material
 from .builders import VacancyBuilder, SubstitutionBuilder, InterstitialBuilder, PointDefectBuilderParameters
-from .configuration import VacancyConfiguration, SubstitutionConfiguration, InterstitialConfiguration
+from .configuration import PointDefectConfiguration
 from .enums import PointDefectTypeEnum
 
 
@@ -16,7 +16,7 @@ def DEFECT_BUILDER_MAP(builder_parameters):
 
 def create_defect(
     material: Material,
-    configuration: Union[VacancyConfiguration, SubstitutionConfiguration, InterstitialConfiguration],
+    configuration: PointDefectConfiguration,
     builder_parameters: Optional[PointDefectBuilderParameters] = None,
 ) -> Material:
     """
