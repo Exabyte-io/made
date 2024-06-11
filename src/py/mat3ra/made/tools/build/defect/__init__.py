@@ -22,8 +22,8 @@ def create_defect(
     Return a material with a selected defect added.
 
     Args:
-        material: The material to which the defect will be added.
         configuration: The configuration of the defect to be added.
+        builder_parameters: The parameters to be used by the defect builder.
 
     Returns:
         The material with the defect added.
