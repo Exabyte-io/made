@@ -1,9 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const mathjs_1 = __importDefault(require("mathjs"));
+const math_1 = require("@mat3ra/code/dist/js/math");
 const constants_1 = require("../constants");
 const lattice_1 = require("../lattice/lattice");
 /**
@@ -40,12 +37,14 @@ function getBasisConfigTranslatedToCenter(material) {
     material.toCartesian();
     const updatedBasis = material.Basis;
     const centerOfCoordinates = updatedBasis.centerOfCoordinatesPoint;
-    const centerOfLattice = mathjs_1.default.multiply(0.5, material.Lattice.vectorArrays.reduce((a, b) => mathjs_1.default.add(a, b)));
-    const translationVector = mathjs_1.default.subtract(centerOfLattice, centerOfCoordinates);
+    const centerOfLattice = math_1.math.multiply(
+        0.5,
+        material.Lattice.vectorArrays.reduce((a, b) => math_1.math.add(a, b)),
+    );
+    const translationVector = math_1.math.subtract(centerOfLattice, centerOfCoordinates);
     updatedBasis.translateByVector(translationVector);
     material.setBasis(updatedBasis.toJSON());
-    if (originalUnits !== constants_1.ATOMIC_COORD_UNITS.cartesian)
-        material.toCrystal();
+    if (originalUnits !== constants_1.ATOMIC_COORD_UNITS.cartesian) material.toCrystal();
 }
 exports.default = {
     scaleOneLatticeVector,

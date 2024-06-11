@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Union
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntity
 from mat3ra.esse.models.material import MaterialSchema
-
 from mat3ra.made.utils import map_array_with_id_value_to_array
 
 defaultMaterialConfig = {

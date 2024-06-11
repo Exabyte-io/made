@@ -1,4 +1,6 @@
 from typing import List, Tuple, Any
+
+from mat3ra.code.entity import InMemoryEntity
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer as PymatgenSpacegroupAnalyzer
 from pydantic import BaseModel
 
@@ -6,7 +8,7 @@ from mat3ra.made.material import Material
 from ...convert import to_pymatgen, from_pymatgen
 
 
-class SlabConfiguration(BaseModel):
+class SlabConfiguration(BaseModel, InMemoryEntity):
     """
     Configuration for building a slab.
 
@@ -54,3 +56,16 @@ class SlabConfiguration(BaseModel):
             xy_supercell_matrix=xy_supercell_matrix,
             use_orthogonal_z=use_orthogonal_z,
         )
+
+    @property
+    def _json(self):
+        return {
+            "type": "SlabConfiguration",
+            "bulk": self.bulk.to_json(),
+            "miller_indices": self.miller_indices,
+            "thickness": self.thickness,
+            "vacuum": self.vacuum,
+            "xy_supercell_matrix": self.xy_supercell_matrix,
+            "use_conventional_cell": self.use_conventional_cell,
+            "use_orthogonal_z": self.use_orthogonal_z,
+        }

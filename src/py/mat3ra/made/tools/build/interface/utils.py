@@ -1,8 +1,11 @@
 import types
 from typing import List
 import numpy as np
+from mat3ra.made.material import Material
+
+from ...modify import filter_by_label
+from ...convert import PymatgenInterface, INTERFACE_LABELS_MAP
 from .enums import StrainModes
-from ...convert import PymatgenInterface
 
 
 def interface_patch_with_mean_abs_strain(target: PymatgenInterface, tolerance: float = 10e-6):
@@ -34,3 +37,10 @@ def remove_duplicate_interfaces(
         if not any(are_interfaces_duplicate(interface, unique_interface) for unique_interface in filtered_interfaces):
             filtered_interfaces.append(interface)
     return filtered_interfaces
+
+
+def get_slab(interface: Material, part: str = "film"):
+    try:
+        return filter_by_label(interface, INTERFACE_LABELS_MAP[part])
+    except ValueError:
+        raise ValueError(f"Material does not contain label for {part}.")
