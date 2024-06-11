@@ -80,12 +80,12 @@ def get_closest_site_id_from_position(material: Material, position: List[float])
 
     Args:
         material (Material): The material object to find the closest site in.
-        position (np.ndarray): The position to find the closest site to.
+        position (List[float]): The position to find the closest site to.
 
     Returns:
         int: The site ID of the closest site.
     """
-    coordinates = np.array(material.basis["coordinates"])
+    coordinates = np.array(material.coordinates_array)
     position = np.array(position)  # type: ignore
     distances = np.linalg.norm(coordinates - position, axis=1)
     return int(np.argmin(distances))

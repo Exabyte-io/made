@@ -6,7 +6,7 @@ from .configuration import PointDefectConfiguration
 from .enums import PointDefectTypeEnum
 
 
-def DEFECT_BUILDER_MAP(builder_parameters):
+def DEFECT_BUILDER_FACTORY(builder_parameters):
     return {
         PointDefectTypeEnum.VACANCY: VacancyBuilder(builder_parameters),
         PointDefectTypeEnum.SUBSTITUTION: SubstitutionBuilder(builder_parameters),
@@ -15,7 +15,6 @@ def DEFECT_BUILDER_MAP(builder_parameters):
 
 
 def create_defect(
-    material: Material,
     configuration: PointDefectConfiguration,
     builder_parameters: Optional[PointDefectBuilderParameters] = None,
 ) -> Material:
@@ -29,7 +28,6 @@ def create_defect(
     Returns:
         The material with the defect added.
     """
-    builder = DEFECT_BUILDER_MAP(builder_parameters)[configuration.defect_type]
+    builder = DEFECT_BUILDER_FACTORY(builder_parameters)[configuration.defect_type]
 
-    configuration.crystal = material
-    return builder.get_material(configuration) if builder else material
+    return builder.get_material(configuration) if builder else configuration.crystal

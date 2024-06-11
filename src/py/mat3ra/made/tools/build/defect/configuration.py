@@ -1,5 +1,6 @@
 from typing import Optional, List, Any
 
+from mat3ra.code.entity import InMemoryEntity
 from pydantic import BaseModel
 
 from ...analyze import get_closest_site_id_from_position
@@ -11,9 +12,10 @@ class BaseDefectConfiguration(BaseModel):
     crystal: Any = None
 
 
-class PointDefectConfiguration(BaseDefectConfiguration):
+class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     defect_type: PointDefectTypeEnum
     position: Optional[List[float]] = [0, 0, 0]  # fractional coordinates
+    site_id: Optional[int] = None
     chemical_element: Optional[str] = None
 
     def __init__(self, position=position, site_id=None, **data):
@@ -27,3 +29,11 @@ class PointDefectConfiguration(BaseDefectConfiguration):
     def from_site_id(cls, site_id: int, **data):
         position = cls.crystal.coordinates_array[site_id]
         return cls(position=position, **data)
+
+    @property
+    def _json(self):
+        return {
+            "defect_type": self.defect_type,
+            "position": self.position,
+            "chemical_element": self.chemical_element,
+        }
