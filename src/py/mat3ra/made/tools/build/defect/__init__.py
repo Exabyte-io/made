@@ -1,16 +1,21 @@
 from typing import Optional
 
 from mat3ra.made.material import Material
-from .builders import VacancyBuilder, SubstitutionBuilder, InterstitialBuilder, PointDefectBuilderParameters
+from .builders import (
+    VacancyPointDefectBuilder,
+    SubstitutionPointDefectBuilder,
+    InterstitialPointDefectBuilder,
+    PointDefectBuilderParameters,
+)
 from .configuration import PointDefectConfiguration
 from .enums import PointDefectTypeEnum
 
 
 def DEFECT_BUILDER_FACTORY(builder_parameters):
     return {
-        PointDefectTypeEnum.VACANCY: VacancyBuilder(builder_parameters),
-        PointDefectTypeEnum.SUBSTITUTION: SubstitutionBuilder(builder_parameters),
-        PointDefectTypeEnum.INTERSTITIAL: InterstitialBuilder(builder_parameters),
+        PointDefectTypeEnum.VACANCY: VacancyPointDefectBuilder(builder_parameters),
+        PointDefectTypeEnum.SUBSTITUTION: SubstitutionPointDefectBuilder(builder_parameters),
+        PointDefectTypeEnum.INTERSTITIAL: InterstitialPointDefectBuilder(builder_parameters),
     }
 
 
