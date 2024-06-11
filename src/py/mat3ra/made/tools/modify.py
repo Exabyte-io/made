@@ -1,29 +1,32 @@
 from typing import Union
 
-from ase import Atoms
+from mat3ra.made.material import Material
+from mat3ra.made.utils import filter_array_with_id_value_by_ids, filter_array_with_id_value_by_values
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
-from .convert import (
-    decorator_convert_material_args_kwargs_to_atoms,
-    decorator_convert_material_args_kwargs_to_structure,
-)
+from .convert import decorator_convert_material_args_kwargs_to_structure
 from .utils import translate_to_bottom_pymatgen_structure
 
 
-@decorator_convert_material_args_kwargs_to_atoms
-def filter_by_label(atoms: Atoms, label: Union[int, str]):
+def filter_by_label(material: Material, label: Union[int, str]) -> Material:
     """
-    Filter out only atoms corresponding to the label/tag.
+    Filter out only atoms corresponding to the label.
 
     Args:
-        atoms (ase.Atoms): The Atoms object to filter.
+        material (Material): The material object to filter.
         label (int|str): The tag/label to filter by.
 
     Returns:
-        ase.Atoms: The filtered Atoms object.
+        Material: The filtered material object.
     """
-    return atoms[atoms.get_tags() == label]
+    new_material = material.clone()
+    labels = material.basis["labels"]
+    filtered_labels = filter_array_with_id_value_by_values(labels, label)
+    filtered_label_ids = [item["id"] for item in filtered_labels]
+    for key in ["coordinates", "elements", "labels"]:
+        new_material.basis[key] = filter_array_with_id_value_by_ids(new_material.basis[key], filtered_label_ids)
+    return new_material
 
 
 @decorator_convert_material_args_kwargs_to_structure
