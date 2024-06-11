@@ -1,9 +1,9 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
-    create_defect,
-    VacancyConfiguration,
-    SubstitutionConfiguration,
     InterstitialConfiguration,
+    SubstitutionConfiguration,
+    VacancyConfiguration,
+    create_defect,
 )
 
 
