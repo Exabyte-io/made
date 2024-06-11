@@ -1,47 +1,27 @@
-from typing import Optional, List, Union, Any
+from typing import Optional, List, Any
 
-import numpy as np
 from pydantic import BaseModel
 
-from .enums import PointDefectTypeEnum
+from ...analyze import get_closest_site_id_from_position
 
 
 class BaseDefectConfiguration(BaseModel):
     # TODO: fix arbitrary_types_allowed error and set Material class type
     crystal: Any = None
-    # defect_type type can be an Enum for a specific defect class (for point defect, 2d defect, etc.)
-    defect_type: Union[PointDefectTypeEnum, None] = None
 
 
-class BasePointDefectConfiguration(BaseDefectConfiguration):
-    position: Optional[List[float]] = None  # fractional coordinates
-    site_id: Optional[int] = 0
+class PointDefectConfiguration(BaseDefectConfiguration):
+    position: Optional[List[float]] = [0, 0, 0]  # fractional coordinates
+    chemical_element: Optional[str] = None
 
-    def __init__(self, **data):
+    def __init__(self, position=position, site_id=None, **data):
         super().__init__(**data)
-        if self.position:
-            self.site_id = self._get_site_id_from_position()
+        if site_id is not None:
+            self.position = self.crystal.coordinates_array[site_id]
+        else:
+            self.site_id = get_closest_site_id_from_position(self.crystal, position)
 
-    # TODO: move to analysis module?
-    def _get_site_id_from_position(self):
-        closest_site_id = self.site_id
-        if self.crystal is not None:
-            coordinates = np.array(self.crystal.basis["coordinates"])
-            position = np.array(self.position)
-            distances = np.linalg.norm(coordinates - position, axis=1)
-            closest_site_id = np.argmin(distances)
-        return closest_site_id
-
-
-class VacancyConfiguration(BasePointDefectConfiguration):
-    defect_type: PointDefectTypeEnum = PointDefectTypeEnum.VACANCY
-
-
-class SubstitutionConfiguration(BasePointDefectConfiguration):
-    defect_type: PointDefectTypeEnum = PointDefectTypeEnum.SUBSTITUTION
-    element: Optional[str] = "Si"
-
-
-class InterstitialConfiguration(BasePointDefectConfiguration):
-    defect_type: PointDefectTypeEnum = PointDefectTypeEnum.INTERSTITIAL
-    element: Optional[str] = "Si"
+    @classmethod
+    def from_site_id(cls, site_id: int, **data):
+        position = cls.crystal.coordinates_array[site_id]
+        return cls(position=position, **data)
