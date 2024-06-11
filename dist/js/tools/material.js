@@ -37,14 +37,12 @@ function getBasisConfigTranslatedToCenter(material) {
     material.toCartesian();
     const updatedBasis = material.Basis;
     const centerOfCoordinates = updatedBasis.centerOfCoordinatesPoint;
-    const centerOfLattice = math_1.math.multiply(
-        0.5,
-        material.Lattice.vectorArrays.reduce((a, b) => math_1.math.add(a, b)),
-    );
+    const centerOfLattice = math_1.math.multiply(0.5, material.Lattice.vectorArrays.reduce((a, b) => math_1.math.add(a, b)));
     const translationVector = math_1.math.subtract(centerOfLattice, centerOfCoordinates);
     updatedBasis.translateByVector(translationVector);
     material.setBasis(updatedBasis.toJSON());
-    if (originalUnits !== constants_1.ATOMIC_COORD_UNITS.cartesian) material.toCrystal();
+    if (originalUnits !== constants_1.ATOMIC_COORD_UNITS.cartesian)
+        material.toCrystal();
 }
 exports.default = {
     scaleOneLatticeVector,
