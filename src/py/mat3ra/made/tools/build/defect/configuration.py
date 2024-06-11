@@ -3,6 +3,7 @@ from typing import Optional, List, Any
 from pydantic import BaseModel
 
 from ...analyze import get_closest_site_id_from_position
+from .enums import PointDefectTypeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -11,6 +12,7 @@ class BaseDefectConfiguration(BaseModel):
 
 
 class PointDefectConfiguration(BaseDefectConfiguration):
+    defect_type: PointDefectTypeEnum
     position: Optional[List[float]] = [0, 0, 0]  # fractional coordinates
     chemical_element: Optional[str] = None
 
