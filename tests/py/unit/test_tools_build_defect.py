@@ -1,5 +1,5 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect import PointDefectConfiguration, PointDefectBuilderParameters, create_defect
+from mat3ra.made.tools.build.defect import PointDefectBuilderParameters, PointDefectConfiguration, create_defect
 
 clean_material = Material.create(Material.default_config)
 
