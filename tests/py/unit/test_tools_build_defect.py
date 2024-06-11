@@ -46,6 +46,6 @@ def test_create_defect_from_site_id():
     )
 
     assert material_with_defect.basis["elements"] == [
-        {"id": 0, "value": "Ge"},
-        {"id": 1, "value": "Si0+"},
+        {"id": 0, "value": "Si0+"},
+        {"id": 1, "value": "Ge"},
     ]
