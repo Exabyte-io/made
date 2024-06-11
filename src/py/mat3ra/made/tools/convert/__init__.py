@@ -3,9 +3,10 @@ import json
 from functools import wraps
 from typing import Any, Callable, Dict, Union
 
-from mat3ra.made.material import Material
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
+from mat3ra.made.material import Material
+from mat3ra.made.utils import map_array_with_id_value_to_array, map_array_to_array_with_id_value
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
 
@@ -17,8 +18,6 @@ from .utils import (
     PymatgenSlab,
     PymatgenStructure,
     label_pymatgen_slab_termination,
-    map_array_to_array_with_id_value,
-    map_array_with_id_value_to_array,
 )
 
 

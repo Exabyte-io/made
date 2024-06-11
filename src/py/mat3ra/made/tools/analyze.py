@@ -1,7 +1,10 @@
+from typing import List
+
 import numpy as np
 from ase import Atoms
 
 from .convert import decorator_convert_material_args_kwargs_to_atoms
+from ..material import Material
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -69,3 +72,20 @@ def get_chemical_formula(atoms: Atoms):
         str: The formula of the atoms.
     """
     return atoms.get_chemical_formula()
+
+
+def get_closest_site_id_from_position(material: Material, position: List[float]) -> int:
+    """
+    Get the site ID of the closest site to a given position in the crystal.
+
+    Args:
+        material (Material): The material object to find the closest site in.
+        position (np.ndarray): The position to find the closest site to.
+
+    Returns:
+        int: The site ID of the closest site.
+    """
+    coordinates = np.array(material.basis["coordinates"])
+    position = np.array(position)  # type: ignore
+    distances = np.linalg.norm(coordinates - position, axis=1)
+    return int(np.argmin(distances))
