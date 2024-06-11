@@ -46,13 +46,13 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
         return [defect.defect_structure]
 
 
-class VacancyBuilder(PointDefectBuilder):
+class VacancyPointDefectBuilder(PointDefectBuilder):
     _generator: PymatgenVacancy = PymatgenVacancy
 
 
-class SubstitutionBuilder(PointDefectBuilder):
+class SubstitutionPointDefectBuilder(PointDefectBuilder):
     _generator: PymatgenSubstitution = PymatgenSubstitution
 
 
-class InterstitialBuilder(PointDefectBuilder):
+class InterstitialPointDefectBuilder(PointDefectBuilder):
     _generator: PymatgenInterstitial = PymatgenInterstitial
