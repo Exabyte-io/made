@@ -1,7 +1,8 @@
 from typing import Optional, List, Any
+from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
-from pydantic import BaseModel
+from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_position
 from .enums import PointDefectTypeEnum
@@ -27,7 +28,8 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
 
     @classmethod
     def from_site_id(cls, site_id: int, **data):
-        position = cls.crystal.coordinates_array[site_id]
+        crystal: Material = data.get("crystal")
+        position = crystal.coordinates_array[site_id]
         return cls(position=position, **data)
 
     @property

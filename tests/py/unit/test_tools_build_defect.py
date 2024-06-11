@@ -1,5 +1,5 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect import PointDefectConfiguration, create_defect
+from mat3ra.made.tools.build.defect import PointDefectConfiguration, PointDefectBuilderParameters, create_defect
 
 clean_material = Material.create(Material.default_config)
 
@@ -32,4 +32,20 @@ def test_create_interstitial():
         {"id": 0, "value": "Ge3+"},
         {"id": 1, "value": "Si0+"},
         {"id": 2, "value": "Si0+"},
+    ]
+
+
+def test_create_defect_from_site_id():
+    # Substitution of Ge in place of Si at site_id=1
+    defect_configuration = PointDefectConfiguration.from_site_id(
+        crystal=clean_material, defect_type="substitution", chemical_element="Ge", site_id=1
+    )
+    defect_builder_parameters = PointDefectBuilderParameters(center_defect=False)
+    material_with_defect = create_defect(
+        builder_parameters=defect_builder_parameters, configuration=defect_configuration
+    )
+
+    assert material_with_defect.basis["elements"] == [
+        {"id": 0, "value": "Ge"},
+        {"id": 1, "value": "Si0+"},
     ]
