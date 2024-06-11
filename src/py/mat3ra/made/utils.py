@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Union
+
 from mat3ra.utils.array import convert_to_array_if_not
 
 

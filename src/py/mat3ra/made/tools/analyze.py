@@ -3,8 +3,8 @@ from typing import List
 import numpy as np
 from ase import Atoms
 
-from .convert import decorator_convert_material_args_kwargs_to_atoms
 from ..material import Material
+from .convert import decorator_convert_material_args_kwargs_to_atoms
 
 
 @decorator_convert_material_args_kwargs_to_atoms
