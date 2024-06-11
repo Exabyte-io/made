@@ -1,15 +1,13 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
-    InterstitialConfiguration,
-    SubstitutionConfiguration,
-    VacancyConfiguration,
+    PointDefectConfiguration,
     create_defect,
 )
 
 
 def test_create_vacancy():
     # vacancy in place of 0 element
-    configuration = VacancyConfiguration()
+    configuration = PointDefectConfiguration(defect_type="VACANCY", site_id=0)
     material = Material.create(Material.default_config)
     defect = create_defect(material, configuration)
 
@@ -18,7 +16,7 @@ def test_create_vacancy():
 
 def test_create_substitution():
     # Substitution of Ge in place of Si at 0 element
-    configuration = SubstitutionConfiguration(element="Ge")
+    configuration = PointDefectConfiguration(defect_type="substitution", element="Ge")
     material = Material.create(Material.default_config)
     defect = create_defect(material, configuration)
 
@@ -28,7 +26,7 @@ def test_create_substitution():
 
 def test_create_interstitial():
     # Interstitial Ge at 0.5, 0.5, 0.5
-    configuration = InterstitialConfiguration(element="Ge", position=[0.5, 0.5, 0.5])
+    configuration = PointDefectConfiguration(defect_type="interstitial", element="Ge", position=[0.5, 0.5, 0.5])
     material = Material.create(Material.default_config)
     defect = create_defect(material, configuration)
 
