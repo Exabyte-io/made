@@ -30,7 +30,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     def from_site_id(cls, site_id: int, **data):
         crystal: Material = data.get("crystal")
         position = crystal.coordinates_array[site_id]
-        return cls(position=position, **data)
+        return cls(position=position, site_id=site_id, **data)
 
     @property
     def _json(self):
