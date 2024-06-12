@@ -48,7 +48,8 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
 
     def _update_material_name(self, material: Material, configuration: BaseBuilder._ConfigurationType) -> Material:
         updated_material = super()._update_material_name(material, configuration)
-        new_name = f"{updated_material.name}, {configuration.defect_type} {configuration.chemical_element} Defect"
+        capitalized_defect_type = configuration.defect_type.name.capitalize()
+        new_name = f"{updated_material.name}, {capitalized_defect_type} {configuration.chemical_element} Defect"
         updated_material.name = new_name
         return updated_material
 
