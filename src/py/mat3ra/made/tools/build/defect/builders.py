@@ -45,7 +45,8 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
         )
         defect = self._generator(pymatgen_structure, pymatgen_periodic_site)
         defect_structure = defect.defect_structure.copy()
-        return [defect_structure.remove_oxidation_states()]
+        defect_structure.remove_oxidation_states()
+        return [defect_structure]
 
     def _update_material_name(self, material: Material, configuration: BaseBuilder._ConfigurationType) -> Material:
         updated_material = super()._update_material_name(material, configuration)
