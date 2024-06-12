@@ -53,10 +53,6 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
         updated_material.name = new_name
         return updated_material
 
-    def _update_material_metadata(self, material, configuration):
-        material.metadata["build"] = {"configuration": configuration.to_json()}
-        return material
-
 
 class VacancyPointDefectBuilder(PointDefectBuilder):
     _generator: PymatgenVacancy = PymatgenVacancy
