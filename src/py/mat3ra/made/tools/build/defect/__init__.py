@@ -9,7 +9,7 @@ from .enums import PointDefectTypeEnum
 
 
 class DefectBuilderFactory(BaseFactory):
-    __class_registry___ = {
+    __class_registry__ = {
         PointDefectTypeEnum.VACANCY: "mat3ra.made.tools.build.defect.builders.VacancyPointDefectBuilder",
         PointDefectTypeEnum.SUBSTITUTION: "mat3ra.made.tools.build.defect.builders.SubstitutionPointDefectBuilder",
         PointDefectTypeEnum.INTERSTITIAL: "mat3ra.made.tools.build.defect.builders.InterstitialPointDefectBuilder",
