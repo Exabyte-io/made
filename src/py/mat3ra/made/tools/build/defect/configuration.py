@@ -35,6 +35,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     @property
     def _json(self):
         return {
+            "type": "PointDefectConfiguration",
             "defect_type": self.defect_type,
             "position": self.position,
             "chemical_element": self.chemical_element,
