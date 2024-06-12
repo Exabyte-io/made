@@ -17,7 +17,7 @@ def test_create_substitution():
     configuration = PointDefectConfiguration(crystal=clean_material, defect_type="substitution", chemical_element="Ge")
     defect = create_defect(configuration)
 
-    assert defect.basis["elements"] == [{"id": 0, "value": "Ge"}, {"id": 1, "value": "Si0+"}]
+    assert defect.basis["elements"] == [{"id": 0, "value": "Ge"}, {"id": 1, "value": "Si"}]
     assert defect.basis["coordinates"][0] == {"id": 0, "value": [0.0, 0.0, 0.0]}
 
 
@@ -29,9 +29,9 @@ def test_create_interstitial():
     defect = create_defect(configuration)
 
     assert defect.basis["elements"] == [
-        {"id": 0, "value": "Ge3+"},
-        {"id": 1, "value": "Si0+"},
-        {"id": 2, "value": "Si0+"},
+        {"id": 0, "value": "Ge"},
+        {"id": 1, "value": "Si"},
+        {"id": 2, "value": "Si"},
     ]
 
 
@@ -46,6 +46,6 @@ def test_create_defect_from_site_id():
     )
 
     assert material_with_defect.basis["elements"] == [
-        {"id": 0, "value": "Si0+"},
+        {"id": 0, "value": "Si"},
         {"id": 1, "value": "Ge"},
     ]
