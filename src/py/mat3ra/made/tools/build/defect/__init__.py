@@ -1,21 +1,18 @@
 from typing import Optional
 
+from mat3ra.utils.factory import BaseFactory
 from mat3ra.made.material import Material
-from .builders import (
-    VacancyPointDefectBuilder,
-    SubstitutionPointDefectBuilder,
-    InterstitialPointDefectBuilder,
-    PointDefectBuilderParameters,
-)
+
+from .builders import PointDefectBuilderParameters
 from .configuration import PointDefectConfiguration
 from .enums import PointDefectTypeEnum
 
 
-def DEFECT_BUILDER_FACTORY(builder_parameters):
-    return {
-        PointDefectTypeEnum.VACANCY: VacancyPointDefectBuilder(builder_parameters),
-        PointDefectTypeEnum.SUBSTITUTION: SubstitutionPointDefectBuilder(builder_parameters),
-        PointDefectTypeEnum.INTERSTITIAL: InterstitialPointDefectBuilder(builder_parameters),
+class DefectBuilderFactory(BaseFactory):
+    __class_registry___ = {
+        PointDefectTypeEnum.VACANCY: "mat3ra.made.tools.build.defect.builders.VacancyPointDefectBuilder",
+        PointDefectTypeEnum.SUBSTITUTION: "mat3ra.made.tools.build.defect.builders.SubstitutionPointDefectBuilder",
+        PointDefectTypeEnum.INTERSTITIAL: "mat3ra.made.tools.build.defect.builders.InterstitialPointDefectBuilder",
     }
 
 
@@ -33,6 +30,7 @@ def create_defect(
     Returns:
         The material with the defect added.
     """
-    builder = DEFECT_BUILDER_FACTORY(builder_parameters)[configuration.defect_type]
+    BuilderClass = DefectBuilderFactory.get_class_by_name(configuration.defect_type)
+    builder = BuilderClass(builder_parameters)
 
     return builder.get_material(configuration) if builder else configuration.crystal
