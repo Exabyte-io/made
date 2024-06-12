@@ -54,7 +54,7 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
 
-    _BuildParametersType = Optional[SimpleInterfaceBuilderParameters]
+    _BuildParametersType = SimpleInterfaceBuilderParameters
     _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
     _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 
@@ -116,9 +116,9 @@ class StrainMatchingInterfaceBuilder(InterfaceBuilder):
         updated_material = super()._update_material_name(material, configuration)
         if StrainModes.mean_abs_strain in material.metadata:
             strain = material.metadata[StrainModes.mean_abs_strain]
-            new_name = f"{updated_material.name}, Strain {strain*100:.3f}%"
+            new_name = f"{updated_material.name}, Strain {strain*100:.3f}pct"
             updated_material.name = new_name
-        return material
+        return updated_material
 
 
 class ZSLStrainMatchingParameters(BaseModel):

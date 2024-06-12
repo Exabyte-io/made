@@ -15,6 +15,10 @@ def map_array_with_id_value_to_array(array: List[Dict[str, Any]]) -> List[Any]:
     return [item["value"] for item in array]
 
 
+def get_array_with_id_value_element_value_by_index(array: List[Dict[str, Any]], index: int = 0) -> List[Any]:
+    return map_array_with_id_value_to_array(array)[index]
+
+
 def filter_array_with_id_value_by_values(
     array: List[Dict[str, Any]], values: Union[List[Any], Any]
 ) -> List[Dict[str, Any]]:

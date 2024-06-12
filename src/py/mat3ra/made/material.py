@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Union
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntity
 from mat3ra.esse.models.material import MaterialSchema
+from mat3ra.made.utils import map_array_with_id_value_to_array
 
 defaultMaterialConfig = {
     "name": "Silicon FCC",
@@ -57,3 +58,7 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
 
     def to_json(self, exclude: List[str] = []) -> MaterialSchemaJSON:
         return {**super().to_json()}
+
+    @property
+    def coordinates_array(self) -> List[List[float]]:
+        return map_array_with_id_value_to_array(self.basis["coordinates"])

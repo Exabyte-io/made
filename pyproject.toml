@@ -27,6 +27,7 @@ dependencies = [
 tools = [
     "pymatgen",
     "ase",
+    "pymatgen-analysis-defects"
 ]
 dev = [
     "pre-commit",

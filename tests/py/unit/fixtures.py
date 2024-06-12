@@ -56,7 +56,7 @@ INTERFACE_PROPERTIES_JSON = {
 
 # Add properties to interface structure
 INTERFACE_STRUCTURE.interface_properties = INTERFACE_PROPERTIES_MOCK
-INTERFACE_NAME = "Cu4(001)-Si8(001), Interface, Strain 0.062%"
+INTERFACE_NAME = "Cu4(001)-Si8(001), Interface, Strain 0.062pct"
 
 # TODO: Use fixtures package when available
 SI_CONVENTIONAL_CELL = {
