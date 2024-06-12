@@ -118,7 +118,7 @@ class StrainMatchingInterfaceBuilder(InterfaceBuilder):
             strain = material.metadata[StrainModes.mean_abs_strain]
             new_name = f"{updated_material.name}, Strain {strain*100:.3f}pct"
             updated_material.name = new_name
-        return material
+        return updated_material
 
 
 class ZSLStrainMatchingParameters(BaseModel):

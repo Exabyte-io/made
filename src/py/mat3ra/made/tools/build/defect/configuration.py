@@ -27,16 +27,18 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
             self.site_id = get_closest_site_id_from_position(self.crystal, position)
 
     @classmethod
-    def from_site_id(cls, site_id: int, **data):
-        crystal: Material = data.get("crystal")
-        position = crystal.coordinates_array[site_id]
-        return cls(position=position, site_id=site_id, **data)
+    def from_site_id(cls, site_id: int, crystal: Material, **data):
+        if crystal:
+            position = crystal.coordinates_array[site_id]
+        else:
+            RuntimeError("Crystal is not defined")
+        return cls(crystal=crystal, position=position, site_id=site_id, **data)
 
     @property
     def _json(self):
         return {
             "type": "PointDefectConfiguration",
-            "defect_type": self.defect_type,
+            "defect_type": self.defect_type.name,
             "position": self.position,
             "chemical_element": self.chemical_element,
         }
