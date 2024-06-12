@@ -1,5 +1,6 @@
 from typing import List, Callable
 
+from mat3ra.made.material import Material
 from pydantic import BaseModel
 from pymatgen.analysis.defects.core import (
     Substitution as PymatgenSubstitution,
@@ -30,12 +31,12 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
     _ConfigurationType = PointDefectConfiguration
     _generator: Callable
 
-    def _get_species(self, configuration: PointDefectConfiguration):
+    def _get_species(self, configuration: BaseBuilder._ConfigurationType):
         crystal_elements = configuration.crystal.basis["elements"]
         placeholder_specie = get_array_with_id_value_element_value_by_index(crystal_elements, 0)
         return configuration.chemical_element or placeholder_specie
 
-    def _generate(self, configuration: PointDefectConfiguration) -> List[_GeneratedItemType]:
+    def _generate(self, configuration: BaseBuilder._ConfigurationType) -> List[_GeneratedItemType]:
         pymatgen_structure = to_pymatgen(configuration.crystal)
         pymatgen_periodic_site = PymatgenPeriodicSite(
             species=self._get_species(configuration),
@@ -44,6 +45,16 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
         )
         defect = self._generator(pymatgen_structure, pymatgen_periodic_site)
         return [defect.defect_structure]
+
+    def _update_material_name(self, material: Material, configuration: BaseBuilder._ConfigurationType) -> Material:
+        updated_material = super()._update_material_name(material, configuration)
+        new_name = f"{updated_material.name}, {configuration.defect_type} {configuration.chemical_element} Defect"
+        updated_material.name = new_name
+        return updated_material
+
+    def _update_material_metadata(self, material, configuration):
+        material.metadata["build"] = {"configuration": configuration.to_json()}
+        return material
 
 
 class VacancyPointDefectBuilder(PointDefectBuilder):
