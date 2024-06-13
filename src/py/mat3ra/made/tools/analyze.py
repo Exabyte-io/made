@@ -2,9 +2,10 @@ from typing import List
 
 import numpy as np
 from ase import Atoms
+from pymatgen.core import IStructure
 
 from ..material import Material
-from .convert import decorator_convert_material_args_kwargs_to_atoms
+from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -89,3 +90,56 @@ def get_closest_site_id_from_position(material: Material, position: List[float])
     position = np.array(position)  # type: ignore
     distances = np.linalg.norm(coordinates - position, axis=1)
     return int(np.argmin(distances))
+
+
+def select_layers(material: Material, atom_index: int, layer_thickness: float):
+    """
+    Selects all atoms within a specified layer thickness of a central atom along a direction.
+    This direction will be orthogonal to the AB plane.
+    Layer thickness is converted from angstroms to fractional units based on the lattice vector length.
+
+    :param material: Material object.
+    :param atom_index: Index of the central atom.
+    :param layer_thickness: Thickness of the layer in angstroms.
+    :return: List of indices of atoms within the specified layer.
+    """
+    coordinates = material.basis["coordinates"]
+    vectors = material.lattice["vectors"]
+    direction_vector = vectors["c"]
+
+    # Normalize the direction vector
+    direction_length = np.linalg.norm(direction_vector)
+    direction_norm = direction_vector / direction_length
+    central_atom_position = coordinates[atom_index]["value"]
+    central_atom_projection = np.dot(central_atom_position, direction_norm)
+
+    layer_thickness_frac = layer_thickness / direction_length
+
+    lower_bound = central_atom_projection - layer_thickness_frac / 2
+    upper_bound = central_atom_projection + layer_thickness_frac / 2
+
+    selected_indices = []
+    for coord in coordinates:
+        # Project each position onto the direction vector
+        projection = np.dot(coord["value"], direction_norm)
+        if lower_bound <= projection <= upper_bound:
+            selected_indices.append(coord["id"])
+    return selected_indices
+
+
+def select_atoms_within_radius_pbc(material: Material, atom_index, radius):
+    """
+    Selects all atoms within a specified radius of a central atom considering periodic boundary conditions.
+    :param material: Material object
+    :param atom_index: Index of the central atom
+    :param radius: Radius in angstroms within which atoms will be selected
+    :return: List of indices of atoms within the specified radius
+    """
+    structure = to_pymatgen(material)
+    immutable_structure = IStructure.from_sites(structure.sites)
+
+    central_atom = immutable_structure[atom_index]
+    sites_within_radius = structure.get_sites_in_sphere(central_atom.coords, radius)
+
+    selected_indices = [site.index for site in sites_within_radius]
+    return selected_indices
