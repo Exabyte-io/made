@@ -63,25 +63,41 @@ def wrap_to_unit_cell(structure: Structure):
     return structure
 
 
-def filter_by_layers(material, central_atom_id, layer_thickness, invert=False):
+def filter_material_by_ids(material: Material, ids: List[int], invert: bool = False) -> Material:
+    """
+    Filter out only atoms corresponding to the ids.
+
+    Args:
+        material (Material): The material object to filter.
+        ids (List[int]): The ids to filter by.
+        invert (bool): Whether to invert the selection.
+
+    Returns:
+        Material: The filtered material object.
+    """
     new_material = material.clone()
+    for key in ["coordinates", "elements", "labels"]:
+        if invert:
+            new_material.basis[key] = [item for i, item in enumerate(new_material.basis[key]) if i not in ids]
+        else:
+            new_material.basis[key] = [item for i, item in enumerate(new_material.basis[key]) if i in ids]
+
+    return new_material
+
+
+def filter_by_layers(material, central_atom_id, layer_thickness, invert=False):
     ids = select_atoms_within_layers(
         material,
         central_atom_id,
         layer_thickness,
     )
-    if invert:
-        ids = [i for i in range(len(material.basis["coordinates"])) if i not in ids]
-    new_basis = filter_array_with_id_value_by_ids(material.basis, ids)
-    new_material.basis = new_basis
-    return new_material
+    return filter_material_by_ids(material, ids, invert=invert)
 
 
-def filter_by_sphere(material, central_atom_id, radius):
-    new_material = material.clone()
+def filter_by_sphere(material, central_atom_id, radius, invert=False):
     ids = select_atoms_within_radius_pbc(
         material,
         central_atom_id,
         radius,
     )
-    return new_material
+    return filter_material_by_ids(material, ids, invert=invert)
