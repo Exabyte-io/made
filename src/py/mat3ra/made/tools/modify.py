@@ -1,10 +1,12 @@
-from typing import Union
+from typing import Union, List
 
+import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.utils import filter_array_with_id_value_by_ids, filter_array_with_id_value_by_values
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
+from .analyze import select_atoms_within_layers, select_atoms_within_radius_pbc
 from .convert import decorator_convert_material_args_kwargs_to_structure
 from .utils import translate_to_bottom_pymatgen_structure
 
@@ -59,3 +61,27 @@ def wrap_to_unit_cell(structure: Structure):
     """
     structure.make_supercell((1, 1, 1), to_unit_cell=True)
     return structure
+
+
+def filter_by_layers(material, central_atom_id, layer_thickness, invert=False):
+    new_material = material.clone()
+    ids = select_atoms_within_layers(
+        material,
+        central_atom_id,
+        layer_thickness,
+    )
+    if invert:
+        ids = [i for i in range(len(material.basis["coordinates"])) if i not in ids]
+    new_basis = filter_array_with_id_value_by_ids(material.basis, ids)
+    new_material.basis = new_basis
+    return new_material
+
+
+def filter_by_sphere(material, central_atom_id, radius):
+    new_material = material.clone()
+    ids = select_atoms_within_radius_pbc(
+        material,
+        central_atom_id,
+        radius,
+    )
+    return new_material
