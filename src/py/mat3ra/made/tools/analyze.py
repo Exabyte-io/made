@@ -92,16 +92,19 @@ def get_closest_site_id_from_position(material: Material, position: List[float])
     return int(np.argmin(distances))
 
 
-def select_layers(material: Material, atom_index: int, layer_thickness: float):
+def select_atoms_within_layers(material: Material, atom_index: int, layer_thickness: float):
     """
-    Selects all atoms within a specified layer thickness of a central atom along a direction.
+    Select all atoms within a specified layer thickness of a central atom along a direction.
     This direction will be orthogonal to the AB plane.
     Layer thickness is converted from angstroms to fractional units based on the lattice vector length.
 
-    :param material: Material object.
-    :param atom_index: Index of the central atom.
-    :param layer_thickness: Thickness of the layer in angstroms.
-    :return: List of indices of atoms within the specified layer.
+    Args:
+        material (Material): Material object
+        atom_index (int): Index of the central atom
+        layer_thickness (float): Thickness of the layer in angstroms
+
+    Returns:
+        List[int]: List of indices of atoms within the specified layer
     """
     coordinates = material.basis["coordinates"]
     vectors = material.lattice["vectors"]
@@ -127,13 +130,17 @@ def select_layers(material: Material, atom_index: int, layer_thickness: float):
     return selected_indices
 
 
-def select_atoms_within_radius_pbc(material: Material, atom_index, radius):
+def select_atoms_within_radius_pbc(material: Material, atom_index: int, radius: float):
     """
-    Selects all atoms within a specified radius of a central atom considering periodic boundary conditions.
-    :param material: Material object
-    :param atom_index: Index of the central atom
-    :param radius: Radius in angstroms within which atoms will be selected
-    :return: List of indices of atoms within the specified radius
+    Select all atoms within a specified radius of a central atom considering periodic boundary conditions.
+
+    Args:
+        material (Material): Material object
+        atom_index (int): Index of the central atom
+        radius (float): Radius of the sphere in angstroms
+
+    Returns:
+        List[int]: List of indices of atoms within the specified
     """
     structure = to_pymatgen(material)
     immutable_structure = IStructure.from_sites(structure.sites)
