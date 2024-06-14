@@ -1,9 +1,8 @@
 from ase.build import bulk
+from mat3ra.made.material import Material
+from mat3ra.made.tools.build.utils import merge_materials
 from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.modify import filter_by_layers
-from mat3ra.made.tools.build.utils import merge_materials
-
-from mat3ra.made.material import Material
 from mat3ra.utils import assertion as assertion_utils
 
 ase_ni = bulk("Ni", "fcc", a=3.52, cubic=True)

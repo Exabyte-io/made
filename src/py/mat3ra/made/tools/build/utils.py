@@ -6,7 +6,7 @@ from mat3ra.made.material import Material
 
 def merge_materials(materials: List[Material], distance_tolerance: float = 0.01) -> Material:
     """
-    Merge multiple materials into a single material, handling potential spatial duplicates.
+    Merge multiple materials into a single material, replacing colliding atoms with the latest material's atoms.
     """
     if not materials:
         return None
