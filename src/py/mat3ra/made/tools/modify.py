@@ -1,6 +1,5 @@
-from typing import Union, List
+from typing import List, Union
 
-import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.utils import filter_array_with_id_value_by_ids, filter_array_with_id_value_by_values
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
@@ -86,6 +85,18 @@ def filter_material_by_ids(material: Material, ids: List[int], invert: bool = Fa
 
 
 def filter_by_layers(material, central_atom_id, layer_thickness, invert=False):
+    """
+    Filter out atoms within a specified layer thickness of a central atom along c-vector direction.
+
+    Args:
+        material (Material): The material object to filter.
+        central_atom_id (int): Index of the central atom.
+        layer_thickness (float): Thickness of the layer in angstroms.
+        invert (bool): Whether to invert the selection.
+
+    Returns:
+        Material: The filtered material object.
+    """
     ids = select_atoms_within_layers(
         material,
         central_atom_id,
@@ -95,6 +106,18 @@ def filter_by_layers(material, central_atom_id, layer_thickness, invert=False):
 
 
 def filter_by_sphere(material, central_atom_id, radius, invert=False):
+    """
+    Filter out atoms within a specified radius of a central atom considering periodic boundary conditions.
+
+    Args:
+        material (Material): The material object to filter.
+        central_atom_id (int): Index of the central atom.
+        radius (float): Radius of the sphere in angstroms.
+        invert (bool): Whether to invert the selection.
+
+    Returns:
+        Material: The filtered material object.
+    """
     ids = select_atoms_within_radius_pbc(
         material,
         central_atom_id,
