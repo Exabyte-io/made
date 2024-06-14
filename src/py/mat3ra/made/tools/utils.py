@@ -1,6 +1,7 @@
 from functools import wraps
-from typing import Callable
+from typing import Callable, Dict
 
+import numpy as np
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 from pymatgen.core.structure import Structure
 
@@ -34,3 +35,37 @@ def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
         return func(*new_args, **kwargs)
 
     return wrapper
+
+
+def convert_basis_to_cartesian(basis: Dict) -> Dict:
+    """
+    Convert the basis to the Cartesian coordinates.
+    Args:
+        basis (Dict): The basis to convert.
+
+    Returns:
+        Dict: The basis in Cartesian coordinates.
+    """
+    if basis["units"] == "cartesian":
+        return basis
+    unit_cell = basis["cell"]
+    basis["coordinates"] = np.multiply(basis["coordinates"], unit_cell)
+    basis["units"] = "cartesian"
+    return basis
+
+
+def convert_basis_to_crystal(basis: Dict) -> Dict:
+    """
+    Convert the basis to the crystal coordinates.
+    Args:
+        basis (Dict): The basis to convert.
+
+    Returns:
+        Dict: The basis in crystal coordinates.
+    """
+    if basis["units"] == "crystal":
+        return basis
+    unit_cell = basis["cell"]
+    basis["coordinates"] = np.multiply(basis["coordinates"], np.linalg.inv(unit_cell))
+    basis["units"] = "crystal"
+    return basis
