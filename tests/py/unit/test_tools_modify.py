@@ -1,11 +1,10 @@
 from ase.build import bulk
-
-from mat3ra.utils import assertion as assertion_utils
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.modify import filter_by_label, filter_by_layers, filter_by_sphere
-from .fixtures import SI_CONVENTIONAL_CELL
+from mat3ra.utils import assertion as assertion_utils
 
+from .fixtures import SI_CONVENTIONAL_CELL
 
 COMMON_PART = {
     "units": "crystal",
