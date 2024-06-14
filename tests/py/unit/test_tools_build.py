@@ -13,17 +13,17 @@ cavity = filter_by_layers(material, 0, 1.0, invert=True)
 # Change 0th element
 section.basis["elements"][0]["value"] = "Ge"
 
-# Add 3rd element to cavity for collision
-cavity.basis["elements"].append({"id": 3, "value": "S"})
-cavity.basis["coordinates"].append({"id": 3, "value": section.basis["coordinates"][1]["value"]})
+# Add element to cavity for collision test
+cavity.basis["elements"].append({"id": 4, "value": "S"})
+cavity.basis["coordinates"].append({"id": 4, "value": section.basis["coordinates"][1]["value"]})
 
 expected_merged_material_basis = {
-    "elements": [{"id": 0, "value": "Ge"}, {"id": 3, "value": "S"}, {"id": 1, "value": "Ni"}, {"id": 2, "value": "Ni"}],
+    "elements": [{"id": 0, "value": "Ge"}, {"id": 1, "value": "Ni"}, {"id": 2, "value": "Ni"}, {"id": 4, "value": "S"}],
     "coordinates": [
         {"id": 0, "value": [0.0, 0.0, 0.0]},
-        {"id": 3, "value": [0.5, 0.5, 0.0]},
         {"id": 1, "value": [0.0, 0.5, 0.5]},
         {"id": 2, "value": [0.5, 0.0, 0.5]},
+        {"id": 4, "value": [0.5, 0.5, 0.0]},
     ],
     "labels": [],
 }
@@ -33,14 +33,14 @@ expected_merged_material_reverse_basis = {
     "elements": [
         {"id": 1, "value": "Ni"},
         {"id": 2, "value": "Ni"},
-        {"id": 3, "value": "Ni"},
         {"id": 0, "value": "Ge"},
+        {"id": 3, "value": "Ni"},
     ],
     "coordinates": [
         {"id": 1, "value": [0.0, 0.5, 0.5]},
         {"id": 2, "value": [0.5, 0.0, 0.5]},
-        {"id": 3, "value": [0.5, 0.5, 0.0]},
         {"id": 0, "value": [0.0, 0.0, 0.0]},
+        {"id": 3, "value": [0.5, 0.5, 0.0]},
     ],
     "labels": [],
 }
