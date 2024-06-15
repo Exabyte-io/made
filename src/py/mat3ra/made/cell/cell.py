@@ -26,6 +26,15 @@ class Cell(RoundNumericValuesMixin, BaseModel):
             return [self.vector1, self.vector2, self.vector3]
         return self.round_array_or_number([self.vector1, self.vector2, self.vector3])
 
+    def to_json(self, skip_rounding=False):
+        _ = self.round_array_or_number
+        if skip_rounding:
+            return {
+                "vector1": _(self.vector1) if skip_rounding else self.vector1,
+                "vector2": _(self.vector2) if skip_rounding else self.vector2,
+                "vector3": _(self.vector3) if skip_rounding else self.vector3,
+            }
+
     def clone(self):
         return self.from_nested_array(self.vectors_as_array)
 
