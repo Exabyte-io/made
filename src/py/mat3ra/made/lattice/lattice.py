@@ -1,12 +1,11 @@
-from typing import List, Dict, Any
-
 import math
+from typing import Any, Dict, List
+
 import numpy as np
+from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel
 
-from mat3ra.utils.mixins import RoundNumericValuesMixin
 from ..cell.cell import Cell
-
 
 HASH_TOLERANCE = 3
 

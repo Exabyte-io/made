@@ -1,9 +1,9 @@
 from typing import List
 
 import numpy as np
-from pydantic import BaseModel
 from mat3ra.esse.models.core.primitive.array_of_3_numbers import ArrayOf3NumberElementsSchema
 from mat3ra.utils.mixins import RoundNumericValuesMixin
+from pydantic import BaseModel
 
 
 class Cell(RoundNumericValuesMixin, BaseModel):

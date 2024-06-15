@@ -1,7 +1,6 @@
 import json
 
 from mat3ra.code.constants import AtomicCoordinateUnits
-
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel
 
@@ -13,10 +12,9 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     elements: ArrayWithIds = ArrayWithIds(["Si"])
     coordinates: ArrayWithIds = ArrayWithIds([0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
-    cell: Cell = Cell()
+    cell: Cell = Cell([1, 0, 0], [0, 1, 0], [0, 0, 1])
     # TODO: isolate labels to a separate class
     labels: ArrayWithIds = ArrayWithIds([])
-
 
     def to_json(self, skip_rounding=False):
         json_value = {
@@ -27,6 +25,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
             "labels": self.labels.to_json(),
         }
         return json.loads(json.dumps(json_value))
+
     def clone(self):
         return Basis(
             elements=self.toJSON()["elements"],
@@ -61,9 +60,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         self.elements.add_item(element)
         self.coordinates.add_item(coordinate)
 
-    def remove_atom(self, element=None, coordinate=None, id=None):
-        # TODO: implement remove_atom
-        # if element and len(coordinate) > 0:
-        #     self.elements.remove_item(element, id)
-        #     self.coordinates.remove_item(coordinate, id)
-        #     self.labels.remove_item(id)
+    def remove_atom_by_id(self, id=None):
+        self.elements.remove_item(id)
+        self.coordinates.remove_item(id)
+        self.labels.remove_item(id)
