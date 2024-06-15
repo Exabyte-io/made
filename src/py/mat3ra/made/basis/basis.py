@@ -9,12 +9,12 @@ from ..utils import ArrayWithIds
 
 
 class Basis(RoundNumericValuesMixin, BaseModel):
-    elements: ArrayWithIds = ArrayWithIds(["Si"])
-    coordinates: ArrayWithIds = ArrayWithIds([0, 0, 0])
+    elements: ArrayWithIds = ArrayWithIds(array=["Si"])
+    coordinates: ArrayWithIds = ArrayWithIds(array=[0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
     cell: Cell = Cell([1, 0, 0], [0, 1, 0], [0, 0, 1])
     # TODO: isolate labels to a separate class
-    labels: ArrayWithIds = ArrayWithIds([])
+    labels: ArrayWithIds = ArrayWithIds(array=[])
 
     def to_json(self, skip_rounding=False):
         json_value = {
