@@ -1,25 +1,38 @@
 from typing import List
 
 import numpy as np
+from pydantic import BaseModel
+from mat3ra.esse.models.core.primitive.array_of_3_numbers import ArrayOf3NumberElementsSchema
+from mat3ra.utils.mixins import RoundNumericValuesMixin
 
 
-class Cell:
-    tolerance = 1
+class Cell(RoundNumericValuesMixin, BaseModel):
+    # TODO: figure out how to use
+    vector1: ArrayOf3NumberElementsSchema = [1, 0, 0]
+    vector2: ArrayOf3NumberElementsSchema = [0, 1, 0]
+    vector3: ArrayOf3NumberElementsSchema = [0, 0, 1]
+    tolerance = 1e-6
 
-    def __init__(self, nested_array):
-        self.vector1, self.vector2, self.vector3 = nested_array
+    @classmethod
+    def from_nested_array(cls, nested_array):
+        return cls(vector1=nested_array[0], vector2=nested_array[1], vector3=nested_array[2])
+
+    def __init__(self, vector1, vector2, vector3):
+        super().__init__(**{"vector1": vector1, "vector2": vector2, "vector3": vector3})
 
     @property
-    def vectors_as_array(self) -> List[List[float]]:
-        return [[0 if abs(c) < self.tolerance else c for c in v] for v in [self.vector1, self.vector2, self.vector3]]
+    def vectors_as_array(self, skip_rounding=False) -> List[ArrayOf3NumberElementsSchema]:
+        if skip_rounding:
+            return [self.vector1, self.vector2, self.vector3]
+        return self.round_array_or_number([self.vector1, self.vector2, self.vector3])
 
     def clone(self):
-        return self.__class__(self.vectors_as_array)
+        return self.from_nested_array(self.vectors_as_array)
 
     def clone_and_scale_by_matrix(self, matrix):
-        newCell = self.clone()
-        newCell.scale_by_matrix(matrix)
-        return newCell
+        new_cell = self.clone()
+        new_cell.scale_by_matrix(matrix)
+        return new_cell
 
     def convert_point_to_cartesian(self, point):
         np_vector = np.array(self.vectors_as_array)
