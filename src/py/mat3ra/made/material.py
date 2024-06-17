@@ -67,10 +67,8 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
 
     @property
     def basis(self) -> Basis:
-        # TODO: get the correct type
-        return Basis(self.get_prop("basis"))  # type: ignore
+        return Basis.from_dict(self.get_prop("basis"))
 
     @property
     def lattice(self) -> Lattice:
-        # TODO: get the correct type
-        return Lattice(self.get_prop("lattice"))  # type: ignore
+        return Lattice.from_dict(self.get_prop("lattice"))

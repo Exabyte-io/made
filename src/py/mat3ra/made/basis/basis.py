@@ -1,4 +1,5 @@
 import json
+from typing import Dict
 
 from mat3ra.code.constants import AtomicCoordinateUnits
 from mat3ra.utils.mixins import RoundNumericValuesMixin
@@ -15,6 +16,16 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     cell: Cell = Cell([1, 0, 0], [0, 1, 0], [0, 0, 1])
     # TODO: isolate labels to a separate class
     labels: ArrayWithIds = ArrayWithIds(array=[])
+
+    @staticmethod
+    def from_dict(config: Dict) -> "Basis":
+        return Basis(
+            elements=config.get("elements", []),
+            coordinates=config.get("coordinates", []),
+            units=config.get("units", AtomicCoordinateUnits.crystal),
+            cell=Cell.from_dict(config.get("cell", {})),
+            labels=config.get("labels", []),
+        )
 
     def to_json(self, skip_rounding=False):
         json_value = {

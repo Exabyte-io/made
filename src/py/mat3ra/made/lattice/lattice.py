@@ -20,6 +20,19 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
     units: Dict[str, str]
     type: str = "TRI"
 
+    @staticmethod
+    def from_dict(config: Dict) -> "Lattice":
+        return Lattice(
+            a=config.get("a", 0.0),
+            b=config.get("b", 0.0),
+            c=config.get("c", 0.0),
+            alpha=config.get("alpha", 0.0),
+            beta=config.get("beta", 0.0),
+            gamma=config.get("gamma", 0.0),
+            units=config.get("units", {}),
+            type=config.get("type", "TRI"),
+        )
+
     @property
     def vectors(self) -> List[List[float]]:
         a = self.a
