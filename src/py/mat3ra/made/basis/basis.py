@@ -17,14 +17,14 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     # TODO: isolate labels to a separate class
     labels: ArrayWithIds = ArrayWithIds(array=[])
 
-    @staticmethod
-    def from_dict(config: Dict) -> "Basis":
+    @classmethod
+    def from_dict(cls, config: Dict) -> "Basis":
         return Basis(
-            elements=config.get("elements", []),
-            coordinates=config.get("coordinates", []),
+            elements=ArrayWithIds.from_list(config.get("elements", [])),
+            coordinates=ArrayWithIds.from_list(config.get("coordinates", [])),
             units=config.get("units", AtomicCoordinateUnits.crystal),
-            cell=Cell.from_dict(config.get("cell", {})),
-            labels=config.get("labels", []),
+            cell=Cell.from_nested_array(config.get("cell", {})),
+            labels=ArrayWithIds.from_list(config.get("labels", [])),
         )
 
     def to_json(self, skip_rounding=False):

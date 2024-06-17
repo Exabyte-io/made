@@ -63,6 +63,11 @@ class ValueWithId(BaseModel):
 class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
     array: List[Any] = []
 
+    @classmethod
+    def from_list(cls, list_of_dicts: List[Dict[str, Any]]) -> "ArrayWithIds":
+        array = [item["value"] for item in list_of_dicts]
+        return cls(array=array)
+
     def to_array_of_values_with_ids(self) -> List[ValueWithId]:
         return [ValueWithId(id=index, value=item) for index, item in enumerate(self.array)]
 

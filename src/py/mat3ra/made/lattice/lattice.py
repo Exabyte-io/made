@@ -20,8 +20,8 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
     units: Dict[str, str]
     type: str = "TRI"
 
-    @staticmethod
-    def from_dict(config: Dict) -> "Lattice":
+    @classmethod
+    def from_dict(cls, config: Dict) -> "Lattice":
         return Lattice(
             a=config.get("a", 0.0),
             b=config.get("b", 0.0),
