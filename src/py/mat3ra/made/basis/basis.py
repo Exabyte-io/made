@@ -13,17 +13,18 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     elements: ArrayWithIds = ArrayWithIds(array=["Si"])
     coordinates: ArrayWithIds = ArrayWithIds(array=[0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
-    cell: Cell = Cell([1, 0, 0], [0, 1, 0], [0, 0, 1])
+    cell: Cell = Cell()
     # TODO: isolate labels to a separate class
     labels: ArrayWithIds = ArrayWithIds(array=[])
 
     @classmethod
     def from_dict(cls, config: Dict) -> "Basis":
+        cell_vectors = config.get("cell", {})
         return Basis(
             elements=ArrayWithIds.from_list(config.get("elements", [])),
             coordinates=ArrayWithIds.from_list(config.get("coordinates", [])),
             units=config.get("units", AtomicCoordinateUnits.crystal),
-            cell=Cell.from_nested_array(config.get("cell", {})),
+            cell=Cell(cell_vectors[0], cell_vectors[1], cell_vectors[2]) if cell_vectors else Cell(),
             labels=ArrayWithIds.from_list(config.get("labels", [])),
         )
 
@@ -46,6 +47,14 @@ class Basis(RoundNumericValuesMixin, BaseModel):
             isEmpty=False,
             labels=self.labels,
         )
+
+    @property
+    def labels(self):
+        return self.labels
+
+    @property.setter
+    def labels(self, value):
+        self.labels = value
 
     @property
     def is_in_crystal_units(self):

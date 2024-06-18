@@ -17,7 +17,7 @@ class Cell(RoundNumericValuesMixin, BaseModel):
     def from_nested_array(cls, nested_array):
         return cls(vector1=nested_array[0], vector2=nested_array[1], vector3=nested_array[2])
 
-    def __init__(self, vector1, vector2, vector3):
+    def __init__(self, vector1=[1, 0, 0], vector2=[0, 1, 0], vector3=[0, 0, 1]):
         super().__init__(**{"vector1": vector1, "vector2": vector2, "vector3": vector3})
 
     @property

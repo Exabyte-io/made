@@ -21,8 +21,8 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
         Material: The filtered material object.
     """
     new_material = material.clone()
-    labels = material.basis["labels"]
-    filtered_labels = filter_array_with_id_value_by_values(labels, label)
+    labels = material.basis.labels
+    filtered_labels = labels.filter_by_values(label)
     filtered_label_ids = [item["id"] for item in filtered_labels]
     for key in ["coordinates", "elements", "labels"]:
         new_material.basis[key] = filter_array_with_id_value_by_ids(new_material.basis[key], filtered_label_ids)

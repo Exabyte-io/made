@@ -82,9 +82,15 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
         int_ids = list(map(lambda i: int(i), convert_to_array_if_not(ids)))
         self.array = [item for index, item in enumerate(self.array) if index in int_ids]
 
+    def to_dict(self, skip_rounding=True) -> List[Dict[str, Any]]:
+        return [
+            item.to_dict() if skip_rounding else self.round_array_or_number(item.to_dict())
+            for item in self.to_array_of_values_with_ids()
+        ]
+
     def to_json(self, skip_rounding=True) -> str:
         array_with_ids_values = [
-            self.round_array_or_number(item) if skip_rounding else item for item in self.to_array_of_values_with_ids()
+            item if skip_rounding else self.round_array_or_number(item) for item in self.to_array_of_values_with_ids()
         ]
         return json.dumps([item.to_json() for item in array_with_ids_values])
 
