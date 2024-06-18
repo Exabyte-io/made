@@ -32,8 +32,8 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
     _generator: Callable
 
     def _get_species(self, configuration: BaseBuilder._ConfigurationType):
-        crystal_elements = configuration.crystal.basis["elements"]
-        placeholder_specie = get_array_with_id_value_element_value_by_index(crystal_elements, 0)
+        crystal_elements = configuration.crystal.basis.elements.array
+        placeholder_specie = crystal_elements[0]
         return configuration.chemical_element or placeholder_specie
 
     def _generate(self, configuration: BaseBuilder._ConfigurationType) -> List[_GeneratedItemType]:
