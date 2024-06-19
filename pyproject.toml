@@ -25,7 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 # tracking separately the deps required to use the tools module
 tools = [
-    "pymatgen",
+    "pymatgen<=2024.6.4",
     "ase",
     "pymatgen-analysis-defects"
 ]
