@@ -6,10 +6,10 @@ from mat3ra.made.material import Material
 from mat3ra.utils import assertion as assertion_utils
 
 REFERENCE_OBJECT_1 = {"key1": "value1", "key2": "value2"}
-material = Material.create(Material.default_config)
 
 
 def test_create():
+    material = Material.create(Material.default_config)
     assert isinstance(material.basis, Basis)
     assert isinstance(material.lattice, Lattice)
     assert material.to_json() == Material.default_config
@@ -17,6 +17,7 @@ def test_create():
 
 
 def test_material_to_json():
+    material = Material.create(Material.default_config)
     labels_array = [{"id": 0, "value": 0}, {"id": 1, "value": 1}]
     config_with_labels = {
         **Material.default_config,
@@ -31,7 +32,7 @@ def test_material_to_json():
 
 
 def test_basis_to_json():
+    material = Material.create(Material.default_config)
     basis = material.basis
     expected_basis_config = {**Material.default_config["basis"], "cell": None, "labels": []}
-    expected_basis_json = json.loads(json.dumps(expected_basis_config))
-    assertion_utils.assert_deep_almost_equal(expected_basis_json, basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_basis_config, basis.to_json())
