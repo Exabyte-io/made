@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Union, Optional
 
 from mat3ra.utils.array import convert_to_array_if_not
 from mat3ra.utils.mixins import RoundNumericValuesMixin
@@ -44,15 +44,16 @@ def are_arrays_equal_by_id_value(array1: List[Dict[str, Any]], array2: List[Dict
     return map_array_with_id_value_to_array(array1) == map_array_with_id_value_to_array(array2)
 
 
-class ValueWithId(BaseModel):
+class ValueWithId(RoundNumericValuesMixin, BaseModel):
     id: int = 0
     value: Any = None
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {"id": self.id, "value": self.value}
+    def to_dict(self, skip_rounding: bool = True) -> Dict[str, Any]:
+        rounded_value = self.round_array_or_number(self.value) if not skip_rounding else self.value
+        return {"id": self.id, "value": rounded_value}
 
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict())
+    def to_json(self, skip_rounding: bool = True) -> str:
+        return json.dumps(self.to_dict(skip_rounding=skip_rounding))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ValueWithId):
@@ -62,48 +63,66 @@ class ValueWithId(BaseModel):
 
 class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
     array: List[Any] = []
+    ids: List[int] = [index for index in range(len(array))]
 
     @classmethod
     def from_list(cls, list_of_dicts: List[Dict[str, Any]]) -> "ArrayWithIds":
         array = [item["value"] for item in list_of_dicts]
-        return cls(array=array)
+        ids = [item["id"] for item in list_of_dicts]
+        return cls(array=array, ids=ids)
 
     def to_array_of_values_with_ids(self) -> List[ValueWithId]:
-        return [ValueWithId(id=index, value=item) for index, item in enumerate(self.array)]
+        return [ValueWithId(id=id, value=item) for id, item in zip(self.ids, self.array)]
 
-    def get_element_value_by_index(self, index: int = 0) -> List[Any]:
-        return self.array[index]
+    def get_element_value_by_index(self, index: int) -> Any:
+        return self.array[index] if index < len(self.array) else None
 
     def filter_by_values(self, values: Union[List[Any], Any]):
-        values = convert_to_array_if_not(values)
+        values = [values] if not isinstance(values, list) else values
         self.array = [item for item in self.array if item in values]
 
-    def filter_by_ids(self, ids: Union[List[int], List[str], int, str]):
+    def filter_by_indices(self, ids: Union[List[int], List[str], int, str]):
         int_ids = list(map(lambda i: int(i), convert_to_array_if_not(ids)))
         self.array = [item for index, item in enumerate(self.array) if index in int_ids]
+        self.ids = [item for index, item in enumerate(self.ids) if index in int_ids]
 
-    def to_dict(self, skip_rounding=True) -> List[Dict[str, Any]]:
+    def filter_by_ids(self, ids: Union[List[int], int]):
+        if isinstance(ids, int):
+            ids = [ids]
+        ids_set = set(ids)
+        keep_indices = [index for index, id_ in enumerate(self.ids) if id_ in ids_set]
+        self.ids = [self.ids[index] for index in keep_indices]
+        self.array = [self.array[index] for index in keep_indices]
+
+    def to_dict(self) -> List[Dict[str, Any]]:
         return [
-            item.to_dict() if skip_rounding else self.round_array_or_number(item.to_dict())
-            for item in self.to_array_of_values_with_ids()
+            item.to_dict() if isinstance(item, ValueWithId) else ValueWithId(id=index, value=item).to_dict()
+            for index, item in enumerate(self.array)
         ]
 
     def to_json(self, skip_rounding=True) -> str:
         array_with_ids_values = [
-            item if skip_rounding else self.round_array_or_number(item) for item in self.to_array_of_values_with_ids()
+            ValueWithId(id=item.id, value=self.round_array_or_number(item.value)) if not skip_rounding else item
+            for item in self.to_array_of_values_with_ids()
         ]
-        return json.dumps([item.to_json() for item in array_with_ids_values])
+        return json.dumps([item.to_dict() for item in array_with_ids_values])
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, ArrayWithIds):
-            return False
-        return self.array == other.array
+        return isinstance(other, ArrayWithIds) and self.array == other.array and self.ids == other.ids
 
     def map_array_in_place(self, func: Callable):
         self.array = list(map(func, self.array))
 
-    def add_item(self, element: Any):
+    def add_item(self, element: Any, id: Optional[int] = None):
+        if id is None:
+            new_id = max(self.ids, default=-1) + 1
+        else:
+            new_id = id
         self.array.append(element)
+        self.ids.append(new_id)
 
-    def remove_item(self, index: int = 0):
-        self.array.pop(index)
+    def remove_item(self, index: int, id: Optional[int] = None):
+        if id is not None:
+            index = self.ids.index(id)
+        del self.array[index]
+        del self.ids[index]
