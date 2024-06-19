@@ -9,7 +9,7 @@ def test_create_vacancy():
     configuration = PointDefectConfiguration(crystal=clean_material, defect_type="vacancy", site_id=0)
     defect = create_defect(configuration)
 
-    assert len(defect.basis.elements.array) == 1
+    assert len(defect.basis.elements.values) == 1
 
 
 def test_create_substitution():

@@ -1,8 +1,10 @@
 import numpy as np
 from ase import Atoms
 from ase.build import bulk
+from mat3ra.made.basis.basis import Basis
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
+from mat3ra.made.utils import ArrayWithIds
 from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Element, Lattice, Structure
 
@@ -56,7 +58,8 @@ def test_from_poscar():
 
 def test_to_ase():
     material = Material.create(Material.default_config)
-    material.basis["labels"] = [{"id": 0, "value": 0}, {"id": 1, "value": 1}]
+    labels_array = [{"id": 0, "value": 0}, {"id": 1, "value": 1}]
+    material.basis = Basis(**Material.default_config["basis"], labels=labels_array)
     ase_atoms = to_ase(material)
     assert isinstance(ase_atoms, Atoms)
     assert np.allclose(
