@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from mat3ra.code.constants import AtomicCoordinateUnits
 from mat3ra.utils.mixins import RoundNumericValuesMixin
@@ -10,22 +10,31 @@ from ..utils import ArrayWithIds
 
 
 class Basis(RoundNumericValuesMixin, BaseModel):
-    elements: ArrayWithIds = ArrayWithIds(array=["Si"])
-    coordinates: ArrayWithIds = ArrayWithIds(array=[0, 0, 0])
+    elements: ArrayWithIds = ArrayWithIds(values=["Si"])
+    coordinates: ArrayWithIds = ArrayWithIds(values=[0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
     cell: Optional[Cell] = None
     # TODO: isolate labels to a separate class
-    labels: ArrayWithIds = ArrayWithIds(array=[])
+    labels: Optional[ArrayWithIds] = ArrayWithIds(values=[])
+    constraints: Optional[ArrayWithIds] = ArrayWithIds(values=[])
 
     @classmethod
-    def from_dict(cls, config: Dict) -> "Basis":
-        cell_vectors = config.get("cell", {})
+    def from_dict(
+        cls,
+        elements: List[Dict],
+        coordinates: List[Dict],
+        units: str,
+        labels: Optional[List[Dict]] = None,
+        cell: Optional[Dict] = None,
+        constraints: Optional[List[Dict]] = None,
+    ) -> "Basis":
         return Basis(
-            elements=ArrayWithIds.from_list(config.get("elements", [])),
-            coordinates=ArrayWithIds.from_list(config.get("coordinates", [])),
-            units=config.get("units", AtomicCoordinateUnits.crystal),
-            cell=Cell(cell_vectors[0], cell_vectors[1], cell_vectors[2]) if cell_vectors else None,
-            labels=ArrayWithIds.from_list(config.get("labels", [])),
+            elements=ArrayWithIds.from_list_of_dicts(elements),
+            coordinates=ArrayWithIds.from_list_of_dicts(coordinates),
+            units=units,
+            cell=Cell.from_nested_array(cell) if cell else None,
+            labels=ArrayWithIds.from_list_of_dicts(labels) if labels else ArrayWithIds(values=[]),
+            constraints=ArrayWithIds.from_list_of_dicts(constraints) if constraints else ArrayWithIds(values=[]),
         )
 
     def to_json(self, skip_rounding=False):
