@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable, Dict, List, Union, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from mat3ra.utils.array import convert_to_array_if_not
 from mat3ra.utils.mixins import RoundNumericValuesMixin
@@ -63,7 +63,7 @@ class ValueWithId(RoundNumericValuesMixin, BaseModel):
 
 class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
     values: List[Any] = []
-    ids: List[int] = [index for index in range(len(values))]
+    ids: List[int] = []
 
     @classmethod
     def from_list_of_dicts(cls, list_of_dicts: List[Dict[str, Any]]) -> "ArrayWithIds":
@@ -81,21 +81,28 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
         return self.values[index] if index < len(self.values) else None
 
     def filter_by_values(self, values: Union[List[Any], Any]):
-        values = [values] if not isinstance(values, list) else values
-        self.values = [item for item in self.values if item in values]
+        values_to_keep = set(values) if isinstance(values, list) else {values}
+        filtered_items = [(v, i) for v, i in zip(self.values, self.ids) if v in values_to_keep]
+        if filtered_items:
+            values_unpacked, ids_unpacked = zip(*filtered_items)
+            self.values = list(values_unpacked)
+            self.ids = list(ids_unpacked)
+        else:
+            self.values = []
+            self.ids = []
 
-    def filter_by_indices(self, ids: Union[List[int], List[str], int, str]):
-        int_ids = list(map(lambda i: int(i), convert_to_array_if_not(ids)))
-        self.values = [item for index, item in enumerate(self.values) if index in int_ids]
-        self.ids = [item for index, item in enumerate(self.ids) if index in int_ids]
+    def filter_by_indices(self, indices: Union[List[int], int]):
+        index_set = set(indices) if isinstance(indices, list) else {indices}
+        self.values = [self.values[i] for i in range(len(self.values)) if i in index_set]
+        self.ids = [self.ids[i] for i in range(len(self.ids)) if i in index_set]
 
     def filter_by_ids(self, ids: Union[List[int], int]):
         if isinstance(ids, int):
             ids = [ids]
         ids_set = set(ids)
         keep_indices = [index for index, id_ in enumerate(self.ids) if id_ in ids_set]
-        self.ids = [self.ids[index] for index in keep_indices]
         self.values = [self.values[index] for index in keep_indices]
+        self.ids = [self.ids[index] for index in keep_indices]
 
     def to_dict(self) -> List[Dict[str, Any]]:
         return [
@@ -108,7 +115,7 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
             ValueWithId(id=item.id, value=self.round_array_or_number(item.value)) if not skip_rounding else item
             for item in self.to_array_of_values_with_ids()
         ]
-        return json.dumps([item.to_dict() for item in array_with_ids_values])
+        return json.loads(json.dumps([item.to_dict() for item in array_with_ids_values]))
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, ArrayWithIds) and self.values == other.values and self.ids == other.ids
@@ -126,6 +133,12 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
 
     def remove_item(self, index: int, id: Optional[int] = None):
         if id is not None:
-            index = self.ids.index(id)
-        del self.values[index]
-        del self.ids[index]
+            try:
+                index = self.ids.index(id)
+            except ValueError:
+                raise ValueError("ID not found in the list")
+        if index < len(self.values):
+            del self.values[index]
+            del self.ids[index]
+        else:
+            raise IndexError("Index out of range")
