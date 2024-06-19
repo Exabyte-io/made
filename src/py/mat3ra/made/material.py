@@ -3,7 +3,9 @@ from typing import Any, Dict, List, Union
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntity
 from mat3ra.esse.models.material import MaterialSchema
-from mat3ra.made.utils import map_array_with_id_value_to_array
+
+from .basis.basis import Basis
+from .lattice.lattice import Lattice
 
 defaultMaterialConfig = {
     "name": "Silicon FCC",
@@ -61,4 +63,20 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
 
     @property
     def coordinates_array(self) -> List[List[float]]:
-        return map_array_with_id_value_to_array(self.basis["coordinates"])
+        return self.basis.coordinates.values
+
+    @property
+    def basis(self) -> Basis:
+        return Basis.from_dict(**self.get_prop("basis"))
+
+    @basis.setter
+    def basis(self, basis: Basis) -> None:
+        self.set_prop("basis", basis.to_json())
+
+    @property
+    def lattice(self) -> Lattice:
+        return Lattice(**self.get_prop("lattice"))
+
+    @lattice.setter
+    def lattice(self, lattice: Lattice) -> None:
+        self.set_prop("lattice", lattice.to_json())
