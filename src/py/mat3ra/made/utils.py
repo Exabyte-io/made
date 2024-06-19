@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, List, Union, Optional
 
 from mat3ra.utils.array import convert_to_array_if_not
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 # TODO: move to a more general location
@@ -62,28 +62,31 @@ class ValueWithId(RoundNumericValuesMixin, BaseModel):
 
 
 class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
-    array: List[Any] = []
-    ids: List[int] = [index for index in range(len(array))]
+    values: List[Any] = []
+    ids: List[int] = [index for index in range(len(values))]
 
     @classmethod
-    def from_list(cls, list_of_dicts: List[Dict[str, Any]]) -> "ArrayWithIds":
-        array = [item["value"] for item in list_of_dicts]
-        ids = [item["id"] for item in list_of_dicts]
-        return cls(array=array, ids=ids)
+    def from_list_of_dicts(cls, list_of_dicts: List[Dict[str, Any]]) -> "ArrayWithIds":
+        try:
+            values = [item["value"] for item in list_of_dicts]
+            ids = [item["id"] for item in list_of_dicts]
+            return cls(values=values, ids=ids)
+        except KeyError:
+            raise ValueError("List of dictionaries must contain 'id' and 'value' keys")
 
     def to_array_of_values_with_ids(self) -> List[ValueWithId]:
-        return [ValueWithId(id=id, value=item) for id, item in zip(self.ids, self.array)]
+        return [ValueWithId(id=id, value=item) for id, item in zip(self.ids, self.values)]
 
     def get_element_value_by_index(self, index: int) -> Any:
-        return self.array[index] if index < len(self.array) else None
+        return self.values[index] if index < len(self.values) else None
 
     def filter_by_values(self, values: Union[List[Any], Any]):
         values = [values] if not isinstance(values, list) else values
-        self.array = [item for item in self.array if item in values]
+        self.values = [item for item in self.values if item in values]
 
     def filter_by_indices(self, ids: Union[List[int], List[str], int, str]):
         int_ids = list(map(lambda i: int(i), convert_to_array_if_not(ids)))
-        self.array = [item for index, item in enumerate(self.array) if index in int_ids]
+        self.values = [item for index, item in enumerate(self.values) if index in int_ids]
         self.ids = [item for index, item in enumerate(self.ids) if index in int_ids]
 
     def filter_by_ids(self, ids: Union[List[int], int]):
@@ -92,12 +95,12 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
         ids_set = set(ids)
         keep_indices = [index for index, id_ in enumerate(self.ids) if id_ in ids_set]
         self.ids = [self.ids[index] for index in keep_indices]
-        self.array = [self.array[index] for index in keep_indices]
+        self.values = [self.values[index] for index in keep_indices]
 
     def to_dict(self) -> List[Dict[str, Any]]:
         return [
             item.to_dict() if isinstance(item, ValueWithId) else ValueWithId(id=index, value=item).to_dict()
-            for index, item in enumerate(self.array)
+            for index, item in enumerate(self.values)
         ]
 
     def to_json(self, skip_rounding=True) -> str:
@@ -108,21 +111,21 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
         return json.dumps([item.to_dict() for item in array_with_ids_values])
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, ArrayWithIds) and self.array == other.array and self.ids == other.ids
+        return isinstance(other, ArrayWithIds) and self.values == other.values and self.ids == other.ids
 
     def map_array_in_place(self, func: Callable):
-        self.array = list(map(func, self.array))
+        self.values = list(map(func, self.values))
 
     def add_item(self, element: Any, id: Optional[int] = None):
         if id is None:
             new_id = max(self.ids, default=-1) + 1
         else:
             new_id = id
-        self.array.append(element)
+        self.values.append(element)
         self.ids.append(new_id)
 
     def remove_item(self, index: int, id: Optional[int] = None):
         if id is not None:
             index = self.ids.index(id)
-        del self.array[index]
+        del self.values[index]
         del self.ids[index]
