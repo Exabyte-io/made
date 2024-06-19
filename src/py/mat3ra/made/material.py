@@ -69,6 +69,14 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
     def basis(self) -> Basis:
         return Basis.from_dict(self.get_prop("basis"))
 
+    @basis.setter
+    def basis(self, basis: Basis) -> None:
+        self.set_prop("basis", basis.to_json())
+
     @property
     def lattice(self) -> Lattice:
         return Lattice.from_dict(self.get_prop("lattice"))
+
+    @lattice.setter
+    def lattice(self, lattice: Lattice) -> None:
+        self.set_prop("lattice", lattice.to_json())
