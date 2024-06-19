@@ -4,7 +4,6 @@ from ase.build import bulk
 from mat3ra.made.basis.basis import Basis
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
-from mat3ra.made.utils import ArrayWithIds
 from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Element, Lattice, Structure
 

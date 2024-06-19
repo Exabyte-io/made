@@ -1,6 +1,5 @@
 from typing import Union
 
-from mat3ra.made.basis.basis import Basis
 from mat3ra.made.material import Material
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure

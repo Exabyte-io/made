@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from mat3ra.utils.array import convert_to_array_if_not
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
 
 # TODO: move to a more general location

@@ -13,7 +13,6 @@ from ...build import BaseBuilder
 from ...convert import PymatgenStructure, to_pymatgen
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration
-from mat3ra.made.utils import get_array_with_id_value_element_value_by_index
 
 
 class PointDefectBuilderParameters(BaseModel):
