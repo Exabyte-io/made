@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+from typing import Dict, Optional
 
 from mat3ra.code.constants import AtomicCoordinateUnits
 from mat3ra.utils.mixins import RoundNumericValuesMixin
@@ -13,7 +13,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     elements: ArrayWithIds = ArrayWithIds(array=["Si"])
     coordinates: ArrayWithIds = ArrayWithIds(array=[0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
-    cell: Cell = Cell()
+    cell: Optional[Cell] = None
     # TODO: isolate labels to a separate class
     labels: ArrayWithIds = ArrayWithIds(array=[])
 
@@ -24,7 +24,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
             elements=ArrayWithIds.from_list(config.get("elements", [])),
             coordinates=ArrayWithIds.from_list(config.get("coordinates", [])),
             units=config.get("units", AtomicCoordinateUnits.crystal),
-            cell=Cell(cell_vectors[0], cell_vectors[1], cell_vectors[2]) if cell_vectors else Cell(),
+            cell=Cell(cell_vectors[0], cell_vectors[1], cell_vectors[2]) if cell_vectors else None,
             labels=ArrayWithIds.from_list(config.get("labels", [])),
         )
 
@@ -33,7 +33,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
             "elements": self.elements.to_json(),
             "coordinates": self.coordinates.to_json(skip_rounding=skip_rounding),
             "units": self.units,
-            "cell": self.cell.to_json(skip_rounding=skip_rounding),
+            "cell": self.cell.to_json(skip_rounding=skip_rounding) if self.cell else None,
             "labels": self.labels.to_json(),
         }
         return json.loads(json.dumps(json_value))
@@ -47,14 +47,6 @@ class Basis(RoundNumericValuesMixin, BaseModel):
             isEmpty=False,
             labels=self.labels,
         )
-
-    @property
-    def labels(self):
-        return self.labels
-
-    @property.setter
-    def labels(self, value):
-        self.labels = value
 
     @property
     def is_in_crystal_units(self):
