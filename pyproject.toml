@@ -16,7 +16,7 @@ classifiers = [
 ]
 dependencies = [
     # add requirements here
-    "numpy",
+    "numpy<=1.26.4",
     "mat3ra-utils",
     "mat3ra-esse",
     "mat3ra-code",
@@ -25,7 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 # tracking separately the deps required to use the tools module
 tools = [
-    "pymatgen",
+    "pymatgen<=2024.6.4",
     "ase",
     "pymatgen-analysis-defects"
 ]
