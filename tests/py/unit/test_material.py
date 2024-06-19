@@ -1,5 +1,3 @@
-import json
-
 from mat3ra.made.basis.basis import Basis
 from mat3ra.made.lattice.lattice import Lattice
 from mat3ra.made.material import Material
