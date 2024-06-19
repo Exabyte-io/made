@@ -63,11 +63,11 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
 
     @property
     def coordinates_array(self) -> List[List[float]]:
-        return self.basis.coordinates.array
+        return self.basis.coordinates.values
 
     @property
     def basis(self) -> Basis:
-        return Basis.from_dict(self.get_prop("basis"))
+        return Basis.from_dict(**self.get_prop("basis"))
 
     @basis.setter
     def basis(self, basis: Basis) -> None:
@@ -75,7 +75,7 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
 
     @property
     def lattice(self) -> Lattice:
-        return Lattice.from_dict(self.get_prop("lattice"))
+        return Lattice(**self.get_prop("lattice"))
 
     @lattice.setter
     def lattice(self, lattice: Lattice) -> None:
