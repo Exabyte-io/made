@@ -14,6 +14,4 @@ def test_filter_by_label():
     film_material = Material(from_ase(film))
 
     # Ids of filtered elements will be missing, comparing the resulting values
-    assert [el["value"] for el in film_material.basis["elements"]] == [
-        el["value"] for el in film_extracted.basis["elements"]
-    ]
+    assert [el for el in film_material.basis.elements.array] == [el for el in film_extracted.basis.elements.array]
