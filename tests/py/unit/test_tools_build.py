@@ -11,11 +11,12 @@ section = filter_by_layers(material, 0, 1.0)
 cavity = filter_by_layers(material, 0, 1.0, invert=True)
 
 # Change 0th element
-section.basis["elements"][0]["value"] = "Ge"
+section.basis.elements.values[0] = "Ge"
 
 # Add element to cavity for collision test
-cavity.basis["elements"].append({"id": 4, "value": "S"})
-cavity.basis["coordinates"].append({"id": 4, "value": section.basis["coordinates"][1]["value"]})
+cavity.basis.elements.add_item("S", id=4)
+coordinate_value = section.basis.coordinates.values[1]
+cavity.basis.coordinates.add_item(coordinate_value, id=4)
 
 expected_merged_material_basis = {
     "elements": [{"id": 0, "value": "Ge"}, {"id": 1, "value": "Ni"}, {"id": 2, "value": "Ni"}, {"id": 4, "value": "S"}],

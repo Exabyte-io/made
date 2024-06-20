@@ -92,8 +92,8 @@ def test_filter_by_layers():
     material = Material(SI_CONVENTIONAL_CELL)
     section = filter_by_layers(material, 0, 3.0)
     cavity = filter_by_layers(material, 0, 3.0, invert=True)
-    assertion_utils.assert_deep_almost_equal(expected_layers_section_basis, section.basis)
-    assertion_utils.assert_deep_almost_equal(expected_layers_cavity_basis, cavity.basis)
+    assertion_utils.assert_deep_almost_equal(expected_layers_section_basis, section.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_layers_cavity_basis, cavity.basis.to_json())
 
 
 def test_filter_by_sphere():
