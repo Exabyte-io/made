@@ -13,7 +13,6 @@ from ...build import BaseBuilder
 from ...convert import PymatgenStructure, to_pymatgen
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration
-from mat3ra.made.utils import get_array_with_id_value_element_value_by_index
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -32,8 +31,8 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
     _generator: Callable
 
     def _get_species(self, configuration: BaseBuilder._ConfigurationType):
-        crystal_elements = configuration.crystal.basis["elements"]
-        placeholder_specie = get_array_with_id_value_element_value_by_index(crystal_elements, 0)
+        crystal_elements = configuration.crystal.basis.elements.values
+        placeholder_specie = crystal_elements[0]
         return configuration.chemical_element or placeholder_specie
 
     def _generate(self, configuration: BaseBuilder._ConfigurationType) -> List[_GeneratedItemType]:
