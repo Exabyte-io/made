@@ -9,7 +9,7 @@ def test_create_vacancy():
     configuration = PointDefectConfiguration(crystal=clean_material, defect_type="vacancy", site_id=0)
     defect = create_defect(configuration)
 
-    assert len(defect.basis["elements"]) == 1
+    assert len(defect.basis.elements.values) == 1
 
 
 def test_create_substitution():
@@ -17,8 +17,8 @@ def test_create_substitution():
     configuration = PointDefectConfiguration(crystal=clean_material, defect_type="substitution", chemical_element="Ge")
     defect = create_defect(configuration)
 
-    assert defect.basis["elements"] == [{"id": 0, "value": "Ge"}, {"id": 1, "value": "Si"}]
-    assert defect.basis["coordinates"][0] == {"id": 0, "value": [0.0, 0.0, 0.0]}
+    assert defect.basis.elements.to_dict() == [{"id": 0, "value": "Ge"}, {"id": 1, "value": "Si"}]
+    assert defect.basis.coordinates.to_dict()[0] == {"id": 0, "value": [0.0, 0.0, 0.0]}
 
 
 def test_create_interstitial():
@@ -28,7 +28,7 @@ def test_create_interstitial():
     )
     defect = create_defect(configuration)
 
-    assert defect.basis["elements"] == [
+    assert defect.basis.elements.to_dict() == [
         {"id": 0, "value": "Ge"},
         {"id": 1, "value": "Si"},
         {"id": 2, "value": "Si"},
@@ -45,7 +45,7 @@ def test_create_defect_from_site_id():
         builder_parameters=defect_builder_parameters, configuration=defect_configuration
     )
 
-    assert material_with_defect.basis["elements"] == [
+    assert material_with_defect.basis.elements.to_dict() == [
         {"id": 0, "value": "Si"},
         {"id": 1, "value": "Ge"},
     ]

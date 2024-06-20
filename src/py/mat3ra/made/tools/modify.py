@@ -1,7 +1,6 @@
 from typing import Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.utils import filter_array_with_id_value_by_ids, filter_array_with_id_value_by_values
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
@@ -21,11 +20,11 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
         Material: The filtered material object.
     """
     new_material = material.clone()
-    labels = material.basis["labels"]
-    filtered_labels = filter_array_with_id_value_by_values(labels, label)
-    filtered_label_ids = [item["id"] for item in filtered_labels]
-    for key in ["coordinates", "elements", "labels"]:
-        new_material.basis[key] = filter_array_with_id_value_by_ids(new_material.basis[key], filtered_label_ids)
+    labels_array = new_material.basis.labels.to_array_of_values_with_ids()
+    filtered_label_ids = [_label.id for _label in labels_array if _label.value == label]
+    new_basis = new_material.basis
+    new_basis.filter_atoms_by_ids(filtered_label_ids)
+    new_material.basis = new_basis
     return new_material
 
 
