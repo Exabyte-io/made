@@ -13,7 +13,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     elements: ArrayWithIds = ArrayWithIds(values=["Si"])
     coordinates: ArrayWithIds = ArrayWithIds(values=[0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
-    cell: Optional[Cell] = None
+    cell: Optional[Cell] = Cell()
     # TODO: isolate labels to a separate class
     labels: Optional[ArrayWithIds] = ArrayWithIds(values=[])
     constraints: Optional[ArrayWithIds] = ArrayWithIds(values=[])
@@ -32,7 +32,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
             elements=ArrayWithIds.from_list_of_dicts(elements),
             coordinates=ArrayWithIds.from_list_of_dicts(coordinates),
             units=units,
-            cell=Cell.from_nested_array(cell) if cell else None,
+            cell=Cell.from_nested_array(cell),
             labels=ArrayWithIds.from_list_of_dicts(labels) if labels else ArrayWithIds(values=[]),
             constraints=ArrayWithIds.from_list_of_dicts(constraints) if constraints else ArrayWithIds(values=[]),
         )
