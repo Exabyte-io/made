@@ -13,8 +13,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     elements: ArrayWithIds = ArrayWithIds(values=["Si"])
     coordinates: ArrayWithIds = ArrayWithIds(values=[0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
-    cell: Optional[Cell] = Cell()
-    # TODO: isolate labels to a separate class
+    cell: Optional[Cell] = None
     labels: Optional[ArrayWithIds] = ArrayWithIds(values=[])
     constraints: Optional[ArrayWithIds] = ArrayWithIds(values=[])
 
