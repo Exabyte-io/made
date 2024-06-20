@@ -14,7 +14,6 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     coordinates: ArrayWithIds = ArrayWithIds(values=[0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
     cell: Optional[Cell] = None
-    # TODO: isolate labels to a separate class
     labels: Optional[ArrayWithIds] = ArrayWithIds(values=[])
     constraints: Optional[ArrayWithIds] = ArrayWithIds(values=[])
 
