@@ -1,38 +1,29 @@
 from typing import List, Dict
 
 import numpy as np
+from mat3ra.made.basis.basis import Basis
 from mat3ra.made.material import Material
 from mat3ra.made.utils import filter_array_with_id_value_by_ids
 
 from mat3ra.made.tools.utils import convert_basis_to_crystal
 
 
-def resolve_close_coordinates(basis: Dict, distance_tolerance: float = 0.01) -> Dict:
+def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.01) -> Basis:
     """
     Resolve close coordinates in the basis by replacing them with the latest one.
     """
-    elements = basis["elements"]
-    coordinates = basis["coordinates"]
-    labels = basis.get("labels", [])
-
-    ids = set([coord["id"] for coord in coordinates])
+    coordinates = basis.coordinates.to_array_of_values_with_ids()
+    ids = set([coord.id for coord in coordinates])
     ids_to_remove = set()
 
     for i in range(1, len(coordinates)):
         for j in range(i):
-            if (
-                np.linalg.norm(np.array(coordinates[i]["value"]) - np.array(coordinates[j]["value"]))
-                < distance_tolerance
-            ):
-                ids_to_remove.add(coordinates[j]["id"])
+            if np.linalg.norm(np.array(coordinates[i].value) - np.array(coordinates[j].value)) < distance_tolerance:
+                ids_to_remove.add(coordinates[j].id)
 
     ids_to_keep = list(ids - ids_to_remove)
-
-    final_elements = filter_array_with_id_value_by_ids(elements, ids_to_keep)
-    final_coordinates = filter_array_with_id_value_by_ids(coordinates, ids_to_keep)
-    final_labels = filter_array_with_id_value_by_ids(labels, ids_to_keep)
-
-    return {"elements": final_elements, "coordinates": final_coordinates, "labels": final_labels}
+    basis.filter_atoms_by_ids(ids_to_keep)
+    return basis
 
 
 def merge_two_materials(material1: Material, material2: Material, distance_tolerance: float = 0.01) -> Material:
@@ -49,34 +40,34 @@ def merge_two_materials(material1: Material, material2: Material, distance_toler
     material2.basis = convert_basis_to_crystal(material2.basis)
 
     merged_lattice = material1.lattice
-    merged_elements = material1.basis["elements"]
-    merged_coordinates = material1.basis["coordinates"]
-    merged_labels = material1.basis["labels"]
+    merged_elements = material1.basis.elements
+    merged_coordinates = material1.basis.coordinates
+    merged_labels = material1.basis.labels
 
-    for coordinate in material2.basis["coordinates"]:
-        merged_coordinates.append(coordinate)
+    for coordinate in material2.basis.coordinates.values:
+        merged_coordinates.add_item(coordinate)
 
-    for element in material2.basis["elements"]:
-        merged_elements.append(element)
+    for element in material2.basis.elements.values:
+        merged_elements.add_item(element)
 
-    if "labels" in material2.basis:
-        for label in material2.basis["labels"]:
-            merged_labels.append(label)
+    if material2.basis.labels:
+        for label in material2.basis.labels.values:
+            merged_labels.add_item(label)
 
-    merged_basis = {
-        "elements": merged_elements,
-        "coordinates": merged_coordinates,
-        "labels": merged_labels,
-    }
+    merged_basis = Basis(
+        elements=merged_elements,
+        coordinates=merged_coordinates,
+        units=material1.basis.units,
+        cell=material1.basis.cell,
+        labels=merged_labels,
+    )
+    resolved_basis = resolve_close_coordinates_basis(merged_basis, distance_tolerance)
 
-    resolved_basis = resolve_close_coordinates(merged_basis, distance_tolerance)
-
-    merged_material_config = {
-        "name": "Merged Material",
-        "lattice": merged_lattice,
-        "basis": resolved_basis,
-    }
-    return Material(merged_material_config)
+    name = "Merged Material"
+    new_material = Material.create(
+        {"name": name, "lattice": merged_lattice.to_json(), "basis": resolved_basis.to_json()}
+    )
+    return new_material
 
 
 def merge_materials(materials: List[Material], distance_tolerance: float = 0.01) -> Material:

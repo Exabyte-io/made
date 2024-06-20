@@ -2,6 +2,7 @@ from functools import wraps
 from typing import Callable, Dict
 
 import numpy as np
+from mat3ra.made.basis.basis import Basis
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 from pymatgen.core.structure import Structure
 
@@ -37,7 +38,7 @@ def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
     return wrapper
 
 
-def convert_basis_to_cartesian(basis: Dict) -> Dict:
+def convert_basis_to_cartesian(basis: Basis) -> Basis:
     """
     Convert the basis to the Cartesian coordinates.
     Args:
@@ -46,15 +47,15 @@ def convert_basis_to_cartesian(basis: Dict) -> Dict:
     Returns:
         Dict: The basis in Cartesian coordinates.
     """
-    if basis["units"] == "cartesian":
+    if basis.units == "cartesian":
         return basis
-    unit_cell = basis["cell"]
-    basis["coordinates"] = np.multiply(basis["coordinates"], unit_cell)
-    basis["units"] = "cartesian"
+    unit_cell = np.array(basis.cell)
+    basis.coordinates = np.multiply(basis.coordinates, unit_cell)
+    basis.units = "cartesian"
     return basis
 
 
-def convert_basis_to_crystal(basis: Dict) -> Dict:
+def convert_basis_to_crystal(basis: Basis) -> Basis:
     """
     Convert the basis to the crystal coordinates.
     Args:
@@ -63,9 +64,9 @@ def convert_basis_to_crystal(basis: Dict) -> Dict:
     Returns:
         Dict: The basis in crystal coordinates.
     """
-    if basis["units"] == "crystal":
+    if basis.units == "crystal":
         return basis
-    unit_cell = basis["cell"]
-    basis["coordinates"] = np.multiply(basis["coordinates"], np.linalg.inv(unit_cell))
-    basis["units"] = "crystal"
+    unit_cell = np.array(basis.cell)
+    basis.coordinates.values = np.multiply(basis.coordinates.values, np.linalg.inv(unit_cell))
+    basis.units = "crystal"
     return basis
