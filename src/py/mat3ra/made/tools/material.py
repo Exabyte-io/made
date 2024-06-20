@@ -4,10 +4,12 @@ from mat3ra.code.constants import AtomicCoordinateUnits
 
 def scale_one_lattice_vector(material, key="a", factor=1.0):
     """
-    Scales one lattice vector for the given material.
-    :param material: The material acted upon.
-    :param key: Lattice vector key.
-    :param factor: Float scaling factor.
+    Scales one lattice vector for the given material in place.
+
+    Args:
+        material: The material to scale.
+        key: The key of the lattice vector to scale.
+        factor: The factor to scale the lattice vector by
     """
     material.to_cartesian()
 
@@ -23,7 +25,8 @@ def get_basis_config_translated_to_center(material):
     """
     Updates the basis of a material by translating the coordinates
     so that the center of the material and lattice are aligned.
-    :param material: The material to update.
+    Args:
+        material: The material to update.
     """
     original_units = material.basis.units
     material.to_cartesian()
