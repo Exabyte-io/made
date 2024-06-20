@@ -74,12 +74,11 @@ def filter_material_by_ids(material: Material, ids: List[int], invert: bool = Fa
         Material: The filtered material object.
     """
     new_material = material.clone()
-    for key in ["coordinates", "elements", "labels"]:
-        if invert:
-            new_material.basis[key] = [item for i, item in enumerate(new_material.basis[key]) if i not in ids]
-        else:
-            new_material.basis[key] = [item for i, item in enumerate(new_material.basis[key]) if i in ids]
-
+    new_basis = new_material.basis
+    if invert is True:
+        ids = list(set(new_basis.elements.ids) - set(ids))
+    new_basis.filter_atoms_by_ids(ids)
+    new_material.basis = new_basis
     return new_material
 
 

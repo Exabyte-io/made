@@ -106,15 +106,15 @@ def select_atoms_within_layers(material: Material, atom_index: int, layer_thickn
     Returns:
         List[int]: List of indices of atoms within the specified layer
     """
-    coordinates = material.basis["coordinates"]
-    vectors = material.lattice["vectors"]
-    direction_vector = vectors["c"]
+    coordinates = material.basis.coordinates.to_array_of_values_with_ids()
+    vectors = material.lattice.vectors
+    direction_vector = np.array(vectors[2])
 
     # Normalize the direction vector
     direction_length = np.linalg.norm(direction_vector)
     direction_norm = direction_vector / direction_length
-    central_atom_position = coordinates[atom_index]["value"]
-    central_atom_projection = np.dot(central_atom_position, direction_norm)
+    central_atom_position = coordinates[atom_index]
+    central_atom_projection = np.dot(central_atom_position.value, direction_norm)
 
     layer_thickness_frac = layer_thickness / direction_length
 
@@ -124,9 +124,9 @@ def select_atoms_within_layers(material: Material, atom_index: int, layer_thickn
     selected_indices = []
     for coord in coordinates:
         # Project each position onto the direction vector
-        projection = np.dot(coord["value"], direction_norm)
+        projection = np.dot(coord.value, direction_norm)
         if lower_bound <= projection <= upper_bound:
-            selected_indices.append(coord["id"])
+            selected_indices.append(coord.id)
     return selected_indices
 
 
