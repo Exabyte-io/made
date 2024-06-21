@@ -1,22 +1,21 @@
 from typing import List
 
 import numpy as np
-from mat3ra.esse.models.core.primitive.array_of_3_numbers import ArrayOf3NumberElementsSchema
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel
 
 
 class Cell(RoundNumericValuesMixin, BaseModel):
-    # TODO: figure out how to use
-    vector1: ArrayOf3NumberElementsSchema = [1, 0, 0]
-    vector2: ArrayOf3NumberElementsSchema = [0, 1, 0]
-    vector3: ArrayOf3NumberElementsSchema = [0, 0, 1]
+    # TODO: figure out how to use ArrayOf3NumberElementsSchema
+    vector1: List[float] = [1, 0, 0]
+    vector2: List[float] = [0, 1, 0]
+    vector3: List[float] = [0, 0, 1]
     __round_precision__ = 1e-6
 
     @classmethod
     def from_nested_array(cls, nested_array):
-        if not nested_array:
-            nested_array = [cls.vector1, cls.vector2, cls.vector3]
+        if nested_array is None:
+            nested_array = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         return cls(vector1=nested_array[0], vector2=nested_array[1], vector3=nested_array[2])
 
     def __init__(self, vector1=None, vector2=None, vector3=None):
@@ -29,19 +28,18 @@ class Cell(RoundNumericValuesMixin, BaseModel):
         super().__init__(**{"vector1": vector1, "vector2": vector2, "vector3": vector3})
 
     @property
-    def vectors_as_array(self, skip_rounding=False) -> List[ArrayOf3NumberElementsSchema]:
+    def vectors_as_array(self, skip_rounding=False) -> List[List[float]]:
         if skip_rounding:
             return [self.vector1, self.vector2, self.vector3]
         return self.round_array_or_number([self.vector1, self.vector2, self.vector3])
 
     def to_json(self, skip_rounding=False):
         _ = self.round_array_or_number
-        if skip_rounding:
-            return {
-                "vector1": _(self.vector1) if skip_rounding else self.vector1,
-                "vector2": _(self.vector2) if skip_rounding else self.vector2,
-                "vector3": _(self.vector3) if skip_rounding else self.vector3,
-            }
+        return [
+            self.vector1 if skip_rounding else _(self.vector1),
+            self.vector2 if skip_rounding else _(self.vector2),
+            self.vector3 if skip_rounding else _(self.vector3),
+        ]
 
     def clone(self):
         return self.from_nested_array(self.vectors_as_array)
