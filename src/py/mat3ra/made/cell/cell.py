@@ -19,7 +19,13 @@ class Cell(RoundNumericValuesMixin, BaseModel):
             nested_array = [cls.vector1, cls.vector2, cls.vector3]
         return cls(vector1=nested_array[0], vector2=nested_array[1], vector3=nested_array[2])
 
-    def __init__(self, vector1=[1, 0, 0], vector2=[0, 1, 0], vector3=[0, 0, 1]):
+    def __init__(self, vector1=None, vector2=None, vector3=None):
+        if vector1 is None:
+            vector1 = [1, 0, 0]
+        if vector2 is None:
+            vector2 = [0, 1, 0]
+        if vector3 is None:
+            vector3 = [0, 0, 1]
         super().__init__(**{"vector1": vector1, "vector2": vector2, "vector3": vector3})
 
     @property
