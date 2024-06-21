@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from ase import Atoms
@@ -92,7 +92,7 @@ def get_closest_site_id_from_position(material: Material, position: List[float])
     return int(np.argmin(distances))
 
 
-def select_atoms_within_layers(material: Material, atom_index: int, layer_thickness: float):
+def get_atom_indices_within_layer_by_atom_index(material: Material, atom_index: int, layer_thickness: float):
     """
     Select all atoms within a specified layer thickness of a central atom along a direction.
     This direction will be orthogonal to the AB plane.
@@ -128,6 +128,48 @@ def select_atoms_within_layers(material: Material, atom_index: int, layer_thickn
         if lower_bound <= projection <= upper_bound:
             selected_indices.append(coord.id)
     return selected_indices
+
+
+def get_atom_indices_within_layer_by_atom_position(material: Material, position: List[float], layer_thickness: float):
+    """
+    Select all atoms within a specified layer thickness of a central atom along a direction.
+    This direction will be orthogonal to the AB plane.
+    Layer thickness is converted from angstroms to fractional units based on the lattice vector length.
+
+    Args:
+        material (Material): Material object
+        position (List[float]): Position of the central atom in crystal coordinates
+        layer_thickness (float): Thickness of the layer in angstroms
+
+    Returns:
+        List[int]: List of indices of atoms within the specified layer
+    """
+    site_id = get_closest_site_id_from_position(material, position)
+    return get_atom_indices_within_layer_by_atom_index(material, site_id, layer_thickness)
+
+
+def get_atom_indices_within_layer(
+    material: Material,
+    atom_index: Optional[int] = 0,
+    position: Optional[List[float]] = None,
+    layer_thickness: float = 1,
+):
+    """
+    Select all atoms within a specified layer thickness of the central atom along the c-vector direction.
+
+    Args:
+        material (Material): Material object
+        atom_index (int): Index of the central atom
+        position (List[float]): Position of the central atom in crystal coordinates
+        layer_thickness (float): Thickness of the layer in angstroms
+
+    Returns:
+        List[int]: List of indices of atoms within the specified layer
+    """
+    if position is not None:
+        return get_atom_indices_within_layer_by_atom_position(material, position, layer_thickness)
+    if atom_index is not None:
+        return get_atom_indices_within_layer_by_atom_index(material, atom_index, layer_thickness)
 
 
 def select_atoms_within_radius_pbc(material: Material, atom_index: int, radius: float):

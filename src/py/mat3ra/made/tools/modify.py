@@ -4,7 +4,7 @@ from mat3ra.made.material import Material
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
-from .analyze import select_atoms_within_layers, select_atoms_within_radius_pbc
+from .analyze import get_atom_indices_within_layer_by_atom_index, select_atoms_within_radius_pbc
 from .convert import decorator_convert_material_args_kwargs_to_structure
 from .utils import translate_to_bottom_pymatgen_structure
 
@@ -95,7 +95,7 @@ def filter_by_layers(material, central_atom_id, layer_thickness, invert=False) -
     Returns:
         Material: The filtered material object.
     """
-    ids = select_atoms_within_layers(
+    ids = get_atom_indices_within_layer_by_atom_index(
         material,
         central_atom_id,
         layer_thickness,
