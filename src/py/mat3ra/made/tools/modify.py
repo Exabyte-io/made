@@ -82,7 +82,7 @@ def filter_material_by_ids(material: Material, ids: List[int], invert: bool = Fa
     return new_material
 
 
-def filter_by_layers(material, central_atom_id, layer_thickness, invert=False):
+def filter_by_layers(material, central_atom_id, layer_thickness, invert=False) -> Material:
     """
     Filter out atoms within a specified layer thickness of a central atom along c-vector direction.
 
@@ -103,7 +103,7 @@ def filter_by_layers(material, central_atom_id, layer_thickness, invert=False):
     return filter_material_by_ids(material, ids, invert=invert)
 
 
-def filter_by_sphere(material, central_atom_id, radius, invert=False):
+def filter_by_sphere(material, central_atom_id, radius, invert=False) -> Material:
     """
     Filter out atoms within a specified radius of a central atom considering periodic boundary conditions.
 
