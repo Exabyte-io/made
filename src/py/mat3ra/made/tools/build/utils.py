@@ -10,7 +10,7 @@ from mat3ra.made.tools.utils import convert_basis_to_crystal
 
 def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.01) -> Basis:
     """
-    Resolve close coordinates in the basis by replacing them with the latest one.
+    Find all atoms that are within distance tolerance and only keep the last one, remove other sites
     """
     coordinates = basis.coordinates.to_array_of_values_with_ids()
     ids = set([coord.id for coord in coordinates])

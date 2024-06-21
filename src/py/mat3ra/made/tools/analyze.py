@@ -2,10 +2,12 @@ from typing import List, Optional
 
 import numpy as np
 from ase import Atoms
-from pymatgen.core import IStructure
+from pymatgen.core import IStructure as PymatgenIStructure
 
 from ..material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
+
+PymatgenIStructure = PymatgenIStructure
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -172,20 +174,27 @@ def get_atom_indices_within_layer(
         return get_atom_indices_within_layer_by_atom_index(material, atom_index, layer_thickness)
 
 
-def select_atoms_within_radius_pbc(material: Material, atom_index: int, radius: float):
+def get_atom_indices_within_radius_pbc(
+    material: Material, atom_index: Optional[int] = 0, position: Optional[List[float]] = None, radius: float = 1
+):
     """
     Select all atoms within a specified radius of a central atom considering periodic boundary conditions.
 
     Args:
         material (Material): Material object
         atom_index (int): Index of the central atom
+        position (List[float]): Position of the central atom in crystal coordinates
         radius (float): Radius of the sphere in angstroms
 
     Returns:
         List[int]: List of indices of atoms within the specified
     """
+
+    if position is not None:
+        atom_index = get_closest_site_id_from_position(material, position)
+
     structure = to_pymatgen(material)
-    immutable_structure = IStructure.from_sites(structure.sites)
+    immutable_structure = PymatgenIStructure.from_sites(structure.sites)
 
     central_atom = immutable_structure[atom_index]
     sites_within_radius = structure.get_sites_in_sphere(central_atom.coords, radius)
