@@ -9,7 +9,6 @@ from .fixtures import SI_CONVENTIONAL_CELL
 COMMON_PART = {
     "units": "crystal",
     "cell": [[5.468763846, 0.0, 0.0], [-0.0, 5.468763846, 0.0], [0.0, 0.0, 5.468763846]],
-    "constraints": [],
     "labels": [],
 }
 
@@ -100,5 +99,5 @@ def test_filter_by_sphere():
     material = Material(SI_CONVENTIONAL_CELL)
     cluster = filter_by_sphere(material, 0, 2.0)
     cavity = filter_by_sphere(material, 0, 2.0, invert=True)
-    assertion_utils.assert_deep_almost_equal(expected_sphere_cluster_basis, cluster.basis)
-    assertion_utils.assert_deep_almost_equal(expected_sphere_cavity_basis, cavity.basis)
+    assertion_utils.assert_deep_almost_equal(expected_sphere_cluster_basis, cluster.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_sphere_cavity_basis, cavity.basis.to_json())
