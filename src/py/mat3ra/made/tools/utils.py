@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, Dict
+from typing import Callable
 
 import numpy as np
 from mat3ra.made.basis.basis import Basis
