@@ -4,7 +4,7 @@ from mat3ra.made.material import Material
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
-from .analyze import get_atom_indices_within_layer_by_atom_index, select_atoms_within_radius_pbc
+from .analyze import get_atom_indices_within_layer_by_atom_index, get_atom_indices_within_radius_pbc
 from .convert import decorator_convert_material_args_kwargs_to_structure
 from .utils import translate_to_bottom_pymatgen_structure
 
@@ -116,9 +116,9 @@ def filter_by_sphere(material, central_atom_id, radius, invert=False) -> Materia
     Returns:
         Material: The filtered material object.
     """
-    ids = select_atoms_within_radius_pbc(
-        material,
-        central_atom_id,
-        radius,
+    ids = get_atom_indices_within_radius_pbc(
+        material=material,
+        atom_index=central_atom_id,
+        radius=radius,
     )
     return filter_material_by_ids(material, ids, invert=invert)
