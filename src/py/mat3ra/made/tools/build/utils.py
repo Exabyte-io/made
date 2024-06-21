@@ -1,9 +1,8 @@
-from typing import List, Dict
+from typing import List
 
 import numpy as np
 from mat3ra.made.basis.basis import Basis
 from mat3ra.made.material import Material
-from mat3ra.made.utils import filter_array_with_id_value_by_ids
 
 from mat3ra.made.tools.utils import convert_basis_to_crystal
 
