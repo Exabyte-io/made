@@ -19,7 +19,7 @@ class Cell(RoundNumericValuesMixin, BaseModel):
         return cls(vector1=nested_array[0], vector2=nested_array[1], vector3=nested_array[2])
 
     @property
-    def vectors_as_array(self, skip_rounding=False) -> List[List[float]]:
+    def vectors_as_nested_array(self, skip_rounding=False) -> List[List[float]]:
         if skip_rounding:
             return [self.vector1, self.vector2, self.vector3]
         return self.round_array_or_number([self.vector1, self.vector2, self.vector3])
@@ -33,7 +33,7 @@ class Cell(RoundNumericValuesMixin, BaseModel):
         ]
 
     def clone(self):
-        return self.from_nested_array(self.vectors_as_array)
+        return self.from_nested_array(self.vectors_as_nested_array)
 
     def clone_and_scale_by_matrix(self, matrix):
         new_cell = self.clone()
@@ -41,13 +41,13 @@ class Cell(RoundNumericValuesMixin, BaseModel):
         return new_cell
 
     def convert_point_to_cartesian(self, point):
-        np_vector = np.array(self.vectors_as_array)
+        np_vector = np.array(self.vectors_as_nested_array)
         return np.dot(point, np_vector)
 
     def convert_point_to_fractional(self, point):
-        np_vector = np.array(self.vectors_as_array)
+        np_vector = np.array(self.vectors_as_nested_array)
         return np.dot(point, np.linalg.inv(np_vector))
 
     def scale_by_matrix(self, matrix):
-        np_vector = np.array(self.vectors_as_array)
+        np_vector = np.array(self.vectors_as_nested_array)
         self.vector1, self.vector2, self.vector3 = np.dot(matrix, np_vector).tolist()
