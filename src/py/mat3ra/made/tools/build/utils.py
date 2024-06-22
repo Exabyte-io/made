@@ -1,6 +1,5 @@
 from typing import List
 
-import numpy as np
 from mat3ra.made.basis import Basis
 from mat3ra.made.material import Material
 
