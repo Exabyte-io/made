@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable
+from typing import Callable, List
 
 import numpy as np
 from mat3ra.made.basis import Basis
@@ -70,3 +70,28 @@ def convert_basis_to_crystal(basis: Basis) -> Basis:
     basis.coordinates.values = np.multiply(basis.coordinates.values, np.linalg.inv(unit_cell))
     basis.units = "crystal"
     return basis
+
+
+def get_distance_between_coordinates(coordinate1: List[float], coordinate2: List[float]) -> float:
+    """
+    Get the distance between two coordinates.
+    Args:
+        coordinate1 (List[float]): The first coordinate.
+        coordinate2 (List[float]): The second coordinate.
+
+    Returns:
+        float: The distance between the two coordinates.
+    """
+    return float(np.linalg.norm(np.array(coordinate1) - np.array(coordinate2)))
+
+
+def get_norm(vector: List[float]) -> float:
+    """
+    Get the norm of a vector.
+    Args:
+        vector (List[float]): The vector.
+
+    Returns:
+        float: The norm of the vector.
+    """
+    return float(np.linalg.norm(vector))

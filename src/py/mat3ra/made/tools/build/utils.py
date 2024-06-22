@@ -4,7 +4,7 @@ import numpy as np
 from mat3ra.made.basis import Basis
 from mat3ra.made.material import Material
 
-from mat3ra.made.tools.utils import convert_basis_to_crystal
+from ..utils import convert_basis_to_crystal, get_distance_between_coordinates
 
 
 def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.01) -> Basis:
@@ -17,7 +17,7 @@ def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.
 
     for i in range(1, len(coordinates)):
         for j in range(i):
-            if np.linalg.norm(np.array(coordinates[i].value) - np.array(coordinates[j].value)) < distance_tolerance:
+            if get_distance_between_coordinates(coordinates[i].value, coordinates[j].value) < distance_tolerance:
                 ids_to_remove.add(coordinates[j].id)
 
     ids_to_keep = list(ids - ids_to_remove)
