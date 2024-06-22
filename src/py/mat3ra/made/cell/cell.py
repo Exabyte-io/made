@@ -10,7 +10,7 @@ class Cell(RoundNumericValuesMixin, BaseModel):
     vector1: List[float] = [1, 0, 0]
     vector2: List[float] = [0, 1, 0]
     vector3: List[float] = [0, 0, 1]
-    __round_precision__ = 1e-6
+    __round_precision__ = 6
 
     @classmethod
     def from_nested_array(cls, nested_array):
