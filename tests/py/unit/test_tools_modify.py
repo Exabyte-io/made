@@ -12,7 +12,7 @@ COMMON_PART = {
     "labels": [],
 }
 
-expected_layers_section_basis = {
+expected_basis_layers_section = {
     "elements": [
         {"id": 0, "value": "Si"},
         {"id": 3, "value": "Si"},
@@ -28,7 +28,7 @@ expected_layers_section_basis = {
     **COMMON_PART,
 }
 
-expected_layers_cavity_basis = {
+expected_basis_layers_cavity = {
     "elements": [
         {"id": 1, "value": "Si"},
         {"id": 2, "value": "Si"},
@@ -45,13 +45,13 @@ expected_layers_cavity_basis = {
 }
 
 
-expected_sphere_cluster_basis = {
+expected_basis_sphere_cluster = {
     "elements": [{"id": 0, "value": "Si"}],
     "coordinates": [{"id": 0, "value": [0.5, 0.0, 0.0]}],
     **COMMON_PART,
 }
 
-expected_sphere_cavity_basis = {
+expected_basis_sphere_cavity = {
     "elements": [
         {"id": 1, "value": "Si"},
         {"id": 2, "value": "Si"},
@@ -91,13 +91,13 @@ def test_filter_by_layers():
     material = Material(SI_CONVENTIONAL_CELL)
     section = filter_by_layers(material, 0, 3.0)
     cavity = filter_by_layers(material, 0, 3.0, invert=True)
-    assertion_utils.assert_deep_almost_equal(expected_layers_section_basis, section.basis.to_json())
-    assertion_utils.assert_deep_almost_equal(expected_layers_cavity_basis, cavity.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_basis_layers_section, section.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_basis_layers_cavity, cavity.basis.to_json())
 
 
 def test_filter_by_sphere():
     material = Material(SI_CONVENTIONAL_CELL)
     cluster = filter_by_sphere(material, 0, 2.0)
     cavity = filter_by_sphere(material, 0, 2.0, invert=True)
-    assertion_utils.assert_deep_almost_equal(expected_sphere_cluster_basis, cluster.basis.to_json())
-    assertion_utils.assert_deep_almost_equal(expected_sphere_cavity_basis, cavity.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, cluster.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_json())
