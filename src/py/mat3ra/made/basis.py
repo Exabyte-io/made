@@ -5,8 +5,8 @@ from mat3ra.code.constants import AtomicCoordinateUnits
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel
 
-from ..cell.cell import Cell
-from ..utils import ArrayWithIds
+from .cell import Cell
+from .utils import ArrayWithIds
 
 
 class Basis(RoundNumericValuesMixin, BaseModel):
