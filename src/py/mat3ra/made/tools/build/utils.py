@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from mat3ra.made.basis.basis import Basis
+from mat3ra.made.basis import Basis
 from mat3ra.made.material import Material
 
 from mat3ra.made.tools.utils import convert_basis_to_crystal

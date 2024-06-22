@@ -2,7 +2,7 @@ from functools import wraps
 from typing import Callable
 
 import numpy as np
-from mat3ra.made.basis.basis import Basis
+from mat3ra.made.basis import Basis
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 from pymatgen.core.structure import Structure
 

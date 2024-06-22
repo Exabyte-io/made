@@ -5,7 +5,7 @@ import numpy as np
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel
 
-from ..cell.cell import Cell
+from .cell import Cell
 
 HASH_TOLERANCE = 3
 

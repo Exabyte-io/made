@@ -4,8 +4,8 @@ from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntity
 from mat3ra.esse.models.material import MaterialSchema
 
-from .basis.basis import Basis
-from .lattice.lattice import Lattice
+from .basis import Basis
+from .lattice import Lattice
 
 defaultMaterialConfig = {
     "name": "Silicon FCC",
