@@ -2,14 +2,14 @@ from typing import List
 
 import numpy as np
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Cell(RoundNumericValuesMixin, BaseModel):
     # TODO: figure out how to use ArrayOf3NumberElementsSchema
-    vector1: List[float] = [1, 0, 0]
-    vector2: List[float] = [0, 1, 0]
-    vector3: List[float] = [0, 0, 1]
+    vector1: List[float] = Field(default_factory=lambda: [1, 0, 0])
+    vector2: List[float] = Field(default_factory=lambda: [0, 1, 0])
+    vector3: List[float] = Field(default_factory=lambda: [0, 0, 1])
     __round_precision__ = 6
 
     @classmethod
@@ -17,15 +17,6 @@ class Cell(RoundNumericValuesMixin, BaseModel):
         if nested_array is None:
             nested_array = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         return cls(vector1=nested_array[0], vector2=nested_array[1], vector3=nested_array[2])
-
-    def __init__(self, vector1=None, vector2=None, vector3=None):
-        if vector1 is None:
-            vector1 = [1, 0, 0]
-        if vector2 is None:
-            vector2 = [0, 1, 0]
-        if vector3 is None:
-            vector3 = [0, 0, 1]
-        super().__init__(**{"vector1": vector1, "vector2": vector2, "vector3": vector3})
 
     @property
     def vectors_as_array(self, skip_rounding=False) -> List[List[float]]:

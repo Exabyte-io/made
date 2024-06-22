@@ -31,7 +31,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
             elements=ArrayWithIds.from_list_of_dicts(elements),
             coordinates=ArrayWithIds.from_list_of_dicts(coordinates),
             units=units,
-            cell=Cell.from_nested_array(cell) if cell else Cell(),
+            cell=Cell.from_nested_array(cell),
             labels=ArrayWithIds.from_list_of_dicts(labels) if labels else ArrayWithIds(values=[]),
             constraints=ArrayWithIds.from_list_of_dicts(constraints) if constraints else ArrayWithIds(values=[]),
         )
