@@ -5,8 +5,8 @@ from mat3ra.code.constants import AtomicCoordinateUnits
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel
 
-from ..cell.cell import Cell
-from ..utils import ArrayWithIds
+from .cell import Cell
+from .utils import ArrayWithIds
 
 
 class Basis(RoundNumericValuesMixin, BaseModel):
@@ -31,7 +31,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
             elements=ArrayWithIds.from_list_of_dicts(elements),
             coordinates=ArrayWithIds.from_list_of_dicts(coordinates),
             units=units,
-            cell=Cell.from_nested_array(cell) if cell else None,
+            cell=Cell.from_nested_array(cell),
             labels=ArrayWithIds.from_list_of_dicts(labels) if labels else ArrayWithIds(values=[]),
             constraints=ArrayWithIds.from_list_of_dicts(constraints) if constraints else ArrayWithIds(values=[]),
         )
