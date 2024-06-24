@@ -24,7 +24,11 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         # Pymatgen accepts the coordinate of the atom within small tolerance
         if site_id is None:
             self.site_id = get_closest_site_id_from_position(self.crystal, position)
-            self.position = self.crystal.coordinates_array[self.site_id]
+            self.position = (
+                position
+                if data["defect_type"] == PointDefectTypeEnum.INTERSTITIAL
+                else self.crystal.coordinates_array[self.site_id]
+            )
         else:
             self.position = self.crystal.coordinates_array[site_id]
 
