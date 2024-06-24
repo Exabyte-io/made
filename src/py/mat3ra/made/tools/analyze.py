@@ -1,10 +1,13 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from ase import Atoms
+from pymatgen.core import IStructure as PymatgenIStructure
 
 from ..material import Material
-from .convert import decorator_convert_material_args_kwargs_to_atoms
+from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
+
+PymatgenIStructure = PymatgenIStructure
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -89,3 +92,112 @@ def get_closest_site_id_from_position(material: Material, position: List[float])
     position = np.array(position)  # type: ignore
     distances = np.linalg.norm(coordinates - position, axis=1)
     return int(np.argmin(distances))
+
+
+def get_atom_indices_within_layer_by_atom_index(material: Material, atom_index: int, layer_thickness: float):
+    """
+    Select all atoms within a specified layer thickness of a central atom along a direction.
+    This direction will be orthogonal to the AB plane.
+    Layer thickness is converted from angstroms to fractional units based on the lattice vector length.
+
+    Args:
+        material (Material): Material object
+        atom_index (int): Index of the central atom
+        layer_thickness (float): Thickness of the layer in angstroms
+
+    Returns:
+        List[int]: List of indices of atoms within the specified layer
+    """
+    coordinates = material.basis.coordinates.to_array_of_values_with_ids()
+    vectors = material.lattice.vectors
+    direction_vector = np.array(vectors[2])
+
+    # Normalize the direction vector
+    direction_length = np.linalg.norm(direction_vector)
+    direction_norm = direction_vector / direction_length
+    central_atom_position = coordinates[atom_index]
+    central_atom_projection = np.dot(central_atom_position.value, direction_norm)
+
+    layer_thickness_frac = layer_thickness / direction_length
+
+    lower_bound = central_atom_projection - layer_thickness_frac / 2
+    upper_bound = central_atom_projection + layer_thickness_frac / 2
+
+    selected_indices = []
+    for coord in coordinates:
+        # Project each position onto the direction vector
+        projection = np.dot(coord.value, direction_norm)
+        if lower_bound <= projection <= upper_bound:
+            selected_indices.append(coord.id)
+    return selected_indices
+
+
+def get_atom_indices_within_layer_by_atom_position(material: Material, position: List[float], layer_thickness: float):
+    """
+    Select all atoms within a specified layer thickness of a central atom along a direction.
+    This direction will be orthogonal to the AB plane.
+    Layer thickness is converted from angstroms to fractional units based on the lattice vector length.
+
+    Args:
+        material (Material): Material object
+        position (List[float]): Position of the central atom in crystal coordinates
+        layer_thickness (float): Thickness of the layer in angstroms
+
+    Returns:
+        List[int]: List of indices of atoms within the specified layer
+    """
+    site_id = get_closest_site_id_from_position(material, position)
+    return get_atom_indices_within_layer_by_atom_index(material, site_id, layer_thickness)
+
+
+def get_atom_indices_within_layer(
+    material: Material,
+    atom_index: Optional[int] = 0,
+    position: Optional[List[float]] = None,
+    layer_thickness: float = 1,
+):
+    """
+    Select all atoms within a specified layer thickness of the central atom along the c-vector direction.
+
+    Args:
+        material (Material): Material object
+        atom_index (int): Index of the central atom
+        position (List[float]): Position of the central atom in crystal coordinates
+        layer_thickness (float): Thickness of the layer in angstroms
+
+    Returns:
+        List[int]: List of indices of atoms within the specified layer
+    """
+    if position is not None:
+        return get_atom_indices_within_layer_by_atom_position(material, position, layer_thickness)
+    if atom_index is not None:
+        return get_atom_indices_within_layer_by_atom_index(material, atom_index, layer_thickness)
+
+
+def get_atom_indices_within_radius_pbc(
+    material: Material, atom_index: Optional[int] = 0, position: Optional[List[float]] = None, radius: float = 1
+):
+    """
+    Select all atoms within a specified radius of a central atom considering periodic boundary conditions.
+
+    Args:
+        material (Material): Material object
+        atom_index (int): Index of the central atom
+        position (List[float]): Position of the central atom in crystal coordinates
+        radius (float): Radius of the sphere in angstroms
+
+    Returns:
+        List[int]: List of indices of atoms within the specified
+    """
+
+    if position is not None:
+        atom_index = get_closest_site_id_from_position(material, position)
+
+    structure = to_pymatgen(material)
+    immutable_structure = PymatgenIStructure.from_sites(structure.sites)
+
+    central_atom = immutable_structure[atom_index]
+    sites_within_radius = structure.get_sites_in_sphere(central_atom.coords, radius)
+
+    selected_indices = [site.index for site in sites_within_radius]
+    return selected_indices
