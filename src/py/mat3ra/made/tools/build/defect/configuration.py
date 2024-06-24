@@ -21,10 +21,12 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
 
     def __init__(self, position=position, site_id=None, **data):
         super().__init__(**data)
-        if site_id is not None:
-            self.position = self.crystal.coordinates_array[site_id]
-        else:
+        # Pymatgen accepts the coordinate of the atom within small tolerance
+        if site_id is None:
             self.site_id = get_closest_site_id_from_position(self.crystal, position)
+            self.position = self.crystal.coordinates_array[self.site_id]
+        else:
+            self.position = self.crystal.coordinates_array[site_id]
 
     @classmethod
     def from_site_id(cls, site_id: int, crystal: Material, **data):
