@@ -15,24 +15,32 @@ class BaseDefectConfiguration(BaseModel):
 
 class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     defect_type: PointDefectTypeEnum
-    position: Optional[List[float]] = [0, 0, 0]  # fractional coordinates
-    site_id: Optional[int] = None
+    position: List[float] = [0, 0, 0]  # fractional coordinates
     chemical_element: Optional[str] = None
 
-    def __init__(self, position=position, site_id=None, **data):
-        super().__init__(**data)
-        if site_id is not None:
-            self.position = self.crystal.coordinates_array[site_id]
-        else:
-            self.site_id = get_closest_site_id_from_position(self.crystal, position)
+    @classmethod
+    def from_site_id(
+        cls, crystal: Material, defect_type: PointDefectTypeEnum, site_id: int, chemical_element: Optional[str] = None
+    ):
+        if not crystal:
+            RuntimeError("Crystal is not defined")
+        position = crystal.coordinates_array[site_id]
+        return cls(crystal=crystal, defect_type=defect_type, position=position, chemical_element=chemical_element)
 
     @classmethod
-    def from_site_id(cls, site_id: int, crystal: Material, **data):
-        if crystal:
-            position = crystal.coordinates_array[site_id]
-        else:
+    def from_approximate_position(
+        cls,
+        crystal: Material,
+        defect_type: PointDefectTypeEnum,
+        approximate_position: List[float],
+        chemical_element: Optional[str] = None,
+    ):
+        if not crystal:
             RuntimeError("Crystal is not defined")
-        return cls(crystal=crystal, position=position, site_id=site_id, **data)
+        closest_site_id = get_closest_site_id_from_position(crystal, approximate_position)
+        return cls.from_site_id(
+            crystal=crystal, defect_type=defect_type, site_id=closest_site_id, chemical_element=chemical_element
+        )
 
     @property
     def _json(self):
