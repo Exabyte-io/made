@@ -15,22 +15,8 @@ class BaseDefectConfiguration(BaseModel):
 
 class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     defect_type: PointDefectTypeEnum
-    position: Optional[List[float]] = [0, 0, 0]  # fractional coordinates
-    site_id: Optional[int] = None
+    position: List[float] = [0, 0, 0]  # fractional coordinates
     chemical_element: Optional[str] = None
-
-    def __init__(self, position=position, site_id=None, **data):
-        super().__init__(**data)
-        # Pymatgen accepts the coordinate of the atom within small tolerance
-        if site_id is None:
-            self.site_id = get_closest_site_id_from_position(self.crystal, position)
-            self.position = (
-                position
-                if data["defect_type"] == PointDefectTypeEnum.INTERSTITIAL
-                else self.crystal.coordinates_array[self.site_id]
-            )
-        else:
-            self.position = self.crystal.coordinates_array[site_id]
 
     @classmethod
     def from_site_id(cls, site_id: int, crystal: Material, **data):
@@ -38,7 +24,14 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
             position = crystal.coordinates_array[site_id]
         else:
             RuntimeError("Crystal is not defined")
-        return cls(crystal=crystal, position=position, site_id=site_id, **data)
+        return cls(crystal=crystal, position=position, **data)
+
+    def from_approximate_position(
+        self,
+        approximate_position: List[float],
+    ):
+        closest_site_id = get_closest_site_id_from_position(self.crystal, approximate_position)
+        self.position = self.crystal.coordinates_array[closest_site_id]
 
     @property
     def _json(self):
