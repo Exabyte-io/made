@@ -19,19 +19,22 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     chemical_element: Optional[str] = None
 
     @classmethod
-    def from_site_id(cls, site_id: int, crystal: Material, **data):
-        if crystal:
-            position = crystal.coordinates_array[site_id]
-        else:
+    def from_site_id(cls, site_id: int, crystal: Material):
+        if not crystal:
             RuntimeError("Crystal is not defined")
-        return cls(crystal=crystal, position=position, **data)
+        position = crystal.coordinates_array[site_id]            
+        return cls(crystal=crystal, position=position)
 
+    @classmethod
     def from_approximate_position(
-        self,
+        cls,
         approximate_position: List[float],
+        crystal: Material
     ):
-        closest_site_id = get_closest_site_id_from_position(self.crystal, approximate_position)
-        self.position = self.crystal.coordinates_array[closest_site_id]
+        if not crystal:
+            RuntimeError("Crystal is not defined")
+        closest_site_id = get_closest_site_id_from_position(crystal, approximate_position)
+        return cls.from_site_id(closest_site_id, crystal)
 
     @property
     def _json(self):
