@@ -28,11 +28,19 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         return cls(crystal=crystal, defect_type=defect_type, position=position, chemical_element=chemical_element)
 
     @classmethod
-    def from_approximate_position(cls, approximate_position: List[float], crystal: Material):
+    def from_approximate_position(
+        cls,
+        crystal: Material,
+        defect_type: PointDefectTypeEnum,
+        approximate_position: List[float],
+        chemical_element: Optional[str] = None,
+    ):
         if not crystal:
             RuntimeError("Crystal is not defined")
         closest_site_id = get_closest_site_id_from_position(crystal, approximate_position)
-        return cls.from_site_id(closest_site_id, crystal)
+        return cls.from_site_id(
+            crystal=crystal, defect_type=defect_type, site_id=closest_site_id, chemical_element=chemical_element
+        )
 
     @property
     def _json(self):
