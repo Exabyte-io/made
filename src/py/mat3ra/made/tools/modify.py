@@ -1,4 +1,4 @@
-from typing import List, Union, Callable
+from typing import List, Union
 
 from mat3ra.made.material import Material
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
