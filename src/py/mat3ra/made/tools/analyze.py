@@ -235,9 +235,9 @@ def get_atom_indices_with_projection(
 
 
 # TODO: Predefined equations can be exported using a factory or enum
-def circle_equation(x, y, h=0, k=0, r=1) -> bool:
+def circle_equation_condition(x, y, h=0, k=0, r=1) -> bool:
     return (x - h) ** 2 + (y - k) ** 2 <= r**2
 
 
-def rectangle_equation(x, y, a=0, b=1, c=0, d=1) -> bool:
+def rectangle_equation_condition(x, y, a=0, b=1, c=0, d=1) -> bool:
     return a <= x <= b and c <= y <= d
