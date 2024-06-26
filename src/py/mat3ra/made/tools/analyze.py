@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 import numpy as np
 from ase import Atoms
@@ -201,3 +201,43 @@ def get_atom_indices_within_radius_pbc(
 
     selected_indices = [site.index for site in sites_within_radius]
     return selected_indices
+
+
+def get_atom_indices_with_projection(
+    material: Material, equation: Callable[[float, float], bool], use_cartesian: bool = False, invert: bool = False
+) -> List[int]:
+    """
+    Select atoms whose x and y coordinates satisfy the given equation (or inequality).
+
+    Args:
+        material (Material): Material object
+        equation (Callable[[float, float], bool]): Function representing the equation or inequality.
+        use_cartesian (bool): Whether to use Cartesian coordinates for the equation evaluation.
+        invert (bool): Whether to invert the selection.
+
+    Returns:
+        List[int]: List of indices of atoms within the specified region.
+    """
+    new_material = material.clone()
+    if use_cartesian:
+        new_basis = new_material.basis
+        new_basis.to_cartesian()
+        new_material.basis = new_basis
+    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
+
+    selected_indices = []
+    for coord in coordinates:
+        x, y = coord.value[0], coord.value[1]
+        if invert ^ equation(x, y):
+            selected_indices.append(coord.id)
+
+    return selected_indices
+
+
+# TODO: Predefined equations can be exported using a factory or enum
+def circle_equation(x, y, h=0, k=0, r=1) -> bool:
+    return (x - h) ** 2 + (y - k) ** 2 <= r**2
+
+
+def rectangle_equation(x, y, a=0, b=1, c=0, d=1) -> bool:
+    return a <= x <= b and c <= y <= d
