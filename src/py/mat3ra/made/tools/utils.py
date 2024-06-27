@@ -100,8 +100,29 @@ def get_norm(vector: List[float]) -> float:
 # Condition functions:
 # TODO: Predefined equations can be exported using a factory or enum
 def is_point_in_circle(x=0, y=0, r=1) -> Callable[[List[float]], bool]:
+    """
+    Check if a point is inside a circle.
+    Args:
+        x (float): The x-coordinate of the circle center.
+        y (float): The y-coordinate of the circle center.
+        r (float): The radius of the circle.
+
+    Returns:
+        Callable[[List[float]], bool]: The condition function to check if a point is inside the circle.
+    """
     return lambda vector: (vector[0] - x) ** 2 + (vector[1] - y) ** 2 <= r**2
 
 
 def is_point_in_rectangle(a=0, b=1, c=0, d=1) -> Callable[[List[float]], bool]:
+    """
+    Check if a point is inside a rectangle.
+    Args:
+        a (float): Lower limit of x-coordinate.
+        b (float): Upper limit of x-coordinate.
+        c (float): Lower limit of y-coordinate.
+        d (float): Upper limit of y-coordinate.
+
+    Returns:
+        Callable[[List[float]], bool]: The condition function to check if a point is inside the rectangle.
+    """
     return lambda vector: a <= vector[0] <= b and c <= vector[1] <= d
