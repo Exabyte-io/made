@@ -143,6 +143,7 @@ def filter_by_coordinates_condition(
         material (Material): The material object to filter.
         condition (Callable): The coordinate condition function.
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
+        invert_selection (bool): Whether to invert the selection.
 
     Returns:
         Material: The filtered material object.
