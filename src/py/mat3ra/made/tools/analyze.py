@@ -202,8 +202,11 @@ def get_atom_indices_within_radius_pbc(
     selected_indices = [site.index for site in sites_within_radius]
     return selected_indices
 
+
 def get_atom_indices_with_coordinates_condition(
-        material: Material, condition: Callable[[List[float]], bool], use_cartesian_coordinates: bool = False, invert_selection: bool = False
+    material: Material,
+    condition: Callable[[List[float]], bool],
+    use_cartesian_coordinates: bool = False,
 ) -> List[int]:
     """
     Select atoms whose coordinates satisfy the given condition.
@@ -212,7 +215,6 @@ def get_atom_indices_with_coordinates_condition(
         material (Material): Material object
         condition (Callable[List[float], bool]): Function that checks if coordinates satisfy the condition.
         use_cartesian (bool): Whether to use Cartesian coordinates for the condition evaluation.
-        invert_selection (bool): Whether to invert the selection.
 
     Returns:
         List[int]: List of indices of atoms whose coordinates satisfy the condition.
@@ -226,17 +228,7 @@ def get_atom_indices_with_coordinates_condition(
 
     selected_indices = []
     for coord in coordinates:
-        x, y, z = coord.value[0], coord.value[1], coord.value[2]
-        if invert_selection ^ condition(x, y, z):
+        if condition(coord.value):
             selected_indices.append(coord.id)
 
     return selected_indices
-
-
-# TODO: Predefined equations can be exported using a factory or enum
-def circle_equation_condition(x, y, h=0, k=0, r=1) -> bool:
-    return (x - h) ** 2 + (y - k) ** 2 <= r**2
-
-
-def rectangle_equation_condition(x, y, a=0, b=1, c=0, d=1) -> bool:
-    return a <= x <= b and c <= y <= d

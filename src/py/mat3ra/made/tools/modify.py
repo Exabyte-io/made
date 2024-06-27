@@ -1,10 +1,14 @@
-from typing import List, Union
+from typing import Callable, List, Union
 
 from mat3ra.made.material import Material
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
-from .analyze import get_atom_indices_within_layer_by_atom_index, get_atom_indices_within_radius_pbc
+from .analyze import (
+    get_atom_indices_with_coordinates_condition,
+    get_atom_indices_within_layer_by_atom_index,
+    get_atom_indices_within_radius_pbc,
+)
 from .convert import decorator_convert_material_args_kwargs_to_structure
 from .utils import translate_to_bottom_pymatgen_structure
 
@@ -124,3 +128,30 @@ def filter_by_sphere(material: Material, central_atom_id: int, radius: float, in
         radius=radius,
     )
     return filter_material_by_ids(material, ids, invert=invert)
+
+
+def filter_by_coordinates_condition(
+    material: Material,
+    condition: Callable[[List[float]], bool],
+    use_cartesian_coordinates: bool = False,
+    invert_selection: bool = False,
+) -> Material:
+    """
+    Filter atoms based on a condition on their coordinates.
+
+    Args:
+        material (Material): The material object to filter.
+        condition (Callable): The condition to filter by.
+
+    Returns:
+        Material: The filtered material object.
+    """
+    new_material = material.clone()
+    ids = get_atom_indices_with_coordinates_condition(
+        material,
+        condition,
+        use_cartesian_coordinates=use_cartesian_coordinates,
+    )
+
+    new_material = filter_material_by_ids(new_material, ids, invert=invert_selection)
+    return new_material
