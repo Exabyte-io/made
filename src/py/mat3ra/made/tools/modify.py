@@ -10,7 +10,7 @@ from .analyze import (
     get_atom_indices_within_radius_pbc,
 )
 from .convert import decorator_convert_material_args_kwargs_to_structure
-from .utils import translate_to_bottom_pymatgen_structure
+from .utils import is_point_in_circle, is_point_in_rectangle, translate_to_bottom_pymatgen_structure
 
 
 def filter_by_label(material: Material, label: Union[int, str]) -> Material:
@@ -86,6 +86,35 @@ def filter_material_by_ids(material: Material, ids: List[int], invert: bool = Fa
     return new_material
 
 
+def filter_by_coordinates_condition(
+    material: Material,
+    condition: Callable[[List[float]], bool],
+    use_cartesian_coordinates: bool = False,
+    invert_selection: bool = False,
+) -> Material:
+    """
+    Filter atoms based on a condition on their coordinates.
+
+    Args:
+        material (Material): The material object to filter.
+        condition (Callable): The coordinate condition function.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
+        invert_selection (bool): Whether to invert the selection.
+
+    Returns:
+        Material: The filtered material object.
+    """
+    new_material = material.clone()
+    ids = get_atom_indices_with_coordinates_condition(
+        material,
+        condition,
+        use_cartesian_coordinates=use_cartesian_coordinates,
+    )
+
+    new_material = filter_material_by_ids(new_material, ids, invert=invert_selection)
+    return new_material
+
+
 def filter_by_layers(
     material: Material, central_atom_id: int, layer_thickness: float, invert: bool = False
 ) -> Material:
@@ -130,30 +159,61 @@ def filter_by_sphere(material: Material, central_atom_id: int, radius: float, in
     return filter_material_by_ids(material, ids, invert=invert)
 
 
-def filter_by_coordinates_condition(
+def filter_by_circle_projection(
     material: Material,
-    condition: Callable[[List[float]], bool],
+    x: float = 0.5,
+    y: float = 0.5,
+    r: float = 0.25,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
     """
-    Filter atoms based on a condition on their coordinates.
+    Get material with atoms that are within or outside an XY circle projection.
 
     Args:
         material (Material): The material object to filter.
-        condition (Callable): The coordinate condition function.
-        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
+        x (float): The x-coordinate of the circle center.
+        y (float): The y-coordinate of the circle center.
+        r (float): The radius of the circle.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates
         invert_selection (bool): Whether to invert the selection.
 
     Returns:
         Material: The filtered material object.
     """
-    new_material = material.clone()
-    ids = get_atom_indices_with_coordinates_condition(
-        material,
-        condition,
-        use_cartesian_coordinates=use_cartesian_coordinates,
+    condition = is_point_in_circle(x, y, r)
+    return filter_by_coordinates_condition(
+        material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
     )
 
-    new_material = filter_material_by_ids(new_material, ids, invert=invert_selection)
-    return new_material
+
+def filter_by_rectangle_projection(
+    material: Material,
+    x_min: float = 0.25,
+    x_max: float = 0.75,
+    y_min: float = 0.25,
+    y_max: float = 0.75,
+    use_cartesian_coordinates: bool = False,
+    invert_selection: bool = False,
+) -> Material:
+    """
+    Get material with atoms that are within or outside an XY rectangle projection.
+
+    Args:
+
+        material (Material): The material object to filter.
+        x_min (float): The minimum x-coordinate of the rectangle.
+        x_max (float): The maximum x-coordinate of the rectangle.
+        y_min (float): The minimum y-coordinate of the rectangle.
+        y_max (float): The maximum y-coordinate of the rectangle.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates
+        invert_selection (bool): Whether to invert the selection.
+
+    Returns:
+        Material: The filtered material object.
+    """
+    condition = is_point_in_rectangle(x_min, x_max, y_min, y_max)
+
+    return filter_by_coordinates_condition(
+        material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
+    )
