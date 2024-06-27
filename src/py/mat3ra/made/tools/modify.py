@@ -141,7 +141,8 @@ def filter_by_coordinates_condition(
 
     Args:
         material (Material): The material object to filter.
-        condition (Callable): The condition to filter by.
+        condition (Callable): The coordinate condition function.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
 
     Returns:
         Material: The filtered material object.
