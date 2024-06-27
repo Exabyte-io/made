@@ -95,3 +95,13 @@ def get_norm(vector: List[float]) -> float:
         float: The norm of the vector.
     """
     return float(np.linalg.norm(vector))
+
+
+# Condition functions:
+# TODO: Predefined equations can be exported using a factory or enum
+def is_point_in_circle(x=0, y=0, r=1) -> Callable[[List[float]], bool]:
+    return lambda vector: (vector[0] - x) ** 2 + (vector[1] - y) ** 2 <= r**2
+
+
+def is_point_in_rectangle(a=0, b=1, c=0, d=1) -> Callable[[List[float]], bool]:
+    return lambda vector: a <= vector[0] <= b and c <= vector[1] <= d
