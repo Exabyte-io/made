@@ -1,7 +1,13 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase
-from mat3ra.made.tools.modify import filter_by_circle_projection, filter_by_label, filter_by_layers, filter_by_sphere
+from mat3ra.made.tools.modify import (
+    filter_by_circle_projection,
+    filter_by_label,
+    filter_by_layers,
+    filter_by_rectangle_projection,
+    filter_by_sphere,
+)
 from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures import SI_CONVENTIONAL_CELL
@@ -108,9 +114,15 @@ def test_filter_by_sphere():
 
 def test_filter_by_circle_projection():
     material = Material(SI_CONVENTIONAL_CELL)
+    # Small cylinder in the middle of the cell containing the central atom will be removed -- the same as with sphere
     section = filter_by_circle_projection(material, 0.5, 0.5, CRYSTAL_RADIUS)
     cavity = filter_by_circle_projection(material, 0.5, 0.5, CRYSTAL_RADIUS, invert_selection=True)
-    print(section.basis.to_json())
-    print(cavity.basis.to_json())
     assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, section.basis.to_json())
     assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_json())
+
+
+def test_filter_by_rectangle_projection():
+    material = Material(SI_CONVENTIONAL_CELL)
+    # Default will contain all the atoms
+    section = filter_by_rectangle_projection(material)
+    assertion_utils.assert_deep_almost_equal(material.basis.to_json(), section.basis.to_json())
