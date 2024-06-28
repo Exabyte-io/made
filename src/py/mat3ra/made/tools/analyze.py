@@ -1,24 +1,21 @@
 from typing import List, Optional
 
 import numpy as np
-from ase import Atoms
-from pymatgen.core import IStructure as PymatgenIStructure
 
 from ..material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
-
-PymatgenIStructure = PymatgenIStructure
+from .third_party import ASEAtoms, PymatgenIStructure
 
 
 @decorator_convert_material_args_kwargs_to_atoms
 def get_average_interlayer_distance(
-    interface_atoms: Atoms, tag_substrate: str, tag_film: str, threshold: float = 0.5
+    interface_atoms: ASEAtoms, tag_substrate: str, tag_film: str, threshold: float = 0.5
 ) -> float:
     """
     Calculate the average distance between the top layer of substrate atoms and the bottom layer of film atoms.
 
     Args:
-        interface_atoms (ase.Atoms): The ASE Atoms object containing both sets of atoms.
+        interface_atoms (ase.ASEAtoms): The ASE ASEAtoms object containing both sets of atoms.
         tag_substrate (int): The tag representing the substrate atoms.
         tag_film (int): The tag representing the film atoms.
         threshold (float): The threshold for identifying the top and bottom layers of atoms.
@@ -48,12 +45,12 @@ def get_average_interlayer_distance(
 
 
 @decorator_convert_material_args_kwargs_to_atoms
-def get_surface_area(atoms: Atoms):
+def get_surface_area(atoms: ASEAtoms):
     """
     Calculate the area of the surface perpendicular to the z-axis of the atoms structure.
 
     Args:
-        atoms (ase.Atoms): The Atoms object to calculate the surface area of.
+        atoms (ase.ASEAtoms): The ASEAtoms object to calculate the surface area of.
 
     Returns:
         float: The surface area of the atoms.
@@ -64,12 +61,12 @@ def get_surface_area(atoms: Atoms):
 
 
 @decorator_convert_material_args_kwargs_to_atoms
-def get_chemical_formula(atoms: Atoms):
+def get_chemical_formula(atoms: ASEAtoms):
     """
     Calculate the formula of the atoms structure.
 
     Args:
-        atoms (ase.Atoms): The Atoms object to calculate the formula of.
+        atoms (ase.ASEAtoms): The ASEAtoms object to calculate the formula of.
 
     Returns:
         str: The formula of the atoms.
