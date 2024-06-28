@@ -8,17 +8,19 @@ from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.io.vasp.inputs import Poscar
 
-from .utils import (
-    INTERFACE_LABELS_MAP,
+from ..third_party import (
     ASEAtoms,
     PymatgenInterface,
     PymatgenLattice,
     PymatgenSlab,
     PymatgenStructure,
+    label_pymatgen_slab_termination,
+)
+from .utils import (
+    INTERFACE_LABELS_MAP,
     extract_labels_from_pymatgen_structure,
     extract_metadata_from_pymatgen_structure,
     extract_tags_from_ase_atoms,
-    label_pymatgen_slab_termination,
     map_array_to_array_with_id_value,
 )
 

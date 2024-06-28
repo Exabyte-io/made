@@ -7,7 +7,7 @@ from pymatgen.analysis.defects.core import (
     Vacancy as PymatgenVacancy,
     Interstitial as PymatgenInterstitial,
 )
-from pymatgen.core import PeriodicSite as PymatgenPeriodicSite
+from ...third_party import PymatgenPeriodicSite
 
 from ...build import BaseBuilder
 from ...convert import PymatgenStructure, to_pymatgen
