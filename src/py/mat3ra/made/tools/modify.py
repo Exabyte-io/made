@@ -146,7 +146,13 @@ def filter_by_layers(
     return filter_by_coordinates_condition(material, condition, invert_selection=invert_selection)
 
 
-def filter_by_sphere(material: Material, central_atom_id: int, radius: float, invert: bool = False) -> Material:
+def filter_by_sphere(
+    material: Material,
+    center_coordinate: List[float] = [0, 0, 0],
+    central_atom_id: Optional[int] = None,
+    radius: float = 1,
+    invert: bool = False,
+) -> Material:
     """
     Filter out atoms within a specified radius of a central atom considering periodic boundary conditions.
 
@@ -162,6 +168,7 @@ def filter_by_sphere(material: Material, central_atom_id: int, radius: float, in
     ids = get_atom_indices_within_radius_pbc(
         material=material,
         atom_index=central_atom_id,
+        position=center_coordinate,
         radius=radius,
     )
     return filter_material_by_ids(material, ids, invert=invert)
