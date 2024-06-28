@@ -89,8 +89,8 @@ def test_filter_by_label():
 
 def test_filter_by_layers():
     material = Material(SI_CONVENTIONAL_CELL)
-    section = filter_by_layers(material, 0, 3.0)
-    cavity = filter_by_layers(material, 0, 3.0, invert=True)
+    section = filter_by_layers(material=material, central_atom_id=0, layer_thickness=3.0)
+    cavity = filter_by_layers(material=material, central_atom_id=0, layer_thickness=3.0, invert_selection=True)
     assertion_utils.assert_deep_almost_equal(expected_basis_layers_section, section.basis.to_json())
     assertion_utils.assert_deep_almost_equal(expected_basis_layers_cavity, cavity.basis.to_json())
 
