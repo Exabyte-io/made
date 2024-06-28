@@ -113,13 +113,13 @@ def is_point_in_circle(x=0, y=0, r=1) -> Callable[[List[float]], bool]:
     return lambda vector: (vector[0] - x) ** 2 + (vector[1] - y) ** 2 <= r**2
 
 
-def is_point_in_rectangle(x_min=0, x_max=1, y_min=0, y_max=1) -> Callable[[List[float]], bool]:
+def is_point_in_rectangle(x_min=0, y_min=0, x_max=1, y_max=1) -> Callable[[List[float]], bool]:
     """
     Check if a point is inside a rectangle.
     Args:
         x_min (float): Lower limit of x-coordinate.
-        x_max (float): Upper limit of x-coordinate.
         y_min (float): Lower limit of y-coordinate.
+        x_max (float): Upper limit of x-coordinate.
         y_max (float): Upper limit of y-coordinate.
 
     Returns:
@@ -128,18 +128,40 @@ def is_point_in_rectangle(x_min=0, x_max=1, y_min=0, y_max=1) -> Callable[[List[
     return lambda vector: x_min <= vector[0] <= x_max and y_min <= vector[1] <= y_max
 
 
-def is_point_in_box(x_min=0, x_max=1, y_min=0, y_max=1, z_min=0, z_max=1) -> Callable[[List[float]], bool]:
+def is_point_in_box(min_coordinate: List[float], max_coordinate: List[float]) -> Callable[[List[float]], bool]:
     """
     Check if a point is inside a box.
     Args:
-        x_min (float): Lower limit of x-coordinate.
-        x_max (float): Upper limit of x-coordinate.
-        y_min (float): Lower limit of y-coordinate.
-        y_max (float): Upper limit of y-coordinate.
-        z_min (float): Lower limit of z-coordinate.
-        z_max (float): Upper limit of z-coordinate.
-
+        min_coordinate (List[float]): The minimum coordinate of the box.
+        max_coordinate (List[float]): The maximum coordinate of the box.
     Returns:
         Callable[[List[float]], bool]: The condition function to check if a point is inside the box.
     """
+    x_min, y_min, z_min = min_coordinate
+    x_max, y_max, z_max = max_coordinate
     return lambda vector: x_min <= vector[0] <= x_max and y_min <= vector[1] <= y_max and z_min <= vector[2] <= z_max
+
+
+def is_point_within_layer(
+    center_position: List[float], direction_vector: List[float], layer_thickness: float
+) -> Callable[[List[float]], bool]:
+    """
+    Creates a condition function that checks if a point's projection along a specified direction vector
+    is within a certain layer thickness centered around a given position.
+
+    Args:
+        center_position (List[float]): The coordinates of the center position.
+        direction_vector (List[float]): The direction vector along which the layer thickness is defined.
+        layer_thickness (float): The thickness of the layer along the direction vector.
+
+    Returns:
+        Callable[[List[float]], bool]: The condition function to check if a point is within the specified layer.
+    """
+    direction_norm = np.array(direction_vector) / np.linalg.norm(direction_vector)
+    central_projection = np.dot(center_position, direction_norm)
+    layer_thickness_frac = layer_thickness / np.linalg.norm(direction_vector)
+
+    lower_bound = central_projection - layer_thickness_frac / 2
+    upper_bound = central_projection + layer_thickness_frac / 2
+
+    return lambda coord: lower_bound <= np.dot(coord, direction_norm) <= upper_bound

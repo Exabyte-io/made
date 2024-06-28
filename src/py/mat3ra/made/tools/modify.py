@@ -1,12 +1,19 @@
 from typing import Callable, List, Optional, Union
 
+import numpy as np
 from mat3ra.made.material import Material
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
 from .analyze import get_atom_indices_with_coordinates_condition, get_atom_indices_within_radius_pbc
 from .convert import decorator_convert_material_args_kwargs_to_structure
-from .utils import is_point_in_box, is_point_in_circle, is_point_in_rectangle, translate_to_bottom_pymatgen_structure
+from .utils import (
+    is_point_in_box,
+    is_point_in_circle,
+    is_point_in_rectangle,
+    is_point_within_layer,
+    translate_to_bottom_pymatgen_structure,
+)
 
 
 def filter_by_label(material: Material, label: Union[int, str]) -> Material:
@@ -113,7 +120,7 @@ def filter_by_coordinates_condition(
 
 def filter_by_layers(
     material: Material,
-    center_coordinate: List[float],
+    center_coordinate: List[float] = [0, 0, 0],
     central_atom_id: Optional[int] = None,
     layer_thickness: float = 1.0,
     invert_selection: bool = False,
@@ -133,9 +140,9 @@ def filter_by_layers(
     """
     if central_atom_id is not None:
         center_coordinate = material.basis.coordinates.get_element_value_by_index(central_atom_id)
-    condition = is_point_in_box(
-        z_min=center_coordinate[2] - layer_thickness / 2, z_max=center_coordinate[2] + layer_thickness / 2
-    )
+    vectors = material.lattice.vectors
+    direction_vector = np.array(vectors[2])
+    condition = is_point_within_layer(center_coordinate, direction_vector, layer_thickness)
     return filter_by_coordinates_condition(material, condition, invert_selection=invert_selection)
 
 
@@ -190,10 +197,10 @@ def filter_by_circle_projection(
 
 def filter_by_rectangle_projection(
     material: Material,
-    x_min: float = 0.25,
-    x_max: float = 0.75,
-    y_min: float = 0.25,
-    y_max: float = 0.75,
+    x_min: float = 0.0,
+    y_min: float = 0.0,
+    x_max: float = 1.0,
+    y_max: float = 1.0,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
@@ -204,8 +211,8 @@ def filter_by_rectangle_projection(
 
         material (Material): The material object to filter.
         x_min (float): The minimum x-coordinate of the rectangle.
-        x_max (float): The maximum x-coordinate of the rectangle.
         y_min (float): The minimum y-coordinate of the rectangle.
+        x_max (float): The maximum x-coordinate of the rectangle.
         y_max (float): The maximum y-coordinate of the rectangle.
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates
         invert_selection (bool): Whether to invert the selection.
@@ -213,8 +220,24 @@ def filter_by_rectangle_projection(
     Returns:
         Material: The filtered material object.
     """
-    condition = is_point_in_rectangle(x_min, x_max, y_min, y_max)
+    condition = is_point_in_rectangle(x_min, y_min, x_max, y_max)
 
+    return filter_by_coordinates_condition(
+        material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
+    )
+
+
+def filter_by_box(
+    material: Material,
+    min_coordinate: List[float] = [0.0, 0.0, 0.0],
+    max_coordinate: List[float] = [1.0, 1.0, 1.0],
+    use_cartesian_coordinates: bool = False,
+    invert_selection: bool = False,
+) -> Material:
+    """
+    Get material with atoms that are within or outside an XYZ box.
+    """
+    condition = is_point_in_box(min_coordinate, max_coordinate)
     return filter_by_coordinates_condition(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
     )
