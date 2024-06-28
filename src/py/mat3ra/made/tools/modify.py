@@ -1,16 +1,12 @@
-from typing import Callable, List, Union
+from typing import Callable, List, Optional, Union
 
 from mat3ra.made.material import Material
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
 from pymatgen.core.structure import Structure
 
-from .analyze import (
-    get_atom_indices_with_coordinates_condition,
-    get_atom_indices_within_layer_by_atom_index,
-    get_atom_indices_within_radius_pbc,
-)
+from .analyze import get_atom_indices_with_coordinates_condition, get_atom_indices_within_radius_pbc
 from .convert import decorator_convert_material_args_kwargs_to_structure
-from .utils import is_point_in_circle, is_point_in_rectangle, translate_to_bottom_pymatgen_structure
+from .utils import is_point_in_box, is_point_in_circle, is_point_in_rectangle, translate_to_bottom_pymatgen_structure
 
 
 def filter_by_label(material: Material, label: Union[int, str]) -> Material:
@@ -116,26 +112,31 @@ def filter_by_coordinates_condition(
 
 
 def filter_by_layers(
-    material: Material, central_atom_id: int, layer_thickness: float, invert: bool = False
+    material: Material,
+    center_coordinate: List[float],
+    central_atom_id: Optional[int] = None,
+    layer_thickness: float = 1.0,
+    invert_selection: bool = False,
 ) -> Material:
     """
     Filter out atoms within a specified layer thickness of a central atom along c-vector direction.
 
     Args:
         material (Material): The material object to filter.
+        center_coordinate (List[float]): Index of the central atom.
         central_atom_id (int): Index of the central atom.
         layer_thickness (float): Thickness of the layer in angstroms.
-        invert (bool): Whether to invert the selection.
+        invert_selection (bool): Whether to invert the selection.
 
     Returns:
         Material: The filtered material object.
     """
-    ids = get_atom_indices_within_layer_by_atom_index(
-        material,
-        central_atom_id,
-        layer_thickness,
+    if central_atom_id is not None:
+        center_coordinate = material.basis.coordinates.get_element_value_by_index(central_atom_id)
+    condition = is_point_in_box(
+        z_min=center_coordinate[2] - layer_thickness / 2, z_max=center_coordinate[2] + layer_thickness / 2
     )
-    return filter_material_by_ids(material, ids, invert=invert)
+    return filter_by_coordinates_condition(material, condition, invert_selection=invert_selection)
 
 
 def filter_by_sphere(material: Material, central_atom_id: int, radius: float, invert: bool = False) -> Material:

@@ -113,16 +113,33 @@ def is_point_in_circle(x=0, y=0, r=1) -> Callable[[List[float]], bool]:
     return lambda vector: (vector[0] - x) ** 2 + (vector[1] - y) ** 2 <= r**2
 
 
-def is_point_in_rectangle(a=0, b=1, c=0, d=1) -> Callable[[List[float]], bool]:
+def is_point_in_rectangle(x_min=0, x_max=1, y_min=0, y_max=1) -> Callable[[List[float]], bool]:
     """
     Check if a point is inside a rectangle.
     Args:
-        a (float): Lower limit of x-coordinate.
-        b (float): Upper limit of x-coordinate.
-        c (float): Lower limit of y-coordinate.
-        d (float): Upper limit of y-coordinate.
+        x_min (float): Lower limit of x-coordinate.
+        x_max (float): Upper limit of x-coordinate.
+        y_min (float): Lower limit of y-coordinate.
+        y_max (float): Upper limit of y-coordinate.
 
     Returns:
         Callable[[List[float]], bool]: The condition function to check if a point is inside the rectangle.
     """
-    return lambda vector: a <= vector[0] <= b and c <= vector[1] <= d
+    return lambda vector: x_min <= vector[0] <= x_max and y_min <= vector[1] <= y_max
+
+
+def is_point_in_box(x_min=0, x_max=1, y_min=0, y_max=1, z_min=0, z_max=1) -> Callable[[List[float]], bool]:
+    """
+    Check if a point is inside a box.
+    Args:
+        x_min (float): Lower limit of x-coordinate.
+        x_max (float): Upper limit of x-coordinate.
+        y_min (float): Lower limit of y-coordinate.
+        y_max (float): Upper limit of y-coordinate.
+        z_min (float): Lower limit of z-coordinate.
+        z_max (float): Upper limit of z-coordinate.
+
+    Returns:
+        Callable[[List[float]], bool]: The condition function to check if a point is inside the box.
+    """
+    return lambda vector: x_min <= vector[0] <= x_max and y_min <= vector[1] <= y_max and z_min <= vector[2] <= z_max
