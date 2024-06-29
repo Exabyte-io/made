@@ -1,4 +1,5 @@
-from ..convert import from_ase, from_pymatgen, ASEAtoms, PymatgenStructure
+from ..convert import from_ase, from_pymatgen
+from ..third_party import ASEAtoms, PymatgenStructure
 
 
 class ConvertGeneratedItemsASEAtomsMixin:

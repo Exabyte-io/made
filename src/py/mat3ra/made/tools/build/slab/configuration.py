@@ -1,10 +1,10 @@
 from typing import List, Tuple, Any
-
-from mat3ra.code.entity import InMemoryEntity
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer as PymatgenSpacegroupAnalyzer
 from pydantic import BaseModel
 
+from mat3ra.code.entity import InMemoryEntity
+
 from mat3ra.made.material import Material
+from ...third_party import PymatgenSpacegroupAnalyzer
 from ...convert import to_pymatgen, from_pymatgen
 
 
