@@ -1,22 +1,10 @@
 import json
 from typing import Any, Dict, List, Union
 
-from ase import Atoms as ASEAtoms
 from mat3ra.made.utils import map_array_to_array_with_id_value
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
-from pymatgen.core.interface import Interface as PymatgenInterface
-from pymatgen.core.interface import label_termination
-from pymatgen.core.structure import Lattice as PymatgenLattice
-from pymatgen.core.structure import Structure as PymatgenStructure
-from pymatgen.core.surface import Slab as PymatgenSlab
 
-# Re-exported imports to allow for both use in type hints and instantiation
-PymatgenLattice = PymatgenLattice
-PymatgenStructure = PymatgenStructure
-PymatgenSlab = PymatgenSlab
-PymatgenInterface = PymatgenInterface
-ASEAtoms = ASEAtoms
-label_pymatgen_slab_termination = label_termination
+from ..third_party import ASEAtoms, PymatgenInterface, PymatgenStructure
 
 INTERFACE_LABELS_MAP = {"substrate": 0, "film": 1}
 

@@ -2,11 +2,10 @@ from typing import Callable, List, Optional, Union
 
 import numpy as np
 from mat3ra.made.material import Material
-from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
-from pymatgen.core.structure import Structure
 
 from .analyze import get_atom_indices_with_coordinates_condition, get_atom_indices_within_radius_pbc
 from .convert import decorator_convert_material_args_kwargs_to_structure
+from .third_party import PymatgenSpacegroupAnalyzer, PymatgenStructure
 from .utils import (
     is_point_in_box,
     is_point_in_circle,
@@ -37,7 +36,7 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
 
 
 @decorator_convert_material_args_kwargs_to_structure
-def translate_to_bottom(structure: Structure, use_conventional_cell: bool = True):
+def translate_to_bottom(structure: PymatgenStructure, use_conventional_cell: bool = True):
     """
     Translate atoms to the bottom of the cell (vacuum on top) to allow for the correct consecutive interface generation.
     If use_conventional_cell is passed, conventional cell is used.
@@ -49,20 +48,20 @@ def translate_to_bottom(structure: Structure, use_conventional_cell: bool = True
         Structure: The normalized pymatgen Structure object.
     """
     if use_conventional_cell:
-        structure = SpacegroupAnalyzer(structure).get_conventional_standard_structure()
+        structure = PymatgenSpacegroupAnalyzer(structure).get_conventional_standard_structure()
     structure = translate_to_bottom_pymatgen_structure(structure)
     return structure
 
 
 @decorator_convert_material_args_kwargs_to_structure
-def wrap_to_unit_cell(structure: Structure):
+def wrap_to_unit_cell(structure: PymatgenStructure):
     """
     Wrap atoms to the cell
 
     Args:
-        structure (Structure): The pymatgen Structure object to normalize.
+        structure (PymatgenStructure): The pymatgen PymatgenStructure object to normalize.
     Returns:
-        Structure: The wrapped pymatgen Structure object.
+        PymatgenStructure: The wrapped pymatgen PymatgenStructure object.
     """
     structure.make_supercell((1, 1, 1), to_unit_cell=True)
     return structure
