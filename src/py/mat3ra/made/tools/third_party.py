@@ -1,7 +1,7 @@
 from ase import Atoms as ASEAtoms
 from ase.build.supercells import make_supercell as ase_make_supercell
 from ase.calculators.calculator import Calculator as ASECalculator
-from ase.calculators.emt import EMT
+from ase.calculators.emt import EMT as ASECalculatorEMT
 from pymatgen.analysis.defects.core import Interstitial as PymatgenInterstitial
 from pymatgen.analysis.defects.core import Substitution as PymatgenSubstitution
 from pymatgen.analysis.defects.core import Vacancy as PymatgenVacancy
@@ -22,7 +22,7 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer as PymatgenSpacegroupA
 __all__ = [
     "ASEAtoms",
     "ASECalculator",
-    "EMT",
+    "ASECalculatorEMT",
     "PymatgenLattice",
     "PymatgenStructure",
     "PymatgenIStructure",

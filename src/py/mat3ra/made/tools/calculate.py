@@ -4,7 +4,7 @@ from ..material import Material
 from .analyze import get_surface_area
 from .build.interface.utils import get_slab
 from .convert import decorator_convert_material_args_kwargs_to_atoms
-from .third_party import EMT, ASEAtoms, ASECalculator
+from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -90,7 +90,7 @@ def calculate_interfacial_energy(
     substrate_bulk: Optional[Material] = None,
     film_slab: Optional[Material] = None,
     film_bulk: Optional[Material] = None,
-    calculator: ASECalculator = EMT(),
+    calculator: ASECalculator = ASECalculatorEMT(),
 ):
     """
     Calculate the interfacial energy.
