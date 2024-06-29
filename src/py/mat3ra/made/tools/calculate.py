@@ -1,22 +1,19 @@
 from typing import Optional
 
-from ase import Atoms
-from ase.calculators.calculator import Calculator
-from ase.calculators.emt import EMT
-
 from ..material import Material
 from .analyze import get_surface_area
 from .build.interface.utils import get_slab
 from .convert import decorator_convert_material_args_kwargs_to_atoms
+from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
 
 
 @decorator_convert_material_args_kwargs_to_atoms
-def calculate_total_energy(atoms: Atoms, calculator: Calculator):
+def calculate_total_energy(atoms: ASEAtoms, calculator: ASECalculator):
     """
     Set calculator for ASE Atoms and calculate the total energy.
 
     Args:
-        atoms (ase.Atoms): The Atoms object to calculate the energy of.
+        atoms (ASEAtoms): The Atoms object to calculate the energy of.
         calculator (ase.calculators.calculator.Calculator): The calculator to use for the energy calculation.
 
     Returns:
@@ -27,12 +24,12 @@ def calculate_total_energy(atoms: Atoms, calculator: Calculator):
 
 
 @decorator_convert_material_args_kwargs_to_atoms
-def calculate_total_energy_per_atom(atoms: Atoms, calculator: Calculator):
+def calculate_total_energy_per_atom(atoms: ASEAtoms, calculator: ASECalculator):
     """
     Set calculator for ASE Atoms and calculate the total energy per atom.
 
     Args:
-            atoms (ase.Atoms): The Atoms object to calculate the energy of.
+            atoms (ASEAtoms): The Atoms object to calculate the energy of.
             calculator (ase.calculators.calculator.Calculator): The calculator to use for the energy calculation.
 
     Returns:
@@ -42,13 +39,13 @@ def calculate_total_energy_per_atom(atoms: Atoms, calculator: Calculator):
 
 
 @decorator_convert_material_args_kwargs_to_atoms
-def calculate_surface_energy(slab: Atoms, bulk: Atoms, calculator: Calculator):
+def calculate_surface_energy(slab: ASEAtoms, bulk: ASEAtoms, calculator: ASECalculator):
     """
     Calculate the surface energy by subtracting the weighted bulk energy from the slab energy.
 
     Args:
-        slab (ase.Atoms): The slab Atoms object to calculate the surface energy of.
-        bulk (ase.Atoms): The bulk Atoms object to calculate the surface energy of.
+        slab (ASEAtoms): The slab Atoms object to calculate the surface energy of.
+        bulk (ASEAtoms): The bulk Atoms object to calculate the surface energy of.
         calculator (ase.calculators.calculator.Calculator): The calculator to use for the energy calculation.
 
     Returns:
@@ -62,7 +59,9 @@ def calculate_surface_energy(slab: Atoms, bulk: Atoms, calculator: Calculator):
 
 
 @decorator_convert_material_args_kwargs_to_atoms
-def calculate_adhesion_energy(interface: Atoms, substrate_slab: Atoms, film_slab: Atoms, calculator: Calculator):
+def calculate_adhesion_energy(
+    interface: ASEAtoms, substrate_slab: ASEAtoms, film_slab: ASEAtoms, calculator: ASECalculator
+):
     """
     Calculate the adhesion energy.
     The adhesion energy is the difference between the energy of the interface and
@@ -70,9 +69,9 @@ def calculate_adhesion_energy(interface: Atoms, substrate_slab: Atoms, film_slab
     According to: 10.1088/0953-8984/27/30/305004
 
     Args:
-        interface (ase.Atoms): The interface Atoms object to calculate the adhesion energy of.
-        substrate_slab (ase.Atoms): The substrate slab Atoms object to calculate the adhesion energy of.
-        film_slab (ase.Atoms): The film slab Atoms object to calculate the adhesion energy of.
+        interface (ASEAtoms): The interface ASEAtoms object to calculate the adhesion energy of.
+        substrate_slab (ASEAtoms): The substrate slab ASEAtoms object to calculate the adhesion energy of.
+        film_slab (ASEAtoms): The film slab ASEAtoms object to calculate the adhesion energy of.
         calculator (ase.calculators.calculator.Calculator): The calculator to use for the energy calculation.
 
     Returns:
@@ -91,7 +90,7 @@ def calculate_interfacial_energy(
     substrate_bulk: Optional[Material] = None,
     film_slab: Optional[Material] = None,
     film_bulk: Optional[Material] = None,
-    calculator: Calculator = EMT(),
+    calculator: ASECalculator = ASECalculatorEMT(),
 ):
     """
     Calculate the interfacial energy.

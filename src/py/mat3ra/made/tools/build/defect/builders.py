@@ -2,15 +2,16 @@ from typing import List, Callable
 
 from mat3ra.made.material import Material
 from pydantic import BaseModel
-from pymatgen.analysis.defects.core import (
-    Substitution as PymatgenSubstitution,
-    Vacancy as PymatgenVacancy,
-    Interstitial as PymatgenInterstitial,
-)
-from pymatgen.core import PeriodicSite as PymatgenPeriodicSite
 
+from ...third_party import (
+    PymatgenStructure,
+    PymatgenPeriodicSite,
+    PymatgenVacancy,
+    PymatgenSubstitution,
+    PymatgenInterstitial,
+)
 from ...build import BaseBuilder
-from ...convert import PymatgenStructure, to_pymatgen
+from ...convert import to_pymatgen
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration
 

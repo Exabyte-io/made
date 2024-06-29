@@ -1,18 +1,16 @@
-from pymatgen.core.surface import SlabGenerator as PymatgenSlabGenerator
-from ...convert import label_pymatgen_slab_termination
 from typing import List
 from pydantic import BaseModel
 
-
 from mat3ra.made.material import Material
 
-from .termination import Termination
+from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 from ...analyze import get_chemical_formula
-from ...convert import to_pymatgen, PymatgenSlab
+from ...convert import to_pymatgen
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from ..supercell import create_supercell
 from .configuration import SlabConfiguration
+from .termination import Termination
 
 
 class SlabSelectorParameters(BaseModel):

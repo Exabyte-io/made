@@ -5,20 +5,22 @@ from typing import Any, Callable, Dict, Union
 from mat3ra.made.material import Material
 from mat3ra.made.utils import map_array_with_id_value_to_array
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pymatgen.io.ase import AseAtomsAdaptor
-from pymatgen.io.vasp.inputs import Poscar
 
-from .utils import (
-    INTERFACE_LABELS_MAP,
+from ..third_party import (
     ASEAtoms,
+    PymatgenAseAtomsAdaptor,
     PymatgenInterface,
     PymatgenLattice,
+    PymatgenPoscar,
     PymatgenSlab,
     PymatgenStructure,
+    label_pymatgen_slab_termination,
+)
+from .utils import (
+    INTERFACE_LABELS_MAP,
     extract_labels_from_pymatgen_structure,
     extract_metadata_from_pymatgen_structure,
     extract_tags_from_ase_atoms,
-    label_pymatgen_slab_termination,
     map_array_to_array_with_id_value,
 )
 
@@ -138,7 +140,7 @@ def to_poscar(material_or_material_data: Union[Material, Dict[str, Any]]) -> str
         str: A POSCAR string.
     """
     structure = to_pymatgen(material_or_material_data)
-    poscar = Poscar(structure)
+    poscar = PymatgenPoscar(structure)
     # For pymatgen `2023.6.23` supporting py3.8 the method name is "get_string"
     # TODO: cleanup the if statement when dropping support for py3.8
     if hasattr(poscar, "get_string"):
@@ -175,7 +177,7 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAto
     else:
         material_config = material_or_material_data
     structure = to_pymatgen(material_config)
-    atoms = AseAtomsAdaptor.get_atoms(structure)
+    atoms = PymatgenAseAtomsAdaptor.get_atoms(structure)
 
     atomic_labels = material_config["basis"].get("labels", [])
     if atomic_labels:
@@ -196,7 +198,7 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
         dict: A dictionary containing the material information in ESSE format.
     """
     # TODO: check that atomic labels/tags are properly handled
-    structure = AseAtomsAdaptor.get_structure(ase_atoms)
+    structure = PymatgenAseAtomsAdaptor.get_structure(ase_atoms)
     material = from_pymatgen(structure)
     ase_tags = extract_tags_from_ase_atoms(ase_atoms)
     material["basis"]["labels"] = ase_tags
