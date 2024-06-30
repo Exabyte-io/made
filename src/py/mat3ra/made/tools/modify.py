@@ -7,9 +7,10 @@ from .analyze import get_atom_indices_with_condition_on_coordinates, get_atom_in
 from .convert import decorator_convert_material_args_kwargs_to_structure
 from .third_party import PymatgenSpacegroupAnalyzer, PymatgenStructure
 from .utils import (
+    _is_2d_point_in_circle,
+    _is_2d_point_in_rectangle,
     is_point_in_box,
-    is_point_in_circle,
-    is_point_in_rectangle,
+    is_point_in_cylinder,
     is_point_within_layer,
     translate_to_bottom_pymatgen_structure,
 )
@@ -200,7 +201,40 @@ def filter_by_circle_projection(
     """
 
     def condition(coordinate):
-        return is_point_in_circle(coordinate, x, y, r)
+        return _is_2d_point_in_circle(coordinate, x, y, r)
+
+    return filter_by_condition_on_coordinates(
+        material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
+    )
+
+
+def filter_by_cylinder(
+    material: Material,
+    center_position: List[float] = [0.5, 0.5],
+    min_z: float = 0,
+    max_z: float = 1,
+    radius: float = 0.25,
+    use_cartesian_coordinates: bool = False,
+    invert_selection: bool = False,
+) -> Material:
+    """
+    Get material with atoms that are within or outside a cylinder.
+
+    Args:
+        material (Material): The material object to filter.
+        center_position (List[float]): The coordinates of the center position.
+        radius (float): The radius of the cylinder.
+        min_z (float): Lower limit of z-coordinate.
+        max_z (float): Upper limit of z-coordinate.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates
+        invert_selection (bool): Whether to invert the selection.
+
+    Returns:
+        Material: The filtered material object.
+    """
+
+    def condition(coordinate):
+        return is_point_in_cylinder(coordinate, center_position, radius, min_z, max_z)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
@@ -234,7 +268,7 @@ def filter_by_rectangle_projection(
     """
 
     def condition(coordinate):
-        return is_point_in_rectangle(coordinate, x_min, y_min, x_max, y_max)
+        return _is_2d_point_in_rectangle(coordinate, x_min, y_min, x_max, y_max)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection

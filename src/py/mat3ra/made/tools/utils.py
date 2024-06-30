@@ -100,7 +100,7 @@ def get_norm(vector: List[float]) -> float:
 
 # Condition functions:
 # TODO: Predefined equations can be exported using a factory or enum
-def is_point_in_circle(coordinate: List[float], x=0, y=0, r=1) -> bool:
+def _is_2d_point_in_circle(coordinate: List[float], x=0, y=0, r=1) -> bool:
     """
     Check if a point is inside a circle.
     Args:
@@ -115,7 +115,28 @@ def is_point_in_circle(coordinate: List[float], x=0, y=0, r=1) -> bool:
     return (coordinate[0] - x) ** 2 + (coordinate[1] - y) ** 2 <= r**2
 
 
-def is_point_in_rectangle(coordinate: List[float], x_min=0, y_min=0, x_max=1, y_max=1) -> bool:
+def is_point_in_cylinder(
+    coordinate: List[float], center_position: List[float], radius: float = 0.25, min_z: float = 0, max_z: float = 1
+) -> bool:
+    """
+    Check if a point is inside a cylinder.
+    Args:
+        coordinate (List[float]): The coordinate to check.
+        center_position (List[float]): The coordinates of the center position.
+        min_z (float): Lower limit of z-coordinate.
+        max_z (float): Upper limit of z-coordinate.
+        radius (float): The radius of the cylinder.
+
+    Returns:
+        bool: True if the point is inside the cylinder, False otherwise.
+    """
+    return (
+        _is_2d_point_in_circle(coordinate, center_position[0], center_position[1], radius)
+        and min_z <= coordinate[2] <= max_z
+    )
+
+
+def _is_2d_point_in_rectangle(coordinate: List[float], x_min=0, y_min=0, x_max=1, y_max=1) -> bool:
     """
     Check if a point is inside a rectangle.
     Args:
@@ -131,7 +152,9 @@ def is_point_in_rectangle(coordinate: List[float], x_min=0, y_min=0, x_max=1, y_
     return x_min <= coordinate[0] <= x_max and y_min <= coordinate[1] <= y_max
 
 
-def is_point_in_box(coordinate: List[float], min_coordinate: List[float], max_coordinate: List[float]) -> bool:
+def is_point_in_box(
+    coordinate: List[float], min_coordinate: List[float] = [0, 0, 0], max_coordinate: List[float] = [1, 1, 1]
+) -> bool:
     """
     Check if a point is inside a box.
     Args:
