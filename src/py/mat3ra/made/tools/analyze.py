@@ -200,7 +200,7 @@ def get_atom_indices_within_radius_pbc(
     return selected_indices
 
 
-def get_atom_indices_with_coordinates_condition(
+def get_atom_indices_with_condition_on_coordinates(
     material: Material,
     condition: Callable[[List[float]], bool],
     use_cartesian_coordinates: bool = False,
