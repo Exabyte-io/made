@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 import numpy as np
 
@@ -197,4 +197,35 @@ def get_atom_indices_within_radius_pbc(
     sites_within_radius = structure.get_sites_in_sphere(central_atom.coords, radius)
 
     selected_indices = [site.index for site in sites_within_radius]
+    return selected_indices
+
+
+def get_atom_indices_with_condition_on_coordinates(
+    material: Material,
+    condition: Callable[[List[float]], bool],
+    use_cartesian_coordinates: bool = False,
+) -> List[int]:
+    """
+    Select atoms whose coordinates satisfy the given condition.
+
+    Args:
+        material (Material): Material object
+        condition (Callable[List[float], bool]): Function that checks if coordinates satisfy the condition.
+        use_cartesian (bool): Whether to use Cartesian coordinates for the condition evaluation.
+
+    Returns:
+        List[int]: List of indices of atoms whose coordinates satisfy the condition.
+    """
+    new_material = material.clone()
+    if use_cartesian_coordinates:
+        new_basis = new_material.basis
+        new_basis.to_cartesian()
+        new_material.basis = new_basis
+    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
+
+    selected_indices = []
+    for coord in coordinates:
+        if condition(coord.value):
+            selected_indices.append(coord.id)
+
     return selected_indices

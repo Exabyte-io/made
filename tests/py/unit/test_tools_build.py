@@ -7,8 +7,8 @@ from mat3ra.utils import assertion as assertion_utils
 
 ase_ni = bulk("Ni", "fcc", a=3.52, cubic=True)
 material = Material(from_ase(ase_ni))
-section = filter_by_layers(material, 0, 1.0)
-cavity = filter_by_layers(material, 0, 1.0, invert=True)
+section = filter_by_layers(material, central_atom_id=0, layer_thickness=1.0)
+cavity = filter_by_layers(material, central_atom_id=0, layer_thickness=1.0, invert_selection=True)
 
 # Change 0th element
 section.basis.elements.values[0] = "Ge"
