@@ -96,3 +96,69 @@ def get_norm(vector: List[float]) -> float:
         float: The norm of the vector.
     """
     return float(np.linalg.norm(vector))
+
+
+# Condition functions:
+
+
+def is_coordinate_in_cylinder(
+    coordinate: List[float], center_position: List[float], radius: float = 0.25, min_z: float = 0, max_z: float = 1
+) -> bool:
+    """
+    Check if a point is inside a cylinder.
+    Args:
+        coordinate (List[float]): The coordinate to check.
+        center_position (List[float]): The coordinates of the center position.
+        min_z (float): Lower limit of z-coordinate.
+        max_z (float): Upper limit of z-coordinate.
+        radius (float): The radius of the cylinder.
+
+    Returns:
+        bool: True if the point is inside the cylinder, False otherwise.
+    """
+    return (coordinate[0] - center_position[0]) ** 2 + (coordinate[1] - center_position[1]) ** 2 <= radius**2 and (
+        min_z <= coordinate[2] <= max_z
+    )
+
+
+def is_coordinate_in_box(
+    coordinate: List[float], min_coordinate: List[float] = [0, 0, 0], max_coordinate: List[float] = [1, 1, 1]
+) -> bool:
+    """
+    Check if a point is inside a box.
+    Args:
+        coordinate (List[float]): The coordinate to check.
+        min_coordinate (List[float]): The minimum coordinate of the box.
+        max_coordinate (List[float]): The maximum coordinate of the box.
+    Returns:
+        bool: True if the point is inside the box, False otherwise.
+    """
+    x_min, y_min, z_min = min_coordinate
+    x_max, y_max, z_max = max_coordinate
+    return x_min <= coordinate[0] <= x_max and y_min <= coordinate[1] <= y_max and z_min <= coordinate[2] <= z_max
+
+
+def is_coordinate_within_layer(
+    coordinate: List[float], center_position: List[float], direction_vector: List[float], layer_thickness: float
+) -> bool:
+    """
+    Checks if a point's projection along a specified direction vector
+    is within a certain layer thickness centered around a given position.
+
+    Args:
+        coordinate (List[float]): The coordinate to check.
+        center_position (List[float]): The coordinates of the center position.
+        direction_vector (List[float]): The direction vector along which the layer thickness is defined.
+        layer_thickness (float): The thickness of the layer along the direction vector.
+
+    Returns:
+        bool: True if the point is within the layer thickness, False otherwise.
+    """
+    direction_norm = np.array(direction_vector) / np.linalg.norm(direction_vector)
+    central_projection = np.dot(center_position, direction_norm)
+    layer_thickness_frac = layer_thickness / np.linalg.norm(direction_vector)
+
+    lower_bound = central_projection - layer_thickness_frac / 2
+    upper_bound = central_projection + layer_thickness_frac / 2
+
+    return lower_bound <= np.dot(coordinate, direction_norm) <= upper_bound

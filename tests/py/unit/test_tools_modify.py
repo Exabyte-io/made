@@ -1,7 +1,13 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase
-from mat3ra.made.tools.modify import filter_by_label, filter_by_layers, filter_by_sphere
+from mat3ra.made.tools.modify import (
+    filter_by_circle_projection,
+    filter_by_label,
+    filter_by_layers,
+    filter_by_rectangle_projection,
+    filter_by_sphere,
+)
 from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures import SI_CONVENTIONAL_CELL
@@ -46,15 +52,15 @@ expected_basis_layers_cavity = {
 
 
 expected_basis_sphere_cluster = {
-    "elements": [{"id": 0, "value": "Si"}],
-    "coordinates": [{"id": 0, "value": [0.5, 0.0, 0.0]}],
+    "elements": [{"id": 2, "value": "Si"}],
+    "coordinates": [{"id": 2, "value": [0.5, 0.5, 0.5]}],
     **COMMON_PART,
 }
 
 expected_basis_sphere_cavity = {
     "elements": [
+        {"id": 0, "value": "Si"},
         {"id": 1, "value": "Si"},
-        {"id": 2, "value": "Si"},
         {"id": 3, "value": "Si"},
         {"id": 4, "value": "Si"},
         {"id": 5, "value": "Si"},
@@ -62,8 +68,8 @@ expected_basis_sphere_cavity = {
         {"id": 7, "value": "Si"},
     ],
     "coordinates": [
+        {"id": 0, "value": [0.5, 0.0, 0.0]},
         {"id": 1, "value": [0.25, 0.25, 0.75]},
-        {"id": 2, "value": [0.5, 0.5, 0.5]},
         {"id": 3, "value": [0.25, 0.75, 0.25]},
         {"id": 4, "value": [0.0, 0.0, 0.5]},
         {"id": 5, "value": [0.75, 0.25, 0.25]},
@@ -72,6 +78,9 @@ expected_basis_sphere_cavity = {
     ],
     **COMMON_PART,
 }
+
+CRYSTAL_RADIUS = 0.25  # in crystal coordinates
+CRYSTAL_CENTER_3D = [0.5, 0.5, 0.5]  # in crystal coordinates
 
 
 def test_filter_by_label():
@@ -89,15 +98,31 @@ def test_filter_by_label():
 
 def test_filter_by_layers():
     material = Material(SI_CONVENTIONAL_CELL)
-    section = filter_by_layers(material, 0, 3.0)
-    cavity = filter_by_layers(material, 0, 3.0, invert=True)
+    section = filter_by_layers(material=material, central_atom_id=0, layer_thickness=3.0)
+    cavity = filter_by_layers(material=material, central_atom_id=0, layer_thickness=3.0, invert_selection=True)
     assertion_utils.assert_deep_almost_equal(expected_basis_layers_section, section.basis.to_json())
     assertion_utils.assert_deep_almost_equal(expected_basis_layers_cavity, cavity.basis.to_json())
 
 
 def test_filter_by_sphere():
     material = Material(SI_CONVENTIONAL_CELL)
-    cluster = filter_by_sphere(material, 0, 2.0)
-    cavity = filter_by_sphere(material, 0, 2.0, invert=True)
+    cluster = filter_by_sphere(material, center_coordinate=CRYSTAL_CENTER_3D, radius=CRYSTAL_RADIUS)
+    cavity = filter_by_sphere(material, center_coordinate=CRYSTAL_CENTER_3D, radius=CRYSTAL_RADIUS, invert=True)
     assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, cluster.basis.to_json())
     assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_json())
+
+
+def test_filter_by_circle_projection():
+    material = Material(SI_CONVENTIONAL_CELL)
+    # Small cylinder in the middle of the cell containing the central atom will be removed -- the same as with sphere
+    section = filter_by_circle_projection(material, 0.5, 0.5, CRYSTAL_RADIUS)
+    cavity = filter_by_circle_projection(material, 0.5, 0.5, CRYSTAL_RADIUS, invert_selection=True)
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, section.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_json())
+
+
+def test_filter_by_rectangle_projection():
+    material = Material(SI_CONVENTIONAL_CELL)
+    # Default will contain all the atoms
+    section = filter_by_rectangle_projection(material)
+    assertion_utils.assert_deep_almost_equal(material.basis.to_json(), section.basis.to_json())
