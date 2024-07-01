@@ -7,11 +7,9 @@ from .analyze import get_atom_indices_with_condition_on_coordinates, get_atom_in
 from .convert import decorator_convert_material_args_kwargs_to_structure
 from .third_party import PymatgenSpacegroupAnalyzer, PymatgenStructure
 from .utils import (
-    _is_2d_point_in_circle,
-    _is_2d_point_in_rectangle,
-    is_point_in_box,
-    is_point_in_cylinder,
-    is_point_within_layer,
+    is_coordinate_in_box,
+    is_coordinate_in_cylinder,
+    is_coordinate_within_layer,
     translate_to_bottom_pymatgen_structure,
 )
 
@@ -144,7 +142,7 @@ def filter_by_layers(
     direction_vector = np.array(vectors[2])
 
     def condition(coordinate):
-        return is_point_within_layer(coordinate, center_coordinate, direction_vector, layer_thickness)
+        return is_coordinate_within_layer(coordinate, center_coordinate, direction_vector, layer_thickness)
 
     return filter_by_condition_on_coordinates(material, condition, invert_selection=invert_selection)
 
@@ -201,7 +199,7 @@ def filter_by_circle_projection(
     """
 
     def condition(coordinate):
-        return _is_2d_point_in_circle(coordinate, x, y, r)
+        return is_coordinate_in_cylinder(coordinate, [x, y, 0], r, min_z=0, max_z=1)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
@@ -234,7 +232,7 @@ def filter_by_cylinder(
     """
 
     def condition(coordinate):
-        return is_point_in_cylinder(coordinate, center_position, radius, min_z, max_z)
+        return is_coordinate_in_cylinder(coordinate, center_position, radius, min_z, max_z)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
@@ -268,7 +266,7 @@ def filter_by_rectangle_projection(
     """
 
     def condition(coordinate):
-        return _is_2d_point_in_rectangle(coordinate, x_min, y_min, x_max, y_max)
+        return is_coordinate_in_box(coordinate, [x_min, y_min, 0], [x_max, y_max, 1])
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
@@ -287,7 +285,7 @@ def filter_by_box(
     """
 
     def condition(coordinate):
-        return is_point_in_box(coordinate, min_coordinate, max_coordinate)
+        return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
