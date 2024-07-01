@@ -293,18 +293,18 @@ def filter_by_box(
     )
 
 
-def filter_by_triangular_prism(
+def filter_by_triangle_projection(
     material: Material,
-    coordinate_1: List[float],
-    coordinate_2: List[float],
-    coordinate_3: List[float],
+    coordinate_1: List[float] = [0, 0],
+    coordinate_2: List[float] = [0, 1],
+    coordinate_3: List[float] = [1, 0],
     min_z: float = 0,
     max_z: float = 1,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
     """
-    Get material with atoms that are within or outside a triangular prism.
+    Get material with atoms that are within or outside a prism formed by triangle projection.
 
     Args:
         material (Material): The material object to filter.
