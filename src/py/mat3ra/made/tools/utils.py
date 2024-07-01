@@ -162,3 +162,50 @@ def is_coordinate_within_layer(
     upper_bound = central_projection + layer_thickness_frac / 2
 
     return lower_bound <= np.dot(coordinate, direction_norm) <= upper_bound
+
+
+def is_coordinate_in_triangular_prism(
+    coordinate: List[float],
+    coordinate_1: List[float],
+    coordinate_2: List[float],
+    coordinate_3: List[float],
+    min_z: float = 0,
+    max_z: float = 1,
+) -> bool:
+    """
+    Check if a point is inside a triangular prism.
+    Args:
+        coordinate (List[float]): The coordinate to check.
+        coordinate_1 (List[float]): The first coordinate of the triangle.
+        coordinate_2 (List[float]): The second coordinate of the triangle.
+        coordinate_3 (List[float]): The third coordinate of the triangle.
+        min_z (float): Lower limit of z-coordinate.
+        max_z (float): Upper limit of z-coordinate.
+
+    Returns:
+        bool: True if the point is inside the triangular prism, False otherwise.
+    """
+    coordinate = np.array(coordinate)
+    v1 = np.array(coordinate_1)
+    v2 = np.array(coordinate_2)
+    v3 = np.array(coordinate_3)
+
+    # Vectors in the x-y plane
+    v2_v1 = v2 - v1
+    v3_v1 = v3 - v1
+    coordinate_v1 = coordinate - v1
+
+    # Compute dot products for the barycentric coordinates
+    d00 = np.dot(v2_v1, v2_v1)
+    d01 = np.dot(v2_v1, v3_v1)
+    d11 = np.dot(v3_v1, v3_v1)
+    d20 = np.dot(coordinate_v1, v2_v1)
+    d21 = np.dot(coordinate_v1, v3_v1)
+
+    # Calculate barycentric coordinates
+    denom = d00 * d11 - d01 * d01
+    v = (d11 * d20 - d01 * d21) / denom
+    w = (d00 * d21 - d01 * d20) / denom
+    u = 1.0 - v - w
+
+    return (u >= 0) and (v >= 0) and (w >= 0) and (u + v + w <= 1) and (min_z <= coordinate[2] <= max_z)
