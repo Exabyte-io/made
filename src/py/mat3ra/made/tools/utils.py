@@ -195,7 +195,6 @@ def is_coordinate_in_triangular_prism(
     v2 = np.array(coordinate_2)
     v3 = np.array(coordinate_3)
 
-    # Vectors in the x-y plane
     v2_v1 = v2 - v1
     v3_v1 = v3 - v1
     coordinate_v1 = coordinate - v1
