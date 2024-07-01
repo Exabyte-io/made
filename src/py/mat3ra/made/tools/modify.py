@@ -9,6 +9,7 @@ from .third_party import PymatgenSpacegroupAnalyzer, PymatgenStructure
 from .utils import (
     is_coordinate_in_box,
     is_coordinate_in_cylinder,
+    is_coordinate_in_triangular_prism,
     is_coordinate_within_layer,
     translate_to_bottom_pymatgen_structure,
 )
@@ -286,6 +287,41 @@ def filter_by_box(
 
     def condition(coordinate):
         return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
+
+    return filter_by_condition_on_coordinates(
+        material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
+    )
+
+
+def filter_by_triangular_prism(
+    material: Material,
+    coordinate_1: List[float],
+    coordinate_2: List[float],
+    coordinate_3: List[float],
+    min_z: float = 0,
+    max_z: float = 1,
+    use_cartesian_coordinates: bool = False,
+    invert_selection: bool = False,
+) -> Material:
+    """
+    Get material with atoms that are within or outside a triangular prism.
+
+    Args:
+        material (Material): The material object to filter.
+        coordinate_1 (List[float]): The coordinate of the first vertex.
+        coordinate_2 (List[float]): The coordinate of the second vertex.
+        coordinate_3 (List[float]): The coordinate of the third vertex.
+        min_z (float): Lower limit of z-coordinate.
+        max_z (float): Upper limit of z-coordinate.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates
+        invert_selection (bool): Whether to invert the selection.
+
+    Returns:
+        Material: The filtered material object.
+    """
+
+    def condition(coordinate):
+        return is_coordinate_in_triangular_prism(coordinate, coordinate_1, coordinate_2, coordinate_3, min_z, max_z)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
