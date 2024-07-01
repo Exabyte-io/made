@@ -185,6 +185,11 @@ def is_coordinate_in_triangular_prism(
     Returns:
         bool: True if the point is inside the triangular prism, False otherwise.
     """
+    # convert to 3D coordinates at the origin XY plane
+    coordinate_1.extend([0] * (3 - len(coordinate_1)))
+    coordinate_2.extend([0] * (3 - len(coordinate_2)))
+    coordinate_3.extend([0] * (3 - len(coordinate_3)))
+
     coordinate = np.array(coordinate)
     v1 = np.array(coordinate_1)
     v2 = np.array(coordinate_2)
