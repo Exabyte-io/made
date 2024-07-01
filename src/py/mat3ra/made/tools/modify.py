@@ -242,10 +242,8 @@ def filter_by_cylinder(
 
 def filter_by_rectangle_projection(
     material: Material,
-    x_min: float = 0.0,
-    y_min: float = 0.0,
-    x_max: float = 1.0,
-    y_max: float = 1.0,
+    min_coordinate: List[float] = [0, 0],
+    max_coordinate: List[float] = [1, 1],
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
@@ -253,21 +251,20 @@ def filter_by_rectangle_projection(
     Get material with atoms that are within or outside an XY rectangle projection.
 
     Args:
-
         material (Material): The material object to filter.
-        x_min (float): The minimum x-coordinate of the rectangle.
-        y_min (float): The minimum y-coordinate of the rectangle.
-        x_max (float): The maximum x-coordinate of the rectangle.
-        y_max (float): The maximum y-coordinate of the rectangle.
+        min_coordinate (List[float]): The minimum coordinate of the rectangle.
+        max_coordinate (List[float]): The maximum coordinate of the rectangle.
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates
         invert_selection (bool): Whether to invert the selection.
 
     Returns:
         Material: The filtered material object.
     """
+    min_coordinate = min_coordinate[:2] + [0]
+    max_coordinate = max_coordinate[:2] + [1]
 
     def condition(coordinate):
-        return is_coordinate_in_box(coordinate, [x_min, y_min, 0], [x_max, y_max, 1])
+        return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
