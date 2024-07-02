@@ -343,15 +343,15 @@ def add_vacuum(material: Material, vacuum: float = 5.0) -> Material:
 
 def set_vacuum(material: Material, vacuum: float = 5.0) -> Material:
     """
-    Set the vacuum thickness of the material along the c-axis. This function first strips any existing vacuum
-    and then sets the new vacuum thickness specified.
+    Set the vacuum thickness of the material along the c-axis.
+    This function first strips any existing vacuum and then sets the new vacuum thickness specified.
 
     Args:
-        material: The custom Material object, assumed to be convertible to an ASE Atoms object.
+        material (Material): The material object to set the vacuum thickness.
         vacuum (float): The thickness of the vacuum in angstroms to set above the material.
 
     Returns:
-        ASE Atoms: The ASE Atoms object with the specified vacuum thickness set.
+        Material: The material object with the vacuum thickness set.
     """
     atoms = to_ase(material)
     max_z = max(atoms.positions[:, 2])
