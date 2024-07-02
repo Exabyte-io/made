@@ -1,6 +1,7 @@
 from typing import Callable, List, Optional
 
 import numpy as np
+from pymatgen.analysis.local_env import VoronoiNN
 
 from ..material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
@@ -229,3 +230,29 @@ def get_atom_indices_with_condition_on_coordinates(
             selected_indices.append(coord.id)
 
     return selected_indices
+
+
+def get_neighboring_atoms_indices(material: Material, position: List[float] = [0, 0, 0]) -> Optional[List[int]]:
+    """
+    Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
+
+    Args:
+        material (Material): The material object to find neighbors in.
+        position (List[float]): The position to find neighbors for.
+
+    Returns:
+        List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
+    """
+    structure = to_pymatgen(material)
+
+    voronoi_nn = VoronoiNN(tol=0.5)
+    structure.append("X", position, validate_proximity=False)
+    neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
+    neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
+    structure.remove_sites([-1])
+
+    all_coordinates = material.basis.coordinates
+    all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
+    neighboring_atoms_ids = all_coordinates.ids
+
+    return neighboring_atoms_ids
