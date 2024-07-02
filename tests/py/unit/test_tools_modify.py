@@ -2,16 +2,19 @@ from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.modify import (
+    add_vacuum,
     filter_by_circle_projection,
     filter_by_label,
     filter_by_layers,
     filter_by_rectangle_projection,
     filter_by_sphere,
     filter_by_triangle_projection,
+    set_vacuum,
+    translate_to_bottom,
 )
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import SI_CONVENTIONAL_CELL
+from .fixtures import SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
 
 COMMON_PART = {
     "units": "crystal",
@@ -136,3 +139,18 @@ def test_filter_by_triangle_projection():
     cavity = filter_by_triangle_projection(material, [0.4, 0.4], [0.4, 0.5], [0.5, 0.5], invert_selection=True)
     assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, section.basis.to_json())
     assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_json())
+
+
+def test_add_vacuum():
+    material = Material(SI_SLAB)
+    material_with_vacuum = add_vacuum(material, 5.0)
+    assertion_utils.assert_deep_almost_equal(SI_SLAB_VACUUM, material_with_vacuum.to_json())
+
+
+def test_set_vacuum():
+    material_with_vacuum = Material(SI_SLAB_VACUUM)
+    material_no_vacuum = set_vacuum(material_with_vacuum, 0)
+    # to compare correctly, we need to translate the expected material to the bottom
+    # as it down when setting vacuum to 0
+    material_with_vacuum_down = translate_to_bottom(material_with_vacuum)
+    assertion_utils.assert_deep_almost_equal(material_with_vacuum_down.to_json(), material_no_vacuum.to_json())
