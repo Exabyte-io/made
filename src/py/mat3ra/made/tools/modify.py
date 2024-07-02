@@ -5,13 +5,12 @@ from mat3ra.made.material import Material
 
 from .analyze import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
 from .convert import decorator_convert_material_args_kwargs_to_structure, from_ase, to_ase
-from .third_party import PymatgenSpacegroupAnalyzer, PymatgenStructure, ase_add_vacuum
+from .third_party import PymatgenStructure, ase_add_vacuum
 from .utils import (
     is_coordinate_in_box,
     is_coordinate_in_cylinder,
     is_coordinate_in_triangular_prism,
     is_coordinate_within_layer,
-    translate_to_bottom_pymatgen_structure,
 )
 
 
@@ -35,22 +34,19 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
     return new_material
 
 
-@decorator_convert_material_args_kwargs_to_structure
-def translate_to_bottom(structure: PymatgenStructure, use_conventional_cell: bool = True):
+def translate_to_bottom(material: Material) -> Material:
     """
-    Translate atoms to the bottom of the cell (vacuum on top) to allow for the correct consecutive interface generation.
-    If use_conventional_cell is passed, conventional cell is used.
+    Translate atoms to the bottom of the cell (vacuum on top).
 
     Args:
-        structure (Structure): The pymatgen Structure object to normalize.
-        use_conventional_cell: Whether to convert to the conventional cell.
+        material (Material): The material object to normalize.
     Returns:
-        Structure: The normalized pymatgen Structure object.
+        Material: The translated material object.
     """
-    if use_conventional_cell:
-        structure = PymatgenSpacegroupAnalyzer(structure).get_conventional_standard_structure()
-    structure = translate_to_bottom_pymatgen_structure(structure)
-    return structure
+    atoms = to_ase(material)
+    min_z = min(atoms.positions[:, 2])
+    atoms.translate((0, 0, -min_z))
+    return Material(from_ase(atoms))
 
 
 @decorator_convert_material_args_kwargs_to_structure
@@ -338,7 +334,9 @@ def add_vacuum(material: Material, vacuum: float = 5.0) -> Material:
     """
     new_material_atoms = to_ase(material)
     ase_add_vacuum(new_material_atoms, vacuum)
-    return Material(from_ase(new_material_atoms))
+    new_material = Material(from_ase(new_material_atoms))
+    new_material.name = material.name
+    return new_material
 
 
 def set_vacuum(material: Material, vacuum: float = 5.0) -> Material:
@@ -353,12 +351,13 @@ def set_vacuum(material: Material, vacuum: float = 5.0) -> Material:
     Returns:
         Material: The material object with the vacuum thickness set.
     """
-    atoms = to_ase(material)
-    max_z = max(atoms.positions[:, 2])
-    new_c = max_z + vacuum
-
+    atoms = to_ase(translate_to_bottom(material))
+    new_c = max(atoms.positions[:, 2]) + vacuum
     new_cell = atoms.cell.copy()
     new_cell[2, 2] = new_c
     atoms.cell = new_cell
 
-    return Material(from_ase(atoms))
+    new_material = Material(from_ase(atoms))
+    new_material.name = material.name
+
+    return new_material
