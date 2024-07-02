@@ -220,3 +220,50 @@ SI_SLAB = {
     },
     "isUpdated": True,
 }
+
+SI_SLAB_VACUUM = {
+    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.5, 0.386029718]},
+            {"id": 1, "value": [0.5, 0.0, 0.4718141]},
+            {"id": 2, "value": [0.0, 0.0, 0.557598482]},
+            {"id": 3, "value": [-0.0, 0.5, 0.643382864]},
+        ],
+        "units": "crystal",
+        "cell": [[3.867, 0.0, 0.0], [-0.0, 3.867, 0.0], [0.0, 0.0, 15.937527692]],
+        "constraints": [],
+        "labels": [],
+    },
+    "lattice": {
+        "a": 3.867,
+        "b": 3.867,
+        "c": 15.937527692,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+        "vectors": {
+            "a": [3.867, 0.0, 0.0],
+            "b": [-0.0, 3.867, 0.0],
+            "c": [0.0, 0.0, 15.937527692],
+            "alat": 1,
+            "units": "angstrom",
+        },
+    },
+    "isNonPeriodic": False,
+    "_id": "",
+    "metadata": {
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "termination": "Si_P4/mmm_1",
+        "build": {"configuration": SI_SLAB_CONFIGURATION},
+    },
+    "isUpdated": True,
+}
