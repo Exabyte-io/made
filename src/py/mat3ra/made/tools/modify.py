@@ -4,8 +4,8 @@ import numpy as np
 from mat3ra.made.material import Material
 
 from .analyze import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
-from .convert import decorator_convert_material_args_kwargs_to_structure
-from .third_party import PymatgenSpacegroupAnalyzer, PymatgenStructure
+from .convert import decorator_convert_material_args_kwargs_to_structure, from_ase, to_ase
+from .third_party import PymatgenSpacegroupAnalyzer, PymatgenStructure, ase_add_vacuum
 from .utils import (
     is_coordinate_in_box,
     is_coordinate_in_cylinder,
@@ -323,3 +323,33 @@ def filter_by_triangle_projection(
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
     )
+
+
+def add_vacuum(material: Material, vacuum: float = 5.0) -> Material:
+    """
+    Add vacuum to the top of the material.
+
+    Args:
+        material (Material): The material object to add vacuum to.
+        vacuum (float): The thickness of the vacuum in angstroms.
+
+    Returns:
+        Material: The material object with vacuum added.
+    """
+    new_material_atoms = to_ase(material)
+    ase_add_vacuum(new_material_atoms, vacuum)
+    return Material(from_ase(new_material_atoms))
+
+
+def set_vacuum(material: Material, vacuum: float = 5.0) -> Material:
+    """
+    Set the vacuum thickness of the material.
+    Strips any existing vacuum along the c-axis and sets the new vacuum thickness.
+
+    Args:
+        material (Material): The material object to set the vacuum thickness.
+        vacuum (float): The thickness of the vacuum in angstroms.
+
+    Returns:
+        Material: The material object with vacuum set.
+    """
