@@ -331,7 +331,7 @@ def add_vacuum(material: Material, vacuum: float = 5.0) -> Material:
 
     Args:
         material (Material): The material object to add vacuum to.
-        vacuum (float): The thickness of the vacuum in angstroms.
+        vacuum (float): The thickness of the vacuum to add in angstroms.
 
     Returns:
         Material: The material object with vacuum added.
@@ -348,7 +348,7 @@ def set_vacuum(material: Material, vacuum: float = 5.0) -> Material:
 
     Args:
         material (Material): The material object to set the vacuum thickness.
-        vacuum (float): The thickness of the vacuum in angstroms to set above the material.
+        vacuum (float): The total thickness of the vacuum in angstroms to set above the material.
 
     Returns:
         Material: The material object with the vacuum thickness set.
