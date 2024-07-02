@@ -67,3 +67,13 @@ class SubstitutionPointDefectBuilder(PointDefectBuilder):
 
 class InterstitialPointDefectBuilder(PointDefectBuilder):
     _generator: PymatgenInterstitial = PymatgenInterstitial
+
+
+class SlabDefectBuilderParameters(BaseModel):
+    add_vacuum: bool = True
+    min_vacuum_thickness: float = 5.0
+
+
+class SlabDefectBuilder(BaseBuilder):
+    _BuildParametersType = SlabDefectBuilderParameters
+    _DefaultBuildParameters = SlabDefectBuilderParameters()
