@@ -149,8 +149,11 @@ def test_add_vacuum():
 
 def test_set_vacuum():
     material_with_vacuum = Material(SI_SLAB_VACUUM)
-    material_no_vacuum = set_vacuum(material_with_vacuum, 0)
+    vacuum = 6.836
+    material_with_set_vacuum = set_vacuum(material_with_vacuum, vacuum)
     # to compare correctly, we need to translate the expected material to the bottom
     # as it down when setting vacuum to 0
-    material_with_vacuum_down = translate_to_bottom(material_with_vacuum)
-    assertion_utils.assert_deep_almost_equal(material_with_vacuum_down.to_json(), material_no_vacuum.to_json())
+    material = Material(SI_SLAB)
+    material_down = translate_to_bottom(material)
+
+    assertion_utils.assert_deep_almost_equal(material_down.to_json(), material_with_set_vacuum.to_json())
