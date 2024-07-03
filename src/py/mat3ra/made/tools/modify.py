@@ -34,32 +34,45 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
     return new_material
 
 
-def translate_atoms(
-    material: Material,
-    vector: Optional[List[float]] = None,
-    to: Optional[Literal["top", "bottom", "center"]] = None,
+def translate_to_z_level(
+    material: Material, z_level: Optional[Literal["top", "bottom", "center"]] = "bottom"
 ) -> Material:
     """
-    Translate atoms to the bottom of the cell (vacuum on top).
+    Translate atoms to the specified z-level.
 
     Args:
         material (Material): The material object to normalize.
-        vector (List[float]): The vector to translate the atoms by (in crystal coordinates)
-        to (str): The position to translate the atoms to (top, bottom, center)
+        z_level (str): The z-level to translate the atoms to (top, bottom, center)
     Returns:
         Material: The translated material object.
     """
     atoms = to_ase(material)
     min_z = min(atoms.positions[:, 2])
     max_z = max(atoms.positions[:, 2])
-    if to == "top":
+    if z_level == "top":
         atoms.translate((0, 0, 1 - max_z))
-    elif to == "bottom":
+    elif z_level == "bottom":
         atoms.translate((0, 0, -min_z))
-    elif to == "center":
+    elif z_level == "center":
         atoms.translate((0, 0, (1 - min_z - max_z) / 2))
-    elif vector is not None:
-        atoms.translate(tuple(vector))
+    return Material(from_ase(atoms))
+
+
+def translate_by_vector(
+    material: Material,
+    vector: List[float] = [0, 0, 0],
+) -> Material:
+    """
+    Translate atoms by a vector.
+
+    Args:
+        material (Material): The material object to normalize.
+        vector (List[float]): The vector to translate the atoms by (in crystal coordinates)
+    Returns:
+        Material: The translated material object.
+    """
+    atoms = to_ase(material)
+    atoms.translate(tuple(vector))
     return Material(from_ase(atoms))
 
 
@@ -354,9 +367,9 @@ def add_vacuum(material: Material, vacuum: float = 5.0, top=True, bottom=False) 
     ase_add_vacuum(new_material_atoms, vacuum_amount)
     new_material = Material(from_ase(new_material_atoms))
     if bottom and not top:
-        new_material = translate_atoms(new_material, to="top")
+        new_material = translate_to_z_level(new_material, z_level="top")
     elif top and bottom:
-        new_material = translate_atoms(new_material, to="center")
+        new_material = translate_to_z_level(new_material, z_level="center")
     return new_material
 
 
@@ -374,14 +387,14 @@ def remove_vacuum(material: Material, top=True, bottom=True, fixed_padding=1.0) 
     Returns:
         Material: The material object with the vacuum thickness set.
     """
-    atoms = to_ase(translate_atoms(material, to="bottom"))
+    atoms = to_ase(translate_to_z_level(material, z_level="bottom"))
     new_c = max(atoms.positions[:, 2]) + fixed_padding
     new_cell = atoms.cell.copy()
     new_cell[2, 2] = new_c
     atoms.cell = new_cell
     new_material = Material(from_ase(atoms))
     if top and not bottom:
-        new_material = translate_atoms(new_material, to="top")
+        new_material = translate_to_z_level(new_material, z_level="top")
     if bottom and not top:
-        new_material = translate_atoms(new_material, to="bottom")
+        new_material = translate_to_z_level(new_material, z_level="bottom")
     return new_material
