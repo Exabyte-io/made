@@ -176,17 +176,6 @@ SI_SLAB_CONFIGURATION: Dict[str, Any] = {
     "use_orthogonal_z": True,
 }
 
-COMMON_SLAB_PART: Dict[str, Any] = {
-    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
-    "isNonPeriodic": False,
-    "_id": "",
-    "metadata": {
-        "boundaryConditions": {"type": "pbc", "offset": 0},
-        "termination": "Si_P4/mmm_1",
-        "build": {"configuration": SI_SLAB_CONFIGURATION},
-    },
-    "isUpdated": True,
-}
 SI_SLAB: Dict[str, Any] = {
     "basis": {
         "elements": [
@@ -223,27 +212,24 @@ SI_SLAB: Dict[str, Any] = {
             "units": "angstrom",
         },
     },
-    **COMMON_SLAB_PART,
-}
-
-lattice_with_adjusted_c: Dict[str, Any] = copy.deepcopy(SI_SLAB["lattice"])
-lattice_with_adjusted_c["c"] = 15.937527692
-lattice_with_adjusted_c["vectors"]["c"] = [0.0, 0.0, 15.937527692]
-
-SI_SLAB_VACUUM: Dict[str, Any] = {
-    "basis": {
-        "elements": SI_SLAB["basis"]["elements"],
-        "coordinates": [
-            {"id": 0, "value": [0.5, 0.5, 0.386029718]},
-            {"id": 1, "value": [0.5, 0.0, 0.4718141]},
-            {"id": 2, "value": [0.0, 0.0, 0.557598482]},
-            {"id": 3, "value": [-0.0, 0.5, 0.643382864]},
-        ],
-        "units": "crystal",
-        "cell": [[3.867, 0.0, 0.0], [-0.0, 3.867, 0.0], [0.0, 0.0, 15.937527692]],
-        "constraints": [],
-        "labels": [],
+    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+    "isNonPeriodic": False,
+    "_id": "",
+    "metadata": {
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "termination": "Si_P4/mmm_1",
+        "build": {"configuration": SI_SLAB_CONFIGURATION},
     },
-    "lattice": lattice_with_adjusted_c,
-    **COMMON_SLAB_PART,
+    "isUpdated": True,
 }
+
+SI_SLAB_VACUUM = copy.deepcopy(SI_SLAB)
+SI_SLAB_VACUUM["basis"]["coordinates"] = [
+    {"id": 0, "value": [0.5, 0.5, 0.386029718]},
+    {"id": 1, "value": [0.5, 0.0, 0.4718141]},
+    {"id": 2, "value": [0.0, 0.0, 0.557598482]},
+    {"id": 3, "value": [-0.0, 0.5, 0.643382864]},
+]
+SI_SLAB_VACUUM["basis"]["cell"] = [[3.867, 0.0, 0.0], [-0.0, 3.867, 0.0], [0.0, 0.0, 15.937527692]]
+SI_SLAB_VACUUM["lattice"]["c"] = 15.937527692
+SI_SLAB_VACUUM["lattice"]["vectors"]["c"] = [0.0, 0.0, 15.937527692]
