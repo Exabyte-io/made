@@ -10,7 +10,7 @@ from mat3ra.made.tools.modify import (
     filter_by_sphere,
     filter_by_triangle_projection,
     set_vacuum,
-    translate_to_bottom,
+    translate_atoms,
 )
 from mat3ra.utils import assertion as assertion_utils
 
@@ -154,6 +154,6 @@ def test_set_vacuum():
     # to compare correctly, we need to translate the expected material to the bottom
     # as it down when setting vacuum to 0
     material = Material(SI_SLAB)
-    material_down = translate_to_bottom(material)
+    material_down = translate_atoms(material, to="bottom")
 
     assertion_utils.assert_deep_almost_equal(material_down.to_json(), material_with_set_vacuum.to_json())
