@@ -9,7 +9,7 @@ from mat3ra.made.tools.modify import (
     filter_by_rectangle_projection,
     filter_by_sphere,
     filter_by_triangle_projection,
-    set_vacuum,
+    remove_vacuum,
     translate_atoms,
 )
 from mat3ra.utils import assertion as assertion_utils
@@ -150,7 +150,8 @@ def test_add_vacuum():
 def test_set_vacuum():
     material_with_vacuum = Material(SI_SLAB_VACUUM)
     vacuum = 6.836
-    material_with_set_vacuum = set_vacuum(material_with_vacuum, vacuum)
+    material_with_set_vacuum = remove_vacuum(material_with_vacuum, top=True, bottom=True, fixed_padding=0)
+    material_with_set_vacuum = add_vacuum(material_with_set_vacuum, vacuum)
     # to compare correctly, we need to translate the expected material to the bottom
     # as it down when setting vacuum to 0
     material = Material(SI_SLAB)
