@@ -350,16 +350,12 @@ def add_vacuum(material: Material, vacuum: float = 5.0, top=True, bottom=False) 
         Material: The material object with vacuum added.
     """
     new_material_atoms = to_ase(material)
-    if top and not bottom:
-        ase_add_vacuum(new_material_atoms, vacuum)
-        new_material = Material(from_ase(new_material_atoms))
+    vacuum_amount = vacuum * 2 if top and bottom else vacuum
+    ase_add_vacuum(new_material_atoms, vacuum_amount)
+    new_material = Material(from_ase(new_material_atoms))
     if bottom and not top:
-        ase_add_vacuum(new_material_atoms, vacuum)
-        new_material = Material(from_ase(new_material_atoms))
         new_material = translate_atoms(new_material, to="top")
-    if top and bottom:
-        ase_add_vacuum(new_material_atoms, vacuum * 2)
-        new_material = Material(from_ase(new_material_atoms))
+    elif top and bottom:
         new_material = translate_atoms(new_material, to="center")
     return new_material
 
