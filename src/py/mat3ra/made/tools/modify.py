@@ -350,10 +350,10 @@ def add_vacuum(material: Material, vacuum: float = 5.0, top=True, bottom=False) 
         Material: The material object with vacuum added.
     """
     new_material_atoms = to_ase(material)
-    if top:
+    if top and not bottom:
         ase_add_vacuum(new_material_atoms, vacuum)
         new_material = Material(from_ase(new_material_atoms))
-    if bottom:
+    if bottom and not top:
         ase_add_vacuum(new_material_atoms, vacuum)
         new_material = Material(from_ase(new_material_atoms))
         new_material = translate_atoms(new_material, to="top")
@@ -364,23 +364,28 @@ def add_vacuum(material: Material, vacuum: float = 5.0, top=True, bottom=False) 
     return new_material
 
 
-def set_vacuum(material: Material, vacuum: float = 5.0) -> Material:
+def remove_vacuum(material: Material, top=True, bottom=True, fixed_padding=1.0) -> Material:
     """
-    Set the vacuum thickness of the material along the c-axis.
-    This function first strips any existing vacuum and then sets the new vacuum thickness specified.
+    Remove vacuum from the material along the c-axis.
+    From top, from bottom, or from both.
 
     Args:
         material (Material): The material object to set the vacuum thickness.
-        vacuum (float): The total thickness of the vacuum in angstroms to set above the material.
+        top (bool): Whether to remove vacuum from the top.
+        bottom (bool): Whether to remove vacuum from the bottom.
+        fixed_padding (float): The fixed padding to add to the top and bottom to avoid collision in pbc (in angstroms).
 
     Returns:
         Material: The material object with the vacuum thickness set.
     """
     atoms = to_ase(translate_atoms(material, to="bottom"))
-    new_c = max(atoms.positions[:, 2]) + vacuum
+    new_c = max(atoms.positions[:, 2]) + fixed_padding
     new_cell = atoms.cell.copy()
     new_cell[2, 2] = new_c
     atoms.cell = new_cell
     new_material = Material(from_ase(atoms))
-
+    if top and not bottom:
+        new_material = translate_atoms(new_material, to="top")
+    if bottom and not top:
+        new_material = translate_atoms(new_material, to="bottom")
     return new_material
