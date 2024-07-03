@@ -150,8 +150,8 @@ def test_add_vacuum():
 def test_set_vacuum():
     material_with_vacuum = Material(SI_SLAB_VACUUM)
     vacuum = 6.836
-    material_with_set_vacuum = remove_vacuum(material_with_vacuum, top=True, bottom=True, fixed_padding=0)
-    material_with_set_vacuum = add_vacuum(material_with_set_vacuum, vacuum)
+    material_with_no_vacuum = remove_vacuum(material_with_vacuum, from_top=True, from_bottom=True, fixed_padding=0)
+    material_with_set_vacuum = add_vacuum(material_with_no_vacuum, vacuum)
     # to compare correctly, we need to translate the expected material to the bottom
     # as it down when setting vacuum to 0
     material = Material(SI_SLAB)

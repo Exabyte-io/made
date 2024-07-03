@@ -348,7 +348,7 @@ def filter_by_triangle_projection(
     )
 
 
-def add_vacuum(material: Material, vacuum: float = 5.0, top=True, bottom=False) -> Material:
+def add_vacuum(material: Material, vacuum: float = 5.0, add_on_top=True, add_to_bottom=False) -> Material:
     """
     Add vacuum to the material along the c-axis.
     On top, on bottom, or both.
@@ -356,33 +356,33 @@ def add_vacuum(material: Material, vacuum: float = 5.0, top=True, bottom=False) 
     Args:
         material (Material): The material object to add vacuum to.
         vacuum (float): The thickness of the vacuum to add in angstroms.
-        top (bool): Whether to add vacuum on top.
-        bottom (bool): Whether to add vacuum on bottom.
+        add_on_top (bool): Whether to add vacuum on top.
+        add_to_bottom (bool): Whether to add vacuum on bottom.
 
     Returns:
         Material: The material object with vacuum added.
     """
     new_material_atoms = to_ase(material)
-    vacuum_amount = vacuum * 2 if top and bottom else vacuum
+    vacuum_amount = vacuum * 2 if add_on_top and add_to_bottom else vacuum
     ase_add_vacuum(new_material_atoms, vacuum_amount)
     new_material = Material(from_ase(new_material_atoms))
-    if bottom and not top:
+    if add_to_bottom and not add_on_top:
         new_material = translate_to_z_level(new_material, z_level="top")
-    elif top and bottom:
+    elif add_on_top and add_to_bottom:
         new_material = translate_to_z_level(new_material, z_level="center")
     return new_material
 
 
-def remove_vacuum(material: Material, top=True, bottom=True, fixed_padding=1.0) -> Material:
+def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_padding=1.0) -> Material:
     """
     Remove vacuum from the material along the c-axis.
     From top, from bottom, or from both.
 
     Args:
         material (Material): The material object to set the vacuum thickness.
-        top (bool): Whether to remove vacuum from the top.
-        bottom (bool): Whether to remove vacuum from the bottom.
-        fixed_padding (float): The fixed padding to add to the top and bottom to avoid collision in pbc (in angstroms).
+        from_top (bool): Whether to remove vacuum from the top.
+        from_bottom (bool): Whether to remove vacuum from the bottom.
+        fixed_padding (float): The fixed padding of vacuum to add to avoid collisions in pbc (in angstroms).
 
     Returns:
         Material: The material object with the vacuum thickness set.
@@ -393,8 +393,8 @@ def remove_vacuum(material: Material, top=True, bottom=True, fixed_padding=1.0) 
     new_cell[2, 2] = new_c
     atoms.cell = new_cell
     new_material = Material(from_ase(atoms))
-    if top and not bottom:
+    if from_top and not from_bottom:
         new_material = translate_to_z_level(new_material, z_level="top")
-    if bottom and not top:
+    if from_bottom and not from_top:
         new_material = translate_to_z_level(new_material, z_level="bottom")
     return new_material
