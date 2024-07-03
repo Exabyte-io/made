@@ -62,7 +62,7 @@ INTERFACE_STRUCTURE.interface_properties = INTERFACE_PROPERTIES_MOCK
 INTERFACE_NAME = "Cu4(001)-Si8(001), Interface, Strain 0.062pct"
 
 # TODO: Use fixtures package when available
-SI_CONVENTIONAL_CELL = {
+SI_CONVENTIONAL_CELL: Dict[str, Any] = {
     "name": "Si8",
     "basis": {
         "elements": [
@@ -113,7 +113,7 @@ SI_CONVENTIONAL_CELL = {
     "isUpdated": True,
 }
 
-SI_SUPERCELL_2X2X1 = {
+SI_SUPERCELL_2X2X1: Dict[str, Any] = {
     "name": "Si8",
     "basis": {
         "elements": [
@@ -165,7 +165,7 @@ SI_SUPERCELL_2X2X1 = {
 }
 
 
-SI_SLAB_CONFIGURATION = {
+SI_SLAB_CONFIGURATION: Dict[str, Any] = {
     "type": "SlabConfiguration",
     "bulk": SI_CONVENTIONAL_CELL,
     "miller_indices": (0, 0, 1),
@@ -176,7 +176,7 @@ SI_SLAB_CONFIGURATION = {
     "use_orthogonal_z": True,
 }
 
-COMMON_SLAB_PART = {
+COMMON_SLAB_PART: Dict[str, Any] = {
     "name": "Si8(001), termination Si_P4/mmm_1, Slab",
     "isNonPeriodic": False,
     "_id": "",
@@ -230,7 +230,7 @@ lattice_with_adjusted_c: Dict[str, Any] = copy.deepcopy(SI_SLAB["lattice"])
 lattice_with_adjusted_c["c"] = 15.937527692
 lattice_with_adjusted_c["vectors"]["c"] = [0.0, 0.0, 15.937527692]
 
-SI_SLAB_VACUUM = {
+SI_SLAB_VACUUM: Dict[str, Any] = {
     "basis": {
         "elements": SI_SLAB["basis"]["elements"],
         "coordinates": [
