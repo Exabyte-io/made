@@ -335,7 +335,6 @@ def add_vacuum(material: Material, vacuum: float = 5.0) -> Material:
     new_material_atoms = to_ase(material)
     ase_add_vacuum(new_material_atoms, vacuum)
     new_material = Material(from_ase(new_material_atoms))
-    new_material.name = material.name
     return new_material
 
 
@@ -356,8 +355,6 @@ def set_vacuum(material: Material, vacuum: float = 5.0) -> Material:
     new_cell = atoms.cell.copy()
     new_cell[2, 2] = new_c
     atoms.cell = new_cell
-
     new_material = Material(from_ase(atoms))
-    new_material.name = material.name
 
     return new_material

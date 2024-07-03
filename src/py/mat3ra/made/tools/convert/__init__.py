@@ -184,6 +184,8 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAto
         atoms.set_tags(map_array_with_id_value_to_array(atomic_labels))
     if "metadata" in material_config:
         atoms.info.update({"metadata": material_config["metadata"]})
+
+    atoms.info.update({"name": material_config["name"]})
     return atoms
 
 
@@ -205,6 +207,7 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     ase_metadata = ase_atoms.info.get("metadata", {})
     if ase_metadata:
         material["metadata"].update(ase_metadata)
+    material["name"] = ase_atoms.info.get("name", "")
     return material
 
 
