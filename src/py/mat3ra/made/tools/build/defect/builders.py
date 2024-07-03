@@ -1,7 +1,8 @@
 from typing import List, Callable
 
-from mat3ra.made.material import Material
 from pydantic import BaseModel
+from mat3ra.made.material import Material
+
 
 from ...third_party import (
     PymatgenStructure,
@@ -14,6 +15,7 @@ from ...build import BaseBuilder
 from ...convert import to_pymatgen
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration
+from ...analyze import get_neighboring_atoms_indices
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -67,3 +69,74 @@ class SubstitutionPointDefectBuilder(PointDefectBuilder):
 
 class InterstitialPointDefectBuilder(PointDefectBuilder):
     _generator: PymatgenInterstitial = PymatgenInterstitial
+
+
+class SlabDefectBuilderParameters(BaseModel):
+    add_vacuum: bool = True
+    min_vacuum_thickness: float = 5.0
+
+
+class SlabDefectBuilder(BaseBuilder):
+    _BuildParametersType = SlabDefectBuilderParameters
+    _DefaultBuildParameters = SlabDefectBuilderParameters()
+
+
+class AdatomSlabDefectBuilder(SlabDefectBuilder):
+    _GeneratedItemType: Material = Material
+
+    def add_adatom(
+        material: Material, chemical_element: str = "Si", position: List[float] = [0.5, 0.5, 0.5]
+    ) -> Material:
+        material_copy = material.clone()
+        basis = material_copy.basis
+        basis.add_atom(chemical_element, position)
+        material_copy.basis = basis
+        return [material_copy]
+
+    _generator = add_adatom
+
+
+class EquidistantAdatomSlabDefectBuilder(SlabDefectBuilder):
+    _GeneratedItemType: Material = Material
+
+    def add_adatom_equdistant(
+        material: Material,
+        chemical_element: str = "Si",
+        approximate_position: List[float] = [0.5, 0.5, 0.5],
+        distance: float = 2.0,
+    ) -> Material:
+        """
+        Adds an atom to the material at a position that is equidistant to the nearest atoms
+        (that are found within proximity to the approx position) with the specified distance.
+        """
+        material_copy: Material = material.clone()
+        basis = material_copy.basis
+
+        distance = distance / material_copy.lattice.c
+        max_z = max([coordinate[2] for coordinate in basis.coordinates.values])
+
+        # Move the appx position to the top of the slab
+        adatom_position = approximate_position.copy()
+        adatom_position[2] = max_z + distance
+
+        neighboring_atoms_ids = get_neighboring_atoms_indices(material, adatom_position)
+
+        # Find equidistant position from heighboring atoms with the set z
+        if neighboring_atoms_ids is not None:
+            neighboring_atoms_coordinates = [basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
+
+        equidistant_position = [
+            sum([coordinate[i] for coordinate in neighboring_atoms_coordinates]) / len(neighboring_atoms_coordinates)
+            for i in range(3)
+        ]
+        equidistant_position[2] = adatom_position[2]
+
+        # Check for valid position (inside the cell)
+        if equidistant_position[2] > basis.cell.vectors_as_nested_array[2][2]:
+            raise ValueError("The adatom position is outside the cell.")
+
+        basis.add_atom(chemical_element, equidistant_position)
+        material_copy.basis = basis
+        return [material_copy]
+
+    _generator = add_adatom_equdistant

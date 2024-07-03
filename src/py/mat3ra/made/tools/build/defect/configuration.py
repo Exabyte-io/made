@@ -5,7 +5,7 @@ from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_position
-from .enums import PointDefectTypeEnum
+from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -23,7 +23,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         cls, crystal: Material, defect_type: PointDefectTypeEnum, site_id: int, chemical_element: Optional[str] = None
     ):
         if not crystal:
-            RuntimeError("Crystal is not defined")
+            raise RuntimeError("Crystal is not defined")
         position = crystal.coordinates_array[site_id]
         return cls(crystal=crystal, defect_type=defect_type, position=position, chemical_element=chemical_element)
 
@@ -36,7 +36,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         chemical_element: Optional[str] = None,
     ):
         if not crystal:
-            RuntimeError("Crystal is not defined")
+            raise RuntimeError("Crystal is not defined")
         closest_site_id = get_closest_site_id_from_position(crystal, approximate_position)
         return cls.from_site_id(
             crystal=crystal, defect_type=defect_type, site_id=closest_site_id, chemical_element=chemical_element
@@ -50,3 +50,12 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
             "position": self.position,
             "chemical_element": self.chemical_element,
         }
+
+
+class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
+    defect_type: SlabDefectTypeEnum
+
+
+class AdatomSlabDefectConfiguration(SlabDefectConfiguration):
+    position: List[float] = [0.5, 0.5, 0.5]
+    chemical_element: str = "Si"
