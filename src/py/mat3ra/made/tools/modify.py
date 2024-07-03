@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Literal, Optional, Union
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -34,18 +34,32 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
     return new_material
 
 
-def translate_to_bottom(material: Material) -> Material:
+def translate_atoms(
+    material: Material,
+    vector: Optional[List[float]] = None,
+    to: Optional[Literal["top", "bottom", "center"]] = None,
+) -> Material:
     """
     Translate atoms to the bottom of the cell (vacuum on top).
 
     Args:
         material (Material): The material object to normalize.
+        vector (List[float]): The vector to translate the atoms by (in crystal coordinates)
+        to (str): The position to translate the atoms to (top, bottom, center)
     Returns:
         Material: The translated material object.
     """
     atoms = to_ase(material)
     min_z = min(atoms.positions[:, 2])
-    atoms.translate((0, 0, -min_z))
+    max_z = max(atoms.positions[:, 2])
+    if to == "top":
+        atoms.translate((0, 0, 1 - max_z))
+    elif to == "bottom":
+        atoms.translate((0, 0, -min_z))
+    elif to == "center":
+        atoms.translate((0, 0, (1 - min_z - max_z) / 2))
+    elif vector is not None:
+        atoms.translate(tuple(vector))
     return Material(from_ase(atoms))
 
 
@@ -321,20 +335,32 @@ def filter_by_triangle_projection(
     )
 
 
-def add_vacuum(material: Material, vacuum: float = 5.0) -> Material:
+def add_vacuum(material: Material, vacuum: float = 5.0, top=True, bottom=False) -> Material:
     """
-    Add vacuum to the top of the material.
+    Add vacuum to the material along the c-axis.
+    On top, on bottom, or both.
 
     Args:
         material (Material): The material object to add vacuum to.
         vacuum (float): The thickness of the vacuum to add in angstroms.
+        top (bool): Whether to add vacuum on top.
+        bottom (bool): Whether to add vacuum on bottom.
 
     Returns:
         Material: The material object with vacuum added.
     """
     new_material_atoms = to_ase(material)
-    ase_add_vacuum(new_material_atoms, vacuum)
-    new_material = Material(from_ase(new_material_atoms))
+    if top:
+        ase_add_vacuum(new_material_atoms, vacuum)
+        new_material = Material(from_ase(new_material_atoms))
+    if bottom:
+        ase_add_vacuum(new_material_atoms, vacuum)
+        new_material = Material(from_ase(new_material_atoms))
+        new_material = translate_atoms(new_material, to="top")
+    if top and bottom:
+        ase_add_vacuum(new_material_atoms, vacuum * 2)
+        new_material = Material(from_ase(new_material_atoms))
+        new_material = translate_atoms(new_material, to="center")
     return new_material
 
 
@@ -350,7 +376,7 @@ def set_vacuum(material: Material, vacuum: float = 5.0) -> Material:
     Returns:
         Material: The material object with the vacuum thickness set.
     """
-    atoms = to_ase(translate_to_bottom(material))
+    atoms = to_ase(translate_atoms(material, to="bottom"))
     new_c = max(atoms.positions[:, 2]) + vacuum
     new_cell = atoms.cell.copy()
     new_cell[2, 2] = new_c
