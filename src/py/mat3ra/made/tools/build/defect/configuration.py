@@ -5,7 +5,7 @@ from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_position
-from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
+from .enums import PointDefectTypeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -50,12 +50,3 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
             "position": self.position,
             "chemical_element": self.chemical_element,
         }
-
-
-class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
-    defect_type: SlabDefectTypeEnum
-
-
-class AdatomSlabDefectConfiguration(SlabDefectConfiguration):
-    position: List[float] = [0.5, 0.5, 0.5]
-    chemical_element: str = "Si"

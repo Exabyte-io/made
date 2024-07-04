@@ -5,6 +5,7 @@ from ase.calculators.emt import EMT as ASECalculatorEMT
 from pymatgen.analysis.defects.core import Interstitial as PymatgenInterstitial
 from pymatgen.analysis.defects.core import Substitution as PymatgenSubstitution
 from pymatgen.analysis.defects.core import Vacancy as PymatgenVacancy
+from pymatgen.analysis.local_env import VoronoiNN as PymatgenVoronoiNN
 from pymatgen.core import IStructure as PymatgenIStructure
 from pymatgen.core import PeriodicSite as PymatgenPeriodicSite
 from pymatgen.core.interface import Interface as PymatgenInterface
@@ -38,4 +39,5 @@ __all__ = [
     "ase_make_supercell",
     "PymatgenAseAtomsAdaptor",
     "PymatgenPoscar",
+    "PymatgenVoronoiNN",
 ]
