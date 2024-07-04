@@ -1,11 +1,10 @@
 from typing import Callable, List, Optional
 
 import numpy as np
-from pymatgen.analysis.local_env import VoronoiNN
 
 from ..material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
-from .third_party import ASEAtoms, PymatgenIStructure
+from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -245,7 +244,7 @@ def get_neighboring_atoms_indices(material: Material, position: List[float] = [0
     """
     structure = to_pymatgen(material)
 
-    voronoi_nn = VoronoiNN(tol=0.5)
+    voronoi_nn = PymatgenVoronoiNN(tol=0.5)
     structure.append("X", position, validate_proximity=False)
     neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
