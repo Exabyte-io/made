@@ -229,3 +229,47 @@ def get_atom_indices_with_condition_on_coordinates(
             selected_indices.append(coord.id)
 
     return selected_indices
+
+
+def get_atomic_coordinates_min_z(
+    material: Material,
+    use_cartesian_coordinates: bool = False,
+) -> float:
+    """
+    Return minimum of Z coordinates in crystal or cartesian units.
+
+    Args:
+        material (Material): Material object.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates
+    Returns:
+        float: Minimum of Z coordinates.
+    """
+    new_material = material.clone()
+    if use_cartesian_coordinates:
+        new_basis = new_material.basis
+        new_basis.to_cartesian()
+        new_material.basis = new_basis
+    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
+    return min([coord.value[2] for coord in coordinates])
+
+
+def get_atomic_coordinates_max_z(
+    material: Material,
+    use_cartesian_coordinates: bool = False,
+) -> float:
+    """
+    Return maximum of Z coordinates
+
+    Args:
+        material (Material): Material object.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
+    Returns:
+        float: Maximum of Z coordinates.
+    """
+    new_material = material.clone()
+    if use_cartesian_coordinates:
+        new_basis = new_material.basis
+        new_basis.to_cartesian()
+        new_material.basis = new_basis
+    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
+    return max([coord.value[2] for coord in coordinates])
