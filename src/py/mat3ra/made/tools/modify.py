@@ -1,9 +1,13 @@
 from typing import Callable, List, Literal, Optional, Union
 
-import numpy as np
 from mat3ra.made.material import Material
 
-from .analyze import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
+from .analyze import (
+    get_atom_indices_with_condition_on_coordinates,
+    get_atom_indices_within_radius_pbc,
+    get_atomic_coordinates_min_z,
+    get_atomic_coordinates_max_z,
+)
 from .convert import decorator_convert_material_args_kwargs_to_structure, from_ase, to_ase
 from .third_party import PymatgenStructure, ase_add_vacuum
 from .utils import (
@@ -46,32 +50,40 @@ def translate_to_z_level(
     Returns:
         Material: The translated material object.
     """
-    atoms = to_ase(material)
-    min_z = min(atoms.positions[:, 2])
-    max_z = max(atoms.positions[:, 2])
+    min_z = get_atomic_coordinates_min_z(material)
+    max_z = get_atomic_coordinates_max_z(material)
     if z_level == "top":
-        atoms.translate((0, 0, 1 - max_z))
+        material = translate_by_vector(material, vector=[0, 0, 1 - max_z])
     elif z_level == "bottom":
-        atoms.translate((0, 0, -min_z))
+        material = translate_by_vector(material, vector=[0, 0, -min_z])
     elif z_level == "center":
-        atoms.translate((0, 0, (1 - min_z - max_z) / 2))
-    return Material(from_ase(atoms))
+        material = translate_by_vector(material, vector=[0, 0, (1 - min_z - max_z) / 2])
+    return material
 
 
 def translate_by_vector(
     material: Material,
-    vector: List[float] = [0, 0, 0],
+    vector: Optional[List[float]] = None,
+    use_cartesian_coordinates: bool = False,
 ) -> Material:
     """
     Translate atoms by a vector.
 
     Args:
         material (Material): The material object to normalize.
-        vector (List[float]): The vector to translate the atoms by (in crystal coordinates)
+        vector (List[float]): The vector to translate the atoms by (in crystal coordinates by default).
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
     Returns:
         Material: The translated material object.
     """
+    if not use_cartesian_coordinates:
+        vector = material.basis.cell.convert_point_to_cartesian(vector)
+
+    if vector is None:
+        vector = [0, 0, 0]
+
     atoms = to_ase(material)
+    # ASE accepts cartesian coordinates for translation
     atoms.translate(tuple(vector))
     return Material(from_ase(atoms))
 
@@ -163,7 +175,7 @@ def filter_by_layers(
     if central_atom_id is not None:
         center_coordinate = material.basis.coordinates.get_element_value_by_index(central_atom_id)
     vectors = material.lattice.vectors
-    direction_vector = np.array(vectors[2])
+    direction_vector = vectors[2]
 
     def condition(coordinate):
         return is_coordinate_within_layer(coordinate, center_coordinate, direction_vector, layer_thickness)
@@ -348,7 +360,7 @@ def filter_by_triangle_projection(
     )
 
 
-def add_vacuum(material: Material, vacuum: float = 5.0, add_on_top=True, add_to_bottom=False) -> Material:
+def add_vacuum(material: Material, vacuum: float = 5.0, on_top=True, to_bottom=False) -> Material:
     """
     Add vacuum to the material along the c-axis.
     On top, on bottom, or both.
@@ -356,19 +368,19 @@ def add_vacuum(material: Material, vacuum: float = 5.0, add_on_top=True, add_to_
     Args:
         material (Material): The material object to add vacuum to.
         vacuum (float): The thickness of the vacuum to add in angstroms.
-        add_on_top (bool): Whether to add vacuum on top.
-        add_to_bottom (bool): Whether to add vacuum on bottom.
+        on_top (bool): Whether to add vacuum on top.
+        to_bottom (bool): Whether to add vacuum on bottom.
 
     Returns:
         Material: The material object with vacuum added.
     """
     new_material_atoms = to_ase(material)
-    vacuum_amount = vacuum * 2 if add_on_top and add_to_bottom else vacuum
+    vacuum_amount = vacuum * 2 if on_top and to_bottom else vacuum
     ase_add_vacuum(new_material_atoms, vacuum_amount)
     new_material = Material(from_ase(new_material_atoms))
-    if add_to_bottom and not add_on_top:
+    if to_bottom and not on_top:
         new_material = translate_to_z_level(new_material, z_level="top")
-    elif add_on_top and add_to_bottom:
+    elif on_top and to_bottom:
         new_material = translate_to_z_level(new_material, z_level="center")
     return new_material
 
