@@ -147,7 +147,7 @@ def test_add_vacuum():
     assertion_utils.assert_deep_almost_equal(SI_SLAB_VACUUM, material_with_vacuum.to_json())
 
 
-def test_set_vacuum():
+def test_remove_vacuum():
     material_with_vacuum = Material(SI_SLAB_VACUUM)
     vacuum = 6.836
     material_with_no_vacuum = remove_vacuum(material_with_vacuum, from_top=True, from_bottom=True, fixed_padding=0)
