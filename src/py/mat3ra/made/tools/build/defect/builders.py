@@ -13,9 +13,9 @@ from ...third_party import (
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
+from ...analyze import get_nearest_neighbors_atom_indices, get_center_of_coordinates, get_atomic_coordinates_max_z
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration
-from ...analyze import get_nearest_neighbors_atom_indices, get_center_of_coordinates
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -130,7 +130,7 @@ class EquidistantAdatomSlabDefectBuilder(SlabDefectBuilder):
         material_copy: Material = material.clone()
         basis = material_copy.basis
         distance_in_crystal_units = distance_z / material_copy.lattice.c
-        max_z = max([coordinate[2] for coordinate in basis.coordinates.values])
+        max_z = get_atomic_coordinates_max_z(material_copy)
         adatom_position = approximate_position_on_surface.copy()
         adatom_position[2] = max_z + distance_in_crystal_units
 
