@@ -211,7 +211,7 @@ def get_atom_indices_with_condition_on_coordinates(
     Args:
         material (Material): Material object
         condition (Callable[List[float], bool]): Function that checks if coordinates satisfy the condition.
-        use_cartesian (bool): Whether to use Cartesian coordinates for the condition evaluation.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates for the condition evaluation.
 
     Returns:
         List[int]: List of indices of atoms whose coordinates satisfy the condition.
@@ -231,7 +231,7 @@ def get_atom_indices_with_condition_on_coordinates(
     return selected_indices
 
 
-def get_neighboring_atoms_indices(material: Material, position: List[float] = [0, 0, 0]) -> Optional[List[int]]:
+def get_nearest_neighbors_atom_indices(material: Material, position: List[float] = [0, 0, 0]) -> Optional[List[int]]:
     """
     Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
 
@@ -255,3 +255,16 @@ def get_neighboring_atoms_indices(material: Material, position: List[float] = [0
     neighboring_atoms_ids = all_coordinates.ids
 
     return neighboring_atoms_ids
+
+
+def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
+    """
+    Calculate the center of the coordinates.
+
+    Args:
+        coordinates (List[List[float]]): The list of coordinates.
+
+    Returns:
+        List[float]: The center of the coordinates.
+    """
+    return [sum([coordinate[i] for coordinate in coordinates]) / len(coordinates) for i in range(3)]
