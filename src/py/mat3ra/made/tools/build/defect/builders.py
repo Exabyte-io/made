@@ -15,7 +15,7 @@ from ...build import BaseBuilder
 from ...convert import to_pymatgen
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration
-from ...analyze import get_neighboring_atoms_indices
+from ...analyze import get_nearest_neighbors_atom_indices, get_center_of_coordinates
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -72,8 +72,8 @@ class InterstitialPointDefectBuilder(PointDefectBuilder):
 
 
 class SlabDefectBuilderParameters(BaseModel):
-    add_vacuum: bool = True
-    min_vacuum_thickness: float = 5.0
+    auto_add_vacuum: bool = True
+    vacuum_thickness: float = 5.0
 
 
 class SlabDefectBuilder(BaseBuilder):
@@ -85,10 +85,18 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
     _GeneratedItemType: Material = Material
 
     def add_adatom(
-        material: Material, chemical_element: str = "Si", position: List[float] = [0.5, 0.5, 0.5]
-    ) -> Material:
+        self,
+        material: Material,
+        chemical_element: str = "Si",
+        position_on_surface: List[float] = [0.5, 0.5],
+        distance_z: float = 2.0,
+    ) -> List[Material]:
         material_copy = material.clone()
         basis = material_copy.basis
+        distance_in_crystal_units = distance_z / material_copy.lattice.c
+        max_z = max([coordinate[2] for coordinate in basis.coordinates.values])
+        position = position_on_surface.copy()
+        position[2] = max_z + distance_in_crystal_units
         basis.add_atom(chemical_element, position)
         material_copy.basis = basis
         return [material_copy]
@@ -100,38 +108,39 @@ class EquidistantAdatomSlabDefectBuilder(SlabDefectBuilder):
     _GeneratedItemType: Material = Material
 
     def add_adatom_equdistant(
+        self,
         material: Material,
         chemical_element: str = "Si",
-        approximate_position: List[float] = [0.5, 0.5, 0.5],
-        distance: float = 2.0,
-    ) -> Material:
+        approximate_position_on_surface: List[float] = [0.5, 0.5],
+        distance_z: float = 2.0,
+    ) -> List[Material]:
         """
-        Adds an atom to the material at a position that is equidistant to the nearest atoms
+        Add an atom to the material at a position that is equidistant to the nearest atoms
         (that are found within proximity to the approx position) with the specified distance.
+
+        Args:
+            material (Material): The material to add the adatom to.
+            chemical_element (str): The chemical element of the adatom.
+            approximate_position_on_surface (List[float]): The approximate position of the adatom on the surface.
+            distance_z (float): The distance from the nearest atoms to the adatom.
+
+        Returns:
+            List[Material]: A list containing the material with the adatom added.
         """
         material_copy: Material = material.clone()
         basis = material_copy.basis
-
-        distance = distance / material_copy.lattice.c
+        distance_in_crystal_units = distance_z / material_copy.lattice.c
         max_z = max([coordinate[2] for coordinate in basis.coordinates.values])
+        adatom_position = approximate_position_on_surface.copy()
+        adatom_position[2] = max_z + distance_in_crystal_units
 
-        # Move the appx position to the top of the slab
-        adatom_position = approximate_position.copy()
-        adatom_position[2] = max_z + distance
+        neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_position)
+        if not neighboring_atoms_ids:
+            raise ValueError("No neighboring atoms found.")
+        neighboring_atoms_coordinates = [basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
 
-        neighboring_atoms_ids = get_neighboring_atoms_indices(material, adatom_position)
-
-        # Find equidistant position from heighboring atoms with the set z
-        if neighboring_atoms_ids is not None:
-            neighboring_atoms_coordinates = [basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
-
-        equidistant_position = [
-            sum([coordinate[i] for coordinate in neighboring_atoms_coordinates]) / len(neighboring_atoms_coordinates)
-            for i in range(3)
-        ]
+        equidistant_position = get_center_of_coordinates(neighboring_atoms_coordinates)
         equidistant_position[2] = adatom_position[2]
-
-        # Check for valid position (inside the cell)
         if equidistant_position[2] > basis.cell.vectors_as_nested_array[2][2]:
             raise ValueError("The adatom position is outside the cell.")
 
