@@ -5,8 +5,8 @@ from mat3ra.made.material import Material
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
-    get_atomic_coordinates_min_z,
     get_atomic_coordinates_max_z,
+    get_atomic_coordinates_min_z,
 )
 from .convert import decorator_convert_material_args_kwargs_to_structure, from_ase, to_ase
 from .third_party import PymatgenStructure, ase_add_vacuum
