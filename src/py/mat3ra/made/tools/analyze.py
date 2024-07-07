@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Literal
 
 import numpy as np
 
@@ -211,7 +211,7 @@ def get_atom_indices_with_condition_on_coordinates(
     Args:
         material (Material): Material object
         condition (Callable[List[float], bool]): Function that checks if coordinates satisfy the condition.
-        use_cartesian (bool): Whether to use Cartesian coordinates for the condition evaluation.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates for the condition evaluation.
 
     Returns:
         List[int]: List of indices of atoms whose coordinates satisfy the condition.
@@ -229,3 +229,30 @@ def get_atom_indices_with_condition_on_coordinates(
             selected_indices.append(coord.id)
 
     return selected_indices
+
+
+def get_atomic_coordinates_extremum(
+    material: Material,
+    extremum: Literal["max", "min"] = "max",
+    axis: Literal["x", "y", "z"] = "z",
+    use_cartesian_coordinates: bool = False,
+) -> float:
+    """
+    Return minimum or maximum of coordinates along the specified axis.
+
+    Args:
+        material (Material): Material object.
+        extremum (str): "min" or "max".
+        axis (str):  "x", "y", or "z".
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
+    Returns:
+        float: Minimum or maximum of coordinates along the specified axis.
+    """
+    new_material = material.clone()
+    if use_cartesian_coordinates:
+        new_basis = new_material.basis
+        new_basis.to_cartesian()
+        new_material.basis = new_basis
+    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
+    values = [coord.value[{"x": 0, "y": 1, "z": 2}[axis]] for coord in coordinates]
+    return getattr(np, extremum)(values)

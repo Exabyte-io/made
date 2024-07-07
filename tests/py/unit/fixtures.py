@@ -1,3 +1,6 @@
+import copy
+from typing import Any, Dict
+
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.interface.termination_pair import TerminationPair
@@ -59,7 +62,7 @@ INTERFACE_STRUCTURE.interface_properties = INTERFACE_PROPERTIES_MOCK
 INTERFACE_NAME = "Cu4(001)-Si8(001), Interface, Strain 0.062pct"
 
 # TODO: Use fixtures package when available
-SI_CONVENTIONAL_CELL = {
+SI_CONVENTIONAL_CELL: Dict[str, Any] = {
     "name": "Si8",
     "basis": {
         "elements": [
@@ -110,7 +113,7 @@ SI_CONVENTIONAL_CELL = {
     "isUpdated": True,
 }
 
-SI_SUPERCELL_2X2X1 = {
+SI_SUPERCELL_2X2X1: Dict[str, Any] = {
     "name": "Si8",
     "basis": {
         "elements": [
@@ -162,7 +165,7 @@ SI_SUPERCELL_2X2X1 = {
 }
 
 
-SI_SLAB_CONFIGURATION = {
+SI_SLAB_CONFIGURATION: Dict[str, Any] = {
     "type": "SlabConfiguration",
     "bulk": SI_CONVENTIONAL_CELL,
     "miller_indices": (0, 0, 1),
@@ -173,9 +176,7 @@ SI_SLAB_CONFIGURATION = {
     "use_orthogonal_z": True,
 }
 
-
-SI_SLAB = {
-    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+SI_SLAB: Dict[str, Any] = {
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -211,6 +212,7 @@ SI_SLAB = {
             "units": "angstrom",
         },
     },
+    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
     "isNonPeriodic": False,
     "_id": "",
     "metadata": {
@@ -220,3 +222,14 @@ SI_SLAB = {
     },
     "isUpdated": True,
 }
+
+SI_SLAB_VACUUM = copy.deepcopy(SI_SLAB)
+SI_SLAB_VACUUM["basis"]["coordinates"] = [
+    {"id": 0, "value": [0.5, 0.5, 0.386029718]},
+    {"id": 1, "value": [0.5, 0.0, 0.4718141]},
+    {"id": 2, "value": [0.0, 0.0, 0.557598482]},
+    {"id": 3, "value": [-0.0, 0.5, 0.643382864]},
+]
+SI_SLAB_VACUUM["basis"]["cell"] = [[3.867, 0.0, 0.0], [-0.0, 3.867, 0.0], [0.0, 0.0, 15.937527692]]
+SI_SLAB_VACUUM["lattice"]["c"] = 15.937527692
+SI_SLAB_VACUUM["lattice"]["vectors"]["c"] = [0.0, 0.0, 15.937527692]
