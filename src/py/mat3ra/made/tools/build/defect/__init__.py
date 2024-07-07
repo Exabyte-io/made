@@ -3,7 +3,12 @@ from typing import Optional, Union
 from mat3ra.utils.factory import BaseFactory
 from mat3ra.made.material import Material
 
-from .builders import PointDefectBuilderParameters, SlabDefectBuilderParameters
+from .builders import (
+    PointDefectBuilderParameters,
+    SlabDefectBuilderParameters,
+    AdatomSlabDefectBuilder,
+    EquidistantAdatomSlabDefectBuilder,
+)
 from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
 from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
 
@@ -13,7 +18,6 @@ class DefectBuilderFactory(BaseFactory):
         PointDefectTypeEnum.VACANCY: "mat3ra.made.tools.build.defect.builders.VacancyPointDefectBuilder",
         PointDefectTypeEnum.SUBSTITUTION: "mat3ra.made.tools.build.defect.builders.SubstitutionPointDefectBuilder",
         PointDefectTypeEnum.INTERSTITIAL: "mat3ra.made.tools.build.defect.builders.InterstitialPointDefectBuilder",
-        SlabDefectTypeEnum.ADATOM: "mat3ra.made.tools.build.defect.builders.AdatomSlabDefectBuilder",
     }
 
 
@@ -35,3 +39,12 @@ def create_defect(
     builder = BuilderClass(builder_parameters)
 
     return builder.get_material(configuration) if builder else configuration.crystal
+
+
+def create_feature(
+    configuration: Union[AdatomSlabDefectConfiguration],
+    builder: Optional[Union[AdatomSlabDefectBuilder, EquidistantAdatomSlabDefectBuilder]] = None,
+) -> Material:
+    if builder is None:
+        builder = AdatomSlabDefectBuilder(build_parameters=SlabDefectBuilderParameters())
+    return builder.get_material(configuration)
