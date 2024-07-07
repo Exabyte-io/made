@@ -123,7 +123,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         )
 
 
-class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectConfiguration):
+class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
     def create_adatom(
         self,
         material: Material,

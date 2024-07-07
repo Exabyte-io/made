@@ -267,7 +267,7 @@ def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
     Returns:
         List[float]: The center of the coordinates.
     """
-    return [sum([coordinate[i] for coordinate in coordinates]) / len(coordinates) for i in range(3)]
+    return np.mean(np.array(coordinates), axis=0)
 
 
 def get_atomic_coordinates_extremum(
