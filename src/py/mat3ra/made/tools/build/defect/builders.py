@@ -85,25 +85,25 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
     _ConfigurationType: type(AdatomSlabDefectConfiguration) = AdatomSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
-    def add_adatom(
+    def create_adatom(
         self,
         material: Material,
         chemical_element: str = "Si",
         position_on_surface: List[float] = [0.5, 0.5],
         distance_z: float = 2.0,
     ) -> List[Material]:
-        material_copy = material.clone()
-        basis = material_copy.basis
-        distance_in_crystal_units = distance_z / material_copy.lattice.c
-        max_z = get_atomic_coordinates_extremum(material_copy)
+        new_material = material.clone()
+        basis = new_material.basis
+        distance_in_crystal_units = distance_z / new_material.lattice.c
+        max_z = get_atomic_coordinates_extremum(new_material)
         position = position_on_surface.copy()
         position.append(max_z + distance_in_crystal_units)
         basis.add_atom(chemical_element, position)
-        material_copy.basis = basis
-        return [material_copy]
+        new_material.basis = basis
+        return [new_material]
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
-        return self.add_adatom(
+        return self.create_adatom(
             material=configuration.crystal,
             chemical_element=configuration.chemical_element,
             position_on_surface=configuration.position_on_surface,
@@ -111,55 +111,27 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         )
 
 
-class EquidistantAdatomSlabDefectBuilder(SlabDefectBuilder):
-    _ConfigurationType: type(AdatomSlabDefectConfiguration) = AdatomSlabDefectConfiguration  # type: ignore
-    _GeneratedItemType: Material = Material
-
-    def add_adatom_equdistant(
+class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectConfiguration):
+    def create_adatom(
         self,
         material: Material,
         chemical_element: str = "Si",
-        approximate_position_on_surface: List[float] = [0.5, 0.5],
+        position_on_surface: List[float] = [0.5, 0.5],
         distance_z: float = 2.0,
     ) -> List[Material]:
-        """
-        Add an atom to the material at a position that is equidistant to the nearest atoms
-        (that are found within proximity to the approx position) with the specified distance.
+        equidistant_position = self.get_equidistant_position(material, position_on_surface)
+        return super().create_adatom(material, chemical_element, equidistant_position, distance_z)
 
-        Args:
-            material (Material): The material to add the adatom to.
-            chemical_element (str): The chemical element of the adatom.
-            approximate_position_on_surface (List[float]): The approximate position of the adatom on the surface.
-            distance_z (float): The distance from the nearest atoms to the adatom.
-
-        Returns:
-            List[Material]: A list containing the material with the adatom added.
-        """
-        material_copy: Material = material.clone()
-        basis = material_copy.basis
-        distance_in_crystal_units = distance_z / material_copy.lattice.c
-        max_z = get_atomic_coordinates_extremum(material_copy)
-        adatom_position = approximate_position_on_surface.copy()
-        adatom_position[2] = max_z + distance_in_crystal_units
-
+    def get_equidistant_position(self, material: Material, adatom_position: List[float]) -> List[float]:
+        new_basis = material.basis
         neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_position)
         if not neighboring_atoms_ids:
             raise ValueError("No neighboring atoms found.")
-        neighboring_atoms_coordinates = [basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
+        neighboring_atoms_coordinates = [new_basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
 
         equidistant_position = get_center_of_coordinates(neighboring_atoms_coordinates)
         equidistant_position[2] = adatom_position[2]
-        if equidistant_position[2] > basis.cell.vectors_as_nested_array[2][2]:
+        if equidistant_position[2] > new_basis.cell.vectors_as_nested_array[2][2]:
             raise ValueError("The adatom position is outside the cell.")
 
-        basis.add_atom(chemical_element, equidistant_position)
-        material_copy.basis = basis
-        return [material_copy]
-
-    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
-        return self.add_adatom_equdistant(
-            material=configuration.crystal,
-            chemical_element=configuration.chemical_element,
-            approximate_position_on_surface=configuration.position_on_surface,
-            distance_z=configuration.distance_z,
-        )
+        return equidistant_position
