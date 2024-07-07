@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Literal
 
 import numpy as np
 
@@ -292,18 +292,22 @@ def get_atomic_coordinates_min_z(
     return min([coord.value[2] for coord in coordinates])
 
 
-def get_atomic_coordinates_max_z(
+def get_atomic_coordinates_extremum(
     material: Material,
+    extremum: Literal["max", "min"] = "max",
+    axis: Literal["x", "y", "z"] = "z",
     use_cartesian_coordinates: bool = False,
 ) -> float:
     """
-    Return maximum of Z coordinates
+    Return minimum or maximum of coordinates along the specified axis.
 
     Args:
         material (Material): Material object.
+        extremum (str): "min" or "max".
+        axis (str):  "x", "y", or "z".
         use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
     Returns:
-        float: Maximum of Z coordinates.
+        float: Minimum or maximum of coordinates along the specified axis.
     """
     new_material = material.clone()
     if use_cartesian_coordinates:
@@ -311,4 +315,5 @@ def get_atomic_coordinates_max_z(
         new_basis.to_cartesian()
         new_material.basis = new_basis
     coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
-    return max([coord.value[2] for coord in coordinates])
+    values = [coord.value[{"x": 0, "y": 1, "z": 2}[axis]] for coord in coordinates]
+    return getattr(np, extremum)(values)
