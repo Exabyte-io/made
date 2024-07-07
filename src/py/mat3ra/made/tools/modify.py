@@ -5,8 +5,7 @@ from mat3ra.made.material import Material
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
-    get_atomic_coordinates_max_z,
-    get_atomic_coordinates_min_z,
+    get_atomic_coordinates_extremum,
 )
 from .convert import decorator_convert_material_args_kwargs_to_structure, from_ase, to_ase
 from .third_party import PymatgenStructure, ase_add_vacuum
@@ -50,8 +49,8 @@ def translate_to_z_level(
     Returns:
         Material: The translated material object.
     """
-    min_z = get_atomic_coordinates_min_z(material)
-    max_z = get_atomic_coordinates_max_z(material)
+    min_z = get_atomic_coordinates_extremum(material, "min")
+    max_z = get_atomic_coordinates_extremum(material)
     if z_level == "top":
         material = translate_by_vector(material, vector=[0, 0, 1 - max_z])
     elif z_level == "bottom":
@@ -399,12 +398,18 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
     Returns:
         Material: The material object with the vacuum thickness set.
     """
-    atoms = to_ase(translate_to_z_level(material, z_level="bottom"))
-    new_c = max(atoms.positions[:, 2]) + fixed_padding
-    new_cell = atoms.cell.copy()
-    new_cell[2, 2] = new_c
-    atoms.cell = new_cell
-    new_material = Material(from_ase(atoms))
+    translated_material = translate_to_z_level(material, z_level="bottom")
+    new_basis = translated_material.basis
+    new_basis.to_cartesian()
+    new_lattice = translated_material.lattice
+    new_lattice.c = get_atomic_coordinates_extremum(translated_material, use_cartesian_coordinates=True) + fixed_padding
+    new_basis.cell.vector3 = new_lattice.vectors[2]
+    new_basis.to_crystal()
+    new_material = material.clone()
+
+    new_material.basis = new_basis
+    new_material.lattice = new_lattice
+
     if from_top and not from_bottom:
         new_material = translate_to_z_level(new_material, z_level="top")
     if from_bottom and not from_top:

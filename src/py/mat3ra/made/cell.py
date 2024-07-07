@@ -44,7 +44,7 @@ class Cell(RoundNumericValuesMixin, BaseModel):
         np_vector = np.array(self.vectors_as_nested_array)
         return np.dot(point, np_vector)
 
-    def convert_point_to_fractional(self, point):
+    def convert_point_to_crystal(self, point):
         np_vector = np.array(self.vectors_as_nested_array)
         return np.dot(point, np.linalg.inv(np_vector))
 
