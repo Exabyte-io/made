@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Literal
+from typing import Callable, List, Literal, Optional
 
 import numpy as np
 
@@ -268,28 +268,6 @@ def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
         List[float]: The center of the coordinates.
     """
     return [sum([coordinate[i] for coordinate in coordinates]) / len(coordinates) for i in range(3)]
-
-
-def get_atomic_coordinates_min_z(
-    material: Material,
-    use_cartesian_coordinates: bool = False,
-) -> float:
-    """
-    Return minimum of Z coordinates in crystal or cartesian units.
-
-    Args:
-        material (Material): Material object.
-        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates
-    Returns:
-        float: Minimum of Z coordinates.
-    """
-    new_material = material.clone()
-    if use_cartesian_coordinates:
-        new_basis = new_material.basis
-        new_basis.to_cartesian()
-        new_material.basis = new_basis
-    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
-    return min([coord.value[2] for coord in coordinates])
 
 
 def get_atomic_coordinates_extremum(

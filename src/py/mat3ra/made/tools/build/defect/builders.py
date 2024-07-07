@@ -13,7 +13,7 @@ from ...third_party import (
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
-from ...analyze import get_nearest_neighbors_atom_indices, get_center_of_coordinates, get_atomic_coordinates_max_z
+from ...analyze import get_nearest_neighbors_atom_indices, get_center_of_coordinates, get_atomic_coordinates_extremum
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
 
@@ -95,7 +95,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         material_copy = material.clone()
         basis = material_copy.basis
         distance_in_crystal_units = distance_z / material_copy.lattice.c
-        max_z = get_atomic_coordinates_max_z(material_copy)
+        max_z = get_atomic_coordinates_extremum(material_copy)
         position = position_on_surface.copy()
         position.append(max_z + distance_in_crystal_units)
         basis.add_atom(chemical_element, position)
@@ -112,6 +112,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
 
 
 class EquidistantAdatomSlabDefectBuilder(SlabDefectBuilder):
+    _ConfigurationType: type(AdatomSlabDefectConfiguration) = AdatomSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
     def add_adatom_equdistant(
@@ -137,7 +138,7 @@ class EquidistantAdatomSlabDefectBuilder(SlabDefectBuilder):
         material_copy: Material = material.clone()
         basis = material_copy.basis
         distance_in_crystal_units = distance_z / material_copy.lattice.c
-        max_z = get_atomic_coordinates_max_z(material_copy)
+        max_z = get_atomic_coordinates_extremum(material_copy)
         adatom_position = approximate_position_on_surface.copy()
         adatom_position[2] = max_z + distance_in_crystal_units
 
@@ -155,4 +156,10 @@ class EquidistantAdatomSlabDefectBuilder(SlabDefectBuilder):
         material_copy.basis = basis
         return [material_copy]
 
-    _generate = add_adatom_equdistant
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        return self.add_adatom_equdistant(
+            material=configuration.crystal,
+            chemical_element=configuration.chemical_element,
+            approximate_position_on_surface=configuration.position_on_surface,
+            distance_z=configuration.distance_z,
+        )
