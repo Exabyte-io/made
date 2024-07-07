@@ -1,4 +1,5 @@
 from ase import Atoms as ASEAtoms
+from ase.build import add_vacuum as ase_add_vacuum
 from ase.build.supercells import make_supercell as ase_make_supercell
 from ase.calculators.calculator import Calculator as ASECalculator
 from ase.calculators.emt import EMT as ASECalculatorEMT
@@ -36,6 +37,7 @@ __all__ = [
     "PymatgenInterstitial",
     "label_pymatgen_slab_termination",
     "ase_make_supercell",
+    "ase_add_vacuum",
     "PymatgenAseAtomsAdaptor",
     "PymatgenPoscar",
 ]

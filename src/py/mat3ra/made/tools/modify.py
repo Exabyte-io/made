@@ -1,17 +1,19 @@
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Literal, Optional, Union
 
-import numpy as np
 from mat3ra.made.material import Material
 
-from .analyze import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
-from .convert import decorator_convert_material_args_kwargs_to_structure
-from .third_party import PymatgenSpacegroupAnalyzer, PymatgenStructure
+from .analyze import (
+    get_atom_indices_with_condition_on_coordinates,
+    get_atom_indices_within_radius_pbc,
+    get_atomic_coordinates_extremum,
+)
+from .convert import decorator_convert_material_args_kwargs_to_structure, from_ase, to_ase
+from .third_party import PymatgenStructure, ase_add_vacuum
 from .utils import (
     is_coordinate_in_box,
     is_coordinate_in_cylinder,
     is_coordinate_in_triangular_prism,
     is_coordinate_within_layer,
-    translate_to_bottom_pymatgen_structure,
 )
 
 
@@ -35,22 +37,54 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
     return new_material
 
 
-@decorator_convert_material_args_kwargs_to_structure
-def translate_to_bottom(structure: PymatgenStructure, use_conventional_cell: bool = True):
+def translate_to_z_level(
+    material: Material, z_level: Optional[Literal["top", "bottom", "center"]] = "bottom"
+) -> Material:
     """
-    Translate atoms to the bottom of the cell (vacuum on top) to allow for the correct consecutive interface generation.
-    If use_conventional_cell is passed, conventional cell is used.
+    Translate atoms to the specified z-level.
 
     Args:
-        structure (Structure): The pymatgen Structure object to normalize.
-        use_conventional_cell: Whether to convert to the conventional cell.
+        material (Material): The material object to normalize.
+        z_level (str): The z-level to translate the atoms to (top, bottom, center)
     Returns:
-        Structure: The normalized pymatgen Structure object.
+        Material: The translated material object.
     """
-    if use_conventional_cell:
-        structure = PymatgenSpacegroupAnalyzer(structure).get_conventional_standard_structure()
-    structure = translate_to_bottom_pymatgen_structure(structure)
-    return structure
+    min_z = get_atomic_coordinates_extremum(material, "min")
+    max_z = get_atomic_coordinates_extremum(material)
+    if z_level == "top":
+        material = translate_by_vector(material, vector=[0, 0, 1 - max_z])
+    elif z_level == "bottom":
+        material = translate_by_vector(material, vector=[0, 0, -min_z])
+    elif z_level == "center":
+        material = translate_by_vector(material, vector=[0, 0, (1 - min_z - max_z) / 2])
+    return material
+
+
+def translate_by_vector(
+    material: Material,
+    vector: Optional[List[float]] = None,
+    use_cartesian_coordinates: bool = False,
+) -> Material:
+    """
+    Translate atoms by a vector.
+
+    Args:
+        material (Material): The material object to normalize.
+        vector (List[float]): The vector to translate the atoms by (in crystal coordinates by default).
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
+    Returns:
+        Material: The translated material object.
+    """
+    if not use_cartesian_coordinates:
+        vector = material.basis.cell.convert_point_to_cartesian(vector)
+
+    if vector is None:
+        vector = [0, 0, 0]
+
+    atoms = to_ase(material)
+    # ASE accepts cartesian coordinates for translation
+    atoms.translate(tuple(vector))
+    return Material(from_ase(atoms))
 
 
 @decorator_convert_material_args_kwargs_to_structure
@@ -140,7 +174,7 @@ def filter_by_layers(
     if central_atom_id is not None:
         center_coordinate = material.basis.coordinates.get_element_value_by_index(central_atom_id)
     vectors = material.lattice.vectors
-    direction_vector = np.array(vectors[2])
+    direction_vector = vectors[2]
 
     def condition(coordinate):
         return is_coordinate_within_layer(coordinate, center_coordinate, direction_vector, layer_thickness)
@@ -323,3 +357,61 @@ def filter_by_triangle_projection(
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
     )
+
+
+def add_vacuum(material: Material, vacuum: float = 5.0, on_top=True, to_bottom=False) -> Material:
+    """
+    Add vacuum to the material along the c-axis.
+    On top, on bottom, or both.
+
+    Args:
+        material (Material): The material object to add vacuum to.
+        vacuum (float): The thickness of the vacuum to add in angstroms.
+        on_top (bool): Whether to add vacuum on top.
+        to_bottom (bool): Whether to add vacuum on bottom.
+
+    Returns:
+        Material: The material object with vacuum added.
+    """
+    new_material_atoms = to_ase(material)
+    vacuum_amount = vacuum * 2 if on_top and to_bottom else vacuum
+    ase_add_vacuum(new_material_atoms, vacuum_amount)
+    new_material = Material(from_ase(new_material_atoms))
+    if to_bottom and not on_top:
+        new_material = translate_to_z_level(new_material, z_level="top")
+    elif on_top and to_bottom:
+        new_material = translate_to_z_level(new_material, z_level="center")
+    return new_material
+
+
+def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_padding=1.0) -> Material:
+    """
+    Remove vacuum from the material along the c-axis.
+    From top, from bottom, or from both.
+
+    Args:
+        material (Material): The material object to set the vacuum thickness.
+        from_top (bool): Whether to remove vacuum from the top.
+        from_bottom (bool): Whether to remove vacuum from the bottom.
+        fixed_padding (float): The fixed padding of vacuum to add to avoid collisions in pbc (in angstroms).
+
+    Returns:
+        Material: The material object with the vacuum thickness set.
+    """
+    translated_material = translate_to_z_level(material, z_level="bottom")
+    new_basis = translated_material.basis
+    new_basis.to_cartesian()
+    new_lattice = translated_material.lattice
+    new_lattice.c = get_atomic_coordinates_extremum(translated_material, use_cartesian_coordinates=True) + fixed_padding
+    new_basis.cell.vector3 = new_lattice.vectors[2]
+    new_basis.to_crystal()
+    new_material = material.clone()
+
+    new_material.basis = new_basis
+    new_material.lattice = new_lattice
+
+    if from_top and not from_bottom:
+        new_material = translate_to_z_level(new_material, z_level="top")
+    if from_bottom and not from_top:
+        new_material = translate_to_z_level(new_material, z_level="bottom")
+    return new_material

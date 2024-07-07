@@ -67,13 +67,13 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     def to_cartesian(self):
         if self.is_in_cartesian_units:
             return
-        self.coordinates = self.coordinates.map_array_in_place(self.cell.convert_point_to_cartesian)
+        self.coordinates.map_array_in_place(self.cell.convert_point_to_cartesian)
         self.units = AtomicCoordinateUnits.cartesian
 
     def to_crystal(self):
         if self.is_in_crystal_units:
             return
-        self.coordinates = self.coordinates.map_array_in_place(self.cell.convert_point_to_crystal)
+        self.coordinates.map_array_in_place(self.cell.convert_point_to_crystal)
         self.units = AtomicCoordinateUnits.crystal
 
     def add_atom(self, element="Si", coordinate=[0.5, 0.5, 0.5]):
