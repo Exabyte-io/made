@@ -15,7 +15,7 @@ from ...build import BaseBuilder
 from ...convert import to_pymatgen
 from ...analyze import get_nearest_neighbors_atom_indices, get_center_of_coordinates, get_atomic_coordinates_max_z
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from .configuration import PointDefectConfiguration
+from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -82,6 +82,7 @@ class SlabDefectBuilder(BaseBuilder):
 
 
 class AdatomSlabDefectBuilder(SlabDefectBuilder):
+    _ConfigurationType: type(AdatomSlabDefectConfiguration) = AdatomSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
     def add_adatom(
@@ -94,14 +95,20 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         material_copy = material.clone()
         basis = material_copy.basis
         distance_in_crystal_units = distance_z / material_copy.lattice.c
-        max_z = max([coordinate[2] for coordinate in basis.coordinates.values])
+        max_z = get_atomic_coordinates_max_z(material_copy)
         position = position_on_surface.copy()
-        position[2] = max_z + distance_in_crystal_units
+        position.append(max_z + distance_in_crystal_units)
         basis.add_atom(chemical_element, position)
         material_copy.basis = basis
         return [material_copy]
 
-    _generator = add_adatom
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        return self.add_adatom(
+            material=configuration.crystal,
+            chemical_element=configuration.chemical_element,
+            position_on_surface=configuration.position_on_surface,
+            distance_z=configuration.distance_z,
+        )
 
 
 class EquidistantAdatomSlabDefectBuilder(SlabDefectBuilder):
@@ -148,4 +155,4 @@ class EquidistantAdatomSlabDefectBuilder(SlabDefectBuilder):
         material_copy.basis = basis
         return [material_copy]
 
-    _generator = add_adatom_equdistant
+    _generate = add_adatom_equdistant

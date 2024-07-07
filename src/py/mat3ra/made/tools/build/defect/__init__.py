@@ -1,11 +1,11 @@
-from typing import Optional
+from typing import Optional, Union
 
 from mat3ra.utils.factory import BaseFactory
 from mat3ra.made.material import Material
 
-from .builders import PointDefectBuilderParameters
-from .configuration import PointDefectConfiguration
-from .enums import PointDefectTypeEnum
+from .builders import PointDefectBuilderParameters, SlabDefectBuilderParameters
+from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
+from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
 
 
 class DefectBuilderFactory(BaseFactory):
@@ -13,12 +13,13 @@ class DefectBuilderFactory(BaseFactory):
         PointDefectTypeEnum.VACANCY: "mat3ra.made.tools.build.defect.builders.VacancyPointDefectBuilder",
         PointDefectTypeEnum.SUBSTITUTION: "mat3ra.made.tools.build.defect.builders.SubstitutionPointDefectBuilder",
         PointDefectTypeEnum.INTERSTITIAL: "mat3ra.made.tools.build.defect.builders.InterstitialPointDefectBuilder",
+        SlabDefectTypeEnum.ADATOM: "mat3ra.made.tools.build.defect.builders.AdatomSlabDefectBuilder",
     }
 
 
 def create_defect(
-    configuration: PointDefectConfiguration,
-    builder_parameters: Optional[PointDefectBuilderParameters] = None,
+    configuration: Union[PointDefectConfiguration, AdatomSlabDefectConfiguration],
+    builder_parameters: Union[PointDefectBuilderParameters, SlabDefectBuilderParameters, None] = None,
 ) -> Material:
     """
     Return a material with a selected defect added.
