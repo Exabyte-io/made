@@ -52,7 +52,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         }
 
 
-class SlabDefectConfiguration(BaseDefectConfiguration):
+class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     pass
 
 
@@ -61,3 +61,13 @@ class AdatomSlabDefectConfiguration(SlabDefectConfiguration):
     position_on_surface: List[float] = [0.5, 0.5]
     distance_z: float = 2.0
     chemical_element: str = "Si"
+
+    @property
+    def _json(self):
+        return {
+            "type": "AdatomSlabDefectConfiguration",
+            "defect_type": self.defect_type.name,
+            "position_on_surface": self.position_on_surface,
+            "distance_z": self.distance_z,
+            "chemical_element": self.chemical_element,
+        }
