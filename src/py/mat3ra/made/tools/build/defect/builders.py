@@ -132,7 +132,8 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectConfiguration):
         distance_z: float = 2.0,
     ) -> List[Material]:
         """
-        Create an adatom with an equidistant XY position among the nearest neighbors at the given distance from the surface.
+        Create an adatom with an equidistant XY position among the nearest neighbors
+        at the given distance from the surface.
 
         Args:
             material: The material to add the adatom to.
