@@ -92,6 +92,18 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         position_on_surface: List[float] = [0.5, 0.5],
         distance_z: float = 2.0,
     ) -> List[Material]:
+        """
+        Create an adatom at the specified position on the surface of the material.
+
+        Args:
+            material: The material to add the adatom to.
+            chemical_element: The chemical element of the adatom.
+            position_on_surface: The position on the surface of the material.
+            distance_z: The distance of the adatom from the surface.
+
+        Returns:
+            The material with the adatom added.
+        """
         new_material = material.clone()
         basis = new_material.basis
         distance_in_crystal_units = distance_z / new_material.lattice.c
@@ -119,6 +131,18 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectConfiguration):
         position_on_surface: List[float] = [0.5, 0.5],
         distance_z: float = 2.0,
     ) -> List[Material]:
+        """
+        Create an adatom with an equidistant XY position among the nearest neighbors at the given distance from the surface.
+
+        Args:
+            material: The material to add the adatom to.
+            chemical_element: The chemical element of the adatom.
+            position_on_surface: The position on the surface of the material.
+            distance_z: The distance of the adatom from the surface.
+
+        Returns:
+            The material with the adatom added.
+        """
         equidistant_position = self.get_equidistant_position(material, position_on_surface)
         return super().create_adatom(material, chemical_element, equidistant_position, distance_z)
 
