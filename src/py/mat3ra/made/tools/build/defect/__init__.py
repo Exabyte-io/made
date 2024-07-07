@@ -41,10 +41,20 @@ def create_defect(
     return builder.get_material(configuration) if builder else configuration.crystal
 
 
-def create_feature(
+def create_slab_defect(
     configuration: Union[AdatomSlabDefectConfiguration],
     builder: Optional[Union[AdatomSlabDefectBuilder, EquidistantAdatomSlabDefectBuilder]] = None,
 ) -> Material:
+    """
+    Return a material with a selected slab defect added.
+
+    Args:
+        configuration: The configuration of the defect to be added.
+        builder: The builder to be used to create the defect.
+
+    Returns:
+        The material with the defect added.
+    """
     if builder is None:
         builder = AdatomSlabDefectBuilder(build_parameters=SlabDefectBuilderParameters())
     return builder.get_material(configuration)
