@@ -106,7 +106,6 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         """
         if position_on_surface is None:
             position_on_surface = [0.5, 0.5]
-        position_on_surface = position_on_surface[:2]
         new_material = material.clone()
         new_basis = new_material.basis
         adatom_position = self._calculate_position_from_2d(material, position_on_surface, distance_z)
@@ -121,6 +120,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         distance_z = distance_z
         distance_in_crystal_units = distance_z / material.lattice.c
         position = position_on_surface.copy()
+        position = position[:2]
         position.append(max_z + distance_in_crystal_units)
         return position
 
