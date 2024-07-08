@@ -1,5 +1,16 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect import PointDefectBuilderParameters, PointDefectConfiguration, create_defect
+from mat3ra.made.tools.build.defect import (
+    PointDefectBuilderParameters,
+    PointDefectConfiguration,
+    create_defect,
+    AdatomSlabDefectConfiguration,
+    create_slab_defect,
+    EquidistantAdatomSlabDefectBuilder,
+)
+from mat3ra.made.tools.build.slab import create_slab, SlabConfiguration
+
+from mat3ra.made.tools.build.slab import get_terminations
+from mat3ra.utils import assertion as assertion_utils
 
 clean_material = Material.create(Material.default_config)
 
@@ -49,3 +60,34 @@ def test_create_defect_from_site_id():
         {"id": 0, "value": "Si"},
         {"id": 1, "value": "Ge"},
     ]
+
+
+def test_create_adatom():
+    # Adatom of Si at 0.5, 0.5 position
+    material = Material.create(Material.default_config)
+    slab_config = SlabConfiguration(material, (1, 1, 1), thickness=3, vacuum=6, use_orthogonal_z=True)
+    t = get_terminations(slab_config)[0]
+    slab = create_slab(slab_config, t)
+    configuration = AdatomSlabDefectConfiguration(
+        crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
+    )
+    defect = create_slab_defect(configuration=configuration, builder=None)
+
+    assert defect.basis.elements.values[-1] == "Si"
+    assertion_utils.assert_deep_almost_equal([0.5, 0.5, 0.389826], defect.basis.coordinates.values[-1])
+
+
+def test_create_adatom_equidistant():
+    # Adatom of Si at approximate 0.5, 0.5 position
+    material = Material.create(Material.default_config)
+    slab_config = SlabConfiguration(material, (1, 1, 1), thickness=3, vacuum=6, use_orthogonal_z=True)
+    t = get_terminations(slab_config)[0]
+    slab = create_slab(slab_config, t)
+    configuration = AdatomSlabDefectConfiguration(
+        crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
+    )
+    defect = create_slab_defect(configuration=configuration, builder=EquidistantAdatomSlabDefectBuilder())
+
+    assert defect.basis.elements.values[-1] == "Si"
+    # We expect adatom to shift from provided position
+    assertion_utils.assert_deep_almost_equal(defect.basis.coordinates.values[-1], [0.8333333, 0.4166666, 0.389826])
