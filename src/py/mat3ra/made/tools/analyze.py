@@ -257,19 +257,6 @@ def get_nearest_neighbors_atom_indices(material: Material, position: List[float]
     return neighboring_atoms_ids
 
 
-def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
-    """
-    Calculate the center of the coordinates.
-
-    Args:
-        coordinates (List[List[float]]): The list of coordinates.
-
-    Returns:
-        List[float]: The center of the coordinates.
-    """
-    return list(np.mean(np.array(coordinates), axis=0))
-
-
 def get_atomic_coordinates_extremum(
     material: Material,
     extremum: Literal["max", "min"] = "max",
