@@ -1,5 +1,6 @@
 from typing import List, Callable, Optional
 
+from mat3ra.made.tools.modify import add_vacuum
 from pydantic import BaseModel
 from mat3ra.made.material import Material
 
@@ -158,7 +159,15 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         if position_on_surface is None:
             position_on_surface = [0.5, 0.5]
         equidistant_position = self.get_equidistant_position(material, position_on_surface, distance_z)
-        return super().create_adatom(material, chemical_element, equidistant_position, distance_z)
+        new_material = material.clone()
+        if equidistant_position[2] > 1:
+            if self.build_parameters.auto_add_vacuum:
+                new_material = add_vacuum(material, self.build_parameters.vacuum_thickness)
+                equidistant_position = self.get_equidistant_position(new_material, position_on_surface, distance_z)
+            else:
+                raise ValueError("Not enough vacuum space to place the adatom.")
+
+        return super().create_adatom(new_material, chemical_element, equidistant_position, distance_z)
 
     def get_equidistant_position(
         self, material: Material, position_on_surface: List[float], distance_z: float = 2.0
@@ -172,7 +181,5 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
 
         equidistant_position = get_center_of_coordinates(neighboring_atoms_coordinates)
         equidistant_position[2] = adatom_position[2]
-        if equidistant_position[2] > new_basis.cell.vectors_as_nested_array[2][2]:
-            raise ValueError("The adatom position is outside the cell.")
 
         return equidistant_position
