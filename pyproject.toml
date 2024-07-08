@@ -4,8 +4,10 @@ dynamic = ["version"]
 description = "MAterials DEfinitions and/or MAterials DEsign library."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { file = "LICENSE.md" }
-authors = [{ name = "Exabyte Inc.", email = "info@mat3ra.com" }]
+license = {file = "LICENSE.md"}
+authors = [
+    {name = "Exabyte Inc.", email = "info@mat3ra.com"}
+]
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -23,8 +25,19 @@ dependencies = [
 
 [project.optional-dependencies]
 # tracking separately the deps required to use the tools module
-tools = ["pymatgen", "ase", "pymatgen-analysis-defects"]
-dev = ["pre-commit", "black", "ruff", "isort", "mypy", "pip-tools"]
+tools = [
+    "pymatgen",
+    "ase",
+    "pymatgen-analysis-defects"
+]
+dev = [
+    "pre-commit",
+    "black",
+    "ruff",
+    "isort",
+    "mypy",
+    "pip-tools",
+]
 tests = [
     "coverage[toml]>=5.3",
     "pytest",
@@ -34,7 +47,10 @@ tests = [
     "pydantic",
     "mat3ra-made[tools]",
 ]
-all = ["mat3ra-made[tests]", "mat3ra-made[dev]"]
+all = [
+    "mat3ra-made[tests]",
+    "mat3ra-made[dev]",
+]
 
 # Entrypoint scripts can be defined here, see examples below.
 [project.scripts]
@@ -42,7 +58,10 @@ all = ["mat3ra-made[tests]", "mat3ra-made[dev]"]
 
 
 [build-system]
-requires = ["setuptools>=42", "setuptools-scm[toml]>=3.4"]
+requires = [
+    "setuptools>=42",
+    "setuptools-scm[toml]>=3.4"
+]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
@@ -65,7 +84,10 @@ extend-exclude = '''
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
-extend-exclude = ["src/js", "tests/fixtures"]
+extend-exclude = [
+    "src/js",
+    "tests/fixtures"
+]
 line-length = 120
 target-version = "py38"
 
