@@ -184,9 +184,9 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             supercell_material, supercell_adatom_position
         )
         if neighboring_atoms_ids is None or supercell_neighboring_atoms_ids is None:
-            raise ValueError("No neighboring atoms found.")
+            raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
         if len(supercell_neighboring_atoms_ids) != len(neighboring_atoms_ids):
-            raise ValueError("The supercell is too small to add a meaningful equidistant adatom.")
+            raise ValueError("Number of neighboring atoms is not the same in PBC. Try increasing the supercell size.")
         neighboring_atoms_coordinates = [new_basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
 
         equidistant_position = get_center_of_coordinates(neighboring_atoms_coordinates)
