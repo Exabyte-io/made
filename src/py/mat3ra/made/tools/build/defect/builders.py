@@ -13,7 +13,8 @@ from ...third_party import (
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
-from ...analyze import get_nearest_neighbors_atom_indices, get_center_of_coordinates, get_atomic_coordinates_extremum
+from ...analyze import get_nearest_neighbors_atom_indices, get_atomic_coordinates_extremum
+from ....utils import get_center_of_coordinates
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
 
