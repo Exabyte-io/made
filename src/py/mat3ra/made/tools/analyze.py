@@ -248,7 +248,14 @@ def get_nearest_neighbors_atom_indices(
     if position is None:
         position = [0, 0, 0]
     structure = to_pymatgen(material)
-    voronoi_nn = PymatgenVoronoiNN(tol=0.5)
+    voronoi_nn = PymatgenVoronoiNN(
+        tol=0.5,
+        cutoff=13.0,
+        allow_pathological=False,
+        weight="solid_angle",
+        extra_nn_info=True,
+        compute_adj_neighbors=True,
+    )
     structure.append("X", position, validate_proximity=False)
     neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
