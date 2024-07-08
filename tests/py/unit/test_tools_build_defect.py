@@ -12,7 +12,14 @@ from mat3ra.utils import assertion as assertion_utils
 
 clean_material = Material.create(Material.default_config)
 
-slab_config = SlabConfiguration(clean_material, (1, 1, 1), thickness=3, vacuum=6, use_orthogonal_z=True)
+slab_config = SlabConfiguration(
+    clean_material,
+    (1, 1, 1),
+    thickness=3,
+    vacuum=6,
+    use_orthogonal_z=True,
+    xy_supercell_matrix=[[2, 0, 0], [0, 2, 0], [0, 0, 1]],
+)
 t = get_terminations(slab_config)[0]
 slab = create_slab(slab_config, t)
 
@@ -84,4 +91,4 @@ def test_create_adatom_equidistant():
 
     assert defect.basis.elements.values[-1] == "Si"
     # We expect adatom to shift from provided position
-    assertion_utils.assert_deep_almost_equal([0.8333333, 0.4166666, 0.389826], defect.basis.coordinates.values[-1])
+    assertion_utils.assert_deep_almost_equal([0.58333333, 0.4166666, 0.389826], defect.basis.coordinates.values[-1])

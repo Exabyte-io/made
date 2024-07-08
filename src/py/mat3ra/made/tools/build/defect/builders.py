@@ -1,5 +1,6 @@
 from typing import List, Callable, Optional
 
+from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.modify import add_vacuum
 from pydantic import BaseModel
 from mat3ra.made.material import Material
@@ -175,8 +176,18 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         new_basis = material.basis
         adatom_position = self._calculate_position_from_2d(material, position_on_surface, distance_z)
         neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_position)
-        if not neighboring_atoms_ids:
+        # check if neighboring atoms number is the same in the 3x3x1 supercell
+        supercell_material = create_supercell(material, [[3, 0, 0], [0, 3, 0], [0, 0, 1]])
+        # Move the coordinate to the central unit cell of the supercell (crystal coordinates)
+
+        supercell_adatom_position = [1 / 3 + adatom_position[0] / 3, 1 / 3 + adatom_position[1] / 3, adatom_position[2]]
+        supercell_neighboring_atoms_ids = get_nearest_neighbors_atom_indices(
+            supercell_material, supercell_adatom_position
+        )
+        if not (neighboring_atoms_ids and supercell_neighboring_atoms_ids):
             raise ValueError("No neighboring atoms found.")
+        if len(supercell_neighboring_atoms_ids) != len(neighboring_atoms_ids):
+            raise ValueError("The supercell is too small to add a meaningful equidistant adatom.")
         neighboring_atoms_coordinates = [new_basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
 
         equidistant_position = get_center_of_coordinates(neighboring_atoms_coordinates)
