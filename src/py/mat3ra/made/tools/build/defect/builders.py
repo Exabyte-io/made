@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List, Callable, Optional
 
 from pydantic import BaseModel
 from mat3ra.made.material import Material
@@ -89,7 +89,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         self,
         material: Material,
         chemical_element: str = "Si",
-        position_on_surface: List[float] = [0.5, 0.5],
+        position_on_surface: Optional[List[float]] = None,
         distance_z: float = 2.0,
     ) -> List[Material]:
         """
@@ -104,6 +104,9 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         Returns:
             The material with the adatom added.
         """
+        if position_on_surface is None:
+            position_on_surface = [0.5, 0.5]
+        position_on_surface = position_on_surface[:2]
         new_material = material.clone()
         basis = new_material.basis
         distance_in_crystal_units = distance_z / new_material.lattice.c
@@ -128,7 +131,7 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         self,
         material: Material,
         chemical_element: str = "Si",
-        position_on_surface: List[float] = [0.5, 0.5],
+        position_on_surface: Optional[List[float]] = None,
         distance_z: float = 2.0,
     ) -> List[Material]:
         """
@@ -144,11 +147,18 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         Returns:
             The material with the adatom added.
         """
-        equidistant_position = self.get_equidistant_position(material, position_on_surface)
+        if position_on_surface is None:
+            position_on_surface = [0.5, 0.5]
+        equidistant_position = self.get_equidistant_position(material, position_on_surface, distance_z)
         return super().create_adatom(material, chemical_element, equidistant_position, distance_z)
 
-    def get_equidistant_position(self, material: Material, adatom_position: List[float]) -> List[float]:
+    def get_equidistant_position(
+        self, material: Material, position_on_surface: List[float], distance_z: float = 2.0
+    ) -> List[float]:
         new_basis = material.basis
+        adatom_position = position_on_surface.copy()
+        distance_z_crystal = distance_z / material.lattice.c
+        adatom_position.append(get_atomic_coordinates_extremum(material) + distance_z_crystal)
         neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_position)
         if not neighboring_atoms_ids:
             raise ValueError("No neighboring atoms found.")
