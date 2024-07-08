@@ -111,21 +111,23 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
             position_on_surface = [0.5, 0.5]
         new_material = material.clone()
         new_basis = new_material.basis
-        adatom_position = self._calculate_position_from_2d(material, position_on_surface, distance_z)
-        new_basis.add_atom(chemical_element, adatom_position)
+        adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
+            material, position_on_surface, distance_z
+        )
+        new_basis.add_atom(chemical_element, adatom_coordinate)
         new_material.basis = new_basis
         return [new_material]
 
-    def _calculate_position_from_2d(
+    def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
         max_z = get_atomic_coordinates_extremum(material)
         distance_z = distance_z
         distance_in_crystal_units = distance_z / material.lattice.c
-        position = position_on_surface.copy()
-        position = position[:2]
-        position.append(max_z + distance_in_crystal_units)
-        return position
+        coordinate = position_on_surface.copy()
+        coordinate = coordinate[:2]
+        coordinate.append(max_z + distance_in_crystal_units)
+        return coordinate
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return self.create_adatom(
@@ -174,14 +176,20 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         self, material: Material, position_on_surface: List[float], distance_z: float = 2.0
     ) -> List[float]:
         new_basis = material.basis
-        adatom_position = self._calculate_position_from_2d(material, position_on_surface, distance_z)
-        neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_position)
+        adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
+            material, position_on_surface, distance_z
+        )
+        neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_coordinate)
         # We need to check if neighboring atoms number is the same in pbc
         supercell_material = create_supercell(material, [[3, 0, 0], [0, 3, 0], [0, 0, 1]])
         # Move the coordinate to the central unit cell of the supercell (crystal coordinates)
-        supercell_adatom_position = [1 / 3 + adatom_position[0] / 3, 1 / 3 + adatom_position[1] / 3, adatom_position[2]]
+        supercell_adatom_coordinate = [
+            1 / 3 + adatom_coordinate[0] / 3,
+            1 / 3 + adatom_coordinate[1] / 3,
+            adatom_coordinate[2],
+        ]
         supercell_neighboring_atoms_ids = get_nearest_neighbors_atom_indices(
-            supercell_material, supercell_adatom_position
+            supercell_material, supercell_adatom_coordinate
         )
         if neighboring_atoms_ids is None or supercell_neighboring_atoms_ids is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
@@ -189,7 +197,7 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             raise ValueError("Number of neighboring atoms is not the same in PBC. Try increasing the supercell size.")
         neighboring_atoms_coordinates = [new_basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
 
-        equidistant_position = get_center_of_coordinates(neighboring_atoms_coordinates)
-        equidistant_position[2] = adatom_position[2]
+        equidistant_coordinate = get_center_of_coordinates(neighboring_atoms_coordinates)
+        equidistant_coordinate[2] = adatom_coordinate[2]
 
-        return equidistant_position
+        return equidistant_coordinate
