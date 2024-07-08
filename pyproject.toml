@@ -23,7 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # tracking separately the deps required to use the tools module
-tools = ["pymatgen==2024.4.13", "ase", "pymatgen-analysis-defects"]
+tools = ["pymatgen", "ase", "pymatgen-analysis-defects"]
 dev = ["pre-commit", "black", "ruff", "isort", "mypy", "pip-tools"]
 tests = [
     "coverage[toml]>=5.3",
