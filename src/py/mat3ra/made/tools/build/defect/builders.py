@@ -108,14 +108,21 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
             position_on_surface = [0.5, 0.5]
         position_on_surface = position_on_surface[:2]
         new_material = material.clone()
-        basis = new_material.basis
-        distance_in_crystal_units = distance_z / new_material.lattice.c
-        max_z = get_atomic_coordinates_extremum(new_material)
+        new_basis = new_material.basis
+        adatom_position = self._calculate_position_from_2d(material, position_on_surface, distance_z)
+        new_basis.add_atom(chemical_element, adatom_position)
+        new_material.basis = new_basis
+        return [new_material]
+
+    def _calculate_position_from_2d(
+        self, material: Material, position_on_surface: List[float], distance_z: float
+    ) -> List[float]:
+        max_z = get_atomic_coordinates_extremum(material)
+        distance_z = distance_z
+        distance_in_crystal_units = distance_z / material.lattice.c
         position = position_on_surface.copy()
         position.append(max_z + distance_in_crystal_units)
-        basis.add_atom(chemical_element, position)
-        new_material.basis = basis
-        return [new_material]
+        return position
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return self.create_adatom(
@@ -156,9 +163,7 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         self, material: Material, position_on_surface: List[float], distance_z: float = 2.0
     ) -> List[float]:
         new_basis = material.basis
-        adatom_position = position_on_surface.copy()
-        distance_z_crystal = distance_z / material.lattice.c
-        adatom_position.append(get_atomic_coordinates_extremum(material) + distance_z_crystal)
+        adatom_position = self._calculate_position_from_2d(material, position_on_surface, distance_z)
         neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_position)
         if not neighboring_atoms_ids:
             raise ValueError("No neighboring atoms found.")
