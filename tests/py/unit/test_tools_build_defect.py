@@ -12,8 +12,7 @@ from mat3ra.utils import assertion as assertion_utils
 
 clean_material = Material.create(Material.default_config)
 
-material = Material.create(Material.default_config)
-slab_config = SlabConfiguration(material, (1, 1, 1), thickness=3, vacuum=6, use_orthogonal_z=True)
+slab_config = SlabConfiguration(clean_material, (1, 1, 1), thickness=3, vacuum=6, use_orthogonal_z=True)
 t = get_terminations(slab_config)[0]
 slab = create_slab(slab_config, t)
 
@@ -66,10 +65,9 @@ def test_create_defect_from_site_id():
 
 
 def test_create_adatom():
-    clean_slab = slab.clone()
     # Adatom of Si at 0.5, 0.5 position
     configuration = AdatomSlabDefectConfiguration(
-        crystal=clean_slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
+        crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
     )
     defect = create_slab_defect(configuration=configuration, builder=None)
 
@@ -78,10 +76,9 @@ def test_create_adatom():
 
 
 def test_create_adatom_equidistant():
-    clean_slab = slab.clone()
     # Adatom of Si at approximate 0.5, 0.5 position
     configuration = AdatomSlabDefectConfiguration(
-        crystal=clean_slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
+        crystal=slab, position_on_surface=[0.51, 0.5], distance_z=2, chemical_element="Si"
     )
     defect = create_slab_defect(configuration=configuration, builder=EquidistantAdatomSlabDefectBuilder())
 
