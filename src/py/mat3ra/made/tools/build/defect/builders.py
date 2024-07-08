@@ -176,10 +176,9 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         new_basis = material.basis
         adatom_position = self._calculate_position_from_2d(material, position_on_surface, distance_z)
         neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_position)
-        # check if neighboring atoms number is the same in the 3x3x1 supercell
+        # We need to check if neighboring atoms number is the same in pbc
         supercell_material = create_supercell(material, [[3, 0, 0], [0, 3, 0], [0, 0, 1]])
         # Move the coordinate to the central unit cell of the supercell (crystal coordinates)
-
         supercell_adatom_position = [1 / 3 + adatom_position[0] / 3, 1 / 3 + adatom_position[1] / 3, adatom_position[2]]
         supercell_neighboring_atoms_ids = get_nearest_neighbors_atom_indices(
             supercell_material, supercell_adatom_position
