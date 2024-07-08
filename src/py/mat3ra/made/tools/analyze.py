@@ -232,7 +232,8 @@ def get_atom_indices_with_condition_on_coordinates(
 
 
 def get_nearest_neighbors_atom_indices(
-    material: Material, position: Optional[List[float]] = None
+    material: Material,
+    position: Optional[List[float]] = None,
 ) -> Optional[List[int]]:
     """
     Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
@@ -247,7 +248,6 @@ def get_nearest_neighbors_atom_indices(
     if position is None:
         position = [0, 0, 0]
     structure = to_pymatgen(material)
-
     voronoi_nn = PymatgenVoronoiNN(tol=0.5)
     structure.append("X", position, validate_proximity=False)
     neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
@@ -256,9 +256,7 @@ def get_nearest_neighbors_atom_indices(
 
     all_coordinates = material.basis.coordinates
     all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
-    neighboring_atoms_ids = all_coordinates.ids
-
-    return neighboring_atoms_ids
+    return all_coordinates.ids
 
 
 def get_atomic_coordinates_extremum(

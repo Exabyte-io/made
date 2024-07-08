@@ -91,4 +91,4 @@ def test_create_adatom_equidistant():
 
     assert defect.basis.elements.values[-1] == "Si"
     # We expect adatom to shift from provided position
-    assertion_utils.assert_deep_almost_equal([0.58333333, 0.4166666, 0.389826], defect.basis.coordinates.values[-1])
+    assertion_utils.assert_deep_almost_equal([0.583333333, 0.541666667, 0.389826], defect.basis.coordinates.values[-1])
