@@ -1,15 +1,13 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
+    AdatomSlabDefectConfiguration,
+    EquidistantAdatomSlabDefectBuilder,
     PointDefectBuilderParameters,
     PointDefectConfiguration,
     create_defect,
-    AdatomSlabDefectConfiguration,
     create_slab_defect,
-    EquidistantAdatomSlabDefectBuilder,
 )
-from mat3ra.made.tools.build.slab import create_slab, SlabConfiguration
-
-from mat3ra.made.tools.build.slab import get_terminations
+from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
 from mat3ra.utils import assertion as assertion_utils
 
 clean_material = Material.create(Material.default_config)
