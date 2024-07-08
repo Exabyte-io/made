@@ -1,6 +1,7 @@
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
 
+import numpy as np
 from mat3ra.utils.array import convert_to_array_if_not
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel
@@ -42,6 +43,19 @@ def filter_array_with_id_value_by_ids(
 
 def are_arrays_equal_by_id_value(array1: List[Dict[str, Any]], array2: List[Dict[str, Any]]) -> bool:
     return map_array_with_id_value_to_array(array1) == map_array_with_id_value_to_array(array2)
+
+
+def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
+    """
+    Calculate the center of the coordinates.
+
+    Args:
+        coordinates (List[List[float]]): The list of coordinates.
+
+    Returns:
+        List[float]: The center of the coordinates.
+    """
+    return list(np.mean(np.array(coordinates), axis=0))
 
 
 class ValueWithId(RoundNumericValuesMixin, BaseModel):

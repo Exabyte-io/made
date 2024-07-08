@@ -1,10 +1,10 @@
-from typing import Callable, List, Optional, Literal
+from typing import Callable, List, Literal, Optional
 
 import numpy as np
 
 from ..material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
-from .third_party import ASEAtoms, PymatgenIStructure
+from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -229,6 +229,41 @@ def get_atom_indices_with_condition_on_coordinates(
             selected_indices.append(coord.id)
 
     return selected_indices
+
+
+def get_nearest_neighbors_atom_indices(
+    material: Material,
+    position: Optional[List[float]] = None,
+) -> Optional[List[int]]:
+    """
+    Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
+
+    Args:
+        material (Material): The material object to find neighbors in.
+        position (List[float]): The position to find neighbors for.
+
+    Returns:
+        List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
+    """
+    if position is None:
+        position = [0, 0, 0]
+    structure = to_pymatgen(material)
+    voronoi_nn = PymatgenVoronoiNN(
+        tol=0.5,
+        cutoff=13.0,
+        allow_pathological=False,
+        weight="solid_angle",
+        extra_nn_info=True,
+        compute_adj_neighbors=True,
+    )
+    structure.append("X", position, validate_proximity=False)
+    neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
+    neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
+    structure.remove_sites([-1])
+
+    all_coordinates = material.basis.coordinates
+    all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
+    return all_coordinates.ids
 
 
 def get_atomic_coordinates_extremum(
