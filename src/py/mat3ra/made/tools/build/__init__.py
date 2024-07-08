@@ -65,6 +65,8 @@ class BaseBuilder(BaseModel):
     def _post_process(
         self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType]
     ) -> List[Material]:
+        if self._GeneratedItemType == Material:
+            return items
         return [Material(self._convert_generated_item(item)) for item in items]
 
     @staticmethod
