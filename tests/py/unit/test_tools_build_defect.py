@@ -18,7 +18,7 @@ slab_config = SlabConfiguration(
     thickness=3,
     vacuum=6,
     use_orthogonal_z=True,
-    xy_supercell_matrix=[[2, 0, 0], [0, 2, 0], [0, 0, 1]],
+    xy_supercell_matrix=[[3, 0, 0], [0, 3, 0], [0, 0, 1]],
 )
 t = get_terminations(slab_config)[0]
 slab = create_slab(slab_config, t)
@@ -85,7 +85,7 @@ def test_create_adatom():
 def test_create_adatom_equidistant():
     # Adatom of Si at approximate 0.5, 0.5 position
     configuration = AdatomSlabDefectConfiguration(
-        crystal=slab, position_on_surface=[0.0, 0.25], distance_z=2, chemical_element="Si"
+        crystal=slab, position_on_surface=[0.45, 0.5], distance_z=2, chemical_element="Si"
     )
     defect = create_slab_defect(configuration=configuration, builder=EquidistantAdatomSlabDefectBuilder())
 
