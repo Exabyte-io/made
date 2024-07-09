@@ -21,6 +21,7 @@ from ...analyze import (
     get_nearest_neighbors_atom_indices,
     get_atomic_coordinates_extremum,
     get_closest_site_id_from_position,
+    get_closest_site_id_from_position_and_element,
 )
 from ....utils import get_center_of_coordinates
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
@@ -253,9 +254,15 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         cartesian_basis = material_with_additional_layer.basis
         cartesian_basis.to_cartesian()
         material_with_additional_layer.basis = cartesian_basis
-        closest_site_id = get_closest_site_id_from_position(
-            material_with_additional_layer, approximate_adatom_coordinate_cartesian
-        )
+
+        if chemical_element is None:
+            closest_site_id = get_closest_site_id_from_position(
+                material_with_additional_layer, approximate_adatom_coordinate_cartesian
+            )
+        else:
+            closest_site_id = get_closest_site_id_from_position_and_element(
+                material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
+            )
 
         new_vacuum = material_with_additional_layer.lattice.c - new_material.lattice.c
         new_material = add_vacuum(new_material, new_vacuum)
