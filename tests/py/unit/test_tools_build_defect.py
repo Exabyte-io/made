@@ -85,7 +85,7 @@ def test_create_adatom():
 def test_create_adatom_equidistant():
     # Adatom of Si at approximate 0.5, 0.5 position
     configuration = AdatomSlabDefectConfiguration(
-        crystal=slab, position_on_surface=[0.45, 0.5], distance_z=2, chemical_element="Si"
+        crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
     )
     defect = create_slab_defect(configuration=configuration, builder=EquidistantAdatomSlabDefectBuilder())
 
