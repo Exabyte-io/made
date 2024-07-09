@@ -249,7 +249,7 @@ def get_nearest_neighbors_atom_indices(
         position = [0, 0, 0]
     structure = to_pymatgen(material)
     voronoi_nn = PymatgenVoronoiNN(
-        tol=0.75,
+        tol=0.9,
         cutoff=15.0,
         allow_pathological=False,
         weight="solid_angle",
