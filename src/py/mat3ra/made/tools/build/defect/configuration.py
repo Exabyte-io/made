@@ -46,6 +46,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     def _json(self):
         return {
             "type": "PointDefectConfiguration",
+            "crystal": self.crystal.to_json(),
             "defect_type": self.defect_type.name,
             "position": self.position,
             "chemical_element": self.chemical_element,
@@ -66,6 +67,7 @@ class AdatomSlabDefectConfiguration(SlabDefectConfiguration):
     def _json(self):
         return {
             "type": "AdatomSlabDefectConfiguration",
+            "crystal": self.crystal.to_json(),
             "defect_type": self.defect_type.name,
             "position_on_surface": self.position_on_surface,
             "distance_z": self.distance_z,
