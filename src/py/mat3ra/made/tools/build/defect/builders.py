@@ -250,14 +250,18 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         material_with_additional_layer = create_slab(new_slab_config, termination)
 
         # Get atom that is closest to the provided position
-        material_with_additional_layer.basis.to_cartesian()
+        cartesian_basis = material_with_additional_layer.basis
+        cartesian_basis.to_cartesian()
+        material_with_additional_layer.basis = cartesian_basis
         closest_site_id = get_closest_site_id_from_position(
             material_with_additional_layer, approximate_adatom_coordinate_cartesian
         )
 
         new_vacuum = material_with_additional_layer.lattice.c - new_material.lattice.c
         new_material = add_vacuum(new_material, new_vacuum)
-
+        cartesian_basis = new_material.basis
+        cartesian_basis.to_cartesian()
+        new_material.basis = cartesian_basis
         only_adatom_material = filter_material_by_ids(material_with_additional_layer, [closest_site_id])
         new_material = merge_materials(
             [only_adatom_material, new_material],
