@@ -1,7 +1,9 @@
 from typing import List, Callable, Optional
 
+from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, Termination
 from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.modify import add_vacuum
+from mat3ra.made.tools.build.utils import merge_materials
+from mat3ra.made.tools.modify import add_vacuum, filter_material_by_ids
 from pydantic import BaseModel
 from mat3ra.made.material import Material
 
@@ -15,7 +17,11 @@ from ...third_party import (
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
-from ...analyze import get_nearest_neighbors_atom_indices, get_atomic_coordinates_extremum
+from ...analyze import (
+    get_nearest_neighbors_atom_indices,
+    get_atomic_coordinates_extremum,
+    get_closest_site_id_from_position,
+)
 from ....utils import get_center_of_coordinates
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
@@ -201,3 +207,61 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         equidistant_coordinate[2] = adatom_coordinate[2]
 
         return equidistant_coordinate
+
+
+class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
+    def create_adatom(
+        self,
+        material: Material,
+        chemical_element: str = "Si",
+        position_on_surface: Optional[List[float]] = None,
+        distance_z: float = 0,
+    ) -> List[Material]:
+        """
+        Create an adatom at the crystal site closest to the specified position on the surface of the material.
+
+        Args:
+            material: The material to add the adatom to.
+            chemical_element: The chemical element of the adatom.
+            position_on_surface: The position on the surface of the material.
+            distance_z: The distance of the adatom from the surface.
+
+        Returns:
+            The material with the adatom added.
+        """
+        if position_on_surface is None:
+            position_on_surface = [0.5, 0.5]
+        new_material = material.clone()
+        approximate_adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
+            material, position_on_surface, distance_z
+        )
+        approximate_adatom_coordinate_cartesian = material.basis.cell.convert_point_to_cartesian(
+            approximate_adatom_coordinate
+        )
+
+        # Create material with additional layer
+        termination = Termination.from_string(material.metadata.get("build").get("termination"))
+        build_config = material.metadata.get("build").get("configuration")
+        if build_config["type"] != "SlabConfiguration":
+            raise ValueError("Material is not a slab.")
+        build_config.pop("type")
+        build_config["thickness"] = build_config["thickness"] + 1
+        new_slab_config = SlabConfiguration(**build_config)
+        material_with_additional_layer = create_slab(new_slab_config, termination)
+
+        # Get atom that is closest to the provided position
+        material_with_additional_layer.basis.to_cartesian()
+        closest_site_id = get_closest_site_id_from_position(
+            material_with_additional_layer, approximate_adatom_coordinate_cartesian
+        )
+
+        new_vacuum = material_with_additional_layer.lattice.c - new_material.lattice.c
+        new_material = add_vacuum(new_material, new_vacuum)
+
+        only_adatom_material = filter_material_by_ids(material_with_additional_layer, [closest_site_id])
+        new_material = merge_materials(
+            [only_adatom_material, new_material],
+            merge_dangerously=True,
+        )
+
+        return [new_material]
