@@ -7,7 +7,6 @@ from mat3ra.made.tools.modify import add_vacuum, filter_material_by_ids
 from pydantic import BaseModel
 from mat3ra.made.material import Material
 
-from ...modify import translate_to_z_level
 from ...third_party import (
     PymatgenStructure,
     PymatgenPeriodicSite,
