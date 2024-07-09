@@ -85,10 +85,10 @@ def test_create_adatom():
 def test_create_adatom_equidistant():
     # Adatom of Si at approximate 0.5, 0.5 position
     configuration = AdatomSlabDefectConfiguration(
-        crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
+        crystal=slab, position_on_surface=[0.0, 0.25], distance_z=2, chemical_element="Si"
     )
     defect = create_slab_defect(configuration=configuration, builder=EquidistantAdatomSlabDefectBuilder())
 
     assert defect.basis.elements.values[-1] == "Si"
     # We expect adatom to shift from provided position
-    assertion_utils.assert_deep_almost_equal([0.4583333333, 0.541666667, 0.389826], defect.basis.coordinates.values[-1])
+    assertion_utils.assert_deep_almost_equal([0.916666666, 0.208333334, 0.389826], defect.basis.coordinates.values[-1])
