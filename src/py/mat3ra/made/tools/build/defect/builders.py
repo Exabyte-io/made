@@ -211,10 +211,66 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
 
 
 class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
+    def calculate_approximate_adatom_coordinate(
+        self, material: Material, position_on_surface: List[float], distance_z: float
+    ) -> List[float]:
+        approximate_adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
+            material, position_on_surface, distance_z
+        )
+        approximate_adatom_coordinate_cartesian = material.basis.cell.convert_point_to_cartesian(
+            approximate_adatom_coordinate
+        )
+        return approximate_adatom_coordinate_cartesian
+
+    def create_material_with_additional_layer(self, material: Material) -> Material:
+        termination = Termination.from_string(material.metadata.get("build").get("termination"))
+        build_config = material.metadata.get("build").get("configuration")
+        if build_config["type"] != "SlabConfiguration":
+            raise ValueError("Material is not a slab.")
+        build_config.pop("type")
+        build_config["thickness"] = build_config["thickness"] + 1
+        new_slab_config = SlabConfiguration(**build_config)
+        material_with_additional_layer = create_slab(new_slab_config, termination)
+
+        cartesian_basis = material_with_additional_layer.basis
+        cartesian_basis.to_cartesian()
+        material_with_additional_layer.basis = cartesian_basis
+
+        return material_with_additional_layer
+
+    def create_only_adatom_material(
+        self,
+        material_with_additional_layer: Material,
+        approximate_adatom_coordinate_cartesian: List[float],
+        chemical_element: Optional[str] = None,
+    ) -> Material:
+        if chemical_element is None:
+            closest_site_id = get_closest_site_id_from_position(
+                material_with_additional_layer, approximate_adatom_coordinate_cartesian
+            )
+        else:
+            closest_site_id = get_closest_site_id_from_position_and_element(
+                material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
+            )
+        only_adatom_material = filter_material_by_ids(material_with_additional_layer, [closest_site_id])
+        return only_adatom_material
+
+    def merge_material_with_adatom(self, material: Material, only_adatom_material: Material) -> Material:
+        new_vacuum = only_adatom_material.lattice.c - material.lattice.c
+        new_material = add_vacuum(material, new_vacuum)
+        cartesian_basis = new_material.basis
+        cartesian_basis.to_cartesian()
+        new_material.basis = cartesian_basis
+        new_material = merge_materials(
+            [only_adatom_material, new_material],
+            merge_dangerously=True,
+        )
+        return new_material
+
     def create_adatom(
         self,
         material: Material,
-        chemical_element: str = "Si",
+        chemical_element: Optional[str] = "",
         position_on_surface: Optional[List[float]] = None,
         distance_z: float = 0,
     ) -> List[Material]:
@@ -232,47 +288,17 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         """
         if position_on_surface is None:
             position_on_surface = [0.5, 0.5]
+
         new_material = material.clone()
-        approximate_adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
-            material, position_on_surface, distance_z
-        )
-        approximate_adatom_coordinate_cartesian = material.basis.cell.convert_point_to_cartesian(
-            approximate_adatom_coordinate
+
+        approximate_adatom_coordinate_cartesian = self.calculate_approximate_adatom_coordinate(
+            new_material, position_on_surface, distance_z
         )
 
-        # Create material with additional layer
-        termination = Termination.from_string(material.metadata.get("build").get("termination"))
-        build_config = material.metadata.get("build").get("configuration")
-        if build_config["type"] != "SlabConfiguration":
-            raise ValueError("Material is not a slab.")
-        build_config.pop("type")
-        build_config["thickness"] = build_config["thickness"] + 1
-        new_slab_config = SlabConfiguration(**build_config)
-        material_with_additional_layer = create_slab(new_slab_config, termination)
+        material_with_additional_layer = self.create_material_with_additional_layer(new_material)
 
-        # Get atom that is closest to the provided position
-        cartesian_basis = material_with_additional_layer.basis
-        cartesian_basis.to_cartesian()
-        material_with_additional_layer.basis = cartesian_basis
-
-        if chemical_element is None:
-            closest_site_id = get_closest_site_id_from_position(
-                material_with_additional_layer, approximate_adatom_coordinate_cartesian
-            )
-        else:
-            closest_site_id = get_closest_site_id_from_position_and_element(
-                material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
-            )
-
-        new_vacuum = material_with_additional_layer.lattice.c - new_material.lattice.c
-        new_material = add_vacuum(new_material, new_vacuum)
-        cartesian_basis = new_material.basis
-        cartesian_basis.to_cartesian()
-        new_material.basis = cartesian_basis
-        only_adatom_material = filter_material_by_ids(material_with_additional_layer, [closest_site_id])
-        new_material = merge_materials(
-            [only_adatom_material, new_material],
-            merge_dangerously=True,
+        only_adatom_material = self.create_only_adatom_material(
+            material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
         )
 
-        return [new_material]
+        return [self.merge_material_with_adatom(new_material, only_adatom_material)]
