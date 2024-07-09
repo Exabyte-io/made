@@ -55,6 +55,7 @@ def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
     Returns:
         List[float]: The center of the coordinates.
     """
+    print("coordinates to np.mean", coordinates)
     return list(np.mean(np.array(coordinates), axis=0))
 
 

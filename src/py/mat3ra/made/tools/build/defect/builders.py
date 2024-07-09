@@ -202,9 +202,11 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
         if len(supercell_neighboring_atoms_ids) != len(neighboring_atoms_ids):
             raise ValueError("Number of neighboring atoms is not the same in PBC. Try increasing the supercell size.")
-        neighboring_atoms_coordinates = [new_basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
+        new_basis.coordinates.filter_by_ids(neighboring_atoms_ids)
+        neighboring_atoms_coordinates = new_basis.coordinates.values
 
         equidistant_coordinate = get_center_of_coordinates(neighboring_atoms_coordinates)
+        print("equidistant coordinate", equidistant_coordinate)
         equidistant_coordinate[2] = adatom_coordinate[2]
 
         return equidistant_coordinate
