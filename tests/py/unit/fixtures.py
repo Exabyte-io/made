@@ -217,8 +217,10 @@ SI_SLAB: Dict[str, Any] = {
     "_id": "",
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "termination": "Si_P4/mmm_1",
-        "build": {"configuration": SI_SLAB_CONFIGURATION},
+        "build": {
+            "configuration": SI_SLAB_CONFIGURATION,
+            "termination": "Si_P4/mmm_1",
+        },
     },
     "isUpdated": True,
 }
