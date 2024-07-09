@@ -3,7 +3,7 @@ from typing import List
 from mat3ra.made.basis import Basis
 from mat3ra.made.material import Material
 
-from ..utils import convert_basis_to_crystal, get_distance_between_coordinates
+from ..utils import get_distance_between_coordinates
 
 
 def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.01) -> Basis:
@@ -25,8 +25,8 @@ def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.
 
 
 def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
-    basis1 = convert_basis_to_crystal(basis1)
-    basis2 = convert_basis_to_crystal(basis2)
+    basis1.to_crystal()
+    basis2.to_crystal()
 
     merged_elements = basis1.elements
     merged_coordinates = basis1.coordinates
