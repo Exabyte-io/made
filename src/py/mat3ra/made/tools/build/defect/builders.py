@@ -270,7 +270,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
     def create_adatom(
         self,
         material: Material,
-        chemical_element: Optional[str] = "",
+        chemical_element: Optional[str] = None,
         position_on_surface: Optional[List[float]] = None,
         distance_z: float = 0,
     ) -> List[Material]:
