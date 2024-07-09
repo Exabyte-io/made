@@ -92,7 +92,7 @@ def get_closest_site_id_from_position(material: Material, position: List[float])
 
 
 def get_closest_site_id_from_position_and_element(
-    material: Material, position: List[float], element: Optional[str] = None
+    material: Material, position: List[float], chemical_element: Optional[str] = None
 ) -> int:
     """
     Get the site ID of the closest site with a given element to a given position in the crystal.
@@ -100,7 +100,7 @@ def get_closest_site_id_from_position_and_element(
     Args:
         material (Material): The material object to find the closest site in.
         position (List[float]): The position to find the closest site to.
-        element (str): The element of the site to find.
+        chemical_element (str): The element of the site to find.
 
     Returns:
         int: The site ID of the closest site with the given element.
@@ -109,9 +109,9 @@ def get_closest_site_id_from_position_and_element(
     position = np.array(position)  # type: ignore
     distances = np.linalg.norm(coordinates - position, axis=1)
 
-    if element is not None:
+    if chemical_element is not None:
         elements = np.array(material.basis.elements.values)
-        element_indices = np.where(elements == element)[0]
+        element_indices = np.where(elements == chemical_element)[0]
         distances = distances[element_indices]
         return int(element_indices[np.argmin(distances)])
     else:
