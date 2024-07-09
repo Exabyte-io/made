@@ -61,7 +61,7 @@ class AdatomSlabDefectConfiguration(SlabDefectConfiguration):
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ADATOM
     position_on_surface: List[float] = [0.5, 0.5]
     distance_z: float = 2.0
-    chemical_element: Optional[str] = "Si"
+    chemical_element: Optional[str] = None
 
     @property
     def _json(self):
