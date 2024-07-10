@@ -6,6 +6,7 @@ from mat3ra.made.tools.build.defect import (
     PointDefectConfiguration,
     create_defect,
     create_slab_defect,
+    CrystalSiteAdatomSlabDefectBuilder,
 )
 from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
 from mat3ra.utils import assertion as assertion_utils
@@ -83,7 +84,6 @@ def test_create_adatom():
 
 
 def test_create_adatom_equidistant():
-    slab = create_slab(slab_config, t)
     # Adatom of Si at approximate 0.5, 0.5 position
     configuration = AdatomSlabDefectConfiguration(
         crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
@@ -94,3 +94,15 @@ def test_create_adatom_equidistant():
     assert defect.basis.elements.values[-1] == "Si"
     # We expect adatom to shift from provided position
     assertion_utils.assert_deep_almost_equal([0.123123123, 0.472222222, 0.389826], defect.basis.coordinates.values[-1])
+
+
+def test_create_crystal_site_adatom():
+    # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
+    configuration = AdatomSlabDefectConfiguration(
+        crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element=None
+    )
+    builder = CrystalSiteAdatomSlabDefectBuilder()
+    defect = create_slab_defect(configuration=configuration, builder=builder)
+
+    assert defect.basis.elements.values[-1] == "Si"
+    assertion_utils.assert_deep_almost_equal([0.9444444, 0.805555, 0.2875], defect.basis.coordinates.values[-1])
