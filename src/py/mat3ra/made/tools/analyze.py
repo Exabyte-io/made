@@ -286,12 +286,10 @@ def get_nearest_neighbors_atom_indices(
     structure.append("X", position, validate_proximity=False)
     neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
-    print("neighbors ids", neighboring_atoms_pymatgen_ids)
     structure.remove_sites([-1])
 
     all_coordinates = material.basis.coordinates
     all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
-    print("all cordinates ids", all_coordinates.ids)
     return all_coordinates.ids
 
 
