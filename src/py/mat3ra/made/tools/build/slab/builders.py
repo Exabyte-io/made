@@ -31,6 +31,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             min_vacuum_size=configuration.vacuum,
             in_unit_planes=True,
             reorient_lattice=True,
+            primitive=False,
         )
         raw_slabs = generator.get_slabs()
         self.__configuration = configuration
