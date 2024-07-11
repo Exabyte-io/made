@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from mat3ra.made.basis import Basis
 from mat3ra.made.material import Material
@@ -55,7 +55,11 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
 
 
 def merge_two_materials(
-    material1: Material, material2: Material, distance_tolerance: float, merge_dangerously=False
+    material1: Material,
+    material2: Material,
+    material_name: Optional[str],
+    distance_tolerance: float,
+    merge_dangerously=False,
 ) -> Material:
     """
     Merge two materials with the same lattice into a single material,
@@ -64,6 +68,7 @@ def merge_two_materials(
     Args:
         material1 (Material): First material to merge.
         material2 (Material): Second material to merge.
+        material_name (str): Name of the merged material.
         distance_tolerance (float): Distance tolerance for merging atoms.
         merge_dangerously (bool): If True, merge materials with different lattices.
     """
@@ -75,7 +80,7 @@ def merge_two_materials(
     merged_lattice = material1.lattice
     resolved_basis = merge_two_bases(material1.basis, material2.basis, distance_tolerance)
 
-    name = "Merged Material"
+    name = material_name or "Merged Material"
     new_material = Material.create(
         {"name": name, "lattice": merged_lattice.to_json(), "basis": resolved_basis.to_json()}
     )
@@ -83,9 +88,16 @@ def merge_two_materials(
     return new_material
 
 
-def merge_materials(materials: List[Material], distance_tolerance: float = 0.01, merge_dangerously=False) -> Material:
+def merge_materials(
+    materials: List[Material],
+    material_name: Optional[str] = None,
+    distance_tolerance: float = 0.01,
+    merge_dangerously=False,
+) -> Material:
     merged_material = materials[0]
     for material in materials[1:]:
-        merged_material = merge_two_materials(merged_material, material, distance_tolerance, merge_dangerously)
+        merged_material = merge_two_materials(
+            merged_material, material, material_name, distance_tolerance, merge_dangerously
+        )
 
     return merged_material
