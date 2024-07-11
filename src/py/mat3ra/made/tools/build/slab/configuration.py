@@ -20,6 +20,7 @@ class SlabConfiguration(BaseModel, InMemoryEntity):
         xy_supercell_matrix (List[List[int]]): The supercell matrix for the xy plane.
         use_conventional_cell (bool): Whether to use the conventional cell.
         use_orthogonal_z (bool): Whether to use orthogonal z.
+        make_primitive (bool): Whether to try to find primitive cell for the created slab.
     """
 
     # TODO: fix arbitrary_types_allowed error and set Material class type
@@ -30,6 +31,7 @@ class SlabConfiguration(BaseModel, InMemoryEntity):
     xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
     use_conventional_cell: bool = True
     use_orthogonal_z: bool = False
+    make_primitive: bool = False
 
     def __init__(
         self,
@@ -40,6 +42,7 @@ class SlabConfiguration(BaseModel, InMemoryEntity):
         xy_supercell_matrix=xy_supercell_matrix,
         use_conventional_cell=use_conventional_cell,
         use_orthogonal_z=use_orthogonal_z,
+        make_primitive=make_primitive,
     ):
         bulk = bulk or Material(Material.default_config)
         __bulk_pymatgen_structure = (
@@ -54,7 +57,9 @@ class SlabConfiguration(BaseModel, InMemoryEntity):
             thickness=thickness,
             vacuum=vacuum,
             xy_supercell_matrix=xy_supercell_matrix,
+            use_conventional_cell=use_conventional_cell,
             use_orthogonal_z=use_orthogonal_z,
+            make_primitive=make_primitive,
         )
 
     @property
@@ -68,4 +73,5 @@ class SlabConfiguration(BaseModel, InMemoryEntity):
             "xy_supercell_matrix": self.xy_supercell_matrix,
             "use_conventional_cell": self.use_conventional_cell,
             "use_orthogonal_z": self.use_orthogonal_z,
+            "make_primitive": self.make_primitive,
         }
