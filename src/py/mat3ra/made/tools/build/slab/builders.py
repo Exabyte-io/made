@@ -71,6 +71,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         miller_indices = "".join([str(i) for i in configuration.miller_indices])
         termination = material.metadata.get("build").get("termination", "")
         # for example: "Si8(001), termination Si_P4/mmm_1, Slab"
-        new_name = f"{formula}({miller_indices}), termination {termination}, Slab"
+        safe_termination_str = termination.replace("/", ":")
+        new_name = f"{formula}({miller_indices}), termination {safe_termination_str}, Slab"
         material.name = new_name
         return material
