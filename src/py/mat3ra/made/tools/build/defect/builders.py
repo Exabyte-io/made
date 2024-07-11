@@ -135,6 +135,13 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         coordinate.append(max_z + distance_in_crystal_units)
         return coordinate
 
+    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
+        updated_material = super()._update_material_name(material, configuration)
+        adatom_element = configuration.chemical_element
+        new_name = f"{updated_material.name}, Adatom {adatom_element} Defect"
+        updated_material.name = new_name
+        return updated_material
+
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return self.create_adatom(
             material=configuration.crystal,
