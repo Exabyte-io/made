@@ -174,6 +174,7 @@ SI_SLAB_CONFIGURATION: Dict[str, Any] = {
     "xy_supercell_matrix": [[1, 0], [0, 1]],
     "use_conventional_cell": True,
     "use_orthogonal_z": True,
+    "make_primitive": True,
 }
 
 SI_SLAB: Dict[str, Any] = {
