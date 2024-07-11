@@ -15,6 +15,7 @@ def test_build_slab():
         vacuum=1,
         xy_supercell_matrix=[[1, 0], [0, 1]],
         use_orthogonal_z=True,
+        make_primitive=True,
     )
     termination = get_terminations(slab_config)[0]
     slab = create_slab(slab_config, termination)
