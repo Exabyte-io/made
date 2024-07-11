@@ -268,7 +268,8 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         cartesian_basis.to_cartesian()
         new_material.basis = cartesian_basis
         new_material = merge_materials(
-            [only_adatom_material, new_material],
+            materials=[only_adatom_material, new_material],
+            material_name=material.name,
             merge_dangerously=True,
         )
         return new_material
