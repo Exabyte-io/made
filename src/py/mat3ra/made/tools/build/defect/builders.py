@@ -3,7 +3,7 @@ from typing import List, Callable, Optional
 from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, Termination
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.build.utils import merge_materials
-from mat3ra.made.tools.modify import add_vacuum, filter_material_by_ids
+from mat3ra.made.tools.modify import add_vacuum, filter_material_by_ids, filter_by_sphere, filter_by_box
 from pydantic import BaseModel
 from mat3ra.made.material import Material
 
@@ -88,6 +88,23 @@ class SlabDefectBuilderParameters(BaseModel):
 class SlabDefectBuilder(BaseBuilder):
     _BuildParametersType = SlabDefectBuilderParameters
     _DefaultBuildParameters = SlabDefectBuilderParameters()
+
+    def _create_material_with_additional_layers(self, material: Material, added_thickness: int = 1) -> Material:
+        new_material = material.clone()
+        termination = Termination.from_string(new_material.metadata.get("build").get("termination"))
+        build_config = new_material.metadata.get("build").get("configuration")
+        if "type" not in build_config or build_config["type"] != "SlabConfiguration":
+            raise ValueError("Material is not a slab.")
+        build_config.pop("type")
+        build_config["thickness"] = build_config["thickness"] + added_thickness
+        new_slab_config = SlabConfiguration(**build_config)
+        material_with_additional_layer = create_slab(new_slab_config, termination)
+
+        cartesian_basis = material_with_additional_layer.basis
+        cartesian_basis.to_cartesian()
+        material_with_additional_layer.basis = cartesian_basis
+
+        return material_with_additional_layer
 
 
 class AdatomSlabDefectBuilder(SlabDefectBuilder):
@@ -228,22 +245,6 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         )
         return approximate_adatom_coordinate_cartesian
 
-    def create_material_with_additional_layer(self, material: Material) -> Material:
-        termination = Termination.from_string(material.metadata.get("build").get("termination"))
-        build_config = material.metadata.get("build").get("configuration")
-        if build_config["type"] != "SlabConfiguration":
-            raise ValueError("Material is not a slab.")
-        build_config.pop("type")
-        build_config["thickness"] = build_config["thickness"] + 1
-        new_slab_config = SlabConfiguration(**build_config)
-        material_with_additional_layer = create_slab(new_slab_config, termination)
-
-        cartesian_basis = material_with_additional_layer.basis
-        cartesian_basis.to_cartesian()
-        material_with_additional_layer.basis = cartesian_basis
-
-        return material_with_additional_layer
-
     def create_only_adatom_material(
         self,
         material_with_additional_layer: Material,
@@ -302,10 +303,62 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             new_material, position_on_surface, distance_z
         )
 
-        material_with_additional_layer = self.create_material_with_additional_layer(new_material)
+        material_with_additional_layer = self._create_material_with_additional_layers(new_material, added_thickness=1)
 
         only_adatom_material = self.create_only_adatom_material(
             material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
         )
 
         return [self.merge_material_with_adatom(new_material, only_adatom_material)]
+
+
+class IslandSlabDefectBuilder(SlabDefectBuilder):
+    def create_island(
+        self, material: Material, position_on_surface: List[float], radius: float, thickness: int
+    ) -> List[Material]:
+        """
+        Create an island at the specified position on the surface of the material.
+
+        Args:
+            material: The material to add the island to.
+            position_on_surface: The position on the surface of the material.
+            radius: The radius of the island.
+            thickness: The thickness of the island in atomic layers.
+
+        Returns:
+            The material with the island added.
+        """
+
+        new_material = material.clone()
+        new_basis = new_material.basis.copy()
+        new_basis.to_cartesian()
+        new_material.basis = new_basis
+        original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
+        material_with_additional_layers = self._create_material_with_additional_layers(new_material, thickness)
+        added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
+
+        # Get the atoms within the sphere
+        center_coordinate = position_on_surface.copy()
+        center_coordinate.append(original_max_z)
+        atoms_within_sphere = filter_by_sphere(
+            material=material_with_additional_layers,
+            center_coordinate=center_coordinate,
+            radius=radius,
+        )
+        atoms_within_sphere = atoms_within_sphere.to_cartesian()
+        # Filter atoms in the added layers
+        island_material = filter_by_box(
+            material=atoms_within_sphere,
+            min_coordinate=[0, 0, original_max_z],
+            max_coordinate=[1, 1, added_layers_max_z],
+            use_cartesian_coordinates=True,
+        )
+
+        # Merge the island material with the atoms within the sphere
+        material_with_island = merge_materials(
+            materials=[new_material, island_material],
+            material_name=material.name,
+            merge_dangerously=True,
+        )
+
+        return [material_with_island]
