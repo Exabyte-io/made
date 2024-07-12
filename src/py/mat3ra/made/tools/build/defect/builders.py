@@ -343,7 +343,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
             center_coordinate=center_coordinate,
             radius=radius,
         )
-        atoms_within_sphere = atoms_within_sphere.to_cartesian()
+        atoms_within_sphere.to_cartesian()
         # Filter atoms in the added layers
         island_material = filter_by_box(
             material=atoms_within_sphere,
