@@ -89,6 +89,30 @@ class SlabDefectBuilder(BaseBuilder):
     _BuildParametersType = SlabDefectBuilderParameters
     _DefaultBuildParameters = SlabDefectBuilderParameters()
 
+    def create_material_with_additional_layers(self, material: Material, added_thickness: int = 1) -> Material:
+        new_material = material.clone()
+        termination = Termination.from_string(new_material.metadata.get("build").get("termination"))
+        build_config = new_material.metadata.get("build").get("configuration")
+        if build_config["type"] != "SlabConfiguration":
+            raise ValueError("Material is not a slab.")
+        build_config.pop("type")
+        build_config["thickness"] = build_config["thickness"] + added_thickness
+        new_slab_config = SlabConfiguration(**build_config)
+        material_with_additional_layer = create_slab(new_slab_config, termination)
+
+        return material_with_additional_layer
+
+    def merge_slab_and_defect(self, material: Material, isolated_defect: Material) -> Material:
+        new_vacuum = isolated_defect.lattice.c - material.lattice.c
+        new_material = add_vacuum(material, new_vacuum)
+        new_material.to_cartesian()
+        new_material = merge_materials(
+            materials=[isolated_defect, new_material],
+            material_name=material.name,
+            merge_dangerously=True,
+        )
+        return new_material
+
 
 class AdatomSlabDefectBuilder(SlabDefectBuilder):
     _ConfigurationType: type(AdatomSlabDefectConfiguration) = AdatomSlabDefectConfiguration  # type: ignore
@@ -231,23 +255,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         )
         return approximate_adatom_coordinate_cartesian
 
-    def create_material_with_additional_layer(self, material: Material) -> Material:
-        termination = Termination.from_string(material.metadata.get("build").get("termination"))
-        build_config = material.metadata.get("build").get("configuration")
-        if build_config["type"] != "SlabConfiguration":
-            raise ValueError("Material is not a slab.")
-        build_config.pop("type")
-        build_config["thickness"] = build_config["thickness"] + 1
-        new_slab_config = SlabConfiguration(**build_config)
-        material_with_additional_layer = create_slab(new_slab_config, termination)
-
-        cartesian_basis = material_with_additional_layer.basis
-        cartesian_basis.to_cartesian()
-        material_with_additional_layer.basis = cartesian_basis
-
-        return material_with_additional_layer
-
-    def create_only_adatom_material(
+    def create_isolated_defect(
         self,
         material_with_additional_layer: Material,
         approximate_adatom_coordinate_cartesian: List[float],
@@ -263,19 +271,6 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             )
         only_adatom_material = filter_material_by_ids(material_with_additional_layer, [closest_site_id])
         return only_adatom_material
-
-    def merge_material_with_adatom(self, material: Material, only_adatom_material: Material) -> Material:
-        new_vacuum = only_adatom_material.lattice.c - material.lattice.c
-        new_material = add_vacuum(material, new_vacuum)
-        cartesian_basis = new_material.basis
-        cartesian_basis.to_cartesian()
-        new_material.basis = cartesian_basis
-        new_material = merge_materials(
-            materials=[only_adatom_material, new_material],
-            material_name=material.name,
-            merge_dangerously=True,
-        )
-        return new_material
 
     def create_adatom(
         self,
@@ -305,10 +300,11 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             new_material, position_on_surface, distance_z
         )
 
-        material_with_additional_layer = self.create_material_with_additional_layer(new_material)
+        material_with_additional_layer = self.create_material_with_additional_layers(new_material)
+        material_with_additional_layer.to_cartesian()
 
-        only_adatom_material = self.create_only_adatom_material(
+        only_adatom_material = self.create_isolated_defect(
             material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
         )
 
-        return [self.merge_material_with_adatom(new_material, only_adatom_material)]
+        return [self.merge_slab_and_defect(new_material, only_adatom_material)]
