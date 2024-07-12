@@ -100,10 +100,6 @@ class SlabDefectBuilder(BaseBuilder):
         new_slab_config = SlabConfiguration(**build_config)
         material_with_additional_layer = create_slab(new_slab_config, termination)
 
-        cartesian_basis = material_with_additional_layer.basis
-        cartesian_basis.to_cartesian()
-        material_with_additional_layer.basis = cartesian_basis
-
         return material_with_additional_layer
 
 
