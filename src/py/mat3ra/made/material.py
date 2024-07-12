@@ -80,3 +80,13 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
     @lattice.setter
     def lattice(self, lattice: Lattice) -> None:
         self.set_prop("lattice", lattice.to_json())
+
+    def to_cartesian(self) -> None:
+        new_basis = self.basis.copy()
+        new_basis.to_cartesian()
+        self.basis = new_basis
+
+    def to_crystal(self) -> None:
+        new_basis = self.basis.copy()
+        new_basis.to_crystal()
+        self.basis = new_basis
