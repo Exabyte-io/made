@@ -9,3 +9,4 @@ class PointDefectTypeEnum(str, Enum):
 
 class SlabDefectTypeEnum(str, Enum):
     ADATOM = "adatom"
+    ISLAND = "island"
