@@ -130,10 +130,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         max_z = get_atomic_coordinates_extremum(material)
         distance_z = distance_z
         distance_in_crystal_units = distance_z / material.lattice.c
-        coordinate = position_on_surface.copy()
-        coordinate = coordinate[:2]
-        coordinate.append(max_z + distance_in_crystal_units)
-        return coordinate
+        return [position_on_surface[0], position_on_surface[1], max_z + distance_in_crystal_units]
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         updated_material = super()._update_material_name(material, configuration)
@@ -188,12 +185,11 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
     def get_equidistant_position(
         self, material: Material, position_on_surface: List[float], distance_z: float = 2.0
     ) -> List[float]:
-        new_basis = material.basis.copy()
         adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
             material, position_on_surface, distance_z
         )
-        neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_coordinate)
-        # We need to check if neighboring atoms number is the same in pbc
+
+        # We need to find the neighboring atoms with pbc.
         supercell_material = create_supercell(material, [[3, 0, 0], [0, 3, 0], [0, 0, 1]])
         # Move the coordinate to the central unit cell of the supercell (crystal coordinates)
         supercell_adatom_coordinate = [
@@ -204,14 +200,21 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         supercell_neighboring_atoms_ids = get_nearest_neighbors_atom_indices(
             supercell_material, supercell_adatom_coordinate
         )
-        if neighboring_atoms_ids is None or supercell_neighboring_atoms_ids is None:
+
+        if supercell_neighboring_atoms_ids is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
-        if len(supercell_neighboring_atoms_ids) != len(neighboring_atoms_ids):
-            raise ValueError("Number of neighboring atoms is not the same in PBC. Try increasing the supercell size.")
-        new_basis.coordinates.filter_by_ids(neighboring_atoms_ids)
-        neighboring_atoms_coordinates = new_basis.coordinates.values
-        equidistant_coordinate = get_center_of_coordinates(neighboring_atoms_coordinates)
-        equidistant_coordinate[2] = adatom_coordinate[2]
+
+        new_supercell_basis = supercell_material.basis.copy()
+        new_supercell_basis.coordinates.filter_by_ids(supercell_neighboring_atoms_ids)
+        neighboring_atoms_coordinates = new_supercell_basis.coordinates.values
+        supercell_equidistant_coordinate = get_center_of_coordinates(neighboring_atoms_coordinates)
+        supercell_equidistant_coordinate[2] = adatom_coordinate[2]
+
+        equidistant_coordinate = [
+            (supercell_equidistant_coordinate[0] - 1 / 3) * 3,
+            (supercell_equidistant_coordinate[1] - 1 / 3) * 3,
+            supercell_equidistant_coordinate[2],
+        ]
 
         return equidistant_coordinate
 
