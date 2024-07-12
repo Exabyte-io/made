@@ -73,3 +73,21 @@ class AdatomSlabDefectConfiguration(SlabDefectConfiguration):
             "distance_z": self.distance_z,
             "chemical_element": self.chemical_element,
         }
+
+
+class IslandSlabDefectConfiguration(SlabDefectConfiguration):
+    defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ISLAND
+    position_on_surface: List[float] = [0.5, 0.5]
+    radius: float = 0.25
+    thickness: int = 1
+
+    @property
+    def _json(self):
+        return {
+            "type": "IslandSlabDefectConfiguration",
+            "crystal": self.crystal.to_json(),
+            "defect_type": self.defect_type.name,
+            "position_on_surface": self.position_on_surface,
+            "radius": self.radius,
+            "thickness": self.thickness,
+        }
