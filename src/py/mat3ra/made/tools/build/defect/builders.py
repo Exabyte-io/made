@@ -307,7 +307,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
         )
 
-        return [self.merge_material_with_adatom(new_material, only_adatom_material)]
+        return [self.merge_slab_and_defect(new_material, only_adatom_material)]
 
 
 class IslandSlabDefectBuilder(SlabDefectBuilder):
@@ -328,11 +328,9 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         """
 
         new_material = material.clone()
-        new_basis = new_material.basis.copy()
-        new_basis.to_cartesian()
-        new_material.basis = new_basis
+        new_material.to_cartesian()
         original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
-        material_with_additional_layers = self._create_material_with_additional_layers(new_material, thickness)
+        material_with_additional_layers = self.create_material_with_additional_layers(new_material, thickness)
         added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
 
         # Get the atoms within the sphere
@@ -352,11 +350,4 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
             use_cartesian_coordinates=True,
         )
 
-        # Merge the island material with the atoms within the sphere
-        material_with_island = merge_materials(
-            materials=[new_material, island_material],
-            material_name=material.name,
-            merge_dangerously=True,
-        )
-
-        return [material_with_island]
+        return [self.merge_slab_and_defect(material_with_additional_layers, island_material)]
