@@ -39,11 +39,13 @@ class SlabConfiguration(BaseModel, InMemoryEntity):
         miller_indices=miller_indices,
         thickness=thickness,
         vacuum=vacuum,
-        xy_supercell_matrix=xy_supercell_matrix,
+        xy_supercell_matrix=None,
         use_conventional_cell=use_conventional_cell,
         use_orthogonal_z=use_orthogonal_z,
         make_primitive=make_primitive,
     ):
+        if xy_supercell_matrix is None:
+            xy_supercell_matrix = [[1, 0], [0, 1]]
         bulk = bulk or Material(Material.default_config)
         __bulk_pymatgen_structure = (
             PymatgenSpacegroupAnalyzer(to_pymatgen(bulk)).get_conventional_standard_structure()
