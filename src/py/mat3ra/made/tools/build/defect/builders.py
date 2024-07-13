@@ -224,9 +224,8 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
 
-        isolated_neighboring_atoms_basis = supercell_material.basis.coordinates.filter_by_ids(
-            neighboring_atoms_ids_in_supercell
-        )
+        isolated_neighboring_atoms_basis = supercell_material.basis.copy()
+        isolated_neighboring_atoms_basis.coordinates.filter_by_ids(neighboring_atoms_ids_in_supercell)
         equidistant_coordinate_in_supercell = get_center_of_coordinates(
             isolated_neighboring_atoms_basis.coordinates.values
         )
