@@ -37,7 +37,7 @@ class DefectBuilder(BaseBuilder):
         raise NotImplementedError
 
 
-class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
+class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuilder):
     """
     Builder class for generating point defects.
     """
