@@ -19,8 +19,8 @@ from ...convert import to_pymatgen
 from ...analyze import (
     get_nearest_neighbors_atom_indices,
     get_atomic_coordinates_extremum,
-    get_closest_site_id_from_position,
-    get_closest_site_id_from_position_and_element,
+    get_closest_site_id_from_coordinate,
+    get_closest_site_id_from_coordinate_and_element,
 )
 from ...utils import convert_to_coordinate_in_central_cell_of_3x3x3, convert_from_coordinate_in_central_cell_of_3x3x3
 from ....utils import get_center_of_coordinates
@@ -52,7 +52,7 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
         pymatgen_structure = to_pymatgen(configuration.crystal)
         pymatgen_periodic_site = PymatgenPeriodicSite(
             species=self._get_species(configuration),
-            coords=configuration.position,
+            coords=configuration.coordinate,
             lattice=pymatgen_structure.lattice,
         )
         defect = self._generator(pymatgen_structure, pymatgen_periodic_site)
@@ -248,19 +248,17 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
 
     def create_isolated_defect(
         self,
-        material_with_additional_layer: Material,
+        material: Material,
         approximate_adatom_coordinate_cartesian: List[float],
         chemical_element: Optional[str] = None,
     ) -> Material:
         if chemical_element is None:
-            closest_site_id = get_closest_site_id_from_position(
-                material_with_additional_layer, approximate_adatom_coordinate_cartesian
-            )
+            closest_site_id = get_closest_site_id_from_coordinate(material, approximate_adatom_coordinate_cartesian)
         else:
-            closest_site_id = get_closest_site_id_from_position_and_element(
-                material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
+            closest_site_id = get_closest_site_id_from_coordinate_and_element(
+                material, approximate_adatom_coordinate_cartesian, chemical_element
             )
-        only_adatom_material = filter_material_by_ids(material_with_additional_layer, [closest_site_id])
+        only_adatom_material = filter_material_by_ids(material, [closest_site_id])
         return only_adatom_material
 
     def create_adatom(

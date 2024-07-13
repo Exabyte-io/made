@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 
-from ...analyze import get_closest_site_id_from_position
+from ...analyze import get_closest_site_id_from_coordinate
 from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
 
 
@@ -15,7 +15,7 @@ class BaseDefectConfiguration(BaseModel):
 
 class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     defect_type: PointDefectTypeEnum
-    position: List[float] = [0, 0, 0]  # fractional coordinates
+    coordinate: List[float] = [0, 0, 0]  # fractional coordinates
     chemical_element: Optional[str] = None
 
     @classmethod
@@ -24,20 +24,20 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     ):
         if not crystal:
             raise RuntimeError("Crystal is not defined")
-        position = crystal.coordinates_array[site_id]
-        return cls(crystal=crystal, defect_type=defect_type, position=position, chemical_element=chemical_element)
+        coordinate = crystal.coordinates_array[site_id]
+        return cls(crystal=crystal, defect_type=defect_type, position=coordinate, chemical_element=chemical_element)
 
     @classmethod
     def from_approximate_position(
         cls,
         crystal: Material,
         defect_type: PointDefectTypeEnum,
-        approximate_position: List[float],
+        approximate_coordinate: List[float],
         chemical_element: Optional[str] = None,
     ):
         if not crystal:
             raise RuntimeError("Crystal is not defined")
-        closest_site_id = get_closest_site_id_from_position(crystal, approximate_position)
+        closest_site_id = get_closest_site_id_from_coordinate(crystal, approximate_coordinate)
         return cls.from_site_id(
             crystal=crystal, defect_type=defect_type, site_id=closest_site_id, chemical_element=chemical_element
         )
@@ -48,7 +48,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
             "type": "PointDefectConfiguration",
             "crystal": self.crystal.to_json(),
             "defect_type": self.defect_type.name,
-            "position": self.position,
+            "coordinate": self.coordinate,
             "chemical_element": self.chemical_element,
         }
 
