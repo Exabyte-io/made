@@ -25,7 +25,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         if not crystal:
             raise RuntimeError("Crystal is not defined")
         coordinate = crystal.coordinates_array[site_id]
-        return cls(crystal=crystal, defect_type=defect_type, position=coordinate, chemical_element=chemical_element)
+        return cls(crystal=crystal, defect_type=defect_type, coordinate=coordinate, chemical_element=chemical_element)
 
     @classmethod
     def from_approximate_position(
