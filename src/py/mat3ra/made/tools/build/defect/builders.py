@@ -32,6 +32,11 @@ class PointDefectBuilderParameters(BaseModel):
     center_defect: bool = False
 
 
+class DefectBuilder(BaseBuilder):
+    def create_isolated_defect(self, material: Material, defect_configuration: PointDefectConfiguration) -> Material:
+        raise NotImplementedError
+
+
 class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     """
     Builder class for generating point defects.
@@ -86,7 +91,7 @@ class SlabDefectBuilderParameters(BaseModel):
     vacuum_thickness: float = 5.0
 
 
-class SlabDefectBuilder(BaseBuilder):
+class SlabDefectBuilder(DefectBuilder):
     _BuildParametersType = SlabDefectBuilderParameters
     _DefaultBuildParameters = SlabDefectBuilderParameters()
 
