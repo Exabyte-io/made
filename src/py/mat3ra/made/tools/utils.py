@@ -1,10 +1,13 @@
 from functools import wraps
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 import numpy as np
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 
 from .third_party import PymatgenStructure
+
+DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
+DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
 
 
 # TODO: convert to accept ASE Atoms object
@@ -180,29 +183,35 @@ def is_coordinate_in_triangular_prism(
     return (u >= 0) and (v >= 0) and (w >= 0) and (u + v + w <= 1) and (min_z <= coordinate[2] <= max_z)
 
 
-def convert_to_coordinate_in_central_cell_of_3x3x3(coordinate: List[float]) -> List[float]:
+def transform_coordinate_to_supercell(
+    coordinate: List[float],
+    scaling_factor: Optional[List[int]] = None,
+    translation_vector: Optional[List[float]] = None,
+    reverse: bool = False,
+) -> List[float]:
     """
-    Convert a coordinate of unit cell to the central cell of a 3x3x3 supercell.
+    Convert a crystal coordinate of unit cell to a coordinate in a supercell.
     Args:
         coordinate (List[float]): The coordinates to convert.
+        scaling_factor (List[int]): The scaling factor for the supercell.
+        translation_vector (List[float]): The translation vector for the supercell.
+        reverse (bool): Whether to convert in the reverse transformation.
 
     Returns:
         List[float]: The converted coordinates.
     """
-    coord_array = np.array(coordinate)
-    converted_array = coord_array / 3 + 1 / 3
-    return converted_array.tolist()
+    if scaling_factor is None:
+        np_scaling_factor = np.array([3, 3, 3])
+    else:
+        np_scaling_factor = np.array(scaling_factor)
 
+    if translation_vector is None:
+        np_translation_vector = np.array([0, 0, 0])
+    else:
+        np_translation_vector = np.array(translation_vector)
 
-def convert_from_coordinate_in_central_cell_of_3x3x3(coordinate: List[float]) -> List[float]:
-    """
-    Convert a coordinate from the central cell of a 3x3x3 supercell to the original unit cell.
-    Args:
-        coordinate (List[float]): The coordinates to convert.
-
-    Returns:
-        List[float]: The converted coordinates.
-    """
-    coord_array = np.array(coordinate)
-    converted_array = (coord_array - 1 / 3) * 3
+    np_coordinate = np.array(coordinate)
+    converted_array = np_coordinate * (1 / np_scaling_factor) + np_translation_vector
+    if reverse:
+        converted_array = (np_coordinate - np_translation_vector) * np_scaling_factor
     return converted_array.tolist()

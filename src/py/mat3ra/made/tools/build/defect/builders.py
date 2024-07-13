@@ -22,7 +22,7 @@ from ...analyze import (
     get_closest_site_id_from_coordinate,
     get_closest_site_id_from_coordinate_and_element,
 )
-from ...utils import convert_to_coordinate_in_central_cell_of_3x3x3, convert_from_coordinate_in_central_cell_of_3x3x3
+from ...utils import transform_coordinate_to_supercell
 from ....utils import get_center_of_coordinates
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
@@ -218,10 +218,13 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
             material, position_on_surface, distance_z
         )
-
         # We need to find the neighboring atoms with pbc by looking at the central unit cell in 3x3x3 supercell
-        supercell_material = create_supercell(material, [[3, 0, 0], [0, 3, 0], [0, 0, 3]])
-        adatom_coordinate_in_supercell = convert_to_coordinate_in_central_cell_of_3x3x3(adatom_coordinate)
+        scaling_factor = [3, 3, 1]
+        translation_vector = [1 / 3, 1 / 3, 0]
+        supercell_material = create_supercell(material, scaling_factor=scaling_factor)
+        adatom_coordinate_in_supercell = transform_coordinate_to_supercell(
+            coordinate=adatom_coordinate, scaling_factor=scaling_factor, translation_vector=translation_vector
+        )
 
         neighboring_atoms_ids_in_supercell = get_nearest_neighbors_atom_indices(
             supercell_material, adatom_coordinate_in_supercell
@@ -236,7 +239,9 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         )
         equidistant_coordinate_in_supercell[2] = adatom_coordinate[2]
 
-        return convert_from_coordinate_in_central_cell_of_3x3x3(equidistant_coordinate_in_supercell)
+        return transform_coordinate_to_supercell(
+            equidistant_coordinate_in_supercell, scaling_factor, translation_vector, reverse=True
+        )
 
 
 class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
