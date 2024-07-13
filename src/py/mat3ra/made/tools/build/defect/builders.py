@@ -22,6 +22,7 @@ from ...analyze import (
     get_closest_site_id_from_position,
     get_closest_site_id_from_position_and_element,
 )
+from ...utils import convert_to_coordinate_in_central_cell_of_3x3x3, convert_from_coordinate_in_central_cell_of_3x3x3
 from ....utils import get_center_of_coordinates
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
@@ -213,34 +214,25 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             material, position_on_surface, distance_z
         )
 
-        # We need to find the neighboring atoms with pbc.
-        supercell_material = create_supercell(material, [[3, 0, 0], [0, 3, 0], [0, 0, 1]])
-        # Move the coordinate to the central unit cell of the supercell (crystal coordinates)
-        supercell_adatom_coordinate = [
-            1 / 3 + adatom_coordinate[0] / 3,
-            1 / 3 + adatom_coordinate[1] / 3,
-            adatom_coordinate[2],
-        ]
-        supercell_neighboring_atoms_ids = get_nearest_neighbors_atom_indices(
-            supercell_material, supercell_adatom_coordinate
-        )
+        # We need to find the neighboring atoms with pbc by looking at the central unit cell in 3x3x3 supercell
+        supercell_material = create_supercell(material, [[3, 0, 0], [0, 3, 0], [0, 0, 3]])
+        adatom_coordinate_in_supercell = convert_to_coordinate_in_central_cell_of_3x3x3(adatom_coordinate)
 
-        if supercell_neighboring_atoms_ids is None:
+        neighboring_atoms_ids_in_supercell = get_nearest_neighbors_atom_indices(
+            supercell_material, adatom_coordinate_in_supercell
+        )
+        if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
 
-        new_supercell_basis = supercell_material.basis.copy()
-        new_supercell_basis.coordinates.filter_by_ids(supercell_neighboring_atoms_ids)
-        neighboring_atoms_coordinates = new_supercell_basis.coordinates.values
-        supercell_equidistant_coordinate = get_center_of_coordinates(neighboring_atoms_coordinates)
-        supercell_equidistant_coordinate[2] = adatom_coordinate[2]
+        isolated_neighboring_atoms_basis = supercell_material.basis.coordinates.filter_by_ids(
+            neighboring_atoms_ids_in_supercell
+        )
+        equidistant_coordinate_in_supercell = get_center_of_coordinates(
+            isolated_neighboring_atoms_basis.coordinates.values
+        )
+        equidistant_coordinate_in_supercell[2] = adatom_coordinate[2]
 
-        equidistant_coordinate = [
-            (supercell_equidistant_coordinate[0] - 1 / 3) * 3,
-            (supercell_equidistant_coordinate[1] - 1 / 3) * 3,
-            supercell_equidistant_coordinate[2],
-        ]
-
-        return equidistant_coordinate
+        return convert_from_coordinate_in_central_cell_of_3x3x3(equidistant_coordinate_in_supercell)
 
 
 class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):

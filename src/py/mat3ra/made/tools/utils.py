@@ -178,3 +178,31 @@ def is_coordinate_in_triangular_prism(
     u = 1.0 - v - w
 
     return (u >= 0) and (v >= 0) and (w >= 0) and (u + v + w <= 1) and (min_z <= coordinate[2] <= max_z)
+
+
+def convert_to_coordinate_in_central_cell_of_3x3x3(coordinate: List[float]) -> List[float]:
+    """
+    Convert a coordinate of unit cell to the central cell of a 3x3x3 supercell.
+    Args:
+        coordinate (List[float]): The coordinates to convert.
+
+    Returns:
+        List[float]: The converted coordinates.
+    """
+    coord_array = np.array(coordinate)
+    converted_array = coord_array / 3 + 1 / 3
+    return converted_array.tolist()
+
+
+def convert_from_coordinate_in_central_cell_of_3x3x3(coordinate: List[float]) -> List[float]:
+    """
+    Convert a coordinate from the central cell of a 3x3x3 supercell to the original unit cell.
+    Args:
+        coordinate (List[float]): The coordinates to convert.
+
+    Returns:
+        List[float]: The converted coordinates.
+    """
+    coord_array = np.array(coordinate)
+    converted_array = (coord_array - 1 / 3) * 3
+    return converted_array.tolist()
