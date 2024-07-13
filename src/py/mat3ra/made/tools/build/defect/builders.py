@@ -319,7 +319,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
 
         Args:
             material: The material to add the island to.
-            position_on_surface: The position on the surface of the material.
+            position_on_surface: The position on the surface of the material in crystal coordinates.
             radius: The radius of the island.
             thickness: The thickness of the island in atomic layers.
 
