@@ -97,10 +97,11 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
 
 
 class IslandSlabDefectConfiguration(SlabDefectConfiguration):
+    def _default_condition(coordinate: List[float]) -> bool:
+        return is_coordinate_in_cylinder(coordinate, [0.5, 0.5], radius=0.25)
+
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ISLAND
-    condition: Optional[Callable[[List[float]], bool]] = lambda coordinate: is_coordinate_in_cylinder(
-        coordinate, [0.5, 0.5], radius=0.25
-    )
+    condition: Optional[Callable[[List[float]], bool]] = _default_condition
     thickness: int = 1
 
     @property

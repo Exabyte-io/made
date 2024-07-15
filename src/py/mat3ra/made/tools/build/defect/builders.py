@@ -26,7 +26,7 @@ from ...analyze import (
     get_closest_site_id_from_coordinate_and_element,
 )
 from ....utils import get_center_of_coordinates
-from ...utils import transform_coordinate_to_supercell, is_coordinate_in_cylinder
+from ...utils import transform_coordinate_to_supercell
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
@@ -344,7 +344,9 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
 
         if condition is None:
-            condition = lambda coordinate: True
+
+            def condition(coordinate: List[float]):
+                return True
 
         atoms_within_island = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
