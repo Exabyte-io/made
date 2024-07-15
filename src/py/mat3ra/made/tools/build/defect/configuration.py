@@ -5,7 +5,7 @@ from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
-from .enums import PointDefectTypeEnum
+from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
