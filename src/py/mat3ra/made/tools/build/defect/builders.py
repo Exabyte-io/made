@@ -1,10 +1,7 @@
 from typing import List, Callable, Optional
 
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.modify import add_vacuum
 from pydantic import BaseModel
 from mat3ra.made.material import Material
-
 
 from ...third_party import (
     PymatgenStructure,
@@ -13,19 +10,35 @@ from ...third_party import (
     PymatgenSubstitution,
     PymatgenInterstitial,
 )
+
+from ...modify import add_vacuum, filter_material_by_ids
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
-from ...analyze import get_nearest_neighbors_atom_indices, get_atomic_coordinates_extremum
+from ...analyze import (
+    get_nearest_neighbors_atom_indices,
+    get_atomic_coordinates_extremum,
+    get_closest_site_id_from_coordinate,
+    get_closest_site_id_from_coordinate_and_element,
+)
 from ....utils import get_center_of_coordinates
+from ...utils import transform_coordinate_to_supercell
+from ..utils import merge_materials
+from ..slab import SlabConfiguration, create_slab, Termination
+from ..supercell import create_supercell
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
+from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration
 
 
 class PointDefectBuilderParameters(BaseModel):
     center_defect: bool = False
 
 
-class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
+class DefectBuilder(BaseBuilder):
+    def create_isolated_defect(self, material: Material, defect_configuration: PointDefectConfiguration) -> Material:
+        raise NotImplementedError
+
+
+class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuilder):
     """
     Builder class for generating point defects.
     """
@@ -45,7 +58,7 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilde
         pymatgen_structure = to_pymatgen(configuration.crystal)
         pymatgen_periodic_site = PymatgenPeriodicSite(
             species=self._get_species(configuration),
-            coords=configuration.position,
+            coords=configuration.coordinate,
             lattice=pymatgen_structure.lattice,
         )
         defect = self._generator(pymatgen_structure, pymatgen_periodic_site)
@@ -79,13 +92,37 @@ class SlabDefectBuilderParameters(BaseModel):
     vacuum_thickness: float = 5.0
 
 
-class SlabDefectBuilder(BaseBuilder):
+class SlabDefectBuilder(DefectBuilder):
     _BuildParametersType = SlabDefectBuilderParameters
     _DefaultBuildParameters = SlabDefectBuilderParameters()
 
+    def create_material_with_additional_layers(self, material: Material, added_thickness: int = 1) -> Material:
+        new_material = material.clone()
+        termination = Termination.from_string(new_material.metadata.get("build").get("termination"))
+        build_config = new_material.metadata.get("build").get("configuration")
+        if build_config["type"] != "SlabConfiguration":
+            raise ValueError("Material is not a slab.")
+        build_config.pop("type")
+        build_config["thickness"] = build_config["thickness"] + added_thickness
+        new_slab_config = SlabConfiguration(**build_config)
+        material_with_additional_layer = create_slab(new_slab_config, termination)
+
+        return material_with_additional_layer
+
+    def merge_slab_and_defect(self, material: Material, isolated_defect: Material) -> Material:
+        new_vacuum = isolated_defect.lattice.c - material.lattice.c
+        new_material = add_vacuum(material, new_vacuum)
+        new_material.to_cartesian()
+        new_material = merge_materials(
+            materials=[isolated_defect, new_material],
+            material_name=material.name,
+            merge_dangerously=True,
+        )
+        return new_material
+
 
 class AdatomSlabDefectBuilder(SlabDefectBuilder):
-    _ConfigurationType: type(AdatomSlabDefectConfiguration) = AdatomSlabDefectConfiguration  # type: ignore
+    _ConfigurationType: type(AdatomSlabPointDefectConfiguration) = AdatomSlabPointDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
     def create_adatom(
@@ -111,21 +148,27 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
             position_on_surface = [0.5, 0.5]
         new_material = material.clone()
         new_basis = new_material.basis
-        adatom_position = self._calculate_position_from_2d(material, position_on_surface, distance_z)
-        new_basis.add_atom(chemical_element, adatom_position)
+        adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
+            material, position_on_surface, distance_z
+        )
+        new_basis.add_atom(chemical_element, adatom_coordinate)
         new_material.basis = new_basis
         return [new_material]
 
-    def _calculate_position_from_2d(
+    def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
         max_z = get_atomic_coordinates_extremum(material)
         distance_z = distance_z
         distance_in_crystal_units = distance_z / material.lattice.c
-        position = position_on_surface.copy()
-        position = position[:2]
-        position.append(max_z + distance_in_crystal_units)
-        return position
+        return [position_on_surface[0], position_on_surface[1], max_z + distance_in_crystal_units]
+
+    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
+        updated_material = super()._update_material_name(material, configuration)
+        adatom_element = configuration.chemical_element
+        new_name = f"{updated_material.name}, Adatom {adatom_element} Defect"
+        updated_material.name = new_name
+        return updated_material
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return self.create_adatom(
@@ -173,23 +216,95 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
     def get_equidistant_position(
         self, material: Material, position_on_surface: List[float], distance_z: float = 2.0
     ) -> List[float]:
-        new_basis = material.basis
-        adatom_position = self._calculate_position_from_2d(material, position_on_surface, distance_z)
-        neighboring_atoms_ids = get_nearest_neighbors_atom_indices(material, adatom_position)
-        # We need to check if neighboring atoms number is the same in pbc
-        supercell_material = create_supercell(material, [[3, 0, 0], [0, 3, 0], [0, 0, 1]])
-        # Move the coordinate to the central unit cell of the supercell (crystal coordinates)
-        supercell_adatom_position = [1 / 3 + adatom_position[0] / 3, 1 / 3 + adatom_position[1] / 3, adatom_position[2]]
-        supercell_neighboring_atoms_ids = get_nearest_neighbors_atom_indices(
-            supercell_material, supercell_adatom_position
+        adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
+            material, position_on_surface, distance_z
         )
-        if neighboring_atoms_ids is None or supercell_neighboring_atoms_ids is None:
+        # We need to find the neighboring atoms with pbc by looking at the central unit cell in 3x3x3 supercell
+        scaling_factor = [3, 3, 1]
+        translation_vector = [1 / 3, 1 / 3, 0]
+        supercell_material = create_supercell(material, scaling_factor=scaling_factor)
+        adatom_coordinate_in_supercell = transform_coordinate_to_supercell(
+            coordinate=adatom_coordinate, scaling_factor=scaling_factor, translation_vector=translation_vector
+        )
+
+        neighboring_atoms_ids_in_supercell = get_nearest_neighbors_atom_indices(
+            supercell_material, adatom_coordinate_in_supercell
+        )
+        if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
-        if len(supercell_neighboring_atoms_ids) != len(neighboring_atoms_ids):
-            raise ValueError("Number of neighboring atoms is not the same in PBC. Try increasing the supercell size.")
-        neighboring_atoms_coordinates = [new_basis.coordinates.values[atom_id] for atom_id in neighboring_atoms_ids]
 
-        equidistant_position = get_center_of_coordinates(neighboring_atoms_coordinates)
-        equidistant_position[2] = adatom_position[2]
+        isolated_neighboring_atoms_basis = supercell_material.basis.copy()
+        isolated_neighboring_atoms_basis.coordinates.filter_by_ids(neighboring_atoms_ids_in_supercell)
+        equidistant_coordinate_in_supercell = get_center_of_coordinates(
+            isolated_neighboring_atoms_basis.coordinates.values
+        )
+        equidistant_coordinate_in_supercell[2] = adatom_coordinate[2]
 
-        return equidistant_position
+        return transform_coordinate_to_supercell(
+            equidistant_coordinate_in_supercell, scaling_factor, translation_vector, reverse=True
+        )
+
+
+class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
+    def calculate_approximate_adatom_coordinate(
+        self, material: Material, position_on_surface: List[float], distance_z: float
+    ) -> List[float]:
+        approximate_adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
+            material, position_on_surface, distance_z
+        )
+        approximate_adatom_coordinate_cartesian = material.basis.cell.convert_point_to_cartesian(
+            approximate_adatom_coordinate
+        )
+        return approximate_adatom_coordinate_cartesian
+
+    def create_isolated_defect(
+        self,
+        material: Material,
+        approximate_adatom_coordinate_cartesian: List[float],
+        chemical_element: Optional[str] = None,
+    ) -> Material:
+        if chemical_element is None:
+            closest_site_id = get_closest_site_id_from_coordinate(material, approximate_adatom_coordinate_cartesian)
+        else:
+            closest_site_id = get_closest_site_id_from_coordinate_and_element(
+                material, approximate_adatom_coordinate_cartesian, chemical_element
+            )
+        only_adatom_material = filter_material_by_ids(material, [closest_site_id])
+        return only_adatom_material
+
+    def create_adatom(
+        self,
+        material: Material,
+        chemical_element: Optional[str] = None,
+        position_on_surface: Optional[List[float]] = None,
+        distance_z: float = 0,
+    ) -> List[Material]:
+        """
+        Create an adatom at the crystal site closest to the specified position on the surface of the material.
+
+        Args:
+            material: The material to add the adatom to.
+            chemical_element: The chemical element of the adatom.
+            position_on_surface: The position on the surface of the material.
+            distance_z: The distance of the adatom from the surface.
+
+        Returns:
+            The material with the adatom added.
+        """
+        if position_on_surface is None:
+            position_on_surface = [0.5, 0.5]
+
+        new_material = material.clone()
+
+        approximate_adatom_coordinate_cartesian = self.calculate_approximate_adatom_coordinate(
+            new_material, position_on_surface, distance_z
+        )
+
+        material_with_additional_layer = self.create_material_with_additional_layers(new_material)
+        material_with_additional_layer.to_cartesian()
+
+        only_adatom_material = self.create_isolated_defect(
+            material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
+        )
+
+        return [self.merge_slab_and_defect(new_material, only_adatom_material)]

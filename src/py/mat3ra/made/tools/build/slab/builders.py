@@ -31,6 +31,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             min_vacuum_size=configuration.vacuum,
             in_unit_planes=True,
             reorient_lattice=True,
+            primitive=configuration.make_primitive,
         )
         raw_slabs = generator.get_slabs()
         self.__configuration = configuration
@@ -47,7 +48,9 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         materials = super()._post_process(items, post_process_parameters)
         materials = [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
         for idx, material in enumerate(materials):
-            material.metadata["termination"] = label_pymatgen_slab_termination(items[idx])
+            if "build" not in material.metadata:
+                material.metadata["build"] = {}
+            material.metadata["build"]["termination"] = label_pymatgen_slab_termination(items[idx])
 
         return materials
 
@@ -66,7 +69,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
         formula = get_chemical_formula(configuration.bulk)
         miller_indices = "".join([str(i) for i in configuration.miller_indices])
-        termination = material.metadata["termination"]
+        termination = material.metadata.get("build").get("termination", "")
         # for example: "Si8(001), termination Si_P4/mmm_1, Slab"
         new_name = f"{formula}({miller_indices}), termination {termination}, Slab"
         material.name = new_name
