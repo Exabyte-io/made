@@ -320,7 +320,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
     def create_island(
         self,
         material: Material,
-        condition: Callable[[List[float]], bool] = is_coordinate_in_cylinder,
+        condition: Optional[Callable[[List[float]], bool]] = None,
         thickness: int = 1,
         use_cartesian_coordinates: bool = False,
     ) -> List[Material]:
@@ -342,12 +342,14 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         material_with_additional_layers = self.create_material_with_additional_layers(new_material, thickness)
         added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
 
-        def _condition(coordinate):
+        def condition_on_atoms(coordinate):
+            if condition is None:
+                return lambda coordinate: is_coordinate_in_cylinder(coordinate, [0.5, 0.5])
             return condition(coordinate)
 
         atoms_within_island = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
-            condition=_condition,
+            condition=condition_on_atoms,
             use_cartesian_coordinates=use_cartesian_coordinates,
         )
         atoms_within_island.to_cartesian()
