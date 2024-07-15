@@ -1,4 +1,4 @@
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Callable
 from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
@@ -6,6 +6,7 @@ from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
+from ...utils import is_coordinate_in_cylinder
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -97,8 +98,9 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
 
 class IslandSlabDefectConfiguration(SlabDefectConfiguration):
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ISLAND
-    position_on_surface: List[float] = [0.5, 0.5]
-    radius: float = 0.25
+    condition: Optional[Callable[[List[float]], bool]] = lambda coordinate: is_coordinate_in_cylinder(
+        coordinate, [0.5, 0.5], radius=0.25
+    )
     thickness: int = 1
 
     @property
@@ -107,7 +109,6 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
             "type": "IslandSlabDefectConfiguration",
             "crystal": self.crystal.to_json(),
             "defect_type": self.defect_type.name,
-            "position_on_surface": self.position_on_surface,
-            "radius": self.radius,
+            "condition": self.condition,
             "thickness": self.thickness,
         }

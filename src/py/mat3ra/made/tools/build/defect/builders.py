@@ -31,7 +31,7 @@ from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration
+from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration, IslandSlabDefectConfiguration
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -316,6 +316,9 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
 
 
 class IslandSlabDefectBuilder(SlabDefectBuilder):
+    _ConfigurationType: type(IslandSlabDefectConfiguration) = IslandSlabDefectConfiguration  # type: ignore
+    _GeneratedItemType: Material = Material
+
     def create_island(
         self,
         material: Material,
@@ -336,28 +339,32 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         """
 
         new_material = material.clone()
-        new_material.to_cartesian()
-        original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
+        original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=False)
         material_with_additional_layers = self.create_material_with_additional_layers(new_material, thickness)
         added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
 
-        def condition_on_atoms(coordinate):
-            if condition is None:
-                return lambda coordinate: is_coordinate_in_cylinder(coordinate, [0.5, 0.5])
-            return condition(coordinate)
+        if condition is None:
+            condition = lambda coordinate: True
 
         atoms_within_island = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
-            condition=condition_on_atoms,
+            condition=condition,
             use_cartesian_coordinates=use_cartesian_coordinates,
         )
-        atoms_within_island.to_cartesian()
+
         # Filter atoms in the added layers
         island_material = filter_by_box(
             material=atoms_within_island,
             min_coordinate=[0, 0, original_max_z],
             max_coordinate=[1, 1, added_layers_max_z],
-            use_cartesian_coordinates=True,
         )
 
-        return [self.merge_slab_and_defect(material_with_additional_layers, island_material)]
+        return [self.merge_slab_and_defect(island_material, new_material)]
+
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        return self.create_island(
+            material=configuration.crystal,
+            condition=configuration.condition,
+            thickness=configuration.thickness,
+            use_cartesian_coordinates=configuration.use_cartesian_coordinates,
+        )
