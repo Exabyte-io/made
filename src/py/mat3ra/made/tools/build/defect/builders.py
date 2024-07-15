@@ -15,7 +15,6 @@ from ...modify import (
     add_vacuum,
     filter_material_by_ids,
     filter_by_box,
-    filter_by_sphere,
     filter_by_condition_on_coordinates,
 )
 from ...build import BaseBuilder

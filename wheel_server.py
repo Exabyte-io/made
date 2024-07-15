@@ -1,8 +1,8 @@
+import argparse
+import glob
 import os
 import socket
-import argparse
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-import glob
 
 
 class CORSHTTPRequestHandler(SimpleHTTPRequestHandler):
