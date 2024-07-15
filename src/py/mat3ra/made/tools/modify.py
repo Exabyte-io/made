@@ -204,7 +204,7 @@ def filter_by_sphere(
     ids = get_atom_indices_within_radius_pbc(
         material=material,
         atom_index=central_atom_id,
-        position=center_coordinate,
+        coordinate=center_coordinate,
         radius=radius,
     )
     return filter_material_by_ids(material, ids, invert=invert)

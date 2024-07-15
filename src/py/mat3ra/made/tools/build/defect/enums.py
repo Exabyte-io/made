@@ -5,8 +5,5 @@ class PointDefectTypeEnum(str, Enum):
     VACANCY = "vacancy"
     SUBSTITUTION = "substitution"
     INTERSTITIAL = "interstitial"
-
-
-class SlabDefectTypeEnum(str, Enum):
     ADATOM = "adatom"
     ISLAND = "island"

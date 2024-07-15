@@ -74,40 +74,40 @@ def get_chemical_formula(atoms: ASEAtoms):
     return atoms.get_chemical_formula()
 
 
-def get_closest_site_id_from_position(material: Material, position: List[float]) -> int:
+def get_closest_site_id_from_coordinate(material: Material, coordinate: List[float]) -> int:
     """
-    Get the site ID of the closest site to a given position in the crystal.
+    Get the site ID of the closest site to a given coordinate in the crystal.
 
     Args:
         material (Material): The material object to find the closest site in.
-        position (List[float]): The position to find the closest site to.
+        coordinate (List[float]): The coordinate to find the closest site to.
 
     Returns:
         int: The site ID of the closest site.
     """
     coordinates = np.array(material.coordinates_array)
-    position = np.array(position)  # type: ignore
-    distances = np.linalg.norm(coordinates - position, axis=1)
+    coordinate = np.array(coordinate)  # type: ignore
+    distances = np.linalg.norm(coordinates - coordinate, axis=1)
     return int(np.argmin(distances))
 
 
-def get_closest_site_id_from_position_and_element(
-    material: Material, position: List[float], chemical_element: Optional[str] = None
+def get_closest_site_id_from_coordinate_and_element(
+    material: Material, coordinate: List[float], chemical_element: Optional[str] = None
 ) -> int:
     """
-    Get the site ID of the closest site with a given element to a given position in the crystal.
+    Get the site ID of the closest site with a given element to a given coordinate in the crystal.
 
     Args:
         material (Material): The material object to find the closest site in.
-        position (List[float]): The position to find the closest site to.
+        coordinate (List[float]): The coordinate to find the closest site to.
         chemical_element (str): The element of the site to find.
 
     Returns:
         int: The site ID of the closest site with the given element.
     """
     coordinates = np.array(material.basis.coordinates.values)
-    position = np.array(position)  # type: ignore
-    distances = np.linalg.norm(coordinates - position, axis=1)
+    coordinate = np.array(coordinate)  # type: ignore
+    distances = np.linalg.norm(coordinates - coordinate, axis=1)
 
     if chemical_element is not None:
         elements = np.array(material.basis.elements.values)
@@ -139,8 +139,8 @@ def get_atom_indices_within_layer_by_atom_index(material: Material, atom_index: 
     # Normalize the direction vector
     direction_length = np.linalg.norm(direction_vector)
     direction_norm = direction_vector / direction_length
-    central_atom_position = coordinates[atom_index]
-    central_atom_projection = np.dot(central_atom_position.value, direction_norm)
+    central_atom_coordinate = coordinates[atom_index]
+    central_atom_projection = np.dot(central_atom_coordinate.value, direction_norm)
 
     layer_thickness_frac = layer_thickness / direction_length
 
@@ -149,14 +149,16 @@ def get_atom_indices_within_layer_by_atom_index(material: Material, atom_index: 
 
     selected_indices = []
     for coord in coordinates:
-        # Project each position onto the direction vector
+        # Project each coordinate onto the direction vector
         projection = np.dot(coord.value, direction_norm)
         if lower_bound <= projection <= upper_bound:
             selected_indices.append(coord.id)
     return selected_indices
 
 
-def get_atom_indices_within_layer_by_atom_position(material: Material, position: List[float], layer_thickness: float):
+def get_atom_indices_within_layer_by_atom_coordinate(
+    material: Material, coordinate: List[float], layer_thickness: float
+):
     """
     Select all atoms within a specified layer thickness of a central atom along a direction.
     This direction will be orthogonal to the AB plane.
@@ -164,20 +166,20 @@ def get_atom_indices_within_layer_by_atom_position(material: Material, position:
 
     Args:
         material (Material): Material object
-        position (List[float]): Position of the central atom in crystal coordinates
+        coordinate (List[float]): Coordinate of the central atom in crystal coordinates
         layer_thickness (float): Thickness of the layer in angstroms
 
     Returns:
         List[int]: List of indices of atoms within the specified layer
     """
-    site_id = get_closest_site_id_from_position(material, position)
+    site_id = get_closest_site_id_from_coordinate(material, coordinate)
     return get_atom_indices_within_layer_by_atom_index(material, site_id, layer_thickness)
 
 
 def get_atom_indices_within_layer(
     material: Material,
     atom_index: Optional[int] = 0,
-    position: Optional[List[float]] = None,
+    coordinate: Optional[List[float]] = None,
     layer_thickness: float = 1,
 ):
     """
@@ -186,20 +188,20 @@ def get_atom_indices_within_layer(
     Args:
         material (Material): Material object
         atom_index (int): Index of the central atom
-        position (List[float]): Position of the central atom in crystal coordinates
+        coordinate (List[float]): Coordinate of the central atom in crystal coordinates
         layer_thickness (float): Thickness of the layer in angstroms
 
     Returns:
         List[int]: List of indices of atoms within the specified layer
     """
-    if position is not None:
-        return get_atom_indices_within_layer_by_atom_position(material, position, layer_thickness)
+    if coordinate is not None:
+        return get_atom_indices_within_layer_by_atom_coordinate(material, coordinate, layer_thickness)
     if atom_index is not None:
         return get_atom_indices_within_layer_by_atom_index(material, atom_index, layer_thickness)
 
 
 def get_atom_indices_within_radius_pbc(
-    material: Material, atom_index: Optional[int] = 0, position: Optional[List[float]] = None, radius: float = 1
+    material: Material, atom_index: Optional[int] = 0, coordinate: Optional[List[float]] = None, radius: float = 1
 ):
     """
     Select all atoms within a specified radius of a central atom considering periodic boundary conditions.
@@ -207,15 +209,15 @@ def get_atom_indices_within_radius_pbc(
     Args:
         material (Material): Material object
         atom_index (int): Index of the central atom
-        position (List[float]): Position of the central atom in crystal coordinates
+        coordinate (List[float]): Coordinate of the central atom in crystal coordinates
         radius (float): Radius of the sphere in angstroms
 
     Returns:
         List[int]: List of indices of atoms within the specified
     """
 
-    if position is not None:
-        atom_index = get_closest_site_id_from_position(material, position)
+    if coordinate is not None:
+        atom_index = get_closest_site_id_from_coordinate(material, coordinate)
 
     structure = to_pymatgen(material)
     immutable_structure = PymatgenIStructure.from_sites(structure.sites)
@@ -260,20 +262,20 @@ def get_atom_indices_with_condition_on_coordinates(
 
 def get_nearest_neighbors_atom_indices(
     material: Material,
-    position: Optional[List[float]] = None,
+    coordinate: Optional[List[float]] = None,
 ) -> Optional[List[int]]:
     """
     Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
 
     Args:
         material (Material): The material object to find neighbors in.
-        position (List[float]): The position to find neighbors for.
+        coordinate (List[float]): The position to find neighbors for.
 
     Returns:
         List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
     """
-    if position is None:
-        position = [0, 0, 0]
+    if coordinate is None:
+        coordinate = [0, 0, 0]
     structure = to_pymatgen(material)
     voronoi_nn = PymatgenVoronoiNN(
         tol=0.5,
@@ -283,7 +285,7 @@ def get_nearest_neighbors_atom_indices(
         extra_nn_info=True,
         compute_adj_neighbors=True,
     )
-    structure.append("X", position, validate_proximity=False)
+    structure.append("X", coordinate, validate_proximity=False)
     neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
     structure.remove_sites([-1])

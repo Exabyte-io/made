@@ -55,7 +55,7 @@ def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
     Returns:
         List[float]: The center of the coordinates.
     """
-    return list(np.mean(np.array(coordinates), axis=0))
+    return np.mean(np.array(coordinates), axis=0).tolist()
 
 
 class ValueWithId(RoundNumericValuesMixin, BaseModel):

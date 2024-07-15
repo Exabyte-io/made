@@ -1,12 +1,12 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
-    AdatomSlabDefectConfiguration,
+    AdatomSlabPointDefectConfiguration,
+    CrystalSiteAdatomSlabDefectBuilder,
     EquidistantAdatomSlabDefectBuilder,
     PointDefectBuilderParameters,
     PointDefectConfiguration,
     create_defect,
     create_slab_defect,
-    CrystalSiteAdatomSlabDefectBuilder,
 )
 from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
 from mat3ra.utils import assertion as assertion_utils
@@ -74,7 +74,7 @@ def test_create_defect_from_site_id():
 
 def test_create_adatom():
     # Adatom of Si at 0.5, 0.5 position
-    configuration = AdatomSlabDefectConfiguration(
+    configuration = AdatomSlabPointDefectConfiguration(
         crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
     )
     defect = create_slab_defect(configuration=configuration, builder=None)
@@ -85,7 +85,7 @@ def test_create_adatom():
 
 def test_create_adatom_equidistant():
     # Adatom of Si at approximate 0.5, 0.5 position
-    configuration = AdatomSlabDefectConfiguration(
+    configuration = AdatomSlabPointDefectConfiguration(
         crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
     )
     defect = create_slab_defect(configuration=configuration, builder=EquidistantAdatomSlabDefectBuilder())
@@ -99,7 +99,7 @@ def test_create_adatom_equidistant():
 
 def test_create_crystal_site_adatom():
     # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
-    configuration = AdatomSlabDefectConfiguration(
+    configuration = AdatomSlabPointDefectConfiguration(
         crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element=None
     )
     builder = CrystalSiteAdatomSlabDefectBuilder()
