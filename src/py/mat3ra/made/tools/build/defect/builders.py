@@ -1,9 +1,5 @@
 from typing import List, Callable, Optional
 
-from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, Termination
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.build.utils import merge_materials
-from mat3ra.made.tools.modify import add_vacuum, filter_material_by_ids
 from pydantic import BaseModel
 from mat3ra.made.material import Material
 
@@ -14,6 +10,8 @@ from ...third_party import (
     PymatgenSubstitution,
     PymatgenInterstitial,
 )
+
+from ...modify import add_vacuum, filter_material_by_ids
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
 from ...analyze import (
@@ -22,8 +20,11 @@ from ...analyze import (
     get_closest_site_id_from_coordinate,
     get_closest_site_id_from_coordinate_and_element,
 )
-from ...utils import transform_coordinate_to_supercell
 from ....utils import get_center_of_coordinates
+from ...utils import transform_coordinate_to_supercell
+from ..utils import merge_materials
+from ..slab import SlabConfiguration, create_slab, Termination
+from ..supercell import create_supercell
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration
 

@@ -5,7 +5,7 @@ from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
-from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
+from .enums import PointDefectTypeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -85,7 +85,7 @@ class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfigura
 
 
 class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
-    defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ADATOM
+    defect_type: PointDefectTypeEnum = PointDefectTypeEnum.ADATOM
 
     @property
     def _json(self):

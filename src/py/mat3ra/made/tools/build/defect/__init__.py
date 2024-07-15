@@ -11,7 +11,7 @@ from .builders import (
     CrystalSiteAdatomSlabDefectBuilder,
 )
 from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration
-from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
+from .enums import PointDefectTypeEnum
 
 
 class DefectBuilderFactory(BaseFactory):
