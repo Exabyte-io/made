@@ -11,7 +11,13 @@ from ...third_party import (
     PymatgenInterstitial,
 )
 
-from ...modify import add_vacuum, filter_material_by_ids, filter_by_box, filter_by_sphere
+from ...modify import (
+    add_vacuum,
+    filter_material_by_ids,
+    filter_by_box,
+    filter_by_sphere,
+    filter_by_condition_on_coordinates,
+)
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
 from ...analyze import (
@@ -21,7 +27,7 @@ from ...analyze import (
     get_closest_site_id_from_coordinate_and_element,
 )
 from ....utils import get_center_of_coordinates
-from ...utils import transform_coordinate_to_supercell
+from ...utils import transform_coordinate_to_supercell, is_coordinate_in_cylinder
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
@@ -312,17 +318,20 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
 
 class IslandSlabDefectBuilder(SlabDefectBuilder):
     def create_island(
-        self, material: Material, position_on_surface: List[float], radius: float, thickness: int
+        self,
+        material: Material,
+        condition: Callable[[List[float]], bool] = is_coordinate_in_cylinder,
+        thickness: int = 1,
+        use_cartesian_coordinates: bool = False,
     ) -> List[Material]:
         """
         Create an island at the specified position on the surface of the material.
 
         Args:
             material: The material to add the island to.
-            position_on_surface: The position on the surface of the material in crystal coordinates.
-            radius: The radius of the island.
-            thickness: The thickness of the island in atomic layers.
-
+            condition: The condition on coordinates to describe the island.
+            thickness: The thickness of the island in layers.
+            use_cartesian_coordinates: Whether to use Cartesian coordinates for the condition.
         Returns:
             The material with the island added.
         """
@@ -333,18 +342,18 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         material_with_additional_layers = self.create_material_with_additional_layers(new_material, thickness)
         added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
 
-        # Get the atoms within the sphere
-        center_coordinate = position_on_surface.copy()
-        center_coordinate.append(original_max_z)
-        atoms_within_sphere = filter_by_sphere(
+        def _condition(coordinate):
+            return condition(coordinate)
+
+        atoms_within_island = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
-            center_coordinate=center_coordinate,
-            radius=radius,
+            condition=_condition,
+            use_cartesian_coordinates=use_cartesian_coordinates,
         )
-        atoms_within_sphere.to_cartesian()
+        atoms_within_island.to_cartesian()
         # Filter atoms in the added layers
         island_material = filter_by_box(
-            material=atoms_within_sphere,
+            material=atoms_within_island,
             min_coordinate=[0, 0, original_max_z],
             max_coordinate=[1, 1, added_layers_max_z],
             use_cartesian_coordinates=True,
