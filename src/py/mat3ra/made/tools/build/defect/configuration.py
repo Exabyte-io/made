@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 
-from ...analyze import get_closest_site_id_from_coordinate
+from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
 
 
@@ -57,19 +57,39 @@ class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     pass
 
 
-class AdatomSlabDefectConfiguration(SlabDefectConfiguration):
-    defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ADATOM
-    position_on_surface: List[float] = [0.5, 0.5]
-    distance_z: float = 2.0
-    chemical_element: Optional[str] = None
+class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfiguration):
+    position_on_surface: List[float]
+    distance_z: float
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if not self.position_on_surface:
+            self.position_on_surface = [self.coordinate[0], self.coordinate[1]]
+        if not self.distance_z:
+            self.distance_z = self.crystal.basis.cell.convert_point_to_cartesian(
+                [
+                    self.coordinate[0],
+                    self.coordinate[1],
+                    self.coordinate[2] - get_atomic_coordinates_extremum(self.crystal),
+                ]
+            )[2]
 
     @property
     def _json(self):
         return {
-            "type": "AdatomSlabDefectConfiguration",
-            "crystal": self.crystal.to_json(),
-            "defect_type": self.defect_type.name,
+            **super()._json,
+            "type": "SlabPointDefectConfiguration",
             "position_on_surface": self.position_on_surface,
             "distance_z": self.distance_z,
-            "chemical_element": self.chemical_element,
+        }
+
+
+class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
+    defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ADATOM
+
+    @property
+    def _json(self):
+        return {
+            **super()._json,
+            "type": "AdatomSlabPointDefectConfiguration",
         }

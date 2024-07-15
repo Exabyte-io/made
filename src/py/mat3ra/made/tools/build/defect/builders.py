@@ -25,7 +25,7 @@ from ...analyze import (
 from ...utils import transform_coordinate_to_supercell
 from ....utils import get_center_of_coordinates
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from .configuration import PointDefectConfiguration, AdatomSlabDefectConfiguration
+from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -121,7 +121,7 @@ class SlabDefectBuilder(DefectBuilder):
 
 
 class AdatomSlabDefectBuilder(SlabDefectBuilder):
-    _ConfigurationType: type(AdatomSlabDefectConfiguration) = AdatomSlabDefectConfiguration  # type: ignore
+    _ConfigurationType: type(AdatomSlabPointDefectConfiguration) = AdatomSlabPointDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
     def create_adatom(
