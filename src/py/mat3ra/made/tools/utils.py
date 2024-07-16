@@ -215,3 +215,38 @@ def transform_coordinate_to_supercell(
     if reverse:
         converted_array = (np_coordinate - np_translation_vector) * np_scaling_factor
     return converted_array.tolist()
+
+
+class CoordinateCondition:
+    @classmethod
+    def cylinder(
+        cls, center_position: List[float] = [0.5, 0.5], radius: float = 0.25, min_z: float = 0, max_z: float = 1
+    ):
+        condition_json = {
+            "type": "cylinder",
+            "center_position": center_position,
+            "radius": radius,
+            "min_z": min_z,
+            "max_z": max_z,
+        }
+        return (
+            lambda coordinate: is_coordinate_in_cylinder(coordinate, center_position, radius, min_z, max_z),
+            condition_json,
+        )
+
+    @classmethod
+    def prism(
+        cls,
+        coordinate_1: List[float] = [0, 0],
+        coordinate_2: List[float] = [1, 0],
+        coordinate_3: List[float] = [0, 1],
+        min_z: float = 0,
+        max_z: float = 1,
+    ):
+        return lambda coordinate: is_coordinate_in_triangular_prism(
+            coordinate, coordinate_1, coordinate_2, coordinate_3, min_z, max_z
+        )
+
+    @classmethod
+    def box(cls, min_coordinate: List[float] = [0, 0, 0], max_coordinate: List[float] = [1, 1, 1]):
+        return lambda coordinate: is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
