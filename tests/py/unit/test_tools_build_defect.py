@@ -116,6 +116,7 @@ def test_create_crystal_site_adatom():
 
 def test_create_island():
     clean_material = Material.create(Material.default_config)
+    clean_material.basis.elements.values[2] = "C"
     print("clean_material", clean_material.basis.coordinates.values)
     slab_config = SlabConfiguration(
         bulk=clean_material,
@@ -124,10 +125,14 @@ def test_create_island():
         vacuum=6,
         xy_supercell_matrix=[[1, 0], [0, 1]],
         use_orthogonal_z=True,
+        make_primitive=False,
     )
+    print(get_terminations(slab_config))
     t = get_terminations(slab_config)[0]
     slab = create_slab(slab_config, t)
+    print(slab.to_json())
     print("slab", slab.basis.coordinates.values)
+
     condition = CoordinateCondition.cylinder(center_position=[0.5, 0.5], radius=0.25, min_z=0, max_z=1)
     island_config = IslandSlabDefectConfiguration(
         crystal=slab,
