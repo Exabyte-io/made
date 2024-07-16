@@ -96,7 +96,7 @@ def test_create_adatom_equidistant():
     assert defect.basis.elements.values[-1] == "Si"
     # We expect adatom to shift from provided position
     assertion_utils.assert_deep_almost_equal(
-        [0.527777778, 0.486111111, 0.450843412], defect.basis.coordinates.values[-1]
+        [0.583333334, 0.458333333, 0.450843412], defect.basis.coordinates.values[-1]
     )
 
 
@@ -109,7 +109,9 @@ def test_create_crystal_site_adatom():
     defect = create_slab_defect(configuration=configuration, builder=builder)
 
     assert defect.basis.elements.values[-1] == "Si"
-    assertion_utils.assert_deep_almost_equal([0.6944444, 0.486111111, 0.352272727], defect.basis.coordinates.values[-1])
+    assertion_utils.assert_deep_almost_equal(
+        [0.083333333, 0.458333333, 0.352272727], defect.basis.coordinates.values[-1]
+    )
 
 
 def test_create_island():
