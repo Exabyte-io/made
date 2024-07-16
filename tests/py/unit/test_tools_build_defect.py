@@ -115,11 +115,51 @@ def test_create_crystal_site_adatom():
 
 
 def test_create_island():
-    clean_material = Material.create(Material.default_config)
+    ni_config = {
+        "lattice": {
+            "a": 3.475146,
+            "b": 3.475146,
+            "c": 3.475146,
+            "alpha": 90,
+            "beta": 90,
+            "gamma": 120,
+            "units": {"length": "angstrom", "angle": "degree"},
+            "type": "HEX",
+            "vectors": {
+                "a": [3.475146, 0, 0],
+                "b": [-1.737573, 3.009565, 0],
+                "c": [0, 0, 3.475146],
+                "alat": 1,
+                "units": "angstrom",
+            },
+        },
+        "basis": {
+            "elements": [
+                {"id": 0, "value": "Ni"},
+                {"id": 1, "value": "Ni"},
+                {"id": 2, "value": "Ni"},
+                {"id": 3, "value": "Ni"},
+            ],
+            "coordinates": [
+                {"id": 0, "value": [0, 0, 0]},
+                {"id": 1, "value": [0, 0.5, 0.5]},
+                {"id": 2, "value": [0.5, 0, 0.5]},
+                {"id": 3, "value": [0.5, 0.5, 0]},
+            ],
+            "units": "crystal",
+            "cell": [
+                [3.475146, 0, 2.127913212734864e-16],
+                [-1.7375729999999994, 3.0095647178598774, 2.127913212734864e-16],
+                [0, 0, 3.475146],
+            ],
+            "constraints": [],
+        },
+        "name": "Ni HEX",
+        "isNonPeriodic": False,
+    }
 
-    new_basis = clean_material.basis.copy()
-    new_basis.elements.values[1] = "C"
-    clean_material.basis = new_basis
+    clean_material = Material.create(ni_config)
+
     print("clean_material", clean_material.basis.coordinates.values)
 
     slab_config = SlabConfiguration(
