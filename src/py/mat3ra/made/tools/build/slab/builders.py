@@ -9,7 +9,7 @@ from ...convert import to_pymatgen
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
 
-# from ..supercell import create_supercell
+from ..supercell import create_supercell
 from .configuration import SlabConfiguration
 from .termination import Termination
 
@@ -47,7 +47,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
 
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = super()._post_process(items, post_process_parameters)
-        # materials = [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
+        materials = [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
         for idx, material in enumerate(materials):
             if "build" not in material.metadata:
                 material.metadata["build"] = {}

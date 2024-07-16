@@ -116,8 +116,12 @@ def test_create_crystal_site_adatom():
 
 def test_create_island():
     clean_material = Material.create(Material.default_config)
-    clean_material.basis.elements.values[1] = "C"
+
+    new_basis = clean_material.basis.copy()
+    new_basis.elements.values[1] = "C"
+    clean_material.basis = new_basis
     print("clean_material", clean_material.basis.coordinates.values)
+
     slab_config = SlabConfiguration(
         bulk=clean_material,
         miller_indices=(1, 1, 1),
