@@ -89,6 +89,23 @@ def is_coordinate_in_cylinder(
     )
 
 
+def is_coordinate_in_sphere(coordinate: List[float], center_position: List[float], radius: float = 0.25) -> bool:
+    """
+    Check if a coordinate is inside a sphere.
+    Args:
+        coordinate (List[float]): The coordinate to check.
+        center_position (List[float]): The coordinates of the center position.
+        radius (float): The radius of the sphere.
+
+    Returns:
+        bool: True if the coordinate is inside the sphere, False otherwise.
+    """
+    np_coordinate = np.array(coordinate)
+    np_center_position = np.array(center_position)
+    distance_squared = np.sum((np_coordinate - np_center_position) ** 2)
+    return distance_squared <= radius**2
+
+
 def is_coordinate_in_box(
     coordinate: List[float], min_coordinate: List[float] = [0, 0, 0], max_coordinate: List[float] = [1, 1, 1]
 ) -> bool:
@@ -231,6 +248,18 @@ class CoordinateCondition:
         }
         return (
             lambda coordinate: is_coordinate_in_cylinder(coordinate, center_position, radius, min_z, max_z),
+            condition_json,
+        )
+
+    @classmethod
+    def sphere(cls, center_position: List[float] = [0.5, 0.5, 0.5], radius: float = 0.25):
+        condition_json = {
+            "type": "sphere",
+            "center_position": center_position,
+            "radius": radius,
+        }
+        return (
+            lambda coordinate: is_coordinate_in_sphere(coordinate, center_position, radius),
             condition_json,
         )
 
