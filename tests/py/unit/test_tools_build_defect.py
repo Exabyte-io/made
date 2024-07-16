@@ -20,7 +20,7 @@ slab_config = SlabConfiguration(
     bulk=clean_material,
     miller_indices=(1, 1, 1),
     thickness=4,
-    vacuum=6,
+    vacuum=7,
     xy_supercell_matrix=[[1, 0], [0, 1]],
     use_orthogonal_z=True,
 )
@@ -124,10 +124,10 @@ def test_create_island():
     )
 
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
-    print("slab elements", slab.basis.elements.values)
-    print("slab coords", slab.basis.coordinates.values)
-    print("defect elements", defect.basis.elements.values)
-    print("defect coords", defect.basis.coordinates.values)
+    print("slab elements", len(slab.basis.elements.values), slab.basis.elements.values)
+    print("slab coords", len(slab.basis.coordinates.values), slab.basis.coordinates.values)
+    print("defect elements", len(defect.basis.elements.values), defect.basis.elements.values)
+    print("defect coords", len(defect.basis.coordinates.values), defect.basis.coordinates.values)
     # Only one atom is in the island for this configuration
     assert len(defect.basis.elements.values) == len(slab.basis.elements.values) + 1
     assert defect.basis.elements.values[-1] == "Si"
