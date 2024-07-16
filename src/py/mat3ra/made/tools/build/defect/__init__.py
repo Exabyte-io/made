@@ -9,8 +9,9 @@ from .builders import (
     AdatomSlabDefectBuilder,
     EquidistantAdatomSlabDefectBuilder,
     CrystalSiteAdatomSlabDefectBuilder,
+    IslandSlabDefectBuilder,
 )
-from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration
+from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration, IslandSlabDefectConfiguration
 from .enums import PointDefectTypeEnum
 
 
@@ -43,9 +44,14 @@ def create_defect(
 
 
 def create_slab_defect(
-    configuration: Union[AdatomSlabPointDefectConfiguration],
+    configuration: Union[AdatomSlabPointDefectConfiguration, IslandSlabDefectConfiguration],
     builder: Optional[
-        Union[AdatomSlabDefectBuilder, EquidistantAdatomSlabDefectBuilder, CrystalSiteAdatomSlabDefectBuilder]
+        Union[
+            AdatomSlabDefectBuilder,
+            EquidistantAdatomSlabDefectBuilder,
+            CrystalSiteAdatomSlabDefectBuilder,
+            IslandSlabDefectBuilder,
+        ]
     ] = None,
 ) -> Material:
     """
