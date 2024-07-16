@@ -243,10 +243,22 @@ class CoordinateCondition:
         min_z: float = 0,
         max_z: float = 1,
     ):
-        return lambda coordinate: is_coordinate_in_triangular_prism(
-            coordinate, coordinate_1, coordinate_2, coordinate_3, min_z, max_z
+        condition_json = {
+            "type": "prism",
+            "coordinate_1": coordinate_1,
+            "coordinate_2": coordinate_2,
+            "coordinate_3": coordinate_3,
+            "min_z": min_z,
+            "max_z": max_z,
+        }
+        return (
+            lambda coordinate: is_coordinate_in_triangular_prism(
+                coordinate, coordinate_1, coordinate_2, coordinate_3, min_z, max_z
+            ),
+            condition_json,
         )
 
     @classmethod
     def box(cls, min_coordinate: List[float] = [0, 0, 0], max_coordinate: List[float] = [1, 1, 1]):
-        return lambda coordinate: is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
+        condition_json = {"type": "box", "min_coordinate": min_coordinate, "max_coordinate": max_coordinate}
+        return lambda coordinate: is_coordinate_in_box(coordinate, min_coordinate, max_coordinate), condition_json
