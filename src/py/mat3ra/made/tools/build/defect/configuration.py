@@ -6,7 +6,7 @@ from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
-from ...utils import is_coordinate_in_cylinder, CoordinateCondition
+from ...utils import CoordinateCondition
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -23,7 +23,7 @@ class BaseDefectConfiguration(BaseModel):
 
 class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     defect_type: PointDefectTypeEnum
-    coordinate: List[float] = [0, 0, 0]  # fractional coordinates
+    coordinate: List[float] = [0, 0, 0]  # crystal coordinates
     chemical_element: Optional[str] = None
 
     @classmethod
@@ -104,7 +104,6 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
 
 
 class IslandSlabDefectConfiguration(SlabDefectConfiguration):
-
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ISLAND
     condition: Optional[Tuple[Callable[[List[float]], bool], Dict]] = CoordinateCondition.cylinder()
     thickness: int = 1
