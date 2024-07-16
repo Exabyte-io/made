@@ -8,7 +8,8 @@ from ...analyze import get_chemical_formula
 from ...convert import to_pymatgen
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from ..supercell import create_supercell
+
+# from ..supercell import create_supercell
 from .configuration import SlabConfiguration
 from .termination import Termination
 
