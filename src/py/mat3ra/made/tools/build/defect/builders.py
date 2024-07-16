@@ -364,9 +364,10 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         return [self.merge_slab_and_defect(island_material, new_material)]
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        condition_callable, _ = configuration.condition
         return self.create_island(
             material=configuration.crystal,
-            condition=configuration.condition,
+            condition=condition_callable,
             thickness=configuration.thickness,
             use_cartesian_coordinates=configuration.use_cartesian_coordinates,
         )

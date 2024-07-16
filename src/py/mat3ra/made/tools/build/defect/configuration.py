@@ -1,4 +1,4 @@
-from typing import Optional, List, Any, Callable
+from typing import Optional, List, Any, Callable, Dict, Tuple
 from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
@@ -6,12 +6,19 @@ from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
-from ...utils import is_coordinate_in_cylinder
+from ...utils import is_coordinate_in_cylinder, CoordinateCondition
 
 
 class BaseDefectConfiguration(BaseModel):
     # TODO: fix arbitrary_types_allowed error and set Material class type
     crystal: Any = None
+
+    @property
+    def _json(self):
+        return {
+            "type": "BaseDefectConfiguration",
+            "crystal": self.crystal.to_json(),
+        }
 
 
 class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
@@ -46,8 +53,8 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     @property
     def _json(self):
         return {
+            **super()._json,
             "type": "PointDefectConfiguration",
-            "crystal": self.crystal.to_json(),
             "defect_type": self.defect_type.name,
             "coordinate": self.coordinate,
             "chemical_element": self.chemical_element,
@@ -97,19 +104,18 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
 
 
 class IslandSlabDefectConfiguration(SlabDefectConfiguration):
-    def _default_condition(coordinate: List[float]) -> bool:
-        return is_coordinate_in_cylinder(coordinate, [0.5, 0.5], radius=0.25)
 
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ISLAND
-    condition: Optional[Callable[[List[float]], bool]] = _default_condition
+    condition: Optional[Tuple[Callable[[List[float]], bool], Dict]] = CoordinateCondition.cylinder()
     thickness: int = 1
 
     @property
     def _json(self):
+        _, condition_json = self.condition
         return {
+            **super()._json,
             "type": "IslandSlabDefectConfiguration",
-            "crystal": self.crystal.to_json(),
             "defect_type": self.defect_type.name,
-            "condition": self.condition,
+            "condition": condition_json,
             "thickness": self.thickness,
         }
