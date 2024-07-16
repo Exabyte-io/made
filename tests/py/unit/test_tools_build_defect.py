@@ -20,7 +20,7 @@ slab_config = SlabConfiguration(
     bulk=clean_material,
     miller_indices=(1, 1, 1),
     thickness=4,
-    vacuum=7,
+    vacuum=6,
     xy_supercell_matrix=[[1, 0], [0, 1]],
     use_orthogonal_z=True,
 )
@@ -115,6 +115,19 @@ def test_create_crystal_site_adatom():
 
 
 def test_create_island():
+    clean_material = Material.create(Material.default_config)
+    print("clean_material", clean_material.basis.coordinates.values)
+    slab_config = SlabConfiguration(
+        bulk=clean_material,
+        miller_indices=(1, 1, 1),
+        thickness=4,
+        vacuum=6,
+        xy_supercell_matrix=[[1, 0], [0, 1]],
+        use_orthogonal_z=True,
+    )
+    t = get_terminations(slab_config)[0]
+    slab = create_slab(slab_config, t)
+    print("slab", slab.basis.coordinates.values)
     condition = CoordinateCondition.cylinder(center_position=[0.5, 0.5], radius=0.25, min_z=0, max_z=1)
     island_config = IslandSlabDefectConfiguration(
         crystal=slab,
@@ -129,5 +142,5 @@ def test_create_island():
     print("defect elements", len(defect.basis.elements.values), defect.basis.elements.values)
     print("defect coords", len(defect.basis.coordinates.values), defect.basis.coordinates.values)
     # Only one atom is in the island for this configuration
-    assert len(defect.basis.elements.values) == len(slab.basis.elements.values) + 1
+    assert len(defect.basis.elements.values) == len(slab.basis.elements.values) + 10
     assert defect.basis.elements.values[-1] == "Si"
