@@ -118,3 +118,23 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
             "condition": condition_json,
             "thickness": self.thickness,
         }
+
+
+class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
+    defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
+    cut_direction: List[int] = [0, 0, 1]
+    center_position: List[float] = [0.5, 0.5]
+    bunching_number: int = 0  # number of layers to bunch
+    bunching_step: int = 2  # Sideways layers
+
+    @property
+    def _json(self):
+        return {
+            **super()._json,
+            "type": "TerraceSlabDefectConfiguration",
+            "defect_type": self.defect_type.name,
+            "cut_direction": self.cut_direction,
+            "center_position": self.center_position,
+            "bunching_number": self.bunching_number,
+            "bunching_step": self.bunching_step,
+        }
