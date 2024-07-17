@@ -115,25 +115,9 @@ def test_create_crystal_site_adatom():
 
 
 def test_create_island():
-    ni_config = {
-        "basis": {
-            "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
-            "coordinates": [{"id": 0, "value": [0, 0, 0]}, {"id": 1, "value": [0.25, 0.25, 0.25]}],
-            "units": "crystal",
-        },
-        "lattice": {
-            "a": 5,
-            "b": 5,
-            "c": 5,
-            "alpha": 90,
-            "beta": 90,
-            "gamma": 90,
-            "type": "TRI",
-            "units": {"length": "angstrom", "angle": "degree"},
-        },
-    }
-
-    clean_material = Material.create(ni_config)
+    config = Material.default_config
+    print("default config", config)
+    clean_material = Material.create(config)
 
     print("clean_material", clean_material.basis.coordinates.values)
 
