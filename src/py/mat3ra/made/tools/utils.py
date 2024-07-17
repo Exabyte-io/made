@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 from mat3ra.utils.matrix import convert_2x2_to_3x3
@@ -234,60 +234,53 @@ def transform_coordinate_to_supercell(
     return converted_array.tolist()
 
 
-class CoordinateCondition:
-    @classmethod
+class CoordinateConditionBuilder:
+    def create_condition(self, condition_type: str, evaluation_func: Callable, **kwargs) -> Tuple[Callable, Dict]:
+        condition_json = {"type": condition_type, **kwargs}
+        return lambda coordinate: evaluation_func(coordinate, **kwargs), condition_json
+
     def cylinder(
-        cls, center_position: List[float] = [0.5, 0.5], radius: float = 0.25, min_z: float = 0, max_z: float = 1
+        self, center_position: List[float] = [0.5, 0.5], radius: float = 0.25, min_z: float = 0, max_z: float = 1
     ):
-        condition_json = {
-            "type": "cylinder",
-            "center_position": center_position,
-            "radius": radius,
-            "min_z": min_z,
-            "max_z": max_z,
-        }
-        return (
-            lambda coordinate: is_coordinate_in_cylinder(coordinate, center_position, radius, min_z, max_z),
-            condition_json,
+        return self.create_condition(
+            condition_type="cylinder",
+            evaluation_func=is_coordinate_in_cylinder,
+            center_position=center_position,
+            radius=radius,
+            min_z=min_z,
+            max_z=max_z,
         )
 
-    @classmethod
-    def sphere(cls, center_position: List[float] = [0.5, 0.5, 0.5], radius: float = 0.25):
-        condition_json = {
-            "type": "sphere",
-            "center_position": center_position,
-            "radius": radius,
-        }
-        return (
-            lambda coordinate: is_coordinate_in_sphere(coordinate, center_position, radius),
-            condition_json,
+    def sphere(self, center_position: List[float] = [0.5, 0.5, 0.5], radius: float = 0.25):
+        return self.create_condition(
+            condition_type="sphere",
+            evaluation_func=is_coordinate_in_sphere,
+            center_position=center_position,
+            radius=radius,
         )
 
-    @classmethod
     def prism(
-        cls,
+        self,
         coordinate_1: List[float] = [0, 0],
         coordinate_2: List[float] = [1, 0],
         coordinate_3: List[float] = [0, 1],
         min_z: float = 0,
         max_z: float = 1,
     ):
-        condition_json = {
-            "type": "prism",
-            "coordinate_1": coordinate_1,
-            "coordinate_2": coordinate_2,
-            "coordinate_3": coordinate_3,
-            "min_z": min_z,
-            "max_z": max_z,
-        }
-        return (
-            lambda coordinate: is_coordinate_in_triangular_prism(
-                coordinate, coordinate_1, coordinate_2, coordinate_3, min_z, max_z
-            ),
-            condition_json,
+        return self.create_condition(
+            condition_type="prism",
+            evaluation_func=is_coordinate_in_triangular_prism,
+            coordinate_1=coordinate_1,
+            coordinate_2=coordinate_2,
+            coordinate_3=coordinate_3,
+            min_z=min_z,
+            max_z=max_z,
         )
 
-    @classmethod
-    def box(cls, min_coordinate: List[float] = [0, 0, 0], max_coordinate: List[float] = [1, 1, 1]):
-        condition_json = {"type": "box", "min_coordinate": min_coordinate, "max_coordinate": max_coordinate}
-        return lambda coordinate: is_coordinate_in_box(coordinate, min_coordinate, max_coordinate), condition_json
+    def box(self, min_coordinate: List[float] = [0, 0, 0], max_coordinate: List[float] = [1, 1, 1]):
+        return self.create_condition(
+            condition_type="box",
+            evaluation_func=is_coordinate_in_box,
+            min_coordinate=min_coordinate,
+            max_coordinate=max_coordinate,
+        )
