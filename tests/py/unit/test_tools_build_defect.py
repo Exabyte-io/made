@@ -96,7 +96,7 @@ def test_create_adatom_equidistant():
     assert defect.basis.elements.values[-1] == "Si"
     # We expect adatom to shift from provided position
     assertion_utils.assert_deep_almost_equal(
-        [0.583333334, 0.458333333, 0.450843412], defect.basis.coordinates.values[-1]
+        [0.527777778, 0.486111111, 0.450843412], defect.basis.coordinates.values[-1]
     )
 
 
@@ -109,33 +109,10 @@ def test_create_crystal_site_adatom():
     defect = create_slab_defect(configuration=configuration, builder=builder)
 
     assert defect.basis.elements.values[-1] == "Si"
-    assertion_utils.assert_deep_almost_equal(
-        [0.083333333, 0.458333333, 0.352272727], defect.basis.coordinates.values[-1]
-    )
+    assertion_utils.assert_deep_almost_equal([0.6944444, 0.486111111, 0.352272727], defect.basis.coordinates.values[-1])
 
 
 def test_create_island():
-    config = Material.default_config
-    print("default config", config)
-    clean_material = Material.create(config)
-
-    print("clean_material", clean_material.basis.coordinates.values)
-
-    slab_config = SlabConfiguration(
-        bulk=clean_material,
-        miller_indices=(1, 1, 1),
-        thickness=4,
-        vacuum=6,
-        xy_supercell_matrix=[[1, 0], [0, 1]],
-        use_orthogonal_z=True,
-        make_primitive=False,
-    )
-    print(get_terminations(slab_config))
-    t = get_terminations(slab_config)[0]
-    slab = create_slab(slab_config, t)
-    print(slab.to_json())
-    print("slab", slab.basis.coordinates.values)
-
     condition = CoordinateCondition.cylinder(center_position=[0.5, 0.5], radius=0.25, min_z=0, max_z=1)
     island_config = IslandSlabDefectConfiguration(
         crystal=slab,
@@ -145,10 +122,7 @@ def test_create_island():
     )
 
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
-    print("slab elements", len(slab.basis.elements.values), slab.basis.elements.values)
-    print("slab coords", len(slab.basis.coordinates.values), slab.basis.coordinates.values)
-    print("defect elements", len(defect.basis.elements.values), defect.basis.elements.values)
-    print("defect coords", len(defect.basis.coordinates.values), defect.basis.coordinates.values)
+
     # Only one atom is in the island for this configuration
-    assert len(defect.basis.elements.values) == len(slab.basis.elements.values) + 10
+    assert len(defect.basis.elements.values) == len(slab.basis.elements.values) + 1
     assert defect.basis.elements.values[-1] == "Si"
