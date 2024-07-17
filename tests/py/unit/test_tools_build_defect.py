@@ -115,7 +115,7 @@ def test_create_crystal_site_adatom():
 
 
 def test_create_island():
-    condition = CoordinateConditionBuilder().cylinder(center_position=[0.5, 0.5], radius=0.25, min_z=0, max_z=1)
+    condition = CoordinateConditionBuilder().cylinder(center_position=[0.625, 0.5], radius=0.25, min_z=0, max_z=1)
     island_config = IslandSlabDefectConfiguration(
         crystal=slab,
         defect_type="island",
