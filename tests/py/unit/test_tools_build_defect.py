@@ -11,7 +11,7 @@ from mat3ra.made.tools.build.defect import (
 from mat3ra.made.tools.build.defect.builders import IslandSlabDefectBuilder
 from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration
 from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
-from mat3ra.made.tools.utils import CoordinateCondition
+from mat3ra.made.tools.utils import CoordinateConditionBuilder
 from mat3ra.utils import assertion as assertion_utils
 
 clean_material = Material.create(Material.default_config)
@@ -113,7 +113,7 @@ def test_create_crystal_site_adatom():
 
 
 def test_create_island():
-    condition = CoordinateCondition.cylinder(center_position=[0.5, 0.5], radius=0.25, min_z=0, max_z=1)
+    condition = CoordinateConditionBuilder().cylinder(center_position=[0.5, 0.5], radius=0.25, min_z=0, max_z=1)
     island_config = IslandSlabDefectConfiguration(
         crystal=slab,
         defect_type="island",
