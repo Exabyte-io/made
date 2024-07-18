@@ -375,7 +375,8 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         )
 
 
-class TerraceIslandSlabDefectBuilder(IslandSlabDefectBuilder):
+class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
+
     def create_terrace(
         self,
         material: Material,
@@ -400,39 +401,20 @@ class TerraceIslandSlabDefectBuilder(IslandSlabDefectBuilder):
         """
         new_material = material.clone()
         original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=False)
-        material_with_additional_layers = self.create_material_with_additional_layers(new_material, 1)
+        material_with_additional_layers = self.create_material_with_additional_layers(new_material, bunching_number)
         added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
 
-        # Convert cut direction to Cartesian and compute slope and intercept
-        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), cut_direction)[
-            :2
-        ]  # Get 2D vector
-        slope = direction_vector[1] / direction_vector[0]
-        intercept = center_position[1] - slope * center_position[0]
+        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), cut_direction)
 
-        # Calculate intersection points with x=0 and y=0
-        y_intercept = intercept  # This is where line crosses y-axis
-        x_intercept = -intercept / slope  # Solve for x when y=0
+        condition = CoordinateConditionBuilder().plane(
+            plane_normal=direction_vector,
+            plane_point_coordinate=center_position,
+        )
 
-        # Determine the additional vertex based on vector polarity
-        corner_vertex = [0, 0] if direction_vector[0] > 0 else [1, 1]
-
-        # Define the triangle vertices
-        triangle_vertices = [
-            [0, y_intercept],  # Intersection with y-axis
-            [x_intercept, 0],  # Intersection with x-axis
-            corner_vertex,  # Either [0,0] or [1,1]
-        ]
-
-        coordinate1 = triangle_vertices[0]
-        coordinate2 = triangle_vertices[1]
-        coordinate3 = triangle_vertices[2]
-
-        atoms_within_terrace = filter_by_triangle_projection(
+        atoms_within_terrace = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
-            coordinate_1=coordinate1,
-            coordinate_2=coordinate2,
-            coordinate_3=coordinate3,
+            condition=condition,
+            use_cartesian_coordinates=use_cartesian_coordinates,
         )
 
         # Filter atoms in the added layers
