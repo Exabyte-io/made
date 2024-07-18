@@ -17,7 +17,6 @@ from ...modify import (
     filter_material_by_ids,
     filter_by_box,
     filter_by_condition_on_coordinates,
-    filter_by_triangle_projection,
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
@@ -33,7 +32,12 @@ from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration, IslandSlabDefectConfiguration
+from .configuration import (
+    PointDefectConfiguration,
+    AdatomSlabPointDefectConfiguration,
+    IslandSlabDefectConfiguration,
+    TerraceSlabDefectConfiguration,
+)
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -376,13 +380,13 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
 
 
 class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
-    _ConfigurationType: type(TerraceIslandSlabDefectBuilder) = IslandSlabDefectConfiguration  # type: ignore
-    _GeneratedItemType = Material
+    _ConfigurationType: type(TerraceSlabDefectConfiguration) = TerraceSlabDefectConfiguration  # type: ignore
+    _GeneratedItemType: Material = Material
 
     def create_terrace(
         self,
         material: Material,
-        cut_direction: List[int] = None,
+        cut_direction: Optional[List[int]] = None,
         pivot_coordinate: Optional[List[float]] = None,
         steps_number: int = 1,
         use_cartesian_coordinates: bool = False,
