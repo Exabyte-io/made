@@ -200,6 +200,25 @@ def is_coordinate_in_triangular_prism(
     return (u >= 0) and (v >= 0) and (w >= 0) and (u + v + w <= 1) and (min_z <= coordinate[2] <= max_z)
 
 
+def is_coordinate_behind_plane(
+    coordinate: List[float], plane_normal: List[float], plane_point_coordinate: List[float]
+) -> bool:
+    """
+    Check if a coordinate is behind a plane.
+    Args:
+        coordinate (List[float]): The coordinate to check.
+        plane_normal (List[float]): The normal vector of the plane.
+        plane_point_coordinate (List[float]): The coordinate of a point on the plane.
+
+    Returns:
+        bool: True if the coordinate is behind the plane, False otherwise.
+    """
+    np_coordinate = np.array(coordinate)
+    np_plane_normal = np.array(plane_normal)
+    np_plane_point = np.array(plane_point_coordinate)
+    return np.dot(np_plane_normal, np_coordinate - np_plane_point) < 0
+
+
 def transform_coordinate_to_supercell(
     coordinate: List[float],
     scaling_factor: Optional[List[int]] = None,
@@ -283,4 +302,12 @@ class CoordinateConditionBuilder:
             evaluation_func=is_coordinate_in_box,
             min_coordinate=min_coordinate,
             max_coordinate=max_coordinate,
+        )
+
+    def plane(self, plane_normal: List[float], plane_point_coordinate: List[float]):
+        return self.create_condition(
+            condition_type="plane",
+            evaluation_func=is_coordinate_behind_plane,
+            plane_normal=plane_normal,
+            plane_point_coordinate=plane_point_coordinate,
         )
