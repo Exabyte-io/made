@@ -376,14 +376,15 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
 
 
 class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
+    _ConfigurationType: type(TerraceIslandSlabDefectBuilder) = IslandSlabDefectConfiguration  # type: ignore
+    _GeneratedItemType = Material
 
     def create_terrace(
         self,
         material: Material,
-        cut_direction: List[int] = [0, 0, 1],
-        center_position: List[float] = [0.5, 0.5],
-        bunching_number: int = 1,
-        bunching_step: float = 2.0,
+        cut_direction: List[int] = None,
+        pivot_coordinate: Optional[List[float]] = None,
+        steps_number: int = 1,
         use_cartesian_coordinates: bool = False,
     ) -> List[Material]:
         """
@@ -392,23 +393,28 @@ class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
         Args:
             material: The material to add the terrace to.
             cut_direction: The direction of the cut in lattice directions.
-            center_position: The center position of the terrace.
-            bunching_number: The number of steps to bunch.
-            bunching_step: The minimum terrace width for each step in angstrom.
+            pivot_coordinate: The center position of the terrace.
+            steps_number: The number of steps to bunch.
             use_cartesian_coordinates: Whether to use Cartesian coordinates for the center position.
         Returns:
             The material with the terrace added.
         """
+
         new_material = material.clone()
         original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=False)
-        material_with_additional_layers = self.create_material_with_additional_layers(new_material, bunching_number)
+        material_with_additional_layers = self.create_material_with_additional_layers(new_material, steps_number)
         added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
+
+        if cut_direction is None:
+            cut_direction = [1, 0, 0]
+        if pivot_coordinate is None:
+            pivot_coordinate = [0.5, 0.5, original_max_z]
 
         direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), cut_direction)
 
         condition = CoordinateConditionBuilder().plane(
             plane_normal=direction_vector,
-            plane_point_coordinate=center_position,
+            plane_point_coordinate=pivot_coordinate,
         )
 
         atoms_within_terrace = filter_by_condition_on_coordinates(
@@ -425,3 +431,12 @@ class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
         )
 
         return [self.merge_slab_and_defect(terrace_material, new_material)]
+
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        return self.create_terrace(
+            material=configuration.crystal,
+            cut_direction=configuration.cut_direction,
+            pivot_coordinate=configuration.pivot_coordinate,
+            steps_number=configuration.steps_number,
+            use_cartesian_coordinates=configuration.use_cartesian_coordinates,
+        )

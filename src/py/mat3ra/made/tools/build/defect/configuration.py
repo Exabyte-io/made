@@ -122,10 +122,9 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
 
 class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
-    cut_direction: List[int] = [0, 0, 1]
-    center_position: List[float] = [0.5, 0.5]
-    bunching_number: int = 1  # number of steps to bunch
-    bunching_step: float = 2.0  # min terrace width for each step in angstrom
+    cut_direction: List[int] = [1, 0, 0]
+    pivot_coordinate: List[float] = [0.5, 0.5, 0.5]
+    steps_number: int = 1  # number of steps to bunch
 
     @property
     def _json(self):
@@ -134,7 +133,6 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
             "type": "TerraceSlabDefectConfiguration",
             "defect_type": self.defect_type.name,
             "cut_direction": self.cut_direction,
-            "center_position": self.center_position,
-            "bunching_number": self.bunching_number,
-            "bunching_step": self.bunching_step,
+            "pivot_coordinate": self.pivot_coordinate,
+            "steps_number": self.steps_number,
         }
