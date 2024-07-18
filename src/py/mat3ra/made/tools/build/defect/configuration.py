@@ -124,8 +124,8 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
     cut_direction: List[int] = [0, 0, 1]
     center_position: List[float] = [0.5, 0.5]
-    bunching_number: int = 0  # number of layers to bunch
-    bunching_step: int = 2  # Sideways layers
+    bunching_number: int = 1  # number of steps to bunch
+    bunching_step: float = 2.0  # min terrace width for each step in angstrom
 
     @property
     def _json(self):
