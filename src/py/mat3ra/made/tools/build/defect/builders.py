@@ -1,5 +1,6 @@
 from typing import List, Callable, Optional
 
+import numpy as np
 from pydantic import BaseModel
 from mat3ra.made.material import Material
 
@@ -16,6 +17,7 @@ from ...modify import (
     filter_material_by_ids,
     filter_by_box,
     filter_by_condition_on_coordinates,
+    filter_by_triangle_projection,
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
@@ -26,7 +28,7 @@ from ...analyze import (
     get_closest_site_id_from_coordinate_and_element,
 )
 from ....utils import get_center_of_coordinates
-from ...utils import transform_coordinate_to_supercell
+from ...utils import transform_coordinate_to_supercell, CoordinateConditionBuilder
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
@@ -371,3 +373,73 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
             thickness=configuration.thickness,
             use_cartesian_coordinates=configuration.use_cartesian_coordinates,
         )
+
+
+class TerraceIslandSlabDefectBuilder(IslandSlabDefectBuilder):
+    def create_terrace(
+        self,
+        material: Material,
+        cut_direction: List[int] = [0, 0, 1],
+        center_position: List[float] = [0.5, 0.5],
+        bunching_number: int = 1,
+        bunching_step: float = 2.0,
+        use_cartesian_coordinates: bool = False,
+    ) -> List[Material]:
+        """
+        Create a terrace at the specified position on the surface of the material.
+
+        Args:
+            material: The material to add the terrace to.
+            cut_direction: The direction of the cut in lattice directions.
+            center_position: The center position of the terrace.
+            bunching_number: The number of steps to bunch.
+            bunching_step: The minimum terrace width for each step in angstrom.
+            use_cartesian_coordinates: Whether to use Cartesian coordinates for the center position.
+        Returns:
+            The material with the terrace added.
+        """
+        new_material = material.clone()
+        original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=False)
+        material_with_additional_layers = self.create_material_with_additional_layers(new_material, 1)
+        added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
+
+        # Convert cut direction to Cartesian and compute slope and intercept
+        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), cut_direction)[
+            :2
+        ]  # Get 2D vector
+        slope = direction_vector[1] / direction_vector[0]
+        intercept = center_position[1] - slope * center_position[0]
+
+        # Calculate intersection points with x=0 and y=0
+        y_intercept = intercept  # This is where line crosses y-axis
+        x_intercept = -intercept / slope  # Solve for x when y=0
+
+        # Determine the additional vertex based on vector polarity
+        corner_vertex = [0, 0] if direction_vector[0] > 0 else [1, 1]
+
+        # Define the triangle vertices
+        triangle_vertices = [
+            [0, y_intercept],  # Intersection with y-axis
+            [x_intercept, 0],  # Intersection with x-axis
+            corner_vertex,  # Either [0,0] or [1,1]
+        ]
+
+        coordinate1 = triangle_vertices[0]
+        coordinate2 = triangle_vertices[1]
+        coordinate3 = triangle_vertices[2]
+
+        atoms_within_terrace = filter_by_triangle_projection(
+            material=material_with_additional_layers,
+            coordinate_1=coordinate1,
+            coordinate_2=coordinate2,
+            coordinate_3=coordinate3,
+        )
+
+        # Filter atoms in the added layers
+        terrace_material = filter_by_box(
+            material=atoms_within_terrace,
+            min_coordinate=[0, 0, original_max_z],
+            max_coordinate=[1, 1, added_layers_max_z],
+        )
+
+        return [self.merge_slab_and_defect(terrace_material, new_material)]
