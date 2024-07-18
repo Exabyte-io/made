@@ -175,14 +175,14 @@ def is_coordinate_in_triangular_prism(
     coordinate_2.extend([0] * (3 - len(coordinate_2)))
     coordinate_3.extend([0] * (3 - len(coordinate_3)))
 
-    coordinate = np.array(coordinate)
+    np_coordinate = np.array(coordinate)
     v1 = np.array(coordinate_1)
     v2 = np.array(coordinate_2)
     v3 = np.array(coordinate_3)
 
     v2_v1 = v2 - v1
     v3_v1 = v3 - v1
-    coordinate_v1 = coordinate - v1
+    coordinate_v1 = np_coordinate - v1
 
     # Compute dot products for the barycentric coordinates
     d00 = np.dot(v2_v1, v2_v1)
@@ -197,7 +197,7 @@ def is_coordinate_in_triangular_prism(
     w = (d00 * d21 - d01 * d20) / denom
     u = 1.0 - v - w
 
-    return (u >= 0) and (v >= 0) and (w >= 0) and (u + v + w <= 1) and (min_z <= coordinate[2] <= max_z)
+    return (u >= 0) and (v >= 0) and (w >= 0) and (u + v + w <= 1) and (min_z <= np_coordinate[2] <= max_z)
 
 
 def is_coordinate_behind_plane(
@@ -258,9 +258,9 @@ class CoordinateConditionBuilder:
         condition_json = {"type": condition_type, **kwargs}
         return lambda coordinate: evaluation_func(coordinate, **kwargs), condition_json
 
-    def cylinder(
-        self, center_position: List[float] = [0.5, 0.5], radius: float = 0.25, min_z: float = 0, max_z: float = 1
-    ):
+    def cylinder(self, center_position=None, radius: float = 0.25, min_z: float = 0, max_z: float = 1):
+        if center_position is None:
+            center_position = [0.5, 0.5]
         return self.create_condition(
             condition_type="cylinder",
             evaluation_func=is_coordinate_in_cylinder,
@@ -270,7 +270,9 @@ class CoordinateConditionBuilder:
             max_z=max_z,
         )
 
-    def sphere(self, center_position: List[float] = [0.5, 0.5, 0.5], radius: float = 0.25):
+    def sphere(self, center_position=None, radius: float = 0.25):
+        if center_position is None:
+            center_position = [0.5, 0.5, 0.5]
         return self.create_condition(
             condition_type="sphere",
             evaluation_func=is_coordinate_in_sphere,
@@ -278,25 +280,29 @@ class CoordinateConditionBuilder:
             radius=radius,
         )
 
-    def prism(
+    def triangular_prism(
         self,
-        coordinate_1: List[float] = [0, 0],
-        coordinate_2: List[float] = [1, 0],
-        coordinate_3: List[float] = [0, 1],
+        position_on_surface_1: List[float] = [0, 0],
+        position_on_surface_2: List[float] = [1, 0],
+        position_on_surface_3: List[float] = [0, 1],
         min_z: float = 0,
         max_z: float = 1,
     ):
         return self.create_condition(
             condition_type="prism",
             evaluation_func=is_coordinate_in_triangular_prism,
-            coordinate_1=coordinate_1,
-            coordinate_2=coordinate_2,
-            coordinate_3=coordinate_3,
+            coordinate_1=position_on_surface_1,
+            coordinate_2=position_on_surface_2,
+            coordinate_3=position_on_surface_3,
             min_z=min_z,
             max_z=max_z,
         )
 
-    def box(self, min_coordinate: List[float] = [0, 0, 0], max_coordinate: List[float] = [1, 1, 1]):
+    def box(self, min_coordinate=None, max_coordinate=None):
+        if max_coordinate is None:
+            max_coordinate = [1, 1, 1]
+        if min_coordinate is None:
+            min_coordinate = [0, 0, 0]
         return self.create_condition(
             condition_type="box",
             evaluation_func=is_coordinate_in_box,

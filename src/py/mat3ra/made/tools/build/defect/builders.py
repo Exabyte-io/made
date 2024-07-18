@@ -416,7 +416,7 @@ class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
 
         direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), cut_direction)
 
-        condition = CoordinateConditionBuilder().plane(
+        condition, json = CoordinateConditionBuilder().plane(
             plane_normal=direction_vector,
             plane_point_coordinate=pivot_coordinate,
         )
