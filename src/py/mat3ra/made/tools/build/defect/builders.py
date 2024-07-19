@@ -463,7 +463,8 @@ class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
         length = np.linalg.norm(
             np.dot(np.array(material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
         )
-        angle = -np.arccos(height_cart / np.sqrt(length**2 + height**2)) * 180 / np.pi
+
+        angle = -np.arcsin(height_cart / np.sqrt(length**2 + height**2)) * 180 / np.pi
 
         return [self._rotate_material(material=result_material, axis=normalized_rotation_axis, angle=angle)]
 
