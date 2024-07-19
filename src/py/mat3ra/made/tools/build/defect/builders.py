@@ -16,10 +16,11 @@ from ...modify import (
     add_vacuum,
     filter_material_by_ids,
     filter_by_box,
-    filter_by_condition_on_coordinates, translate_to_z_level,
+    filter_by_condition_on_coordinates,
+    translate_to_z_level,
 )
 from ...build import BaseBuilder
-from ...convert import to_pymatgen
+from ...convert import to_pymatgen, to_ase, from_ase
 from ...analyze import (
     get_nearest_neighbors_atom_indices,
     get_atomic_coordinates_extremum,
@@ -383,6 +384,23 @@ class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
     _ConfigurationType: type(TerraceSlabDefectConfiguration) = TerraceSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
+    def _rotate_material(self, material: Material, axis: List[int], angle: float) -> Material:
+        """
+        Rotate the material around a given axis by a specified angle.
+
+        Args:
+            material (Material): The material to rotate.
+            axis (List[int]): The axis to rotate around, expressed as [x, y, z].
+            angle (float): The angle of rotation in degrees.
+        Returns:
+            Atoms: The rotated material.
+        """
+        atoms = to_ase(material)
+        atoms.rotate(v=axis, a=angle, center="COM")
+        atoms.wrap()
+
+        return Material(from_ase(atoms))
+
     def create_terrace(
         self,
         material: Material,
@@ -447,7 +465,7 @@ class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
         )
         angle = -np.arccos(height_cart / np.sqrt(length**2 + height**2)) * 180 / np.pi
 
-        return [rotate_material(material=result_material, axis=normalized_rotation_axis, angle=angle)\
+        return [self.rotate_material(material=result_material, axis=normalized_rotation_axis, angle=angle)]
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return self.create_terrace(
