@@ -16,7 +16,7 @@ from ...modify import (
     add_vacuum,
     filter_material_by_ids,
     filter_by_box,
-    filter_by_condition_on_coordinates,
+    filter_by_condition_on_coordinates, translate_to_z_level,
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
@@ -434,7 +434,20 @@ class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
             max_coordinate=[1, 1, added_layers_max_z],
         )
 
-        return [self.merge_slab_and_defect(terrace_material, new_material)]
+        result_material = self.merge_slab_and_defect(new_material, terrace_material)
+        result_material = translate_to_z_level(result_material, "center")
+        rotation_axis = np.cross([0, 0, 1], direction_vector)
+        normalized_rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
+        height = added_layers_max_z - original_max_z  # height of the terrace
+        height_cart = result_material.basis.cell.convert_point_to_cartesian([0, 0, height])[2]
+        # length of the material in the direction of the cut
+        normalized_direction_vector = direction_vector / np.linalg.norm(direction_vector)
+        length = np.linalg.norm(
+            np.dot(np.array(material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
+        )
+        angle = -np.arccos(height_cart / np.sqrt(length**2 + height**2)) * 180 / np.pi
+
+        return [rotate_material(material=result_material, axis=normalized_rotation_axis, angle=angle)\
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return self.create_terrace(
