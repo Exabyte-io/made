@@ -184,6 +184,15 @@ Conventions:
 
 - The "tools" module has external dependencies on "pymatgen" and "ase" packages and so is meant as optional. When implementing new functionality, the use of ASE is recommended over pymatgen for compatibility purposes.
 
+#### 5.2.3. Developing locally for pyodide
+
+To use the package in a pyodide environment, the package must be built and served locally. This can be done as follows:
+
+```bash
+python -m mat3ra.utils.wheel_server
+```
+Then copy the URL or code snippet from the terminal to the notebook to install the package in the pyodide environment.
+
 ### 5.3. Known Issues
 
 #### 5.3.1. JavaScript/TypeScript
