@@ -465,7 +465,7 @@ class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
         )
         angle = -np.arccos(height_cart / np.sqrt(length**2 + height**2)) * 180 / np.pi
 
-        return [self.rotate_material(material=result_material, axis=normalized_rotation_axis, angle=angle)]
+        return [self._rotate_material(material=result_material, axis=normalized_rotation_axis, angle=angle)]
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return self.create_terrace(
