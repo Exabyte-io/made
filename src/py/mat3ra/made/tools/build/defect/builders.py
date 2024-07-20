@@ -380,7 +380,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         )
 
 
-class TerraceIslandSlabDefectBuilder(SlabDefectBuilder):
+class TerraceSlabDefectBuilder(SlabDefectBuilder):
     _ConfigurationType: type(TerraceSlabDefectConfiguration) = TerraceSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
