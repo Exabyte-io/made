@@ -18,7 +18,7 @@ dependencies = [
     # add requirements here
     # new verison of numpy==2.0.0 is not handled by pymatgen yet
     "numpy<=1.26.4",
-    "mat3ra-utils@git+https://github.com/exabyte-io/utils.git@e19479b5ff4913e600303b3977324bf243a842e0",
+    "mat3ra-utils@git+https://github.com/exabyte-io/utils.git@dd1eddbfcaddadc7aaf12da53eb1bc6a65a90964",
     "mat3ra-esse",
     "mat3ra-code",
 ]
@@ -55,7 +55,6 @@ all = [
 # Entrypoint scripts can be defined here, see examples below.
 [project.scripts]
 # my-script = "my_package.my_module:my_function"
-wheel_server = "mat3ra.utils.wheel_server:main"
 
 
 [build-system]
