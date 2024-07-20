@@ -384,6 +384,17 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
     _ConfigurationType: type(TerraceSlabDefectConfiguration) = TerraceSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
+    def _calculate_rotation_parameters(self, direction_vector, material_with_additional_layers, original_max_z):
+        rotation_axis = np.cross([0, 0, 1], direction_vector)
+        normalized_rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
+        added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
+        height_cart = material_with_additional_layers.basis.cell.convert_point_to_cartesian(
+            [0, 0, added_layers_max_z - original_max_z]
+        )[2]
+        length = np.linalg.norm(direction_vector)
+        angle = -np.arcsin(height_cart / np.sqrt(length**2 + height_cart**2)) * 180 / np.pi
+        return normalized_rotation_axis, angle
+
     def _rotate_material(self, material: Material, axis: List[int], angle: float) -> Material:
         """
         Rotate the material around a given axis by a specified angle.
@@ -421,12 +432,10 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         Returns:
             The material with the terrace added.
         """
-
         new_material = material.clone()
         original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=False)
         material_with_additional_layers = self.create_material_with_additional_layers(new_material, steps_number)
         added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
-
         if cut_direction is None:
             cut_direction = [1, 0, 0]
         if pivot_coordinate is None:
@@ -434,7 +443,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
 
         direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), cut_direction)
 
-        condition, json = CoordinateConditionBuilder().plane(
+        condition, _ = CoordinateConditionBuilder().plane(
             plane_normal=direction_vector,
             plane_point_coordinate=pivot_coordinate,
         )
@@ -445,7 +454,6 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             use_cartesian_coordinates=use_cartesian_coordinates,
         )
 
-        # Filter atoms in the added layers
         terrace_material = filter_by_box(
             material=atoms_within_terrace,
             min_coordinate=[0, 0, original_max_z],
@@ -454,19 +462,12 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
 
         result_material = self.merge_slab_and_defect(new_material, terrace_material)
         result_material = translate_to_z_level(result_material, "center")
-        rotation_axis = np.cross([0, 0, 1], direction_vector)
-        normalized_rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
-        height = added_layers_max_z - original_max_z  # height of the terrace
-        height_cart = result_material.basis.cell.convert_point_to_cartesian([0, 0, height])[2]
-        # length of the material in the direction of the cut
-        normalized_direction_vector = direction_vector / np.linalg.norm(direction_vector)
-        length = np.linalg.norm(
-            np.dot(np.array(material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
+
+        rotation_axis, angle = self._calculate_rotation_parameters(
+            direction_vector, material_with_additional_layers, original_max_z
         )
 
-        angle = -np.arcsin(height_cart / np.sqrt(length**2 + height**2)) * 180 / np.pi
-
-        return [self._rotate_material(material=result_material, axis=normalized_rotation_axis, angle=angle)]
+        return [self._rotate_material(material=result_material, axis=rotation_axis, angle=angle)]
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return self.create_terrace(
