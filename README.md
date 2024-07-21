@@ -186,12 +186,12 @@ Conventions:
 
 #### 5.2.3. Developing locally for pyodide
 
-To use the package in a pyodide environment, the package must be built and served locally. This can be done as follows:
+To build and serve locally, use the following command:
 
 ```bash
 python -m mat3ra.utils.wheel_server
 ```
-Then copy the URL or code snippet from the terminal to the notebook to install the package in the pyodide environment.
+More details can be found in the [script documentation](https://github.com/Exabyte-io/utils/blob/main/README.md).
 
 ### 5.3. Known Issues
 
