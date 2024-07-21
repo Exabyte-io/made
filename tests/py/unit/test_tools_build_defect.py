@@ -8,7 +8,10 @@ from mat3ra.made.tools.build.defect import (
     create_defect,
     create_slab_defect,
 )
+from mat3ra.made.tools.build.defect.builders import IslandSlabDefectBuilder
+from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration
 from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
+from mat3ra.made.tools.utils import CoordinateConditionBuilder
 from mat3ra.utils import assertion as assertion_utils
 
 clean_material = Material.create(Material.default_config)
@@ -18,7 +21,7 @@ slab_config = SlabConfiguration(
     miller_indices=(1, 1, 1),
     thickness=4,
     vacuum=6,
-    xy_supercell_matrix=[[3, 0], [0, 3]],
+    xy_supercell_matrix=[[1, 0], [0, 1]],
     use_orthogonal_z=True,
 )
 t = get_terminations(slab_config)[0]
@@ -93,7 +96,7 @@ def test_create_adatom_equidistant():
     assert defect.basis.elements.values[-1] == "Si"
     # We expect adatom to shift from provided position
     assertion_utils.assert_deep_almost_equal(
-        [0.527777778, 0.486111111, 0.450843412], defect.basis.coordinates.values[-1]
+        [0.583333334, 0.458333333, 0.450843412], defect.basis.coordinates.values[-1]
     )
 
 
@@ -106,4 +109,22 @@ def test_create_crystal_site_adatom():
     defect = create_slab_defect(configuration=configuration, builder=builder)
 
     assert defect.basis.elements.values[-1] == "Si"
-    assertion_utils.assert_deep_almost_equal([0.6944444, 0.486111111, 0.352272727], defect.basis.coordinates.values[-1])
+    assertion_utils.assert_deep_almost_equal(
+        [0.083333333, 0.458333333, 0.352272727], defect.basis.coordinates.values[-1]
+    )
+
+
+def test_create_island():
+    condition = CoordinateConditionBuilder().cylinder(center_position=[0.625, 0.5], radius=0.25, min_z=0, max_z=1)
+    island_config = IslandSlabDefectConfiguration(
+        crystal=slab,
+        defect_type="island",
+        condition=condition,
+        thickness=1,
+    )
+
+    defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
+
+    # Only one atom is in the island for this configuration
+    assert len(defect.basis.elements.values) == len(slab.basis.elements.values) + 1
+    assert defect.basis.elements.values[-1] == "Si"

@@ -1,4 +1,6 @@
 from typing import List, Tuple, Any
+
+import numpy as np
 from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
@@ -28,7 +30,7 @@ class SlabConfiguration(BaseModel, InMemoryEntity):
     miller_indices: Tuple[int, int, int] = (0, 0, 1)
     thickness: int = 1
     vacuum: int = 1
-    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
+    xy_supercell_matrix: List[List[int]] = np.eye(2).tolist()
     use_conventional_cell: bool = True
     use_orthogonal_z: bool = False
     make_primitive: bool = False
@@ -39,11 +41,13 @@ class SlabConfiguration(BaseModel, InMemoryEntity):
         miller_indices=miller_indices,
         thickness=thickness,
         vacuum=vacuum,
-        xy_supercell_matrix=xy_supercell_matrix,
+        xy_supercell_matrix=None,
         use_conventional_cell=use_conventional_cell,
         use_orthogonal_z=use_orthogonal_z,
         make_primitive=make_primitive,
     ):
+        if xy_supercell_matrix is None:
+            xy_supercell_matrix = np.eye(2).tolist()
         bulk = bulk or Material(Material.default_config)
         __bulk_pymatgen_structure = (
             PymatgenSpacegroupAnalyzer(to_pymatgen(bulk)).get_conventional_standard_structure()

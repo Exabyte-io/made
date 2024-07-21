@@ -184,6 +184,15 @@ Conventions:
 
 - The "tools" module has external dependencies on "pymatgen" and "ase" packages and so is meant as optional. When implementing new functionality, the use of ASE is recommended over pymatgen for compatibility purposes.
 
+#### 5.2.3. Developing locally for pyodide
+
+To build and serve locally, use the following command:
+
+```bash
+wheel_server
+```
+More details can be found in the [script documentation](https://github.com/Exabyte-io/utils/blob/main/README.md).
+
 ### 5.3. Known Issues
 
 #### 5.3.1. JavaScript/TypeScript
