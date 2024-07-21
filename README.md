@@ -189,7 +189,7 @@ Conventions:
 To build and serve locally, use the following command:
 
 ```bash
-python -m mat3ra.utils.wheel_server
+wheel_server
 ```
 More details can be found in the [script documentation](https://github.com/Exabyte-io/utils/blob/main/README.md).
 
