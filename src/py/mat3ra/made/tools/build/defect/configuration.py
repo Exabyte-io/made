@@ -167,7 +167,7 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
 
 class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
-    cut_direction: List[int] = [1, 0, 0]
+    cut_direction: List[float] = [1, 0, 0]
     pivot_coordinate: List[float] = [0.5, 0.5, 0.5]
     steps_number: int = 1  # number of steps to bunch
 

@@ -384,6 +384,44 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
     _ConfigurationType: type(TerraceSlabDefectConfiguration) = TerraceSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
+    def _calculate_cut_vector_and_projection(self, material, cut_direction):
+        np_cut_direction = np.array(cut_direction)
+        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), np_cut_direction)
+        normalized_direction_vector = direction_vector / np.linalg.norm(direction_vector)
+        cut_direction_xy_proj_cart = np.linalg.norm(
+            np.dot(np.array(material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
+        )
+        return normalized_direction_vector, cut_direction_xy_proj_cart
+
+    def _calcualte_height(self, material, material_with_additional_layers):
+        original_max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=True)
+        added_layers_max_z = get_atomic_coordinates_extremum(
+            material_with_additional_layers, use_cartesian_coordinates=True
+        )
+        height_cart = added_layers_max_z - original_max_z
+        return height_cart
+
+    def _calculate_rotation_parameters(self, material, cut_direction, height_cart):
+        """Calculate the necessary rotation angle and axis."""
+        normalized_direction_vector, cut_direction_xy_proj_cart = self._calculate_cut_vector_and_projection(
+            material, cut_direction
+        )
+        angle = np.arctan(height_cart / cut_direction_xy_proj_cart) * 180 / np.pi
+        normalized_rotation_axis = np.cross(normalized_direction_vector, [0, 0, 1]).tolist()
+        return normalized_rotation_axis, angle, cut_direction_xy_proj_cart
+
+    def _adjust_lattice(self, result_material, delta_length, normalized_direction_vector):
+        """Adjust the lattice vectors to accommodate the new structure dimensions."""
+        vector_a = np.array(result_material.basis.cell.vector1)
+        vector_b = np.array(result_material.basis.cell.vector2)
+        delta_a_cart = np.dot(vector_a, normalized_direction_vector) * delta_length / np.linalg.norm(vector_a)
+        delta_b_cart = np.dot(vector_b, normalized_direction_vector) * delta_length / np.linalg.norm(vector_b)
+        vector_a_prime = vector_a + delta_a_cart * vector_a / np.linalg.norm(vector_a)
+        vector_b_prime = vector_b + delta_b_cart * vector_b / np.linalg.norm(vector_b)
+        result_material.basis.cell.vector1 = vector_a_prime
+        result_material.basis.cell.vector2 = vector_b_prime
+        return result_material
+
     def _rotate_material(self, material: Material, axis: List[int], angle: float) -> Material:
         """
         Rotate the material around a given axis by a specified angle.
@@ -404,10 +442,11 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
     def create_terrace(
         self,
         material: Material,
-        cut_direction: Optional[List[int]] = None,
+        cut_direction: Optional[List[float]] = None,
         pivot_coordinate: Optional[List[float]] = None,
         steps_number: int = 1,
         use_cartesian_coordinates: bool = False,
+        rotate_to_match_pbc: bool = True,
     ) -> List[Material]:
         """
         Create a terrace at the specified position on the surface of the material.
@@ -418,6 +457,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             pivot_coordinate: The center position of the terrace.
             steps_number: The number of steps to bunch.
             use_cartesian_coordinates: Whether to use Cartesian coordinates for the center position.
+            rotate_to_match_pbc: Whether to rotate the material to match the periodic boundary conditions.
         Returns:
             The material with the terrace added.
         """
@@ -428,66 +468,32 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
 
         new_material = material.clone()
         material_with_additional_layers = self.create_material_with_additional_layers(new_material, steps_number)
-        np_cut_direction = np.array(cut_direction)
-        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), np_cut_direction)
 
+        direction_vector = self._calculate_cut_vector_and_projection(material_with_additional_layers, cut_direction)
         condition, json = CoordinateConditionBuilder().plane(
-            plane_normal=direction_vector,
+            plane_normal=cut_direction,
             plane_point_coordinate=pivot_coordinate,
         )
-
         atoms_within_terrace = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
             condition=condition,
             use_cartesian_coordinates=use_cartesian_coordinates,
         )
 
-        # Calculate the height of the terrace
-        original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
-        added_layers_max_z = get_atomic_coordinates_extremum(
-            material_with_additional_layers, use_cartesian_coordinates=True
-        )
-        height_cart = added_layers_max_z - original_max_z
-
-        # Create material with terrace
         result_material = self.merge_slab_and_defect(new_material, atoms_within_terrace)
         result_material = translate_to_z_level(result_material, "center")
 
-        # Calcualte the angle and axis of rotation
-        normalized_direction_vector = direction_vector / np.linalg.norm(direction_vector)
-        cut_direction_xy_proj_cart = np.linalg.norm(
-            np.dot(np.array(material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
-        )
-        angle = np.arctan(height_cart / cut_direction_xy_proj_cart) * 180 / np.pi
-        normalized_rotation_axis = np.cross(normalized_direction_vector, [0, 0, 1]).tolist()
+        if rotate_to_match_pbc:
+            terrace_height_cart = self._calcualte_height(material, material_with_additional_layers)
+            normalized_rotation_axis, angle, cut_direction_xy_proj_cart = self._calculate_rotation_parameters(
+                result_material, direction_vector, terrace_height_cart
+            )
+            hypotenuse = np.linalg.norm(np.array([terrace_height_cart, cut_direction_xy_proj_cart]))
+            delta_length = hypotenuse - cut_direction_xy_proj_cart
+            result_material = self._adjust_lattice(result_material, delta_length, direction_vector)
+            result_material = self._rotate_material(result_material, normalized_rotation_axis, angle)
 
-        # Calculate adjustments to the lattice to have matching pbc
-        hypotenuse = np.linalg.norm(np.array([height_cart, cut_direction_xy_proj_cart]))
-        delta_length = hypotenuse - cut_direction_xy_proj_cart
-
-        vector_a = np.array(result_material.basis.cell.vector1)
-        vector_b = np.array(result_material.basis.cell.vector2)
-
-        delta_a_cart = np.dot(vector_a, normalized_direction_vector) * delta_length / np.linalg.norm(vector_a)
-        delta_b_cart = np.dot(vector_b, normalized_direction_vector) * delta_length / np.linalg.norm(vector_b)
-
-        vector_a_prime = vector_a + delta_a_cart * vector_a / np.linalg.norm(vector_a)
-        vector_b_prime = vector_b + delta_b_cart * vector_b / np.linalg.norm(vector_b)
-
-        # Adjust basis and lattice
-        new_basis_cart = result_material.basis.clone()
-        new_basis_cart.to_cartesian()
-        new_basis_cart.cell.vector1 = vector_a_prime
-        new_basis_cart.cell.vector2 = vector_b_prime
-
-        new_lattice = result_material.lattice.clone()
-        new_lattice.a = new_lattice.a + delta_a_cart
-        new_lattice.b = new_lattice.b + delta_b_cart
-
-        result_material.lattice = new_lattice
-        result_material.basis = new_basis_cart
-
-        return [self._rotate_material(material=result_material, axis=normalized_rotation_axis, angle=angle)]
+        return [result_material]
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return self.create_terrace(
