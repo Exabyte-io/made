@@ -166,6 +166,19 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
 
 
 class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
+    """
+    Configuration for a terrace slab defect.
+
+    Args:
+        crystal (Material): The Material object (must be a created slab).
+        defect_type (SlabDefectTypeEnum): The type of the defect.
+        cut_direction (List[float]): The direction of the cut as lattice vector, can be thought as a normal to the plane
+        that cuts the slab with added number of layers.
+        pivot_coordinate (List[float]): The pivot coordinate: the point in the unit cell
+        where the normal of the cut plane passes through.
+        steps_number (int): The number of steps to bunch (number of added layers).
+    """
+
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
     cut_direction: List[float] = [1, 0, 0]
     pivot_coordinate: List[float] = [0.5, 0.5, 0.5]
