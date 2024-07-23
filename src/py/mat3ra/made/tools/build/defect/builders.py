@@ -396,11 +396,11 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         height_cart = added_layers_max_z - original_max_z
         return height_cart
 
-    def _calculate_rotation_parameters(self, original_material, result_material, normalized_direction_vector):
+    def _calculate_rotation_parameters(self, original_material, new_material, normalized_direction_vector):
         """Calculate the necessary rotation angle and axis."""
-        height_cart = self._calcualte_height(original_material, result_material)
+        height_cart = self._calcualte_height(original_material, new_material)
         cut_direction_xy_proj_cart = np.linalg.norm(
-            np.dot(np.array(result_material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
+            np.dot(np.array(new_material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
         )
         # Slope of the terrace along the cut direction
         hypotenuse = np.linalg.norm([height_cart, cut_direction_xy_proj_cart])
@@ -409,25 +409,31 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         delta_length = hypotenuse - cut_direction_xy_proj_cart
         return angle, normalized_rotation_axis, delta_length
 
-    def _adjust_lattice(self, result_material, delta_length, normalized_direction_vector):
+    def _increase_lattice_size(self, material, length_increase, direction_of_increase):
         """Adjust the lattice vectors to accommodate the new structure dimensions."""
-        vector_a = np.array(result_material.basis.cell.vector1)
-        vector_b = np.array(result_material.basis.cell.vector2)
-        delta_a_cart = np.dot(vector_a, normalized_direction_vector) * delta_length / np.linalg.norm(vector_a)
-        delta_b_cart = np.dot(vector_b, normalized_direction_vector) * delta_length / np.linalg.norm(vector_b)
+        vector_a, vector_b = np.array(material.basis.cell.vector1), np.array(material.basis.cell.vector2)
+        delta_a_cart = np.dot(vector_a, direction_of_increase) * length_increase / np.linalg.norm(vector_a)
+        delta_b_cart = np.dot(vector_b, direction_of_increase) * length_increase / np.linalg.norm(vector_b)
         vector_a_prime = vector_a + delta_a_cart * vector_a / np.linalg.norm(vector_a)
         vector_b_prime = vector_b + delta_b_cart * vector_b / np.linalg.norm(vector_b)
 
-        cart_basis = result_material.basis.copy()
+        cart_basis = material.basis.copy()
         cart_basis.to_cartesian()
         cart_basis.cell.vector1 = vector_a_prime
         cart_basis.cell.vector2 = vector_b_prime
-        new_lattice = result_material.lattice.clone()
+        material.basis = cart_basis
+
+        new_lattice = material.lattice.clone()
         new_lattice.a = new_lattice.a + delta_a_cart
         new_lattice.b = new_lattice.b + delta_b_cart
-        result_material.lattice = new_lattice
-        result_material.basis = cart_basis
-        return result_material
+        material.lattice = new_lattice
+        return material
+
+    def _update_material_name(self, material, configuration):
+        updated_material = super()._update_material_name(material, configuration)
+        new_name = f"{updated_material.name}, {configuration.steps_number}-step Terrace {configuration.cut_direction}"
+        updated_material.name = new_name
+        return updated_material
 
     def _rotate_material(self, material: Material, axis: List[int], angle: float) -> Material:
         """
@@ -485,21 +491,20 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             plane_normal=normalized_direction_vector,
             plane_point_coordinate=pivot_coordinate,
         )[0]
-
         atoms_within_terrace = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
             condition=condition,
             use_cartesian_coordinates=use_cartesian_coordinates,
         )
+        merged_material = self.merge_slab_and_defect(new_material, atoms_within_terrace)
 
-        result_material = self.merge_slab_and_defect(new_material, atoms_within_terrace)
         angle, normalized_rotation_axis, delta_length = self._calculate_rotation_parameters(
-            material, result_material, normalized_direction_vector
+            material, merged_material, normalized_direction_vector
         )
-        result_material = translate_to_z_level(result_material, "center")
+        result_material = translate_to_z_level(merged_material, "center")
 
         if rotate_to_match_pbc:
-            adjusted_material = self._adjust_lattice(result_material, delta_length, normalized_direction_vector)
+            adjusted_material = self._increase_lattice_size(result_material, delta_length, normalized_direction_vector)
             result_material = self._rotate_material(
                 material=adjusted_material, axis=normalized_rotation_axis, angle=angle
             )
