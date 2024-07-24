@@ -207,8 +207,10 @@ class PointDefectPairConfiguration(BaseModel):
     Configuration for a pair of point defects.
 
     Args:
-        primary_defect_configuration (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]): The first defect.
-        secondary_defect_configuration (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]): The second defect.
+        primary_defect_configuration (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]):
+        The first defect.
+        secondary_defect_configuration (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]):
+        The second defect.
         radius (float): The radius from the first defect to the second defect.
     """
 

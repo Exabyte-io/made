@@ -324,11 +324,10 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
 
 
 class PointDefectPairBuilder(PointDefectBuilder):
-    _ConfigurationType: type(PointDefectPairConfiguration) = PointDefectPairConfiguration # type: ignore
+    _ConfigurationType: type(PointDefectPairConfiguration) = PointDefectPairConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
-    def _create_defect(self, defect_configuration: PointDefectConfiguration = None) -> Material:
-
+    def _create_defect(self, defect_configuration: PointDefectConfiguration) -> Material:
         defect_builder: Union[
             VacancyPointDefectBuilder,
             SubstitutionPointDefectBuilder,
@@ -346,7 +345,6 @@ class PointDefectPairBuilder(PointDefectBuilder):
         else:
             raise ValueError(f"Unsupported defect type: {defect_configuration.defect_type}")
 
-        # Use the defect builder to add the defect to the material
         return defect_builder.get_material(defect_configuration)
 
     def create_defect_pair(
