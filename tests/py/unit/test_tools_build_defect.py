@@ -8,8 +8,8 @@ from mat3ra.made.tools.build.defect import (
     create_defect,
     create_slab_defect,
 )
-from mat3ra.made.tools.build.defect.builders import IslandSlabDefectBuilder
-from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration
+from mat3ra.made.tools.build.defect.builders import IslandSlabDefectBuilder, TerraceSlabDefectBuilder
+from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration, TerraceSlabDefectConfiguration
 from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
 from mat3ra.made.tools.utils import CoordinateConditionBuilder
 from mat3ra.utils import assertion as assertion_utils
@@ -128,3 +128,25 @@ def test_create_island():
     # Only one atom is in the island for this configuration
     assert len(defect.basis.elements.values) == len(slab.basis.elements.values) + 1
     assert defect.basis.elements.values[-1] == "Si"
+
+
+def test_create_terrace():
+    slab_config = SlabConfiguration(
+        bulk=clean_material,
+        miller_indices=(0, 0, 1),
+        thickness=3,
+        vacuum=3,
+        xy_supercell_matrix=[[2, 0], [0, 1]],
+        use_orthogonal_z=True,
+    )
+    t = get_terminations(slab_config)[0]
+    slab = create_slab(slab_config, t)
+
+    config = TerraceSlabDefectConfiguration(
+        crystal=slab,
+        cut_direction=[1, 0, 0],
+        pivot_coordinate=[0.5, 0.5, 0.5],
+        steps_number=1,
+    )
+    new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
+    assertion_utils.assert_deep_almost_equal([0.720082355, 0.5, 0.461401798], new_slab.basis.coordinates.values[42])
