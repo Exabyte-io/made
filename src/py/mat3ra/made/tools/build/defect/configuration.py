@@ -1,4 +1,4 @@
-from typing import Optional, List, Any, Callable, Dict, Tuple
+from typing import Optional, List, Any, Callable, Dict, Tuple, Union
 from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
@@ -199,4 +199,44 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
             "steps_number": self.steps_number,
             "use_cartesian_coordinates": self.use_cartesian_coordinates,
             "rotate_to_match_pbc": self.rotate_to_match_pbc,
+        }
+
+
+class DefectPairConfiguration(BaseModel):
+    """
+    Configuration for a pair of point defects.
+
+    Args:
+        defect1 (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]): The first defect.
+        defect2 (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]): The second defect.
+        radius (float): The radius from the first defect to the second defect.
+    """
+
+    defect1: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
+    defect2: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
+    radius: float
+
+    @classmethod
+    def from_radius(
+        cls,
+        defect1: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
+        defect2: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
+        radius: float,
+    ):
+        # nudging the defect2 coordinate from it's set position to be within radius of defect1 coordinate
+        defect2_coordinate = defect2.coordinate
+        defect1_coordinate = defect1.coordinate
+        vector = [defect2_coordinate[i] - defect1_coordinate[i] for i in range(3)]
+        magnitude = sum([vector[i] ** 2 for i in range(3)]) ** 0.5
+        scaled_vector = [vector[i] * radius / magnitude for i in range(3)]
+        nudged_coordinate = [defect1_coordinate[i] + scaled_vector[i] for i in range(3)]
+        defect2.coordinate = nudged_coordinate
+        return cls(defect1=defect1, defect2=defect2, radius=radius)
+
+    @property
+    def _json(self):
+        return {
+            "type": "DefectPairConfiguration",
+            "defect1": self.defect1.to_json(),
+            "defect2": self.defect2.to_json(),
         }
