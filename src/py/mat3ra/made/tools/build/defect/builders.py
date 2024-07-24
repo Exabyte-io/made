@@ -459,7 +459,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
     def create_terrace(
         self,
         material: Material,
-        cut_direction: Optional[List[float]] = None,
+        cut_direction: Optional[List[int]] = None,
         pivot_coordinate: Optional[List[float]] = None,
         steps_number: int = 1,
         use_cartesian_coordinates: bool = False,

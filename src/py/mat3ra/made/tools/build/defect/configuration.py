@@ -172,17 +172,21 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
     Args:
         crystal (Material): The Material object (must be a created slab).
         defect_type (SlabDefectTypeEnum): The type of the defect.
-        cut_direction (List[float]): The direction of the cut as lattice vector, can be thought as a normal to the plane
+        cut_direction (List[int]): The direction of the cut as lattice vector, can be thought as a normal to the plane
         that cuts the slab with added number of layers.
         pivot_coordinate (List[float]): The pivot coordinate: the point in the unit cell
         where the normal of the cut plane passes through.
         steps_number (int): The number of steps to bunch (number of added layers).
+        use_cartesian_coordinates (bool): The flag to use cartesian coordinates for coordinates and vectors.
+        rotate_to_match_pbc (bool): The flag to rotate the slab with a terrace to match periodic boundary conditions.
     """
 
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
-    cut_direction: List[float] = [1, 0, 0]
+    cut_direction: List[int] = [1, 0, 0]
     pivot_coordinate: List[float] = [0.5, 0.5, 0.5]
     steps_number: int = 1  # number of steps to bunch
+    use_cartesian_coordinates: bool = False
+    rotate_to_match_pbc: bool = True
 
     @property
     def _json(self):
@@ -193,4 +197,6 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
             "cut_direction": self.cut_direction,
             "pivot_coordinate": self.pivot_coordinate,
             "steps_number": self.steps_number,
+            "use_cartesian_coordinates": self.use_cartesian_coordinates,
+            "rotate_to_match_pbc": self.rotate_to_match_pbc,
         }
