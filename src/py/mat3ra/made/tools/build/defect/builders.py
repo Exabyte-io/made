@@ -1,4 +1,4 @@
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, Union
 
 import numpy as np
 from pydantic import BaseModel
@@ -38,6 +38,7 @@ from .configuration import (
     AdatomSlabPointDefectConfiguration,
     IslandSlabDefectConfiguration,
     TerraceSlabDefectConfiguration,
+    PointDefectPairConfiguration,
 )
 
 
@@ -320,6 +321,62 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         )
 
         return [self.merge_slab_and_defect(new_material, only_adatom_material)]
+
+
+class PointDefectPairBuilder(PointDefectBuilder):
+    _ConfigurationType: type(PointDefectPairConfiguration) = PointDefectPairConfiguration # type: ignore
+    _GeneratedItemType: Material = Material
+
+    def _create_defect(self, defect_configuration: PointDefectConfiguration = None) -> Material:
+
+        defect_builder: Union[
+            VacancyPointDefectBuilder,
+            SubstitutionPointDefectBuilder,
+            InterstitialPointDefectBuilder,
+            AdatomSlabDefectBuilder,
+        ]
+        if defect_configuration.defect_type == "vacancy":
+            defect_builder = VacancyPointDefectBuilder()
+        elif defect_configuration.defect_type == "substitution":
+            defect_builder = SubstitutionPointDefectBuilder()
+        elif defect_configuration.defect_type == "interstitial":
+            defect_builder = InterstitialPointDefectBuilder()
+        elif defect_configuration.defect_type == "adatom":
+            defect_builder = AdatomSlabDefectBuilder()
+        else:
+            raise ValueError(f"Unsupported defect type: {defect_configuration.defect_type}")
+
+        # Use the defect builder to add the defect to the material
+        return defect_builder.get_material(defect_configuration)
+
+    def create_defect_pair(
+        self,
+        primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
+        secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
+    ) -> Material:
+        """
+        Create a pair of point defects in the material.
+
+        Args:
+            primary_defect_configuration: The configuration of the first defect.
+            secondary_defect_configuration: The configuration of the second defect.
+
+        Returns:
+            Material: The material with both defects added.
+        """
+        primary_material = self._create_defect(primary_defect_configuration)
+        secondary_defect_configuration.crystal = primary_material
+        secondary_material = self._create_defect(secondary_defect_configuration)
+
+        return secondary_material
+
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        return [
+            self.create_defect_pair(
+                primary_defect_configuration=configuration.primary_defect,
+                secondary_defect_configuration=configuration.secondary_defect,
+            )
+        ]
 
 
 class IslandSlabDefectBuilder(SlabDefectBuilder):
