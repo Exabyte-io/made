@@ -372,6 +372,11 @@ class PointDefectPairBuilder(PointDefectBuilder):
             Material: The material with both defects added.
         """
         primary_material = self._create_defect(primary_defect_configuration)
+        # Remove metadata to allow for independent defect creation
+        primary_material.metadata["build"]["configuration"] = primary_defect_configuration.crystal.metadata["build"][
+            "configuration"
+        ]
+        primary_material.name = primary_defect_configuration.crystal.name
         secondary_defect_configuration.crystal = primary_material
         secondary_material = self._create_defect(secondary_defect_configuration)
 
@@ -384,6 +389,14 @@ class PointDefectPairBuilder(PointDefectBuilder):
                 secondary_defect_configuration=configuration.secondary_defect_configuration,
             )
         ]
+
+    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
+        updated_material = super()._update_material_name(material, configuration)
+        name_1 = configuration.primary_defect_configuration.defect_type.name.capitalize()
+        name_2 = configuration.secondary_defect_configuration.defect_type.name.capitalize()
+        new_name = f"{updated_material.name}, {name_1} and {name_2} Defect Pair"
+        updated_material.name = new_name
+        return updated_material
 
 
 class IslandSlabDefectBuilder(SlabDefectBuilder):
