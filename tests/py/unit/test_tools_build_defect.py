@@ -5,18 +5,23 @@ from mat3ra.made.tools.build.defect import (
     EquidistantAdatomSlabDefectBuilder,
     PointDefectBuilderParameters,
     PointDefectConfiguration,
+    PointDefectTypeEnum,
     create_defect,
     create_slab_defect,
-    PointDefectTypeEnum,
 )
-from mat3ra.made.tools.build.defect.builders import IslandSlabDefectBuilder, TerraceSlabDefectBuilder
-from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration, TerraceSlabDefectConfiguration
+from mat3ra.made.tools.build.defect.builders import (
+    IslandSlabDefectBuilder,
+    PointDefectPairBuilder,
+    TerraceSlabDefectBuilder,
+)
+from mat3ra.made.tools.build.defect.configuration import (
+    IslandSlabDefectConfiguration,
+    PointDefectPairConfiguration,
+    TerraceSlabDefectConfiguration,
+)
 from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
 from mat3ra.made.tools.utils import CoordinateConditionBuilder
 from mat3ra.utils import assertion as assertion_utils
-
-from mat3ra.made.tools.build.defect.builders import PointDefectPairBuilder
-from mat3ra.made.tools.build.defect.configuration import PointDefectPairConfiguration
 
 clean_material = Material.create(Material.default_config)
 
