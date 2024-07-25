@@ -6,7 +6,7 @@ from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from ...utils import CoordinateConditionBuilder
-from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
+from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -128,12 +128,15 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
     """
 
     defect_type: PointDefectTypeEnum = PointDefectTypeEnum.ADATOM
+    placement_method: AtomPlacementMethodEnum = AtomPlacementMethodEnum.COORDINATE
 
     @property
     def _json(self):
         return {
             **super()._json,
             "type": "AdatomSlabPointDefectConfiguration",
+            "defect_type": self.defect_type.name,
+            "placement_method": self.placement_method.name,
         }
 
 
@@ -202,7 +205,7 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
         }
 
 
-class PointDefectPairConfiguration(BaseModel):
+class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
     """
     Configuration for a pair of point defects.
 
@@ -211,38 +214,17 @@ class PointDefectPairConfiguration(BaseModel):
         The first defect.
         secondary_defect_configuration (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]):
         The second defect.
-        radius (float): The radius from the first defect to the second defect.
     """
 
+    defect_type: PointDefectTypeEnum = PointDefectTypeEnum.PAIR
     primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
     secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
-    radius: float
-
-    @classmethod
-    def from_radius(
-        cls,
-        primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
-        secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
-        radius: float,
-    ):
-        # nudging the defect2 coordinate from it's set position to be within radius of defect1 coordinate
-        defect1_coordinate = primary_defect_configuration.coordinate
-        defect2_coordinate = secondary_defect_configuration.coordinate
-        vector = [defect2_coordinate[i] - defect1_coordinate[i] for i in range(3)]
-        magnitude = sum([vector[i] ** 2 for i in range(3)]) ** 0.5
-        scaled_vector = [vector[i] * radius / magnitude for i in range(3)]
-        nudged_coordinate = [defect1_coordinate[i] + scaled_vector[i] for i in range(3)]
-        secondary_defect_configuration.coordinate = nudged_coordinate
-        return cls(
-            primary_defect_configuration=primary_defect_configuration,
-            secondary_defect_configuration=secondary_defect_configuration,
-            radius=radius,
-        )
 
     @property
     def _json(self):
         return {
-            "type": "DefectPairConfiguration",
-            "defect1": self.primary_defect_configuration.to_json(),
-            "defect2": self.secondary_defect_configuration.to_json(),
+            "type": self.get_cls_name(),
+            "defect_type": self.defect_type.name,
+            "primary_defect_configuration": self.primary_defect_configuration.to_json(),
+            "secondary_defect_configuration": self.secondary_defect_configuration.to_json(),
         }
