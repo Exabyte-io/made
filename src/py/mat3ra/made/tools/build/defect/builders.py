@@ -34,7 +34,7 @@ from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from .enums import AtomPlacementMethodEnum
+from .enums import AtomPlacementMethodEnum, DefectBuilderFactory
 from .configuration import (
     PointDefectConfiguration,
     AdatomSlabPointDefectConfiguration,
@@ -338,22 +338,13 @@ class PointDefectPairBuilder(PointDefectBuilder):
             CrystalSiteAdatomSlabDefectBuilder,
             EquidistantAdatomSlabDefectBuilder,
         ]
-        if defect_configuration.defect_type == "vacancy":
-            defect_builder = VacancyPointDefectBuilder()
-        elif defect_configuration.defect_type == "substitution":
-            defect_builder = SubstitutionPointDefectBuilder()
-        elif defect_configuration.defect_type == "interstitial":
-            defect_builder = InterstitialPointDefectBuilder()
-        elif defect_configuration.defect_type == "adatom":
-            if defect_configuration.placement_method == AtomPlacementMethodEnum.COORDINATE:
-                defect_builder = AdatomSlabDefectBuilder()
-            elif defect_configuration.placement_method == AtomPlacementMethodEnum.CRYSTAL_SITE:
-                defect_builder = CrystalSiteAdatomSlabDefectBuilder()
-            elif defect_configuration.placement_method == AtomPlacementMethodEnum.EQUIDISTANT:
-                defect_builder = EquidistantAdatomSlabDefectBuilder()
-        else:
-            raise ValueError(f"Unsupported defect type: {defect_configuration.defect_type}")
 
+        key = defect_configuration.defect_type.value
+        if hasattr(defect_configuration, "placement_method") and defect_configuration.placement_method is not None:
+            key += f":{defect_configuration.placement_method}"
+
+        builder_class = DefectBuilderFactory.get_class_by_name(key)
+        defect_builder = builder_class()
         return defect_builder.get_material(defect_configuration)
 
     def create_defect_pair(
