@@ -4,6 +4,7 @@ import numpy as np
 from pydantic import BaseModel
 from mat3ra.made.material import Material
 
+
 from ...third_party import (
     PymatgenStructure,
     PymatgenPeriodicSite,
@@ -33,6 +34,7 @@ from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
+from .enums import AtomPlacementMethodEnum
 from .configuration import (
     PointDefectConfiguration,
     AdatomSlabPointDefectConfiguration,
@@ -333,6 +335,8 @@ class PointDefectPairBuilder(PointDefectBuilder):
             SubstitutionPointDefectBuilder,
             InterstitialPointDefectBuilder,
             AdatomSlabDefectBuilder,
+            CrystalSiteAdatomSlabDefectBuilder,
+            EquidistantAdatomSlabDefectBuilder,
         ]
         if defect_configuration.defect_type == "vacancy":
             defect_builder = VacancyPointDefectBuilder()
@@ -341,7 +345,12 @@ class PointDefectPairBuilder(PointDefectBuilder):
         elif defect_configuration.defect_type == "interstitial":
             defect_builder = InterstitialPointDefectBuilder()
         elif defect_configuration.defect_type == "adatom":
-            defect_builder = AdatomSlabDefectBuilder()
+            if defect_configuration.placement_method == AtomPlacementMethodEnum.COORDINATE:
+                defect_builder = AdatomSlabDefectBuilder()
+            elif defect_configuration.placement_method == AtomPlacementMethodEnum.CRYSTAL_SITE:
+                defect_builder = CrystalSiteAdatomSlabDefectBuilder()
+            elif defect_configuration.placement_method == AtomPlacementMethodEnum.EQUIDISTANT:
+                defect_builder = EquidistantAdatomSlabDefectBuilder()
         else:
             raise ValueError(f"Unsupported defect type: {defect_configuration.defect_type}")
 
@@ -371,8 +380,8 @@ class PointDefectPairBuilder(PointDefectBuilder):
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         return [
             self.create_defect_pair(
-                primary_defect_configuration=configuration.primary_defect,
-                secondary_defect_configuration=configuration.secondary_defect,
+                primary_defect_configuration=configuration.primary_defect_configuration,
+                secondary_defect_configuration=configuration.secondary_defect_configuration,
             )
         ]
 
