@@ -253,6 +253,37 @@ def transform_coordinate_to_supercell(
     return converted_array.tolist()
 
 
+def sine_wave(
+    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis="x"
+) -> List[float]:
+    """
+    Deform a coordinate using a sine wave.
+    Args:
+        coordinate (List[float]): The coordinate to deform.
+        amplitude (float): The amplitude of the sine wave in cartesian coordinates.
+        wavelength (float): The wavelength of the sine wave in cartesian coordinates.
+        phase (float): The phase of the sine wave in cartesian coordinates.
+        axis (str): The axis of the direction of the sine wave.
+
+    Returns:
+        List[float]: The deformed coordinate.
+    """
+    if axis == "x":
+        return [
+            coordinate[0],
+            coordinate[1],
+            coordinate[2] + amplitude * np.sin(2 * np.pi * coordinate[0] / wavelength + phase),
+        ]
+    elif axis == "y":
+        return [
+            coordinate[0],
+            coordinate[1],
+            coordinate[2] + amplitude * np.sin(2 * np.pi * coordinate[1] / wavelength + phase),
+        ]
+    else:
+        return coordinate
+
+
 class CoordinateConditionBuilder:
     def create_condition(self, condition_type: str, evaluation_func: Callable, **kwargs) -> Tuple[Callable, Dict]:
         condition_json = {"type": condition_type, **kwargs}
@@ -316,4 +347,22 @@ class CoordinateConditionBuilder:
             evaluation_func=is_coordinate_behind_plane,
             plane_normal=plane_normal,
             plane_point_coordinate=plane_point_coordinate,
+        )
+
+
+class DeformationFunctionBuilder:
+    def create_deformation_function(
+        self, deformation_type: str, evaluation_func: Callable, **kwargs
+    ) -> Tuple[Callable, Dict]:
+        deformation_json = {"type": deformation_type, **kwargs}
+        return lambda coordinate: evaluation_func(coordinate, **kwargs), deformation_json
+
+    def sine_wave(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis="x"):
+        return self.create_deformation_function(
+            deformation_type="sine_wave",
+            evaluation_func=sine_wave,
+            amplitude=amplitude,
+            wavelength=wavelength,
+            phase=phase,
+            axis=axis,
         )
