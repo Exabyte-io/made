@@ -1,6 +1,7 @@
 from typing import Any, List, Optional
 
 import numpy as np
+from mat3ra.made.tools.modify import translate_to_z_level
 from pydantic import BaseModel
 from ase.build.tools import niggli_reduce
 from pymatgen.analysis.interfaces.coherent_interfaces import (
@@ -144,9 +145,11 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
 
     def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
         generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.dict())
+        substrate_down = translate_to_z_level(configuration.substrate_configuration.bulk, "bottom")
+        film_down = translate_to_z_level(configuration.film_configuration.bulk, "bottom")
         builder = CoherentInterfaceBuilder(
-            substrate_structure=to_pymatgen(configuration.substrate_configuration.bulk),
-            film_structure=to_pymatgen(configuration.film_configuration.bulk),
+            substrate_structure=to_pymatgen(substrate_down),
+            film_structure=to_pymatgen(film_down),
             substrate_miller=configuration.substrate_configuration.miller_indices,
             film_miller=configuration.film_configuration.miller_indices,
             zslgen=generator,
