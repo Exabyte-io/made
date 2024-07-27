@@ -1,12 +1,10 @@
-from typing import List, Optional, Any
+from typing import List
 
-import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 
-from scipy.integrate import quad
-from scipy.optimize import root_scalar
 from .configuration import DeformationConfiguration
+from ...utils import solve_sine_wave_x_prime
 
 
 class DeformationBuilder(BaseBuilder):
@@ -39,36 +37,18 @@ class DeformationBuilder(BaseBuilder):
 
 
 class ContinuousDeformationBuilder(DeformationBuilder):
-    def df_dx(self, x, wavelength, phase):
-        return (2 * np.pi / wavelength) * np.cos(2 * np.pi * x / wavelength + phase)
-
-    def arc_length_integral(self, x_prime, x, amplitude, wavelength, phase):
-        def integrand(t):
-            return np.sqrt(1 + (amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * t / wavelength + phase)) ** 2)
-
-        # Compute the arc length from 0 to x_prime.
-        calculated_length = quad(func=integrand, a=0, b=x_prime)[0]
-        return calculated_length - x
-
-    def find_x_prime(self, x, amplitude, wavelength, phase):
-        # Find x' such that the integral from 0 to x' equals x
-        result = root_scalar(
-            self.arc_length_integral, args=(x, amplitude, wavelength, phase), bracket=[0, 10 * x], method="brentq"
-        )
-        return result.root
 
     def deform_slab_continuously(self, configuration):
         new_material = configuration.slab.clone()
         new_material.to_cartesian()
         new_coordinates = []
         for coord in new_material.basis.coordinates.values:
-            x_prime = self.find_x_prime(
+            x_prime = solve_sine_wave_x_prime(
                 coord[0],
                 configuration.deformation_function[1]["amplitude"],
                 configuration.deformation_function[1]["wavelength"],
                 configuration.deformation_function[1]["phase"],
             )
-            print(coord[0], x_prime)
             perturbed_coord = configuration.deformation_function[0]([x_prime, coord[1], coord[2]])
             new_coordinates.append(perturbed_coord)
 
