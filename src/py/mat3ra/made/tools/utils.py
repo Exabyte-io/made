@@ -253,37 +253,6 @@ def transform_coordinate_to_supercell(
     return converted_array.tolist()
 
 
-def sine_wave(
-    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis="x"
-) -> List[float]:
-    """
-    Deform a coordinate using a sine wave.
-    Args:
-        coordinate (List[float]): The coordinate to deform.
-        amplitude (float): The amplitude of the sine wave in cartesian coordinates.
-        wavelength (float): The wavelength of the sine wave in cartesian coordinates.
-        phase (float): The phase of the sine wave in cartesian coordinates.
-        axis (str): The axis of the direction of the sine wave.
-
-    Returns:
-        List[float]: The deformed coordinate.
-    """
-    if axis == "x":
-        return [
-            coordinate[0],
-            coordinate[1],
-            coordinate[2] + amplitude * np.sin(2 * np.pi * coordinate[0] / wavelength + phase),
-        ]
-    elif axis == "y":
-        return [
-            coordinate[0],
-            coordinate[1],
-            coordinate[2] + amplitude * np.sin(2 * np.pi * coordinate[1] / wavelength + phase),
-        ]
-    else:
-        return coordinate
-
-
 class CoordinateConditionBuilder:
     def create_condition(self, condition_type: str, evaluation_func: Callable, **kwargs) -> Tuple[Callable, Dict]:
         condition_json = {"type": condition_type, **kwargs}
@@ -350,6 +319,91 @@ class CoordinateConditionBuilder:
         )
 
 
+def sine_wave(
+    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis="x"
+) -> List[float]:
+    """
+    Deform a coordinate using a sine wave.
+    Args:
+        coordinate (List[float]): The coordinate to deform.
+        amplitude (float): The amplitude of the sine wave in cartesian coordinates.
+        wavelength (float): The wavelength of the sine wave in cartesian coordinates.
+        phase (float): The phase of the sine wave in cartesian coordinates.
+        axis (str): The axis of the direction of the sine wave.
+
+    Returns:
+        List[float]: The deformed coordinate.
+    """
+    axis_map = {"x": 0, "y": 1}
+    if axis in axis_map:
+        index = axis_map[axis]
+        return [
+            coordinate[0],
+            coordinate[1],
+            coordinate[2] + amplitude * np.sin(2 * np.pi * coordinate[index] / wavelength + phase),
+        ]
+    else:
+        return coordinate
+
+
+def sine_wave_radial(
+    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, center_position=None
+) -> List[float]:
+    """
+    Deform a coordinate using a radial sine wave.
+    Args:
+        coordinate (List[float]): The coordinate to deform.
+        amplitude (float): The amplitude of the sine wave in cartesian coordinates.
+        wavelength (float): The wavelength of the sine wave in cartesian coordinates.
+        phase (float): The phase of the sine wave in cartesian coordinates.
+        center_position (List[float]): The center position of the sine wave on the plane.
+
+    Returns:
+        List[float]: The deformed coordinate.
+    """
+    if center_position is None:
+        center_position = [0.5, 0.5]
+    np_position = np.array(coordinate[:2])
+    np_center_position = np.array(center_position)
+    distance = np.linalg.norm(np_position - np_center_position)
+    return [
+        coordinate[0],
+        coordinate[1],
+        coordinate[2] + amplitude * np.sin(2 * np.pi * distance / wavelength + phase),
+    ]
+
+
+def sine_wave_differential(
+    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis="x"
+) -> List[float]:
+    """
+    Deform a coordinate using the differential of a sine wave.
+    Args:
+        coordinate (List[float]): The coordinate to deform.
+        amplitude (float): The amplitude of the sine wave in cartesian coordinates.
+        wavelength (float): The wavelength of the sine wave in cartesian coordinates.
+        phase (float): The phase of the sine wave in cartesian coordinates.
+        axis (str): The axis of the direction of the sine wave.
+
+    Returns:
+        List[float]: The deformed coordinate.
+    """
+    if axis == "x":
+        return [
+            0,
+            0,
+            amplitude * np.cos(2 * np.pi * coordinate[0] / wavelength + phase) * 2 * np.pi / wavelength,
+        ]
+    elif axis == "y":
+        return [
+            0,
+            0,
+            amplitude * np.cos(2 * np.pi * coordinate[1] / wavelength + phase) * 2 * np.pi / wavelength,
+        ]
+    else:
+        return [0, 0, 0]
+
+
 class DeformationFunctionBuilder:
     def create_deformation_function(
         self, deformation_type: str, evaluation_func: Callable, **kwargs
@@ -365,4 +419,13 @@ class DeformationFunctionBuilder:
             wavelength=wavelength,
             phase=phase,
             axis=axis,
+        )
+
+    def sine_wave_radial(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0):
+        return self.create_deformation_function(
+            deformation_type="sine_wave_radial",
+            evaluation_func=sine_wave_radial,
+            amplitude=amplitude,
+            wavelength=wavelength,
+            phase=phase,
         )
