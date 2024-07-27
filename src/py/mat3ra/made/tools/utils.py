@@ -3,6 +3,8 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 from mat3ra.utils.matrix import convert_2x2_to_3x3
+from scipy.integrate import quad
+from scipy.optimize import root_scalar
 
 from .third_party import PymatgenStructure
 
@@ -373,35 +375,28 @@ def sine_wave_radial(
     ]
 
 
-def sine_wave_differential(
-    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis="x"
-) -> List[float]:
-    """
-    Deform a coordinate using the differential of a sine wave.
-    Args:
-        coordinate (List[float]): The coordinate to deform.
-        amplitude (float): The amplitude of the sine wave in cartesian coordinates.
-        wavelength (float): The wavelength of the sine wave in cartesian coordinates.
-        phase (float): The phase of the sine wave in cartesian coordinates.
-        axis (str): The axis of the direction of the sine wave.
+def sine_wave_diff(x, amplitude, wavelength, phase):
+    return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * x / wavelength + phase)
 
-    Returns:
-        List[float]: The deformed coordinate.
-    """
-    if axis == "x":
-        return [
-            0,
-            0,
-            amplitude * np.cos(2 * np.pi * coordinate[0] / wavelength + phase) * 2 * np.pi / wavelength,
-        ]
-    elif axis == "y":
-        return [
-            0,
-            0,
-            amplitude * np.cos(2 * np.pi * coordinate[1] / wavelength + phase) * 2 * np.pi / wavelength,
-        ]
-    else:
-        return [0, 0, 0]
+
+def sine_wave_length_integral_equation(x_prime, x, amplitude, wavelength, phase):
+    def integrand(t):
+        return np.sqrt(1 + (sine_wave_diff(t, amplitude, wavelength, phase)) ** 2)
+
+    arc_length = quad(func=integrand, a=0, b=x_prime)[0]
+    return arc_length - x
+
+
+def solve_sine_wave_x_prime(self, x, amplitude, wavelength, phase):
+    # Find x' such that the integral from 0 to x' equals x
+    COEFFICIENT = 10
+    result = root_scalar(
+        self.arc_length_integral,
+        args=(x, amplitude, wavelength, phase),
+        bracket=[0, COEFFICIENT * x],
+        method="brentq",
+    )
+    return result.root
 
 
 class DeformationFunctionBuilder:
