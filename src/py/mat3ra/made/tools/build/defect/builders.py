@@ -21,7 +21,7 @@ from ...modify import (
     rotate_material,
 )
 from ...build import BaseBuilder
-from ...convert import to_pymatgen, to_ase, from_ase
+from ...convert import to_pymatgen
 from ...analyze import (
     get_nearest_neighbors_atom_indices,
     get_atomic_coordinates_extremum,
@@ -490,10 +490,12 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         return material
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
-        updated_material = super()._update_material_name(material, configuration)
-        new_name = f"{updated_material.name}, {configuration.number_of_added_layers}-step Terrace {configuration.cut_direction}"
-        updated_material.name = new_name
-        return updated_material
+        new_material = super()._update_material_name(material, configuration)
+        new_name = (
+            f"{new_material.name}, {configuration.number_of_added_layers}-step Terrace {configuration.cut_direction}"
+        )
+        new_material.name = new_name
+        return new_material
 
     def create_terrace(
         self,
