@@ -491,7 +491,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         updated_material = super()._update_material_name(material, configuration)
-        new_name = f"{updated_material.name}, {configuration.steps_number}-step Terrace {configuration.cut_direction}"
+        new_name = f"{updated_material.name}, {configuration.number_of_added_layers}-step Terrace {configuration.cut_direction}"
         updated_material.name = new_name
         return updated_material
 
@@ -500,7 +500,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         material: Material,
         cut_direction: Optional[List[int]] = None,
         pivot_coordinate: Optional[List[float]] = None,
-        steps_number: int = 1,
+        number_of_added_layers: int = 1,
         use_cartesian_coordinates: bool = False,
         rotate_to_match_pbc: bool = True,
     ) -> Material:
@@ -511,7 +511,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             material: The material to add the terrace to.
             cut_direction: The direction of the cut in lattice directions.
             pivot_coordinate: The center position of the terrace.
-            steps_number: The number of steps to bunch.
+            number_of_added_layers: The number of added layers to the slab which will form the terrace
             use_cartesian_coordinates: Whether to use Cartesian coordinates for the center position.
             rotate_to_match_pbc: Whether to rotate the material to match the periodic boundary conditions.
         Returns:
@@ -523,7 +523,9 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             pivot_coordinate = [0.5, 0.5, 0.5]
 
         new_material = material.clone()
-        material_with_additional_layers = self.create_material_with_additional_layers(new_material, steps_number)
+        material_with_additional_layers = self.create_material_with_additional_layers(
+            new_material, number_of_added_layers
+        )
 
         normalized_direction_vector = self._calculate_cut_direction_vector(material, cut_direction)
         condition = CoordinateConditionBuilder().plane(
@@ -553,7 +555,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
                 material=configuration.crystal,
                 cut_direction=configuration.cut_direction,
                 pivot_coordinate=configuration.pivot_coordinate,
-                steps_number=configuration.steps_number,
+                number_of_added_layers=configuration.number_of_added_layers,
                 use_cartesian_coordinates=configuration.use_cartesian_coordinates,
             )
         ]
