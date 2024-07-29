@@ -144,7 +144,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         chemical_element: str = "Si",
         position_on_surface: Optional[List[float]] = None,
         distance_z: float = 2.0,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create an adatom at the specified position on the surface of the material.
 
@@ -166,7 +166,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         )
         new_basis.add_atom(chemical_element, adatom_coordinate)
         new_material.basis = new_basis
-        return [new_material]
+        return new_material
 
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
@@ -184,12 +184,14 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         return updated_material
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
-        return self.create_adatom(
-            material=configuration.crystal,
-            chemical_element=configuration.chemical_element,
-            position_on_surface=configuration.position_on_surface,
-            distance_z=configuration.distance_z,
-        )
+        return [
+            self.create_adatom(
+                material=configuration.crystal,
+                chemical_element=configuration.chemical_element,
+                position_on_surface=configuration.position_on_surface,
+                distance_z=configuration.distance_z,
+            )
+        ]
 
 
 class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
@@ -199,7 +201,7 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         chemical_element: str = "Si",
         position_on_surface: Optional[List[float]] = None,
         distance_z: float = 2.0,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create an adatom with an equidistant XY position among the nearest neighbors
         at the given distance from the surface.
@@ -291,7 +293,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         chemical_element: Optional[str] = None,
         position_on_surface: Optional[List[float]] = None,
         distance_z: float = 0,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create an adatom at the crystal site closest to the specified position on the surface of the material.
 
@@ -320,7 +322,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
         )
 
-        return [self.merge_slab_and_defect(new_material, only_adatom_material)]
+        return self.merge_slab_and_defect(new_material, only_adatom_material)
 
 
 class IslandSlabDefectBuilder(SlabDefectBuilder):
@@ -333,7 +335,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         condition: Optional[Callable[[List[float]], bool]] = None,
         thickness: int = 1,
         use_cartesian_coordinates: bool = False,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create an island at the specified position on the surface of the material.
 
@@ -369,16 +371,18 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
             max_coordinate=[1, 1, added_layers_max_z],
         )
 
-        return [self.merge_slab_and_defect(island_material, new_material)]
+        return self.merge_slab_and_defect(island_material, new_material)
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         condition_callable, _ = configuration.condition
-        return self.create_island(
-            material=configuration.crystal,
-            condition=condition_callable,
-            thickness=configuration.thickness,
-            use_cartesian_coordinates=configuration.use_cartesian_coordinates,
-        )
+        return [
+            self.create_island(
+                material=configuration.crystal,
+                condition=condition_callable,
+                thickness=configuration.thickness,
+                use_cartesian_coordinates=configuration.use_cartesian_coordinates,
+            )
+        ]
 
 
 class TerraceSlabDefectBuilder(SlabDefectBuilder):
@@ -499,7 +503,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         steps_number: int = 1,
         use_cartesian_coordinates: bool = False,
         rotate_to_match_pbc: bool = True,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create a terrace at the specified position on the surface of the material.
 
@@ -541,13 +545,15 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         if rotate_to_match_pbc:
             adjusted_material = self._increase_lattice_size(result_material, delta_length, normalized_direction_vector)
             result_material = rotate_material(material=adjusted_material, axis=normalized_rotation_axis, angle=angle)
-        return [result_material]
+        return result_material
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
-        return self.create_terrace(
-            material=configuration.crystal,
-            cut_direction=configuration.cut_direction,
-            pivot_coordinate=configuration.pivot_coordinate,
-            steps_number=configuration.steps_number,
-            use_cartesian_coordinates=configuration.use_cartesian_coordinates,
-        )
+        return [
+            self.create_terrace(
+                material=configuration.crystal,
+                cut_direction=configuration.cut_direction,
+                pivot_coordinate=configuration.pivot_coordinate,
+                steps_number=configuration.steps_number,
+                use_cartesian_coordinates=configuration.use_cartesian_coordinates,
+            )
+        ]
