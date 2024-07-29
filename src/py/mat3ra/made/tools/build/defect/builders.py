@@ -18,6 +18,7 @@ from ...modify import (
     filter_by_box,
     filter_by_condition_on_coordinates,
     translate_to_z_level,
+    rotate_material,
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen, to_ase, from_ase
@@ -490,27 +491,6 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         updated_material.name = new_name
         return updated_material
 
-    def _rotate_material(self, material: Material, axis: List[int], angle: float) -> Material:
-        """
-        Rotate the material around a given axis by a specified angle.
-
-        Args:
-            material (Material): The material to rotate.
-            axis (List[int]): The axis to rotate around, expressed as [x, y, z].
-            angle (float): The angle of rotation in degrees.
-        Returns:
-            Atoms: The rotated material.
-        """
-        if material.basis.is_in_cartesian_units:
-            crystal_basis = material.basis.copy()
-            crystal_basis.to_crystal()
-            material.basis = crystal_basis
-        atoms = to_ase(material)
-        atoms.rotate(v=axis, a=angle, center="COM")
-        atoms.wrap()
-
-        return Material(from_ase(atoms))
-
     def create_terrace(
         self,
         material: Material,
@@ -560,9 +540,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
 
         if rotate_to_match_pbc:
             adjusted_material = self._increase_lattice_size(result_material, delta_length, normalized_direction_vector)
-            result_material = self._rotate_material(
-                material=adjusted_material, axis=normalized_rotation_axis, angle=angle
-            )
+            result_material = rotate_material(material=adjusted_material, axis=normalized_rotation_axis, angle=angle)
         return [result_material]
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
