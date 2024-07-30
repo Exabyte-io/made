@@ -254,14 +254,16 @@ def transform_coordinate_to_supercell(
 
 
 class CoordinateConditionBuilder:
-    def create_condition(self, condition_type: str, evaluation_func: Callable, **kwargs) -> Tuple[Callable, Dict]:
+    @staticmethod
+    def create_condition(condition_type: str, evaluation_func: Callable, **kwargs) -> Tuple[Callable, Dict]:
         condition_json = {"type": condition_type, **kwargs}
         return lambda coordinate: evaluation_func(coordinate, **kwargs), condition_json
 
-    def cylinder(self, center_position=None, radius: float = 0.25, min_z: float = 0, max_z: float = 1):
+    @staticmethod
+    def cylinder(center_position=None, radius: float = 0.25, min_z: float = 0, max_z: float = 1):
         if center_position is None:
             center_position = [0.5, 0.5]
-        return self.create_condition(
+        return CoordinateConditionBuilder.create_condition(
             condition_type="cylinder",
             evaluation_func=is_coordinate_in_cylinder,
             center_position=center_position,
@@ -270,25 +272,26 @@ class CoordinateConditionBuilder:
             max_z=max_z,
         )
 
-    def sphere(self, center_position=None, radius: float = 0.25):
+    @staticmethod
+    def sphere(center_position=None, radius: float = 0.25):
         if center_position is None:
             center_position = [0.5, 0.5, 0.5]
-        return self.create_condition(
+        return CoordinateConditionBuilder.create_condition(
             condition_type="sphere",
             evaluation_func=is_coordinate_in_sphere,
             center_position=center_position,
             radius=radius,
         )
 
+    @staticmethod
     def triangular_prism(
-        self,
         position_on_surface_1: List[float] = [0, 0],
         position_on_surface_2: List[float] = [1, 0],
         position_on_surface_3: List[float] = [0, 1],
         min_z: float = 0,
         max_z: float = 1,
     ):
-        return self.create_condition(
+        return CoordinateConditionBuilder.create_condition(
             condition_type="prism",
             evaluation_func=is_coordinate_in_triangular_prism,
             coordinate_1=position_on_surface_1,
@@ -298,20 +301,22 @@ class CoordinateConditionBuilder:
             max_z=max_z,
         )
 
-    def box(self, min_coordinate=None, max_coordinate=None):
+    @staticmethod
+    def box(min_coordinate=None, max_coordinate=None):
         if max_coordinate is None:
             max_coordinate = [1, 1, 1]
         if min_coordinate is None:
             min_coordinate = [0, 0, 0]
-        return self.create_condition(
+        return CoordinateConditionBuilder.create_condition(
             condition_type="box",
             evaluation_func=is_coordinate_in_box,
             min_coordinate=min_coordinate,
             max_coordinate=max_coordinate,
         )
 
-    def plane(self, plane_normal: List[float], plane_point_coordinate: List[float]):
-        return self.create_condition(
+    @staticmethod
+    def plane(plane_normal: List[float], plane_point_coordinate: List[float]):
+        return CoordinateConditionBuilder.create_condition(
             condition_type="plane",
             evaluation_func=is_coordinate_behind_plane,
             plane_normal=plane_normal,

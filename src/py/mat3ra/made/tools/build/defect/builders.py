@@ -19,9 +19,10 @@ from ...modify import (
     filter_by_box,
     filter_by_condition_on_coordinates,
     translate_to_z_level,
+    rotate_material,
 )
 from ...build import BaseBuilder
-from ...convert import to_pymatgen, to_ase, from_ase
+from ...convert import to_pymatgen
 from ...analyze import (
     get_nearest_neighbors_atom_indices,
     get_atomic_coordinates_extremum,
@@ -146,7 +147,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         chemical_element: str = "Si",
         position_on_surface: Optional[List[float]] = None,
         distance_z: float = 2.0,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create an adatom at the specified position on the surface of the material.
 
@@ -168,7 +169,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         )
         new_basis.add_atom(chemical_element, adatom_coordinate)
         new_material.basis = new_basis
-        return [new_material]
+        return new_material
 
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
@@ -186,12 +187,14 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         return updated_material
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
-        return self.create_adatom(
-            material=configuration.crystal,
-            chemical_element=configuration.chemical_element,
-            position_on_surface=configuration.position_on_surface,
-            distance_z=configuration.distance_z,
-        )
+        return [
+            self.create_adatom(
+                material=configuration.crystal,
+                chemical_element=configuration.chemical_element,
+                position_on_surface=configuration.position_on_surface,
+                distance_z=configuration.distance_z,
+            )
+        ]
 
 
 class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
@@ -201,7 +204,7 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         chemical_element: str = "Si",
         position_on_surface: Optional[List[float]] = None,
         distance_z: float = 2.0,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create an adatom with an equidistant XY position among the nearest neighbors
         at the given distance from the surface.
@@ -296,7 +299,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         chemical_element: Optional[str] = None,
         position_on_surface: Optional[List[float]] = None,
         distance_z: float = 0,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create an adatom at the crystal site closest to the specified position on the surface of the material.
 
@@ -325,7 +328,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             )
         )
 
-        return [self.merge_slab_and_defect(new_material, only_adatom_material)]
+        return self.merge_slab_and_defect(new_material, only_adatom_material)
 
 
 class DefectPairBuilder(DefectBuilder):
@@ -403,7 +406,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         condition: Optional[Callable[[List[float]], bool]] = None,
         thickness: int = 1,
         use_cartesian_coordinates: bool = False,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create an island at the specified position on the surface of the material.
 
@@ -439,103 +442,141 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
             max_coordinate=[1, 1, added_layers_max_z],
         )
 
-        return [self.merge_slab_and_defect(island_material, new_material)]
+        return self.merge_slab_and_defect(island_material, new_material)
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         condition_callable, _ = configuration.condition
-        return self.create_island(
-            material=configuration.crystal,
-            condition=condition_callable,
-            thickness=configuration.thickness,
-            use_cartesian_coordinates=configuration.use_cartesian_coordinates,
-        )
+        return [
+            self.create_island(
+                material=configuration.crystal,
+                condition=condition_callable,
+                thickness=configuration.number_of_added_layers,
+                use_cartesian_coordinates=configuration.use_cartesian_coordinates,
+            )
+        ]
 
 
 class TerraceSlabDefectBuilder(SlabDefectBuilder):
     _ConfigurationType: type(TerraceSlabDefectConfiguration) = TerraceSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
-    def _calculate_cut_direction_vector(self, material, cut_direction):
+    def _calculate_cut_direction_vector(self, material: Material, cut_direction: List[int]):
+        """
+        Calculate the normalized cut direction vector in Cartesian coordinates.
+
+        Args:
+            material: The material to get the lattice vectors from.
+            cut_direction: The direction of the cut in lattice directions.
+
+        Returns:
+            The normalized cut direction vector in Cartesian coordinates.
+        """
         np_cut_direction = np.array(cut_direction)
         direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), np_cut_direction)
         normalized_direction_vector = direction_vector / np.linalg.norm(direction_vector)
         return normalized_direction_vector
 
-    def _calcualte_height(self, material, new_material):
+    def _calculate_height_cartesian(self, material: Material, new_material: Material):
+        """
+        Calculate the height of the added layers in Cartesian coordinates.
+
+        Args:
+            material: The original material.
+            new_material: The material with the added layers.
+
+        Returns:
+            The height of the added layers in Cartesian coordinates.
+        """
         original_max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=True)
         added_layers_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
-        height_cart = added_layers_max_z - original_max_z
-        return height_cart
+        height_cartesian = added_layers_max_z - original_max_z
+        return height_cartesian
 
-    def _calculate_rotation_parameters(self, original_material, new_material, normalized_direction_vector):
-        """Calculate the necessary rotation angle and axis."""
-        height_cart = self._calcualte_height(original_material, new_material)
+    def _calculate_rotation_parameters(
+        self, original_material: Material, new_material: Material, normalized_direction_vector: List[float]
+    ):
+        """
+        Calculate the necessary rotation angle and axis.
+
+        Args:
+            original_material: The original material.
+            new_material: The material with the added layers.
+            normalized_direction_vector: The normalized cut direction vector in Cartesian coordinates.
+
+        Returns:
+            The rotation angle, normalized rotation axis, and delta length.
+        """
+        height_cartesian = self._calculate_height_cartesian(original_material, new_material)
         cut_direction_xy_proj_cart = np.linalg.norm(
             np.dot(np.array(new_material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
         )
         # Slope of the terrace along the cut direction
-        hypotenuse = np.linalg.norm([height_cart, cut_direction_xy_proj_cart])
-        angle = np.arctan(height_cart / cut_direction_xy_proj_cart) * 180 / np.pi
+        hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])
+        angle = np.arctan(height_cartesian / cut_direction_xy_proj_cart) * 180 / np.pi
         normalized_rotation_axis = np.cross(normalized_direction_vector, [0, 0, 1]).tolist()
         delta_length = hypotenuse - cut_direction_xy_proj_cart
         return angle, normalized_rotation_axis, delta_length
 
-    def _increase_lattice_size(self, material, length_increase, direction_of_increase):
-        """Adjust the lattice vectors to accommodate the new structure dimensions."""
+    def _increase_lattice_size(
+        self, material: Material, length_increase: float, direction_of_increase: List[float]
+    ) -> Material:
+        """
+        Increase the lattice size in a specific direction.
+
+        When the material is rotated to maintain periodic boundary conditions (PBC),
+        the periodicity in the X and Y directions changes.
+        Therefore, the lattice size must be increased to fit the new structure dimensions.
+
+        If the terrace plane is normal to the Z direction, it becomes larger than the previous XY plane of the material
+        because it forms a hypotenuse between PBC points.
+        This method adjusts the lattice vectors to accommodate this change.
+
+        Args:
+            material: The material to increase the lattice size of.
+            length_increase: The increase in length.
+            direction_of_increase: The direction of the increase.
+
+        Returns:
+            The material with the increased lattice size.
+        """
         vector_a, vector_b = np.array(material.basis.cell.vector1), np.array(material.basis.cell.vector2)
-        delta_a_cart = np.dot(vector_a, direction_of_increase) * length_increase / np.linalg.norm(vector_a)
-        delta_b_cart = np.dot(vector_b, direction_of_increase) * length_increase / np.linalg.norm(vector_b)
-        vector_a_prime = vector_a + delta_a_cart * vector_a / np.linalg.norm(vector_a)
-        vector_b_prime = vector_b + delta_b_cart * vector_b / np.linalg.norm(vector_b)
+        norm_a, norm_b = np.linalg.norm(vector_a), np.linalg.norm(vector_b)
+
+        delta_a_cart = np.dot(vector_a, np.array(direction_of_increase)) * length_increase / norm_a
+        delta_b_cart = np.dot(vector_b, np.array(direction_of_increase)) * length_increase / norm_b
+
+        scaling_matrix = np.eye(3)
+        scaling_matrix[0, 0] += delta_a_cart / norm_a
+        scaling_matrix[1, 1] += delta_b_cart / norm_b
 
         cart_basis = material.basis.copy()
         cart_basis.to_cartesian()
-        cart_basis.cell.vector1 = vector_a_prime
-        cart_basis.cell.vector2 = vector_b_prime
+        cart_basis.cell.scale_by_matrix(scaling_matrix)
         material.basis = cart_basis
 
         new_lattice = material.lattice.clone()
-        new_lattice.a = new_lattice.a + delta_a_cart
-        new_lattice.b = new_lattice.b + delta_b_cart
+        new_lattice.a = np.linalg.norm(cart_basis.cell.vector1)
+        new_lattice.b = np.linalg.norm(cart_basis.cell.vector2)
         material.lattice = new_lattice
         return material
 
-    def _update_material_name(self, material, configuration):
-        updated_material = super()._update_material_name(material, configuration)
-        new_name = f"{updated_material.name}, {configuration.steps_number}-step Terrace {configuration.cut_direction}"
-        updated_material.name = new_name
-        return updated_material
-
-    def _rotate_material(self, material: Material, axis: List[int], angle: float) -> Material:
-        """
-        Rotate the material around a given axis by a specified angle.
-
-        Args:
-            material (Material): The material to rotate.
-            axis (List[int]): The axis to rotate around, expressed as [x, y, z].
-            angle (float): The angle of rotation in degrees.
-        Returns:
-            Atoms: The rotated material.
-        """
-        if material.basis.is_in_cartesian_units:
-            crystal_basis = material.basis.copy()
-            crystal_basis.to_crystal()
-            material.basis = crystal_basis
-        atoms = to_ase(material)
-        atoms.rotate(v=axis, a=angle, center="COM")
-        atoms.wrap()
-
-        return Material(from_ase(atoms))
+    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
+        new_material = super()._update_material_name(material, configuration)
+        new_name = (
+            f"{new_material.name}, {configuration.number_of_added_layers}-step Terrace {configuration.cut_direction}"
+        )
+        new_material.name = new_name
+        return new_material
 
     def create_terrace(
         self,
         material: Material,
         cut_direction: Optional[List[int]] = None,
         pivot_coordinate: Optional[List[float]] = None,
-        steps_number: int = 1,
+        number_of_added_layers: int = 1,
         use_cartesian_coordinates: bool = False,
         rotate_to_match_pbc: bool = True,
-    ) -> List[Material]:
+    ) -> Material:
         """
         Create a terrace at the specified position on the surface of the material.
 
@@ -543,7 +584,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             material: The material to add the terrace to.
             cut_direction: The direction of the cut in lattice directions.
             pivot_coordinate: The center position of the terrace.
-            steps_number: The number of steps to bunch.
+            number_of_added_layers: The number of added layers to the slab which will form the terrace
             use_cartesian_coordinates: Whether to use Cartesian coordinates for the center position.
             rotate_to_match_pbc: Whether to rotate the material to match the periodic boundary conditions.
         Returns:
@@ -555,13 +596,15 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             pivot_coordinate = [0.5, 0.5, 0.5]
 
         new_material = material.clone()
-        material_with_additional_layers = self.create_material_with_additional_layers(new_material, steps_number)
+        material_with_additional_layers = self.create_material_with_additional_layers(
+            new_material, number_of_added_layers
+        )
 
         normalized_direction_vector = self._calculate_cut_direction_vector(material, cut_direction)
-        condition = CoordinateConditionBuilder().plane(
+        condition, _ = CoordinateConditionBuilder.plane(
             plane_normal=normalized_direction_vector,
             plane_point_coordinate=pivot_coordinate,
-        )[0]
+        )
         atoms_within_terrace = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
             condition=condition,
@@ -576,16 +619,16 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
 
         if rotate_to_match_pbc:
             adjusted_material = self._increase_lattice_size(result_material, delta_length, normalized_direction_vector)
-            result_material = self._rotate_material(
-                material=adjusted_material, axis=normalized_rotation_axis, angle=angle
-            )
-        return [result_material]
+            result_material = rotate_material(material=adjusted_material, axis=normalized_rotation_axis, angle=angle)
+        return result_material
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
-        return self.create_terrace(
-            material=configuration.crystal,
-            cut_direction=configuration.cut_direction,
-            pivot_coordinate=configuration.pivot_coordinate,
-            steps_number=configuration.steps_number,
-            use_cartesian_coordinates=configuration.use_cartesian_coordinates,
-        )
+        return [
+            self.create_terrace(
+                material=configuration.crystal,
+                cut_direction=configuration.cut_direction,
+                pivot_coordinate=configuration.pivot_coordinate,
+                number_of_added_layers=configuration.number_of_added_layers,
+                use_cartesian_coordinates=configuration.use_cartesian_coordinates,
+            )
+        ]

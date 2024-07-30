@@ -10,6 +10,7 @@ from mat3ra.made.tools.modify import (
     filter_by_sphere,
     filter_by_triangle_projection,
     remove_vacuum,
+    rotate_material,
     translate_to_z_level,
 )
 from mat3ra.utils import assertion as assertion_utils
@@ -158,3 +159,14 @@ def test_remove_vacuum():
     material_down = translate_to_z_level(material, z_level="bottom")
 
     assertion_utils.assert_deep_almost_equal(material_down.to_json(), material_with_set_vacuum.to_json())
+
+
+def test_rotate_material():
+    material = Material(SI_SLAB)
+    # Rotation around Z and X axis will be equivalent for the original material for hist basis in terms of coordinates
+    rotated_material = rotate_material(material, [0, 0, 1], 180)
+    rotated_material = rotate_material(rotated_material, [1, 0, 0], 180)
+    assertion_utils.assert_deep_almost_equal(
+        material.basis.coordinates.values.sort(), rotated_material.basis.coordinates.values.sort()
+    )
+    assertion_utils.assert_deep_almost_equal(material.lattice, rotated_material.lattice)
