@@ -210,9 +210,9 @@ class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
     Configuration for a pair of point defects.
 
     Args:
-        primary_defect_configuration (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]):
+        primary_defect_configuration:
         The first defect.
-        secondary_defect_configuration (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]):
+        secondary_defect_configuration:
         The second defect.
     """
 
