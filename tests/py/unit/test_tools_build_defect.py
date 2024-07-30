@@ -22,7 +22,7 @@ from mat3ra.made.tools.build.defect.configuration import (
 from mat3ra.made.tools.utils import CoordinateConditionBuilder
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import SLAB_111, SLAB_001
+from .fixtures import SLAB_001, SLAB_111
 
 clean_material = Material.create(Material.default_config)
 
