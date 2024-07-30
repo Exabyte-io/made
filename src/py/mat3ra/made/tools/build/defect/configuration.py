@@ -6,7 +6,7 @@ from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from ...utils import CoordinateConditionBuilder
-from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum
+from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum, ComplexDefectTypeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -222,13 +222,11 @@ class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
     Configuration for a pair of point defects.
 
     Args:
-        primary_defect_configuration:
-        The first defect.
-        secondary_defect_configuration:
-        The second defect.
+        primary_defect_configuration: The first defect configuration.
+        secondary_defect_configuration: The second defect configuration. Material is used from the primary defect.
     """
 
-    defect_type: PointDefectTypeEnum = PointDefectTypeEnum.PAIR
+    defect_type: ComplexDefectTypeEnum = ComplexDefectTypeEnum.PAIR
     primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
     secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
 
