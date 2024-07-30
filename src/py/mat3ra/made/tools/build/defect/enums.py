@@ -1,7 +1,5 @@
 from enum import Enum
 
-from mat3ra.utils.factory import BaseFactory
-
 
 class PointDefectTypeEnum(str, Enum):
     VACANCY = "vacancy"
@@ -21,14 +19,3 @@ class AtomPlacementMethodEnum(str, Enum):
     CLOSEST_SITE = "closest_site"
     EQUIDISTANT = "equidistant"
     CRYSTAL_SITE = "crystal_site"
-
-
-class DefectBuilderFactory(BaseFactory):
-    __class_registry__ = {
-        "vacancy": "mat3ra.made.tools.build.defect.builders.VacancyPointDefectBuilder",
-        "substitution": "mat3ra.made.tools.build.defect.builders.SubstitutionPointDefectBuilder",
-        "interstitial": "mat3ra.made.tools.build.defect.builders.InterstitialPointDefectBuilder",
-        "adatom:coordinate": "mat3ra.made.tools.build.defect.builders.AdatomSlabDefectBuilder",
-        "adatom:crystal_site": "mat3ra.made.tools.build.defect.builders.CrystalSiteAdatomSlabDefectBuilder",
-        "adatom:equidistant": "mat3ra.made.tools.build.defect.builders.EquidistantAdatomSlabDefectBuilder",
-    }

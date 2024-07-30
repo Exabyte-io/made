@@ -12,7 +12,8 @@ from .builders import (
     TerraceSlabDefectBuilder,
 )
 from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration, IslandSlabDefectConfiguration
-from .enums import PointDefectTypeEnum, DefectBuilderFactory
+from .enums import PointDefectTypeEnum
+from .factories import DefectBuilderFactory
 
 
 def create_defect(

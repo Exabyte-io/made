@@ -34,7 +34,6 @@ from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from .enums import DefectBuilderFactory
 from .configuration import (
     PointDefectConfiguration,
     AdatomSlabPointDefectConfiguration,
@@ -42,6 +41,7 @@ from .configuration import (
     TerraceSlabDefectConfiguration,
     PointDefectPairConfiguration,
 )
+from .factories import DefectBuilderFactory
 
 
 class PointDefectBuilderParameters(BaseModel):
