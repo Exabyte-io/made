@@ -6,7 +6,7 @@ from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from ...utils import CoordinateConditionBuilder
-from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum
+from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum, ComplexDefectTypeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -72,7 +72,23 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
 
 
 class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
-    pass
+    """
+    Configuration for a slab defect.
+
+    Args:
+        crystal (Material): The Material object.
+        number_of_added_layers (int): The number of added layers.
+    """
+
+    number_of_added_layers: int = 1
+
+    @property
+    def _json(self):
+        return {
+            **super()._json,
+            "type": self.get_cls_name(),
+            "number_of_added_layers": self.number_of_added_layers,
+        }
 
 
 class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfiguration):
@@ -108,7 +124,7 @@ class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfigura
     def _json(self):
         return {
             **super()._json,
-            "type": "SlabPointDefectConfiguration",
+            "type": self.get_cls_name(),
             "position_on_surface": self.position_on_surface,
             "distance_z": self.distance_z,
         }
@@ -134,7 +150,7 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
     def _json(self):
         return {
             **super()._json,
-            "type": "AdatomSlabPointDefectConfiguration",
+            "type": self.get_cls_name(),
             "defect_type": self.defect_type.name,
             "placement_method": self.placement_method.name,
         }
@@ -149,22 +165,20 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
         defect_type (SlabDefectTypeEnum): The type of the defect.
         condition (Optional[Tuple[Callable[[List[float]], bool], Dict]]): The condition on coordinates
         to shape the island. Defaults to a cylinder.
-        thickness (int): The thickness of the defect in atomic layers.
+        number_of_added_layers (int): The number of added layers to the slab which will form the island.
     """
 
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ISLAND
     condition: Optional[Tuple[Callable[[List[float]], bool], Dict]] = CoordinateConditionBuilder().cylinder()
-    thickness: int = 1  # in atomic layers
 
     @property
     def _json(self):
         _, condition_json = self.condition
         return {
             **super()._json,
-            "type": "IslandSlabDefectConfiguration",
+            "type": self.get_cls_name(),
             "defect_type": self.defect_type.name,
             "condition": condition_json,
-            "thickness": self.thickness,
         }
 
 
@@ -179,7 +193,7 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
         that cuts the slab with added number of layers.
         pivot_coordinate (List[float]): The pivot coordinate: the point in the unit cell
         where the normal of the cut plane passes through.
-        steps_number (int): The number of steps to bunch (number of added layers).
+        number_of_added_layers (int): The number of added layers to the slab which will form the terrace.
         use_cartesian_coordinates (bool): The flag to use cartesian coordinates for coordinates and vectors.
         rotate_to_match_pbc (bool): The flag to rotate the slab with a terrace to match periodic boundary conditions.
     """
@@ -187,7 +201,6 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
     cut_direction: List[int] = [1, 0, 0]
     pivot_coordinate: List[float] = [0.5, 0.5, 0.5]
-    steps_number: int = 1  # number of steps to bunch
     use_cartesian_coordinates: bool = False
     rotate_to_match_pbc: bool = True
 
@@ -195,11 +208,10 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
     def _json(self):
         return {
             **super()._json,
-            "type": "TerraceSlabDefectConfiguration",
+            "type": self.get_cls_name(),
             "defect_type": self.defect_type.name,
             "cut_direction": self.cut_direction,
             "pivot_coordinate": self.pivot_coordinate,
-            "steps_number": self.steps_number,
             "use_cartesian_coordinates": self.use_cartesian_coordinates,
             "rotate_to_match_pbc": self.rotate_to_match_pbc,
         }
@@ -210,13 +222,11 @@ class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
     Configuration for a pair of point defects.
 
     Args:
-        primary_defect_configuration (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]):
-        The first defect.
-        secondary_defect_configuration (Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]):
-        The second defect.
+        primary_defect_configuration: The first defect configuration.
+        secondary_defect_configuration: The second defect configuration. Material is used from the primary defect.
     """
 
-    defect_type: PointDefectTypeEnum = PointDefectTypeEnum.PAIR
+    defect_type: ComplexDefectTypeEnum = ComplexDefectTypeEnum.PAIR
     primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
     secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
 

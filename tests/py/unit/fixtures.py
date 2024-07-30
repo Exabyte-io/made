@@ -4,7 +4,7 @@ from typing import Any, Dict
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.interface.termination_pair import TerminationPair
-from mat3ra.made.tools.build.slab import SlabConfiguration, get_terminations
+from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
 from mat3ra.made.tools.convert import from_ase
 from pymatgen.analysis.elasticity.strain import Strain
 from pymatgen.core.interface import Interface
@@ -236,3 +236,27 @@ SI_SLAB_VACUUM["basis"]["coordinates"] = [
 SI_SLAB_VACUUM["basis"]["cell"] = [[3.867, 0.0, 0.0], [-0.0, 3.867, 0.0], [0.0, 0.0, 15.937527692]]
 SI_SLAB_VACUUM["lattice"]["c"] = 15.937527692
 SI_SLAB_VACUUM["lattice"]["vectors"]["c"] = [0.0, 0.0, 15.937527692]
+
+
+clean_material = Material.create(Material.default_config)
+slab_111_config = SlabConfiguration(
+    bulk=clean_material,
+    miller_indices=(1, 1, 1),
+    thickness=4,
+    vacuum=6,
+    xy_supercell_matrix=[[1, 0], [0, 1]],
+    use_orthogonal_z=True,
+)
+t_111 = get_terminations(slab_111_config)[0]
+SLAB_111 = create_slab(slab_111_config, t_111)
+
+slab_001_config = SlabConfiguration(
+    bulk=clean_material,
+    miller_indices=(0, 0, 1),
+    thickness=3,
+    vacuum=3,
+    xy_supercell_matrix=[[2, 0], [0, 1]],
+    use_orthogonal_z=True,
+)
+t_001 = get_terminations(slab_001_config)[0]
+SLAB_001 = create_slab(slab_001_config, t_001)
