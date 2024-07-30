@@ -124,7 +124,7 @@ class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfigura
     def _json(self):
         return {
             **super()._json,
-            "type": "SlabPointDefectConfiguration",
+            "type": self.get_cls_name(),
             "position_on_surface": self.position_on_surface,
             "distance_z": self.distance_z,
         }
@@ -149,7 +149,7 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
     def _json(self):
         return {
             **super()._json,
-            "type": "AdatomSlabPointDefectConfiguration",
+            "type": self.get_cls_name(),
         }
 
 
@@ -173,7 +173,7 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
         _, condition_json = self.condition
         return {
             **super()._json,
-            "type": "IslandSlabDefectConfiguration",
+            "type": self.get_cls_name(),
             "defect_type": self.defect_type.name,
             "condition": condition_json,
         }
@@ -205,7 +205,7 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
     def _json(self):
         return {
             **super()._json,
-            "type": "TerraceSlabDefectConfiguration",
+            "type": self.get_cls_name(),
             "defect_type": self.defect_type.name,
             "cut_direction": self.cut_direction,
             "pivot_coordinate": self.pivot_coordinate,
