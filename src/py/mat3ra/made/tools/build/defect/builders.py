@@ -362,19 +362,9 @@ class PointDefectPairBuilder(PointDefectBuilder, DefectPairBuilder):
     _GeneratedItemType: Material = Material
 
     def create_isolated_defect(self, defect_configuration: PointDefectConfiguration) -> Material:
-        defect_builder: Union[
-            VacancyPointDefectBuilder,
-            SubstitutionPointDefectBuilder,
-            InterstitialPointDefectBuilder,
-            AdatomSlabDefectBuilder,
-            CrystalSiteAdatomSlabDefectBuilder,
-            EquidistantAdatomSlabDefectBuilder,
-        ]
-
         key = defect_configuration.defect_type.value
         if hasattr(defect_configuration, "placement_method") and defect_configuration.placement_method is not None:
             key += f":{defect_configuration.placement_method}"
-
         builder_class = DefectBuilderFactory.get_class_by_name(key)
         defect_builder = builder_class()
         return defect_builder.get_material(defect_configuration)
