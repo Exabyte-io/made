@@ -72,7 +72,23 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
 
 
 class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
-    pass
+    """
+    Configuration for a slab defect.
+
+    Args:
+        crystal (Material): The Material object.
+        number_of_added_layers (int): The number of added layers.
+    """
+
+    number_of_added_layers: int = 1
+
+    @property
+    def _json(self):
+        return {
+            **super()._json,
+            "type": self.get_cls_name(),
+            "number_of_added_layers": self.number_of_added_layers,
+        }
 
 
 class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfiguration):
@@ -146,12 +162,11 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
         defect_type (SlabDefectTypeEnum): The type of the defect.
         condition (Optional[Tuple[Callable[[List[float]], bool], Dict]]): The condition on coordinates
         to shape the island. Defaults to a cylinder.
-        thickness (int): The thickness of the defect in atomic layers.
+        number_of_added_layers (int): The number of added layers to the slab which will form the island.
     """
 
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ISLAND
     condition: Optional[Tuple[Callable[[List[float]], bool], Dict]] = CoordinateConditionBuilder().cylinder()
-    thickness: int = 1  # in atomic layers
 
     @property
     def _json(self):
@@ -161,7 +176,6 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
             "type": "IslandSlabDefectConfiguration",
             "defect_type": self.defect_type.name,
             "condition": condition_json,
-            "thickness": self.thickness,
         }
 
 
@@ -184,7 +198,6 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
     cut_direction: List[int] = [1, 0, 0]
     pivot_coordinate: List[float] = [0.5, 0.5, 0.5]
-    number_of_added_layers: int = 1
     use_cartesian_coordinates: bool = False
     rotate_to_match_pbc: bool = True
 
@@ -196,7 +209,6 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
             "defect_type": self.defect_type.name,
             "cut_direction": self.cut_direction,
             "pivot_coordinate": self.pivot_coordinate,
-            "number_of_added_layers": self.number_of_added_layers,
             "use_cartesian_coordinates": self.use_cartesian_coordinates,
             "rotate_to_match_pbc": self.rotate_to_match_pbc,
         }

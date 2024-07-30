@@ -379,7 +379,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
             self.create_island(
                 material=configuration.crystal,
                 condition=condition_callable,
-                thickness=configuration.thickness,
+                thickness=configuration.number_of_added_layers,
                 use_cartesian_coordinates=configuration.use_cartesian_coordinates,
             )
         ]
