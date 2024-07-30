@@ -530,10 +530,10 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         )
 
         normalized_direction_vector = self._calculate_cut_direction_vector(material, cut_direction)
-        condition = CoordinateConditionBuilder().plane(
+        condition, _ = CoordinateConditionBuilder.plane(
             plane_normal=normalized_direction_vector,
             plane_point_coordinate=pivot_coordinate,
-        )[0]
+        )
         atoms_within_terrace = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
             condition=condition,
