@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Literal
 
 import numpy as np
 from mat3ra.utils.matrix import convert_2x2_to_3x3
@@ -10,6 +10,7 @@ from .third_party import PymatgenStructure
 
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
+AXIS_TO_INDEX_MAP = {"x": 0, "y": 1, "z": 2}
 
 
 # TODO: convert to accept ASE Atoms object
@@ -327,7 +328,11 @@ class CoordinateConditionBuilder:
 
 
 def sine_wave(
-    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis="x"
+    coordinate: List[float],
+    amplitude: float = 0.1,
+    wavelength: float = 1,
+    phase: float = 0,
+    axis: Literal["x", "y"] = "x",
 ) -> List[float]:
     """
     Deform a coordinate using a sine wave.
@@ -341,9 +346,8 @@ def sine_wave(
     Returns:
         List[float]: The deformed coordinate.
     """
-    axis_map = {"x": 0, "y": 1}
-    if axis in axis_map:
-        index = axis_map[axis]
+    if axis in AXIS_TO_INDEX_MAP:
+        index = AXIS_TO_INDEX_MAP[axis]
         return [
             coordinate[0],
             coordinate[1],
@@ -354,28 +358,31 @@ def sine_wave(
 
 
 def solve_sine_wave_coordinate_prime(
-    coordinate: List[float], amplitude: float, wavelength: float, phase: float
+    coordinate: List[float], amplitude: float, wavelength: float, phase: float, axis="x"
 ) -> List[float]:
     def sine_wave_diff(x, amplitude, wavelength, phase):
         return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * x / wavelength + phase)
 
-    def sine_wave_length_integral_equation(x_prime, x, amplitude, wavelength, phase):
+    def sine_wave_length_integral_equation(w_prime, w, amplitude, wavelength, phase):
         def integrand(t):
             return np.sqrt(1 + (sine_wave_diff(t, amplitude, wavelength, phase)) ** 2)
 
-        arc_length = quad(func=integrand, a=0, b=x_prime)[0]
-        return arc_length - x
+        arc_length = quad(func=integrand, a=0, b=w_prime)[0]
+        return arc_length - w
 
     COEFFICIENT = 10
-    x = coordinate[0]
+    index = AXIS_TO_INDEX_MAP.get(axis, 0)
+    w = coordinate[index]
     # Find x' such that the integral from 0 to x' equals x
     result = root_scalar(
         sine_wave_length_integral_equation,
-        args=(x, amplitude, wavelength, phase),
-        bracket=[0, COEFFICIENT * x],
+        args=(w, amplitude, wavelength, phase),
+        bracket=[0, COEFFICIENT * w],
         method="brentq",
     )
-    return [result.root, coordinate[1], coordinate[2]]
+    new_coordinate = coordinate[:]
+    new_coordinate[index] = result.root
+    return new_coordinate
 
 
 def sine_wave_continuous(

@@ -13,7 +13,7 @@ class DeformationBuilder(BaseBuilder):
     @staticmethod
     def deform_slab(configuration):
         new_material = configuration.slab.clone()
-        # new_material.to_cartesian()
+        new_material.to_cartesian()
         new_coordinates = []
         for coord in new_material.basis.coordinates.values:
             perturbed_coord = configuration.deformation_function[0](coord)
