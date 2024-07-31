@@ -174,8 +174,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
-        max_z = get_atomic_coordinates_extremum(material)
-        distance_z = distance_z
+        max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=False)
         distance_in_crystal_units = distance_z / material.lattice.c
         return [position_on_surface[0], position_on_surface[1], max_z + distance_in_crystal_units]
 
