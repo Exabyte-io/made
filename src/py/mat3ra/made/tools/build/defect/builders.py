@@ -274,13 +274,14 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         )
         return approximate_adatom_coordinate_cartesian
 
-    def create_isolated_defect(
+    def create_isolated_adatom(
         self,
+        original_material: Material,
         configuration: AdatomSlabPointDefectConfiguration,
     ) -> Material:
         material: Material = configuration.crystal
         approximate_adatom_coordinate_cartesian: List[float] = self.calculate_approximate_adatom_coordinate(
-            material, configuration.position_on_surface, configuration.distance_z
+            original_material, configuration.position_on_surface, configuration.distance_z
         )
         chemical_element: Optional[str] = configuration.chemical_element or None
         if chemical_element is None:
@@ -318,13 +319,14 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         material_with_additional_layer = self.create_material_with_additional_layers(new_material)
         material_with_additional_layer.to_cartesian()
 
-        only_adatom_material = self.create_isolated_defect(
-            AdatomSlabPointDefectConfiguration(
+        only_adatom_material = self.create_isolated_adatom(
+            original_material=new_material,
+            configuration=AdatomSlabPointDefectConfiguration(
                 crystal=material_with_additional_layer,
                 chemical_element=chemical_element,
                 position_on_surface=position_on_surface,
                 distance_z=distance_z,
-            )
+            ),
         )
 
         return self.merge_slab_and_defect(new_material, only_adatom_material)
