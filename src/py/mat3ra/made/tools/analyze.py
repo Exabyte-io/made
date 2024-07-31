@@ -246,10 +246,12 @@ def get_atom_indices_with_condition_on_coordinates(
         List[int]: List of indices of atoms whose coordinates satisfy the condition.
     """
     new_material = material.clone()
+    new_basis = new_material.basis
     if use_cartesian_coordinates:
-        new_basis = new_material.basis
         new_basis.to_cartesian()
-        new_material.basis = new_basis
+    else:
+        new_basis.to_crystal()
+    new_material.basis = new_basis
     coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
 
     selected_indices = []
