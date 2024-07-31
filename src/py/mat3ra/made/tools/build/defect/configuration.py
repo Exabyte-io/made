@@ -164,7 +164,7 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
         crystal (Material): The Material object.
         defect_type (SlabDefectTypeEnum): The type of the defect.
         condition (Optional[Tuple[Callable[[List[float]], bool], Dict]]): The condition on coordinates
-        to shape the island. Defaults to a cylinder.
+            to shape the island. Defaults to a cylinder.
         number_of_added_layers (int): The number of added layers to the slab which will form the island.
     """
 
@@ -190,9 +190,9 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
         crystal (Material): The Material object (must be a created slab).
         defect_type (SlabDefectTypeEnum): The type of the defect.
         cut_direction (List[int]): The direction of the cut as lattice vector, can be thought as a normal to the plane
-        that cuts the slab with added number of layers.
+            that cuts the slab with added number of layers.
         pivot_coordinate (List[float]): The pivot coordinate: the point in the unit cell
-        where the normal of the cut plane passes through.
+            where the normal of the cut plane passes through.
         number_of_added_layers (int): The number of added layers to the slab which will form the terrace.
         use_cartesian_coordinates (bool): The flag to use cartesian coordinates for coordinates and vectors.
         rotate_to_match_pbc (bool): The flag to rotate the slab with a terrace to match periodic boundary conditions.

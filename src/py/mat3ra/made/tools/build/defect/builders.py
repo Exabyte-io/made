@@ -174,8 +174,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
-        max_z = get_atomic_coordinates_extremum(material)
-        distance_z = distance_z
+        max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=False)
         distance_in_crystal_units = distance_z / material.lattice.c
         return [position_on_surface[0], position_on_surface[1], max_z + distance_in_crystal_units]
 
@@ -275,13 +274,14 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         )
         return approximate_adatom_coordinate_cartesian
 
-    def create_isolated_defect(
+    def create_isolated_adatom(
         self,
+        original_material: Material,
         configuration: AdatomSlabPointDefectConfiguration,
     ) -> Material:
         material: Material = configuration.crystal
         approximate_adatom_coordinate_cartesian: List[float] = self.calculate_approximate_adatom_coordinate(
-            material, configuration.position_on_surface, configuration.distance_z
+            original_material, configuration.position_on_surface, configuration.distance_z
         )
         chemical_element: Optional[str] = configuration.chemical_element or None
         if chemical_element is None:
@@ -319,13 +319,14 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         material_with_additional_layer = self.create_material_with_additional_layers(new_material)
         material_with_additional_layer.to_cartesian()
 
-        only_adatom_material = self.create_isolated_defect(
-            AdatomSlabPointDefectConfiguration(
+        only_adatom_material = self.create_isolated_adatom(
+            original_material=new_material,
+            configuration=AdatomSlabPointDefectConfiguration(
                 crystal=material_with_additional_layer,
                 chemical_element=chemical_element,
                 position_on_surface=position_on_surface,
                 distance_z=distance_z,
-            )
+            ),
         )
 
         return self.merge_slab_and_defect(new_material, only_adatom_material)
@@ -364,7 +365,7 @@ class PointDefectPairBuilder(PointDefectBuilder, DefectPairBuilder):
     def create_isolated_defect(self, defect_configuration: PointDefectConfiguration) -> Material:
         key = defect_configuration.defect_type.value
         if hasattr(defect_configuration, "placement_method") and defect_configuration.placement_method is not None:
-            key += f":{defect_configuration.placement_method}"
+            key += f":{defect_configuration.placement_method.name}".lower()
         builder_class = DefectBuilderFactory.get_class_by_name(key)
         defect_builder = builder_class()
         return defect_builder.get_material(defect_configuration)
