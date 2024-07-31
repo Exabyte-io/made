@@ -5,27 +5,26 @@ from mat3ra.made.tools.build.defect import (
     EquidistantAdatomSlabDefectBuilder,
     PointDefectBuilderParameters,
     PointDefectConfiguration,
+    PointDefectTypeEnum,
     create_defect,
     create_slab_defect,
 )
-from mat3ra.made.tools.build.defect.builders import IslandSlabDefectBuilder, TerraceSlabDefectBuilder
-from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration, TerraceSlabDefectConfiguration
-from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_terminations
+from mat3ra.made.tools.build.defect.builders import (
+    IslandSlabDefectBuilder,
+    PointDefectPairBuilder,
+    TerraceSlabDefectBuilder,
+)
+from mat3ra.made.tools.build.defect.configuration import (
+    IslandSlabDefectConfiguration,
+    PointDefectPairConfiguration,
+    TerraceSlabDefectConfiguration,
+)
 from mat3ra.made.tools.utils import CoordinateConditionBuilder
 from mat3ra.utils import assertion as assertion_utils
 
-clean_material = Material.create(Material.default_config)
+from .fixtures import SLAB_001, SLAB_111
 
-slab_config = SlabConfiguration(
-    bulk=clean_material,
-    miller_indices=(1, 1, 1),
-    thickness=4,
-    vacuum=6,
-    xy_supercell_matrix=[[1, 0], [0, 1]],
-    use_orthogonal_z=True,
-)
-t = get_terminations(slab_config)[0]
-slab = create_slab(slab_config, t)
+clean_material = Material.create(Material.default_config)
 
 
 def test_create_vacancy():
@@ -78,7 +77,7 @@ def test_create_defect_from_site_id():
 def test_create_adatom():
     # Adatom of Si at 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
-        crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
+        crystal=SLAB_111, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
     )
     defect = create_slab_defect(configuration=configuration, builder=None)
 
@@ -89,7 +88,7 @@ def test_create_adatom():
 def test_create_adatom_equidistant():
     # Adatom of Si at approximate 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
-        crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
+        crystal=SLAB_111, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element="Si"
     )
     defect = create_slab_defect(configuration=configuration, builder=EquidistantAdatomSlabDefectBuilder())
 
@@ -103,7 +102,7 @@ def test_create_adatom_equidistant():
 def test_create_crystal_site_adatom():
     # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
-        crystal=slab, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element=None
+        crystal=SLAB_111, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element=None
     )
     builder = CrystalSiteAdatomSlabDefectBuilder()
     defect = create_slab_defect(configuration=configuration, builder=builder)
@@ -117,7 +116,7 @@ def test_create_crystal_site_adatom():
 def test_create_island():
     condition = CoordinateConditionBuilder.cylinder(center_position=[0.625, 0.5], radius=0.25, min_z=0, max_z=1)
     island_config = IslandSlabDefectConfiguration(
-        crystal=slab,
+        crystal=SLAB_111,
         defect_type="island",
         condition=condition,
         thickness=1,
@@ -126,27 +125,35 @@ def test_create_island():
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
 
     # Only one atom is in the island for this configuration
-    assert len(defect.basis.elements.values) == len(slab.basis.elements.values) + 1
+    assert len(defect.basis.elements.values) == len(SLAB_111.basis.elements.values) + 1
     assert defect.basis.elements.values[-1] == "Si"
 
 
 def test_create_terrace():
-    slab_config = SlabConfiguration(
-        bulk=clean_material,
-        miller_indices=(0, 0, 1),
-        thickness=3,
-        vacuum=3,
-        xy_supercell_matrix=[[2, 0], [0, 1]],
-        use_orthogonal_z=True,
-    )
-    t = get_terminations(slab_config)[0]
-    slab = create_slab(slab_config, t)
-
     config = TerraceSlabDefectConfiguration(
-        crystal=slab,
+        crystal=SLAB_001,
         cut_direction=[1, 0, 0],
         pivot_coordinate=[0.5, 0.5, 0.5],
         number_of_added_layers=1,
     )
     new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
     assertion_utils.assert_deep_almost_equal([0.720082355, 0.5, 0.461401798], new_slab.basis.coordinates.values[42])
+
+
+def test_create_defect_pair():
+    defect1_config = PointDefectConfiguration.from_approximate_position(
+        crystal=SLAB_001,
+        defect_type=PointDefectTypeEnum.VACANCY,
+        approximate_coordinate=[0.5, 0.5, 0.25],
+    )
+    defect2_config = PointDefectConfiguration(
+        defect_type=PointDefectTypeEnum.INTERSTITIAL, coordinate=[0.5, 0.55, 0.35], chemical_element="P"
+    )
+    defect_pair_config = PointDefectPairConfiguration(
+        primary_defect_configuration=defect1_config,
+        secondary_defect_configuration=defect2_config,
+    )
+    defect_material = PointDefectPairBuilder().get_material(defect_pair_config)
+
+    assertion_utils.assert_deep_almost_equal("P", defect_material.basis.elements.values[0])
+    assertion_utils.assert_deep_almost_equal([0.5, 0.55, 0.35], defect_material.basis.coordinates.values[0])

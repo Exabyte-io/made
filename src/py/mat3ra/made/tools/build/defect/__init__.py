@@ -1,6 +1,5 @@
 from typing import Optional, Union
 
-from mat3ra.utils.factory import BaseFactory
 from mat3ra.made.material import Material
 
 from .builders import (
@@ -14,14 +13,7 @@ from .builders import (
 )
 from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration, IslandSlabDefectConfiguration
 from .enums import PointDefectTypeEnum
-
-
-class DefectBuilderFactory(BaseFactory):
-    __class_registry__ = {
-        PointDefectTypeEnum.VACANCY: "mat3ra.made.tools.build.defect.builders.VacancyPointDefectBuilder",
-        PointDefectTypeEnum.SUBSTITUTION: "mat3ra.made.tools.build.defect.builders.SubstitutionPointDefectBuilder",
-        PointDefectTypeEnum.INTERSTITIAL: "mat3ra.made.tools.build.defect.builders.InterstitialPointDefectBuilder",
-    }
+from .factories import DefectBuilderFactory
 
 
 def create_defect(

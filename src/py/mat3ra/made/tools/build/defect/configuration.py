@@ -1,4 +1,4 @@
-from typing import Optional, List, Any, Callable, Dict, Tuple
+from typing import Optional, List, Any, Callable, Dict, Tuple, Union
 from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
@@ -6,7 +6,7 @@ from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from ...utils import CoordinateConditionBuilder
-from .enums import PointDefectTypeEnum, SlabDefectTypeEnum
+from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum, ComplexDefectTypeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -144,12 +144,15 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
     """
 
     defect_type: PointDefectTypeEnum = PointDefectTypeEnum.ADATOM
+    placement_method: AtomPlacementMethodEnum = AtomPlacementMethodEnum.COORDINATE
 
     @property
     def _json(self):
         return {
             **super()._json,
             "type": self.get_cls_name(),
+            "defect_type": self.defect_type.name,
+            "placement_method": self.placement_method.name,
         }
 
 
@@ -211,4 +214,27 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
             "pivot_coordinate": self.pivot_coordinate,
             "use_cartesian_coordinates": self.use_cartesian_coordinates,
             "rotate_to_match_pbc": self.rotate_to_match_pbc,
+        }
+
+
+class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
+    """
+    Configuration for a pair of point defects.
+
+    Args:
+        primary_defect_configuration: The first defect configuration.
+        secondary_defect_configuration: The second defect configuration. Material is used from the primary defect.
+    """
+
+    defect_type: ComplexDefectTypeEnum = ComplexDefectTypeEnum.PAIR
+    primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
+    secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
+
+    @property
+    def _json(self):
+        return {
+            "type": self.get_cls_name(),
+            "defect_type": self.defect_type.name,
+            "primary_defect_configuration": self.primary_defect_configuration.to_json(),
+            "secondary_defect_configuration": self.secondary_defect_configuration.to_json(),
         }

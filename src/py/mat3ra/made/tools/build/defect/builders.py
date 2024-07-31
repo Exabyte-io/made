@@ -1,8 +1,9 @@
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, Union
 
 import numpy as np
 from pydantic import BaseModel
 from mat3ra.made.material import Material
+
 
 from ...third_party import (
     PymatgenStructure,
@@ -39,7 +40,9 @@ from .configuration import (
     AdatomSlabPointDefectConfiguration,
     IslandSlabDefectConfiguration,
     TerraceSlabDefectConfiguration,
+    PointDefectPairConfiguration,
 )
+from .factories import DefectBuilderFactory
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -47,7 +50,7 @@ class PointDefectBuilderParameters(BaseModel):
 
 
 class DefectBuilder(BaseBuilder):
-    def create_isolated_defect(self, material: Material, defect_configuration: PointDefectConfiguration) -> Material:
+    def create_isolated_defect(self, defect_configuration: PointDefectConfiguration) -> Material:
         raise NotImplementedError
 
 
@@ -171,8 +174,7 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
-        max_z = get_atomic_coordinates_extremum(material)
-        distance_z = distance_z
+        max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=False)
         distance_in_crystal_units = distance_z / material.lattice.c
         return [position_on_surface[0], position_on_surface[1], max_z + distance_in_crystal_units]
 
@@ -272,12 +274,16 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         )
         return approximate_adatom_coordinate_cartesian
 
-    def create_isolated_defect(
+    def create_isolated_adatom(
         self,
-        material: Material,
-        approximate_adatom_coordinate_cartesian: List[float],
-        chemical_element: Optional[str] = None,
+        original_material: Material,
+        configuration: AdatomSlabPointDefectConfiguration,
     ) -> Material:
+        material: Material = configuration.crystal
+        approximate_adatom_coordinate_cartesian: List[float] = self.calculate_approximate_adatom_coordinate(
+            original_material, configuration.position_on_surface, configuration.distance_z
+        )
+        chemical_element: Optional[str] = configuration.chemical_element or None
         if chemical_element is None:
             closest_site_id = get_closest_site_id_from_coordinate(material, approximate_adatom_coordinate_cartesian)
         else:
@@ -310,19 +316,75 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             position_on_surface = [0.5, 0.5]
 
         new_material = material.clone()
-
-        approximate_adatom_coordinate_cartesian = self.calculate_approximate_adatom_coordinate(
-            new_material, position_on_surface, distance_z
-        )
-
         material_with_additional_layer = self.create_material_with_additional_layers(new_material)
         material_with_additional_layer.to_cartesian()
 
-        only_adatom_material = self.create_isolated_defect(
-            material_with_additional_layer, approximate_adatom_coordinate_cartesian, chemical_element
+        only_adatom_material = self.create_isolated_adatom(
+            original_material=new_material,
+            configuration=AdatomSlabPointDefectConfiguration(
+                crystal=material_with_additional_layer,
+                chemical_element=chemical_element,
+                position_on_surface=position_on_surface,
+                distance_z=distance_z,
+            ),
         )
 
         return self.merge_slab_and_defect(new_material, only_adatom_material)
+
+
+class DefectPairBuilder(DefectBuilder):
+    def create_defect_pair(
+        self,
+        primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
+        secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
+    ) -> Material:
+        """
+        Create a pair of point defects in the material.
+
+        Args:
+            primary_defect_configuration: The configuration of the first defect.
+            secondary_defect_configuration: The configuration of the second defect.
+
+        Returns:
+            Material: The material with both defects added.
+        """
+        primary_material = self.create_isolated_defect(primary_defect_configuration)
+        # Remove metadata to allow for independent defect creation
+        primary_material.metadata["build"] = primary_defect_configuration.crystal.metadata["build"]
+        primary_material.name = primary_defect_configuration.crystal.name
+        secondary_defect_configuration.crystal = primary_material
+        secondary_material = self.create_isolated_defect(secondary_defect_configuration)
+
+        return secondary_material
+
+
+class PointDefectPairBuilder(PointDefectBuilder, DefectPairBuilder):
+    _ConfigurationType: type(PointDefectPairConfiguration) = PointDefectPairConfiguration  # type: ignore
+    _GeneratedItemType: Material = Material
+
+    def create_isolated_defect(self, defect_configuration: PointDefectConfiguration) -> Material:
+        key = defect_configuration.defect_type.value
+        if hasattr(defect_configuration, "placement_method") and defect_configuration.placement_method is not None:
+            key += f":{defect_configuration.placement_method.name}".lower()
+        builder_class = DefectBuilderFactory.get_class_by_name(key)
+        defect_builder = builder_class()
+        return defect_builder.get_material(defect_configuration)
+
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        return [
+            self.create_defect_pair(
+                primary_defect_configuration=configuration.primary_defect_configuration,
+                secondary_defect_configuration=configuration.secondary_defect_configuration,
+            )
+        ]
+
+    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
+        updated_material = super()._update_material_name(material, configuration)
+        name_1 = configuration.primary_defect_configuration.defect_type.name.capitalize()
+        name_2 = configuration.secondary_defect_configuration.defect_type.name.capitalize()
+        new_name = f"{updated_material.name}, {name_1} and {name_2} Defect Pair"
+        updated_material.name = new_name
+        return updated_material
 
 
 class IslandSlabDefectBuilder(SlabDefectBuilder):
