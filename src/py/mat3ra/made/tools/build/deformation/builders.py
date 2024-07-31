@@ -36,7 +36,7 @@ class DeformationBuilder(BaseBuilder):
 
 
 class ContinuousDeformationBuilder(DeformationBuilder):
-    def deform_slab_continuously(self, configuration):
+    def deform_slab_isometrically(self, configuration):
         new_material = configuration.slab.clone()
         new_material.to_cartesian()
         new_coordinates = []
@@ -59,5 +59,5 @@ class ContinuousDeformationBuilder(DeformationBuilder):
         self, configuration: DeformationBuilder._ConfigurationType
     ) -> List[DeformationBuilder._GeneratedItemType]:
         """Generate materials with applied continuous deformation based on the given configuration."""
-        new_material = self.deform_slab_continuously(configuration)
+        new_material = self.deform_slab_isometrically(configuration)
         return [new_material]

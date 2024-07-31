@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, Dict, List, Optional, Tuple, Literal
+from typing import Callable, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
 from mat3ra.utils.matrix import convert_2x2_to_3x3
@@ -11,6 +11,7 @@ from .third_party import PymatgenStructure
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
 AXIS_TO_INDEX_MAP = {"x": 0, "y": 1, "z": 2}
+EQUATION_RANGE_COEFFICIENT = 10
 
 
 # TODO: convert to accept ASE Atoms object
@@ -360,24 +361,22 @@ def sine_wave(
 def solve_sine_wave_coordinate_prime(
     coordinate: List[float], amplitude: float, wavelength: float, phase: float, axis="x"
 ) -> List[float]:
-    def sine_wave_diff(x, amplitude, wavelength, phase):
-        return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * x / wavelength + phase)
+    def sine_wave_diff(w: float, amplitude: float, wavelength: float, phase: float) -> float:
+        return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
 
-    def sine_wave_length_integral_equation(w_prime, w, amplitude, wavelength, phase):
-        def integrand(t):
-            return np.sqrt(1 + (sine_wave_diff(t, amplitude, wavelength, phase)) ** 2)
-
-        arc_length = quad(func=integrand, a=0, b=w_prime)[0]
+    def sine_wave_length_integral_equation(w_prime: float, w: float, amplitude: float, wavelength: float, phase: float):
+        arc_length = quad(
+            lambda t: np.sqrt(1 + (sine_wave_diff(t, amplitude, wavelength, phase)) ** 2), a=0, b=w_prime
+        )[0]
         return arc_length - w
 
-    COEFFICIENT = 10
     index = AXIS_TO_INDEX_MAP.get(axis, 0)
     w = coordinate[index]
     # Find x' such that the integral from 0 to x' equals x
     result = root_scalar(
         sine_wave_length_integral_equation,
         args=(w, amplitude, wavelength, phase),
-        bracket=[0, COEFFICIENT * w],
+        bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
         method="brentq",
     )
     new_coordinate = coordinate[:]
@@ -385,10 +384,14 @@ def solve_sine_wave_coordinate_prime(
     return new_coordinate
 
 
-def sine_wave_continuous(
-    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0
+def sine_wave_isometric(
+    coordinate: List[float],
+    amplitude: float = 0.1,
+    wavelength: float = 1,
+    phase: float = 0,
+    axis: Literal["x", "y"] = "x",
 ) -> List[float]:
-    coordinate_prime = solve_sine_wave_coordinate_prime(coordinate, amplitude, wavelength, phase)
+    coordinate_prime = solve_sine_wave_coordinate_prime(coordinate, amplitude, wavelength, phase, axis)
     return sine_wave(coordinate_prime, amplitude, wavelength, phase, axis="x")
 
 
@@ -426,9 +429,9 @@ class DeformationFunctionBuilder:
         deformation_json = {"type": deformation_type, **kwargs}
         return lambda coordinate: evaluation_func(coordinate, **kwargs), deformation_json
 
-    def sine_wave(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis="x"):
+    def sine_wave(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis: Literal["x", "y"] = "x"):
         return self.create_deformation_function(
-            deformation_type="sine_wave",
+            deformation_type=sine_wave.__name__,
             evaluation_func=sine_wave,
             amplitude=amplitude,
             wavelength=wavelength,
@@ -436,20 +439,24 @@ class DeformationFunctionBuilder:
             axis=axis,
         )
 
-    def sine_wave_continuous(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0):
+    def sine_wave_isometric(
+        self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis: Literal["x", "y"] = "x"
+    ):
         return self.create_deformation_function(
-            deformation_type="sine_wave_continuous",
-            evaluation_func=sine_wave_continuous,
+            deformation_type=sine_wave_isometric.__name__,
+            evaluation_func=sine_wave_isometric,
             amplitude=amplitude,
             wavelength=wavelength,
             phase=phase,
+            axis=axis,
         )
 
-    def sine_wave_radial(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0):
+    def sine_wave_radial(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, center_position=None):
         return self.create_deformation_function(
-            deformation_type="sine_wave_radial",
+            deformation_type=sine_wave_radial.__name__,
             evaluation_func=sine_wave_radial,
             amplitude=amplitude,
             wavelength=wavelength,
             phase=phase,
+            center_position=center_position,
         )
