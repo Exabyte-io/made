@@ -10,3 +10,4 @@ class PointDefectTypeEnum(str, Enum):
 
 class SlabDefectTypeEnum(str, Enum):
     ISLAND = "island"
+    TERRACE = "terrace"

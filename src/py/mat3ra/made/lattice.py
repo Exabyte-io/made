@@ -1,5 +1,5 @@
 import math
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from mat3ra.utils.mixins import RoundNumericValuesMixin
@@ -67,7 +67,9 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
             "vectors": self.vectors,
         }
 
-    def clone(self, extra_context: Dict[str, Any]) -> "Lattice":
+    def clone(self, extra_context: Optional[Dict[str, Any]] = None) -> "Lattice":
+        if extra_context is None:
+            extra_context = {}
         return Lattice(**{**self.to_json(), **extra_context})
 
     @property
