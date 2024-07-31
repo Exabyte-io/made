@@ -4,7 +4,6 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 
 from .configuration import DeformationConfiguration
-from ...utils import solve_sine_wave_x_prime
 
 
 class DeformationBuilder(BaseBuilder):
@@ -37,25 +36,22 @@ class DeformationBuilder(BaseBuilder):
 
 
 class ContinuousDeformationBuilder(DeformationBuilder):
-
     def deform_slab_continuously(self, configuration):
         new_material = configuration.slab.clone()
         new_material.to_cartesian()
         new_coordinates = []
+
+        deformation_function, deformation_json = configuration.deformation_function
         for coord in new_material.basis.coordinates.values:
-            x_prime = solve_sine_wave_x_prime(
-                coord[0],
-                configuration.deformation_function[1]["amplitude"],
-                configuration.deformation_function[1]["wavelength"],
-                configuration.deformation_function[1]["phase"],
-            )
-            perturbed_coord = configuration.deformation_function[0]([x_prime, coord[1], coord[2]])
+            perturbed_coord = deformation_function(coord)
             new_coordinates.append(perturbed_coord)
 
         new_basis = new_material.basis.copy()
         new_basis.coordinates.values = new_coordinates
         new_basis.to_crystal()
         new_material.basis = new_basis
+
+        # TODO: adjust the lattice parameters with the same coordinates transformation
 
         return new_material
 

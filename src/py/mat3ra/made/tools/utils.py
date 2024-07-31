@@ -353,6 +353,38 @@ def sine_wave(
         return coordinate
 
 
+def solve_sine_wave_coordinate_prime(
+    coordinate: List[float], amplitude: float, wavelength: float, phase: float
+) -> List[float]:
+    def sine_wave_diff(x, amplitude, wavelength, phase):
+        return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * x / wavelength + phase)
+
+    def sine_wave_length_integral_equation(x_prime, x, amplitude, wavelength, phase):
+        def integrand(t):
+            return np.sqrt(1 + (sine_wave_diff(t, amplitude, wavelength, phase)) ** 2)
+
+        arc_length = quad(func=integrand, a=0, b=x_prime)[0]
+        return arc_length - x
+
+    COEFFICIENT = 10
+    x = coordinate[0]
+    # Find x' such that the integral from 0 to x' equals x
+    result = root_scalar(
+        sine_wave_length_integral_equation,
+        args=(x, amplitude, wavelength, phase),
+        bracket=[0, COEFFICIENT * x],
+        method="brentq",
+    )
+    return [result.root, coordinate[1], coordinate[2]]
+
+
+def sine_wave_continuous(
+    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0
+) -> List[float]:
+    coordinate_prime = solve_sine_wave_coordinate_prime(coordinate, amplitude, wavelength, phase)
+    return sine_wave(coordinate_prime, amplitude, wavelength, phase, axis="x")
+
+
 def sine_wave_radial(
     coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, center_position=None
 ) -> List[float]:
@@ -380,30 +412,6 @@ def sine_wave_radial(
     ]
 
 
-def sine_wave_diff(x, amplitude, wavelength, phase):
-    return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * x / wavelength + phase)
-
-
-def sine_wave_length_integral_equation(x_prime, x, amplitude, wavelength, phase):
-    def integrand(t):
-        return np.sqrt(1 + (sine_wave_diff(t, amplitude, wavelength, phase)) ** 2)
-
-    arc_length = quad(func=integrand, a=0, b=x_prime)[0]
-    return arc_length - x
-
-
-def solve_sine_wave_x_prime(self, x, amplitude, wavelength, phase):
-    # Find x' such that the integral from 0 to x' equals x
-    COEFFICIENT = 10
-    result = root_scalar(
-        self.arc_length_integral,
-        args=(x, amplitude, wavelength, phase),
-        bracket=[0, COEFFICIENT * x],
-        method="brentq",
-    )
-    return result.root
-
-
 class DeformationFunctionBuilder:
     def create_deformation_function(
         self, deformation_type: str, evaluation_func: Callable, **kwargs
@@ -419,6 +427,15 @@ class DeformationFunctionBuilder:
             wavelength=wavelength,
             phase=phase,
             axis=axis,
+        )
+
+    def sine_wave_continuous(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0):
+        return self.create_deformation_function(
+            deformation_type="sine_wave_continuous",
+            evaluation_func=sine_wave_continuous,
+            amplitude=amplitude,
+            wavelength=wavelength,
+            phase=phase,
         )
 
     def sine_wave_radial(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0):
