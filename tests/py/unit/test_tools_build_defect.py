@@ -146,7 +146,7 @@ def test_create_terrace():
         crystal=slab,
         cut_direction=[1, 0, 0],
         pivot_coordinate=[0.5, 0.5, 0.5],
-        steps_number=1,
+        number_of_added_layers=1,
     )
     new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
     assertion_utils.assert_deep_almost_equal([0.720082355, 0.5, 0.461401798], new_slab.basis.coordinates.values[42])
