@@ -15,7 +15,7 @@ class DeformationBuilder(BaseBuilder):
 class SlabDeformationBuilder(DeformationBuilder):
     @staticmethod
     def deform_slab(configuration):
-        new_material = configuration.slab.clone()
+        new_material = configuration.material.clone()
         new_material.to_cartesian()
         new_coordinates = []
         for coord in new_material.basis.coordinates.values:
@@ -44,7 +44,7 @@ class SlabDeformationBuilder(DeformationBuilder):
 
 class DistancePreservingSlabDeformationBuilder(DeformationBuilder):
     def deform_slab_isometrically(self, configuration):
-        new_material = configuration.slab.clone()
+        new_material = configuration.material.clone()
         if configuration.use_cartesian_coordinates:
             new_material.to_cartesian()
         new_coordinates = []
