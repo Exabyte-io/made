@@ -437,3 +437,17 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     atoms.wrap()
 
     return Material(from_ase(atoms))
+
+
+def wrap_material(material: Material) -> Material:
+    """
+    Wrap the material to the unit cell.
+
+    Args:
+        material (Material): The material to wrap.
+    Returns:
+        Material: The wrapped material.
+    """
+    atoms = to_ase(material)
+    atoms.wrap()
+    return Material(from_ase(atoms))

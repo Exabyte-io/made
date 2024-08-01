@@ -359,7 +359,7 @@ def sine_wave(
 
 
 def solve_sine_wave_coordinate_prime(
-    coordinate: List[float], amplitude: float, wavelength: float, phase: float, axis="x"
+    coordinate: List[float], amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
 ) -> List[float]:
     def sine_wave_diff(w: float, amplitude: float, wavelength: float, phase: float) -> float:
         return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
@@ -370,7 +370,7 @@ def solve_sine_wave_coordinate_prime(
         )[0]
         return arc_length - w
 
-    index = AXIS_TO_INDEX_MAP.get(axis, 0)
+    index = AXIS_TO_INDEX_MAP[axis]
     w = coordinate[index]
     # Find x' such that the integral from 0 to x' equals x
     result = root_scalar(
@@ -392,7 +392,7 @@ def sine_wave_isometric(
     axis: Literal["x", "y"] = "x",
 ) -> List[float]:
     coordinate_prime = solve_sine_wave_coordinate_prime(coordinate, amplitude, wavelength, phase, axis)
-    return sine_wave(coordinate_prime, amplitude, wavelength, phase, axis="x")
+    return sine_wave(coordinate_prime, amplitude, wavelength, phase, axis=axis)
 
 
 def sine_wave_radial(

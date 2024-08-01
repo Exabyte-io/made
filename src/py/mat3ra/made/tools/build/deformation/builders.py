@@ -4,6 +4,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 
 from .configuration import DeformationConfiguration
+from ...modify import wrap_material
 
 
 class DeformationBuilder(BaseBuilder):
@@ -51,8 +52,8 @@ class ContinuousDeformationBuilder(DeformationBuilder):
         new_basis.to_crystal()
         new_material.basis = new_basis
 
+        new_material = wrap_material(new_material)
         # TODO: adjust the lattice parameters with the same coordinates transformation
-
         return new_material
 
     def _generate(
