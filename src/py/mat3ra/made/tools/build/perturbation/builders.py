@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
@@ -11,6 +11,7 @@ from ...utils import PerturbationFunctionHolder
 class PerturbationBuilder(BaseBuilder):
     _ConfigurationType: type(PerturbationConfiguration) = PerturbationConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
+    _PostProcessParametersType = None
 
     @staticmethod
     def _prepare_material(configuration):
@@ -32,6 +33,11 @@ class PerturbationBuilder(BaseBuilder):
         new_material = self.create_perturbed_slab(configuration)
         return [new_material]
 
+    def _post_process(
+        self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType]
+    ) -> List[Material]:
+        return [wrap_material(item) for item in items]
+
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         perturbation_details = f"Perturbation: {configuration.perturbation_function[1].get('type')}"
         material.name = f"{material.name} ({perturbation_details})"
@@ -41,25 +47,20 @@ class PerturbationBuilder(BaseBuilder):
 class SlabPerturbationBuilder(PerturbationBuilder):
     def create_perturbed_slab(self, configuration):
         new_material = self._prepare_material(configuration)
-        new_coordinates = []
         perturbation_function, _ = configuration.perturbation_function
-        for coord in new_material.basis.coordinates.values:
-            perturbed_coord = perturbation_function(coord)
-            new_coordinates.append(perturbed_coord)
+        new_coordinates = [perturbation_function(coord) for coord in new_material.basis.coordinates.values]
         new_material = self._set_new_coordinates(new_material, new_coordinates)
         return new_material
 
 
-class DistancePreservingSlabPerturbationBuilder(PerturbationBuilder):
+class DistancePreservingSlabPerturbationBuilder(SlabPerturbationBuilder):
     def create_perturbed_slab(self, configuration):
         new_material = self._prepare_material(configuration)
-        new_coordinates = []
         perturbation_function, perturbation_json = configuration.perturbation_function
         coord_transformation_function = PerturbationFunctionHolder.get_coord_transformation(perturbation_json)
-        for coord in new_material.basis.coordinates.values:
-            transformed_coord = coord_transformation_function(coord)
-            perturbed_coord = perturbation_function(transformed_coord)
-            new_coordinates.append(perturbed_coord)
+        new_coordinates = [
+            perturbation_function(coord_transformation_function(coord))
+            for coord in new_material.basis.coordinates.values
+        ]
         new_material = self._set_new_coordinates(new_material, new_coordinates)
-        new_material = wrap_material(new_material)
         return new_material
