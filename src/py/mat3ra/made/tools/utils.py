@@ -328,135 +328,143 @@ class CoordinateConditionBuilder:
         )
 
 
-def sine_wave(
-    coordinate: List[float],
-    amplitude: float = 0.1,
-    wavelength: float = 1,
-    phase: float = 0,
-    axis: Literal["x", "y"] = "x",
-) -> List[float]:
-    """
-    Deform a coordinate using a sine wave.
-    Args:
-        coordinate (List[float]): The coordinate to deform.
-        amplitude (float): The amplitude of the sine wave in cartesian coordinates.
-        wavelength (float): The wavelength of the sine wave in cartesian coordinates.
-        phase (float): The phase of the sine wave in cartesian coordinates.
-        axis (str): The axis of the direction of the sine wave.
+class DeformationFunctionHolder:
 
-    Returns:
-        List[float]: The deformed coordinate.
-    """
-    if axis in AXIS_TO_INDEX_MAP:
+    @staticmethod
+    def sine_wave(
+        amplitude: float = 0.1,
+        wavelength: float = 1,
+        phase: float = 0,
+        axis: Literal["x", "y"] = "x",
+    ) -> Tuple[Callable[[List[float]], List[float]], Dict]:
+        """
+        Deform a coordinate using a sine wave.
+        Args:
+            amplitude (float): The amplitude of the sine wave in cartesian coordinates.
+            wavelength (float): The wavelength of the sine wave in cartesian coordinates.
+            phase (float): The phase of the sine wave in cartesian coordinates.
+            axis (str): The axis of the direction of the sine wave.
+
+        Returns:
+            Tuple[Callable[[List[float]], List[float]], Dict]: The deformation function and its configuration
+        """
+        if axis in AXIS_TO_INDEX_MAP:
+            index = AXIS_TO_INDEX_MAP[axis]
+
+        def deformation(coordinate: List[float]):
+            return [
+                coordinate[0],
+                coordinate[1],
+                coordinate[2] + amplitude * np.sin(2 * np.pi * coordinate[index] / wavelength + phase),
+            ]
+
+        config = {"type": "sine_wave", "amplitude": amplitude, "wavelength": wavelength, "phase": phase, "axis": axis}
+
+        return deformation, config
+
+    @staticmethod
+    def _solve_sine_wave_coordinate_prime(
+        coordinate: List[float], amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
+    ) -> List[float]:
+        def sine_wave_diff(w: float, amplitude: float, wavelength: float, phase: float) -> float:
+            return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
+
+        def sine_wave_length_integral_equation(
+            w_prime: float, w: float, amplitude: float, wavelength: float, phase: float
+        ):
+            arc_length = quad(
+                lambda t: np.sqrt(1 + (sine_wave_diff(t, amplitude, wavelength, phase)) ** 2), a=0, b=w_prime
+            )[0]
+            return arc_length - w
+
         index = AXIS_TO_INDEX_MAP[axis]
-        return [
-            coordinate[0],
-            coordinate[1],
-            coordinate[2] + amplitude * np.sin(2 * np.pi * coordinate[index] / wavelength + phase),
-        ]
-    else:
-        return coordinate
-
-
-def solve_sine_wave_coordinate_prime(
-    coordinate: List[float], amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
-) -> List[float]:
-    def sine_wave_diff(w: float, amplitude: float, wavelength: float, phase: float) -> float:
-        return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
-
-    def sine_wave_length_integral_equation(w_prime: float, w: float, amplitude: float, wavelength: float, phase: float):
-        arc_length = quad(
-            lambda t: np.sqrt(1 + (sine_wave_diff(t, amplitude, wavelength, phase)) ** 2), a=0, b=w_prime
-        )[0]
-        return arc_length - w
-
-    index = AXIS_TO_INDEX_MAP[axis]
-    w = coordinate[index]
-    # Find x' such that the integral from 0 to x' equals x
-    result = root_scalar(
-        sine_wave_length_integral_equation,
-        args=(w, amplitude, wavelength, phase),
-        bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
-        method="brentq",
-    )
-    new_coordinate = coordinate[:]
-    new_coordinate[index] = result.root
-    return new_coordinate
-
-
-def sine_wave_isometric(
-    coordinate: List[float],
-    amplitude: float = 0.1,
-    wavelength: float = 1,
-    phase: float = 0,
-    axis: Literal["x", "y"] = "x",
-) -> List[float]:
-    coordinate_prime = solve_sine_wave_coordinate_prime(coordinate, amplitude, wavelength, phase, axis)
-    return sine_wave(coordinate_prime, amplitude, wavelength, phase, axis=axis)
-
-
-def sine_wave_radial(
-    coordinate: List[float], amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, center_position=None
-) -> List[float]:
-    """
-    Deform a coordinate using a radial sine wave.
-    Args:
-        coordinate (List[float]): The coordinate to deform.
-        amplitude (float): The amplitude of the sine wave in cartesian coordinates.
-        wavelength (float): The wavelength of the sine wave in cartesian coordinates.
-        phase (float): The phase of the sine wave in cartesian coordinates.
-        center_position (List[float]): The center position of the sine wave on the plane.
-
-    Returns:
-        List[float]: The deformed coordinate.
-    """
-    if center_position is None:
-        center_position = [0.5, 0.5]
-    np_position = np.array(coordinate[:2])
-    np_center_position = np.array(center_position)
-    distance = np.linalg.norm(np_position - np_center_position)
-    return [
-        coordinate[0],
-        coordinate[1],
-        coordinate[2] + amplitude * np.sin(2 * np.pi * distance / wavelength + phase),
-    ]
-
-
-class DeformationFunctionBuilder:
-    def create_deformation_function(
-        self, deformation_type: str, evaluation_func: Callable, **kwargs
-    ) -> Tuple[Callable, Dict]:
-        deformation_json = {"type": deformation_type, **kwargs}
-        return lambda coordinate: evaluation_func(coordinate, **kwargs), deformation_json
-
-    def sine_wave(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis: Literal["x", "y"] = "x"):
-        return self.create_deformation_function(
-            deformation_type=sine_wave.__name__,
-            evaluation_func=sine_wave,
-            amplitude=amplitude,
-            wavelength=wavelength,
-            phase=phase,
-            axis=axis,
+        w = coordinate[index]
+        # Find x' such that the integral from 0 to x' equals x
+        result = root_scalar(
+            sine_wave_length_integral_equation,
+            args=(w, amplitude, wavelength, phase),
+            bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
+            method="brentq",
         )
+        new_coordinate = coordinate[:]
+        new_coordinate[index] = result.root
+        return new_coordinate
 
+    @staticmethod
     def sine_wave_isometric(
-        self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, axis: Literal["x", "y"] = "x"
-    ):
-        return self.create_deformation_function(
-            deformation_type=sine_wave_isometric.__name__,
-            evaluation_func=sine_wave_isometric,
-            amplitude=amplitude,
-            wavelength=wavelength,
-            phase=phase,
-            axis=axis,
-        )
+        amplitude: float = 0.1,
+        wavelength: float = 1,
+        phase: float = 0,
+        axis: Literal["x", "y"] = "x",
+    ) -> Tuple[Callable[[List[float]], List[float]], Dict]:
+        """
+        Deform a coordinate using a sine wave isometrically.
 
-    def sine_wave_radial(self, amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, center_position=None):
-        return self.create_deformation_function(
-            deformation_type=sine_wave_radial.__name__,
-            evaluation_func=sine_wave_radial,
-            amplitude=amplitude,
-            wavelength=wavelength,
-            phase=phase,
-            center_position=center_position,
-        )
+        Args:
+            amplitude (float): The amplitude of the sine wave in cartesian coordinates.
+            wavelength (float): The wavelength of the sine wave in cartesian coordinates.
+            phase (float): The phase of the sine wave in cartesian coordinates.
+            axis (str): The axis of the direction of the sine wave.
+
+        Returns:
+            Tuple[Callable[[List[float]], List[float]], Dict]: The deformation function and its configuration
+        """
+
+        def sine_wave_isometric(coordinate: List[float]):
+            new_coordinate = DeformationFunctionHolder._solve_sine_wave_coordinate_prime(
+                coordinate, amplitude, wavelength, phase, axis
+            )
+            return [
+                new_coordinate[0],
+                new_coordinate[1],
+                coordinate[2]
+                + amplitude * np.sin(2 * np.pi * new_coordinate[AXIS_TO_INDEX_MAP[axis]] / wavelength + phase),
+            ]
+
+        config = {
+            "type": "sine_wave_isometric",
+            "amplitude": amplitude,
+            "wavelength": wavelength,
+            "phase": phase,
+            "axis": axis,
+        }
+
+        return sine_wave_isometric, config
+
+    @staticmethod
+    def sine_wave_radial(
+        amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, center_position=None
+    ) -> Tuple[Callable[[List[float]], List[float]], Dict]:
+        """
+        Deform a coordinate using a radial sine wave.
+        Args:
+            amplitude (float): The amplitude of the sine wave in cartesian coordinates.
+            wavelength (float): The wavelength of the sine wave in cartesian coordinates.
+            phase (float): The phase of the sine wave in cartesian coordinates.
+            center_position (List[float]): The center position of the sine wave on the plane.
+
+        Returns:
+            Tuple[Callable[[List[float]], List[float]], Dict]: The deformation function and its configuration
+        """
+        if center_position is None:
+            center_position = [0.5, 0.5]
+
+        def radial_sine_wave(coordinate: List[float]):
+            np_position = np.array(coordinate[:2])
+            np_center_position = np.array(center_position)
+            distance = np.linalg.norm(np_position - np_center_position)
+            return [
+                coordinate[0],
+                coordinate[1],
+                coordinate[2] + amplitude * np.sin(2 * np.pi * distance / wavelength + phase),
+            ]
+
+        config = {
+            "type": "sine_wave_radial",
+            "amplitude": amplitude,
+            "wavelength": wavelength,
+            "phase": phase,
+            "center_position": center_position,
+        }
+
+        return radial_sine_wave, config

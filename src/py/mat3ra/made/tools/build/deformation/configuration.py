@@ -4,12 +4,12 @@ from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 from pydantic import BaseModel
 
-from ...utils import DeformationFunctionBuilder
+from ...utils import DeformationFunctionHolder
 
 
 class DeformationConfiguration(BaseModel, InMemoryEntity):
     slab: Material
-    deformation_function: Tuple[Callable[[List[float]], float], Dict] = DeformationFunctionBuilder().sine_wave()
+    deformation_function: Tuple[Callable[[List[float]], float], Dict] = DeformationFunctionHolder.sine_wave()
 
     class Config:
         arbitrary_types_allowed = True
