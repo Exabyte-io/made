@@ -371,6 +371,20 @@ class PerturbationFunctionHolder:
     def sine_wave_transform_coordinates(
         amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
     ) -> Callable[[List[float]], List[float]]:
+        """
+        Transform coordinates to preserve the distance between points on a sine wave.
+        Achieved by calculating the integral of the length between [0,0,0] and given coordinate.
+
+        Args:
+            amplitude (float): The amplitude of the sine wave in cartesian coordinates.
+            wavelength (float): The wavelength of the sine wave in cartesian coordinates.
+            phase (float): The phase of the sine wave in cartesian coordinates.
+            axis (str): The axis of the direction of the sine wave.
+
+        Returns:
+            Callable[[List[float]], List[float]]: The coordinates transformation function.
+        """
+
         def sine_wave_diff(w: float, amplitude: float, wavelength: float, phase: float) -> float:
             return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
 
@@ -384,7 +398,7 @@ class PerturbationFunctionHolder:
 
         index = AXIS_TO_INDEX_MAP[axis]
 
-        def deformation(coordinate: List[float]):
+        def coordinate_transformation(coordinate: List[float]):
             w = coordinate[index]
             # Find x' such that the integral from 0 to x' equals x
             result = root_scalar(
@@ -396,7 +410,7 @@ class PerturbationFunctionHolder:
             coordinate[index] = result.root
             return coordinate
 
-        return deformation
+        return coordinate_transformation
 
     @staticmethod
     def sine_wave_radial(
