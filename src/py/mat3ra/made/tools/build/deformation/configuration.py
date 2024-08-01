@@ -1,4 +1,4 @@
-from typing import Callable, List, Dict, Tuple
+from typing import Callable, Dict, Tuple
 
 from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
@@ -9,7 +9,8 @@ from ...utils import DeformationFunctionHolder
 
 class DeformationConfiguration(BaseModel, InMemoryEntity):
     slab: Material
-    deformation_function: Tuple[Callable[[List[float]], float], Dict] = DeformationFunctionHolder.sine_wave()
+    deformation_function: Tuple[Callable, Dict] = DeformationFunctionHolder.sine_wave()
+    use_cartesian_coordinates: bool = True
 
     class Config:
         arbitrary_types_allowed = True
@@ -21,4 +22,5 @@ class DeformationConfiguration(BaseModel, InMemoryEntity):
             "type": self.get_cls_name(),
             "slab": self.slab.to_json(),
             "deformation_function": deformation_function_json,
+            "use_cartesian_coordinates": self.use_cartesian_coordinates,
         }

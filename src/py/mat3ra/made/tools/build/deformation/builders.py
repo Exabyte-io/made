@@ -11,6 +11,8 @@ class DeformationBuilder(BaseBuilder):
     _ConfigurationType: type(DeformationConfiguration) = DeformationConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
+
+class SlabDeformationBuilder(DeformationBuilder):
     @staticmethod
     def deform_slab(configuration):
         new_material = configuration.slab.clone()
@@ -25,21 +27,26 @@ class DeformationBuilder(BaseBuilder):
         new_material.basis = new_basis
         return new_material
 
-    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+    def _generate(
+        self, configuration: DeformationBuilder._ConfigurationType
+    ) -> List[DeformationBuilder._GeneratedItemType]:
         """Generate materials with applied deformation based on the given configuration."""
         new_material = self.deform_slab(configuration)
         return [new_material]
 
-    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
+    def _update_material_name(
+        self, material: Material, configuration: DeformationBuilder._ConfigurationType
+    ) -> Material:
         deformation_details = f"Deformation: {configuration.deformation_function[0].__name__}"
         material.name = f"{material.name} ({deformation_details})"
         return material
 
 
-class ContinuousDeformationBuilder(DeformationBuilder):
+class DistancePreservingSlabDeformationBuilder(DeformationBuilder):
     def deform_slab_isometrically(self, configuration):
         new_material = configuration.slab.clone()
-        new_material.to_cartesian()
+        if configuration.use_cartesian_coordinates:
+            new_material.to_cartesian()
         new_coordinates = []
 
         deformation_function, deformation_json = configuration.deformation_function
@@ -53,7 +60,6 @@ class ContinuousDeformationBuilder(DeformationBuilder):
         new_material.basis = new_basis
 
         new_material = wrap_material(new_material)
-        # TODO: adjust the lattice parameters with the same coordinates transformation
         return new_material
 
     def _generate(

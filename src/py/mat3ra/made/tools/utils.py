@@ -329,7 +329,6 @@ class CoordinateConditionBuilder:
 
 
 class DeformationFunctionHolder:
-
     @staticmethod
     def sine_wave(
         amplitude: float = 0.1,
