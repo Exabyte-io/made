@@ -328,7 +328,7 @@ class CoordinateConditionBuilder:
         )
 
 
-class DeformationFunctionHolder:
+class PerturbationFunctionHolder:
     @staticmethod
     def sine_wave(
         amplitude: float = 0.1,
@@ -345,7 +345,7 @@ class DeformationFunctionHolder:
             axis (str): The axis of the direction of the sine wave.
 
         Returns:
-            Tuple[Callable[[List[float]], List[float]], Dict]: The deformation function and its configuration
+            Tuple[Callable[[List[float]], List[float]], Dict]: The perturbation function and its configuration
         """
         if axis in AXIS_TO_INDEX_MAP:
             index = AXIS_TO_INDEX_MAP[axis]
@@ -406,11 +406,11 @@ class DeformationFunctionHolder:
             axis (str): The axis of the direction of the sine wave.
 
         Returns:
-            Tuple[Callable[[List[float]], List[float]], Dict]: The deformation function and its configuration
+            Tuple[Callable[[List[float]], List[float]], Dict]: The perturbation function and its configuration
         """
 
         def sine_wave_isometric(coordinate: List[float]):
-            new_coordinate = DeformationFunctionHolder._solve_sine_wave_coordinate_prime(
+            new_coordinate = PerturbationFunctionHolder._solve_sine_wave_coordinate_prime(
                 coordinate, amplitude, wavelength, phase, axis
             )
             return [
@@ -443,7 +443,7 @@ class DeformationFunctionHolder:
             center_position (List[float]): The center position of the sine wave on the plane.
 
         Returns:
-            Tuple[Callable[[List[float]], List[float]], Dict]: The deformation function and its configuration
+            Tuple[Callable[[List[float]], List[float]], Dict]: The perturbation function and its configuration
         """
         if center_position is None:
             center_position = [0.5, 0.5]

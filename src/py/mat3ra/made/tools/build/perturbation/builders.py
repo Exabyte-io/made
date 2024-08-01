@@ -3,23 +3,23 @@ from typing import List
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 
-from .configuration import DeformationConfiguration
+from .configuration import PerturbationConfiguration
 from ...modify import wrap_material
 
 
-class DeformationBuilder(BaseBuilder):
-    _ConfigurationType: type(DeformationConfiguration) = DeformationConfiguration  # type: ignore
+class PerturbationBuilder(BaseBuilder):
+    _ConfigurationType: type(PerturbationConfiguration) = PerturbationConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
 
-class SlabDeformationBuilder(DeformationBuilder):
+class SlabPerturbationBuilder(PerturbationBuilder):
     @staticmethod
     def deform_slab(configuration):
         new_material = configuration.material.clone()
         new_material.to_cartesian()
         new_coordinates = []
         for coord in new_material.basis.coordinates.values:
-            perturbed_coord = configuration.deformation_function[0](coord)
+            perturbed_coord = configuration.perturbation_function[0](coord)
             new_coordinates.append(perturbed_coord)
         new_basis = new_material.basis.copy()
         new_basis.coordinates.values = new_coordinates
@@ -28,30 +28,30 @@ class SlabDeformationBuilder(DeformationBuilder):
         return new_material
 
     def _generate(
-        self, configuration: DeformationBuilder._ConfigurationType
-    ) -> List[DeformationBuilder._GeneratedItemType]:
-        """Generate materials with applied deformation based on the given configuration."""
+        self, configuration: PerturbationBuilder._ConfigurationType
+    ) -> List[PerturbationBuilder._GeneratedItemType]:
+        """Generate materials with applied perturbation based on the given configuration."""
         new_material = self.deform_slab(configuration)
         return [new_material]
 
     def _update_material_name(
-        self, material: Material, configuration: DeformationBuilder._ConfigurationType
+        self, material: Material, configuration: PerturbationBuilder._ConfigurationType
     ) -> Material:
-        deformation_details = f"Deformation: {configuration.deformation_function[0].__name__}"
-        material.name = f"{material.name} ({deformation_details})"
+        perturbation_details = f"Perturbation: {configuration.perturbation_function[0].__name__}"
+        material.name = f"{material.name} ({perturbation_details})"
         return material
 
 
-class DistancePreservingSlabDeformationBuilder(DeformationBuilder):
+class DistancePreservingSlabPerturbationBuilder(PerturbationBuilder):
     def deform_slab_isometrically(self, configuration):
         new_material = configuration.material.clone()
         if configuration.use_cartesian_coordinates:
             new_material.to_cartesian()
         new_coordinates = []
 
-        deformation_function, deformation_json = configuration.deformation_function
+        perturbation_function, perturbation_json = configuration.perturbation_function
         for coord in new_material.basis.coordinates.values:
-            perturbed_coord = deformation_function(coord)
+            perturbed_coord = perturbation_function(coord)
             new_coordinates.append(perturbed_coord)
 
         new_basis = new_material.basis.copy()
@@ -63,8 +63,8 @@ class DistancePreservingSlabDeformationBuilder(DeformationBuilder):
         return new_material
 
     def _generate(
-        self, configuration: DeformationBuilder._ConfigurationType
-    ) -> List[DeformationBuilder._GeneratedItemType]:
-        """Generate materials with applied continuous deformation based on the given configuration."""
+        self, configuration: PerturbationBuilder._ConfigurationType
+    ) -> List[PerturbationBuilder._GeneratedItemType]:
+        """Generate materials with applied continuous perturbation based on the given configuration."""
         new_material = self.deform_slab_isometrically(configuration)
         return [new_material]
