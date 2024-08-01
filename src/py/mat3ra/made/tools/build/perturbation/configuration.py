@@ -17,7 +17,7 @@ class PerturbationConfiguration(BaseModel, InMemoryEntity):
 
     @property
     def _json(self):
-        perturbation_function_json = self.perturbation_function[1]
+        _, perturbation_function_json = self.perturbation_function
         return {
             "type": self.get_cls_name(),
             "material": self.material.to_json(),

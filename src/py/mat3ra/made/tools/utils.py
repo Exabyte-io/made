@@ -330,11 +330,17 @@ class CoordinateConditionBuilder:
 
 class PerturbationFunctionHolder:
     @staticmethod
+    def get_coord_transformation(perturbation_json: dict) -> Callable:
+        name = perturbation_json.pop("type")
+        map = {"sine_wave": PerturbationFunctionHolder._solve_sine_wave_coordinate_prime}
+        return map[name](**perturbation_json)
+
+    @staticmethod
     def sine_wave(
         amplitude: float = 0.1,
         wavelength: float = 1,
         phase: float = 0,
-        axis: Literal["x", "y"] = "x",
+        axis: Optional[Literal["x", "y"]] = "x",
     ) -> Tuple[Callable[[List[float]], List[float]], Dict]:
         """
         Deform a coordinate using a sine wave.
@@ -363,8 +369,8 @@ class PerturbationFunctionHolder:
 
     @staticmethod
     def _solve_sine_wave_coordinate_prime(
-        coordinate: List[float], amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
-    ) -> List[float]:
+        amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
+    ) -> Callable[[List[float]], List[float]]:
         def sine_wave_diff(w: float, amplitude: float, wavelength: float, phase: float) -> float:
             return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
 
@@ -377,58 +383,62 @@ class PerturbationFunctionHolder:
             return arc_length - w
 
         index = AXIS_TO_INDEX_MAP[axis]
-        w = coordinate[index]
-        # Find x' such that the integral from 0 to x' equals x
-        result = root_scalar(
-            sine_wave_length_integral_equation,
-            args=(w, amplitude, wavelength, phase),
-            bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
-            method="brentq",
-        )
-        new_coordinate = coordinate[:]
-        new_coordinate[index] = result.root
-        return new_coordinate
 
-    @staticmethod
-    def sine_wave_isometric(
-        amplitude: float = 0.1,
-        wavelength: float = 1,
-        phase: float = 0,
-        axis: Literal["x", "y"] = "x",
-    ) -> Tuple[Callable[[List[float]], List[float]], Dict]:
-        """
-        Deform a coordinate using a sine wave isometrically.
-
-        Args:
-            amplitude (float): The amplitude of the sine wave in cartesian coordinates.
-            wavelength (float): The wavelength of the sine wave in cartesian coordinates.
-            phase (float): The phase of the sine wave in cartesian coordinates.
-            axis (str): The axis of the direction of the sine wave.
-
-        Returns:
-            Tuple[Callable[[List[float]], List[float]], Dict]: The perturbation function and its configuration
-        """
-
-        def sine_wave_isometric(coordinate: List[float]):
-            new_coordinate = PerturbationFunctionHolder._solve_sine_wave_coordinate_prime(
-                coordinate, amplitude, wavelength, phase, axis
+        def deformation(coordinate: List[float]):
+            w = coordinate[index]
+            # Find x' such that the integral from 0 to x' equals x
+            result = root_scalar(
+                sine_wave_length_integral_equation,
+                args=(w, amplitude, wavelength, phase),
+                bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
+                method="brentq",
             )
-            return [
-                new_coordinate[0],
-                new_coordinate[1],
-                coordinate[2]
-                + amplitude * np.sin(2 * np.pi * new_coordinate[AXIS_TO_INDEX_MAP[axis]] / wavelength + phase),
-            ]
+            new_coordinate = coordinate[:]
+            new_coordinate[index] = result.root
+            return new_coordinate
 
-        config = {
-            "type": "sine_wave_isometric",
-            "amplitude": amplitude,
-            "wavelength": wavelength,
-            "phase": phase,
-            "axis": axis,
-        }
+        return deformation
 
-        return sine_wave_isometric, config
+    # @staticmethod
+    # def sine_wave_isometric(
+    #     amplitude: float = 0.1,
+    #     wavelength: float = 1,
+    #     phase: float = 0,
+    #     axis: Literal["x", "y"] = "x",
+    # ) -> Tuple[Callable[[List[float]], List[float]], Dict]:
+    #     """
+    #     Deform a coordinate using a sine wave isometrically.
+    #
+    #     Args:
+    #         amplitude (float): The amplitude of the sine wave in cartesian coordinates.
+    #         wavelength (float): The wavelength of the sine wave in cartesian coordinates.
+    #         phase (float): The phase of the sine wave in cartesian coordinates.
+    #         axis (str): The axis of the direction of the sine wave.
+    #
+    #     Returns:
+    #         Tuple[Callable[[List[float]], List[float]], Dict]: The perturbation function and its configuration
+    #     """
+    #
+    #     def sine_wave_isometric(coordinate: List[float]):
+    #         new_coordinate = PerturbationFunctionHolder._solve_sine_wave_coordinate_prime(
+    #             coordinate, amplitude, wavelength, phase, axis
+    #         )
+    #         return [
+    #             new_coordinate[0],
+    #             new_coordinate[1],
+    #             coordinate[2]
+    #             + amplitude * np.sin(2 * np.pi * new_coordinate[AXIS_TO_INDEX_MAP[axis]] / wavelength + phase),
+    #         ]
+    #
+    #     config = {
+    #         "type": "sine_wave_isometric",
+    #         "amplitude": amplitude,
+    #         "wavelength": wavelength,
+    #         "phase": phase,
+    #         "axis": axis,
+    #     }
+    #
+    #     return sine_wave_isometric, config
 
     @staticmethod
     def sine_wave_radial(

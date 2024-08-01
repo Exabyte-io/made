@@ -5,6 +5,7 @@ from mat3ra.made.tools.build import BaseBuilder
 
 from .configuration import PerturbationConfiguration
 from ...modify import wrap_material
+from ...utils import PerturbationFunctionHolder
 
 
 class PerturbationBuilder(BaseBuilder):
@@ -18,8 +19,9 @@ class SlabPerturbationBuilder(PerturbationBuilder):
         new_material = configuration.material.clone()
         new_material.to_cartesian()
         new_coordinates = []
+        perturbation_function, _ = configuration.perturbation_function
         for coord in new_material.basis.coordinates.values:
-            perturbed_coord = configuration.perturbation_function[0](coord)
+            perturbed_coord = perturbation_function(coord)
             new_coordinates.append(perturbed_coord)
         new_basis = new_material.basis.copy()
         new_basis.coordinates.values = new_coordinates
@@ -50,8 +52,10 @@ class DistancePreservingSlabPerturbationBuilder(PerturbationBuilder):
         new_coordinates = []
 
         perturbation_function, perturbation_json = configuration.perturbation_function
+        coord_transformation_function = PerturbationFunctionHolder.get_coord_transformation(perturbation_json)
         for coord in new_material.basis.coordinates.values:
-            perturbed_coord = perturbation_function(coord)
+            transformed_coord = coord_transformation_function(coord)
+            perturbed_coord = perturbation_function(transformed_coord)
             new_coordinates.append(perturbed_coord)
 
         new_basis = new_material.basis.copy()
