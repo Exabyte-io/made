@@ -52,6 +52,17 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
             [0.0, 0.0, c],
         ]
 
+    def from_nested_array(self, vectors: List[List[float]]) -> "Lattice":
+        a = np.linalg.norm(vectors[0])
+        b = np.linalg.norm(vectors[1])
+        c = np.linalg.norm(vectors[2])
+        alpha = np.degrees(np.arccos(np.dot(vectors[1], vectors[2]) / (b * c)))
+        beta = np.degrees(np.arccos(np.dot(vectors[0], vectors[2]) / (a * c)))
+        gamma = np.degrees(np.arccos(np.dot(vectors[0], vectors[1]) / (a * b)))
+        return Lattice(
+            a=float(a), b=float(b), c=float(c), alpha=alpha, beta=beta, gamma=gamma, units=self.units, type=self.type
+        )
+
     def to_json(self, skip_rounding: bool = False) -> Dict[str, Any]:
         __round__ = RoundNumericValuesMixin.round_array_or_number
         round_func = __round__ if not skip_rounding else lambda x: x
