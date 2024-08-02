@@ -76,6 +76,10 @@ class CellMatchingDistancePreservingSlabPerturbationBuilder(DistancePreservingSl
     def create_perturbed_slab(self, configuration: PerturbationConfiguration):
         new_material = super().create_perturbed_slab(configuration)
         new_lattice_vectors = self._transform_cell_vectors(configuration)
+        new_lattice = new_material.lattice.copy()
+        new_lattice = new_lattice.from_nested_array(new_lattice_vectors)
+        new_material.lattice = new_lattice
+
         new_basis = new_material.basis.copy()
         new_basis.to_cartesian()
         new_basis.cell = new_basis.cell.from_nested_array(new_lattice_vectors)

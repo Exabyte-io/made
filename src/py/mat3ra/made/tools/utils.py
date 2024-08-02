@@ -11,7 +11,7 @@ from .third_party import PymatgenStructure
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
 AXIS_TO_INDEX_MAP = {"x": 0, "y": 1, "z": 2}
-EQUATION_RANGE_COEFFICIENT = 10
+EQUATION_RANGE_COEFFICIENT = 5
 
 
 # TODO: convert to accept ASE Atoms object
