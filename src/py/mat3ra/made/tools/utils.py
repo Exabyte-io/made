@@ -331,9 +331,10 @@ class CoordinateConditionBuilder:
 class PerturbationFunctionHolder:
     @staticmethod
     def get_coord_transformation(perturbation_json: dict) -> Callable:
-        name = perturbation_json.pop("type")
+        new_perturbation_json = perturbation_json.copy()
+        name = new_perturbation_json.pop("type")
         name_to_function_map = {"sine_wave": PerturbationFunctionHolder.sine_wave_transform_coordinates}
-        return name_to_function_map[name](**perturbation_json)
+        return name_to_function_map[name](**new_perturbation_json)
 
     @staticmethod
     def sine_wave(
