@@ -2,9 +2,9 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
-from ..third_party import ASEAtoms, ase_make_supercell
+from ..third_party import ase_make_supercell
 from ..utils import decorator_convert_2x2_to_3x3
-from ..convert import from_ase, decorator_convert_material_args_kwargs_to_atoms, to_ase
+from ..convert import from_ase, to_ase
 
 
 @decorator_convert_2x2_to_3x3

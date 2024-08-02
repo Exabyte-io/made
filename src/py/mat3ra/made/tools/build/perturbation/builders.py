@@ -11,7 +11,6 @@ from ...utils import PerturbationFunctionHolder
 class PerturbationBuilder(BaseBuilder):
     _ConfigurationType: type(PerturbationConfiguration) = PerturbationConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
-    _PostProcessParametersType = None
 
     @staticmethod
     def _prepare_material(configuration):
@@ -35,7 +34,7 @@ class PerturbationBuilder(BaseBuilder):
         return [new_material]
 
     def _post_process(
-        self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType]
+        self, items: List[_GeneratedItemType], post_process_parameters: Optional[BaseBuilder._PostProcessParametersType]
     ) -> List[Material]:
         return [wrap_material(item) for item in items]
 
