@@ -1,0 +1,23 @@
+from mat3ra.made.material import Material
+from mat3ra.made.tools.build.perturbation.builders import SlabPerturbationBuilder
+from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
+from mat3ra.made.tools.build.supercell import create_supercell
+from mat3ra.made.tools.utils import PerturbationFunctionHolder
+from mat3ra.utils import assertion as assertion_utils
+from .fixtures import GRAPHENE
+
+
+def test_sine_perturbation():
+    material = Material(GRAPHENE)
+    slab = create_supercell(material, [[10, 0, 0], [0, 10, 0], [0, 0, 1]])
+
+    perturbation_config = PerturbationConfiguration(
+        material=slab,
+        perturbation_function=PerturbationFunctionHolder.sine_wave(amplitude=0.05, wavelength=1),
+        use_cartesian_coordinates=False,
+    )
+    builder = SlabPerturbationBuilder()
+    perturbed_slab = builder.get_material(perturbation_config)
+    # Check selected atoms to avoid using 100+ atoms fixture
+    assertion_utils.assert_deep_almost_equal([0.0, 0.0, 0.5], perturbed_slab.basis.coordinates.values[0])
+    assertion_utils.assert_deep_almost_equal([0.2, 0.1, 0.547552826], perturbed_slab.basis.coordinates.values[42])
