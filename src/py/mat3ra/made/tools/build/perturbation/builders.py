@@ -4,7 +4,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 
 from .configuration import PerturbationConfiguration
-from ...modify import wrap_material
+from ...modify import wrap_material, translate_to_z_level
 from ...utils import PerturbationFunctionHolder
 
 
@@ -16,6 +16,7 @@ class PerturbationBuilder(BaseBuilder):
     @staticmethod
     def _prepare_material(configuration):
         new_material = configuration.material.clone()
+        new_material = translate_to_z_level(new_material, "center")
         if configuration.use_cartesian_coordinates:
             new_material.to_cartesian()
         return new_material
