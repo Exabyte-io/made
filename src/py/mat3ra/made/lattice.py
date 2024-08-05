@@ -52,16 +52,28 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
             [0.0, 0.0, c],
         ]
 
-    def from_nested_array(self, vectors: List[List[float]]) -> "Lattice":
+    @classmethod
+    def from_vectors_array(
+        cls, vectors: List[List[float]], units: Optional[Dict[str, str]] = None, type: Optional[str] = None
+    ) -> "Lattice":
+        """
+        Create a Lattice object from a nested array of vectors.
+        Args:
+            vectors (List[List[float]]): A nested array of vectors.
+        Returns:
+            Lattice: A Lattice object.
+        """
         a = np.linalg.norm(vectors[0])
         b = np.linalg.norm(vectors[1])
         c = np.linalg.norm(vectors[2])
         alpha = np.degrees(np.arccos(np.dot(vectors[1], vectors[2]) / (b * c)))
         beta = np.degrees(np.arccos(np.dot(vectors[0], vectors[2]) / (a * c)))
         gamma = np.degrees(np.arccos(np.dot(vectors[0], vectors[1]) / (a * b)))
-        return Lattice(
-            a=float(a), b=float(b), c=float(c), alpha=alpha, beta=beta, gamma=gamma, units=self.units, type=self.type
-        )
+        if units is None:
+            units = cls.units
+        if type is None:
+            type = cls.type
+        return cls(a=float(a), b=float(b), c=float(c), alpha=alpha, beta=beta, gamma=gamma, units=units, type=type)
 
     def to_json(self, skip_rounding: bool = False) -> Dict[str, Any]:
         __round__ = RoundNumericValuesMixin.round_array_or_number
@@ -89,7 +101,7 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
 
     @property
     def cell(self) -> Cell:
-        return Cell.from_nested_array(self.vector_arrays)
+        return Cell.from_vectors_array(self.vector_arrays)
 
     def volume(self) -> float:
         np_vector = np.array(self.vector_arrays)
