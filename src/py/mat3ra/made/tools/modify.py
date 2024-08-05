@@ -9,7 +9,7 @@ from .analyze import (
 )
 from .convert import decorator_convert_material_args_kwargs_to_structure, from_ase, to_ase
 from .third_party import PymatgenStructure, ase_add_vacuum
-from .utils import (
+from .utils.coordinate import (
     is_coordinate_in_box,
     is_coordinate_in_cylinder,
     is_coordinate_in_triangular_prism,
