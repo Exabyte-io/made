@@ -10,20 +10,48 @@ EQUATION_RANGE_COEFFICIENT = 5
 
 
 class FunctionHolder(BaseModel):
+
+    @staticmethod
+    def get_function(*args, **kwargs):
+        """
+        Get the function of the perturbation.
+        """
+        raise NotImplementedError
+
     @staticmethod
     def get_derivative(*args, **kwargs):
+        """
+        Get the derivative of the perturbation function.
+        """
         raise NotImplementedError
 
     @staticmethod
     def get_arc_length_equation(*args, **kwargs):
+        """
+        Get the equation to calculate the arc length between [0,0,0] and a given coordinate of the perturbation.
+        """
         raise NotImplementedError
 
     @staticmethod
     def get_transform_coordinates(*args, **kwargs):
+        """
+        Transform coordinates to preserve the distance between points on a sine wave when perturbation is applied.
+        Achieved by calculating the integral of the length between [0,0,0] and given coordinate.
+
+        Returns:
+            Callable[[List[float]], List[float]]: The coordinates transformation function.
+        """
         raise NotImplementedError
 
 
 class SineWave(FunctionHolder):
+
+    @staticmethod
+    def get_function(
+        w: float, amplitude: float, wavelength: float, phase: float
+    ) -> Callable[[List[float]], List[float]]:
+        return amplitude * np.sin(2 * np.pi * w / wavelength + phase)
+
     @staticmethod
     def get_derivative(w: float, amplitude: float, wavelength: float, phase: float) -> float:
         return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
@@ -41,19 +69,6 @@ class SineWave(FunctionHolder):
     def get_transform_coordinates(
         amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
     ) -> Callable[[List[float]], List[float]]:
-        """
-        Transform coordinates to preserve the distance between points on a sine wave.
-        Achieved by calculating the integral of the length between [0,0,0] and given coordinate.
-
-        Args:
-            amplitude (float): The amplitude of the sine wave in cartesian coordinates.
-            wavelength (float): The wavelength of the sine wave in cartesian coordinates.
-            phase (float): The phase of the sine wave in cartesian coordinates.
-            axis (str): The axis of the direction of the sine wave.
-
-        Returns:
-            Callable[[List[float]], List[float]]: The coordinates transformation function.
-        """
         index = AXIS_TO_INDEX_MAP[axis]
 
         def coordinate_transformation(coordinate: List[float]):
