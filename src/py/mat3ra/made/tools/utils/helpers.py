@@ -10,7 +10,6 @@ EQUATION_RANGE_COEFFICIENT = 5
 
 
 class FunctionHolder(BaseModel):
-
     @staticmethod
     def get_function(*args, **kwargs):
         """
@@ -45,7 +44,6 @@ class FunctionHolder(BaseModel):
 
 
 class SineWave(FunctionHolder):
-
     @staticmethod
     def get_function(
         w: float, amplitude: float, wavelength: float, phase: float
