@@ -2,7 +2,6 @@ from functools import wraps
 from typing import Callable, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
-from mat3ra.utils.factory import BaseFactory
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 
 from ..third_party import PymatgenStructure
@@ -213,17 +212,18 @@ class PerturbationFunctionHolder:
         """
         if axis in AXIS_TO_INDEX_MAP:
             index = AXIS_TO_INDEX_MAP[axis]
+        perturbation_function = PerturbationFunctionHelperFactory.get_class_by_name("sine_wave")
 
-        def deformation(coordinate: List[float]):
+        def perturbation(coordinate: List[float]):
             return [
                 coordinate[0],
                 coordinate[1],
-                coordinate[2] + amplitude * np.sin(2 * np.pi * coordinate[index] / wavelength + phase),
+                coordinate[2] + perturbation_function.get_function(coordinate[index], amplitude, wavelength, phase),
             ]
 
         config = {"type": "sine_wave", "amplitude": amplitude, "wavelength": wavelength, "phase": phase, "axis": axis}
 
-        return deformation, config
+        return perturbation, config
 
     @staticmethod
     def sine_wave_radial(
@@ -243,7 +243,7 @@ class PerturbationFunctionHolder:
         if center_position is None:
             center_position = [0.5, 0.5]
 
-        def radial_sine_wave(coordinate: List[float]):
+        def perturbation(coordinate: List[float]):
             np_position = np.array(coordinate[:2])
             np_center_position = np.array(center_position)
             distance = np.linalg.norm(np_position - np_center_position)
@@ -261,4 +261,4 @@ class PerturbationFunctionHolder:
             "center_position": center_position,
         }
 
-        return radial_sine_wave, config
+        return perturbation, config
