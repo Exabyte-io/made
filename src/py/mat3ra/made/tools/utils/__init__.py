@@ -2,9 +2,8 @@ from functools import wraps
 from typing import Callable, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
+from mat3ra.utils.factory import BaseFactory
 from mat3ra.utils.matrix import convert_2x2_to_3x3
-from scipy.integrate import quad
-from scipy.optimize import root_scalar
 
 from ..third_party import PymatgenStructure
 from .coordinate import (
@@ -14,11 +13,11 @@ from .coordinate import (
     is_coordinate_in_sphere,
     is_coordinate_in_triangular_prism,
 )
+from .factories import PerturbationFunctionHelperFactory
+from .helpers import AXIS_TO_INDEX_MAP
 
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
-AXIS_TO_INDEX_MAP = {"x": 0, "y": 1, "z": 2}
-EQUATION_RANGE_COEFFICIENT = 5
 
 
 # TODO: convert to accept ASE Atoms object
@@ -190,8 +189,9 @@ class PerturbationFunctionHolder:
     def get_coord_transformation(perturbation_json: dict) -> Callable:
         new_perturbation_json = perturbation_json.copy()
         name = new_perturbation_json.pop("type")
-        name_to_function_map = {"sine_wave": PerturbationFunctionHolder.sine_wave_transform_coordinates}
-        return name_to_function_map[name](**new_perturbation_json)
+        helper_function = PerturbationFunctionHelperFactory.get_class_by_name(name)
+        # TODO: add type of SineWave (or corresponding one to the return of the factory)
+        return helper_function.get_transform_coordinates(**new_perturbation_json)
 
     @staticmethod
     def sine_wave(
@@ -224,52 +224,6 @@ class PerturbationFunctionHolder:
         config = {"type": "sine_wave", "amplitude": amplitude, "wavelength": wavelength, "phase": phase, "axis": axis}
 
         return deformation, config
-
-    @staticmethod
-    def sine_wave_diff(w: float, amplitude: float, wavelength: float, phase: float) -> float:
-        return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
-
-    @staticmethod
-    def sine_wave_length_integral_equation(w_prime: float, w: float, amplitude: float, wavelength: float, phase: float):
-        arc_length = quad(
-            lambda t: np.sqrt(1 + (PerturbationFunctionHolder.sine_wave_diff(t, amplitude, wavelength, phase)) ** 2),
-            a=0,
-            b=w_prime,
-        )[0]
-        return arc_length - w
-
-    @staticmethod
-    def sine_wave_transform_coordinates(
-        amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
-    ) -> Callable[[List[float]], List[float]]:
-        """
-        Transform coordinates to preserve the distance between points on a sine wave.
-        Achieved by calculating the integral of the length between [0,0,0] and given coordinate.
-
-        Args:
-            amplitude (float): The amplitude of the sine wave in cartesian coordinates.
-            wavelength (float): The wavelength of the sine wave in cartesian coordinates.
-            phase (float): The phase of the sine wave in cartesian coordinates.
-            axis (str): The axis of the direction of the sine wave.
-
-        Returns:
-            Callable[[List[float]], List[float]]: The coordinates transformation function.
-        """
-        index = AXIS_TO_INDEX_MAP[axis]
-
-        def coordinate_transformation(coordinate: List[float]):
-            w = coordinate[index]
-            # Find x' such that the integral from 0 to x' equals x
-            result = root_scalar(
-                PerturbationFunctionHolder.sine_wave_length_integral_equation,
-                args=(w, amplitude, wavelength, phase),
-                bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
-                method="brentq",
-            )
-            coordinate[index] = result.root
-            return coordinate
-
-        return coordinate_transformation
 
     @staticmethod
     def sine_wave_radial(
