@@ -2,14 +2,11 @@ from functools import wraps
 from typing import Callable, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
-import sympy as sp
 from mat3ra.utils.matrix import convert_2x2_to_3x3
-from pydantic import BaseModel
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
 
 from ..third_party import PymatgenStructure
-
 from .coordinate import (
     is_coordinate_behind_plane,
     is_coordinate_in_box,
