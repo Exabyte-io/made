@@ -2,7 +2,9 @@ from functools import wraps
 from typing import Callable, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
+import sympy as sp
 from mat3ra.utils.matrix import convert_2x2_to_3x3
+from pydantic import BaseModel
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
 
@@ -227,6 +229,19 @@ class PerturbationFunctionHolder:
         return deformation, config
 
     @staticmethod
+    def sine_wave_diff(w: float, amplitude: float, wavelength: float, phase: float) -> float:
+        return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
+
+    @staticmethod
+    def sine_wave_length_integral_equation(w_prime: float, w: float, amplitude: float, wavelength: float, phase: float):
+        arc_length = quad(
+            lambda t: np.sqrt(1 + (PerturbationFunctionHolder.sine_wave_diff(t, amplitude, wavelength, phase)) ** 2),
+            a=0,
+            b=w_prime,
+        )[0]
+        return arc_length - w
+
+    @staticmethod
     def sine_wave_transform_coordinates(
         amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
     ) -> Callable[[List[float]], List[float]]:
@@ -243,25 +258,13 @@ class PerturbationFunctionHolder:
         Returns:
             Callable[[List[float]], List[float]]: The coordinates transformation function.
         """
-
-        def sine_wave_diff(w: float, amplitude: float, wavelength: float, phase: float) -> float:
-            return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
-
-        def sine_wave_length_integral_equation(
-            w_prime: float, w: float, amplitude: float, wavelength: float, phase: float
-        ):
-            arc_length = quad(
-                lambda t: np.sqrt(1 + (sine_wave_diff(t, amplitude, wavelength, phase)) ** 2), a=0, b=w_prime
-            )[0]
-            return arc_length - w
-
         index = AXIS_TO_INDEX_MAP[axis]
 
         def coordinate_transformation(coordinate: List[float]):
             w = coordinate[index]
             # Find x' such that the integral from 0 to x' equals x
             result = root_scalar(
-                sine_wave_length_integral_equation,
+                PerturbationFunctionHolder.sine_wave_length_integral_equation,
                 args=(w, amplitude, wavelength, phase),
                 bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
                 method="brentq",
