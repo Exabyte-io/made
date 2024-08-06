@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from .cell import Cell
 
 HASH_TOLERANCE = 3
+DEFAULT_UNITS = {"length": "angstrom", "angle": "degree"}
+DEFAULT_TYPE = "TRI"
 
 
 class Lattice(RoundNumericValuesMixin, BaseModel):
@@ -17,11 +19,8 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
     alpha: float = 90.0
     beta: float = 90.0
     gamma: float = 90.0
-    units: Dict[str, str] = {
-        "length": "angstrom",
-        "angle": "degree",
-    }
-    type: str = "TRI"
+    units: Dict[str, str] = DEFAULT_UNITS
+    type: str = DEFAULT_TYPE
 
     @property
     def vectors(self) -> List[List[float]]:
@@ -70,9 +69,9 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
         beta = np.degrees(np.arccos(np.dot(vectors[0], vectors[2]) / (a * c)))
         gamma = np.degrees(np.arccos(np.dot(vectors[0], vectors[1]) / (a * b)))
         if units is None:
-            units = cls.units
+            units = DEFAULT_UNITS
         if type is None:
-            type = cls.type
+            type = DEFAULT_TYPE
         return cls(a=float(a), b=float(b), c=float(c), alpha=alpha, beta=beta, gamma=gamma, units=units, type=type)
 
     def to_json(self, skip_rounding: bool = False) -> Dict[str, Any]:
