@@ -1,5 +1,5 @@
 # Place all functions acting on coordinates
-from typing import List, Callable, Tuple, Dict
+from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 

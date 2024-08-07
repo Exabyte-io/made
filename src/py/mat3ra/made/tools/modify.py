@@ -7,8 +7,8 @@ from .analyze import (
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,
 )
-from .convert import decorator_convert_material_args_kwargs_to_structure, from_ase, to_ase
-from .third_party import PymatgenStructure, ase_add_vacuum
+from .convert import from_ase, to_ase
+from .third_party import ase_add_vacuum
 from .utils.coordinate import (
     is_coordinate_in_box,
     is_coordinate_in_cylinder,

@@ -1,6 +1,7 @@
+from typing import Callable, Dict, List, Literal, Optional, Tuple
+
 from .factories import PerturbationFunctionHolderFactory
 from .functions import AXIS_TO_INDEX_MAP
-from typing import List, Tuple, Dict, Callable, Optional, Literal
 
 
 class PerturbationFunctionHolder:

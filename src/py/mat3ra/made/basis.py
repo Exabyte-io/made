@@ -24,7 +24,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         coordinates: List[Dict],
         units: str,
         labels: Optional[List[Dict]] = None,
-        cell: Optional[Dict] = None,
+        cell: Optional[List[List[float]]] = None,
         constraints: Optional[List[Dict]] = None,
     ) -> "Basis":
         return Basis(
