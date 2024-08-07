@@ -12,21 +12,40 @@ EQUATION_RANGE_COEFFICIENT = 5
 class FunctionHolder(BaseModel):
     def apply_function(self, coordinate: List[float]) -> float:
         """
-        Get the function of the perturbation.
+        Get the value of the function at the given coordinate.
         """
         raise NotImplementedError
 
     def apply_derivative(self, coordinate: List[float]) -> float:
         """
-        Get the derivative of the perturbation function.
+        Get the derivative of the function at the given coordinate
         """
         raise NotImplementedError
 
-    def get_arc_length_equation(self, *args, **kwargs) -> float:
+    def get_arc_length(self, a: float, b: float) -> float:
         """
-        Get the equation to calculate the arc length between [0,0,0] and a given coordinate of the perturbation.
+        Get the arc length of the function between a and b.
         """
         raise NotImplementedError
+
+    def get_json(self) -> dict:
+        """
+        Get the json representation of the function holder.
+        """
+        raise NotImplementedError
+
+
+class PerturbationFunctionHolder(FunctionHolder):
+    def get_arc_length_equation(self, w_prime: float, w: float) -> float:
+        """
+        Get the arc length equation for the perturbation function.
+        """
+        arc_length = quad(
+            lambda t: np.sqrt(1 + (self.apply_derivative([t]) ** 2)),
+            a=0,
+            b=w_prime,
+        )[0]
+        return arc_length - w
 
     def transform_coordinates(self, coordinate: List[float]) -> List[float]:
         """
@@ -38,14 +57,14 @@ class FunctionHolder(BaseModel):
         """
         raise NotImplementedError
 
-    def get_json(self) -> dict:
+    def apply_perturbation(self, coordinate: List[float]) -> List[float]:
         """
-        Get the json representation of the perturbation.
+        Apply the perturbation to the given coordinate.
         """
         raise NotImplementedError
 
 
-class SineWaveFunctionHolder(FunctionHolder):
+class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):
     amplitude: float = 0.05
     wavelength: float = 1
     phase: float = 0
@@ -59,13 +78,8 @@ class SineWaveFunctionHolder(FunctionHolder):
         w = coordinate[AXIS_TO_INDEX_MAP[self.axis]]
         return self.amplitude * 2 * np.pi / self.wavelength * np.cos(2 * np.pi * w / self.wavelength + self.phase)
 
-    def get_arc_length_equation(self, w_prime: float, w: float) -> float:
-        arc_length = quad(
-            lambda t: np.sqrt(1 + (self.apply_derivative([t]) ** 2)),
-            a=0,
-            b=w_prime,
-        )[0]
-        return arc_length - w
+    def apply_perturbation(self, coordinate: List[float]) -> List[float]:
+        return [coordinate[0], coordinate[1], coordinate[2] + self.apply_function(coordinate)]
 
     def transform_coordinates(self, coordinate: List[float]) -> List[float]:
         index = AXIS_TO_INDEX_MAP[self.axis]

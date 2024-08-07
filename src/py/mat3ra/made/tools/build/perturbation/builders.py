@@ -50,7 +50,7 @@ class SlabPerturbationBuilder(PerturbationBuilder):
     def create_perturbed_slab(self, configuration: PerturbationConfiguration) -> Material:
         new_material = self._prepare_material(configuration)
         new_coordinates = [
-            [coord[0], coord[1], coord[2] + configuration.perturbation_function_holder.apply_function(coord)]
+            configuration.perturbation_function_holder.apply_perturbation(coord)
             for coord in new_material.basis.coordinates.values
         ]
         new_material = self._set_new_coordinates(new_material, new_coordinates)
@@ -65,8 +65,7 @@ class DistancePreservingSlabPerturbationBuilder(SlabPerturbationBuilder):
             for coord in new_material.basis.coordinates.values
         ]
         new_coordinates = [
-            [coord[0], coord[1], coord[2] + configuration.perturbation_function_holder.apply_function(coord)]
-            for coord in new_coordinates
+            configuration.perturbation_function_holder.apply_perturbation(coord) for coord in new_coordinates
         ]
         new_material = self._set_new_coordinates(new_material, new_coordinates)
         return new_material

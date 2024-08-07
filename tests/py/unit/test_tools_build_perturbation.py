@@ -4,7 +4,7 @@ from mat3ra.made.tools.build.perturbation import create_perturbation
 from mat3ra.made.tools.build.perturbation.builders import SlabPerturbationBuilder
 from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
 from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.utils.functions import SineWaveFunctionHolder
+from mat3ra.made.tools.utils.functions import SineWavePerturbationFunctionHolder
 from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures import GRAPHENE
@@ -16,7 +16,7 @@ def test_sine_perturbation():
 
     perturbation_config = PerturbationConfiguration(
         material=slab,
-        perturbation_function=SineWaveFunctionHolder(amplitude=0.05, wavelength=1),
+        perturbation_function=SineWavePerturbationFunctionHolder(amplitude=0.05, wavelength=1),
         use_cartesian_coordinates=False,
     )
     builder = SlabPerturbationBuilder()
@@ -32,7 +32,7 @@ def test_distance_preserved_sine_perturbation():
 
     perturbation_config = PerturbationConfiguration(
         material=slab,
-        perturbation_function=SineWaveFunctionHolder(amplitude=0.05, wavelength=1, phase=0.25, axis="y"),
+        perturbation_function=SineWavePerturbationFunctionHolder(amplitude=0.05, wavelength=1, phase=0.25, axis="y"),
         use_cartesian_coordinates=False,
     )
     perturbed_slab = create_perturbation(configuration=perturbation_config, preserve_distance=True)
