@@ -3,7 +3,7 @@ from typing import List, Optional, Any
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 
-from .configuration import PerturbationConfiguration, PerturbationFunctionHolder
+from .configuration import PerturbationConfiguration
 from ...modify import wrap_to_unit_cell, translate_to_z_level
 
 
@@ -41,7 +41,7 @@ class PerturbationBuilder(BaseBuilder):
         return [wrap_to_unit_cell(item) for item in items]
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
-        perturbation_details = f"Perturbation: {configuration.perturbation_function[1].get('type')}"
+        perturbation_details = f"Perturbation: {configuration.perturbation_function_holder.get_json().get('type')}"
         material.name = f"{material.name} ({perturbation_details})"
         return material
 
@@ -49,8 +49,10 @@ class PerturbationBuilder(BaseBuilder):
 class SlabPerturbationBuilder(PerturbationBuilder):
     def create_perturbed_slab(self, configuration: PerturbationConfiguration) -> Material:
         new_material = self._prepare_material(configuration)
-        perturbation_function, _ = configuration.perturbation_function
-        new_coordinates = [perturbation_function(coord) for coord in new_material.basis.coordinates.values]
+        new_coordinates = [
+            [coord[0], coord[1], coord[2] + configuration.perturbation_function_holder.apply_function(coord)]
+            for coord in new_material.basis.coordinates.values
+        ]
         new_material = self._set_new_coordinates(new_material, new_coordinates)
         return new_material
 
@@ -58,11 +60,13 @@ class SlabPerturbationBuilder(PerturbationBuilder):
 class DistancePreservingSlabPerturbationBuilder(SlabPerturbationBuilder):
     def create_perturbed_slab(self, configuration: PerturbationConfiguration) -> Material:
         new_material = self._prepare_material(configuration)
-        perturbation_function, perturbation_json = configuration.perturbation_function
-        coord_transformation_function = PerturbationFunctionHolder.get_coord_transformation(perturbation_json)
         new_coordinates = [
-            perturbation_function(coord_transformation_function(coord))
+            configuration.perturbation_function_holder.transform_coordinates(coord)
             for coord in new_material.basis.coordinates.values
+        ]
+        new_coordinates = [
+            [coord[0], coord[1], coord[2] + configuration.perturbation_function_holder.apply_function(coord)]
+            for coord in new_coordinates
         ]
         new_material = self._set_new_coordinates(new_material, new_coordinates)
         return new_material
@@ -70,10 +74,13 @@ class DistancePreservingSlabPerturbationBuilder(SlabPerturbationBuilder):
 
 class CellMatchingDistancePreservingSlabPerturbationBuilder(DistancePreservingSlabPerturbationBuilder):
     def _transform_lattice_vectors(self, configuration: PerturbationConfiguration) -> List[List[float]]:
-        perturbation_function, perturbation_json = configuration.perturbation_function
-        coord_transformation_function = PerturbationFunctionHolder.get_coord_transformation(perturbation_json)
         cell_vectors = configuration.material.basis.cell.vectors_as_array
-        return [perturbation_function(coord_transformation_function(coord)) for coord in cell_vectors]
+        return [
+            configuration.perturbation_function_holder.transform_coordinates(
+                configuration.perturbation_function_holder.transform_coordinates(coord)
+            )
+            for coord in cell_vectors
+        ]
 
     def create_perturbed_slab(self, configuration: PerturbationConfiguration) -> Material:
         new_material = super().create_perturbed_slab(configuration)

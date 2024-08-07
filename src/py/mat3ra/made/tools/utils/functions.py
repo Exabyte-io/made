@@ -1,4 +1,4 @@
-from typing import Callable, List, Literal
+from typing import List, Literal
 
 import numpy as np
 from pydantic import BaseModel
@@ -10,29 +10,25 @@ EQUATION_RANGE_COEFFICIENT = 5
 
 
 class FunctionHolder(BaseModel):
-    @staticmethod
-    def get_function(*args, **kwargs):
+    def apply_function(self, coordinate: List[float]) -> float:
         """
         Get the function of the perturbation.
         """
         raise NotImplementedError
 
-    @staticmethod
-    def get_derivative(*args, **kwargs):
+    def apply_derivative(self, coordinate: List[float]) -> float:
         """
         Get the derivative of the perturbation function.
         """
         raise NotImplementedError
 
-    @staticmethod
-    def get_arc_length_equation(*args, **kwargs):
+    def get_arc_length_equation(self, *args, **kwargs) -> float:
         """
         Get the equation to calculate the arc length between [0,0,0] and a given coordinate of the perturbation.
         """
         raise NotImplementedError
 
-    @staticmethod
-    def get_transform_coordinates(*args, **kwargs):
+    def transform_coordinates(self, coordinate: List[float]) -> List[float]:
         """
         Transform coordinates to preserve the distance between points on a sine wave when perturbation is applied.
         Achieved by calculating the integral of the length between [0,0,0] and given coordinate.
@@ -42,8 +38,7 @@ class FunctionHolder(BaseModel):
         """
         raise NotImplementedError
 
-    @staticmethod
-    def get_json(*args, **kwargs):
+    def get_json(self) -> dict:
         """
         Get the json representation of the perturbation.
         """
@@ -51,45 +46,46 @@ class FunctionHolder(BaseModel):
 
 
 class SineWaveFunctionHolder(FunctionHolder):
-    @staticmethod
-    def get_function(
-        w: float, amplitude: float, wavelength: float, phase: float
-    ) -> Callable[[List[float]], List[float]]:
-        return amplitude * np.sin(2 * np.pi * w / wavelength + phase)
+    amplitude: float = 0.05
+    wavelength: float = 1
+    phase: float = 0
+    axis: Literal["x", "y"] = "x"
 
-    @staticmethod
-    def get_derivative(w: float, amplitude: float, wavelength: float, phase: float) -> float:
-        return amplitude * 2 * np.pi / wavelength * np.cos(2 * np.pi * w / wavelength + phase)
+    def apply_function(self, coordinate: List[float]) -> float:
+        w = coordinate[AXIS_TO_INDEX_MAP[self.axis]]
+        return self.amplitude * np.sin(2 * np.pi * w / self.wavelength + self.phase)
 
-    @staticmethod
-    def get_arc_length_equation(w_prime: float, w: float, amplitude: float, wavelength: float, phase: float) -> float:
+    def apply_derivative(self, coordinate: List[float]) -> float:
+        w = coordinate[AXIS_TO_INDEX_MAP[self.axis]]
+        return self.amplitude * 2 * np.pi / self.wavelength * np.cos(2 * np.pi * w / self.wavelength + self.phase)
+
+    def get_arc_length_equation(self, w_prime: float, w: float) -> float:
         arc_length = quad(
-            lambda t: np.sqrt(1 + (SineWaveFunctionHolder.get_derivative(t, amplitude, wavelength, phase)) ** 2),
+            lambda t: np.sqrt(1 + (self.apply_derivative([t]) ** 2)),
             a=0,
             b=w_prime,
         )[0]
         return arc_length - w
 
-    @staticmethod
-    def get_transform_coordinates(
-        amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]
-    ) -> Callable[[List[float]], List[float]]:
-        index = AXIS_TO_INDEX_MAP[axis]
+    def transform_coordinates(self, coordinate: List[float]) -> List[float]:
+        index = AXIS_TO_INDEX_MAP[self.axis]
 
-        def coordinate_transformation(coordinate: List[float]):
-            w = coordinate[index]
-            # Find x' such that the integral from 0 to x' equals x
-            result = root_scalar(
-                SineWaveFunctionHolder.get_arc_length_equation,
-                args=(w, amplitude, wavelength, phase),
-                bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
-                method="brentq",
-            )
-            coordinate[index] = result.root
-            return coordinate
+        w = coordinate[index]
+        # Find x' such that the integral from 0 to x' equals x
+        result = root_scalar(
+            self.get_arc_length_equation,
+            args=w,
+            bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
+            method="brentq",
+        )
+        coordinate[index] = result.root
+        return coordinate
 
-        return coordinate_transformation
-
-    @staticmethod
-    def get_json(amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]) -> dict:
-        return {"type": "sine_wave", "amplitude": amplitude, "wavelength": wavelength, "phase": phase, "axis": axis}
+    def get_json(self) -> dict:
+        return {
+            "type": self.__class__.__name__,
+            "amplitude": self.amplitude,
+            "wavelength": self.wavelength,
+            "phase": self.phase,
+            "axis": self.axis,
+        }

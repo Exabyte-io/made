@@ -1,15 +1,13 @@
-from typing import Callable, Dict, Tuple
-
 from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 from pydantic import BaseModel
 
-from ...utils.perturbation import PerturbationFunctionHolder
+from ...utils.functions import SineWaveFunctionHolder
 
 
 class PerturbationConfiguration(BaseModel, InMemoryEntity):
     material: Material
-    perturbation_function: Tuple[Callable, Dict] = PerturbationFunctionHolder.sine_wave()
+    perturbation_function_holder: SineWaveFunctionHolder = SineWaveFunctionHolder()
     use_cartesian_coordinates: bool = True
 
     class Config:
@@ -17,7 +15,7 @@ class PerturbationConfiguration(BaseModel, InMemoryEntity):
 
     @property
     def _json(self):
-        _, perturbation_function_json = self.perturbation_function
+        perturbation_function_json = self.perturbation_function_holder.get_json()
         return {
             "type": self.get_cls_name(),
             "material": self.material.to_json(),

@@ -7,7 +7,6 @@ from .builders import (
     CellMatchingDistancePreservingSlabPerturbationBuilder,
 )
 from .configuration import PerturbationConfiguration
-from .builders import PerturbationFunctionHolder  # type: ignore
 
 
 def create_perturbation(
