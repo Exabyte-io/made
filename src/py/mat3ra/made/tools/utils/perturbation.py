@@ -4,6 +4,9 @@ from .factories import PerturbationFunctionHolderFactory
 from .functions import AXIS_TO_INDEX_MAP
 
 
+# TODO: maek use of this class in the perturbation configuration
+# use it to either select the preconfigured function from function holders
+# or to generate a new one with sympy function definitions
 class PerturbationFunctionHolder:
     @staticmethod
     def get_coord_transformation(perturbation_json: dict) -> Callable:
