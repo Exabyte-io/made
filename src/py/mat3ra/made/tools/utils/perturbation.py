@@ -1,5 +1,5 @@
-from .factories import PerturbationFunctionHelperFactory
-from .helpers import AXIS_TO_INDEX_MAP
+from .factories import PerturbationFunctionHolderFactory
+from .functions import AXIS_TO_INDEX_MAP
 from typing import List, Tuple, Dict, Callable, Optional, Literal
 
 
@@ -8,7 +8,7 @@ class PerturbationFunctionHolder:
     def get_coord_transformation(perturbation_json: dict) -> Callable:
         new_perturbation_json = perturbation_json.copy()
         name = new_perturbation_json.pop("type")
-        helper_function = PerturbationFunctionHelperFactory.get_class_by_name(name)
+        helper_function = PerturbationFunctionHolderFactory.get_class_by_name(name)
         # TODO: add type of SineWave (or corresponding one to the return of the factory)
         return helper_function.get_transform_coordinates(**new_perturbation_json)
 
@@ -32,7 +32,7 @@ class PerturbationFunctionHolder:
         """
         if axis in AXIS_TO_INDEX_MAP:
             index = AXIS_TO_INDEX_MAP[axis]
-        perturbation_function = PerturbationFunctionHelperFactory.get_class_by_name("sine_wave")
+        perturbation_function = PerturbationFunctionHolderFactory.get_class_by_name("sine_wave")
 
         def perturbation(coordinate: List[float]):
             return [

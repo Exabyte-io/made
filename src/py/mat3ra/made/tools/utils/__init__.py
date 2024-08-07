@@ -12,8 +12,8 @@ from .coordinate import (
     is_coordinate_in_sphere,
     is_coordinate_in_triangular_prism,
 )
-from .factories import PerturbationFunctionHelperFactory
-from .helpers import AXIS_TO_INDEX_MAP
+from .factories import PerturbationFunctionHolderFactory
+from .functions import AXIS_TO_INDEX_MAP
 
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR

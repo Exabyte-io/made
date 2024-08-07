@@ -50,7 +50,7 @@ class FunctionHolder(BaseModel):
         raise NotImplementedError
 
 
-class SineWave(FunctionHolder):
+class SineWaveFunctionHolder(FunctionHolder):
     @staticmethod
     def get_function(
         w: float, amplitude: float, wavelength: float, phase: float
@@ -64,7 +64,7 @@ class SineWave(FunctionHolder):
     @staticmethod
     def get_arc_length_equation(w_prime: float, w: float, amplitude: float, wavelength: float, phase: float) -> float:
         arc_length = quad(
-            lambda t: np.sqrt(1 + (SineWave.get_derivative(t, amplitude, wavelength, phase)) ** 2),
+            lambda t: np.sqrt(1 + (SineWaveFunctionHolder.get_derivative(t, amplitude, wavelength, phase)) ** 2),
             a=0,
             b=w_prime,
         )[0]
@@ -80,7 +80,7 @@ class SineWave(FunctionHolder):
             w = coordinate[index]
             # Find x' such that the integral from 0 to x' equals x
             result = root_scalar(
-                SineWave.get_arc_length_equation,
+                SineWaveFunctionHolder.get_arc_length_equation,
                 args=(w, amplitude, wavelength, phase),
                 bracket=[0, EQUATION_RANGE_COEFFICIENT * w],
                 method="brentq",
