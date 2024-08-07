@@ -87,18 +87,18 @@ def translate_by_vector(
     return Material(from_ase(atoms))
 
 
-@decorator_convert_material_args_kwargs_to_structure
-def wrap_to_unit_cell(structure: PymatgenStructure):
+def wrap_to_unit_cell(material: Material) -> Material:
     """
-    Wrap atoms to the cell
+    Wrap the material to the unit cell.
 
     Args:
-        structure (PymatgenStructure): The pymatgen PymatgenStructure object to normalize.
+        material (Material): The material to wrap.
     Returns:
-        PymatgenStructure: The wrapped pymatgen PymatgenStructure object.
+        Material: The wrapped material.
     """
-    structure.make_supercell((1, 1, 1), to_unit_cell=True)
-    return structure
+    atoms = to_ase(material)
+    atoms.wrap()
+    return Material(from_ase(atoms))
 
 
 def filter_material_by_ids(material: Material, ids: List[int], invert: bool = False) -> Material:
@@ -436,18 +436,4 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     atoms.rotate(v=axis, a=angle, center="COM")
     atoms.wrap()
 
-    return Material(from_ase(atoms))
-
-
-def wrap_material(material: Material) -> Material:
-    """
-    Wrap the material to the unit cell.
-
-    Args:
-        material (Material): The material to wrap.
-    Returns:
-        Material: The wrapped material.
-    """
-    atoms = to_ase(material)
-    atoms.wrap()
     return Material(from_ase(atoms))
