@@ -20,14 +20,6 @@ class PerturbationBuilder(BaseBuilder):
             new_material.to_cartesian()
         return new_material
 
-    @staticmethod
-    def _set_new_coordinates(new_material: Material, new_coordinates: List[List[float]]) -> Material:
-        new_basis = new_material.basis.copy()
-        new_basis.coordinates.values = new_coordinates
-        new_basis.to_crystal()
-        new_material.basis = new_basis
-        return new_material
-
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         """Generate materials with applied continuous perturbation based on the given configuration."""
         new_material = self.create_perturbed_slab(configuration)
@@ -53,7 +45,7 @@ class SlabPerturbationBuilder(PerturbationBuilder):
             configuration.perturbation_function_holder.apply_perturbation(coord)
             for coord in new_material.basis.coordinates.values
         ]
-        new_material = self._set_new_coordinates(new_material, new_coordinates)
+        new_material.set_coordinates(new_coordinates)
         return new_material
 
 
@@ -67,7 +59,7 @@ class DistancePreservingSlabPerturbationBuilder(SlabPerturbationBuilder):
         new_coordinates = [
             configuration.perturbation_function_holder.apply_perturbation(coord) for coord in new_coordinates
         ]
-        new_material = self._set_new_coordinates(new_material, new_coordinates)
+        new_material.set_coordinates(new_coordinates)
         return new_material
 
 
