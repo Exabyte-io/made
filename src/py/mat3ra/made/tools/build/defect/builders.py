@@ -30,7 +30,8 @@ from ...analyze import (
     get_closest_site_id_from_coordinate_and_element,
 )
 from ....utils import get_center_of_coordinates
-from ...utils import transform_coordinate_to_supercell, CoordinateConditionBuilder
+from ...utils import transform_coordinate_to_supercell
+from ...utils.coordinate import CoordinateConditionBuilder
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
@@ -463,7 +464,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             The normalized cut direction vector in Cartesian coordinates.
         """
         np_cut_direction = np.array(cut_direction)
-        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), np_cut_direction)
+        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_array), np_cut_direction)
         normalized_direction_vector = direction_vector / np.linalg.norm(direction_vector)
         return normalized_direction_vector
 
@@ -499,7 +500,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         """
         height_cartesian = self._calculate_height_cartesian(original_material, new_material)
         cut_direction_xy_proj_cart = np.linalg.norm(
-            np.dot(np.array(new_material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
+            np.dot(np.array(new_material.basis.cell.vectors_as_array), normalized_direction_vector)
         )
         # Slope of the terrace along the cut direction
         hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])

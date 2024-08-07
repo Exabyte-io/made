@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from mat3ra.utils.mixins import RoundNumericValuesMixin
@@ -13,13 +13,13 @@ class Cell(RoundNumericValuesMixin, BaseModel):
     __round_precision__ = 6
 
     @classmethod
-    def from_nested_array(cls, nested_array):
-        if nested_array is None:
-            nested_array = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-        return cls(vector1=nested_array[0], vector2=nested_array[1], vector3=nested_array[2])
+    def from_vectors_array(cls, vectors_array: Optional[List[List[float]]] = None) -> "Cell":
+        if vectors_array is None:
+            vectors_array = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        return cls(vector1=vectors_array[0], vector2=vectors_array[1], vector3=vectors_array[2])
 
     @property
-    def vectors_as_nested_array(self, skip_rounding=False) -> List[List[float]]:
+    def vectors_as_array(self, skip_rounding=False) -> List[List[float]]:
         if skip_rounding:
             return [self.vector1, self.vector2, self.vector3]
         return self.round_array_or_number([self.vector1, self.vector2, self.vector3])
@@ -32,22 +32,22 @@ class Cell(RoundNumericValuesMixin, BaseModel):
             self.vector3 if skip_rounding else _(self.vector3),
         ]
 
-    def clone(self):
-        return self.from_nested_array(self.vectors_as_nested_array)
+    def clone(self) -> "Cell":
+        return self.from_vectors_array(self.vectors_as_array)
 
-    def clone_and_scale_by_matrix(self, matrix):
+    def clone_and_scale_by_matrix(self, matrix: List[List[float]]) -> "Cell":
         new_cell = self.clone()
         new_cell.scale_by_matrix(matrix)
         return new_cell
 
-    def convert_point_to_cartesian(self, point):
-        np_vector = np.array(self.vectors_as_nested_array)
+    def convert_point_to_cartesian(self, point: List[float]) -> List[float]:
+        np_vector = np.array(self.vectors_as_array)
         return np.dot(point, np_vector)
 
-    def convert_point_to_crystal(self, point):
-        np_vector = np.array(self.vectors_as_nested_array)
+    def convert_point_to_crystal(self, point: List[float]) -> List[float]:
+        np_vector = np.array(self.vectors_as_array)
         return np.dot(point, np.linalg.inv(np_vector))
 
-    def scale_by_matrix(self, matrix):
-        np_vector = np.array(self.vectors_as_nested_array)
-        self.vector1, self.vector2, self.vector3 = np.dot(matrix, np_vector).tolist()
+    def scale_by_matrix(self, matrix: List[List[float]]):
+        np_vector = np.array(self.vectors_as_array)
+        self.vector1, self.vector2, self.vector3 = np.dot(np.array(matrix), np_vector).tolist()

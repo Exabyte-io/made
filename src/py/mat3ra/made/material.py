@@ -90,3 +90,8 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
         new_basis = self.basis.copy()
         new_basis.to_crystal()
         self.basis = new_basis
+
+    def set_coordinates(self, coordinates: List[List[float]]) -> None:
+        new_basis = self.basis.copy()
+        new_basis.coordinates.values = coordinates
+        self.basis = new_basis
