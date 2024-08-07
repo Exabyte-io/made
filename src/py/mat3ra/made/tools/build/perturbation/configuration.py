@@ -4,7 +4,7 @@ from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 from pydantic import BaseModel
 
-from ...utils import PerturbationFunctionHolder
+from ...utils.perturbation import PerturbationFunctionHolder
 
 
 class PerturbationConfiguration(BaseModel, InMemoryEntity):

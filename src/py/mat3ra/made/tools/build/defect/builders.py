@@ -30,7 +30,8 @@ from ...analyze import (
     get_closest_site_id_from_coordinate_and_element,
 )
 from ....utils import get_center_of_coordinates
-from ...utils import transform_coordinate_to_supercell, CoordinateConditionBuilder
+from ...utils import transform_coordinate_to_supercell
+from ...utils.coordinate import CoordinateConditionBuilder
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell

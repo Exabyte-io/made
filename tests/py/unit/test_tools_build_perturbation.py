@@ -4,7 +4,7 @@ from mat3ra.made.tools.build.perturbation import create_perturbation
 from mat3ra.made.tools.build.perturbation.builders import SlabPerturbationBuilder
 from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
 from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.utils import PerturbationFunctionHolder
+from mat3ra.made.tools.utils.perturbation import PerturbationFunctionHolder
 from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures import GRAPHENE

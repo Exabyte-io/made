@@ -3,9 +3,8 @@ from typing import List, Optional, Any
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 
-from .configuration import PerturbationConfiguration
+from .configuration import PerturbationConfiguration, PerturbationFunctionHolder
 from ...modify import wrap_to_unit_cell, translate_to_z_level
-from ...utils import PerturbationFunctionHolder
 
 
 class PerturbationBuilder(BaseBuilder):

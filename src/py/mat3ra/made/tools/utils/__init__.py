@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, Dict, List, Literal, Optional, Tuple
+from typing import Callable, List, Optional
 
 import numpy as np
 from mat3ra.utils.matrix import convert_2x2_to_3x3
@@ -75,9 +75,6 @@ def get_norm(vector: List[float]) -> float:
     return float(np.linalg.norm(vector))
 
 
-# Condition functions:
-
-
 def transform_coordinate_to_supercell(
     coordinate: List[float],
     scaling_factor: Optional[List[int]] = None,
@@ -110,116 +107,3 @@ def transform_coordinate_to_supercell(
     if reverse:
         converted_array = (np_coordinate - np_translation_vector) * np_scaling_factor
     return converted_array.tolist()
-
-
-class CoordinateConditionBuilder:
-    @staticmethod
-    def create_condition(condition_type: str, evaluation_func: Callable, **kwargs) -> Tuple[Callable, Dict]:
-        condition_json = {"type": condition_type, **kwargs}
-        return lambda coordinate: evaluation_func(coordinate, **kwargs), condition_json
-
-    @staticmethod
-    def cylinder(center_position=None, radius: float = 0.25, min_z: float = 0, max_z: float = 1):
-        if center_position is None:
-            center_position = [0.5, 0.5]
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="cylinder",
-            evaluation_func=is_coordinate_in_cylinder,
-            center_position=center_position,
-            radius=radius,
-            min_z=min_z,
-            max_z=max_z,
-        )
-
-    @staticmethod
-    def sphere(center_position=None, radius: float = 0.25):
-        if center_position is None:
-            center_position = [0.5, 0.5, 0.5]
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="sphere",
-            evaluation_func=is_coordinate_in_sphere,
-            center_position=center_position,
-            radius=radius,
-        )
-
-    @staticmethod
-    def triangular_prism(
-        position_on_surface_1: List[float] = [0, 0],
-        position_on_surface_2: List[float] = [1, 0],
-        position_on_surface_3: List[float] = [0, 1],
-        min_z: float = 0,
-        max_z: float = 1,
-    ):
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="prism",
-            evaluation_func=is_coordinate_in_triangular_prism,
-            coordinate_1=position_on_surface_1,
-            coordinate_2=position_on_surface_2,
-            coordinate_3=position_on_surface_3,
-            min_z=min_z,
-            max_z=max_z,
-        )
-
-    @staticmethod
-    def box(min_coordinate=None, max_coordinate=None):
-        if max_coordinate is None:
-            max_coordinate = [1, 1, 1]
-        if min_coordinate is None:
-            min_coordinate = [0, 0, 0]
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="box",
-            evaluation_func=is_coordinate_in_box,
-            min_coordinate=min_coordinate,
-            max_coordinate=max_coordinate,
-        )
-
-    @staticmethod
-    def plane(plane_normal: List[float], plane_point_coordinate: List[float]):
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="plane",
-            evaluation_func=is_coordinate_behind_plane,
-            plane_normal=plane_normal,
-            plane_point_coordinate=plane_point_coordinate,
-        )
-
-
-class PerturbationFunctionHolder:
-    @staticmethod
-    def get_coord_transformation(perturbation_json: dict) -> Callable:
-        new_perturbation_json = perturbation_json.copy()
-        name = new_perturbation_json.pop("type")
-        helper_function = PerturbationFunctionHelperFactory.get_class_by_name(name)
-        # TODO: add type of SineWave (or corresponding one to the return of the factory)
-        return helper_function.get_transform_coordinates(**new_perturbation_json)
-
-    @staticmethod
-    def sine_wave(
-        amplitude: float = 0.1,
-        wavelength: float = 1,
-        phase: float = 0,
-        axis: Optional[Literal["x", "y"]] = "x",
-    ) -> Tuple[Callable[[List[float]], List[float]], Dict]:
-        """
-        Deform a coordinate using a sine wave.
-        Args:
-            amplitude (float): The amplitude of the sine wave in cartesian coordinates.
-            wavelength (float): The wavelength of the sine wave in cartesian coordinates.
-            phase (float): The phase of the sine wave in cartesian coordinates.
-            axis (str): The axis of the direction of the sine wave.
-
-        Returns:
-            Tuple[Callable[[List[float]], List[float]], Dict]: The perturbation function and its configuration
-        """
-        if axis in AXIS_TO_INDEX_MAP:
-            index = AXIS_TO_INDEX_MAP[axis]
-        perturbation_function = PerturbationFunctionHelperFactory.get_class_by_name("sine_wave")
-
-        def perturbation(coordinate: List[float]):
-            return [
-                coordinate[0],
-                coordinate[1],
-                coordinate[2] + perturbation_function.get_function(coordinate[index], amplitude, wavelength, phase),
-            ]
-
-        config = perturbation_function.get_json(amplitude, wavelength, phase, axis)
-        return perturbation, config
