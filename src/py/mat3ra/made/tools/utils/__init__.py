@@ -221,44 +221,5 @@ class PerturbationFunctionHolder:
                 coordinate[2] + perturbation_function.get_function(coordinate[index], amplitude, wavelength, phase),
             ]
 
-        config = {"type": "sine_wave", "amplitude": amplitude, "wavelength": wavelength, "phase": phase, "axis": axis}
-
-        return perturbation, config
-
-    @staticmethod
-    def sine_wave_radial(
-        amplitude: float = 0.1, wavelength: float = 1, phase: float = 0, center_position=None
-    ) -> Tuple[Callable[[List[float]], List[float]], Dict]:
-        """
-        Deform a coordinate using a radial sine wave.
-        Args:
-            amplitude (float): The amplitude of the sine wave in cartesian coordinates.
-            wavelength (float): The wavelength of the sine wave in cartesian coordinates.
-            phase (float): The phase of the sine wave in cartesian coordinates.
-            center_position (List[float]): The center position of the sine wave on the plane.
-
-        Returns:
-            Tuple[Callable[[List[float]], List[float]], Dict]: The perturbation function and its configuration
-        """
-        if center_position is None:
-            center_position = [0.5, 0.5]
-
-        def perturbation(coordinate: List[float]):
-            np_position = np.array(coordinate[:2])
-            np_center_position = np.array(center_position)
-            distance = np.linalg.norm(np_position - np_center_position)
-            return [
-                coordinate[0],
-                coordinate[1],
-                coordinate[2] + amplitude * np.sin(2 * np.pi * distance / wavelength + phase),
-            ]
-
-        config = {
-            "type": "sine_wave_radial",
-            "amplitude": amplitude,
-            "wavelength": wavelength,
-            "phase": phase,
-            "center_position": center_position,
-        }
-
+        config = perturbation_function.get_json(amplitude, wavelength, phase, axis)
         return perturbation, config

@@ -42,6 +42,13 @@ class FunctionHolder(BaseModel):
         """
         raise NotImplementedError
 
+    @staticmethod
+    def get_json(*args, **kwargs):
+        """
+        Get the json representation of the perturbation.
+        """
+        raise NotImplementedError
+
 
 class SineWave(FunctionHolder):
     @staticmethod
@@ -82,3 +89,7 @@ class SineWave(FunctionHolder):
             return coordinate
 
         return coordinate_transformation
+
+    @staticmethod
+    def get_json(amplitude: float, wavelength: float, phase: float, axis: Literal["x", "y"]) -> dict:
+        return {"type": "sine_wave", "amplitude": amplitude, "wavelength": wavelength, "phase": phase, "axis": axis}
