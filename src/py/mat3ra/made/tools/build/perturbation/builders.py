@@ -4,7 +4,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 
 from .configuration import PerturbationConfiguration
-from ...modify import wrap_material, translate_to_z_level
+from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...utils import PerturbationFunctionHolder
 
 
@@ -14,7 +14,7 @@ class PerturbationBuilder(BaseBuilder):
     _PostProcessParametersType: Any = None
 
     @staticmethod
-    def _prepare_material(configuration):
+    def _prepare_material(configuration: _ConfigurationType) -> _GeneratedItemType:
         new_material = configuration.material.clone()
         new_material = translate_to_z_level(new_material, "center")
         if configuration.use_cartesian_coordinates:
@@ -22,7 +22,7 @@ class PerturbationBuilder(BaseBuilder):
         return new_material
 
     @staticmethod
-    def _set_new_coordinates(new_material, new_coordinates):
+    def _set_new_coordinates(new_material: Material, new_coordinates: List[List[float]]) -> Material:
         new_basis = new_material.basis.copy()
         new_basis.coordinates.values = new_coordinates
         new_basis.to_crystal()
@@ -39,7 +39,7 @@ class PerturbationBuilder(BaseBuilder):
         items: List[_GeneratedItemType],
         post_process_parameters: Optional[_PostProcessParametersType],
     ) -> List[Material]:
-        return [wrap_material(item) for item in items]
+        return [wrap_to_unit_cell(item) for item in items]
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         perturbation_details = f"Perturbation: {configuration.perturbation_function[1].get('type')}"
@@ -48,7 +48,7 @@ class PerturbationBuilder(BaseBuilder):
 
 
 class SlabPerturbationBuilder(PerturbationBuilder):
-    def create_perturbed_slab(self, configuration):
+    def create_perturbed_slab(self, configuration: PerturbationConfiguration) -> Material:
         new_material = self._prepare_material(configuration)
         perturbation_function, _ = configuration.perturbation_function
         new_coordinates = [perturbation_function(coord) for coord in new_material.basis.coordinates.values]
@@ -57,7 +57,7 @@ class SlabPerturbationBuilder(PerturbationBuilder):
 
 
 class DistancePreservingSlabPerturbationBuilder(SlabPerturbationBuilder):
-    def create_perturbed_slab(self, configuration):
+    def create_perturbed_slab(self, configuration: PerturbationConfiguration) -> Material:
         new_material = self._prepare_material(configuration)
         perturbation_function, perturbation_json = configuration.perturbation_function
         coord_transformation_function = PerturbationFunctionHolder.get_coord_transformation(perturbation_json)
@@ -70,15 +70,15 @@ class DistancePreservingSlabPerturbationBuilder(SlabPerturbationBuilder):
 
 
 class CellMatchingDistancePreservingSlabPerturbationBuilder(DistancePreservingSlabPerturbationBuilder):
-    def _transform_cell_vectors(self, configuration: PerturbationConfiguration) -> List[List[float]]:
+    def _transform_lattice_vectors(self, configuration: PerturbationConfiguration) -> List[List[float]]:
         perturbation_function, perturbation_json = configuration.perturbation_function
         coord_transformation_function = PerturbationFunctionHolder.get_coord_transformation(perturbation_json)
         cell_vectors = configuration.material.basis.cell.vectors_as_array
         return [perturbation_function(coord_transformation_function(coord)) for coord in cell_vectors]
 
-    def create_perturbed_slab(self, configuration: PerturbationConfiguration):
+    def create_perturbed_slab(self, configuration: PerturbationConfiguration) -> Material:
         new_material = super().create_perturbed_slab(configuration)
-        new_lattice_vectors = self._transform_cell_vectors(configuration)
+        new_lattice_vectors = self._transform_lattice_vectors(configuration)
         new_lattice = new_material.lattice.copy()
         new_lattice = new_lattice.from_vectors_array(new_lattice_vectors)
         new_material.lattice = new_lattice

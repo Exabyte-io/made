@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from mat3ra.utils.mixins import RoundNumericValuesMixin
@@ -13,7 +13,7 @@ class Cell(RoundNumericValuesMixin, BaseModel):
     __round_precision__ = 6
 
     @classmethod
-    def from_vectors_array(cls, vectors_array):
+    def from_vectors_array(cls, vectors_array: Optional[List[List[float]]] = None) -> "Cell":
         if vectors_array is None:
             vectors_array = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         return cls(vector1=vectors_array[0], vector2=vectors_array[1], vector3=vectors_array[2])
@@ -32,22 +32,22 @@ class Cell(RoundNumericValuesMixin, BaseModel):
             self.vector3 if skip_rounding else _(self.vector3),
         ]
 
-    def clone(self):
+    def clone(self) -> "Cell":
         return self.from_vectors_array(self.vectors_as_array)
 
-    def clone_and_scale_by_matrix(self, matrix):
+    def clone_and_scale_by_matrix(self, matrix: List[List[float]]) -> "Cell":
         new_cell = self.clone()
         new_cell.scale_by_matrix(matrix)
         return new_cell
 
-    def convert_point_to_cartesian(self, point):
+    def convert_point_to_cartesian(self, point: List[float]) -> List[float]:
         np_vector = np.array(self.vectors_as_array)
         return np.dot(point, np_vector)
 
-    def convert_point_to_crystal(self, point):
+    def convert_point_to_crystal(self, point: List[float]) -> List[float]:
         np_vector = np.array(self.vectors_as_array)
         return np.dot(point, np.linalg.inv(np_vector))
 
-    def scale_by_matrix(self, matrix):
+    def scale_by_matrix(self, matrix: List[List[float]]):
         np_vector = np.array(self.vectors_as_array)
-        self.vector1, self.vector2, self.vector3 = np.dot(matrix, np_vector).tolist()
+        self.vector1, self.vector2, self.vector3 = np.dot(np.array(matrix), np_vector).tolist()

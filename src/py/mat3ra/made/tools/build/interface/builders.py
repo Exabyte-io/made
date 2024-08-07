@@ -145,11 +145,13 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
 
     def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
         generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.dict())
-        substrate_down = translate_to_z_level(configuration.substrate_configuration.bulk, "bottom")
-        film_down = translate_to_z_level(configuration.film_configuration.bulk, "bottom")
+        substrate_with_atoms_translated_to_bottom = translate_to_z_level(
+            configuration.substrate_configuration.bulk, "bottom"
+        )
+        film_with_atoms_translated_to_bottom = translate_to_z_level(configuration.film_configuration.bulk, "bottom")
         builder = CoherentInterfaceBuilder(
-            substrate_structure=to_pymatgen(substrate_down),
-            film_structure=to_pymatgen(film_down),
+            substrate_structure=to_pymatgen(substrate_with_atoms_translated_to_bottom),
+            film_structure=to_pymatgen(film_with_atoms_translated_to_bottom),
             substrate_miller=configuration.substrate_configuration.miller_indices,
             film_miller=configuration.film_configuration.miller_indices,
             zslgen=generator,
