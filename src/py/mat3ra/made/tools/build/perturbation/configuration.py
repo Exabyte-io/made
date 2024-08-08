@@ -9,9 +9,9 @@ from ...utils.functions import SineWavePerturbationFunctionHolder, GeneralPertur
 
 class PerturbationConfiguration(BaseModel, InMemoryEntity):
     material: Material
-    perturbation_function_holder: Union[SineWavePerturbationFunctionHolder, GeneralPerturbationFunctionHolder] = (
-        SineWavePerturbationFunctionHolder()
-    )
+    perturbation_function_holder: Union[
+        SineWavePerturbationFunctionHolder, GeneralPerturbationFunctionHolder
+    ] = SineWavePerturbationFunctionHolder()
     use_cartesian_coordinates: bool = True
 
     class Config:

@@ -1,6 +1,7 @@
-from typing import List, Literal, Callable, Any
+from typing import Any, Callable, List, Literal
 
 import numpy as np
+import sympy as sp
 from pydantic import BaseModel
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
@@ -105,14 +106,15 @@ class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):
         }
 
 
-import sympy as sp
+def default_function(coordinate: List[float]) -> float:
+    return 0
 
 
 class GeneralPerturbationFunctionHolder(PerturbationFunctionHolder):
     variables: List[str] = ["x"]
     symbols: List[sp.Symbol] = [sp.Symbol(var) for var in variables]
     function: sp.Expr = sp.Symbol("f")
-    function_numeric: Callable = lambda x: x
+    function_numeric: Callable = default_function
     derivatives_numeric: dict = {}
 
     class Config:
