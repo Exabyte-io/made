@@ -36,8 +36,8 @@ class FunctionHolder(BaseModel):
         raise NotImplementedError
 
 
-def default_function(coordinate: List[float]) -> float:
-    return 0
+def default_function() -> sp.Expr:
+    return sp.Symbol("f")
 
 
 class PerturbationFunctionHolder(FunctionHolder):
@@ -50,18 +50,18 @@ class PerturbationFunctionHolder(FunctionHolder):
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, function: Optional[Callable] = None, variables: Optional[List[str]] = None, **data: Any):
+    def __init__(self, function: Optional[sp.Expr] = None, variables: Optional[List[str]] = None, **data: Any):
         """
         Initializes with a function involving multiple variables.
         """
         if function is None:
-            function = default_function
+            function = default_function()
         if variables is None:
-            variables = ["x"]
+            variables = ["x", "y", "z"]
         super().__init__(**data)
         self.variables = variables
         self.symbols = sp.symbols(variables)
-        self.function = function(*self.symbols)
+        self.function = function
         self.function_numeric = sp.lambdify(self.symbols, self.function, modules=["numpy"])
         self.derivatives_numeric = {
             var: sp.lambdify(self.symbols, sp.diff(self.function, var), modules=["numpy"]) for var in variables
@@ -83,7 +83,7 @@ class PerturbationFunctionHolder(FunctionHolder):
         Calculate arc length considering a change along one specific axis.
         """
         index = AXIS_TO_INDEX_MAP[axis]
-        a, b = 0, w_prime  # Integration limits based on the current position along the axis
+        a, b = 0, w_prime
 
         def integrand(t):
             temp_coordinate = coordinate[:]
@@ -144,19 +144,23 @@ class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):
         axis: str = "x",
         **data: Any,
     ):
-        super().__init__(**data)
+        function = self._create_function(amplitude, wavelength, phase, axis)
+        variables = [axis]
+        super().__init__(function=function, variables=variables, **data)
         self.amplitude = amplitude
         self.wavelength = wavelength
         self.phase = phase
         self.axis = axis
-        function = lambda x: self.amplitude * sp.sin(2 * sp.pi * x / self.wavelength + self.phase)
-        variables = [self.axis]
 
-        PerturbationFunctionHolder.__init__(self, function=function, variables=variables)
+    def _create_function(self, amplitude, wavelength, phase, axis) -> sp.Expr:
+        w = sp.Symbol(axis)
+        return amplitude * sp.sin(2 * sp.pi * w / wavelength + phase)
 
     def get_json(self) -> dict:
         return {
             "type": self.__class__.__name__,
+            "function": str(self.function),
+            "variables": self.variables,
             "amplitude": self.amplitude,
             "wavelength": self.wavelength,
             "phase": self.phase,
