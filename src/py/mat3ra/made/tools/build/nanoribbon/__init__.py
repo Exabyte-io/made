@@ -22,22 +22,18 @@ class NanoribbonConfiguration(BaseModel):
 
 
 def build_nanoribbon(config: NanoribbonConfiguration) -> Material:
-    # create a supercell of the material (must be 2D) with the desired width and length
-    n = config.length // config.width + 1
-    m = config.width // config.length + 1
-    scaling_matrix = np.diag([config.width * n, config.length * m, 1])
+    n = max(config.width, config.length)
+    scaling_matrix = np.diag([n, n, 1])
     supercell = create_supercell(config.material, scaling_matrix)
-
-    a_nudge = 0.1
-    min_coordinate = [a_nudge, a_nudge, 0]
-    max_coordinate = [
-        config.width * config.material.lattice.a - a_nudge,
-        config.length * config.material.lattice.b - a_nudge,
-        config.material.lattice.c,
-    ]
+    width_crystal = config.width / config.length
+    min_coordinate = [0, 0, 0]
+    max_coordinate = [1, width_crystal, 1]
+    if config.edge_type == "armchair":
+        rotation_matrix = [[1, -1, 0], [1, 1, 0], [0, 0, 1]]
+        supercell = create_supercell(supercell, supercell_matrix=rotation_matrix)
 
     nanoribbon = filter_by_rectangle_projection(
-        supercell, min_coordinate=min_coordinate, max_coordinate=max_coordinate, use_cartesian_coordinates=True
+        supercell, min_coordinate=min_coordinate, max_coordinate=max_coordinate, use_cartesian_coordinates=False
     )
 
     return nanoribbon
