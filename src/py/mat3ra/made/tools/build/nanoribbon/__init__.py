@@ -2,13 +2,10 @@ from typing import Literal
 
 import numpy as np
 from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates, rotate_material, filter_by_rectangle_projection
+from mat3ra.made.tools.modify import filter_by_rectangle_projection
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material
-
-
-from pydantic import BaseModel
 
 
 class NanoribbonConfiguration(BaseModel):
