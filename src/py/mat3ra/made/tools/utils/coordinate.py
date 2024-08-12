@@ -1,7 +1,8 @@
 # Place all functions acting on coordinates
-from typing import Callable, Dict, List, Tuple
+from typing import Dict, List
 
 import numpy as np
+from pydantic import BaseModel, Field
 
 
 def is_coordinate_in_cylinder(
@@ -154,72 +155,61 @@ def is_coordinate_behind_plane(
     return np.dot(np_plane_normal, np_coordinate - np_plane_point) < 0
 
 
-class CoordinateConditionBuilder:
-    @staticmethod
-    def create_condition(condition_type: str, evaluation_func: Callable, **kwargs) -> Tuple[Callable, Dict]:
-        condition_json = {"type": condition_type, **kwargs}
-        return lambda coordinate: evaluation_func(coordinate, **kwargs), condition_json
+class CoordinateCondition(BaseModel):
+    def condition(self, coordinate: List[float]) -> bool:
+        raise NotImplementedError
 
-    @staticmethod
-    def cylinder(center_position=None, radius: float = 0.25, min_z: float = 0, max_z: float = 1):
-        if center_position is None:
-            center_position = [0.5, 0.5]
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="cylinder",
-            evaluation_func=is_coordinate_in_cylinder,
-            center_position=center_position,
-            radius=radius,
-            min_z=min_z,
-            max_z=max_z,
+    def to_json(self) -> Dict:
+        return self.dict()
+
+
+class CylinderCoordinateCondition(CoordinateCondition):
+    center_position: List[float] = Field(default_factory=lambda: [0.5, 0.5])
+    radius: float = 0.25
+    min_z: float = 0
+    max_z: float = 1
+
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_in_cylinder(coordinate, self.center_position, self.radius, self.min_z, self.max_z)
+
+
+class SphereCoordinateCondition(CoordinateCondition):
+    center_position: List[float] = Field(default_factory=lambda: [0.5, 0.5])
+    radius: float = 0.25
+
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_in_sphere(coordinate, self.center_position, self.radius)
+
+
+class BoxCoordinateCondition(CoordinateCondition):
+    min_coordinate: List[float] = Field(default_factory=lambda: [0, 0, 0])
+    max_coordinate: List[float] = Field(default_factory=lambda: [1, 1, 1])
+
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_in_box(coordinate, self.min_coordinate, self.max_coordinate)
+
+
+class TriangularPrismCoordinateCondition(CoordinateCondition):
+    position_on_surface_1: List[float] = [0, 0]
+    position_on_surface_2: List[float] = [1, 0]
+    position_on_surface_3: List[float] = [0, 1]
+    min_z: float = 0
+    max_z: float = 1
+
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_in_triangular_prism(
+            coordinate,
+            self.position_on_surface_1,
+            self.position_on_surface_2,
+            self.position_on_surface_3,
+            self.min_z,
+            self.max_z,
         )
 
-    @staticmethod
-    def sphere(center_position=None, radius: float = 0.25):
-        if center_position is None:
-            center_position = [0.5, 0.5, 0.5]
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="sphere",
-            evaluation_func=is_coordinate_in_sphere,
-            center_position=center_position,
-            radius=radius,
-        )
 
-    @staticmethod
-    def triangular_prism(
-        position_on_surface_1: List[float] = [0, 0],
-        position_on_surface_2: List[float] = [1, 0],
-        position_on_surface_3: List[float] = [0, 1],
-        min_z: float = 0,
-        max_z: float = 1,
-    ):
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="prism",
-            evaluation_func=is_coordinate_in_triangular_prism,
-            coordinate_1=position_on_surface_1,
-            coordinate_2=position_on_surface_2,
-            coordinate_3=position_on_surface_3,
-            min_z=min_z,
-            max_z=max_z,
-        )
+class PlaneCoordinateCondition(CoordinateCondition):
+    plane_normal: List[float]
+    plane_point_coordinate: List[float]
 
-    @staticmethod
-    def box(min_coordinate=None, max_coordinate=None):
-        if max_coordinate is None:
-            max_coordinate = [1, 1, 1]
-        if min_coordinate is None:
-            min_coordinate = [0, 0, 0]
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="box",
-            evaluation_func=is_coordinate_in_box,
-            min_coordinate=min_coordinate,
-            max_coordinate=max_coordinate,
-        )
-
-    @staticmethod
-    def plane(plane_normal: List[float], plane_point_coordinate: List[float]):
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="plane",
-            evaluation_func=is_coordinate_behind_plane,
-            plane_normal=plane_normal,
-            plane_point_coordinate=plane_point_coordinate,
-        )
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_behind_plane(coordinate, self.plane_normal, self.plane_point_coordinate)

@@ -1,17 +1,25 @@
-from typing import Optional, List, Any, Callable, Dict, Tuple, Union
+from typing import Optional, List, Union
 from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 
 from ...analyze import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
-from ...utils.coordinate import CoordinateConditionBuilder
+from ...utils.coordinate import (
+    CylinderCoordinateCondition,
+    SphereCoordinateCondition,
+    BoxCoordinateCondition,
+    TriangularPrismCoordinateCondition,
+    PlaneCoordinateCondition,
+)
 from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum, ComplexDefectTypeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
-    # TODO: fix arbitrary_types_allowed error and set Material class type
-    crystal: Any = None
+    crystal: Material = None
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @property
     def _json(self):
@@ -169,16 +177,21 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
     """
 
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.ISLAND
-    condition: Optional[Tuple[Callable[[List[float]], bool], Dict]] = CoordinateConditionBuilder().cylinder()
+    condition: Union[
+        CylinderCoordinateCondition,
+        SphereCoordinateCondition,
+        BoxCoordinateCondition,
+        TriangularPrismCoordinateCondition,
+        PlaneCoordinateCondition,
+    ] = CylinderCoordinateCondition()
 
     @property
     def _json(self):
-        _, condition_json = self.condition
         return {
             **super()._json,
             "type": self.get_cls_name(),
             "defect_type": self.defect_type.name,
-            "condition": condition_json,
+            "condition": self.condition.to_json(),
         }
 
 
