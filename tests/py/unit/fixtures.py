@@ -114,7 +114,7 @@ SI_CONVENTIONAL_CELL: Dict[str, Any] = {
 }
 
 SI_SUPERCELL_2X2X1: Dict[str, Any] = {
-    "name": "Si8",
+    "name": "Silicon FCC",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -260,3 +260,32 @@ slab_001_config = SlabConfiguration(
 )
 t_001 = get_terminations(slab_001_config)[0]
 SLAB_001 = create_slab(slab_001_config, t_001)
+
+GRAPHENE = {
+    "name": "Graphene",
+    "basis": {
+        "elements": [{"id": 0, "value": "C"}, {"id": 1, "value": "C"}],
+        "coordinates": [{"id": 0, "value": [0, 0, 0]}, {"id": 1, "value": [0.333333, 0.666667, 0]}],
+        "units": "crystal",
+        "cell": [[2.467291, 0, 0], [-1.2336454999, 2.1367366845, 0], [0, 0, 20]],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 2.467291,
+        "b": 2.467291,
+        "c": 20,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "HEX",
+        "vectors": {
+            "a": [2.467291, 0, 0],
+            "b": [-1.233645, 2.136737, 0],
+            "c": [0, 0, 20],
+            "alat": 1,
+            "units": "angstrom",
+        },
+    },
+    "isNonPeriodic": False,
+}
