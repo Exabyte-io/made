@@ -5,7 +5,10 @@ import sympy as sp
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
 
-from .functions import AXIS_TO_INDEX_MAP, EQUATION_RANGE_COEFFICIENT, FunctionHolder
+from .functions import FunctionHolder
+
+AXIS_TO_INDEX_MAP = {"x": 0, "y": 1, "z": 2}
+EQUATION_RANGE_COEFFICIENT = 5
 
 
 def default_function() -> sp.Expr:
@@ -43,12 +46,18 @@ class PerturbationFunctionHolder(FunctionHolder):
         values = [coordinate[AXIS_TO_INDEX_MAP[var]] for var in self.variables]
         return self.function_numeric(*values)
 
-    def apply_derivative(self, coordinate: List[float], axis: str) -> float:
+    def calculate_derivative(self, coordinate: List[float], axis: str) -> float:
         if axis in self.variables:
             values = [coordinate[AXIS_TO_INDEX_MAP[var]] for var in self.variables]
             return self.derivatives_numeric[axis](*values)
         else:
             return 0
+
+    def _integrand(self, t: float, coordinate: List[float], axis: str) -> float:
+        index = AXIS_TO_INDEX_MAP[axis]
+        temp_coordinate = coordinate[:]
+        temp_coordinate[index] = t
+        return np.sqrt(1 + self.calculate_derivative(temp_coordinate, axis) ** 2)
 
     def get_arc_length_equation(self, w_prime: float, coordinate: List[float], axis: str) -> float:
         """
@@ -56,12 +65,7 @@ class PerturbationFunctionHolder(FunctionHolder):
         """
         index = AXIS_TO_INDEX_MAP[axis]
         a, b = 0, w_prime
-
-        def integrand(t):
-            temp_coordinate = coordinate[:]
-            temp_coordinate[index] = t
-            return np.sqrt(1 + self.apply_derivative(temp_coordinate, axis) ** 2)
-
+        integrand = lambda t: self._integrand(t, coordinate, axis)
         arc_length = quad(integrand, a, b)[0]
         return arc_length - coordinate[index]
 
