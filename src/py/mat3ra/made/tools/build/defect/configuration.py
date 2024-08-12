@@ -191,7 +191,7 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
             **super()._json,
             "type": self.get_cls_name(),
             "defect_type": self.defect_type.name,
-            "condition": self.condition.to_json(),
+            "condition": self.condition.get_json(),
         }
 
 

@@ -159,8 +159,10 @@ class CoordinateCondition(BaseModel):
     def condition(self, coordinate: List[float]) -> bool:
         raise NotImplementedError
 
-    def to_json(self) -> Dict:
-        return self.dict()
+    def get_json(self) -> Dict:
+        json = {"type": self.__class__.__name__}
+        json.update(self.dict())
+        return json
 
 
 class CylinderCoordinateCondition(CoordinateCondition):
