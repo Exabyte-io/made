@@ -31,7 +31,7 @@ from ...analyze import (
 )
 from ....utils import get_center_of_coordinates
 from ...utils import transform_coordinate_to_supercell
-from ...utils.coordinate import CoordinateConditionBuilder
+from ...utils import coordinate as CoordinateCondition
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
@@ -437,7 +437,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         return self.merge_slab_and_defect(island_material, new_material)
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
-        condition_callable, _ = configuration.condition
+        condition_callable = configuration.condition.condition
         return [
             self.create_island(
                 material=configuration.crystal,
@@ -593,10 +593,10 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         )
 
         normalized_direction_vector = self._calculate_cut_direction_vector(material, cut_direction)
-        condition, _ = CoordinateConditionBuilder.plane(
+        condition = CoordinateCondition.PlaneCoordinateCondition(
             plane_normal=normalized_direction_vector,
             plane_point_coordinate=pivot_coordinate,
-        )
+        ).condition
         atoms_within_terrace = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
             condition=condition,

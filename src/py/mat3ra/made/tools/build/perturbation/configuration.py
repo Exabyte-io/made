@@ -5,6 +5,7 @@ from mat3ra.made.material import Material
 from pydantic import BaseModel
 
 from ...utils.functions import SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
+from ...utils.perturbation import SineWavePerturbationFunctionHolder
 
 
 class PerturbationConfiguration(BaseModel, InMemoryEntity):

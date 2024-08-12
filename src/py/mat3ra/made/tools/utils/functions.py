@@ -1,10 +1,9 @@
+from typing import List
 from typing import Any, Callable, List, Optional
 
 import numpy as np
 import sympy as sp
 from pydantic import BaseModel
-from scipy.integrate import quad
-from scipy.optimize import root_scalar
 
 AXIS_TO_INDEX_MAP = {"x": 0, "y": 1, "z": 2}
 EQUATION_RANGE_COEFFICIENT = 5
@@ -17,13 +16,13 @@ class FunctionHolder(BaseModel):
         """
         raise NotImplementedError
 
-    def apply_derivative(self, coordinate: List[float], axis: str) -> float:
+    def calculate_derivative(self, coordinate: List[float], axis: str) -> float:
         """
         Get the derivative of the function at the given coordinate
         """
         raise NotImplementedError
 
-    def get_arc_length(self, a: float, b: float) -> float:
+    def calculate_arc_length(self, a: float, b: float) -> float:
         """
         Get the arc length of the function between a and b.
         """
