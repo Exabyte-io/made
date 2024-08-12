@@ -30,7 +30,8 @@ from ...analyze import (
     get_closest_site_id_from_coordinate_and_element,
 )
 from ....utils import get_center_of_coordinates
-from ...utils import transform_coordinate_to_supercell, CoordinateConditionBuilder
+from ...utils import transform_coordinate_to_supercell
+from ...utils import coordinate as CoordinateCondition
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
@@ -436,7 +437,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         return self.merge_slab_and_defect(island_material, new_material)
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
-        condition_callable, _ = configuration.condition
+        condition_callable = configuration.condition.condition
         return [
             self.create_island(
                 material=configuration.crystal,
@@ -463,7 +464,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             The normalized cut direction vector in Cartesian coordinates.
         """
         np_cut_direction = np.array(cut_direction)
-        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_nested_array), np_cut_direction)
+        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_array), np_cut_direction)
         normalized_direction_vector = direction_vector / np.linalg.norm(direction_vector)
         return normalized_direction_vector
 
@@ -499,7 +500,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         """
         height_cartesian = self._calculate_height_cartesian(original_material, new_material)
         cut_direction_xy_proj_cart = np.linalg.norm(
-            np.dot(np.array(new_material.basis.cell.vectors_as_nested_array), normalized_direction_vector)
+            np.dot(np.array(new_material.basis.cell.vectors_as_array), normalized_direction_vector)
         )
         # Slope of the terrace along the cut direction
         hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])
@@ -592,10 +593,10 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         )
 
         normalized_direction_vector = self._calculate_cut_direction_vector(material, cut_direction)
-        condition, _ = CoordinateConditionBuilder.plane(
+        condition = CoordinateCondition.PlaneCoordinateCondition(
             plane_normal=normalized_direction_vector,
             plane_point_coordinate=pivot_coordinate,
-        )
+        ).condition
         atoms_within_terrace = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
             condition=condition,
