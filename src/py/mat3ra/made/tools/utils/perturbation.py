@@ -54,20 +54,17 @@ class PerturbationFunctionHolder(FunctionHolder):
             return 0
 
     def _integrand(self, t: float, coordinate: List[float], axis: str) -> float:
-        index = AXIS_TO_INDEX_MAP[axis]
         temp_coordinate = coordinate[:]
-        temp_coordinate[index] = t
+        temp_coordinate[AXIS_TO_INDEX_MAP[axis]] = t
         return np.sqrt(1 + self.calculate_derivative(temp_coordinate, axis) ** 2)
 
     def get_arc_length_equation(self, w_prime: float, coordinate: List[float], axis: str) -> float:
         """
         Calculate arc length considering a change along one specific axis.
         """
-        index = AXIS_TO_INDEX_MAP[axis]
         a, b = 0, w_prime
-        integrand = lambda t: self._integrand(t, coordinate, axis)
-        arc_length = quad(integrand, a, b)[0]
-        return arc_length - coordinate[index]
+        arc_length = quad(self._integrand, a, b, args=(coordinate, axis))[0]
+        return arc_length - coordinate[AXIS_TO_INDEX_MAP[axis]]
 
     def transform_coordinates(self, coordinate: List[float]) -> List[float]:
         """
@@ -128,7 +125,7 @@ class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):
         self.phase = phase
         self.axis = axis
 
-    def _create_function(self, amplitude, wavelength, phase, axis) -> sp.Expr:
+    def _create_function(self, amplitude: float, wavelength: float, phase: float, axis: str) -> sp.Expr:
         w = sp.Symbol(axis)
         return amplitude * sp.sin(2 * sp.pi * w / wavelength + phase)
 
