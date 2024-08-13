@@ -129,7 +129,7 @@ class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):
     def get_json(self) -> dict:
         return {
             "type": self.__class__.__name__,
-            "function": "sine_wave",
+            "function": str(self.function),
             "variables": self.variables,
             "amplitude": self.amplitude,
             "wavelength": self.wavelength,

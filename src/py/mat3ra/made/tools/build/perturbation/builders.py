@@ -33,7 +33,7 @@ class PerturbationBuilder(BaseBuilder):
         return [wrap_to_unit_cell(item) for item in items]
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
-        perturbation_details = f"Perturbation: {configuration.perturbation_function_holder.get_json().get('function')}"
+        perturbation_details = f"Perturbation: {configuration.perturbation_function_holder.get_json().get('type')}"
         material.name = f"{material.name} ({perturbation_details})"
         return material
 
