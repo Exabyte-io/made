@@ -117,7 +117,8 @@ class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):
         axis: str = "x",
         **data: Any,
     ):
-        function = self._create_function(amplitude, wavelength, phase, axis)
+        w = sp.Symbol(axis)
+        function = amplitude * sp.sin(2 * sp.pi * w / wavelength + phase)
         variables = [axis]
         super().__init__(function=function, variables=variables, **data)
         self.amplitude = amplitude
@@ -125,14 +126,10 @@ class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):
         self.phase = phase
         self.axis = axis
 
-    def _create_function(self, amplitude: float, wavelength: float, phase: float, axis: str) -> sp.Expr:
-        w = sp.Symbol(axis)
-        return amplitude * sp.sin(2 * sp.pi * w / wavelength + phase)
-
     def get_json(self) -> dict:
         return {
             "type": self.__class__.__name__,
-            "function": str(self.function),
+            "function": "sine_wave",
             "variables": self.variables,
             "amplitude": self.amplitude,
             "wavelength": self.wavelength,
