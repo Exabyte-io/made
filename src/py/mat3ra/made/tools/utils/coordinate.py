@@ -1,72 +1,8 @@
-from functools import wraps
-from typing import Callable, Dict, List, Optional, Tuple
+# Place all functions acting on coordinates
+from typing import Dict, List
 
 import numpy as np
-from mat3ra.utils.matrix import convert_2x2_to_3x3
-
-from .third_party import PymatgenStructure
-
-DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
-DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
-
-
-# TODO: convert to accept ASE Atoms object
-def translate_to_bottom_pymatgen_structure(structure: PymatgenStructure):
-    """
-    Translate the structure to the bottom of the cell.
-    Args:
-        structure (PymatgenStructure): The pymatgen Structure object to translate.
-
-    Returns:
-        PymatgenStructure: The translated pymatgen Structure object.
-    """
-    min_c = min(site.c for site in structure)
-    translation_vector = [0, 0, -min_c]
-    translated_structure = structure.copy()
-    for site in translated_structure:
-        site.coords += translation_vector
-    return translated_structure
-
-
-def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
-    """
-    Decorator to convert a 2x2 matrix to a 3x3 matrix.
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        new_args = [convert_2x2_to_3x3(arg) if isinstance(arg, list) and len(arg) == 2 else arg for arg in args]
-        return func(*new_args, **kwargs)
-
-    return wrapper
-
-
-def get_distance_between_coordinates(coordinate1: List[float], coordinate2: List[float]) -> float:
-    """
-    Get the distance between two coordinates.
-    Args:
-        coordinate1 (List[float]): The first coordinate.
-        coordinate2 (List[float]): The second coordinate.
-
-    Returns:
-        float: The distance between the two coordinates.
-    """
-    return float(np.linalg.norm(np.array(coordinate1) - np.array(coordinate2)))
-
-
-def get_norm(vector: List[float]) -> float:
-    """
-    Get the norm of a vector.
-    Args:
-        vector (List[float]): The vector.
-
-    Returns:
-        float: The norm of the vector.
-    """
-    return float(np.linalg.norm(vector))
-
-
-# Condition functions:
+from pydantic import BaseModel, Field
 
 
 def is_coordinate_in_cylinder(
@@ -219,106 +155,63 @@ def is_coordinate_behind_plane(
     return np.dot(np_plane_normal, np_coordinate - np_plane_point) < 0
 
 
-def transform_coordinate_to_supercell(
-    coordinate: List[float],
-    scaling_factor: Optional[List[int]] = None,
-    translation_vector: Optional[List[float]] = None,
-    reverse: bool = False,
-) -> List[float]:
-    """
-    Convert a crystal coordinate of unit cell to a coordinate in a supercell.
-    Args:
-        coordinate (List[float]): The coordinates to convert.
-        scaling_factor (List[int]): The scaling factor for the supercell.
-        translation_vector (List[float]): The translation vector for the supercell.
-        reverse (bool): Whether to convert in the reverse transformation.
+class CoordinateCondition(BaseModel):
+    def condition(self, coordinate: List[float]) -> bool:
+        raise NotImplementedError
 
-    Returns:
-        List[float]: The converted coordinates.
-    """
-    if scaling_factor is None:
-        np_scaling_factor = np.array([3, 3, 3])
-    else:
-        np_scaling_factor = np.array(scaling_factor)
-
-    if translation_vector is None:
-        np_translation_vector = np.array([0, 0, 0])
-    else:
-        np_translation_vector = np.array(translation_vector)
-
-    np_coordinate = np.array(coordinate)
-    converted_array = np_coordinate * (1 / np_scaling_factor) + np_translation_vector
-    if reverse:
-        converted_array = (np_coordinate - np_translation_vector) * np_scaling_factor
-    return converted_array.tolist()
+    def get_json(self) -> Dict:
+        json = {"type": self.__class__.__name__}
+        json.update(self.dict())
+        return json
 
 
-class CoordinateConditionBuilder:
-    @staticmethod
-    def create_condition(condition_type: str, evaluation_func: Callable, **kwargs) -> Tuple[Callable, Dict]:
-        condition_json = {"type": condition_type, **kwargs}
-        return lambda coordinate: evaluation_func(coordinate, **kwargs), condition_json
+class CylinderCoordinateCondition(CoordinateCondition):
+    center_position: List[float] = Field(default_factory=lambda: [0.5, 0.5])
+    radius: float = 0.25
+    min_z: float = 0
+    max_z: float = 1
 
-    @staticmethod
-    def cylinder(center_position=None, radius: float = 0.25, min_z: float = 0, max_z: float = 1):
-        if center_position is None:
-            center_position = [0.5, 0.5]
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="cylinder",
-            evaluation_func=is_coordinate_in_cylinder,
-            center_position=center_position,
-            radius=radius,
-            min_z=min_z,
-            max_z=max_z,
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_in_cylinder(coordinate, self.center_position, self.radius, self.min_z, self.max_z)
+
+
+class SphereCoordinateCondition(CoordinateCondition):
+    center_position: List[float] = Field(default_factory=lambda: [0.5, 0.5])
+    radius: float = 0.25
+
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_in_sphere(coordinate, self.center_position, self.radius)
+
+
+class BoxCoordinateCondition(CoordinateCondition):
+    min_coordinate: List[float] = Field(default_factory=lambda: [0, 0, 0])
+    max_coordinate: List[float] = Field(default_factory=lambda: [1, 1, 1])
+
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_in_box(coordinate, self.min_coordinate, self.max_coordinate)
+
+
+class TriangularPrismCoordinateCondition(CoordinateCondition):
+    position_on_surface_1: List[float] = [0, 0]
+    position_on_surface_2: List[float] = [1, 0]
+    position_on_surface_3: List[float] = [0, 1]
+    min_z: float = 0
+    max_z: float = 1
+
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_in_triangular_prism(
+            coordinate,
+            self.position_on_surface_1,
+            self.position_on_surface_2,
+            self.position_on_surface_3,
+            self.min_z,
+            self.max_z,
         )
 
-    @staticmethod
-    def sphere(center_position=None, radius: float = 0.25):
-        if center_position is None:
-            center_position = [0.5, 0.5, 0.5]
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="sphere",
-            evaluation_func=is_coordinate_in_sphere,
-            center_position=center_position,
-            radius=radius,
-        )
 
-    @staticmethod
-    def triangular_prism(
-        position_on_surface_1: List[float] = [0, 0],
-        position_on_surface_2: List[float] = [1, 0],
-        position_on_surface_3: List[float] = [0, 1],
-        min_z: float = 0,
-        max_z: float = 1,
-    ):
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="prism",
-            evaluation_func=is_coordinate_in_triangular_prism,
-            coordinate_1=position_on_surface_1,
-            coordinate_2=position_on_surface_2,
-            coordinate_3=position_on_surface_3,
-            min_z=min_z,
-            max_z=max_z,
-        )
+class PlaneCoordinateCondition(CoordinateCondition):
+    plane_normal: List[float]
+    plane_point_coordinate: List[float]
 
-    @staticmethod
-    def box(min_coordinate=None, max_coordinate=None):
-        if max_coordinate is None:
-            max_coordinate = [1, 1, 1]
-        if min_coordinate is None:
-            min_coordinate = [0, 0, 0]
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="box",
-            evaluation_func=is_coordinate_in_box,
-            min_coordinate=min_coordinate,
-            max_coordinate=max_coordinate,
-        )
-
-    @staticmethod
-    def plane(plane_normal: List[float], plane_point_coordinate: List[float]):
-        return CoordinateConditionBuilder.create_condition(
-            condition_type="plane",
-            evaluation_func=is_coordinate_behind_plane,
-            plane_normal=plane_normal,
-            plane_point_coordinate=plane_point_coordinate,
-        )
+    def condition(self, coordinate: List[float]) -> bool:
+        return is_coordinate_behind_plane(coordinate, self.plane_normal, self.plane_point_coordinate)

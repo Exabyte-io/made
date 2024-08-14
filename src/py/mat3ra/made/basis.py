@@ -24,14 +24,14 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         coordinates: List[Dict],
         units: str,
         labels: Optional[List[Dict]] = None,
-        cell: Optional[Dict] = None,
+        cell: Optional[List[List[float]]] = None,
         constraints: Optional[List[Dict]] = None,
     ) -> "Basis":
         return Basis(
             elements=ArrayWithIds.from_list_of_dicts(elements),
             coordinates=ArrayWithIds.from_list_of_dicts(coordinates),
             units=units,
-            cell=Cell.from_nested_array(cell),
+            cell=Cell.from_vectors_array(cell),
             labels=ArrayWithIds.from_list_of_dicts(labels) if labels else ArrayWithIds(values=[]),
             constraints=ArrayWithIds.from_list_of_dicts(constraints) if constraints else ArrayWithIds(values=[]),
         )
