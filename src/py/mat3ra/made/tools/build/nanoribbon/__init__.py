@@ -24,6 +24,8 @@ class NanoribbonConfiguration(BaseModel, InMemoryEntity):
     material: Material
     width: int  # in number of unit cells
     length: int  # in number of unit cells
+    vacuum_width: int = 3  # in number of unit cells
+    vacuum_length: int = 0  # in number of unit cells
     edge_type: Literal["armchair", "zigzag"]
 
     class Config:
@@ -35,6 +37,8 @@ class NanoribbonConfiguration(BaseModel, InMemoryEntity):
             "material": self.material.to_json(),
             "width": self.width,
             "length": self.length,
+            "vacuum_width": self.vacuum_width,
+            "vacuum_length": self.vacuum_length,
             "edge_type": self.edge_type,
         }
 
@@ -45,14 +49,14 @@ class NanoribbonBuilder(BaseBuilder):
     _PostProcessParametersType: Any = None
 
     def build_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
-        n = max(config.width, config.length)
-        scaling_matrix = np.diag([n, n, 1])
+        scaling_matrix = np.diag([config.width + config.vacuum_width, config.length + config.vacuum_length, 1])
         supercell = create_supercell(config.material, scaling_matrix)
-        width_crystal = config.width / config.length
+        width_crystal = config.width / (config.width + config.vacuum_width)
+        length_crystal = config.length / (config.length + config.vacuum_length)
         min_coordinate = [0, 0, 0]
-        max_coordinate = [1, width_crystal, 1]
+        max_coordinate = [length_crystal, width_crystal, 1]
         if config.edge_type == "armchair":
-            rotation_matrix = [[1, -1, 0], [1, 1, 0], [0, 0, 1]]
+            rotation_matrix = [[0, -1, 0], [1, 0, 0], [0, 0, 1]]
             supercell = create_supercell(supercell, supercell_matrix=rotation_matrix)
 
         nanoribbon = filter_by_rectangle_projection(
