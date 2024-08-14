@@ -1,6 +1,7 @@
 from typing import Literal, List, Optional, Any
 
 import numpy as np
+from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell
@@ -9,7 +10,17 @@ from pydantic import BaseModel
 from mat3ra.made.material import Material
 
 
-class NanoribbonConfiguration(BaseModel):
+class NanoribbonConfiguration(BaseModel, InMemoryEntity):
+    """
+    Configuration for building a nanoribbon.
+
+    Attributes:
+        material (Material): The material to build the nanoribbon from.
+        width (int): The width of the nanoribbon in number of unit cells.
+        length (int): The length of the nanoribbon in number of unit cells.
+        edge_type (Literal["armchair", "zigzag"]): The edge type of the nanoribbon.
+    """
+
     material: Material
     width: int  # in number of unit cells
     length: int  # in number of unit cells
@@ -17,6 +28,15 @@ class NanoribbonConfiguration(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+    @property
+    def _json(self):
+        return {
+            "material": self.material.to_json(),
+            "width": self.width,
+            "length": self.length,
+            "edge_type": self.edge_type,
+        }
 
 
 class NanoribbonBuilder(BaseBuilder):
