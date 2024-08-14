@@ -51,14 +51,18 @@ class NanoribbonBuilder(BaseBuilder):
     def build_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
         scaling_matrix = np.diag([config.length + config.vacuum_length, config.width + config.vacuum_width, 1])
         supercell = create_supercell(config.material, scaling_matrix)
-        width_crystal = config.width / (config.width + config.vacuum_width)
-        length_crystal = config.length / (config.length + config.vacuum_length)
+        n = config.length + config.vacuum_length
+        m = config.width + config.vacuum_width
+        nudge_value = 0.001
 
         if config.edge_type == "armchair":
             rotation_matrix = [[1, -1, 0], [1, 1, 0], [0, 0, 1]]
+            n = m = max(config.length + config.vacuum_length, config.width + config.vacuum_width)
+            scaling_matrix = np.diag([n, n, 1])
+            supercell = create_supercell(config.material, scaling_matrix)
             supercell = create_supercell(supercell, supercell_matrix=rotation_matrix)
-
-        nudge_value = 0.001
+        length_crystal = config.length / n
+        width_crystal = config.width / m
         min_coordinate = [(1 - length_crystal) / 2, (1 - width_crystal) / 2 + nudge_value, 0]
         max_coordinate = [(1 + length_crystal) / 2 - nudge_value, (1 + width_crystal) / 2, 1]
         nanoribbon = filter_by_rectangle_projection(
