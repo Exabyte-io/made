@@ -1,11 +1,13 @@
 from typing import Callable, List, Literal, Optional, Union
 
+import numpy as np
 from mat3ra.made.material import Material
 
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,
+    get_undercoordinated_atom_indices,
 )
 from .convert import from_ase, to_ase
 from .third_party import ase_add_vacuum
@@ -437,3 +439,15 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     atoms.wrap()
 
     return Material(from_ase(atoms))
+
+
+def passivate_surface(slab: Material, passivant: str, bond_length: float = 3.0):
+    passivated_slab = slab.clone()
+    undercoordinated_atom_indices = get_undercoordinated_atom_indices(passivated_slab)
+    for i in undercoordinated_atom_indices:
+        atom_coordinate = passivated_slab.basis.coordinates.values[i]
+        # TODO: change normal to be from the cloeses center of mass
+        atom_normal = np.array(passivated_slab.basis.coordinates.values[i]) - np.array([0.5, 0.5, 0.5])
+        passivated_slab.add_atom(passivant, atom_coordinate + atom_normal * bond_length)
+
+    return passivated_slab
