@@ -95,3 +95,8 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
         new_basis = self.basis.copy()
         new_basis.coordinates.values = coordinates
         self.basis = new_basis
+
+    def add_atom(self, element: str, coordinate: List[float]) -> None:
+        new_basis = self.basis.copy()
+        new_basis.add_atom(element, coordinate)
+        self.basis = new_basis
