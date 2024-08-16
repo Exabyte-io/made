@@ -2,6 +2,7 @@ from typing import Literal, List, Optional, Any
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntity
+from mat3ra.made.lattice import Lattice
 from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell
@@ -49,25 +50,49 @@ class NanoribbonBuilder(BaseBuilder):
     _PostProcessParametersType: Any = None
 
     def build_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
-        scaling_matrix = np.diag([config.length + config.vacuum_length, config.width + config.vacuum_width, 1])
-        supercell = create_supercell(config.material, scaling_matrix)
-        n = config.length + config.vacuum_length
-        m = config.width + config.vacuum_width
-        nudge_value = 0.001
+        material = config.material
+        provided_width = config.width
+        provided_length = config.length
+        vacuum_w = config.vacuum_width
+        vacuum_l = config.vacuum_length
+        edge_type = config.edge_type
+        coeff = 1
+        if edge_type == "armchair":
+            provided_length, provided_width = provided_width, provided_length
+            vacuum_w, vacuum_l = vacuum_l, vacuum_w
+            coeff = coeff * (provided_width // provided_length + 1)
+        supercell = create_supercell(material, np.diag([2 * provided_length * coeff, 2 * provided_width, 1]))
+        nudge_value = 0.01
+        conditional_nudge_value = nudge_value * (-1 * (edge_type == "armchair") + 1 * (edge_type == "zigzag"))
 
-        if config.edge_type == "armchair":
-            rotation_matrix = [[1, -1, 0], [1, 1, 0], [0, 0, 1]]
-            n = m = max(config.length + config.vacuum_length, config.width + config.vacuum_width)
-            scaling_matrix = np.diag([n, n, 1])
-            supercell = create_supercell(config.material, scaling_matrix)
-            supercell = create_supercell(supercell, supercell_matrix=rotation_matrix)
-        length_crystal = config.length / n
-        width_crystal = config.width / m
-        min_coordinate = [(1 - length_crystal) / 2, (1 - width_crystal) / 2 + nudge_value, 0]
-        max_coordinate = [(1 + length_crystal) / 2 - nudge_value, (1 + width_crystal) / 2, 1]
+        length = provided_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
+        width = provided_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
+        height = np.dot(np.array(material.basis.cell.vector3), np.array([0, 0, 1]))
+
+        vacuum_length = vacuum_l * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
+        vacuum_width = vacuum_w * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
+
+        min_coordinate = [-nudge_value, conditional_nudge_value, 0]
+        max_coordinate = [length - nudge_value, width + conditional_nudge_value, 1]
+
         nanoribbon = filter_by_rectangle_projection(
-            supercell, min_coordinate=min_coordinate, max_coordinate=max_coordinate, use_cartesian_coordinates=False
+            supercell, min_coordinate=min_coordinate, max_coordinate=max_coordinate, use_cartesian_coordinates=True
         )
+        new_basis = nanoribbon.basis.copy()
+        new_basis.to_cartesian()
+        new_length = length + vacuum_length
+        new_width = width + vacuum_width
+
+        new_basis.cell.vector1 = [new_length, 0, 0]
+        new_basis.cell.vector2 = [0, new_width, 0]
+        new_basis.cell.vector3 = [0, 0, height]
+        new_basis.to_crystal()
+        nanoribbon.basis = new_basis
+
+        lattice = Lattice.from_vectors_array([[new_length, 0, 0], [0, new_width, 0], [0, 0, height]])
+        nanoribbon.lattice = lattice
+
+        # TODO: rotate armchair 90 degrees to have length and edge along x axis
 
         return nanoribbon
 
