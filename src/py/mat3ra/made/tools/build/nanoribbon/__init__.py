@@ -73,7 +73,7 @@ class NanoribbonBuilder(BaseBuilder):
         vacuum_width = vacuum_w * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
 
         min_coordinate = [-nudge_value, conditional_nudge_value, 0]
-        max_coordinate = [length - nudge_value, width + conditional_nudge_value, 1]
+        max_coordinate = [length - nudge_value, width + conditional_nudge_value, height]
 
         nanoribbon = filter_by_rectangle_projection(
             supercell, min_coordinate=min_coordinate, max_coordinate=max_coordinate, use_cartesian_coordinates=True
