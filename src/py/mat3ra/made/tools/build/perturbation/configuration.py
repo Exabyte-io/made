@@ -1,13 +1,17 @@
+from typing import Union
+
 from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
 from pydantic import BaseModel
 
-from ...utils.perturbation import SineWavePerturbationFunctionHolder
+from ...utils.perturbation import SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
 
 
 class PerturbationConfiguration(BaseModel, InMemoryEntity):
     material: Material
-    perturbation_function_holder: SineWavePerturbationFunctionHolder = SineWavePerturbationFunctionHolder()
+    perturbation_function_holder: Union[
+        SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
+    ] = SineWavePerturbationFunctionHolder()
     use_cartesian_coordinates: bool = True
 
     class Config:

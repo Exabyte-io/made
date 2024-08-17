@@ -39,12 +39,12 @@ def test_distance_preserved_sine_perturbation():
     # Check selected atoms to avoid using 100+ atoms fixture
     assertion_utils.assert_deep_almost_equal([0.0, 0.0, 0.5], perturbed_slab.basis.coordinates.values[0])
     assertion_utils.assert_deep_almost_equal(
-        [0.201132951, 0.1, 0.546942315], perturbed_slab.basis.coordinates.values[42]
+        [0.197552693, 0.1, 0.546942315], perturbed_slab.basis.coordinates.values[42]
     )
     # Value taken from visually inspected notebook
     expected_cell = Cell(
-        vector1=[23.517094, 0.0, 0.0],
-        vector2=[-11.758818, 21.367367, 0.0],
+        vector1=[24.087442, 0.0, 0.0],
+        vector2=[-12.043583, 21.367367, 0.0],
         vector3=[0.0, 0.0, 20.0],
     )
     assertion_utils.assert_deep_almost_equal(expected_cell.vectors_as_array, perturbed_slab.basis.cell.vectors_as_array)
