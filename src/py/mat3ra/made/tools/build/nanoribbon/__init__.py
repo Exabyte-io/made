@@ -62,6 +62,7 @@ class NanoribbonBuilder(BaseBuilder):
             vacuum_w, vacuum_l = vacuum_l, vacuum_w
             coeff = coeff * (provided_width // provided_length + 1)
         supercell = create_supercell(material, np.diag([2 * provided_length * coeff, 2 * provided_width, 1]))
+        visualize(supercell, repetitions=[1, 1, 1], rotation="0x")
         nudge_value = 0.01
         conditional_nudge_value = nudge_value * (-1 * (edge_type == "armchair") + 1 * (edge_type == "zigzag"))
 
@@ -83,16 +84,20 @@ class NanoribbonBuilder(BaseBuilder):
         new_length = length + vacuum_length
         new_width = width + vacuum_width
 
-        new_basis.cell.vector1 = [new_length, 0, 0]
-        new_basis.cell.vector2 = [0, new_width, 0]
-        new_basis.cell.vector3 = [0, 0, height]
+        length_vector = [new_length, 0, 0]
+        width_vector = [0, new_width, 0]
+        height_vector = [0, 0, height]
+        if edge_type == "armchair":
+            length_vector, width_vector = width_vector, length_vector
+
+        new_basis.cell.vector1 = length_vector
+        new_basis.cell.vector2 = width_vector
+        new_basis.cell.vector3 = height_vector
         new_basis.to_crystal()
         nanoribbon.basis = new_basis
 
-        lattice = Lattice.from_vectors_array([[new_length, 0, 0], [0, new_width, 0], [0, 0, height]])
+        lattice = Lattice.from_vectors_array([length_vector, width_vector, height_vector])
         nanoribbon.lattice = lattice
-
-        # TODO: rotate armchair 90 degrees to have length and edge along x axis
 
         return nanoribbon
 
