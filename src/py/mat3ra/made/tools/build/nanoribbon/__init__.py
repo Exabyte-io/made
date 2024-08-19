@@ -50,21 +50,6 @@ class NanoribbonBuilder(BaseBuilder):
     _PostProcessParametersType: Any = None
 
     @staticmethod
-    def _update_basis_and_lattice(
-        nanoribbon: Material, length_lattice_vector, width_lattice_vector, height_lattice_vector
-    ):
-        new_basis = nanoribbon.basis.copy()
-        new_basis.to_cartesian()
-        new_basis.cell.vector1 = length_lattice_vector
-        new_basis.cell.vector2 = width_lattice_vector
-        new_basis.cell.vector3 = height_lattice_vector
-        new_basis.to_crystal()
-        nanoribbon.basis = new_basis
-        lattice = Lattice.from_vectors_array([length_lattice_vector, width_lattice_vector, height_lattice_vector])
-        nanoribbon.lattice = lattice
-        return nanoribbon
-
-    @staticmethod
     def _calculate_dimensions(config: NanoribbonConfiguration, material: Material):
         provided_width = config.width
         provided_length = config.length
@@ -85,16 +70,19 @@ class NanoribbonBuilder(BaseBuilder):
         return length, width, height, vacuum_length, vacuum_width
 
     @staticmethod
-    def _adjust_for_edge_type(length, width, vacuum_length, vacuum_width, edge_type):
+    def _get_new_lattice_vectors(length, width, height, vacuum_length, vacuum_width, edge_type):
         length_lattice_vector = [length + vacuum_length, 0, 0]
         width_lattice_vector = [0, width + vacuum_width, 0]
+        height_lattice_vector = [0, 0, height]
 
         if edge_type == "armchair":
             length_lattice_vector, width_lattice_vector = width_lattice_vector, length_lattice_vector
 
-        return length_lattice_vector, width_lattice_vector
+        return length_lattice_vector, width_lattice_vector, height_lattice_vector
 
-    def _create_supercell_and_filter(self, material, provided_length, provided_width, length, width, height, edge_type):
+    def _create_supercell_and_cut_nanoribbon(
+        self, material, provided_length, provided_width, length, width, height, edge_type
+    ):
         supercell_size_coeff = 1
         edge_nudge_value = 0.01
         conditional_nudge_value = edge_nudge_value * (-1 * (edge_type == "armchair") + 1 * (edge_type == "zigzag"))
@@ -113,6 +101,21 @@ class NanoribbonBuilder(BaseBuilder):
 
         return nanoribbon
 
+    @staticmethod
+    def _update_basis_and_lattice(
+        nanoribbon: Material, length_lattice_vector, width_lattice_vector, height_lattice_vector
+    ):
+        new_basis = nanoribbon.basis.copy()
+        new_basis.to_cartesian()
+        new_basis.cell.vector1 = length_lattice_vector
+        new_basis.cell.vector2 = width_lattice_vector
+        new_basis.cell.vector3 = height_lattice_vector
+        new_basis.to_crystal()
+        nanoribbon.basis = new_basis
+        lattice = Lattice.from_vectors_array([length_lattice_vector, width_lattice_vector, height_lattice_vector])
+        nanoribbon.lattice = lattice
+        return nanoribbon
+
     def build_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
         material = config.material
         provided_width = config.width
@@ -120,12 +123,11 @@ class NanoribbonBuilder(BaseBuilder):
         edge_type = config.edge_type
         length, width, height, vacuum_length, vacuum_width = self._calculate_dimensions(config, material)
 
-        length_lattice_vector, width_lattice_vector = self._adjust_for_edge_type(
-            length, width, vacuum_length, vacuum_width, edge_type
+        length_lattice_vector, width_lattice_vector, height_lattice_vector = self._get_new_lattice_vectors(
+            length, width, height, vacuum_length, vacuum_width, edge_type
         )
-        height_lattice_vector = [0, 0, height]
 
-        nanoribbon = self._create_supercell_and_filter(
+        nanoribbon = self._create_supercell_and_cut_nanoribbon(
             material, provided_length, provided_width, length, width, height, edge_type
         )
         nanoribbon = self._update_basis_and_lattice(
