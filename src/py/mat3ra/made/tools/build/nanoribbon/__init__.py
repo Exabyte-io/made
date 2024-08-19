@@ -62,19 +62,17 @@ class NanoribbonBuilder(BaseBuilder):
             vacuum_w, vacuum_l = vacuum_l, vacuum_w
             coeff = coeff * (provided_width // provided_length + 1)
         supercell = create_supercell(material, np.diag([2 * provided_length * coeff, 2 * provided_width, 1]))
-        visualize(supercell, repetitions=[1, 1, 1], rotation="0x")
-        nudge_value = 0.01
-        conditional_nudge_value = nudge_value * (-1 * (edge_type == "armchair") + 1 * (edge_type == "zigzag"))
+        edge_nudge_value = 0.01
+        conditional_nudge_value = edge_nudge_value * (-1 * (edge_type == "armchair") + 1 * (edge_type == "zigzag"))
 
         length = provided_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
         width = provided_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
         height = np.dot(np.array(material.basis.cell.vector3), np.array([0, 0, 1]))
-
         vacuum_length = vacuum_l * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
         vacuum_width = vacuum_w * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
 
-        min_coordinate = [-nudge_value, conditional_nudge_value, 0]
-        max_coordinate = [length - nudge_value, width + conditional_nudge_value, height]
+        min_coordinate = [-edge_nudge_value, conditional_nudge_value, 0]
+        max_coordinate = [length - edge_nudge_value, width + conditional_nudge_value, height]
 
         nanoribbon = filter_by_rectangle_projection(
             supercell, min_coordinate=min_coordinate, max_coordinate=max_coordinate, use_cartesian_coordinates=True
