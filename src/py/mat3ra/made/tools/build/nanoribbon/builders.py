@@ -3,14 +3,13 @@ from typing import List, Optional, Any
 import numpy as np
 
 from mat3ra.made.lattice import Lattice
-from mat3ra.made.tools.analyze import get_atomic_coordinates_extremum
 from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell, translate_by_vector
+from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell
 
 from mat3ra.made.material import Material
 from .configuration import NanoribbonConfiguration
-from ...modify import translate_to_z_level
+from ...modify import center_material
 
 
 class NanoribbonBuilder(BaseBuilder):
@@ -85,17 +84,6 @@ class NanoribbonBuilder(BaseBuilder):
         nanoribbon.lattice = lattice
         return nanoribbon
 
-    @staticmethod
-    def _center_nanoribbon(nanoribbon: Material):
-        min_x = get_atomic_coordinates_extremum(nanoribbon, axis="x", extremum="min")
-        max_x = get_atomic_coordinates_extremum(nanoribbon, axis="x", extremum="max")
-        min_y = get_atomic_coordinates_extremum(nanoribbon, axis="y", extremum="min")
-        max_y = get_atomic_coordinates_extremum(nanoribbon, axis="y", extremum="max")
-
-        nanoribbon = translate_by_vector(nanoribbon, vector=[(1 - min_x - max_y) / 2, (1 - min_y - max_y) / 2, 0])
-        nanoribbon = translate_to_z_level(nanoribbon, z_level="center")
-        return nanoribbon
-
     def build_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
         material = config.material
         provided_width = config.width
@@ -113,8 +101,7 @@ class NanoribbonBuilder(BaseBuilder):
         nanoribbon = self._update_basis_and_lattice(
             nanoribbon, length_lattice_vector, width_lattice_vector, height_lattice_vector
         )
-
-        cenetered_nanoribbon = self._center_nanoribbon(nanoribbon)
+        cenetered_nanoribbon = center_material(nanoribbon)
         return cenetered_nanoribbon
 
     def _generate(self, configuration: NanoribbonConfiguration) -> List[_GeneratedItemType]:
