@@ -3,7 +3,7 @@ from enum import Enum
 
 class EdgeTypes(str, Enum):
     """
-    Enum for edge types.
+    Enum for nanoribbon edge types.
     """
 
     zigzag = "zigzag"
