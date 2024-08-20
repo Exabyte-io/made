@@ -4,6 +4,8 @@ from mat3ra.made.material import Material
 from pydantic import BaseModel
 from mat3ra.code.entity import InMemoryEntity
 
+from mat3ra.made.tools.build.nanoribbon.enums import EdgeTypes
+
 
 class NanoribbonConfiguration(BaseModel, InMemoryEntity):
     """
@@ -13,6 +15,8 @@ class NanoribbonConfiguration(BaseModel, InMemoryEntity):
         material (Material): The material to build the nanoribbon from.
         width (int): The width of the nanoribbon in number of unit cells.
         length (int): The length of the nanoribbon in number of unit cells.
+        vacuum_width (int): The width of the vacuum region in number of unit cells.
+        vacuum_length (int): The length of the vacuum region in number of unit cells.
         edge_type (Literal["armchair", "zigzag"]): The edge type of the nanoribbon.
     """
 
@@ -21,7 +25,7 @@ class NanoribbonConfiguration(BaseModel, InMemoryEntity):
     length: int  # in number of unit cells
     vacuum_width: int = 3  # in number of unit cells
     vacuum_length: int = 0  # in number of unit cells
-    edge_type: Literal["armchair", "zigzag"]
+    edge_type: EdgeTypes = EdgeTypes.zigzag
 
     class Config:
         arbitrary_types_allowed = True

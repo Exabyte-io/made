@@ -87,7 +87,7 @@ def translate_by_vector(
     return Material(from_ase(atoms))
 
 
-def center_material(material: Material, axes: Optional[List[str]] = None) -> Material:
+def translate_to_center(material: Material, axes: Optional[List[str]] = None) -> Material:
     """
     Center the material in the unit cell.
 

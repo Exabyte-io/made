@@ -9,7 +9,8 @@ from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_uni
 
 from mat3ra.made.material import Material
 from .configuration import NanoribbonConfiguration
-from ...modify import center_material
+from .enums import EdgeTypes
+from ...modify import translate_to_center
 
 
 class NanoribbonBuilder(BaseBuilder):
@@ -25,7 +26,7 @@ class NanoribbonBuilder(BaseBuilder):
         vacuum_length = config.vacuum_length
         edge_type = config.edge_type
 
-        if edge_type == "armchair":
+        if edge_type == EdgeTypes.armchair:
             provided_length, provided_width = provided_width, provided_length
             vacuum_width, vacuum_length = vacuum_length, vacuum_width
 
@@ -43,7 +44,7 @@ class NanoribbonBuilder(BaseBuilder):
         width_lattice_vector = [0, width + vacuum_width, 0]
         height_lattice_vector = [0, 0, height]
 
-        if edge_type == "armchair":
+        if edge_type == EdgeTypes.armchair:
             length_lattice_vector, width_lattice_vector = width_lattice_vector, length_lattice_vector
 
         return length_lattice_vector, width_lattice_vector, height_lattice_vector
@@ -53,9 +54,11 @@ class NanoribbonBuilder(BaseBuilder):
     ):
         supercell_size_coeff = 1
         edge_nudge_value = 0.01
-        conditional_nudge_value = edge_nudge_value * (-1 * (edge_type == "armchair") + 1 * (edge_type == "zigzag"))
+        conditional_nudge_value = edge_nudge_value * (
+            -1 * (edge_type == EdgeTypes.armchair) + 1 * (edge_type == EdgeTypes.zigzag)
+        )
 
-        if edge_type == "armchair":
+        if edge_type == EdgeTypes.armchair:
             supercell_size_coeff = supercell_size_coeff * (provided_width // provided_length + 1)
 
         min_coordinate = [-edge_nudge_value, conditional_nudge_value, 0]
@@ -101,8 +104,8 @@ class NanoribbonBuilder(BaseBuilder):
         nanoribbon = self._update_basis_and_lattice(
             nanoribbon, length_lattice_vector, width_lattice_vector, height_lattice_vector
         )
-        cenetered_nanoribbon = center_material(nanoribbon)
-        return cenetered_nanoribbon
+        centered_nanoribbon = translate_to_center(nanoribbon)
+        return centered_nanoribbon
 
     def _generate(self, configuration: NanoribbonConfiguration) -> List[_GeneratedItemType]:
         nanoribbon = self.build_nanoribbon(configuration)
