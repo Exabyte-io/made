@@ -2,7 +2,6 @@ from typing import List, Optional, Any
 
 import numpy as np
 
-from mat3ra.made.lattice import Lattice
 from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell
@@ -72,21 +71,6 @@ class NanoribbonBuilder(BaseBuilder):
 
         return nanoribbon
 
-    @staticmethod
-    def _update_basis_and_lattice(
-        nanoribbon: Material, length_lattice_vector, width_lattice_vector, height_lattice_vector
-    ):
-        new_basis = nanoribbon.basis.copy()
-        new_basis.to_cartesian()
-        new_basis.cell.vector1 = length_lattice_vector
-        new_basis.cell.vector2 = width_lattice_vector
-        new_basis.cell.vector3 = height_lattice_vector
-        new_basis.to_crystal()
-        nanoribbon.basis = new_basis
-        lattice = Lattice.from_vectors_array([length_lattice_vector, width_lattice_vector, height_lattice_vector])
-        nanoribbon.lattice = lattice
-        return nanoribbon
-
     def build_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
         material = config.material
         provided_width = config.width
@@ -101,9 +85,7 @@ class NanoribbonBuilder(BaseBuilder):
         nanoribbon = self._create_supercell_and_cut_nanoribbon(
             material, provided_length, provided_width, length, width, height, edge_type
         )
-        nanoribbon = self._update_basis_and_lattice(
-            nanoribbon, length_lattice_vector, width_lattice_vector, height_lattice_vector
-        )
+        nanoribbon.set_new_lattice_vectors(length_lattice_vector, width_lattice_vector, height_lattice_vector)
         centered_nanoribbon = translate_to_center(nanoribbon)
         return centered_nanoribbon
 
