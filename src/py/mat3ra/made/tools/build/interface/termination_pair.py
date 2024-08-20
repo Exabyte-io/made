@@ -40,7 +40,8 @@ def safely_select_termination_pair(
 ) -> TerminationPair:
     """
     Attempt finding provided in generated terminations to find a complete match,
-    if match isn't found, get terminations with equivalent chemical elements.
+    if match isn't found, get terminations with equivalent chemical elements,
+    if that fails, return the first generated termination pair.
     """
     provided_film_termination = provided_termination_pair.film_termination
     provided_substrate_termination = provided_termination_pair.substrate_termination
@@ -55,5 +56,8 @@ def safely_select_termination_pair(
                 == provided_substrate_termination.chemical_elements
             ):
                 hotfix_termination_pair = termination_pair
-                print("Interface will be built with terminations: ", hotfix_termination_pair)
+            else:
+                hotfix_termination_pair = generated_termination_pairs[0]
+            print("Interface will be built with terminations: ", hotfix_termination_pair)
+
     return hotfix_termination_pair

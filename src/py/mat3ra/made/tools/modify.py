@@ -87,6 +87,31 @@ def translate_by_vector(
     return Material(from_ase(atoms))
 
 
+def translate_to_center(material: Material, axes: Optional[List[str]] = None) -> Material:
+    """
+    Center the material in the unit cell.
+
+    Args:
+        material (Material): The material object to center.
+        axes (List[str]): The axes to center the material along.
+    Returns:
+        Material: The centered material object.
+    """
+    new_material = material.clone()
+    new_material.to_crystal()
+    if axes is None:
+        axes = ["x", "y", "z"]
+    min_x = get_atomic_coordinates_extremum(material, axis="x", extremum="min") if "x" in axes else 0
+    max_x = get_atomic_coordinates_extremum(material, axis="x", extremum="max") if "x" in axes else 1
+    min_y = get_atomic_coordinates_extremum(material, axis="y", extremum="min") if "y" in axes else 0
+    max_y = get_atomic_coordinates_extremum(material, axis="y", extremum="max") if "y" in axes else 1
+    if "z" in axes:
+        material = translate_to_z_level(material, z_level="center")
+
+    material = translate_by_vector(material, vector=[(1 - min_x - max_x) / 2, (1 - min_y - max_y) / 2, 0])
+    return material
+
+
 def wrap_to_unit_cell(material: Material) -> Material:
     """
     Wrap the material to the unit cell.
