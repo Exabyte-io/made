@@ -108,7 +108,7 @@ def center_material(material: Material, axes: Optional[List[str]] = None) -> Mat
     if "z" in axes:
         material = translate_to_z_level(material, z_level="center")
 
-    material = translate_by_vector(material, vector=[(1 - min_x - max_y) / 2, (1 - min_y - max_y) / 2, 0])
+    material = translate_by_vector(material, vector=[(1 - min_x - max_x) / 2, (1 - min_y - max_y) / 2, 0])
     return material
 
 

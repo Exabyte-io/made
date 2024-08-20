@@ -1,9 +1,6 @@
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.nanoribbon import NanoribbonConfiguration, build_nanoribbon
 from mat3ra.utils import assertion as assertion_utils
-
-from mat3ra.made.tools.build.nanoribbon import NanoribbonConfiguration
-
-from mat3ra.made.tools.build.nanoribbon import build_nanoribbon
 
 from .fixtures import GRAPHENE, GRAPHENE_ZIGZAG_NANORIBBON
 
