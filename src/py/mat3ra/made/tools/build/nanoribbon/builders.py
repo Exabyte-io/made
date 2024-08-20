@@ -13,29 +13,65 @@ from ...modify import translate_to_center
 
 
 class NanoribbonBuilder(BaseBuilder):
+    """
+    Builder class for creating a nanoribbon from a material.
+
+    The process creates a supercell with large enough dimensions to contain the nanoribbon and then
+    filters the supercell to only include the nanoribbon. The supercell is then centered and returned as the nanoribbon.
+    The nanoribbon can have either Armchair or Zigzag edge. The edge is defined along the vector 1 of the material cell,
+    which corresponds to [1,0,0] direction.
+    """
+
     _ConfigurationType: type(NanoribbonConfiguration) = NanoribbonConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
     _PostProcessParametersType: Any = None
 
+    def create_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
+        material = config.material
+        (
+            length_crystal,
+            width_crystal,
+            height_crystal,
+            vacuum_length_crystal,
+            vacuum_width_crystal,
+        ) = self._calculate_crystal_dimensions(config, material)
+        length_lattice_vector, width_lattice_vector, height_lattice_vector = self._get_new_lattice_vectors(
+            length_crystal, width_crystal, height_crystal, vacuum_length_crystal, vacuum_width_crystal, config.edge_type
+        )
+        n = max(config.length, config.width)
+        large_supercell_to_cut = create_supercell(material, np.diag([2 * n, 2 * n, 1]))
+
+        min_coordinate, max_coordinate = self._calculate_coordinates_of_cut(
+            length_crystal, width_crystal, height_crystal, config.edge_type
+        )
+        nanoribbon = filter_by_rectangle_projection(
+            large_supercell_to_cut,
+            min_coordinate=min_coordinate,
+            max_coordinate=max_coordinate,
+            use_cartesian_coordinates=True,
+        )
+        nanoribbon.set_new_lattice_vectors(length_lattice_vector, width_lattice_vector, height_lattice_vector)
+        return translate_to_center(nanoribbon)
+
     @staticmethod
-    def _calculate_dimensions(config: NanoribbonConfiguration, material: Material):
-        provided_width = config.width
-        provided_length = config.length
+    def _calculate_crystal_dimensions(config: NanoribbonConfiguration, material: Material):
+        nanoribbon_width = config.width
+        nanoribbon_length = config.length
         vacuum_width = config.vacuum_width
         vacuum_length = config.vacuum_length
         edge_type = config.edge_type
 
         if edge_type == EdgeTypes.armchair:
-            provided_length, provided_width = provided_width, provided_length
+            nanoribbon_length, nanoribbon_width = nanoribbon_width, nanoribbon_length
             vacuum_width, vacuum_length = vacuum_length, vacuum_width
 
-        length = provided_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
-        width = provided_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
-        height = np.dot(np.array(material.basis.cell.vector3), np.array([0, 0, 1]))
-        vacuum_length = vacuum_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
-        vacuum_width = vacuum_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
+        length_crystal = nanoribbon_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
+        width_crystal = nanoribbon_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
+        height_crystal = np.dot(np.array(material.basis.cell.vector3), np.array([0, 0, 1]))
+        vacuum_length_crystal = vacuum_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
+        vacuum_width_crystal = vacuum_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
 
-        return length, width, height, vacuum_length, vacuum_width
+        return length_crystal, width_crystal, height_crystal, vacuum_length_crystal, vacuum_width_crystal
 
     @staticmethod
     def _get_new_lattice_vectors(length, width, height, vacuum_length, vacuum_width, edge_type):
@@ -48,49 +84,18 @@ class NanoribbonBuilder(BaseBuilder):
 
         return length_lattice_vector, width_lattice_vector, height_lattice_vector
 
-    def _create_supercell_and_cut_nanoribbon(
-        self, material, provided_length, provided_width, length, width, height, edge_type
-    ):
-        supercell_size_coeff = 1
+    @staticmethod
+    def _calculate_coordinates_of_cut(length, width, height, edge_type):
         edge_nudge_value = 0.01
         conditional_nudge_value = edge_nudge_value * (
             -1 * (edge_type == EdgeTypes.armchair) + 1 * (edge_type == EdgeTypes.zigzag)
         )
-
-        if edge_type == EdgeTypes.armchair:
-            supercell_size_coeff = supercell_size_coeff * (provided_width // provided_length + 1)
-
         min_coordinate = [-edge_nudge_value, conditional_nudge_value, 0]
         max_coordinate = [length - edge_nudge_value, width + conditional_nudge_value, height]
-        supercell = create_supercell(
-            material, np.diag([2 * provided_length * supercell_size_coeff, 2 * provided_width, 1])
-        )
-        nanoribbon = filter_by_rectangle_projection(
-            supercell, min_coordinate=min_coordinate, max_coordinate=max_coordinate, use_cartesian_coordinates=True
-        )
-
-        return nanoribbon
-
-    def build_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
-        material = config.material
-        provided_width = config.width
-        provided_length = config.length
-        edge_type = config.edge_type
-        length, width, height, vacuum_length, vacuum_width = self._calculate_dimensions(config, material)
-
-        length_lattice_vector, width_lattice_vector, height_lattice_vector = self._get_new_lattice_vectors(
-            length, width, height, vacuum_length, vacuum_width, edge_type
-        )
-
-        nanoribbon = self._create_supercell_and_cut_nanoribbon(
-            material, provided_length, provided_width, length, width, height, edge_type
-        )
-        nanoribbon.set_new_lattice_vectors(length_lattice_vector, width_lattice_vector, height_lattice_vector)
-        centered_nanoribbon = translate_to_center(nanoribbon)
-        return centered_nanoribbon
+        return min_coordinate, max_coordinate
 
     def _generate(self, configuration: NanoribbonConfiguration) -> List[_GeneratedItemType]:
-        nanoribbon = self.build_nanoribbon(configuration)
+        nanoribbon = self.create_nanoribbon(configuration)
         return [nanoribbon]
 
     def _post_process(
