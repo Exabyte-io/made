@@ -1,15 +1,15 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Tuple
 
 import numpy as np
 
+from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell
 
-from mat3ra.made.material import Material
+from ...modify import translate_to_center
 from .configuration import NanoribbonConfiguration
 from .enums import EdgeTypes
-from ...modify import translate_to_center
 
 
 class NanoribbonBuilder(BaseBuilder):
@@ -29,20 +29,25 @@ class NanoribbonBuilder(BaseBuilder):
     def create_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
         material = config.material
         (
-            length_crystal,
-            width_crystal,
-            height_crystal,
-            vacuum_length_crystal,
-            vacuum_width_crystal,
-        ) = self._calculate_crystal_dimensions(config, material)
+            length_cartesian,
+            width_cartesian,
+            height_cartesian,
+            vacuum_length_cartesian,
+            vacuum_width_cartesian,
+        ) = self._calculate_cartesian_dimensions(config, material)
         length_lattice_vector, width_lattice_vector, height_lattice_vector = self._get_new_lattice_vectors(
-            length_crystal, width_crystal, height_crystal, vacuum_length_crystal, vacuum_width_crystal, config.edge_type
+            length_cartesian,
+            width_cartesian,
+            height_cartesian,
+            vacuum_length_cartesian,
+            vacuum_width_cartesian,
+            config.edge_type,
         )
         n = max(config.length, config.width)
         large_supercell_to_cut = create_supercell(material, np.diag([2 * n, 2 * n, 1]))
 
         min_coordinate, max_coordinate = self._calculate_coordinates_of_cut(
-            length_crystal, width_crystal, height_crystal, config.edge_type
+            length_cartesian, width_cartesian, height_cartesian, config.edge_type
         )
         nanoribbon = filter_by_rectangle_projection(
             large_supercell_to_cut,
@@ -54,7 +59,10 @@ class NanoribbonBuilder(BaseBuilder):
         return translate_to_center(nanoribbon)
 
     @staticmethod
-    def _calculate_crystal_dimensions(config: NanoribbonConfiguration, material: Material):
+    def _calculate_cartesian_dimensions(config: NanoribbonConfiguration, material: Material):
+        """
+        Calculate the dimensions of the nanoribbon in the cartesian coordinate system.
+        """
         nanoribbon_width = config.width
         nanoribbon_length = config.length
         vacuum_width = config.vacuum_width
@@ -65,16 +73,32 @@ class NanoribbonBuilder(BaseBuilder):
             nanoribbon_length, nanoribbon_width = nanoribbon_width, nanoribbon_length
             vacuum_width, vacuum_length = vacuum_length, vacuum_width
 
-        length_crystal = nanoribbon_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
-        width_crystal = nanoribbon_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
-        height_crystal = np.dot(np.array(material.basis.cell.vector3), np.array([0, 0, 1]))
-        vacuum_length_crystal = vacuum_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
-        vacuum_width_crystal = vacuum_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
+        length_cartesian = nanoribbon_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
+        width_cartesian = nanoribbon_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
+        height_cartesian = np.dot(np.array(material.basis.cell.vector3), np.array([0, 0, 1]))
+        vacuum_length_cartesian = vacuum_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
+        vacuum_width_cartesian = vacuum_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
 
-        return length_crystal, width_crystal, height_crystal, vacuum_length_crystal, vacuum_width_crystal
+        return length_cartesian, width_cartesian, height_cartesian, vacuum_length_cartesian, vacuum_width_cartesian
 
     @staticmethod
-    def _get_new_lattice_vectors(length, width, height, vacuum_length, vacuum_width, edge_type):
+    def _get_new_lattice_vectors(
+        length: float, width: float, height: float, vacuum_length: float, vacuum_width: float, edge_type: EdgeTypes
+    ) -> Tuple[List[float], List[float], List[float]]:
+        """
+        Calculate the new lattice vectors for the nanoribbon.
+
+        Args:
+            length: Length of the nanoribbon.
+            width: Width of the nanoribbon.
+            height: Height of the nanoribbon.
+            vacuum_length: Length of the vacuum region.
+            vacuum_width: Width of the vacuum region.
+            edge_type: Type of the edge of the nanoribbon.
+
+        Returns:
+            Tuple of the new lattice vectors.
+        """
         length_lattice_vector = [length + vacuum_length, 0, 0]
         width_lattice_vector = [0, width + vacuum_width, 0]
         height_lattice_vector = [0, 0, height]
@@ -85,7 +109,21 @@ class NanoribbonBuilder(BaseBuilder):
         return length_lattice_vector, width_lattice_vector, height_lattice_vector
 
     @staticmethod
-    def _calculate_coordinates_of_cut(length, width, height, edge_type):
+    def _calculate_coordinates_of_cut(
+        length: float, width: float, height: float, edge_type: EdgeTypes
+    ) -> Tuple[List[float], List[float]]:
+        """
+        Calculate the coordinates of the rectangular nanoribbon cut from the supercell.
+
+        Args:
+            length: Length of the nanoribbon.
+            width: Width of the nanoribbon.
+            height: Height of the nanoribbon.
+            edge_type: Type of the edge of the nanoribbon.
+
+        Returns:
+            Tuple of the minimum and maximum coordinates of the cut.
+        """
         edge_nudge_value = 0.01
         conditional_nudge_value = edge_nudge_value * (
             -1 * (edge_type == EdgeTypes.armchair) + 1 * (edge_type == EdgeTypes.zigzag)
