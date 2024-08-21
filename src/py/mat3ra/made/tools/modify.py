@@ -444,34 +444,30 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     return Material(from_ase(atoms))
 
 
-def passivate_surface(slab: Material, passivant: str, bond_length: float = 1.0):
-    supercell_sclaing_factor = [3, 3, 3]
+def passivate_surface_single_cell(slab: Material, passivant: str, bond_length: float = 1.0):
+    supercell_scaling_factor = [3, 3, 3]
     centered_slab = translate_to_z_level(slab, "center")
-    supercell_slab = create_supercell(centered_slab, scaling_factor=supercell_sclaing_factor)
-
-    def central_cell_condition(coordinate):
-        return is_coordinate_in_box(coordinate, [1 / 3, 1 / 3, 1 / 3], [2 / 3, 2 / 3, 2 / 3])
-
-    indices_in_central_cell = [
-        idx
-        for idx in supercell_slab.basis.coordinates.ids
-        if central_cell_condition(supercell_slab.basis.coordinates.values[idx])
-    ]
-
+    centered_slab_supercell = create_supercell(centered_slab, scaling_factor=supercell_scaling_factor)
     undercoordinated_atom_indices, neighbors_indices = get_undercoordinated_atom_indices(
-        supercell_slab, indices_in_central_cell
+        centered_slab_supercell, centered_slab_supercell.basis.coordinates.ids
     )
-
+    new_basis = centered_slab_supercell.basis.copy()
     for index in undercoordinated_atom_indices:
-        atom_coordinate = supercell_slab.basis.coordinates.values[index]
-        neighbors_coordinates = [supercell_slab.basis.coordinates.values[j] for j in neighbors_indices[index]]
-        neighbors_average_coordinate = get_center_of_coordinates(neighbors_coordinates)
-        bond_normal = np.array(supercell_slab.basis.coordinates.values[index]) - np.array(neighbors_average_coordinate)
-        bond_vector_crystal = supercell_slab.basis.cell.convert_point_to_crystal(bond_normal * bond_length)
-        passivant_atom_coordinate_supercell = atom_coordinate + bond_vector_crystal
-        passivant_atom_coordinate = transform_coordinate_to_supercell(
-            passivant_atom_coordinate_supercell, scaling_factor=supercell_sclaing_factor, reverse=True
-        )
+        atom_coordinate_crystal = centered_slab_supercell.basis.coordinates.values[index]
+        neighbors_coordinates_crystal = [
+            centered_slab_supercell.basis.coordinates.values[j] for j in neighbors_indices[index]
+        ]
+        neighbors_average_coordinate_crystal = get_center_of_coordinates(neighbors_coordinates_crystal)
 
-        centered_slab.add_atom(passivant, passivant_atom_coordinate)
-    return centered_slab
+        bond_normal_crystal = np.array(centered_slab_supercell.basis.coordinates.values[index]) - np.array(
+            neighbors_average_coordinate_crystal
+        )
+        bond_normal_cartesian = centered_slab_supercell.basis.cell.convert_point_to_cartesian(bond_normal_crystal)
+        bond_vector_cartesian = bond_normal_cartesian * bond_length
+        bond_vector_crystal = centered_slab_supercell.basis.cell.convert_point_to_crystal(bond_vector_cartesian)
+        passivant_atom_coordinate = atom_coordinate_crystal + bond_vector_crystal
+        new_basis.add_atom(passivant, passivant_atom_coordinate)
+
+    centered_slab_supercell.basis = new_basis
+    centered_slab_supercell = filter_by_box(centered_slab_supercell, [1 / 3, 1 / 3, 1 / 3], [2 / 3, 2 / 3, 2 / 3])
+    return centered_slab_supercell
