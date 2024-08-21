@@ -2,6 +2,9 @@ from typing import Callable, List, Literal, Optional, Union
 
 import numpy as np
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.supercell import create_supercell
+from mat3ra.made.tools.utils import transform_coordinate_to_supercell
+from mat3ra.made.utils import get_center_of_coordinates
 
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
@@ -441,13 +444,34 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     return Material(from_ase(atoms))
 
 
-def passivate_surface(slab: Material, passivant: str, bond_length: float = 3.0):
-    passivated_slab = slab.clone()
-    undercoordinated_atom_indices = get_undercoordinated_atom_indices(passivated_slab)
-    for i in undercoordinated_atom_indices:
-        atom_coordinate = passivated_slab.basis.coordinates.values[i]
-        # TODO: change normal to be from the cloeses center of mass
-        atom_normal = np.array(passivated_slab.basis.coordinates.values[i]) - np.array([0.5, 0.5, 0.5])
-        passivated_slab.add_atom(passivant, atom_coordinate + atom_normal * bond_length)
+def passivate_surface(slab: Material, passivant: str, bond_length: float = 1.0):
+    supercell_sclaing_factor = [3, 3, 3]
+    centered_slab = translate_to_z_level(slab, "center")
+    supercell_slab = create_supercell(centered_slab, scaling_factor=supercell_sclaing_factor)
 
-    return passivated_slab
+    def central_cell_condition(coordinate):
+        return is_coordinate_in_box(coordinate, [1 / 3, 1 / 3, 1 / 3], [2 / 3, 2 / 3, 2 / 3])
+
+    indices_in_central_cell = [
+        idx
+        for idx in supercell_slab.basis.coordinates.ids
+        if central_cell_condition(supercell_slab.basis.coordinates.values[idx])
+    ]
+
+    undercoordinated_atom_indices, neighbors_indices = get_undercoordinated_atom_indices(
+        supercell_slab, indices_in_central_cell
+    )
+
+    for index in undercoordinated_atom_indices:
+        atom_coordinate = supercell_slab.basis.coordinates.values[index]
+        neighbors_coordinates = [supercell_slab.basis.coordinates.values[j] for j in neighbors_indices[index]]
+        neighbors_average_coordinate = get_center_of_coordinates(neighbors_coordinates)
+        bond_normal = np.array(supercell_slab.basis.coordinates.values[index]) - np.array(neighbors_average_coordinate)
+        bond_vector_crystal = supercell_slab.basis.cell.convert_point_to_crystal(bond_normal * bond_length)
+        passivant_atom_coordinate_supercell = atom_coordinate + bond_vector_crystal
+        passivant_atom_coordinate = transform_coordinate_to_supercell(
+            passivant_atom_coordinate_supercell, scaling_factor=supercell_sclaing_factor, reverse=True
+        )
+
+        centered_slab.add_atom(passivant, passivant_atom_coordinate)
+    return centered_slab
