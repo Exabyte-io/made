@@ -96,6 +96,19 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
         new_basis.coordinates.values = coordinates
         self.basis = new_basis
 
+    def set_new_lattice_vectors(
+        self, lattice_vector1: List[float], lattice_vector2: List[float], lattice_vector3: List[float]
+    ) -> None:
+        new_basis = self.basis.copy()
+        new_basis.to_cartesian()
+        new_basis.cell.vector1 = lattice_vector1
+        new_basis.cell.vector2 = lattice_vector2
+        new_basis.cell.vector3 = lattice_vector3
+        new_basis.to_crystal()
+        self.basis = new_basis
+        lattice = Lattice.from_vectors_array([lattice_vector1, lattice_vector2, lattice_vector3])
+        self.lattice = lattice
+
     def add_atom(self, element: str, coordinate: List[float]) -> None:
         new_basis = self.basis.copy()
         new_basis.add_atom(element, coordinate)
