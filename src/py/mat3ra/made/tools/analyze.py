@@ -348,7 +348,7 @@ def get_undercoordinated_atom_indices(
         coordinate = material.basis.coordinates.values[idx]
         neighbors_indices: List[int] = []
         try:
-            neighbors_indices = get_nearest_neighbors_atom_indices(material, coordinate, cutoff=5)
+            neighbors_indices = get_nearest_neighbors_atom_indices(material, coordinate, cutoff=5) or []
             neighbors_indices_array.append(neighbors_indices)
         except Exception as e:
             print(f"Error: {e}")
