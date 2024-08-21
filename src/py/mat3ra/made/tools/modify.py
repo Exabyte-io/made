@@ -3,7 +3,6 @@ from typing import Callable, List, Literal, Optional, Union
 import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.utils import transform_coordinate_to_supercell
 from mat3ra.made.utils import get_center_of_coordinates
 
 from .analyze import (
@@ -444,7 +443,7 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     return Material(from_ase(atoms))
 
 
-def passivate_surface_single_cell(slab: Material, passivant: str, bond_length: float = 1.0):
+def passivate_surface(slab: Material, passivant: str, bond_length: float = 1.0):
     supercell_scaling_factor = [3, 3, 3]
     centered_slab = translate_to_z_level(slab, "center")
     centered_slab_supercell = create_supercell(centered_slab, scaling_factor=supercell_scaling_factor)
