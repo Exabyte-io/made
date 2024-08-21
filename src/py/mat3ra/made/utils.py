@@ -95,8 +95,11 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
         return self.values[index] if index < len(self.values) else None
 
     def filter_by_values(self, values: Union[List[Any], Any]):
-        values_to_keep = set(values) if isinstance(values, list) else {values}
-        filtered_items = [(v, i) for v, i in zip(self.values, self.ids) if v in values_to_keep]
+        def make_hashable(value):
+            return tuple(value) if isinstance(value, list) else value
+
+        values_to_keep = set(make_hashable(v) for v in values) if isinstance(values, list) else {make_hashable(values)}
+        filtered_items = [(v, i) for v, i in zip(self.values, self.ids) if make_hashable(v) in values_to_keep]
         if filtered_items:
             values_unpacked, ids_unpacked = zip(*filtered_items)
             self.values = list(values_unpacked)
