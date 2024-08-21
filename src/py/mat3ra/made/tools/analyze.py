@@ -1,5 +1,4 @@
-import math
-from typing import Callable, List, Literal, Optional
+from typing import Callable, List, Literal, Optional, Tuple
 
 import numpy as np
 
@@ -283,17 +282,26 @@ def get_nearest_neighbors_atom_indices(
         coordinate = [0, 0, 0]
     structure = to_pymatgen(material)
     voronoi_nn = PymatgenVoronoiNN(
-        tol=0.5,
+        tol=0.1,
         cutoff=cutoff,
         allow_pathological=False,
         weight="solid_angle",
         extra_nn_info=True,
-        compute_adj_neighbors=True,
+        compute_adj_neighbors=False,
     )
-    structure.append("X", coordinate, validate_proximity=False)
-    neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
+    coordinates = material.basis.coordinates
+    coordinates.filter_by_values([coordinate])
+    site_index = coordinates.ids[0]
+    remove_added = False
+    if site_index is None:
+        structure.append("X", coordinate, validate_proximity=False)
+        site_index = len(structure.sites) - 1
+        remove_added = True
+    neighbors = voronoi_nn.get_nn_info(structure, site_index)
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
-    structure.remove_sites([-1])
+
+    if remove_added:
+        structure.remove_sites([-1])
 
     all_coordinates = material.basis.coordinates
     all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
@@ -329,31 +337,27 @@ def get_atomic_coordinates_extremum(
     return getattr(np, extremum)(values)
 
 
-def get_undercoordinated_atom_indices(material: Material) -> List[int]:
-    """
-    Identify undercoordinated atoms in a material based on a coordination number threshold.
-
-    Args:
-        material (Molecule): The material object as a pymatgen Molecule.
-
-    Returns:
-        List[int]: Indices of undercoordinated atoms.
-    """
+def get_undercoordinated_atom_indices(
+    material: Material, indices_to_check: List[int]
+) -> Tuple[List[int], List[List[int]]]:
+    neighbors_indices_array = []
     neighbors_numbers = []
-    undercoordinated_atom_indices = []
-    average_coordination = 0
-    for idx in material.basis.coordinates.ids:
+    undercoordinated_atom_indices: List[int] = []
+    set_of_neighbors_numbers = set()
+    for idx in indices_to_check:
         coordinate = material.basis.coordinates.values[idx]
+        neighbors_indices: List[int] = []
         try:
-            neighbors_indices = get_nearest_neighbors_atom_indices(material, coordinate, cutoff=3)
-        except:
-            print("error")
+            neighbors_indices = get_nearest_neighbors_atom_indices(material, coordinate, cutoff=5)
+            neighbors_indices_array.append(neighbors_indices)
+        except Exception as e:
+            print(f"Error: {e}")
+            neighbors_indices_array.append([])
             continue
         neighbors_numbers.append(len(neighbors_indices))
-        average_coordination = (average_coordination * (idx + 1) + len(neighbors_indices)) / (idx + 2)
-    threshold = math.floor(average_coordination)
+        set_of_neighbors_numbers.add(len(neighbors_indices))
+    threshold = max(set_of_neighbors_numbers)
     for idx, number in enumerate(neighbors_numbers):
         if number < threshold:
             undercoordinated_atom_indices.append(idx)
-
-    return undercoordinated_atom_indices
+    return undercoordinated_atom_indices, neighbors_indices_array
