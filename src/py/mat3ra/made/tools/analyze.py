@@ -262,7 +262,46 @@ def get_atom_indices_with_condition_on_coordinates(
     return selected_indices
 
 
-def get_nearest_neighbors_atom_indices(
+def get_nearest_neighbors_atom_indices_for_coordinate(
+    material: Material,
+    coordinate: Optional[List[float]] = None,
+    cutoff: float = 15.0,
+) -> Optional[List[int]]:
+    """
+    Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
+
+    Args:
+        material (Material): The material object to find neighbors in.
+        coordinate (List[float]): The position to find neighbors for.
+        cutoff (float): The cutoff radius for identifying neighbors.
+
+    Returns:
+        List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
+    """
+    if coordinate is None:
+        coordinate = [0, 0, 0]
+    structure = to_pymatgen(material)
+    voronoi_nn = PymatgenVoronoiNN(
+        tol=0.5,
+        cutoff=cutoff,
+        allow_pathological=False,
+        weight="solid_angle",
+        extra_nn_info=False,
+        compute_adj_neighbors=False,
+    )
+
+    structure.append("X", coordinate, validate_proximity=False)
+    site_index = len(structure.sites) - 1
+    neighbors = voronoi_nn.get_nn_info(structure, site_index)
+    neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
+    structure.remove_sites([-1])
+
+    all_coordinates = material.basis.coordinates
+    all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
+    return all_coordinates.ids
+
+
+def get_nearest_neighbors_atom_indices_for_atom(
     material: Material,
     coordinate: Optional[List[float]] = None,
     cutoff: float = 15.0,
@@ -286,22 +325,14 @@ def get_nearest_neighbors_atom_indices(
         cutoff=cutoff,
         allow_pathological=False,
         weight="solid_angle",
-        extra_nn_info=True,
+        extra_nn_info=False,
         compute_adj_neighbors=False,
     )
     coordinates = material.basis.coordinates
     coordinates.filter_by_values([coordinate])
     site_index = coordinates.ids[0]
-    remove_added = False
-    if site_index is None:
-        structure.append("X", coordinate, validate_proximity=False)
-        site_index = len(structure.sites) - 1
-        remove_added = True
     neighbors = voronoi_nn.get_nn_info(structure, site_index)
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
-
-    if remove_added:
-        structure.remove_sites([-1])
 
     all_coordinates = material.basis.coordinates
     all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
@@ -338,26 +369,32 @@ def get_atomic_coordinates_extremum(
 
 
 def get_undercoordinated_atom_indices(
-    material: Material, indices_to_check: List[int]
+    material: Material, indices_to_check: Optional[List[int]] = None
 ) -> Tuple[List[int], List[List[int]]]:
+    if indices_to_check is None:
+        indices_to_check = material.basis.coordinates.ids
+
+    coordinates = np.array(material.basis.coordinates.values)
     neighbors_indices_array = []
     neighbors_numbers = []
     undercoordinated_atom_indices: List[int] = []
-    set_of_neighbors_numbers = set()
+
     for idx in indices_to_check:
-        coordinate = material.basis.coordinates.values[idx]
-        neighbors_indices: List[int] = []
+        coordinate = coordinates[idx]
         try:
-            neighbors_indices = get_nearest_neighbors_atom_indices(material, coordinate, cutoff=5) or []
+            neighbors_indices = (
+                get_nearest_neighbors_atom_indices_for_atom(material, coordinate.tolist(), cutoff=5) or []
+            )
             neighbors_indices_array.append(neighbors_indices)
         except Exception as e:
             print(f"Error: {e}")
             neighbors_indices_array.append([])
             continue
         neighbors_numbers.append(len(neighbors_indices))
-        set_of_neighbors_numbers.add(len(neighbors_indices))
-    threshold = max(set_of_neighbors_numbers)
-    for idx, number in enumerate(neighbors_numbers):
-        if number < threshold:
-            undercoordinated_atom_indices.append(idx)
+
+    neighbors_numbers = np.array(neighbors_numbers)  # type: ignore
+    threshold = np.max(neighbors_numbers)
+
+    undercoordinated_atom_indices = np.where(neighbors_numbers < threshold)[0].tolist()
+
     return undercoordinated_atom_indices, neighbors_indices_array
