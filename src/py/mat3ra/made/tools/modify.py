@@ -480,9 +480,12 @@ def get_passivant_coordinate_crystal(
 
 
 def passivate_surface(slab: Material, passivant: str, bond_length: float = 2.0):
+    nudge_value = 0.01
     supercell_scaling_factor = [3, 3, 3]
     min_coordinate = [1 / 3, 1 / 3, 1 / 3]
     max_coordinate = [2 / 3, 2 / 3, 2 / 3]
+    adjusted_min_coordinate = (np.array(min_coordinate) - nudge_value).tolist()
+    adjusted_max_coordinate = (np.array(max_coordinate) + nudge_value).tolist()
     slab = translate_to_z_level(slab, "center")
     new_basis = slab.basis.copy()
     slab_supercell = create_supercell(slab, scaling_factor=supercell_scaling_factor)
@@ -490,7 +493,7 @@ def passivate_surface(slab: Material, passivant: str, bond_length: float = 2.0):
     central_cell_ids = [
         id
         for id, coordinate in zip(slab_supercell.basis.coordinates.ids, slab_supercell.basis.coordinates.values)
-        if is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
+        if is_coordinate_in_box(coordinate, adjusted_min_coordinate, adjusted_max_coordinate)
     ]
     undercoordinated_atom_indices, atom_neighbors_info = get_undercoordinated_atom_indices(
         slab_supercell, central_cell_ids
@@ -505,7 +508,10 @@ def passivate_surface(slab: Material, passivant: str, bond_length: float = 2.0):
             slab_supercell, atom_coordinate_crystal, bond_normal_crystal, bond_length
         ).tolist()
         passivant_coordinate_crystal_original_cell = transform_coordinate_to_supercell(
-            passivant_coordinate_crystal, scaling_factor=supercell_scaling_factor, reverse=True
+            passivant_coordinate_crystal,
+            scaling_factor=supercell_scaling_factor,
+            translation_vector=min_coordinate,
+            reverse=True,
         )
         new_basis.add_atom(passivant, passivant_coordinate_crystal_original_cell)
 
