@@ -377,7 +377,6 @@ def get_undercoordinated_atom_indices(
     coordinates = np.array(material.basis.coordinates.values)
     neighbors_indices_array = []
     neighbors_numbers = []
-    undercoordinated_atom_indices: List[int] = []
 
     for idx in indices_to_check:
         coordinate = coordinates[idx]
@@ -395,6 +394,8 @@ def get_undercoordinated_atom_indices(
     neighbors_numbers = np.array(neighbors_numbers)  # type: ignore
     threshold = np.max(neighbors_numbers)
 
-    undercoordinated_atom_indices = np.where(neighbors_numbers < threshold)[0].tolist()
+    undercoordinated_atom_indices = [
+        idx for idx, num_neighbors in zip(indices_to_check, neighbors_numbers) if num_neighbors < threshold
+    ]
 
     return undercoordinated_atom_indices, neighbors_indices_array
