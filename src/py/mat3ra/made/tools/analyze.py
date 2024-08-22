@@ -369,8 +369,8 @@ def get_atomic_coordinates_extremum(
     return getattr(np, extremum)(values)
 
 
-def get_undercoordinated_atom_indices(
-    material: Material, indices_to_check: Optional[List[int]] = None
+def get_undercoordinated_atoms(
+    material: Material, indices_to_check: Optional[List[int]] = None, coordination_threshold: Optional[int] = None
 ) -> Tuple[List[int], dict]:
     if indices_to_check is None:
         indices_to_check = material.basis.coordinates.ids
@@ -380,20 +380,17 @@ def get_undercoordinated_atom_indices(
     atom_neighbors_info = {}
     for idx in indices_to_check:
         coordinate = coordinates_array[idx]
-        try:
-            neighbors_indices = (
-                get_nearest_neighbors_atom_indices_for_atom(material, coordinate.tolist(), cutoff=9) or []
-            )
-            neighbors_coordinates = [coordinates_array[i] for i in neighbors_indices]
-            neighbors_center = get_center_of_coordinates(neighbors_coordinates)
-            atom_neighbors_info[idx] = (len(neighbors_indices), neighbors_indices, neighbors_center)
-        except Exception as e:
-            print(f"Error: {e}")
-            continue
+        neighbors_indices = get_nearest_neighbors_atom_indices_for_atom(material, coordinate, cutoff=6) or []
+        neighbors_coordinates = [coordinates_array[i] for i in neighbors_indices]
+        neighbors_center = get_center_of_coordinates(neighbors_coordinates)
+        atom_neighbors_info[idx] = (len(neighbors_indices), neighbors_indices, neighbors_center)
         number_of_neighbors.append(len(neighbors_indices))
 
-    threshold = np.max(number_of_neighbors)
+    if coordination_threshold is None:
+        coordination_threshold = np.max(number_of_neighbors)
     undercoordinated_atom_indices = [
-        idx for idx, num_neighbors in zip(indices_to_check, number_of_neighbors) if num_neighbors < threshold
+        idx
+        for idx, num_neighbors in zip(indices_to_check, number_of_neighbors)
+        if num_neighbors < coordination_threshold
     ]
     return undercoordinated_atom_indices, atom_neighbors_info
