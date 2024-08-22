@@ -9,7 +9,7 @@ from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,
-    get_undercoordinated_atom_indices,
+    get_undercoordinated_atoms,
 )
 from .convert import from_ase, to_ase
 from .third_party import ase_add_vacuum
@@ -479,7 +479,9 @@ def get_passivant_coordinate_crystal(
     return passivant_coordinate_crystal
 
 
-def passivate_surface(slab: Material, passivant: str, bond_length: float = 2.0):
+def passivate_material(
+    slab: Material, passivant: str, bond_length: float = 2.0, coordination_threshold: Optional[int] = None
+):
     nudge_value = 0.01
     supercell_scaling_factor = [3, 3, 3]
     min_coordinate = [1 / 3, 1 / 3, 1 / 3]
@@ -495,8 +497,8 @@ def passivate_surface(slab: Material, passivant: str, bond_length: float = 2.0):
         for id, coordinate in zip(slab_supercell.basis.coordinates.ids, slab_supercell.basis.coordinates.values)
         if is_coordinate_in_box(coordinate, adjusted_min_coordinate, adjusted_max_coordinate)
     ]
-    undercoordinated_atom_indices, atom_neighbors_info = get_undercoordinated_atom_indices(
-        slab_supercell, central_cell_ids
+    undercoordinated_atom_indices, atom_neighbors_info = get_undercoordinated_atoms(
+        slab_supercell, central_cell_ids, coordination_threshold
     )
     for index in undercoordinated_atom_indices:
         atom_coordinate_crystal = np.array(slab_supercell.basis.coordinates.values[index])
@@ -517,3 +519,62 @@ def passivate_surface(slab: Material, passivant: str, bond_length: float = 2.0):
 
     slab.basis = new_basis
     return slab
+
+
+# TODO: Get this from peroidic table
+BOND_LENGTHS_MAP = {
+    ("C", "H"): 1.09,
+    ("Ni", "H"): 1.09,
+    ("Si", "H"): 1.48,
+}
+
+
+def passivate_surface(material: Material, passivant: str = "H", default_bond_length: float = 1.0) -> Material:
+    """
+    Passivates the top and bottom surfaces of a material by adding atoms along the Z-axis,
+    with bond lengths determined by the element and passivant.
+
+    Args:
+        material (Material): The material to passivate.
+        passivant (str): The chemical symbol of the passivating atom (e.g., 'H').
+        default_bond_length (float): The default bond length to use if the pair is not found in BOND_LENGTHS_MAP.
+
+    Returns:
+        Material: The passivated material.
+    """
+
+    material = translate_to_z_level(material, "center")
+    coordinates = material.basis.coordinates.values
+    top_z = get_atomic_coordinates_extremum(material, "max", "z")
+    bottom_z = get_atomic_coordinates_extremum(material, "min", "z")
+
+    tolerance = 0.01
+
+    top_surface_atoms = filter_by_box(material, [0, 0, top_z - tolerance], [1, 1, top_z + tolerance])
+    top_surface_indices = top_surface_atoms.basis.coordinates.ids
+
+    bottom_surface_atoms = filter_by_box(material, [0, 0, bottom_z - tolerance], [1, 1, bottom_z + tolerance])
+    bottom_surface_indices = bottom_surface_atoms.basis.coordinates.ids
+
+    new_basis = material.basis.copy()
+
+    for idx in top_surface_indices:
+        atom_coordinate = coordinates[idx]
+        element = material.basis.elements.values[idx]
+        bond_length = BOND_LENGTHS_MAP.get((element, passivant), default_bond_length)
+
+        bond_length_crystal = material.basis.cell.convert_point_to_crystal([0, 0, bond_length])
+        passivant_coordinate = atom_coordinate + bond_length_crystal
+        new_basis.add_atom(passivant, passivant_coordinate)
+
+    for idx in bottom_surface_indices:
+        atom_coordinate = coordinates[idx]
+        element = material.basis.elements.values[idx]
+        bond_length = BOND_LENGTHS_MAP.get((element, passivant), default_bond_length)
+
+        bond_length_crystal = material.basis.cell.convert_point_to_crystal([0, 0, bond_length])
+        passivant_coordinate = atom_coordinate - bond_length_crystal
+        new_basis.add_atom(passivant, passivant_coordinate)
+
+    material.basis = new_basis
+    return material
