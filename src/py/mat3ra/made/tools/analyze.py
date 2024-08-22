@@ -375,33 +375,25 @@ def get_undercoordinated_atom_indices(
     if indices_to_check is None:
         indices_to_check = material.basis.coordinates.ids
 
-    coordinates = np.array(material.basis.coordinates.values)
-    neighbors_indices_array = []
-    neighbors_center_coordinates_array = []
-    neighbors_numbers = []
-
+    coordinates_array = material.basis.coordinates.values
+    number_of_neighbors = []
     atom_neighbors_info = {}
-    print("Indices to check", indices_to_check, len(indices_to_check))
     for idx in indices_to_check:
-        coordinate = coordinates[idx]
+        coordinate = coordinates_array[idx]
         try:
             neighbors_indices = (
                 get_nearest_neighbors_atom_indices_for_atom(material, coordinate.tolist(), cutoff=9) or []
             )
-            neighbors_coordinates = np.array([coordinates[i] for i in neighbors_indices])
+            neighbors_coordinates = [coordinates_array[i] for i in neighbors_indices]
             neighbors_center = get_center_of_coordinates(neighbors_coordinates)
-            neighbors_indices_array.append({idx: neighbors_indices})
-            neighbors_center_coordinates_array.append({idx: neighbors_center})
             atom_neighbors_info[idx] = (len(neighbors_indices), neighbors_indices, neighbors_center)
         except Exception as e:
             print(f"Error: {e}")
-            neighbors_indices_array.append({idx: []})
             continue
-        neighbors_numbers.append(len(neighbors_indices))
+        number_of_neighbors.append(len(neighbors_indices))
 
-    neighbors_numbers = np.array(neighbors_numbers)
-    threshold = np.max(neighbors_numbers)
+    threshold = np.max(number_of_neighbors)
     undercoordinated_atom_indices = [
-        idx for idx, num_neighbors in zip(indices_to_check, neighbors_numbers) if num_neighbors < threshold
+        idx for idx, num_neighbors in zip(indices_to_check, number_of_neighbors) if num_neighbors < threshold
     ]
     return undercoordinated_atom_indices, atom_neighbors_info
