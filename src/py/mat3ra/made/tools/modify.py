@@ -470,28 +470,29 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
 
 def passivate_surface(slab: Material, passivant: str, bond_length: float = 1.0):
     supercell_scaling_factor = [3, 3, 3]
-    centered_slab = translate_to_z_level(slab, "center")
-    centered_slab_supercell = create_supercell(centered_slab, scaling_factor=supercell_scaling_factor)
+    min_coordinate = [1 / 3, 1 / 3, 1 / 3]
+    max_coordinate = [2 / 3, 2 / 3, 2 / 3]
+    slab = translate_to_z_level(slab, "center")
+    slab_supercell = create_supercell(slab, scaling_factor=supercell_scaling_factor)
     undercoordinated_atom_indices, neighbors_indices = get_undercoordinated_atom_indices(
-        centered_slab_supercell, centered_slab_supercell.basis.coordinates.ids
+        slab_supercell, slab_supercell.basis.coordinates.ids
     )
-    new_basis = centered_slab_supercell.basis.copy()
+    new_basis = slab_supercell.basis.copy()
     for index in undercoordinated_atom_indices:
-        atom_coordinate_crystal = centered_slab_supercell.basis.coordinates.values[index]
-        neighbors_coordinates_crystal = [
-            centered_slab_supercell.basis.coordinates.values[j] for j in neighbors_indices[index]
-        ]
+        atom_coordinate_crystal = slab_supercell.basis.coordinates.values[index]
+        neighbors_coordinates_crystal = [slab_supercell.basis.coordinates.values[j] for j in neighbors_indices[index]]
         neighbors_average_coordinate_crystal = get_center_of_coordinates(neighbors_coordinates_crystal)
 
-        bond_normal_crystal = np.array(centered_slab_supercell.basis.coordinates.values[index]) - np.array(
+        local_normal_crystal = np.array(slab_supercell.basis.coordinates.values[index]) - np.array(
             neighbors_average_coordinate_crystal
         )
-        bond_normal_cartesian = centered_slab_supercell.basis.cell.convert_point_to_cartesian(bond_normal_crystal)
-        bond_vector_cartesian = bond_normal_cartesian * bond_length
-        bond_vector_crystal = centered_slab_supercell.basis.cell.convert_point_to_crystal(bond_vector_cartesian)
-        passivant_atom_coordinate = atom_coordinate_crystal + bond_vector_crystal
-        new_basis.add_atom(passivant, passivant_atom_coordinate)
+        local_normal_cartesian = slab_supercell.basis.cell.convert_point_to_cartesian(local_normal_crystal)
+        local_normal_cartesian /= np.linalg.norm(local_normal_cartesian)
+        bond_vector_cartesian = local_normal_cartesian * bond_length
+        bond_vector_crystal = slab_supercell.basis.cell.convert_point_to_crystal(bond_vector_cartesian)
+        passivant_atom_coordinate_crystal = atom_coordinate_crystal + bond_vector_crystal
+        new_basis.add_atom(passivant, passivant_atom_coordinate_crystal)
 
-    centered_slab_supercell.basis = new_basis
-    centered_slab_supercell = filter_by_box(centered_slab_supercell, [1 / 3, 1 / 3, 1 / 3], [2 / 3, 2 / 3, 2 / 3])
-    return centered_slab_supercell
+    slab_supercell.basis = new_basis
+    slab_supercell = filter_by_box(slab_supercell, min_coordinate, max_coordinate)
+    return slab_supercell
