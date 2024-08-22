@@ -3,7 +3,7 @@ from typing import Callable, List, Literal, Optional, Union
 import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.utils import get_center_of_coordinates
+from mat3ra.made.tools.utils import transform_coordinate_to_supercell
 
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
@@ -468,31 +468,46 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     return Material(from_ase(atoms))
 
 
-def passivate_surface(slab: Material, passivant: str, bond_length: float = 1.0):
+def get_passivant_coordinate_crystal(
+    material: Material, atom_coordinate: np.ndarray, bond_direction: np.ndarray, bond_length: float = 2.0
+):
+    bond_normal_cartesian = np.array(material.basis.cell.convert_point_to_cartesian(bond_direction.tolist()))
+    bond_normal_cartesian /= np.linalg.norm(bond_normal_cartesian)
+    bond_vector_cartesian = bond_normal_cartesian * bond_length
+    bond_vector_crystal = np.array(material.basis.cell.convert_point_to_crystal(bond_vector_cartesian.tolist()))
+    passivant_coordinate_crystal = atom_coordinate + bond_vector_crystal
+    return passivant_coordinate_crystal
+
+
+def passivate_surface(slab: Material, passivant: str, bond_length: float = 2.0):
     supercell_scaling_factor = [3, 3, 3]
     min_coordinate = [1 / 3, 1 / 3, 1 / 3]
     max_coordinate = [2 / 3, 2 / 3, 2 / 3]
     slab = translate_to_z_level(slab, "center")
+    new_basis = slab.basis.copy()
     slab_supercell = create_supercell(slab, scaling_factor=supercell_scaling_factor)
-    undercoordinated_atom_indices, neighbors_indices = get_undercoordinated_atom_indices(
-        slab_supercell, slab_supercell.basis.coordinates.ids
-    )
-    new_basis = slab_supercell.basis.copy()
-    for index in undercoordinated_atom_indices:
-        atom_coordinate_crystal = slab_supercell.basis.coordinates.values[index]
-        neighbors_coordinates_crystal = [slab_supercell.basis.coordinates.values[j] for j in neighbors_indices[index]]
-        neighbors_average_coordinate_crystal = get_center_of_coordinates(neighbors_coordinates_crystal)
 
-        local_normal_crystal = np.array(slab_supercell.basis.coordinates.values[index]) - np.array(
+    central_cell_ids = [
+        id
+        for id, coordinate in zip(slab_supercell.basis.coordinates.ids, slab_supercell.basis.coordinates.values)
+        if is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
+    ]
+    undercoordinated_atom_indices, atom_neighbors_info = get_undercoordinated_atom_indices(
+        slab_supercell, central_cell_ids
+    )
+    for index in undercoordinated_atom_indices:
+        atom_coordinate_crystal = np.array(slab_supercell.basis.coordinates.values[index])
+        neighbors_average_coordinate_crystal = atom_neighbors_info[index][2]
+        bond_normal_crystal = np.array(slab_supercell.basis.coordinates.values[index]) - np.array(
             neighbors_average_coordinate_crystal
         )
-        local_normal_cartesian = slab_supercell.basis.cell.convert_point_to_cartesian(local_normal_crystal)
-        local_normal_cartesian /= np.linalg.norm(local_normal_cartesian)
-        bond_vector_cartesian = local_normal_cartesian * bond_length
-        bond_vector_crystal = slab_supercell.basis.cell.convert_point_to_crystal(bond_vector_cartesian)
-        passivant_atom_coordinate_crystal = atom_coordinate_crystal + bond_vector_crystal
-        new_basis.add_atom(passivant, passivant_atom_coordinate_crystal)
+        passivant_coordinate_crystal = get_passivant_coordinate_crystal(
+            slab_supercell, atom_coordinate_crystal, bond_normal_crystal, bond_length
+        ).tolist()
+        passivant_coordinate_crystal_original_cell = transform_coordinate_to_supercell(
+            passivant_coordinate_crystal, scaling_factor=supercell_scaling_factor, reverse=True
+        )
+        new_basis.add_atom(passivant, passivant_coordinate_crystal_original_cell)
 
-    slab_supercell.basis = new_basis
-    slab_supercell = filter_by_box(slab_supercell, min_coordinate, max_coordinate)
-    return slab_supercell
+    slab.basis = new_basis
+    return slab

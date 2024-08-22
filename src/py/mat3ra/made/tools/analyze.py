@@ -1,6 +1,7 @@
 from typing import Callable, List, Literal, Optional, Tuple
 
 import numpy as np
+from mat3ra.made.utils import get_center_of_coordinates
 
 from ..material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
@@ -370,32 +371,37 @@ def get_atomic_coordinates_extremum(
 
 def get_undercoordinated_atom_indices(
     material: Material, indices_to_check: Optional[List[int]] = None
-) -> Tuple[List[int], List[List[int]]]:
+) -> Tuple[List[int], dict]:
     if indices_to_check is None:
         indices_to_check = material.basis.coordinates.ids
 
     coordinates = np.array(material.basis.coordinates.values)
     neighbors_indices_array = []
+    neighbors_center_coordinates_array = []
     neighbors_numbers = []
 
+    atom_neighbors_info = {}
+    print("Indices to check", indices_to_check, len(indices_to_check))
     for idx in indices_to_check:
         coordinate = coordinates[idx]
         try:
             neighbors_indices = (
-                get_nearest_neighbors_atom_indices_for_atom(material, coordinate.tolist(), cutoff=5) or []
+                get_nearest_neighbors_atom_indices_for_atom(material, coordinate.tolist(), cutoff=9) or []
             )
-            neighbors_indices_array.append(neighbors_indices)
+            neighbors_coordinates = np.array([coordinates[i] for i in neighbors_indices])
+            neighbors_center = get_center_of_coordinates(neighbors_coordinates)
+            neighbors_indices_array.append({idx: neighbors_indices})
+            neighbors_center_coordinates_array.append({idx: neighbors_center})
+            atom_neighbors_info[idx] = (len(neighbors_indices), neighbors_indices, neighbors_center)
         except Exception as e:
             print(f"Error: {e}")
-            neighbors_indices_array.append([])
+            neighbors_indices_array.append({idx: []})
             continue
         neighbors_numbers.append(len(neighbors_indices))
 
-    neighbors_numbers = np.array(neighbors_numbers)  # type: ignore
+    neighbors_numbers = np.array(neighbors_numbers)
     threshold = np.max(neighbors_numbers)
-
     undercoordinated_atom_indices = [
         idx for idx, num_neighbors in zip(indices_to_check, neighbors_numbers) if num_neighbors < threshold
     ]
-
-    return undercoordinated_atom_indices, neighbors_indices_array
+    return undercoordinated_atom_indices, atom_neighbors_info
