@@ -226,6 +226,54 @@ SI_SLAB: Dict[str, Any] = {
     "isUpdated": True,
 }
 
+
+SI_SLAB_PASSIVATED = {
+    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+            {"id": 4, "value": "H"},
+            {"id": 5, "value": "H"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.5, 0.312499993]},
+            {"id": 1, "value": [0.5, 0.0, 0.437499993]},
+            {"id": 2, "value": [0.0, 0.0, 0.562499993]},
+            {"id": 3, "value": [0.0, 0.5, 0.687499993]},
+            {"id": 4, "value": [0.0, 0.5, 0.822813932]},
+            {"id": 5, "value": [0.5, 0.5, 0.177186054]},
+        ],
+        "units": "crystal",
+        "cell": [[3.867, 0.0, 0.0], [-0.0, 3.867, 0.0], [0.0, 0.0, 10.937528]],
+        "labels": [],
+    },
+    "lattice": {
+        "a": 3.867,
+        "b": 3.867,
+        "c": 10.937527692,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+        "vectors": {
+            "a": [3.867, 0.0, 0.0],
+            "b": [-0.0, 3.867, 0.0],
+            "c": [0.0, 0.0, 10.937527692],
+            "alat": 1,
+            "units": "angstrom",
+        },
+    },
+    "isNonPeriodic": False,
+    "_id": "",
+    "metadata": SI_SLAB["metadata"],
+    "isUpdated": True,
+}
+
+
 SI_SLAB_VACUUM = copy.deepcopy(SI_SLAB)
 SI_SLAB_VACUUM["basis"]["coordinates"] = [
     {"id": 0, "value": [0.5, 0.5, 0.386029718]},
