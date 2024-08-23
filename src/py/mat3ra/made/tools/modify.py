@@ -550,7 +550,7 @@ def add_passivant_atoms_to_material(
     Args:
         material (Material): The material object to add passivant atoms to.
         axis (AXIS_TYPES): The axis along which the surface or edge lies ("x", "y", or "z").
-        surface (SURFACE_TYPES): The surface to add passivant atoms to ("top", "bottom", or "both"). For edges, assumes both.
+        surface (SURFACE_TYPES): The surface to add passivant atoms to ("top", "bottom", or "both").
         tolerance (float): The tolerance for selecting surface atoms.
         passivant (str): The chemical symbol of the passivating atom (e.g., 'H').
         default_bond_length (float): The default bond length to use if the pair is not found in BOND_LENGTHS_MAP.
@@ -646,7 +646,7 @@ def passivate_edges(
     material: Material,
     passivant: str = "H",
     default_bond_length: float = 1.0,
-    axis: Literal["x", "y"] = "x",
+    axis: Literal["x", "y"] = "y",
 ) -> Material:
     """
     Passivates the edges of a 2D material by adding atoms along the X or Y axis,
