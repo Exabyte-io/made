@@ -340,13 +340,14 @@ def get_atomic_coordinates_extremum(
     return getattr(np, extremum)(values)
 
 
-def get_surface_atoms_indices(material: Material, distance_threshold: float = 0.2) -> List[int]:
+def get_surface_atoms_indices(material: Material, distance_threshold: float = 0.2, z_factor: int = 10) -> List[int]:
     """
     Identify exposed atoms on the top surface of the material.
 
     Args:
         material (Material): Material object to get surface atoms from.
         distance_threshold (float): Distance threshold to determine if an atom is considered "covered".
+        z_factor (int): Factor to multiply distance_threshold when looking deeper into the material.
 
     Returns:
         List[int]: List of indices of exposed top surface atoms.
@@ -358,7 +359,7 @@ def get_surface_atoms_indices(material: Material, distance_threshold: float = 0.
 
     exposed_atoms_indices = []
     for idx, (x, y, z) in enumerate(coordinates):
-        if z >= z_max - distance_threshold:
+        if z >= z_max - z_factor * distance_threshold:
             neighbors_above = kd_tree.query_ball_point([x, y, z + distance_threshold], r=distance_threshold)
 
             if not any(coordinates[n][2] > z for n in neighbors_above):
