@@ -1,7 +1,6 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase
-
 from mat3ra.made.tools.modify import (
     add_vacuum,
     filter_by_circle_projection,
@@ -10,14 +9,14 @@ from mat3ra.made.tools.modify import (
     filter_by_rectangle_projection,
     filter_by_sphere,
     filter_by_triangle_projection,
+    passivate_surface,
     remove_vacuum,
     rotate_material,
     translate_to_z_level,
-    passivate_surface,
 )
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM, SI_SLAB_PASSIVATED
+from .fixtures import SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_PASSIVATED, SI_SLAB_VACUUM
 
 COMMON_PART = {
     "units": "crystal",

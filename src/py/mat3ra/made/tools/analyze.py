@@ -350,7 +350,7 @@ def get_undercoordinated_atoms(
     atom_neighbors_info = {}
     for idx in indices_to_check:
         coordinate = coordinates_array[idx]
-        neighbors_indices = get_nearest_neighbors_atom_indices_for_atom(material, coordinate, cutoff=6) or []
+        neighbors_indices = get_nearest_neighbors_atom_indices(material=material, coordinate=coordinate, cutoff=6) or []
         neighbors_coordinates = [coordinates_array[i] for i in neighbors_indices]
         neighbors_center = get_center_of_coordinates(neighbors_coordinates)
         atom_neighbors_info[idx] = (len(neighbors_indices), neighbors_indices, neighbors_center)
