@@ -267,7 +267,7 @@ def get_nearest_neighbors_atom_indices(
     material: Material,
     coordinate: Optional[List[float]] = None,
     tolerance: float = 0.1,
-    cutoff: float = 15.0,
+    cutoff: float = 13.0,
 ) -> Optional[List[int]]:
     """
     Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.

@@ -536,6 +536,82 @@ class SURFACE_TYPES(str, Enum):
     BOTH = "both"
 
 
+def add_passivant_atoms_to_material(
+    material: Material,
+    axis: Literal["x", "y", "z"],
+    surface: Optional[SURFACE_TYPES] = SURFACE_TYPES.BOTH,
+    tolerance: float = 0.01,
+    passivant: Optional[str] = "H",
+    default_bond_length: float = 1.0,
+) -> Material:
+    """
+    Add passivant atoms to the specified surface or edge of the material.
+
+    Args:
+        material (Material): The material object to add passivant atoms to.
+        axis (AXIS_TYPES): The axis along which the surface or edge lies ("x", "y", or "z").
+        surface (SURFACE_TYPES): The surface to add passivant atoms to ("top", "bottom", or "both"). For edges, assumes both.
+        tolerance (float): The tolerance for selecting surface atoms.
+        passivant (str): The chemical symbol of the passivating atom (e.g., 'H').
+        default_bond_length (float): The default bond length to use if the pair is not found in BOND_LENGTHS_MAP.
+
+    Returns:
+        Material: The material object with passivation atoms added.
+    """
+    axis_idx = {"x": 0, "y": 1, "z": 2}[axis]
+    basis = material.basis.copy()
+    if axis == "z":
+        if surface in [SURFACE_TYPES.TOP, SURFACE_TYPES.BOTH]:
+            z_extremum = get_atomic_coordinates_extremum(material, "max", axis)
+            add_passivant_atoms_to_basis(
+                material, basis, axis_idx, z_extremum, tolerance, passivant, default_bond_length, positive=True
+            )
+        if surface in [SURFACE_TYPES.BOTTOM, SURFACE_TYPES.BOTH]:
+            z_extremum = get_atomic_coordinates_extremum(material, "min", axis)
+            add_passivant_atoms_to_basis(
+                material, basis, axis_idx, z_extremum, tolerance, passivant, default_bond_length, positive=False
+            )
+    else:
+        x_or_y_extremum_max = get_atomic_coordinates_extremum(material, "max", axis)
+        add_passivant_atoms_to_basis(
+            material, basis, axis_idx, x_or_y_extremum_max, tolerance, passivant, default_bond_length, positive=True
+        )
+
+        x_or_y_extremum_min = get_atomic_coordinates_extremum(material, "min", axis)
+        add_passivant_atoms_to_basis(
+            material, basis, axis_idx, x_or_y_extremum_min, tolerance, passivant, default_bond_length, positive=False
+        )
+    material.basis = basis
+    return material
+
+
+def add_passivant_atoms_to_basis(
+    material, basis, axis_idx, extremum, tolerance, passivant, default_bond_length, positive=True
+):
+    """
+    Helper function to add passivant atoms to the specified extremum along a given axis.
+    """
+    min_box = [0, 0, 0]
+    max_box = [1, 1, 1]
+    min_box[axis_idx] = extremum - tolerance
+    max_box[axis_idx] = extremum + tolerance
+
+    surface_atoms = filter_by_box(material, min_box, max_box)
+    surface_indices = surface_atoms.basis.coordinates.ids
+
+    for idx in surface_indices:
+        atom_coordinate = material.basis.coordinates.values[idx]
+        element = material.basis.elements.values[idx]
+        bond_length = BOND_LENGTHS_MAP.get((element, passivant), default_bond_length)
+
+        bond_length_vector = [0, 0, 0]
+        bond_length_vector[axis_idx] = bond_length if positive else -bond_length
+        bond_length_crystal = material.basis.cell.convert_point_to_crystal(bond_length_vector)
+
+        passivant_coordinate = atom_coordinate + bond_length_crystal
+        basis.add_atom(passivant, passivant_coordinate)
+
+
 def passivate_surface(
     material: Material,
     passivant: str = "H",
@@ -543,7 +619,7 @@ def passivate_surface(
     surface: SURFACE_TYPES = SURFACE_TYPES.BOTH,
 ) -> Material:
     """
-    Passivates the top and bottom surfaces of a material by adding atoms along the Z-axis,
+    Passivates the top and/or bottom surfaces of a material by adding atoms along the Z-axis,
     with bond lengths determined by the element and passivant.
 
     Args:
@@ -556,43 +632,37 @@ def passivate_surface(
         Material: The passivated material.
     """
     material = translate_to_z_level(material, "center")
-    tolerance = 0.01
-    new_basis = material.basis.copy()
 
-    if surface in [SURFACE_TYPES.TOP, SURFACE_TYPES.BOTH]:
-        add_passivant_atoms_to_basis(material, SURFACE_TYPES.TOP, tolerance, passivant, default_bond_length, new_basis)
-    if surface in [SURFACE_TYPES.BOTTOM, SURFACE_TYPES.BOTH]:
-        add_passivant_atoms_to_basis(
-            material, SURFACE_TYPES.BOTTOM, tolerance, passivant, default_bond_length, new_basis
-        )
-
-    material.basis = new_basis
-    return material
+    return add_passivant_atoms_to_material(
+        material=material,
+        axis="z",
+        surface=surface,
+        passivant=passivant,
+        default_bond_length=default_bond_length,
+    )
 
 
-def add_passivant_atoms_to_basis(
-    material: Material, z_level: SURFACE_TYPES, tolerance: float, passivant: str, default_bond_length: float, basis
-) -> None:
+def passivate_edges(
+    material: Material,
+    passivant: str = "H",
+    default_bond_length: float = 1.0,
+    axis: Literal["x", "y"] = "x",
+) -> Material:
     """
-    Add passivant atoms to the specified z-level (top or bottom) of the material.
+    Passivates the edges of a 2D material by adding atoms along the X or Y axis,
+    with bond lengths determined by the element and passivant.
 
     Args:
-        material (Material): The material object to add passivant atoms to.
-        z_level (str): The z-level to add passivant atoms to ("top" or "bottom").
-        tolerance (float): The tolerance for selecting surface atoms.
+        material (Material): The material to passivate.
         passivant (str): The chemical symbol of the passivating atom (e.g., 'H').
         default_bond_length (float): The default bond length to use if the pair is not found in BOND_LENGTHS_MAP.
-        basis: The basis of the new material to which passivant atoms will be added.
+        axis (AXIS_TYPES): The axis along which the edges lie ("x" or "y").
+
+    Returns:
+        Material: The passivated material.
     """
-    z_extremum = get_atomic_coordinates_extremum(material, "max" if z_level == "top" else "min", "z")
-    surface_atoms = filter_by_box(material, [0, 0, z_extremum - tolerance], [1, 1, z_extremum + tolerance])
-    surface_indices = surface_atoms.basis.coordinates.ids
-    for idx in surface_indices:
-        atom_coordinate = material.basis.coordinates.values[idx]
-        element = material.basis.elements.values[idx]
-        bond_length = BOND_LENGTHS_MAP.get((element, passivant), default_bond_length)
-        bond_length_crystal = material.basis.cell.convert_point_to_crystal([0, 0, bond_length])
-        passivant_coordinate = (
-            atom_coordinate + bond_length_crystal if z_level == "top" else atom_coordinate - bond_length_crystal
-        )
-        basis.add_atom(passivant, passivant_coordinate)
+    material = translate_to_z_level(material, "center")
+
+    return add_passivant_atoms_to_material(
+        material=material, axis=axis, passivant=passivant, default_bond_length=default_bond_length
+    )
