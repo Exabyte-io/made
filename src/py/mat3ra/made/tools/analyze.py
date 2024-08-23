@@ -263,9 +263,10 @@ def get_atom_indices_with_condition_on_coordinates(
     return selected_indices
 
 
-def get_nearest_neighbors_atom_indices_for_coordinate(
+def get_nearest_neighbors_atom_indices(
     material: Material,
     coordinate: Optional[List[float]] = None,
+    tolerance: float = 0.1,
     cutoff: float = 15.0,
 ) -> Optional[List[int]]:
     """
@@ -283,57 +284,26 @@ def get_nearest_neighbors_atom_indices_for_coordinate(
         coordinate = [0, 0, 0]
     structure = to_pymatgen(material)
     voronoi_nn = PymatgenVoronoiNN(
-        tol=0.5,
+        tol=tolerance,
         cutoff=cutoff,
-        allow_pathological=False,
         weight="solid_angle",
         extra_nn_info=False,
-        compute_adj_neighbors=False,
-    )
-
-    structure.append("X", coordinate, validate_proximity=False)
-    site_index = len(structure.sites) - 1
-    neighbors = voronoi_nn.get_nn_info(structure, site_index)
-    neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
-    structure.remove_sites([-1])
-
-    all_coordinates = material.basis.coordinates
-    all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
-    return all_coordinates.ids
-
-
-def get_nearest_neighbors_atom_indices_for_atom(
-    material: Material,
-    coordinate: Optional[List[float]] = None,
-    cutoff: float = 15.0,
-) -> Optional[List[int]]:
-    """
-    Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
-
-    Args:
-        material (Material): The material object to find neighbors in.
-        coordinate (List[float]): The position to find neighbors for.
-        cutoff (float): The cutoff radius for identifying neighbors.
-
-    Returns:
-        List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
-    """
-    if coordinate is None:
-        coordinate = [0, 0, 0]
-    structure = to_pymatgen(material)
-    voronoi_nn = PymatgenVoronoiNN(
-        tol=0.1,
-        cutoff=cutoff,
-        allow_pathological=False,
-        weight="solid_angle",
-        extra_nn_info=False,
-        compute_adj_neighbors=False,
+        compute_adj_neighbors=True,
     )
     coordinates = material.basis.coordinates
     coordinates.filter_by_values([coordinate])
-    site_index = coordinates.ids[0]
+    site_index = coordinates.ids[0] if coordinates.ids else None
+    remove_dummy_atom = False
+    if site_index is None:
+        structure.append("X", coordinate, validate_proximity=False)
+        site_index = len(structure.sites) - 1
+
+        remove_dummy_atom = True
+
     neighbors = voronoi_nn.get_nn_info(structure, site_index)
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
+    if remove_dummy_atom:
+        structure.remove_sites([-1])
 
     all_coordinates = material.basis.coordinates
     all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)

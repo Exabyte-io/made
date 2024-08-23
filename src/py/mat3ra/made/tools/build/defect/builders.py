@@ -24,7 +24,7 @@ from ...modify import (
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
 from ...analyze import (
-    get_nearest_neighbors_atom_indices_for_coordinate,
+    get_nearest_neighbors_atom_indices,
     get_atomic_coordinates_extremum,
     get_closest_site_id_from_coordinate,
     get_closest_site_id_from_coordinate_and_element,
@@ -245,8 +245,8 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             coordinate=adatom_coordinate, scaling_factor=scaling_factor, translation_vector=translation_vector
         )
 
-        neighboring_atoms_ids_in_supercell = get_nearest_neighbors_atom_indices_for_coordinate(
-            supercell_material, adatom_coordinate_in_supercell
+        neighboring_atoms_ids_in_supercell = get_nearest_neighbors_atom_indices(
+            material=supercell_material, coordinate=adatom_coordinate_in_supercell
         )
         if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
