@@ -470,7 +470,7 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     return Material(from_ase(atoms))
 
 
-def passivate_top(material: Material, passivant: str = "H", bond_length=1.0, depth=10):
+def passivate_top(material: Material, passivant: str = "H", bond_length=1.0, shadowing_radius: float = 2.5, depth=10):
     """
     Passivate the top surface of the material with the specified element.
 
@@ -478,13 +478,14 @@ def passivate_top(material: Material, passivant: str = "H", bond_length=1.0, dep
         material (Material): Material object to passivate.
         passivant (str): Element to use for passivation.
         bond_length (float): Bond length to use for the passivation in Angstroms.
+        shadowing_radius (float): Radius for atoms shadowing underlying from passivation in Angstroms.
         depth (float): Depth from the top surface to passivate in Angstroms.
 
     Returns:
         Material: Material object with the top surface passivated.
     """
     new_material = material.clone()
-    top_atom_indices = get_surface_atoms_indices(material, distance_threshold=2.5, depth=depth)
+    top_atom_indices = get_surface_atoms_indices(material, distance_threshold=shadowing_radius, depth=depth)
     top_atoms = filter_material_by_ids(material, top_atom_indices)
     new_material.to_cartesian()
     top_atoms.to_cartesian()
