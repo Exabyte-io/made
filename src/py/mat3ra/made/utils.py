@@ -94,6 +94,12 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
     def get_element_value_by_index(self, index: int) -> Any:
         return self.values[index] if index < len(self.values) else None
 
+    def get_element_id_by_value(self, value: Any) -> Optional[int]:
+        try:
+            return self.ids[self.values.index(value)]
+        except ValueError:
+            return None
+
     def filter_by_values(self, values: Union[List[Any], Any]):
         def make_hashable(value):
             return tuple(value) if isinstance(value, list) else value
