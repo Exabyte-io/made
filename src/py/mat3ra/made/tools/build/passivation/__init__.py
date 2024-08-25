@@ -51,20 +51,6 @@ def passivate_material(
     return slab
 
 
-# TODO: Get this from peroidic table
-BOND_LENGTHS_MAP = {
-    ("C", "H"): 1.09,
-    ("Ni", "H"): 1.09,
-    ("Si", "H"): 1.48,
-}
-
-
-class SURFACE_TYPES(str, Enum):
-    TOP = "top"
-    BOTTOM = "bottom"
-    BOTH = "both"
-
-
 def add_passivant_atoms_to_material(
     material: Material,
     axis: Literal["x", "y", "z"],
