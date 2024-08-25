@@ -291,8 +291,7 @@ def get_nearest_neighbors_atom_indices(
         compute_adj_neighbors=True,
     )
     coordinates = material.basis.coordinates
-    coordinates.filter_by_values([coordinate])
-    site_index = coordinates.ids[0] if coordinates.ids else None
+    site_index = coordinates.get_element_id_by_value(coordinate)
     remove_dummy_atom = False
     if site_index is None:
         structure.append("X", coordinate, validate_proximity=False)
