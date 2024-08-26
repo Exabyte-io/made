@@ -243,8 +243,8 @@ SI_SLAB_PASSIVATED = {
             {"id": 1, "value": [0.5, 0.0, 0.437499993]},
             {"id": 2, "value": [0.0, 0.0, 0.562499993]},
             {"id": 3, "value": [0.0, 0.5, 0.687499993]},
-            {"id": 4, "value": [0.0, 0.5, 0.822813932]},
-            {"id": 5, "value": [0.5, 0.5, 0.177186054]},
+            {"id": 4, "value": [0.5, 0.5, 0.177186054]},
+            {"id": 5, "value": [0.0, 0.5, 0.822813932]},
         ],
         "units": "crystal",
         "cell": [[3.867, 0.0, 0.0], [-0.0, 3.867, 0.0], [0.0, 0.0, 10.937528]],
@@ -269,7 +269,18 @@ SI_SLAB_PASSIVATED = {
     },
     "isNonPeriodic": False,
     "_id": "",
-    "metadata": SI_SLAB["metadata"],
+    "metadata": {
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "build": {
+            "configuration": {
+                "type": "SurfacePassivationConfiguration",
+                "slab": SI_SLAB,
+                "passivant": "H",
+                "bond_length": 1.48,
+            },
+            "termination": "Si_P4/mmm_1",
+        },
+    },
     "isUpdated": True,
 }
 
