@@ -4,6 +4,7 @@ import numpy as np
 from mat3ra.made.utils import get_center_of_coordinates
 from scipy.spatial import cKDTree
 
+from .build.passivation.enums import SurfaceTypes
 from ..material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
@@ -339,57 +340,42 @@ def get_atomic_coordinates_extremum(
     return getattr(np, extremum)(values)
 
 
-def get_surface_atoms_indices(material: Material, distance_threshold: float = 2.5, depth: float = 5) -> List[int]:
+def get_surface_atoms_indices(
+    material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, distance_threshold: float = 2.5, depth: float = 5
+) -> List[int]:
     """
-    Identify exposed atoms on the top surface of the material.
+    Identify exposed atoms on the top or bottom surface of the material.
 
     Args:
         material (Material): Material object to get surface atoms from.
+        surface (SurfaceTypes): Specify "top" or "bottom" to detect the respective surface atoms.
         distance_threshold (float): Distance threshold to determine if an atom is considered "covered".
-        depth (float): Depth from the top surface to look for exposed atoms.
+        depth (float): Depth from the surface to look for exposed atoms.
 
     Returns:
-        List[int]: List of indices of exposed top surface atoms.
+        List[int]: List of indices of exposed surface atoms.
     """
     material.to_cartesian()
     coordinates = np.array(material.basis.coordinates.values)
     ids = material.basis.coordinates.ids
     kd_tree = cKDTree(coordinates)
-    z_max = np.max(coordinates[:, 2])
+
+    if surface == SurfaceTypes.TOP:
+        z_extremum = np.max(coordinates[:, 2])
+        compare = lambda z: z >= z_extremum - depth
+        neighbor_check = lambda z, neighbors: not any(coordinates[n][2] > z for n in neighbors)
+    elif surface == SurfaceTypes.BOTTOM:
+        z_extremum = np.min(coordinates[:, 2])
+        compare = lambda z: z <= z_extremum + depth
+        neighbor_check = lambda z, neighbors: not any(coordinates[n][2] < z for n in neighbors)
+    else:
+        raise ValueError(f"Surface must be {SurfaceTypes.TOP} or {SurfaceTypes.BOTTOM}")
 
     exposed_atoms_indices = []
     for idx, (x, y, z) in enumerate(coordinates):
-        if z >= z_max - depth:
-            neighbors_above = kd_tree.query_ball_point([x, y, z + distance_threshold], r=distance_threshold)
-
-            if not any(coordinates[n][2] > z for n in neighbors_above):
+        if compare(z):
+            neighbors = kd_tree.query_ball_point([x, y, z + distance_threshold], r=distance_threshold)
+            if neighbor_check(z, neighbors):
                 exposed_atoms_indices.append(ids[idx])
 
     return exposed_atoms_indices
-
-
-def get_undercoordinated_atoms(
-    material: Material, indices_to_check: Optional[List[int]] = None, coordination_threshold: Optional[int] = None
-) -> Tuple[List[int], dict]:
-    if indices_to_check is None:
-        indices_to_check = material.basis.coordinates.ids
-
-    coordinates_array = material.basis.coordinates.values
-    number_of_neighbors = []
-    atom_neighbors_info = {}
-    for idx in indices_to_check:
-        coordinate = coordinates_array[idx]
-        neighbors_indices = get_nearest_neighbors_atom_indices(material=material, coordinate=coordinate, cutoff=6) or []
-        neighbors_coordinates = [coordinates_array[i] for i in neighbors_indices]
-        neighbors_center = get_center_of_coordinates(neighbors_coordinates)
-        atom_neighbors_info[idx] = (len(neighbors_indices), neighbors_indices, neighbors_center)
-        number_of_neighbors.append(len(neighbors_indices))
-
-    if coordination_threshold is None:
-        coordination_threshold = np.max(number_of_neighbors)
-    undercoordinated_atom_indices = [
-        idx
-        for idx, num_neighbors in zip(indices_to_check, number_of_neighbors)
-        if num_neighbors < coordination_threshold
-    ]
-    return undercoordinated_atom_indices, atom_neighbors_info
