@@ -15,6 +15,6 @@ class SurfaceTypes(str, Enum):
 
 
 class EdgeTypes(str, Enum):
-    ALONG_A = "along_a"
-    ALONG_B = "along_b"
+    ALONG_X = "along_x"
+    ALONG_Y = "along_y"
     BOTH = "both"

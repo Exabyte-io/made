@@ -1,6 +1,6 @@
-from typing import Optional
-
 from mat3ra.made.material import Material
+
+from .enums import SurfaceTypes, EdgeTypes
 from ...build import BaseConfiguration
 
 
@@ -10,7 +10,7 @@ class PassivationConfiguration(BaseConfiguration):
 
     Args:
         slab (Material): The Material object.
-        passivant (str): The passivant element.
+        passivant (str): The passivating element.
         bond_length (float): The bond length.
     """
 
