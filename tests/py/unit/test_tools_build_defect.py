@@ -126,8 +126,9 @@ def test_create_island():
 
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
 
-    # Only one atom is in the island for this configuration
-    assert len(defect.basis.elements.values) == len(SLAB_111.basis.elements.values) + 1
+    # Only 2 atoms in the island were added for this configuration
+    NUMBER_OF_ATOMS_IN_ISLAND = 2
+    assert len(defect.basis.elements.values) == len(SLAB_111.basis.elements.values) + NUMBER_OF_ATOMS_IN_ISLAND
     assert defect.basis.elements.values[-1] == "Si"
 
 

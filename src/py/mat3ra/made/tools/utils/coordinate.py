@@ -20,9 +20,10 @@ def is_coordinate_in_cylinder(
     Returns:
         bool: True if the coordinate is inside the cylinder, False otherwise.
     """
-    return (coordinate[0] - center_position[0]) ** 2 + (coordinate[1] - center_position[1]) ** 2 <= radius**2 and (
-        min_z <= coordinate[2] <= max_z
-    )
+    np_coordinate = np.array(coordinate)
+    np_center_position = np.array(center_position)
+    distance_squared = np.sum((np_coordinate[:2] - np_center_position[:2]) ** 2)
+    return distance_squared <= radius**2 and min_z <= np_coordinate[2] <= max_z
 
 
 def is_coordinate_in_sphere(coordinate: List[float], center_position: List[float], radius: float = 0.25) -> bool:
@@ -42,9 +43,7 @@ def is_coordinate_in_sphere(coordinate: List[float], center_position: List[float
     return distance_squared <= radius**2
 
 
-def is_coordinate_in_box(
-    coordinate: List[float], min_coordinate: List[float] = [0, 0, 0], max_coordinate: List[float] = [1, 1, 1]
-) -> bool:
+def is_coordinate_in_box(coordinate: List[float], min_coordinate=None, max_coordinate=None) -> bool:
     """
     Check if a coordinate is inside a box.
     Args:
@@ -54,9 +53,14 @@ def is_coordinate_in_box(
     Returns:
         bool: True if the coordinate is inside the box, False otherwise.
     """
-    x_min, y_min, z_min = min_coordinate
-    x_max, y_max, z_max = max_coordinate
-    return x_min <= coordinate[0] <= x_max and y_min <= coordinate[1] <= y_max and z_min <= coordinate[2] <= z_max
+    if max_coordinate is None:
+        max_coordinate = [1, 1, 1]
+    if min_coordinate is None:
+        min_coordinate = [0, 0, 0]
+    np_coordinate = np.array(coordinate)
+    np_min_coordinate = np.array(min_coordinate)
+    np_max_coordinate = np.array(max_coordinate)
+    return bool(np.all(np_min_coordinate <= np_coordinate) and np.all(np_coordinate <= np_max_coordinate))
 
 
 def is_coordinate_within_layer(
