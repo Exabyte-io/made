@@ -72,45 +72,44 @@ class SurfacePassivationBuilder(PassivationBuilder):
 
     def create_passivated_material(self, configuration: SurfacePassivationConfiguration) -> Material:
         material = super().create_passivated_material(configuration)
-        passivant_coordinates_values_top = np.array([])
-        passivant_coordinates_values_bottom = np.array([])
+        passivant_coordinates_values = []
 
-        if configuration.surface == SurfaceTypes.TOP or configuration.surface == SurfaceTypes.BOTH:
-            passivant_coordinates_values_top = self._get_passivant_coordinates(
-                material,
-                SurfaceTypes.TOP,
-                configuration.bond_length,
-                self.build_parameters.shadowing_radius,
-                self.build_parameters.depth,
+        if configuration.surface in (SurfaceTypes.BOTTOM, SurfaceTypes.BOTH):
+            passivant_coordinates_values.extend(
+                self._get_passivant_coordinates(material, SurfaceTypes.BOTTOM, configuration)
+            )
+        if configuration.surface in (SurfaceTypes.TOP, SurfaceTypes.BOTH):
+            passivant_coordinates_values.extend(
+                self._get_passivant_coordinates(material, SurfaceTypes.TOP, configuration)
             )
 
-        if configuration.surface == SurfaceTypes.BOTTOM or configuration.surface == SurfaceTypes.BOTH:
-            passivant_coordinates_values_bottom = self._get_passivant_coordinates(
-                material,
-                SurfaceTypes.BOTTOM,
-                configuration.bond_length,
-                self.build_parameters.shadowing_radius,
-                self.build_parameters.depth,
-            )
-
-        passivant_coordinates_values = (
-            passivant_coordinates_values_bottom.tolist() + passivant_coordinates_values_top.tolist()
-        )
         return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
 
-    def _get_passivant_coordinates(self, material, surface, bond_length, shadowing_radius, depth):
+    def _get_passivant_coordinates(
+        self, material: Material, surface: SurfaceTypes, configuration: SurfacePassivationConfiguration
+    ):
+        """
+        Calculate the coordinates for placing passivants based on the specified surface type.
+
+        Args:
+            material (Material): Material to passivate.
+            surface (SurfaceTypes): Surface type (TOP or BOTTOM).
+            configuration (SurfacePassivationConfiguration): Configuration for passivation.
+
+        Returns:
+            list: Coordinates where passivants should be added.
+        """
         surface_atoms_indices = get_surface_atoms_indices(
-            material=material,
-            surface=surface,
-            shadowing_radius=shadowing_radius,
-            depth=depth,
+            material, surface, self.build_parameters.shadowing_radius, self.build_parameters.depth
         )
         surface_atoms_coordinates = [
             material.basis.coordinates.get_element_value_by_index(i) for i in surface_atoms_indices
         ]
-        bond_vector = [0, 0, bond_length] if surface == SurfaceTypes.TOP else [0, 0, -bond_length]
+        bond_vector = (
+            [0, 0, configuration.bond_length] if surface == SurfaceTypes.TOP else [0, 0, -configuration.bond_length]
+        )
         passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
-        return np.array(surface_atoms_coordinates) + np.array(passivant_bond_vector_crystal)
+        return (np.array(surface_atoms_coordinates) + np.array(passivant_bond_vector_crystal)).tolist()
 
 
 class EdgePassivationBuilder(PassivationBuilder):
