@@ -1,11 +1,10 @@
-from typing import Callable, List, Literal, Optional, Tuple
+from typing import Callable, List, Literal, Optional
 
 import numpy as np
-from mat3ra.made.utils import get_center_of_coordinates
 from scipy.spatial import cKDTree
 
-from .build.passivation.enums import SurfaceTypes
 from ..material import Material
+from .build.passivation.enums import SurfaceTypes
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
 
@@ -355,27 +354,23 @@ def get_surface_atoms_indices(
     Returns:
         List[int]: List of indices of exposed surface atoms.
     """
-    material.to_cartesian()
-    coordinates = np.array(material.basis.coordinates.values)
-    ids = material.basis.coordinates.ids
+    new_material = material.clone()
+    new_material.to_cartesian()
+    coordinates = np.array(new_material.basis.coordinates.values)
+    ids = new_material.basis.coordinates.ids
     kd_tree = cKDTree(coordinates)
 
-    if surface == SurfaceTypes.TOP:
-        z_extremum = np.max(coordinates[:, 2])
-        compare = lambda z: z >= z_extremum - depth
-        neighbor_check = lambda z, neighbors: not any(coordinates[n][2] > z for n in neighbors)
-    elif surface == SurfaceTypes.BOTTOM:
-        z_extremum = np.min(coordinates[:, 2])
-        compare = lambda z: z <= z_extremum + depth
-        neighbor_check = lambda z, neighbors: not any(coordinates[n][2] < z for n in neighbors)
-    else:
-        raise ValueError(f"Surface must be {SurfaceTypes.TOP} or {SurfaceTypes.BOTTOM}")
+    z_extremum = np.max(coordinates[:, 2]) if surface == SurfaceTypes.TOP else np.min(coordinates[:, 2])
+    depth_check = lambda z: (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
+    shadow_check = lambda z, neighbors: not any(
+        (coordinates[n][2] > z if surface == SurfaceTypes.TOP else coordinates[n][2] < z) for n in neighbors
+    )
 
     exposed_atoms_indices = []
     for idx, (x, y, z) in enumerate(coordinates):
-        if compare(z):
-            neighbors = kd_tree.query_ball_point([x, y, z + shadowing_radius], r=shadowing_radius)
-            if neighbor_check(z, neighbors):
+        if depth_check(z):
+            neighbors = kd_tree.query_ball_point([x, y, z], r=shadowing_radius)
+            if shadow_check(z, neighbors):
                 exposed_atoms_indices.append(ids[idx])
 
     return exposed_atoms_indices
