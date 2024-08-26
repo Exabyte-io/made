@@ -6,8 +6,6 @@ from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,
-    get_undercoordinated_atoms,
-    get_surface_atoms_indices,
 )
 from .convert import from_ase, to_ase
 from .third_party import ase_add_vacuum
@@ -464,31 +462,3 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     atoms.wrap()
 
     return Material(from_ase(atoms))
-
-
-def passivate_top(material: Material, passivant: str = "H", bond_length=1.0, shadowing_radius: float = 2.5, depth=10):
-    """
-    Passivate the top surface of the material with the specified element.
-
-    Args:
-        material (Material): Material object to passivate.
-        passivant (str): Element to use for passivation.
-        bond_length (float): Bond length to use for the passivation in Angstroms.
-        shadowing_radius (float): Radius for atoms shadowing underlying from passivation in Angstroms.
-        depth (float): Depth from the top surface to passivate in Angstroms.
-
-    Returns:
-        Material: Material object with the top surface passivated.
-    """
-    new_material = material.clone()
-    top_atom_indices = get_surface_atoms_indices(material, shadowing_radius=shadowing_radius, depth=depth)
-    top_atoms = filter_material_by_ids(material, top_atom_indices)
-    new_material.to_cartesian()
-    top_atoms.to_cartesian()
-    top_atoms_coordinates = top_atoms.basis.coordinates.values
-    passivant_coordinates = np.array(top_atoms_coordinates) + [0, 0, bond_length]
-
-    for coordinate in passivant_coordinates:
-        new_material.add_atom(passivant, coordinate)
-    new_material.to_crystal()
-    return new_material
