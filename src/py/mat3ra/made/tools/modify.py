@@ -1,16 +1,11 @@
-from enum import Enum
 from typing import Callable, List, Literal, Optional, Union
 
-import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.utils import transform_coordinate_to_supercell
 
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,
-    get_undercoordinated_atoms,
 )
 from .convert import from_ase, to_ase
 from .third_party import ase_add_vacuum
