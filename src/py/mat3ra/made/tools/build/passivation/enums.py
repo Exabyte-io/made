@@ -8,7 +8,13 @@ BOND_LENGTHS_MAP = {
 }
 
 
-class SURFACE_TYPES(str, Enum):
+class SurfaceTypes(str, Enum):
     TOP = "top"
     BOTTOM = "bottom"
+    BOTH = "both"
+
+
+class EdgeTypes(str, Enum):
+    ALONG_A = "along_a"
+    ALONG_B = "along_b"
     BOTH = "both"
