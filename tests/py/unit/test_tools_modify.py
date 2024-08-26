@@ -15,7 +15,7 @@ from mat3ra.made.tools.modify import (
 )
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_PASSIVATED, SI_SLAB_VACUUM
+from .fixtures import SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
 
 COMMON_PART = {
     "units": "crystal",

@@ -339,6 +339,14 @@ def get_atomic_coordinates_extremum(
     return getattr(np, extremum)(values)
 
 
+def depth_check(z, z_extremum, depth, surface):
+    return (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
+
+
+def shadow_check(z, neighbors, surface, coordinates):
+    return not any((coordinates[n][2] > z if surface == SurfaceTypes.TOP else coordinates[n][2] < z) for n in neighbors)
+
+
 def get_surface_atoms_indices(
     material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, shadowing_radius: float = 2.5, depth: float = 5
 ) -> List[int]:
@@ -361,16 +369,12 @@ def get_surface_atoms_indices(
     kd_tree = cKDTree(coordinates)
 
     z_extremum = np.max(coordinates[:, 2]) if surface == SurfaceTypes.TOP else np.min(coordinates[:, 2])
-    depth_check = lambda z: (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
-    shadow_check = lambda z, neighbors: not any(
-        (coordinates[n][2] > z if surface == SurfaceTypes.TOP else coordinates[n][2] < z) for n in neighbors
-    )
 
     exposed_atoms_indices = []
     for idx, (x, y, z) in enumerate(coordinates):
-        if depth_check(z):
+        if depth_check(z, z_extremum, depth, surface):
             neighbors = kd_tree.query_ball_point([x, y, z], r=shadowing_radius)
-            if shadow_check(z, neighbors):
+            if shadow_check(z, neighbors, surface, coordinates):
                 exposed_atoms_indices.append(ids[idx])
 
     return exposed_atoms_indices
