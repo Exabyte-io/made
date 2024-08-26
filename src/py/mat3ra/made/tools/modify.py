@@ -481,7 +481,7 @@ def passivate_top(material: Material, passivant: str = "H", bond_length=1.0, sha
         Material: Material object with the top surface passivated.
     """
     new_material = material.clone()
-    top_atom_indices = get_surface_atoms_indices(material, distance_threshold=shadowing_radius, depth=depth)
+    top_atom_indices = get_surface_atoms_indices(material, shadowing_radius=shadowing_radius, depth=depth)
     top_atoms = filter_material_by_ids(material, top_atom_indices)
     new_material.to_cartesian()
     top_atoms.to_cartesian()
@@ -492,4 +492,3 @@ def passivate_top(material: Material, passivant: str = "H", bond_length=1.0, sha
         new_material.add_atom(passivant, coordinate)
     new_material.to_crystal()
     return new_material
-

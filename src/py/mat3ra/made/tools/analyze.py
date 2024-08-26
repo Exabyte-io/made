@@ -341,7 +341,7 @@ def get_atomic_coordinates_extremum(
 
 
 def get_surface_atoms_indices(
-    material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, distance_threshold: float = 2.5, depth: float = 5
+    material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, shadowing_radius: float = 2.5, depth: float = 5
 ) -> List[int]:
     """
     Identify exposed atoms on the top or bottom surface of the material.
@@ -349,7 +349,7 @@ def get_surface_atoms_indices(
     Args:
         material (Material): Material object to get surface atoms from.
         surface (SurfaceTypes): Specify "top" or "bottom" to detect the respective surface atoms.
-        distance_threshold (float): Distance threshold to determine if an atom is considered "covered".
+        shadowing_radius (float): Radius for atoms shadowing underlying from detecting as exposed.
         depth (float): Depth from the surface to look for exposed atoms.
 
     Returns:
@@ -374,7 +374,7 @@ def get_surface_atoms_indices(
     exposed_atoms_indices = []
     for idx, (x, y, z) in enumerate(coordinates):
         if compare(z):
-            neighbors = kd_tree.query_ball_point([x, y, z + distance_threshold], r=distance_threshold)
+            neighbors = kd_tree.query_ball_point([x, y, z + shadowing_radius], r=shadowing_radius)
             if neighbor_check(z, neighbors):
                 exposed_atoms_indices.append(ids[idx])
 
