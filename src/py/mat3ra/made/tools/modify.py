@@ -2,6 +2,8 @@ from typing import Callable, List, Literal, Optional, Union
 
 from mat3ra.made.material import Material
 
+from py.mat3ra.made.tools.convert.utils import InterfacePartsEnum
+
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
@@ -462,3 +464,40 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     atoms.wrap()
 
     return Material(from_ase(atoms))
+
+
+def displace_interface(
+    material: Material,
+    displacement: List[float],
+    label: InterfacePartsEnum = InterfacePartsEnum.FILM,
+    use_cartesian_coordinates=False,
+) -> Material:
+    """
+    Displace atoms in an interface along a certain direction.
+
+    Args:
+        material (Material): The material object to displace.
+        displacement (List[float]): The displacement vector in angstroms.
+        label (InterfacePartsEnum): The label of the atoms to displace ("substrate" or "film").
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
+
+    Returns:
+        Material: The displaced material object.
+    """
+    new_material = material.clone()
+    if use_cartesian_coordinates:
+        new_material.to_cartesian()
+    labels_array = new_material.basis.labels.to_array_of_values_with_ids()
+    displaced_label_ids = [_label.id for _label in labels_array if _label.value == int(label)]
+
+    new_basis = new_material.basis.copy()
+    new_coordinates_values = new_basis.coordinates.values
+
+    for atom_id in displaced_label_ids:
+        current_coordinates = new_material.basis.coordinates.get_element_value_by_index(atom_id)
+        new_atom_coordinates = [x + y for x, y in zip(current_coordinates, displacement)]
+        new_coordinates_values[atom_id] = new_atom_coordinates
+
+    new_basis.coordinates.values = new_coordinates_values
+    new_material.basis = new_basis
+    return new_material
