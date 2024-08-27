@@ -273,10 +273,11 @@ SI_SLAB_PASSIVATED = {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
             "configuration": {
-                "type": "SurfacePassivationConfiguration",
+                "type": "PassivationConfiguration",
                 "slab": SI_SLAB,
                 "passivant": "H",
                 "bond_length": 1.48,
+                "surface": "both",
             },
             "termination": "Si_P4/mmm_1",
         },

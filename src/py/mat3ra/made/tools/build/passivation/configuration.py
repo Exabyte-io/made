@@ -17,6 +17,7 @@ class PassivationConfiguration(BaseConfiguration):
     slab: Material
     passivant: str = "H"
     bond_length: float = 1.0
+    surface: SurfaceTypes = SurfaceTypes.BOTH
 
     @property
     def _json(self):
@@ -25,20 +26,5 @@ class PassivationConfiguration(BaseConfiguration):
             "slab": self.slab.to_json(),
             "passivant": self.passivant,
             "bond_length": self.bond_length,
-        }
-
-
-class SurfacePassivationConfiguration(PassivationConfiguration):
-    """
-    Configuration for a passivation.
-    """
-
-    surface: SurfaceTypes = SurfaceTypes.BOTH
-
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "surface": self.surface,
+            "surface": self.surface.value,
         }

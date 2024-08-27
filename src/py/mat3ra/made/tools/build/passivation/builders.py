@@ -10,7 +10,6 @@ from ...modify import translate_to_z_level
 from ...build import BaseBuilder
 from .configuration import (
     PassivationConfiguration,
-    SurfacePassivationConfiguration,
 )
 
 
@@ -74,9 +73,9 @@ class SurfacePassivationBuilder(PassivationBuilder):
     """
 
     build_parameters: SurfacePassivationBuilderParameters = SurfacePassivationBuilderParameters()
-    _ConfigurationType = SurfacePassivationConfiguration
+    _ConfigurationType = PassivationConfiguration
 
-    def create_passivated_material(self, configuration: SurfacePassivationConfiguration) -> Material:
+    def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
         material = super().create_passivated_material(configuration)
         passivant_coordinates_values = []
 
@@ -92,7 +91,7 @@ class SurfacePassivationBuilder(PassivationBuilder):
         return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
 
     def _get_passivant_coordinates(
-        self, material: Material, surface: SurfaceTypes, configuration: SurfacePassivationConfiguration
+        self, material: Material, surface: SurfaceTypes, configuration: PassivationConfiguration
     ):
         """
         Calculate the coordinates for placing passivants based on the specified surface type.
@@ -138,12 +137,12 @@ class UndercoordinationPassivationBuilder(PassivationBuilder):
 
     build_parameters: UndercoordinationPassivationBuilderParameters = UndercoordinationPassivationBuilderParameters()
 
-    def create_passivated_material(self, configuration: SurfacePassivationConfiguration) -> Material:
+    def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
         material = super().create_passivated_material(configuration)
         passivant_coordinates_values = self._get_passivant_coordinates(material, configuration)
         return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
 
-    def _get_passivant_coordinates(self, material: Material, configuration: SurfacePassivationConfiguration):
+    def _get_passivant_coordinates(self, material: Material, configuration: PassivationConfiguration):
         """
         Calculate the coordinates for placing passivants based on the specified edge type.
 
