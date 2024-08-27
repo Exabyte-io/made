@@ -11,7 +11,6 @@ from ...build import BaseBuilder
 from .configuration import (
     PassivationConfiguration,
     SurfacePassivationConfiguration,
-    UndercoordinationPassivationConfiguration,
 )
 
 
@@ -139,12 +138,12 @@ class UndercoordinationPassivationBuilder(PassivationBuilder):
 
     build_parameters: UndercoordinationPassivationBuilderParameters = UndercoordinationPassivationBuilderParameters()
 
-    def create_passivated_material(self, configuration: UndercoordinationPassivationConfiguration) -> Material:
+    def create_passivated_material(self, configuration: SurfacePassivationConfiguration) -> Material:
         material = super().create_passivated_material(configuration)
         passivant_coordinates_values = self._get_passivant_coordinates(material, configuration)
         return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
 
-    def _get_passivant_coordinates(self, material: Material, configuration: UndercoordinationPassivationConfiguration):
+    def _get_passivant_coordinates(self, material: Material, configuration: SurfacePassivationConfiguration):
         """
         Calculate the coordinates for placing passivants based on the specified edge type.
 

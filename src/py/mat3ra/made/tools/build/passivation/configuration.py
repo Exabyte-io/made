@@ -1,6 +1,6 @@
 from mat3ra.made.material import Material
 
-from .enums import SurfaceTypes, EdgeTypes
+from .enums import SurfaceTypes
 from ...build import BaseConfiguration
 
 
@@ -35,10 +35,10 @@ class SurfacePassivationConfiguration(PassivationConfiguration):
 
     surface: SurfaceTypes = SurfaceTypes.BOTH
 
-
-class EdgePassivationConfiguration(PassivationConfiguration):
-    """
-    Configuration for a passivation.
-    """
-
-    edge: EdgeTypes = EdgeTypes.BOTH
+    @property
+    def _json(self):
+        return {
+            **super()._json,
+            "type": self.get_cls_name(),
+            "surface": self.surface,
+        }

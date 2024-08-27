@@ -12,9 +12,3 @@ class SurfaceTypes(str, Enum):
     TOP = "top"
     BOTTOM = "bottom"
     BOTH = "both"
-
-
-class EdgeTypes(str, Enum):
-    ALONG_X = "along_x"
-    ALONG_Y = "along_y"
-    BOTH = "both"
