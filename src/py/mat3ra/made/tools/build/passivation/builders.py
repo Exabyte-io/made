@@ -5,7 +5,7 @@ from mat3ra.made.material import Material
 from pydantic import BaseModel
 
 from .enums import SurfaceTypes
-from ...analyze import get_surface_atom_indices, get_undercoordinated_atom_indices
+from ...analyze import get_surface_atom_indices, get_undercoordinated_atom_indices, get_nearest_neighbors_atom_indices
 from ...modify import translate_to_z_level
 from ...build import BaseBuilder
 from .configuration import (
@@ -149,16 +149,36 @@ class UndercoordinationPassivationBuilder(PassivationBuilder):
 
         Args:
             material (Material): Material to passivate.
-            configuration (EdgePassivationConfiguration): Configuration for passivation.
+            configuration (SurfacePassivationConfiguration): Configuration for passivation.
         """
-        edge_atoms_indices = get_undercoordinated_atom_indices(
+        undercoordinated_atoms_indices = get_undercoordinated_atom_indices(
             material=material,
             surface=SurfaceTypes.TOP,
             coordination_number=self.build_parameters.coordination_threshold,
             cutoff=self.build_parameters.cutoff,
         )
-        edge_atoms_coordinates = [material.basis.coordinates.get_element_value_by_index(i) for i in edge_atoms_indices]
-        bond_vector = [0, 0, configuration.bond_length]
 
-        passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
-        return (np.array(edge_atoms_coordinates) + passivant_bond_vector_crystal).tolist()
+        passivant_coordinates = []
+
+        for idx in undercoordinated_atoms_indices:
+            nearest_neighbors = get_nearest_neighbors_atom_indices(
+                material=material,
+                coordinate=material.basis.coordinates.get_element_value_by_index(idx),
+                cutoff=self.build_parameters.cutoff,
+            )
+
+            if nearest_neighbors is None:
+                continue
+            average_coordinate = np.mean(
+                [material.basis.coordinates.get_element_value_by_index(i) for i in nearest_neighbors], axis=0
+            )
+
+            bond_vector = material.basis.coordinates.get_element_value_by_index(idx) - average_coordinate
+            bond_vector = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
+            passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
+
+            passivant_coordinates.append(
+                material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
+            )
+
+        return passivant_coordinates
