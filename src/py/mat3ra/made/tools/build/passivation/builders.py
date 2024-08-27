@@ -5,7 +5,12 @@ from mat3ra.made.material import Material
 from pydantic import BaseModel
 
 from .enums import SurfaceTypes
-from ...analyze import get_surface_atom_indices, get_undercoordinated_atom_indices, get_nearest_neighbors_atom_indices
+from ...analyze import (
+    get_surface_atom_indices,
+    get_undercoordinated_atom_indices,
+    get_nearest_neighbors_atom_indices,
+    get_coordination_numbers,
+)
 from ...modify import translate_to_z_level
 from ...build import BaseBuilder
 from .configuration import (
@@ -117,14 +122,13 @@ class SurfacePassivationBuilder(PassivationBuilder):
         return (np.array(surface_atoms_coordinates) + np.array(passivant_bond_vector_crystal)).tolist()
 
 
-class UndercoordinationPassivationBuilderParameters(BaseModel):
+class UndercoordinationPassivationBuilderParameters(SurfacePassivationBuilderParameters):
     """
     Parameters for the  UndercoordinationPassivationBuilder.
     Args:
         coordination_threshold (int): The coordination threshold for undercoordination.
     """
 
-    cutoff: float = 3.0
     coordination_threshold: int = 3
 
 
@@ -135,43 +139,51 @@ class UndercoordinationPassivationBuilder(PassivationBuilder):
     Detects atoms with coordination number below a threshold and passivates them.
     """
 
-    build_parameters: UndercoordinationPassivationBuilderParameters = UndercoordinationPassivationBuilderParameters()
+    _BuildParametersType = UndercoordinationPassivationBuilderParameters
+    _DefaultBuildParameters = UndercoordinationPassivationBuilderParameters()
 
     def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
         material = super().create_passivated_material(configuration)
-        passivant_coordinates_values = self._get_passivant_coordinates(material, configuration)
+        surface_atoms_indices = get_surface_atom_indices(
+            material=material,
+            surface=SurfaceTypes.TOP,
+            shadowing_radius=self.build_parameters.shadowing_radius,
+            depth=self.build_parameters.depth,
+        )
+        undercoordinated_atoms_indices = get_undercoordinated_atom_indices(
+            material=material,
+            indices=surface_atoms_indices,
+            cutoff=self.build_parameters.shadowing_radius,
+            coordination_threshold=self.build_parameters.coordination_threshold,
+        )
+        passivant_coordinates_values = self._get_passivant_coordinates(
+            material, configuration, undercoordinated_atoms_indices
+        )
         return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
 
-    def _get_passivant_coordinates(self, material: Material, configuration: PassivationConfiguration):
+    def _get_passivant_coordinates(
+        self, material: Material, configuration: PassivationConfiguration, undercoordinated_atoms_indices: list
+    ):
         """
-        Calculate the coordinates for placing passivants based on the specified edge type.
+        Calculate the coordinates for placing passivating atoms based on the specified edge type.
 
         Args:
             material (Material): Material to passivate.
             configuration (SurfacePassivationConfiguration): Configuration for passivation.
+            undercoordinated_atoms_indices (list): Indices of undercoordinated atoms.
         """
-        undercoordinated_atoms_indices = get_undercoordinated_atom_indices(
-            material=material,
-            surface=SurfaceTypes.TOP,
-            coordination_number=self.build_parameters.coordination_threshold,
-            cutoff=self.build_parameters.cutoff,
-        )
-
         passivant_coordinates = []
-
         for idx in undercoordinated_atoms_indices:
             nearest_neighbors = get_nearest_neighbors_atom_indices(
                 material=material,
                 coordinate=material.basis.coordinates.get_element_value_by_index(idx),
-                cutoff=self.build_parameters.cutoff,
+                cutoff=self.build_parameters.shadowing_radius,
             )
-
             if nearest_neighbors is None:
                 continue
             average_coordinate = np.mean(
                 [material.basis.coordinates.get_element_value_by_index(i) for i in nearest_neighbors], axis=0
             )
-
             bond_vector = material.basis.coordinates.get_element_value_by_index(idx) - average_coordinate
             bond_vector = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
             passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
@@ -181,3 +193,20 @@ class UndercoordinationPassivationBuilder(PassivationBuilder):
             )
 
         return passivant_coordinates
+
+    def get_coordination_numbers(self, material: Material):
+        """
+        Get the coordination numbers for all atoms in the material.
+
+        Args:
+            material (Material): The material object.
+
+        Returns:
+            set: The coordination numbers for all atoms in the material.
+        """
+
+        coordination_numbers = set(
+            get_coordination_numbers(material=material, cutoff=self.build_parameters.shadowing_radius)
+        )
+        print("coordination numbers:", coordination_numbers)
+        return coordination_numbers

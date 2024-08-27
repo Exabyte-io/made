@@ -376,40 +376,63 @@ def get_surface_atom_indices(
     for idx, (x, y, z) in enumerate(coordinates):
         if height_check(z, z_extremum, depth, surface):
             neighbors_indices = kd_tree.query_ball_point([x, y, z], r=shadowing_radius)
-            print("neighbors_indices", type(neighbors_indices), neighbors_indices)
             if shadowing_check(z, neighbors_indices, surface, coordinates):
                 exposed_atoms_indices.append(ids[idx])
 
     return exposed_atoms_indices
 
 
-def get_undercoordinated_atom_indices(
-    material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, coordination_number: int = 3, cutoff: float = 3.0
+def get_coordination_numbers(
+    material: Material,
+    indices: Optional[List[int]] = None,
+    cutoff: float = 3.0,
 ) -> List[int]:
     """
-    Identify undercoordinated atoms on the top or bottom surface of the material.
+    Calculate the coordination numbers of atoms in the material.
 
     Args:
-        material (Material): Material object to get undercoordinated atoms from.
-        surface (SurfaceTypes): Specify "top" or "bottom" to detect the respective surface atoms.
-        coordination_number (int): The coordination number to detect undercoordinated atoms.
+        material (Material): Material object to calculate coordination numbers for.
+        indices (List[int]): List of atom indices to calculate coordination numbers for.
+        cutoff (float): The cutoff radius for identifying neighbors.
 
     Returns:
-        List[int]: List of indices of undercoordinated surface atoms.
+        List[int]: List of coordination numbers for each atom in the material.
     """
     new_material = material.clone()
     new_material.to_cartesian()
+    if indices is not None:
+        new_material.basis.coordinates.filter_by_indices(indices)
     coordinates = np.array(new_material.basis.coordinates.values)
-    ids = new_material.basis.coordinates.ids
     kd_tree = cKDTree(coordinates)
 
-    z_extremum = np.max(coordinates[:, 2]) if surface == SurfaceTypes.TOP else np.min(coordinates[:, 2])
-
-    undercoordinated_atoms_indices = []
+    coordination_numbers = []
     for idx, (x, y, z) in enumerate(coordinates):
-        if z == z_extremum:
-            neighbors = kd_tree.query_ball_point([x, y, z], r=cutoff)
-            if len(neighbors) < coordination_number:
-                undercoordinated_atoms_indices.append(ids[idx])
+        neighbors = kd_tree.query_ball_point([x, y, z], r=cutoff)
+        # Explicitly remove the atom itself from the list of neighbors
+        neighbors = [n for n in neighbors if n != idx]
+        coordination_numbers.append(len(neighbors))
 
+    return coordination_numbers
+
+
+def get_undercoordinated_atom_indices(
+    material: Material,
+    indices: List[int],
+    cutoff: float = 3.0,
+    coordination_threshold: int = 3,
+) -> List[int]:
+    """
+    Identify undercoordinated atoms among the specified indices in the material.
+
+    Args:
+        material (Material): Material object to identify undercoordinated atoms in.
+        indices (List[int]): List of atom indices to check for undercoordination.
+        cutoff (float): The cutoff radius for identifying neighbors.
+        coordination_threshold (int): The coordination number threshold for undercoordination.
+
+    Returns:
+        List[int]: List of indices of undercoordinated atoms.
+    """
+    coordination_numbers = get_coordination_numbers(material, indices, cutoff)
+    undercoordinated_atoms_indices = [i for i, cn in enumerate(coordination_numbers) if cn <= coordination_threshold]
     return undercoordinated_atoms_indices
