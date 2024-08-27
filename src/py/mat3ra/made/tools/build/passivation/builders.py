@@ -5,10 +5,14 @@ from mat3ra.made.material import Material
 from pydantic import BaseModel
 
 from .enums import SurfaceTypes
-from ...analyze import get_surface_atoms_indices
+from ...analyze import get_surface_atom_indices, get_undercoordinated_atom_indices
 from ...modify import translate_to_z_level
 from ...build import BaseBuilder
-from .configuration import PassivationConfiguration, SurfacePassivationConfiguration, EdgePassivationConfiguration
+from .configuration import (
+    PassivationConfiguration,
+    SurfacePassivationConfiguration,
+    UndercoordinationPassivationConfiguration,
+)
 
 
 class PassivationBuilder(BaseBuilder):
@@ -70,6 +74,9 @@ class SurfacePassivationBuilder(PassivationBuilder):
     Detects surface atoms looking along Z axis and passivates either the top or bottom surface or both.
     """
 
+    build_parameters: SurfacePassivationBuilderParameters = SurfacePassivationBuilderParameters()
+    _ConfigurationType = SurfacePassivationConfiguration
+
     def create_passivated_material(self, configuration: SurfacePassivationConfiguration) -> Material:
         material = super().create_passivated_material(configuration)
         passivant_coordinates_values = []
@@ -99,7 +106,7 @@ class SurfacePassivationBuilder(PassivationBuilder):
         Returns:
             list: Coordinates where passivants should be added.
         """
-        surface_atoms_indices = get_surface_atoms_indices(
+        surface_atoms_indices = get_surface_atom_indices(
             material, surface, self.build_parameters.shadowing_radius, self.build_parameters.depth
         )
         surface_atoms_coordinates = [
@@ -112,12 +119,47 @@ class SurfacePassivationBuilder(PassivationBuilder):
         return (np.array(surface_atoms_coordinates) + np.array(passivant_bond_vector_crystal)).tolist()
 
 
-class EdgePassivationBuilder(PassivationBuilder):
+class UndercoordinationPassivationBuilderParameters(BaseModel):
     """
-    Builder for passivating an edge.
-
-    Detects edge atoms looking perpendicular to the Z axis and passivates them.
+    Parameters for the  UndercoordinationPassivationBuilder.
+    Args:
+        coordination_threshold (int): The coordination threshold for undercoordination.
     """
 
-    def create_passivated_material(self, configuration: EdgePassivationConfiguration) -> Material:
-        pass
+    cutoff: float = 3.0
+    coordination_threshold: int = 3
+
+
+class UndercoordinationPassivationBuilder(PassivationBuilder):
+    """
+    Builder for passivating material based on undercoordination of atoms.
+
+    Detects atoms with coordination number below a threshold and passivates them.
+    """
+
+    build_parameters: UndercoordinationPassivationBuilderParameters = UndercoordinationPassivationBuilderParameters()
+
+    def create_passivated_material(self, configuration: UndercoordinationPassivationConfiguration) -> Material:
+        material = super().create_passivated_material(configuration)
+        passivant_coordinates_values = self._get_passivant_coordinates(material, configuration)
+        return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
+
+    def _get_passivant_coordinates(self, material: Material, configuration: UndercoordinationPassivationConfiguration):
+        """
+        Calculate the coordinates for placing passivants based on the specified edge type.
+
+        Args:
+            material (Material): Material to passivate.
+            configuration (EdgePassivationConfiguration): Configuration for passivation.
+        """
+        edge_atoms_indices = get_undercoordinated_atom_indices(
+            material=material,
+            surface=SurfaceTypes.TOP,
+            coordination_number=self.build_parameters.coordination_threshold,
+            cutoff=self.build_parameters.cutoff,
+        )
+        edge_atoms_coordinates = [material.basis.coordinates.get_element_value_by_index(i) for i in edge_atoms_indices]
+        bond_vector = [0, 0, configuration.bond_length]
+
+        passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
+        return (np.array(edge_atoms_coordinates) + passivant_bond_vector_crystal).tolist()
