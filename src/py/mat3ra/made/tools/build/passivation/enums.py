@@ -1,4 +1,4 @@
-# TODO: Get this from peroidic table
+# TODO: Get this from periodic table
 from enum import Enum
 
 BOND_LENGTHS_MAP = {
