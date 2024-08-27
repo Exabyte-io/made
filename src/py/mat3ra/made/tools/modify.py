@@ -2,14 +2,13 @@ from typing import Callable, List, Literal, Optional, Union
 
 from mat3ra.made.material import Material
 
-from py.mat3ra.made.tools.convert.utils import InterfacePartsEnum
-
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,
 )
 from .convert import from_ase, to_ase
+from .convert.utils import InterfacePartsEnum
 from .third_party import ase_add_vacuum
 from .utils.coordinate import (
     is_coordinate_in_box,
