@@ -339,6 +339,47 @@ def get_atomic_coordinates_extremum(
     return getattr(np, extremum)(values)
 
 
+def get_local_extremum_atom_index(
+    material: Material,
+    coordinate: List[float],
+    extremum: Literal["max", "min"] = "max",
+    vicinity: float = 1.0,
+    use_cartesian_coordinates: bool = False,
+) -> int:
+    """
+    Return the id of the atom with the minimum or maximum z-coordinate
+    within a certain vicinity of a given (x, y) coordinate.
+
+    Args:
+        material (Material): Material object.
+        coordinate (List[float]): (x, y, z) coordinate to find the local extremum.
+        extremum (str): "min" or "max".
+        vicinity (float): Radius of the vicinity.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
+
+    Returns:
+        int: id of the atom with the minimum or maximum z-coordinate.
+    """
+    new_material = material.clone()
+    if use_cartesian_coordinates:
+        new_material.to_cartesian()
+    else:
+        new_material.to_crystal()
+        vicinity = vicinity / new_material.lattice.a
+    coordinates = np.array(new_material.basis.coordinates.values)
+    ids = np.array(new_material.basis.coordinates.ids)
+    tree = cKDTree(coordinates[:, :2])
+    indices = tree.query_ball_point(coordinate[:2], vicinity)
+    z_values = [(id, coord[2]) for id, coord in zip(ids[indices], coordinates[indices])]
+
+    if extremum == "max":
+        extremum_z_atom = max(z_values, key=lambda item: item[1])
+    else:
+        extremum_z_atom = min(z_values, key=lambda item: item[1])
+
+    return extremum_z_atom[0]
+
+
 def height_check(z: float, z_extremum: float, depth: float, surface: SurfaceTypes):
     return (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
 
