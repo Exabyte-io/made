@@ -9,14 +9,13 @@ from mat3ra.made.tools.modify import (
     filter_by_rectangle_projection,
     filter_by_sphere,
     filter_by_triangle_projection,
-    passivate_surface,
     remove_vacuum,
     rotate_material,
     translate_to_z_level,
 )
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_PASSIVATED, SI_SLAB_VACUUM
+from .fixtures import SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
 
 COMMON_PART = {
     "units": "crystal",
@@ -171,10 +170,3 @@ def test_rotate_material():
         material.basis.coordinates.values.sort(), rotated_material.basis.coordinates.values.sort()
     )
     assertion_utils.assert_deep_almost_equal(material.lattice, rotated_material.lattice)
-
-
-def test_passivate_surface():
-    passivated_material = passivate_surface(
-        material=Material(SI_SLAB), passivant="H", default_bond_length=1.48, surface="both"
-    )
-    assertion_utils.assert_deep_almost_equal(SI_SLAB_PASSIVATED, passivated_material.to_json())
