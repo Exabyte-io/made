@@ -354,18 +354,17 @@ def get_local_extremum_atom_index(
         material (Material): Material object.
         coordinate (List[float]): (x, y, z) coordinate to find the local extremum.
         extremum (str): "min" or "max".
-        vicinity (float): Radius of the vicinity.
+        vicinity (float): Radius of the vicinity, in Angstroms.
         use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
 
     Returns:
         int: id of the atom with the minimum or maximum z-coordinate.
     """
     new_material = material.clone()
-    if use_cartesian_coordinates:
-        new_material.to_cartesian()
-    else:
-        new_material.to_crystal()
-        vicinity = vicinity / new_material.lattice.a
+    new_material.to_cartesian()
+    if not use_cartesian_coordinates:
+        coordinate = new_material.basis.cell.convert_point_to_cartesian(coordinate)
+
     coordinates = np.array(new_material.basis.coordinates.values)
     ids = np.array(new_material.basis.coordinates.ids)
     tree = cKDTree(coordinates[:, :2])
