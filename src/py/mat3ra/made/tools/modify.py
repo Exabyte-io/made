@@ -1,5 +1,6 @@
 from typing import Callable, List, Literal, Optional, Union
 
+import numpy as np
 from mat3ra.made.material import Material
 
 from .analyze import (
@@ -466,7 +467,7 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
 
 
 def displace_interface(
-    material: Material,
+    interface: Material,
     displacement: List[float],
     label: InterfacePartsEnum = InterfacePartsEnum.FILM,
     use_cartesian_coordinates=False,
@@ -475,28 +476,26 @@ def displace_interface(
     Displace atoms in an interface along a certain direction.
 
     Args:
-        material (Material): The material object to displace.
-        displacement (List[float]): The displacement vector in angstroms.
+        interface (Material): The interface Material object.
+        displacement (List[float]): The displacement vector in angstroms or crystal coordinates.
         label (InterfacePartsEnum): The label of the atoms to displace ("substrate" or "film").
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
 
     Returns:
         Material: The displaced material object.
     """
-    new_material = material.clone()
+    new_material = interface.clone()
     if use_cartesian_coordinates:
         new_material.to_cartesian()
     labels_array = new_material.basis.labels.to_array_of_values_with_ids()
     displaced_label_ids = [_label.id for _label in labels_array if _label.value == int(label)]
 
-    new_basis = new_material.basis.copy()
-    new_coordinates_values = new_basis.coordinates.values
-
+    new_coordinates_values = new_material.basis.coordinates.values
     for atom_id in displaced_label_ids:
-        current_coordinates = new_material.basis.coordinates.get_element_value_by_index(atom_id)
-        new_atom_coordinates = [x + y for x, y in zip(current_coordinates, displacement)]
-        new_coordinates_values[atom_id] = new_atom_coordinates
+        current_coordinate = new_material.basis.coordinates.get_element_value_by_index(atom_id)
+        new_atom_coordinate = np.array(current_coordinate) + np.array(displacement)
+        new_coordinates_values[atom_id] = new_atom_coordinate
 
-    new_basis.coordinates.values = new_coordinates_values
-    new_material.basis = new_basis
+    new_material.set_coordinates(new_coordinates_values)
+    new_material.to_crystal()
     return new_material
