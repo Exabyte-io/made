@@ -1,7 +1,8 @@
-from typing import Callable, List, Literal, Optional, Union
+from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.made.material import Material
+from scipy.spatial import cKDTree
 
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
@@ -500,3 +501,61 @@ def displace_interface(
     new_material.to_crystal()
     new_material = wrap_to_unit_cell(new_material)
     return new_material
+
+
+def calculate_norm_of_distances(material: Material, radius: float = 5.0) -> float:
+    """
+    Calculate the norm of distances for each film atom to substrate atoms within a certain radius.
+
+    Args:
+        material (Material): The interface Material object.
+        radius (float): The radius within which to consider substrate atoms.
+
+    Returns:
+        float: The calculated norm.
+    """
+    film_atoms = filter_by_label(material, int(InterfacePartsEnum.FILM))
+    substrate_atoms = filter_by_label(material, int(InterfacePartsEnum.SUBSTRATE))
+
+    film_positions = film_atoms.basis.coordinates.values
+    substrate_positions = substrate_atoms.basis.coordinates.values
+
+    tree = cKDTree(substrate_positions)
+    distances, _ = tree.query(film_positions, distance_upper_bound=radius)
+    distances = distances[~np.isinf(distances)]
+
+    return np.linalg.norm(distances)
+
+
+def get_optimal_displacements(
+    material: Material, grid_size: Tuple[int, int] = (10, 10), step: float = 0.05
+) -> List[List[float]]:
+    """
+    Return all optimal displacements for the interface material by calculating
+    the norm of distances for each film atom to substrate atoms within a certain radius.
+    The displacement is done on a grid and the displacement that yields miminum norm is returned.
+
+    Args:
+        material (Material): The interface Material object.
+        grid_size (Tuple[int, int]): The size of the grid.
+        step (float): The step size in angstroms.
+
+    Returns:
+        List[List[float]]: The optimal displacements.
+    """
+    x_values = np.linspace(0, grid_size[0] * step, grid_size[0])
+    y_values = np.linspace(0, grid_size[1] * step, grid_size[1])
+
+    norms = np.zeros(grid_size)
+
+    for i, x in enumerate(x_values):
+        for j, y in enumerate(y_values):
+            displaced_material = displace_interface(material, [x, y, 0], use_cartesian_coordinates=True)
+            norm = calculate_norm_of_distances(displaced_material)
+            norms[i, j] = norm
+
+    min_norm = np.min(norms)
+    min_positions = np.argwhere(norms == min_norm)
+
+    displacements_with_min_norm = [[x_values[pos[0]], y_values[pos[1]], 0] for pos in min_positions]
+    return displacements_with_min_norm
