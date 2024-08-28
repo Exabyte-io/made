@@ -1,8 +1,10 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase
+from mat3ra.made.tools.convert.utils import InterfacePartsEnum
 from mat3ra.made.tools.modify import (
     add_vacuum,
+    displace_interface,
     filter_by_circle_projection,
     filter_by_label,
     filter_by_layers,
@@ -15,7 +17,7 @@ from mat3ra.made.tools.modify import (
 )
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
+from .fixtures import GRAPHENE_NICKEL_INTERFACE, SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
 
 COMMON_PART = {
     "units": "crystal",
@@ -170,3 +172,18 @@ def test_rotate_material():
         material.basis.coordinates.values.sort(), rotated_material.basis.coordinates.values.sort()
     )
     assertion_utils.assert_deep_almost_equal(material.lattice, rotated_material.lattice)
+
+
+def test_displace_interface():
+    material = Material(GRAPHENE_NICKEL_INTERFACE)
+    expected_coordinates = [
+        {"id": 0, "value": [0.666666667, 0.666666667, 0.350869517]},
+        {"id": 1, "value": [-0.0, 0.0, 0.425701769]},
+        {"id": 2, "value": [0.333333333, 0.333333333, 0.500534021]},
+        {"id": 3, "value": [0.433333333, 0.533333333, 0.911447347]},
+        {"id": 4, "value": [0.766666667, 0.866666667, 0.911447347]},
+    ]
+    expected_labels = GRAPHENE_NICKEL_INTERFACE["basis"]["labels"]
+    displaced_material = displace_interface(material, [0.1, 0.2, 0.3], InterfacePartsEnum.FILM)
+    assertion_utils.assert_deep_almost_equal(expected_coordinates, displaced_material.basis.coordinates.to_dict())
+    assertion_utils.assert_deep_almost_equal(expected_labels, displaced_material.basis.labels.to_dict())
