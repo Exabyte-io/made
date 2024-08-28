@@ -498,4 +498,5 @@ def displace_interface(
 
     new_material.set_coordinates(new_coordinates_values)
     new_material.to_crystal()
+    new_material = wrap_to_unit_cell(new_material)
     return new_material
