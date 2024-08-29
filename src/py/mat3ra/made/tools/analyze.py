@@ -350,7 +350,7 @@ def shadowing_check(z: float, neighbors_indices: List[int], surface: SurfaceType
     )
 
 
-@decorator_handle_periodic_boundary_conditions(cutoff=3.0)
+@decorator_handle_periodic_boundary_conditions(cutoff=0.1)
 def get_surface_atom_indices(
     material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, shadowing_radius: float = 2.5, depth: float = 5
 ) -> List[int]:
@@ -417,6 +417,7 @@ def get_coordination_numbers(
     return coordination_numbers
 
 
+# TODO: fix decorator removal of added atoms and uncomment
 @decorator_handle_periodic_boundary_conditions(cutoff=0.1)
 def get_undercoordinated_atom_indices(
     material: Material,

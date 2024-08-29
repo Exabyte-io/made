@@ -113,15 +113,15 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
     def decorator(func):
         @wraps(func)
         def wrapper(material, *args, **kwargs):
-            # Augment material with periodic images
             augmented_material, original_count = augment_material_with_periodic_images(material, cutoff)
-
-            # Call the original function with augmented material
             result = func(augmented_material, *args, **kwargs)
 
-            # Filter results to include only original atoms
             if isinstance(result, list):
                 result = [idx for idx in result if idx < original_count]
+
+            if isinstance(result, list) and all(isinstance(coord, float) for coord in result):
+                result = [coordinate for coordinate in result if 0 <= coordinate <= 1]
+
             return result
 
         return wrapper
@@ -179,7 +179,7 @@ def augment_material_with_periodic_images(material: Material, cutoff: float = 0.
     augmented_elems = np.concatenate(augmented_elems).tolist()
     augmented_material = material.clone()
 
-    new_basis = material.basis.copy()
+    new_basis = augmented_material.basis.copy()
     for i, coord in enumerate(augmented_coords):
         new_basis.add_atom(augmented_elems[i], coord)
 
