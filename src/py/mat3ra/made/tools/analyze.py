@@ -417,7 +417,6 @@ def get_coordination_numbers(
     return coordination_numbers
 
 
-# TODO: fix decorator removal of added atoms and uncomment
 @decorator_handle_periodic_boundary_conditions(cutoff=0.1)
 def get_undercoordinated_atom_indices(
     material: Material,

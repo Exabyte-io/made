@@ -166,19 +166,18 @@ def augment_material_with_periodic_images(material: Material, cutoff: float = 0.
     original_count = len(material.basis.coordinates.values)
     coordinates = np.array(material.basis.coordinates.values)
     elements = np.array(material.basis.elements.values)
-    augmented_coords = []
-    augmented_elems = []
+    augmented_coords = coordinates.tolist()
+    augmented_elems = elements.tolist()
 
     for axis in range(3):
         for direction in [-1, 1]:
             translated_coords, translated_elems = filter_and_translate(coordinates, elements, axis, cutoff, direction)
-            augmented_coords.append(translated_coords)
-            augmented_elems.append(translated_elems)
+            augmented_coords.extend(translated_coords)
+            augmented_elems.extend(translated_elems)
+            coordinates = np.array(augmented_coords)
+            elements = np.array(augmented_elems)
 
-    augmented_coords = np.vstack(augmented_coords).tolist()
-    augmented_elems = np.concatenate(augmented_elems).tolist()
     augmented_material = material.clone()
-
     new_basis = augmented_material.basis.copy()
     for i, coord in enumerate(augmented_coords):
         new_basis.add_atom(augmented_elems[i], coord)
