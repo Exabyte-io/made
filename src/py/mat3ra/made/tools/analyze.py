@@ -1,6 +1,7 @@
 from typing import Callable, List, Literal, Optional
 
 import numpy as np
+from .utils import decorator_handle_periodic_boundary_conditions
 from scipy.spatial import cKDTree
 
 from ..material import Material
@@ -415,6 +416,7 @@ def get_coordination_numbers(
     return coordination_numbers
 
 
+@decorator_handle_periodic_boundary_conditions(cutoff=3.0)
 def get_undercoordinated_atom_indices(
     material: Material,
     indices: List[int],

@@ -106,3 +106,55 @@ def transform_coordinate_to_supercell(
     if reverse:
         converted_array = (np_coordinate - np_translation_vector) * np_scaling_factor
     return converted_array.tolist()
+
+
+def decorator_handle_periodic_boundary_conditions(cutoff):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(material, *args, **kwargs):
+            # Augment material with periodic images
+            augmented_material, original_count = augment_material_with_periodic_images(material, cutoff)
+
+            # Call the original function with augmented material
+            result = func(augmented_material, *args, **kwargs)
+
+            # Filter results to include only original atoms
+            if isinstance(result, list):  # Assuming result is a list of indices
+                result = [idx for idx in result if idx < original_count]
+            return result
+
+        return wrapper
+
+    return decorator
+
+
+def augment_material_with_periodic_images(material, cutoff):
+    """Augment the material's dataset by adding atoms from periodic images near boundaries."""
+    from ..build.utils import merge_materials
+    from ..modify import filter_by_box, translate_by_vector
+
+    material = material.clone()
+    original_count = len(material.basis.coordinates.values)
+    material_slice_x1 = filter_by_box(material, [0, 0, 0], [cutoff, 1, 1])
+    material_slice_x2 = filter_by_box(material, [1 - cutoff, 0, 0], [1, 1, 1])
+    translated_material_slice_x1 = translate_by_vector(material_slice_x1, [1, 0, 0])
+    translated_material_slice_x2 = translate_by_vector(material_slice_x2, [-1, 0, 0])
+    augmented_material_x = merge_materials([material, translated_material_slice_x1, translated_material_slice_x2])
+
+    material_slice_y1 = filter_by_box(augmented_material_x, [-cutoff, 0, 0], [1 + cutoff, cutoff, 1])
+    material_slice_y2 = filter_by_box(augmented_material_x, [-cutoff, 1 - cutoff, 0], [1 + cutoff, 1, 1])
+    translated_material_slice_y1 = translate_by_vector(material_slice_y1, [0, 1, 0])
+    translated_material_slice_y2 = translate_by_vector(material_slice_y2, [0, -1, 0])
+    augmented_material_y = merge_materials(
+        [augmented_material_x, translated_material_slice_y1, translated_material_slice_y2]
+    )
+
+    material_slice_z1 = filter_by_box(augmented_material_y, [-cutoff, -cutoff, 0], [1 + cutoff, 1 + cutoff, cutoff])
+    material_slice_z2 = filter_by_box(augmented_material_y, [-cutoff, -cutoff, 1 - cutoff], [1 + cutoff, 1 + cutoff, 1])
+    translated_material_slice_z1 = translate_by_vector(material_slice_z1, [0, 0, 1])
+    translated_material_slice_z2 = translate_by_vector(material_slice_z2, [0, 0, -1])
+    augmented_material = merge_materials(
+        [augmented_material_y, translated_material_slice_z1, translated_material_slice_z2]
+    )
+
+    return augmented_material, original_count
