@@ -2,6 +2,7 @@ from functools import wraps
 from typing import Callable, List, Optional
 
 import numpy as np
+from mat3ra.made.material import Material
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 
 from ..third_party import PymatgenStructure
@@ -119,7 +120,7 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
             result = func(augmented_material, *args, **kwargs)
 
             # Filter results to include only original atoms
-            if isinstance(result, list):  # Assuming result is a list of indices
+            if isinstance(result, list):
                 result = [idx for idx in result if idx < original_count]
             return result
 
@@ -128,33 +129,59 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
     return decorator
 
 
-def augment_material_with_periodic_images(material, cutoff):
-    """Augment the material's dataset by adding atoms from periodic images near boundaries."""
-    from ..build.utils import merge_materials
-    from ..modify import filter_by_box, translate_by_vector
+def filter_and_translate(coordinates: np.ndarray, elements: np.ndarray, axis: int, cutoff: float, direction: int):
+    """
+    Filter and translate atom coordinates based on the axis and direction.
 
-    material = material.clone()
+    Args:
+        coordinates (np.ndarray): The coordinates of the atoms.
+        elements (np.ndarray): The elements of the atoms.
+        axis (int): The axis to filter and translate.
+        cutoff (float): The cutoff value for filtering.
+        direction (int): The direction to translate.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: The filtered and translated coordinates and elements.
+    """
+    mask = (coordinates[:, axis] < cutoff) if direction == 1 else (coordinates[:, axis] > (1 - cutoff))
+    filtered_coordinates = coordinates[mask]
+    filtered_elements = elements[mask]
+    translation_vector = np.zeros(3)
+    translation_vector[axis] = direction
+    translated_coordinates = filtered_coordinates + translation_vector
+    return translated_coordinates, filtered_elements
+
+
+def augment_material_with_periodic_images(material: Material, cutoff: float = 0.1):
+    """
+    Augment the material's dataset by adding atoms from periodic images near boundaries.
+
+    Args:
+        material (Material): The material to augment.
+        cutoff (float): The cutoff value for filtering atoms near boundaries.
+
+    Returns:
+        Tuple[Material, int]: The augmented material and the original count of atoms.
+    """
     original_count = len(material.basis.coordinates.values)
-    material_slice_x1 = filter_by_box(material, [0, 0, 0], [cutoff, 1, 1])
-    material_slice_x2 = filter_by_box(material, [1 - cutoff, 0, 0], [1, 1, 1])
-    translated_material_slice_x1 = translate_by_vector(material_slice_x1, [1, 0, 0])
-    translated_material_slice_x2 = translate_by_vector(material_slice_x2, [-1, 0, 0])
-    augmented_material_x = merge_materials([material, translated_material_slice_x1, translated_material_slice_x2])
+    coordinates = np.array(material.basis.coordinates.values)
+    elements = np.array(material.basis.elements.values)
+    augmented_coords = []
+    augmented_elems = []
 
-    material_slice_y1 = filter_by_box(augmented_material_x, [-cutoff, 0, 0], [1 + cutoff, cutoff, 1])
-    material_slice_y2 = filter_by_box(augmented_material_x, [-cutoff, 1 - cutoff, 0], [1 + cutoff, 1, 1])
-    translated_material_slice_y1 = translate_by_vector(material_slice_y1, [0, 1, 0])
-    translated_material_slice_y2 = translate_by_vector(material_slice_y2, [0, -1, 0])
-    augmented_material_y = merge_materials(
-        [augmented_material_x, translated_material_slice_y1, translated_material_slice_y2]
-    )
+    for axis in range(3):
+        for direction in [-1, 1]:
+            translated_coords, translated_elems = filter_and_translate(coordinates, elements, axis, cutoff, direction)
+            augmented_coords.append(translated_coords)
+            augmented_elems.append(translated_elems)
 
-    material_slice_z1 = filter_by_box(augmented_material_y, [-cutoff, -cutoff, 0], [1 + cutoff, 1 + cutoff, cutoff])
-    material_slice_z2 = filter_by_box(augmented_material_y, [-cutoff, -cutoff, 1 - cutoff], [1 + cutoff, 1 + cutoff, 1])
-    translated_material_slice_z1 = translate_by_vector(material_slice_z1, [0, 0, 1])
-    translated_material_slice_z2 = translate_by_vector(material_slice_z2, [0, 0, -1])
-    augmented_material = merge_materials(
-        [augmented_material_y, translated_material_slice_z1, translated_material_slice_z2]
-    )
+    augmented_coords = np.vstack(augmented_coords).tolist()
+    augmented_elems = np.concatenate(augmented_elems).tolist()
+    augmented_material = material.clone()
 
+    new_basis = material.basis.copy()
+    for i, coord in enumerate(augmented_coords):
+        new_basis.add_atom(augmented_elems[i], coord)
+
+    augmented_material.basis = new_basis
     return augmented_material, original_count
