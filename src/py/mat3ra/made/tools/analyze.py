@@ -1,6 +1,8 @@
-from typing import Callable, List, Literal, Optional
+from typing import Callable, List, Literal, Optional, Tuple
 
 import numpy as np
+from mat3ra.made.utils import get_center_of_coordinates
+from scipy.spatial import cKDTree
 
 from ..material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
@@ -265,6 +267,8 @@ def get_atom_indices_with_condition_on_coordinates(
 def get_nearest_neighbors_atom_indices(
     material: Material,
     coordinate: Optional[List[float]] = None,
+    tolerance: float = 0.1,
+    cutoff: float = 13.0,
 ) -> Optional[List[int]]:
     """
     Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
@@ -272,6 +276,7 @@ def get_nearest_neighbors_atom_indices(
     Args:
         material (Material): The material object to find neighbors in.
         coordinate (List[float]): The position to find neighbors for.
+        cutoff (float): The cutoff radius for identifying neighbors.
 
     Returns:
         List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
@@ -280,17 +285,26 @@ def get_nearest_neighbors_atom_indices(
         coordinate = [0, 0, 0]
     structure = to_pymatgen(material)
     voronoi_nn = PymatgenVoronoiNN(
-        tol=0.5,
-        cutoff=15.0,
-        allow_pathological=False,
+        tol=tolerance,
+        cutoff=cutoff,
         weight="solid_angle",
-        extra_nn_info=True,
+        extra_nn_info=False,
         compute_adj_neighbors=True,
     )
-    structure.append("X", coordinate, validate_proximity=False)
-    neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
+    coordinates = material.basis.coordinates
+    coordinates.filter_by_values([coordinate])
+    site_index = coordinates.ids[0] if coordinates.ids else None
+    remove_dummy_atom = False
+    if site_index is None:
+        structure.append("X", coordinate, validate_proximity=False)
+        site_index = len(structure.sites) - 1
+
+        remove_dummy_atom = True
+
+    neighbors = voronoi_nn.get_nn_info(structure, site_index)
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
-    structure.remove_sites([-1])
+    if remove_dummy_atom:
+        structure.remove_sites([-1])
 
     all_coordinates = material.basis.coordinates
     all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
@@ -324,3 +338,59 @@ def get_atomic_coordinates_extremum(
     coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
     values = [coord.value[{"x": 0, "y": 1, "z": 2}[axis]] for coord in coordinates]
     return getattr(np, extremum)(values)
+
+
+def get_surface_atoms_indices(material: Material, distance_threshold: float = 2.5, depth: float = 5) -> List[int]:
+    """
+    Identify exposed atoms on the top surface of the material.
+
+    Args:
+        material (Material): Material object to get surface atoms from.
+        distance_threshold (float): Distance threshold to determine if an atom is considered "covered".
+        depth (float): Depth from the top surface to look for exposed atoms.
+
+    Returns:
+        List[int]: List of indices of exposed top surface atoms.
+    """
+    material.to_cartesian()
+    coordinates = np.array(material.basis.coordinates.values)
+    ids = material.basis.coordinates.ids
+    kd_tree = cKDTree(coordinates)
+    z_max = np.max(coordinates[:, 2])
+
+    exposed_atoms_indices = []
+    for idx, (x, y, z) in enumerate(coordinates):
+        if z >= z_max - depth:
+            neighbors_above = kd_tree.query_ball_point([x, y, z + distance_threshold], r=distance_threshold)
+
+            if not any(coordinates[n][2] > z for n in neighbors_above):
+                exposed_atoms_indices.append(ids[idx])
+
+    return exposed_atoms_indices
+
+
+def get_undercoordinated_atoms(
+    material: Material, indices_to_check: Optional[List[int]] = None, coordination_threshold: Optional[int] = None
+) -> Tuple[List[int], dict]:
+    if indices_to_check is None:
+        indices_to_check = material.basis.coordinates.ids
+
+    coordinates_array = material.basis.coordinates.values
+    number_of_neighbors = []
+    atom_neighbors_info = {}
+    for idx in indices_to_check:
+        coordinate = coordinates_array[idx]
+        neighbors_indices = get_nearest_neighbors_atom_indices(material=material, coordinate=coordinate, cutoff=6) or []
+        neighbors_coordinates = [coordinates_array[i] for i in neighbors_indices]
+        neighbors_center = get_center_of_coordinates(neighbors_coordinates)
+        atom_neighbors_info[idx] = (len(neighbors_indices), neighbors_indices, neighbors_center)
+        number_of_neighbors.append(len(neighbors_indices))
+
+    if coordination_threshold is None:
+        coordination_threshold = np.max(number_of_neighbors)
+    undercoordinated_atom_indices = [
+        idx
+        for idx, num_neighbors in zip(indices_to_check, number_of_neighbors)
+        if num_neighbors < coordination_threshold
+    ]
+    return undercoordinated_atom_indices, atom_neighbors_info
