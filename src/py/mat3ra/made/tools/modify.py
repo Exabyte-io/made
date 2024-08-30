@@ -750,14 +750,17 @@ def calculate_norm_of_distances(material: Material, radius: float = 5.0) -> floa
     film_atoms = filter_by_label(material, int(InterfacePartsEnum.FILM))
     substrate_atoms = filter_by_label(material, int(InterfacePartsEnum.SUBSTRATE))
 
-    film_positions = film_atoms.basis.coordinates.values
-    substrate_positions = substrate_atoms.basis.coordinates.values
+    film_atoms_surface_indices = get_surface_atoms_indices(film_atoms, "BOTTOM", distance_threshold=radius)
+    substrate_atoms_surface_indices = get_surface_atoms_indices(substrate_atoms, "TOP", distance_threshold=radius)
 
-    tree = cKDTree(substrate_positions)
-    distances, _ = tree.query(film_positions, distance_upper_bound=radius)
+    film_coordinates = film_atoms.basis.coordinates.filter_by_indices(film_atoms_surface_indices).values
+    substrate_coordinates = substrate_atoms.basis.coordinates.filter_by_indices(substrate_atoms_surface_indices).values
+
+    tree = cKDTree(substrate_coordinates)
+    distances, _ = tree.query(film_coordinates, distance_upper_bound=radius)
     distances = distances[~np.isinf(distances)]
 
-    return np.linalg.norm(distances)
+    return float(np.linalg.norm(distances))
 
 
 def get_optimal_displacements(
