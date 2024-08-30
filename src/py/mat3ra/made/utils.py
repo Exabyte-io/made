@@ -58,6 +58,23 @@ def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
     return np.mean(np.array(coordinates), axis=0).tolist()
 
 
+def get_overlapping_coordinates(
+    coordinate: List[float], coordinates: List[List[float]], threshold: float = 0.01
+) -> List[List[float]]:
+    """
+    Find coordinates that are within a certain threshold of a given coordinate.
+
+    Args:
+        coordinate (List[float]): The coordinate.
+        coordinates (List[List[float]]): The list of coordinates.
+        threshold (float): The threshold.
+
+    Returns:
+        List[List[float]]: The list of overlapping coordinates.
+    """
+    return [c for c in coordinates if np.linalg.norm(np.array(c) - np.array(coordinate)) < threshold]
+
+
 class ValueWithId(RoundNumericValuesMixin, BaseModel):
     id: int = 0
     value: Any = None
@@ -94,8 +111,11 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
     def get_element_value_by_index(self, index: int) -> Any:
         return self.values[index] if index < len(self.values) else None
 
-    def get_element_index_by_value(self, value: Any) -> Union[int, None]:
-        return self.values.index(value) if value in self.values else None
+    def get_element_id_by_value(self, value: Any) -> Optional[int]:
+        try:
+            return self.ids[self.values.index(value)]
+        except ValueError:
+            return None
 
     def filter_by_values(self, values: Union[List[Any], Any]):
         def make_hashable(value):

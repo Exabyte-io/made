@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import Callable, List, Literal, Optional, Union
-from typing import Callable, List, Literal, Optional, Tuple, Union
 
-import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.utils import transform_coordinate_to_supercell
