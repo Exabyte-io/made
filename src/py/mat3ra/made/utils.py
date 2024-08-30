@@ -58,6 +58,23 @@ def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
     return np.mean(np.array(coordinates), axis=0).tolist()
 
 
+def get_overlapping_coordinates(
+    coordinate: List[float], coordinates: List[List[float]], threshold: float = 0.01
+) -> List[List[float]]:
+    """
+    Find coordinates that are within a certain threshold of a given coordinate.
+
+    Args:
+        coordinate (List[float]): The coordinate.
+        coordinates (List[List[float]]): The list of coordinates.
+        threshold (float): The threshold.
+
+    Returns:
+        List[List[float]]: The list of overlapping coordinates.
+    """
+    return [c for c in coordinates if np.linalg.norm(np.array(c) - np.array(coordinate)) < threshold]
+
+
 class ValueWithId(RoundNumericValuesMixin, BaseModel):
     id: int = 0
     value: Any = None
@@ -94,9 +111,18 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
     def get_element_value_by_index(self, index: int) -> Any:
         return self.values[index] if index < len(self.values) else None
 
+    def get_element_id_by_value(self, value: Any) -> Optional[int]:
+        try:
+            return self.ids[self.values.index(value)]
+        except ValueError:
+            return None
+
     def filter_by_values(self, values: Union[List[Any], Any]):
-        values_to_keep = set(values) if isinstance(values, list) else {values}
-        filtered_items = [(v, i) for v, i in zip(self.values, self.ids) if v in values_to_keep]
+        def make_hashable(value):
+            return tuple(value) if isinstance(value, list) else value
+
+        values_to_keep = set(make_hashable(v) for v in values) if isinstance(values, list) else {make_hashable(values)}
+        filtered_items = [(v, i) for v, i in zip(self.values, self.ids) if make_hashable(v) in values_to_keep]
         if filtered_items:
             values_unpacked, ids_unpacked = zip(*filtered_items)
             self.values = list(values_unpacked)

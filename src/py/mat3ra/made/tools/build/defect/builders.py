@@ -246,7 +246,7 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         )
 
         neighboring_atoms_ids_in_supercell = get_nearest_neighbors_atom_indices(
-            supercell_material, adatom_coordinate_in_supercell
+            material=supercell_material, coordinate=adatom_coordinate_in_supercell
         )
         if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
@@ -392,6 +392,10 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
     _ConfigurationType: type(IslandSlabDefectConfiguration) = IslandSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
+    @staticmethod
+    def _default_condition(coordinate: List[float]):
+        return True
+
     def create_island(
         self,
         material: Material,
@@ -410,27 +414,23 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         Returns:
             The material with the island added.
         """
-
         new_material = material.clone()
         original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=False)
         material_with_additional_layers = self.create_material_with_additional_layers(new_material, thickness)
         added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
-
         if condition is None:
+            condition = self._default_condition
 
-            def condition(coordinate: List[float]):
-                return True
-
+        thickness_nudge_value = (added_layers_max_z - original_max_z) / thickness
         atoms_within_island = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
             condition=condition,
             use_cartesian_coordinates=use_cartesian_coordinates,
         )
-
         # Filter atoms in the added layers
         island_material = filter_by_box(
             material=atoms_within_island,
-            min_coordinate=[0, 0, original_max_z],
+            min_coordinate=[0, 0, original_max_z - thickness_nudge_value],
             max_coordinate=[1, 1, added_layers_max_z],
         )
 
