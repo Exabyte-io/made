@@ -300,8 +300,10 @@ def get_nearest_neighbors_atom_indices(
         site_index = len(structure.sites) - 1
 
         remove_dummy_atom = True
-
-    neighbors = voronoi_nn.get_nn_info(structure, site_index)
+    try:
+        neighbors = voronoi_nn.get_nn_info(structure, site_index)
+    except:
+        return None
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
     if remove_dummy_atom:
         structure.remove_sites([-1])
