@@ -1,13 +1,13 @@
 from typing import Callable, List, Literal, Optional
 
 import numpy as np
-from .utils import decorator_handle_periodic_boundary_conditions
 from scipy.spatial import cKDTree
 
 from ..material import Material
 from .build.passivation.enums import SurfaceTypes
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
+from .utils import decorator_handle_periodic_boundary_conditions
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -302,7 +302,7 @@ def get_nearest_neighbors_atom_indices(
         remove_dummy_atom = True
     try:
         neighbors = voronoi_nn.get_nn_info(structure, site_index)
-    except:
+    except ValueError:
         return None
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
     if remove_dummy_atom:
