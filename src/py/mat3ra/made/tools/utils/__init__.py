@@ -2,6 +2,8 @@ from functools import wraps
 from typing import Callable, List, Optional
 
 import numpy as np
+from mat3ra.made.material import Material
+from mat3ra.made.utils import ArrayWithIds
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 
 from ..third_party import PymatgenStructure
@@ -106,3 +108,87 @@ def transform_coordinate_to_supercell(
     if reverse:
         converted_array = (np_coordinate - np_translation_vector) * np_scaling_factor
     return converted_array.tolist()
+
+
+def decorator_handle_periodic_boundary_conditions(cutoff):
+    """
+    Decorator to handle periodic boundary conditions.
+
+    Copies atoms near boundaries within the cutoff distance beyond the opposite side of the cell
+    creating the effect of periodic boundary conditions for edge atoms.
+
+    Results of the function are filtered to remove atoms or coordinates outside the original cell.
+
+    Args:
+        cutoff (float): The cutoff distance for a border slice in crystal coordinates.
+
+    Returns:
+        Callable: The decorated function.
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(material, *args, **kwargs):
+            augmented_material, last_id = augment_material_with_periodic_images(material, cutoff)
+            result = func(augmented_material, *args, **kwargs)
+
+            if isinstance(result, list):
+                if all(isinstance(x, int) for x in result):
+                    result = [id for id in result if id <= last_id]
+                elif all(isinstance(x, list) and len(x) == 3 for x in result):
+                    result = [coord for coord in result if all(0 <= c < 1 for c in coord)]
+            return result
+
+        return wrapper
+
+    return decorator
+
+
+def filter_and_translate(coordinates: np.ndarray, elements: np.ndarray, axis: int, cutoff: float, direction: int):
+    """
+    Filter and translate atom coordinates based on the axis and direction.
+
+    Args:
+        coordinates (np.ndarray): The coordinates of the atoms.
+        elements (np.ndarray): The elements of the atoms.
+        axis (int): The axis to filter and translate.
+        cutoff (float): The cutoff value for filtering.
+        direction (int): The direction to translate.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: The filtered and translated coordinates and elements.
+    """
+    mask = (coordinates[:, axis] < cutoff) if direction == 1 else (coordinates[:, axis] > (1 - cutoff))
+    filtered_coordinates = coordinates[mask]
+    filtered_elements = elements[mask]
+    translation_vector = np.zeros(3)
+    translation_vector[axis] = direction
+    translated_coordinates = filtered_coordinates + translation_vector
+    return translated_coordinates, filtered_elements
+
+
+def augment_material_with_periodic_images(material: Material, cutoff: float = 0.1):
+    """
+    Augment the material's dataset by adding atoms from periodic images near boundaries.
+
+    Args:
+        material (Material): The material to augment.
+        cutoff (float): The cutoff value for filtering atoms near boundaries.
+
+    Returns:
+        Tuple[Material, int]: The augmented material and the original count of atoms.
+    """
+    last_id = material.basis.coordinates.ids[-1]
+    coordinates = np.array(material.basis.coordinates.values)
+    elements = np.array(material.basis.elements.values)
+    augmented_material = material.clone()
+    new_basis = augmented_material.basis.copy()
+
+    for axis in range(3):
+        for direction in [-1, 1]:
+            translated_coords, translated_elems = filter_and_translate(coordinates, elements, axis, cutoff, direction)
+            for coord, elem in zip(translated_coords, translated_elems):
+                new_basis.add_atom(elem, coord)
+
+    augmented_material.basis = new_basis
+    return augmented_material, last_id

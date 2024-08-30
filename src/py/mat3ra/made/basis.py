@@ -6,7 +6,7 @@ from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel
 
 from .cell import Cell
-from .utils import ArrayWithIds
+from .utils import ArrayWithIds, get_overlapping_coordinates
 
 
 class Basis(RoundNumericValuesMixin, BaseModel):
@@ -76,7 +76,15 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         self.coordinates.map_array_in_place(self.cell.convert_point_to_crystal)
         self.units = AtomicCoordinateUnits.crystal
 
-    def add_atom(self, element="Si", coordinate=[0.5, 0.5, 0.5]):
+    def add_atom(self, element="Si", coordinate=None, force=False):
+        if coordinate is None:
+            coordinate = [0, 0, 0]
+        if get_overlapping_coordinates(coordinate, self.coordinates.values, threshold=0.01):
+            if force:
+                print(f"Warning: Overlapping coordinates found for {coordinate}. Adding atom anyway.")
+            else:
+                print(f"Warning: Overlapping coordinates found for {coordinate}. Not adding atom.")
+                return
         self.elements.add_item(element)
         self.coordinates.add_item(coordinate)
 

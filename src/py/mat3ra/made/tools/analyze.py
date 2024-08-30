@@ -7,6 +7,7 @@ from ..material import Material
 from .build.passivation.enums import SurfaceTypes
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
+from .utils import decorator_handle_periodic_boundary_conditions
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -299,8 +300,10 @@ def get_nearest_neighbors_atom_indices(
         site_index = len(structure.sites) - 1
 
         remove_dummy_atom = True
-
-    neighbors = voronoi_nn.get_nn_info(structure, site_index)
+    try:
+        neighbors = voronoi_nn.get_nn_info(structure, site_index)
+    except ValueError:
+        return None
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
     if remove_dummy_atom:
         structure.remove_sites([-1])
@@ -389,6 +392,7 @@ def shadowing_check(z: float, neighbors_indices: List[int], surface: SurfaceType
     )
 
 
+@decorator_handle_periodic_boundary_conditions(cutoff=0.1)
 def get_surface_atom_indices(
     material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, shadowing_radius: float = 2.5, depth: float = 5
 ) -> List[int]:
@@ -455,6 +459,7 @@ def get_coordination_numbers(
     return coordination_numbers
 
 
+@decorator_handle_periodic_boundary_conditions(cutoff=0.1)
 def get_undercoordinated_atom_indices(
     material: Material,
     indices: List[int],
