@@ -1,4 +1,4 @@
-from typing import Callable, List, Literal, Optional, Union, Tuple
+from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -10,6 +10,7 @@ from .analyze import (
     get_atomic_coordinates_extremum,
     get_surface_atom_indices,
 )
+from .build.passivation.enums import SurfaceTypes
 from .convert import from_ase, to_ase
 from .convert.utils import InterfacePartsEnum
 from .third_party import ase_add_vacuum
@@ -518,9 +519,11 @@ def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.
     film_atoms = filter_by_label(material, int(InterfacePartsEnum.FILM))
     substrate_atoms = filter_by_label(material, int(InterfacePartsEnum.SUBSTRATE))
 
-    film_atoms_surface_indices = get_surface_atom_indices(film_atoms, "BOTTOM", shadowing_radius=shadowing_radius)
+    film_atoms_surface_indices = get_surface_atom_indices(
+        film_atoms, SurfaceTypes.BOTTOM, shadowing_radius=shadowing_radius
+    )
     substrate_atoms_surface_indices = get_surface_atom_indices(
-        substrate_atoms, "TOP", shadowing_radius=shadowing_radius
+        substrate_atoms, SurfaceTypes.TOP, shadowing_radius=shadowing_radius
     )
 
     film_atoms_surface_coordinates = film_atoms.basis.coordinates
@@ -532,7 +535,7 @@ def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.
     substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
 
     tree = cKDTree(substrate_coordinates_values)
-    distances, _ = tree.query(film_coordinates_values, distance_upper_bound=radius)
+    distances, _ = tree.query(film_coordinates_values, distance_upper_bound=shadowing_radius)
     distances = distances[~np.isinf(distances)]
 
     return float(np.linalg.norm(distances))
