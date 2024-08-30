@@ -504,13 +504,13 @@ def displace_interface(
     return new_material
 
 
-def calculate_norm_of_distances(material: Material, radius: float = 5.0) -> float:
+def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.5) -> float:
     """
-    Calculate the norm of distances for each film atom to substrate atoms within a certain radius.
+    Calculate the norm of distances between interfacial gap facing atoms of the film and the substrate.
 
     Args:
         material (Material): The interface Material object.
-        radius (float): The radius within which to consider substrate atoms.
+        shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
 
     Returns:
         float: The calculated norm.
@@ -518,21 +518,28 @@ def calculate_norm_of_distances(material: Material, radius: float = 5.0) -> floa
     film_atoms = filter_by_label(material, int(InterfacePartsEnum.FILM))
     substrate_atoms = filter_by_label(material, int(InterfacePartsEnum.SUBSTRATE))
 
-    film_atoms_surface_indices = get_surface_atom_indices(film_atoms, "BOTTOM", distance_threshold=radius)
-    substrate_atoms_surface_indices = get_surface_atom_indices(substrate_atoms, "TOP", distance_threshold=radius)
+    film_atoms_surface_indices = get_surface_atom_indices(film_atoms, "BOTTOM", shadowing_radius=shadowing_radius)
+    substrate_atoms_surface_indices = get_surface_atom_indices(
+        substrate_atoms, "TOP", shadowing_radius=shadowing_radius
+    )
 
-    film_coordinates = film_atoms.basis.coordinates.filter_by_indices(film_atoms_surface_indices).values
-    substrate_coordinates = substrate_atoms.basis.coordinates.filter_by_indices(substrate_atoms_surface_indices).values
+    film_atoms_surface_coordinates = film_atoms.basis.coordinates
+    film_atoms_surface_coordinates.filter_by_ids(film_atoms_surface_indices)
+    substrate_atoms_surface_coordinates = substrate_atoms.basis.coordinates
+    substrate_atoms_surface_coordinates.filter_by_ids(substrate_atoms_surface_indices)
 
-    tree = cKDTree(substrate_coordinates)
-    distances, _ = tree.query(film_coordinates, distance_upper_bound=radius)
+    film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
+    substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
+
+    tree = cKDTree(substrate_coordinates_values)
+    distances, _ = tree.query(film_coordinates_values, distance_upper_bound=radius)
     distances = distances[~np.isinf(distances)]
 
     return float(np.linalg.norm(distances))
 
 
 def get_optimal_displacements(
-    material: Material, grid_size: Tuple[int, int] = (10, 10), step: float = 0.05
+    material: Material, grid_size: Tuple[int, int] = (10, 10), search_range: float = 5.0
 ) -> List[List[float]]:
     """
     Return all optimal displacements for the interface material by calculating
@@ -542,13 +549,13 @@ def get_optimal_displacements(
     Args:
         material (Material): The interface Material object.
         grid_size (Tuple[int, int]): The size of the grid.
-        step (float): The step size in angstroms.
+        search_range (float): The search range for the displacements.
 
     Returns:
         List[List[float]]: The optimal displacements.
     """
-    x_values = np.linspace(0, grid_size[0] * step, grid_size[0])
-    y_values = np.linspace(0, grid_size[1] * step, grid_size[1])
+    x_values = np.linspace(0, search_range, grid_size[0])
+    y_values = np.linspace(0, search_range, grid_size[1])
 
     norms = np.zeros(grid_size)
 
