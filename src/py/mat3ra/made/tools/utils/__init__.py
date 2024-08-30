@@ -188,8 +188,7 @@ def augment_material_with_periodic_images(material: Material, cutoff: float = 0.
         for direction in [-1, 1]:
             translated_coords, translated_elems = filter_and_translate(coordinates, elements, axis, cutoff, direction)
             for coord, elem in zip(translated_coords, translated_elems):
-                if not any(np.allclose(coord, existing_coord) for existing_coord in new_basis.coordinates.values):
-                    new_basis.add_atom(elem, coord)
+                new_basis.add_atom(elem, coord)
 
     augmented_material.basis = new_basis
     return augmented_material, last_id
