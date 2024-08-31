@@ -93,16 +93,18 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         self.coordinates.remove_item(id)
         self.labels.remove_item(id)
 
-    def filter_atoms_by_ids(self, ids):
+    def filter_atoms_by_ids(self, ids) -> "Basis":
         self.elements.filter_by_ids(ids)
         self.coordinates.filter_by_ids(ids)
         if self.labels is not None:
             self.labels.filter_by_ids(ids)
+        return self
 
-    def filter_atoms_by_labels(self, labels):
+    def filter_atoms_by_labels(self, labels) -> "Basis":
         if self.labels is None:
-            return
+            return self
         self.labels.filter_by_values(labels)
         ids = self.labels.ids
         self.elements.filter_by_ids(ids)
         self.coordinates.filter_by_ids(ids)
+        return self
