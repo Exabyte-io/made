@@ -1,7 +1,12 @@
 from typing import Optional
 
+import numpy as np
+from mat3ra.made.tools.convert.utils import InterfacePartsEnum
+from scipy.spatial import cKDTree
+
+from .build.passivation.enums import SurfaceTypes
 from ..material import Material
-from .analyze import get_surface_area
+from .analyze import get_surface_area, get_surface_atom_indices, calculate_norm_of_distances_between_coordinates
 from .build.interface.utils import get_slab
 from .convert import decorator_convert_material_args_kwargs_to_atoms
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
@@ -125,3 +130,42 @@ def calculate_interfacial_energy(
     surface_energy_film = calculate_surface_energy(film_slab, film_bulk, calculator)
     adhesion_energy = calculate_adhesion_energy(interface, substrate_slab, film_slab, calculator)
     return surface_energy_film + surface_energy_substrate - adhesion_energy
+
+
+def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.5) -> float:
+    """
+    Calculate the norm of distances between interfacial gap facing atoms of the film and the substrate.
+
+    Args:
+        material (Material): The interface Material object.
+        shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
+
+    Returns:
+        float: The calculated norm.
+    """
+    film_material = material.clone()
+    substrate_material = material.clone()
+
+    film_atoms_basis = film_material.basis.copy()
+    substrate_atoms_basis = substrate_material.basis.copy()
+    film_atoms_basis.filter_atoms_by_labels([int(InterfacePartsEnum.FILM)])
+    substrate_atoms_basis.filter_atoms_by_labels([int(InterfacePartsEnum.SUBSTRATE)])
+
+    film_material.basis = film_atoms_basis
+    substrate_material.basis = substrate_atoms_basis
+    film_atoms_surface_indices = get_surface_atom_indices(
+        film_material, SurfaceTypes.BOTTOM, shadowing_radius=shadowing_radius
+    )
+    substrate_atoms_surface_indices = get_surface_atom_indices(
+        substrate_material, SurfaceTypes.TOP, shadowing_radius=shadowing_radius
+    )
+
+    film_atoms_surface_coordinates = film_material.basis.coordinates
+    film_atoms_surface_coordinates.filter_by_ids(film_atoms_surface_indices)
+    substrate_atoms_surface_coordinates = substrate_material.basis.coordinates
+    substrate_atoms_surface_coordinates.filter_by_ids(substrate_atoms_surface_indices)
+
+    film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
+    substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
+
+    return calculate_norm_of_distances_between_coordinates(film_coordinates_values, substrate_coordinates_values)

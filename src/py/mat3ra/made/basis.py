@@ -98,3 +98,9 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         self.coordinates.filter_by_ids(ids)
         if self.labels is not None:
             self.labels.filter_by_ids(ids)
+
+    def filter_atoms_by_labels(self, labels):
+        self.elements.filter_by_values(labels)
+        self.coordinates.filter_by_values(labels)
+        if self.labels is not None:
+            self.labels.filter_by_values(labels)

@@ -1,4 +1,4 @@
-from typing import Callable, List, Literal, Optional
+from typing import Callable, List, Literal, Optional, Tuple
 
 import numpy as np
 from scipy.spatial import cKDTree
@@ -481,3 +481,57 @@ def get_undercoordinated_atom_indices(
     coordination_numbers = get_coordination_numbers(material, indices, cutoff)
     undercoordinated_atoms_indices = [i for i, cn in enumerate(coordination_numbers) if cn <= coordination_threshold]
     return undercoordinated_atoms_indices
+
+
+def calculate_norm_of_distances_between_coordinates(coords1: np.ndarray, coords2: np.ndarray) -> float:
+    """
+    Calculate the norm of distances between two sets of coordinates.
+
+    Args:
+        coords1 (np.ndarray): The first set of coordinates.
+        coords2 (np.ndarray): The second set of coordinates.
+
+    Returns:
+        float: The calculated norm.
+    """
+    tree = cKDTree(coords2)
+    distances, _ = tree.query(coords1)
+    distances = distances[~np.isinf(distances)]
+    return float(np.linalg.norm(distances))
+
+
+def get_optimal_displacements(
+    material: Material, grid_size: Tuple[int, int] = (10, 10), search_range: float = 1.0
+) -> List[List[float]]:
+    """
+    Return all optimal displacements for the interface material by calculating
+    the norm of distances for each film atom to substrate atoms within a certain radius.
+    The displacement is done on a grid and the displacement that yields minimum norm is returned.
+
+    Args:
+        material (Material): The interface Material object.
+        grid_size (Tuple[int, int]): The size of the grid.
+        search_range (float): The search range for the displacements.
+
+    Returns:
+        List[List[float]]: The optimal displacements.
+    """
+    from .modify import displace_interface
+    from .calculate import calculate_norm_of_distances
+
+    x_values = np.linspace(0, search_range, grid_size[0])
+    y_values = np.linspace(0, search_range, grid_size[1])
+
+    norms = np.zeros(grid_size)
+
+    for i, x in enumerate(x_values):
+        for j, y in enumerate(y_values):
+            displaced_material = displace_interface(material, [x, y, 0], use_cartesian_coordinates=True)
+            norm = calculate_norm_of_distances(displaced_material)
+            norms[i, j] = norm
+
+    min_norm = np.min(norms)
+    min_positions = np.argwhere(norms == min_norm)
+
+    displacements_with_min_norm = [[x_values[pos[0]], y_values[pos[1]], 0] for pos in min_positions]
+    return displacements_with_min_norm

@@ -2,15 +2,12 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.made.material import Material
-from scipy.spatial import cKDTree
 
 from .analyze import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,
-    get_surface_atom_indices,
 )
-from .build.passivation.enums import SurfaceTypes
 from .convert import from_ase, to_ase
 from .convert.utils import InterfacePartsEnum
 from .third_party import ase_add_vacuum
@@ -503,73 +500,3 @@ def displace_interface(
     new_material.to_crystal()
     new_material = wrap_to_unit_cell(new_material)
     return new_material
-
-
-def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.5) -> float:
-    """
-    Calculate the norm of distances between interfacial gap facing atoms of the film and the substrate.
-
-    Args:
-        material (Material): The interface Material object.
-        shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
-
-    Returns:
-        float: The calculated norm.
-    """
-    film_atoms = filter_by_label(material, int(InterfacePartsEnum.FILM))
-    substrate_atoms = filter_by_label(material, int(InterfacePartsEnum.SUBSTRATE))
-
-    film_atoms_surface_indices = get_surface_atom_indices(
-        film_atoms, SurfaceTypes.BOTTOM, shadowing_radius=shadowing_radius
-    )
-    substrate_atoms_surface_indices = get_surface_atom_indices(
-        substrate_atoms, SurfaceTypes.TOP, shadowing_radius=shadowing_radius
-    )
-
-    film_atoms_surface_coordinates = film_atoms.basis.coordinates
-    film_atoms_surface_coordinates.filter_by_ids(film_atoms_surface_indices)
-    substrate_atoms_surface_coordinates = substrate_atoms.basis.coordinates
-    substrate_atoms_surface_coordinates.filter_by_ids(substrate_atoms_surface_indices)
-
-    film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
-    substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
-
-    tree = cKDTree(substrate_coordinates_values)
-    distances, _ = tree.query(film_coordinates_values, distance_upper_bound=shadowing_radius)
-    distances = distances[~np.isinf(distances)]
-
-    return float(np.linalg.norm(distances))
-
-
-def get_optimal_displacements(
-    material: Material, grid_size: Tuple[int, int] = (10, 10), search_range: float = 5.0
-) -> List[List[float]]:
-    """
-    Return all optimal displacements for the interface material by calculating
-    the norm of distances for each film atom to substrate atoms within a certain radius.
-    The displacement is done on a grid and the displacement that yields miminum norm is returned.
-
-    Args:
-        material (Material): The interface Material object.
-        grid_size (Tuple[int, int]): The size of the grid.
-        search_range (float): The search range for the displacements.
-
-    Returns:
-        List[List[float]]: The optimal displacements.
-    """
-    x_values = np.linspace(0, search_range, grid_size[0])
-    y_values = np.linspace(0, search_range, grid_size[1])
-
-    norms = np.zeros(grid_size)
-
-    for i, x in enumerate(x_values):
-        for j, y in enumerate(y_values):
-            displaced_material = displace_interface(material, [x, y, 0], use_cartesian_coordinates=True)
-            norm = calculate_norm_of_distances(displaced_material)
-            norms[i, j] = norm
-
-    min_norm = np.min(norms)
-    min_positions = np.argwhere(norms == min_norm)
-
-    displacements_with_min_norm = [[x_values[pos[0]], y_values[pos[1]], 0] for pos in min_positions]
-    return displacements_with_min_norm
