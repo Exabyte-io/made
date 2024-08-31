@@ -483,23 +483,6 @@ def get_undercoordinated_atom_indices(
     return undercoordinated_atoms_indices
 
 
-def calculate_norm_of_distances_between_coordinates(coords1: np.ndarray, coords2: np.ndarray) -> float:
-    """
-    Calculate the norm of distances between two sets of coordinates.
-
-    Args:
-        coords1 (np.ndarray): The first set of coordinates.
-        coords2 (np.ndarray): The second set of coordinates.
-
-    Returns:
-        float: The calculated norm.
-    """
-    tree = cKDTree(coords2)
-    distances, _ = tree.query(coords1)
-    distances = distances[~np.isinf(distances)]
-    return float(np.linalg.norm(distances))
-
-
 def get_optimal_displacements(
     material: Material, grid_size: Tuple[int, int] = (10, 10), search_range: float = 1.0
 ) -> List[List[float]]:

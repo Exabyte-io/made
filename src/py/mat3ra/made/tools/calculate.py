@@ -2,11 +2,11 @@ from typing import Optional
 
 import numpy as np
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
-from scipy.spatial import cKDTree
 
 from .build.passivation.enums import SurfaceTypes
+from .utils import calculate_norm_of_distances_between_coordinates
 from ..material import Material
-from .analyze import get_surface_area, get_surface_atom_indices, calculate_norm_of_distances_between_coordinates
+from .analyze import get_surface_area, get_surface_atom_indices
 from .build.interface.utils import get_slab
 from .convert import decorator_convert_material_args_kwargs_to_atoms
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
