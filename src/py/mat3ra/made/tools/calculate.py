@@ -145,11 +145,8 @@ def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.
     """
     film_material = material.clone()
     substrate_material = material.clone()
-
-    film_atoms_basis = film_material.basis.copy()
-    substrate_atoms_basis = substrate_material.basis.copy()
-    film_atoms_basis.filter_atoms_by_labels([int(InterfacePartsEnum.FILM)])
-    substrate_atoms_basis.filter_atoms_by_labels([int(InterfacePartsEnum.SUBSTRATE)])
+    film_atoms_basis = film_material.basis.filter_atoms_by_labels([int(InterfacePartsEnum.FILM)])
+    substrate_atoms_basis = substrate_material.basis.filter_atoms_by_labels([int(InterfacePartsEnum.SUBSTRATE)])
 
     film_material.basis = film_atoms_basis
     substrate_material.basis = substrate_atoms_basis
