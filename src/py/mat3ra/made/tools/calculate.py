@@ -7,9 +7,12 @@ from ..material import Material
 from .analyze import get_surface_area, get_surface_atom_indices
 from .build.interface.utils import get_slab
 from .build.passivation.enums import SurfaceTypes
-from .convert import decorator_convert_material_args_kwargs_to_atoms
+from .convert import decorator_convert_material_args_kwargs_to_atoms, from_ase
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
 from .utils import calculate_norm_of_distances_between_coordinates, decorator_handle_periodic_boundary_conditions
+
+# TODO: import from thrid_party
+from ase.calculators.calculator import all_changes
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -167,3 +170,37 @@ def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.
     substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
 
     return calculate_norm_of_distances_between_coordinates(film_coordinates_values, substrate_coordinates_values)
+
+
+class SurfaceDistanceCalculator(ASECalculator):
+    """
+    ASE calculator that computes the norm of distances between interfacial gap facing atoms
+    of the film and the substrate.
+
+    # Example usage:
+    # from ase.optimize import BFGS
+    # atoms = to_ase(material)
+    # calc = SurfaceDistanceCalculator(shadowing_radius=2.5)
+    #
+    # atoms.calc = calc
+    # opt = BFGS(atoms)
+    # opt.run(fmax=0.05)
+
+    """
+
+    implemented_properties = ["energy"]
+
+    def __init__(self, shadowing_radius: float = 2.5, **kwargs):
+        super().__init__(**kwargs)
+        self.shadowing_radius = shadowing_radius
+
+    @decorator_convert_material_args_kwargs_to_atoms
+    def calculate(self, atoms: Optional[ASEAtoms] = None, properties=["energy"], system_changes=all_changes):
+        if atoms is None:
+            atoms = self.atoms.copy()
+
+        ASECalculator.calculate(self, atoms, properties, system_changes)
+        material = Material(from_ase(atoms))
+        norm = calculate_norm_of_distances(material, self.shadowing_radius)
+
+        self.results = {"energy": norm}
