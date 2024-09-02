@@ -9,7 +9,7 @@ from .build.interface.utils import get_slab
 from .build.passivation.enums import SurfaceTypes
 from .convert import decorator_convert_material_args_kwargs_to_atoms
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
-from .utils import calculate_norm_of_distances_between_coordinates
+from .utils import calculate_norm_of_distances_between_coordinates, decorator_handle_periodic_boundary_conditions
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -132,6 +132,7 @@ def calculate_interfacial_energy(
     return surface_energy_film + surface_energy_substrate - adhesion_energy
 
 
+@decorator_handle_periodic_boundary_conditions(cutoff=0.25)
 def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.5) -> float:
     """
     Calculate the norm of distances between interfacial gap facing atoms of the film and the substrate.

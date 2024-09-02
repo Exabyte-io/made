@@ -484,7 +484,10 @@ def get_undercoordinated_atom_indices(
 
 
 def get_optimal_displacements(
-    material: Material, grid_size: Tuple[int, int] = (10, 10), search_range: float = 1.0
+    material: Material,
+    grid_size: Tuple[int, int] = (10, 10),
+    search_range: Tuple[float, float] = (-1.0, 1.0),
+    shadowing_radius: float = 2.5,
 ) -> List[List[float]]:
     """
     Return all optimal displacements for the interface material by calculating
@@ -494,7 +497,8 @@ def get_optimal_displacements(
     Args:
         material (Material): The interface Material object.
         grid_size (Tuple[int, int]): The size of the grid.
-        search_range (float): The search range for the displacements.
+        search_range (Tuple[float, float]): The range to search for optimal displacements.
+        shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
 
     Returns:
         List[List[float]]: The optimal displacements.
@@ -502,15 +506,15 @@ def get_optimal_displacements(
     from .calculate import calculate_norm_of_distances
     from .modify import displace_interface
 
-    x_values = np.linspace(0, search_range, grid_size[0])
-    y_values = np.linspace(0, search_range, grid_size[1])
+    x_values = np.linspace(search_range[0], search_range[1], grid_size[0])
+    y_values = np.linspace(search_range[0], search_range[1], grid_size[1])
 
     norms = np.zeros(grid_size)
 
     for i, x in enumerate(x_values):
         for j, y in enumerate(y_values):
             displaced_material = displace_interface(material, [x, y, 0], use_cartesian_coordinates=True)
-            norm = calculate_norm_of_distances(displaced_material)
+            norm = calculate_norm_of_distances(displaced_material, shadowing_radius)
             norms[i, j] = norm
 
     min_norm = np.min(norms)
