@@ -177,22 +177,33 @@ class SurfaceDistanceCalculator(ASECalculator):
     ASE calculator that computes the norm of distances between interfacial gap facing atoms
     of the film and the substrate.
 
-    # Example usage:
-    # from ase.optimize import BFGS
-    # atoms = to_ase(material)
-    # calc = SurfaceDistanceCalculator(shadowing_radius=2.5)
-    #
-    # atoms.calc = calc
-    # opt = BFGS(atoms)
-    # opt.run(fmax=0.05)
+    Example usage:
+    ```python
+    from ase.optimize import BFGS
+    atoms = to_ase(material)
+    calc = SurfaceDistanceCalculator(shadowing_radius=2.5)
 
+    atoms.calc = calc
+    opt = BFGS(atoms)
+    opt.run(fmax=0.05)
+    ```
+    Args:
+        shadowing_radius (float): Radius for atoms shadowing underlying from being treated as a surface, in Angstroms.
+        force_constant (float): The force constant for the finite difference approximation of the
+    Note:
+        Built following: https://wiki.fysik.dtu.dk/ase/development/calculators.html
+
+        The calculate method is responsible for computing the energy and forces (if requested).
+        Forces are estimated using a finite difference method, which is a simple approximation
+        and might not be the most accurate or efficient for all cases.
     """
 
-    implemented_properties = ["energy"]
+    implemented_properties = ["energy", "forces"]
 
-    def __init__(self, shadowing_radius: float = 2.5, **kwargs):
+    def __init__(self, shadowing_radius: float = 2.5, force_constant: float = 1.0, **kwargs):
         super().__init__(**kwargs)
         self.shadowing_radius = shadowing_radius
+        self.force_constant = force_constant
 
     @decorator_convert_material_args_kwargs_to_atoms
     def calculate(self, atoms: Optional[ASEAtoms] = None, properties=["energy"], system_changes=all_changes):
@@ -202,5 +213,19 @@ class SurfaceDistanceCalculator(ASECalculator):
         ASECalculator.calculate(self, atoms, properties, system_changes)
         material = Material(from_ase(atoms))
         norm = calculate_norm_of_distances(material, self.shadowing_radius)
-
         self.results = {"energy": norm}
+
+        if "forces" in properties:
+            forces = np.zeros((len(atoms), 3))
+            dx = 0.01
+            for i in range(len(atoms)):
+                for j in range(3):
+                    atoms_plus = atoms.copy()
+                    atoms_plus.positions[i, j] += dx
+                    material_plus = Material(from_ase(atoms_plus))
+                    norm_plus = calculate_norm_of_distances(material_plus, self.shadowing_radius)
+
+                    # Finite difference approximation of the force
+                    forces[i, j] = -self.force_constant * (norm_plus - norm) / dx
+
+            self.results["forces"] = forces
