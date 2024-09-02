@@ -1,4 +1,4 @@
-from typing import Callable, List, Literal, Optional, Tuple, Union
+from typing import Callable, List, Literal, Optional, Union
 
 import numpy as np
 from mat3ra.made.material import Material

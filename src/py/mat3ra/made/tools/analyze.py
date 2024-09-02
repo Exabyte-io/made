@@ -499,8 +499,8 @@ def get_optimal_displacements(
     Returns:
         List[List[float]]: The optimal displacements.
     """
-    from .modify import displace_interface
     from .calculate import calculate_norm_of_distances
+    from .modify import displace_interface
 
     x_values = np.linspace(0, search_range, grid_size[0])
     y_values = np.linspace(0, search_range, grid_size[1])
