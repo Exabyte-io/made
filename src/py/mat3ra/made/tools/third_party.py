@@ -2,7 +2,10 @@ from ase import Atoms as ASEAtoms
 from ase.build import add_vacuum as ase_add_vacuum
 from ase.build.supercells import make_supercell as ase_make_supercell
 from ase.calculators.calculator import Calculator as ASECalculator
+from ase.calculators.calculator import all_changes as ase_all_changes
 from ase.calculators.emt import EMT as ASECalculatorEMT
+from ase.constraints import FixAtoms as ASEFixAtoms
+from ase.constraints import FixedPlane as ASEFixedPlane
 from pymatgen.analysis.defects.core import Interstitial as PymatgenInterstitial
 from pymatgen.analysis.defects.core import Substitution as PymatgenSubstitution
 from pymatgen.analysis.defects.core import Vacancy as PymatgenVacancy
@@ -25,6 +28,9 @@ __all__ = [
     "ASEAtoms",
     "ASECalculator",
     "ASECalculatorEMT",
+    "ASEFixAtoms",
+    "ASEFixedPlane",
+    "ase_all_changes",
     "PymatgenLattice",
     "PymatgenStructure",
     "PymatgenIStructure",
