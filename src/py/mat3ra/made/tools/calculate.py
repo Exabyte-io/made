@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Union
 
 import numpy as np
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
@@ -13,6 +13,7 @@ from .utils import calculate_norm_of_distances_between_coordinates, decorator_ha
 
 # TODO: import from thrid_party
 from ase.calculators.calculator import all_changes
+from ase.constraints import FixAtoms, FixedPlane
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -200,24 +201,47 @@ class SurfaceDistanceCalculator(ASECalculator):
 
     implemented_properties = ["energy", "forces"]
 
-    def __init__(self, shadowing_radius: float = 2.5, force_constant: float = 1.0, **kwargs):
+    def __init__(
+        self,
+        shadowing_radius: float = 2.5,
+        force_constant: float = 1.0,
+        fix_substrate: bool = True,
+        fix_z: bool = True,
+        symprec: float = 0.01,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self.shadowing_radius = shadowing_radius
         self.force_constant = force_constant
+        self.fix_substrate = fix_substrate
+        self.fix_z = fix_z
+        self.symprec = symprec
 
     @decorator_convert_material_args_kwargs_to_atoms
     def calculate(self, atoms: Optional[ASEAtoms] = None, properties=["energy"], system_changes=all_changes):
         if atoms is None:
             atoms = self.atoms.copy()
 
+        # Apply constraints
+        constraints: List[Union[FixAtoms, FixedPlane]] = []
+        if self.fix_substrate:
+            substrate_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 0]
+            constraints.append(FixAtoms(indices=substrate_indices))
+        if self.fix_z:
+            all_indices = list(range(len(atoms)))
+            constraints.append(FixedPlane(indices=all_indices, direction=[0, 0, 1]))
+
+        atoms.set_constraint(constraints)
+
         ASECalculator.calculate(self, atoms, properties, system_changes)
         material = Material(from_ase(atoms))
         norm = calculate_norm_of_distances(material, self.shadowing_radius)
+
         self.results = {"energy": norm}
 
         if "forces" in properties:
             forces = np.zeros((len(atoms), 3))
-            dx = 0.01
+            dx = 0.01  # Small displacement for finite difference
             for i in range(len(atoms)):
                 for j in range(3):
                     atoms_plus = atoms.copy()
@@ -225,7 +249,15 @@ class SurfaceDistanceCalculator(ASECalculator):
                     material_plus = Material(from_ase(atoms_plus))
                     norm_plus = calculate_norm_of_distances(material_plus, self.shadowing_radius)
 
-                    # Finite difference approximation of the force
                     forces[i, j] = -self.force_constant * (norm_plus - norm) / dx
 
+            for constraint in constraints:
+                constraint.adjust_forces(atoms, forces)
+
             self.results["forces"] = forces
+
+    def get_potential_energy(self, atoms=None, force_consistent=False):
+        return self.get_property("energy", atoms)
+
+    def get_forces(self, atoms=None):
+        return self.get_property("forces", atoms)
