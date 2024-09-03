@@ -1,4 +1,4 @@
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
@@ -8,12 +8,8 @@ from .analyze import get_surface_area, get_surface_atom_indices
 from .build.interface.utils import get_slab
 from .build.passivation.enums import SurfaceTypes
 from .convert import decorator_convert_material_args_kwargs_to_atoms, from_ase
-from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
+from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT, ASEFixAtoms, ASEFixedPlane, ase_all_changes
 from .utils import calculate_norm_of_distances_between_coordinates, decorator_handle_periodic_boundary_conditions
-
-# TODO: import from thrid_party
-from ase.calculators.calculator import all_changes
-from ase.constraints import FixAtoms, FixedPlane
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -217,21 +213,39 @@ class SurfaceDistanceCalculator(ASECalculator):
         self.fix_z = fix_z
         self.symprec = symprec
 
+    def _add_constraints(self, atoms: ASEAtoms) -> ASEAtoms:
+        constraints: List[Union[ASEFixAtoms, ASEFixedPlane]] = []
+        if self.fix_substrate:
+            substrate_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 0]
+            constraints.append(ASEFixAtoms(indices=substrate_indices))
+        if self.fix_z:
+            all_indices = list(range(len(atoms)))
+            constraints.append(ASEFixedPlane(indices=all_indices, direction=[0, 0, 1]))
+
+        atoms.set_constraint(constraints)
+        return atoms
+
+    def _calculate_forces(self, atoms: ASEAtoms, norm: float) -> np.ndarray:
+        forces = np.zeros((len(atoms), 3))
+        dx = 0.01
+        for i in range(len(atoms)):
+            for j in range(3):
+                atoms_plus = atoms.copy()
+                atoms_plus.positions[i, j] += dx
+                material_plus = Material(from_ase(atoms_plus))
+                norm_plus = calculate_norm_of_distances(material_plus, self.shadowing_radius)
+
+                forces[i, j] = -self.force_constant * (norm_plus - norm) / dx
+
+        return forces
+
     @decorator_convert_material_args_kwargs_to_atoms
-    def calculate(self, atoms: Optional[ASEAtoms] = None, properties=["energy"], system_changes=all_changes):
+    def calculate(self, atoms: Optional[ASEAtoms] = None, properties=["energy"], system_changes=ase_all_changes):
         if atoms is None:
             atoms = self.atoms.copy()
 
-        # Apply constraints
-        constraints: List[Union[FixAtoms, FixedPlane]] = []
-        if self.fix_substrate:
-            substrate_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 0]
-            constraints.append(FixAtoms(indices=substrate_indices))
-        if self.fix_z:
-            all_indices = list(range(len(atoms)))
-            constraints.append(FixedPlane(indices=all_indices, direction=[0, 0, 1]))
-
-        atoms.set_constraint(constraints)
+        atoms = self._add_constraints(atoms)
+        constraints = atoms.constraints
 
         ASECalculator.calculate(self, atoms, properties, system_changes)
         material = Material(from_ase(atoms))
@@ -240,20 +254,9 @@ class SurfaceDistanceCalculator(ASECalculator):
         self.results = {"energy": norm}
 
         if "forces" in properties:
-            forces = np.zeros((len(atoms), 3))
-            dx = 0.01  # Small displacement for finite difference
-            for i in range(len(atoms)):
-                for j in range(3):
-                    atoms_plus = atoms.copy()
-                    atoms_plus.positions[i, j] += dx
-                    material_plus = Material(from_ase(atoms_plus))
-                    norm_plus = calculate_norm_of_distances(material_plus, self.shadowing_radius)
-
-                    forces[i, j] = -self.force_constant * (norm_plus - norm) / dx
-
+            forces = self._calculate_forces(atoms, norm)
             for constraint in constraints:
                 constraint.adjust_forces(atoms, forces)
-
             self.results["forces"] = forces
 
     def get_potential_energy(self, atoms=None, force_consistent=False):
