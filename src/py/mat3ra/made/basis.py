@@ -91,7 +91,8 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     def remove_atom_by_id(self, id=None):
         self.elements.remove_item(id)
         self.coordinates.remove_item(id)
-        self.labels.remove_item(id)
+        if len(self.labels.values) > 0:
+            self.labels.remove_item(id)
 
     def filter_atoms_by_ids(self, ids) -> "Basis":
         self.elements.filter_by_ids(ids)
