@@ -235,14 +235,7 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
         merged_material = merge_materials([rotated_film_scaled, rotated_basis_translated])
 
         merged_material_unrotated = rotate_material(merged_material, [0, 0, 1], -angle, wrap=False)
-        # merged_material_unrotated = filter_by_box(merged_material_unrotated, [0, 0, 0], [1, 1, 1])
         p, q = calculate_moire_periodicity(film.lattice.a, film.lattice.b, angle)
-        print(p, q)
-        print(
-            merged_material_unrotated.lattice.a,
-            merged_material_unrotated.lattice.b,
-            merged_material_unrotated.lattice.c,
-        )
 
         vertex_1 = [0, 0, 0]
         vertex_2 = [p / 2, np.sqrt(3) / 2 * q, 0]
