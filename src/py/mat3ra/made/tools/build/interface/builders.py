@@ -223,7 +223,8 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
     def _generate(self, configuration: TwistedInterfaceConfiguration) -> List[Material]:
         film = configuration.film
         angle = configuration.twist_angle
-        n = np.round(1 / np.sin(np.deg2rad(angle)))
+        adjusted_angle = self._reduce_angle_mod(angle, 30)
+        n = np.round(1 / np.sin(np.deg2rad(adjusted_angle)))
         m = 2 * n
         distance_z_vector_crystal = film.basis.cell.convert_point_to_crystal([0, 0, configuration.distance_z])
         rotated_film = create_supercell(film, [[1, -1, 0], [1, 1, 0], [0, 0, 1]])
@@ -263,6 +264,24 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
         final_material = new_atoms.clone()
         final_material.set_new_lattice_vectors(vertex_2, vertex_3, [0, 0, height])
         return [final_material]
+
+    @staticmethod
+    def _reduce_angle_mod(angle, mod):
+        """
+        Reduces any given twist angle to the equivalent small angle under hexagonal symmetry.
+
+        Parameters:
+        angle (float): Twist angle in degrees.
+
+        Returns:
+        float: Reduced twist angle within [0, 60) degrees.
+        """
+        mod_angle = angle % mod
+
+        if mod_angle > mod / 2:
+            mod_angle = mod - mod_angle
+
+        return mod_angle
 
     def _update_material_name(self, material: Material, configuration: TwistedInterfaceConfiguration) -> Material:
         film_formula = get_chemical_formula(configuration.film_configuration.bulk)
