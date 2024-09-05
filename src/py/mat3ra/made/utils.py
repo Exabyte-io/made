@@ -97,6 +97,11 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
     ids: List[int] = []
 
     @classmethod
+    def from_values(cls, values: List[Any]) -> "ArrayWithIds":
+        ids = list(range(len(values)))
+        return cls(values=values, ids=ids)
+
+    @classmethod
     def from_list_of_dicts(cls, list_of_dicts: List[Dict[str, Any]]) -> "ArrayWithIds":
         try:
             values = [item["value"] for item in list_of_dicts]
