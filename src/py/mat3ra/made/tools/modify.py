@@ -444,7 +444,7 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
     return new_material
 
 
-def rotate_material(material: Material, axis: List[int], angle: float) -> Material:
+def rotate_material(material: Material, axis: List[int], angle: float, wrap: bool = True) -> Material:
     """
     Rotate the material around a given axis by a specified angle.
 
@@ -460,8 +460,9 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
         crystal_basis.to_crystal()
         material.basis = crystal_basis
     atoms = to_ase(material)
-    atoms.rotate(v=axis, a=angle, center="COM")
-    atoms.wrap()
+    atoms.rotate(v=axis, a=angle, center=(0, 0, 0))
+    if wrap:
+        atoms.wrap()
 
     return Material(from_ase(atoms))
 
