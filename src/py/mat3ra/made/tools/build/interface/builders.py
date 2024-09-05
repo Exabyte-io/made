@@ -3,7 +3,13 @@ from typing import Any, List, Optional, Tuple
 import numpy as np
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.build.utils import merge_materials
-from mat3ra.made.tools.modify import translate_to_z_level, rotate_material, translate_by_vector, filter_by_box
+from mat3ra.made.tools.modify import (
+    translate_to_z_level,
+    rotate_material,
+    translate_by_vector,
+    filter_by_box,
+    filter_by_triangle_projection,
+)
 from pydantic import BaseModel, Field
 from ase.build.tools import niggli_reduce
 from pymatgen.analysis.interfaces.coherent_interfaces import (
@@ -23,7 +29,7 @@ from ..mixins import (
 )
 from ..slab import create_slab, Termination
 from ..slab.configuration import SlabConfiguration
-from ...analyze import get_chemical_formula
+from ...analyze import get_chemical_formula, calculate_moire_periodicity
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms, from_pymatgen
 from ...build import BaseBuilder, BaseConfiguration
 
@@ -229,9 +235,42 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
         merged_material = merge_materials([rotated_film_scaled, rotated_basis_translated])
 
         merged_material_unrotated = rotate_material(merged_material, [0, 0, 1], -angle, wrap=False)
-        merged_material_unrotated = filter_by_box(merged_material_unrotated, [0, 0, 0], [1, 1, 1])
+        # merged_material_unrotated = filter_by_box(merged_material_unrotated, [0, 0, 0], [1, 1, 1])
+        p, q = calculate_moire_periodicity(film.lattice.a, film.lattice.b, angle)
+        print(p, q)
+        print(
+            merged_material_unrotated.lattice.a,
+            merged_material_unrotated.lattice.b,
+            merged_material_unrotated.lattice.c,
+        )
 
-        return [merged_material_unrotated]
+        vertex_1 = [0, 0, 0]
+        vertex_2 = [p / 2, np.sqrt(3) / 2 * q, 0]
+        vertex_3 = [p, 0, 0]
+        vertex_4 = [3 / 2 * p, np.sqrt(3) / 2 * q, 0]
+        height = merged_material_unrotated.lattice.c
+        new_atoms_1 = filter_by_triangle_projection(
+            merged_material_unrotated,
+            coordinate_1=vertex_1,
+            coordinate_2=vertex_2,
+            coordinate_3=vertex_3,
+            max_z=height,
+            use_cartesian_coordinates=True,
+        )
+        new_atoms_2 = filter_by_triangle_projection(
+            merged_material_unrotated,
+            coordinate_1=vertex_2,
+            coordinate_2=vertex_3,
+            coordinate_3=vertex_4,
+            max_z=height,
+            use_cartesian_coordinates=True,
+        )
+
+        new_atoms = merge_materials([new_atoms_1, new_atoms_2])
+
+        final_material = new_atoms.clone()
+        final_material.set_new_lattice_vectors(vertex_2, vertex_3, [0, 0, height])
+        return [final_material]
 
     def _update_material_name(self, material: Material, configuration: TwistedInterfaceConfiguration) -> Material:
         film_formula = get_chemical_formula(configuration.film_configuration.bulk)
