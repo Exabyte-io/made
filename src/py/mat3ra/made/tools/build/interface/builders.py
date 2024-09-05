@@ -1,7 +1,9 @@
 from typing import Any, List, Optional, Tuple
 
 import numpy as np
-from mat3ra.made.tools.modify import translate_to_z_level
+from mat3ra.made.tools.build.supercell import create_supercell
+from mat3ra.made.tools.build.utils import merge_materials
+from mat3ra.made.tools.modify import translate_to_z_level, rotate_material, translate_by_vector, filter_by_box
 from pydantic import BaseModel, Field
 from ase.build.tools import niggli_reduce
 from pymatgen.analysis.interfaces.coherent_interfaces import (
@@ -23,7 +25,7 @@ from ..slab import create_slab, Termination
 from ..slab.configuration import SlabConfiguration
 from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms, from_pymatgen
-from ...build import BaseBuilder
+from ...build import BaseBuilder, BaseConfiguration
 
 
 class InterfaceBuilderParameters(BaseModel):
@@ -197,62 +199,39 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
 ########################################################################################
 
 
-class TwistedInterfaceConfiguration(InterfaceConfiguration):
+class TwistedInterfaceConfiguration(BaseConfiguration):
+    film: Material
+    substrate: Material
     twist_angle: float = Field(..., description="Twist angle in degrees")
+    distance_z: float = 3.0
 
     @property
     def _json(self):
         json_data = super()._json
-        json_data.update({"type": "TwistedInterfaceConfiguration", "twist_angle": self.twist_angle})
+        json_data.update({"twist_angle": self.twist_angle})
         return json_data
 
 
-class TwistedInterfaceBuilder(ZSLStrainMatchingInterfaceBuilder):
-    _BuildParametersType = ZSLStrainMatchingInterfaceBuilderParameters
+class TwistedInterfaceBuilder(InterfaceBuilder):
     _ConfigurationType = TwistedInterfaceConfiguration
 
-    def _generate(self, configuration: TwistedInterfaceConfiguration) -> List[PymatgenInterface]:
-        generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.dict())
-        substrate_with_atoms_translated_to_bottom = translate_to_z_level(
-            configuration.substrate_configuration.bulk, "bottom"
-        )
-        film_with_atoms_translated_to_bottom = translate_to_z_level(configuration.film_configuration.bulk, "bottom")
+    def _generate(self, configuration: TwistedInterfaceConfiguration) -> List[Material]:
+        film = configuration.film
+        angle = configuration.twist_angle
+        n = np.round(1 / np.sin(np.deg2rad(angle)))
+        m = 2 * n
+        distance_z_vector_crystal = film.basis.cell.convert_point_to_crystal([0, 0, configuration.distance_z])
+        rotated_film = create_supercell(film, [[1, -1, 0], [1, 1, 0], [0, 0, 1]])
+        rotated_film_scaled = create_supercell(rotated_film, scaling_factor=[n, m, 1])
+        rotated_basis = rotate_material(rotated_film_scaled, [0, 0, 1], angle, wrap=False)
+        rotated_basis_translated = translate_by_vector(rotated_basis, distance_z_vector_crystal)
 
-        substrate_structure = to_pymatgen(substrate_with_atoms_translated_to_bottom)
-        film_structure = to_pymatgen(film_with_atoms_translated_to_bottom)
+        merged_material = merge_materials([rotated_film_scaled, rotated_basis_translated])
 
-        # Apply twist to film structure
-        twisted_film = self._twist_structure(film_structure, configuration.twist_angle)
+        merged_material_unrotated = rotate_material(merged_material, [0, 0, 1], -angle, wrap=False)
+        merged_material_unrotated = filter_by_box(merged_material_unrotated, [0, 0, 0], [1, 1, 1])
 
-        builder = CoherentInterfaceBuilder(
-            substrate_structure=substrate_structure,
-            film_structure=twisted_film,
-            substrate_miller=configuration.substrate_configuration.miller_indices,
-            film_miller=configuration.film_configuration.miller_indices,
-            zslgen=generator,
-        )
-
-        generated_termination_pairs = [
-            TerminationPair.from_pymatgen(pymatgen_termination) for pymatgen_termination in builder.terminations
-        ]
-        termination_pair = safely_select_termination_pair(configuration.termination_pair, generated_termination_pairs)
-        interfaces = builder.get_interfaces(
-            termination=termination_pair.to_pymatgen(),
-            gap=configuration.distance_z,
-            vacuum_over_film=configuration.vacuum,
-            film_thickness=configuration.film_configuration.thickness,
-            substrate_thickness=configuration.substrate_configuration.thickness,
-            in_layers=True,
-        )
-
-        return list([interface_patch_with_mean_abs_strain(interface) for interface in interfaces])
-
-    def _twist_structure(self, structure: PymatgenStructure, angle: float) -> PymatgenStructure:
-        from pymatgen.transformations.standard_transformations import RotationTransformation
-
-        rotation = RotationTransformation([0, 0, 1], angle)
-        twisted_structure = rotation.apply_transformation(structure)
-        return twisted_structure
+        return [merged_material_unrotated]
 
     def _update_material_name(self, material: Material, configuration: TwistedInterfaceConfiguration) -> Material:
         film_formula = get_chemical_formula(configuration.film_configuration.bulk)
