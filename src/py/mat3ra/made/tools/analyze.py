@@ -522,3 +522,23 @@ def get_optimal_displacements(
 
     displacements_with_min_norm = [[x_values[pos[0]], y_values[pos[1]], 0] for pos in min_positions]
     return displacements_with_min_norm
+
+
+def calculate_moire_periodicity(lattice_a: float, lattice_b: float, twist_angle: float) -> tuple[float, float]:
+    """
+    Calculate the periodicity of the Moiré pattern considering X and Y independently.
+
+    Args:
+        lattice_a (float): Lattice constant of the first material.
+        lattice_b (float): Lattice constant of the second material.
+        twist_angle (float): Twist angle between the two materials.
+    """
+    theta = np.deg2rad(twist_angle)
+
+    moire_wavelength_x = lattice_a / (2 * np.sin(theta / 2))
+    moire_wavelength_y = lattice_b / (2 * np.sin(theta / 2))
+
+    p = moire_wavelength_x
+    q = moire_wavelength_y
+
+    return p, q
