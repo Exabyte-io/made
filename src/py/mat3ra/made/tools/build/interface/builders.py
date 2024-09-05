@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional
 
 import numpy as np
 from mat3ra.made.tools.build.supercell import create_supercell
@@ -7,7 +7,6 @@ from mat3ra.made.tools.modify import (
     translate_to_z_level,
     rotate_material,
     translate_by_vector,
-    filter_by_box,
     filter_by_triangle_projection,
 )
 from pydantic import BaseModel, Field
@@ -270,8 +269,8 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
         substrate_formula = get_chemical_formula(configuration.substrate_configuration.bulk)
         film_miller = "".join(map(str, configuration.film_configuration.miller_indices))
         substrate_miller = "".join(map(str, configuration.substrate_configuration.miller_indices))
-
-        new_name = f"{film_formula}({film_miller})-{substrate_formula}({substrate_miller}), Twist {configuration.twist_angle:.2f}°"
+        twist_str = f"Twist {configuration.twist_angle:.2f} degrees"
+        new_name = f"{film_formula}({film_miller})-{substrate_formula}({substrate_miller}), {twist_str}"
         if "mean_abs_strain" in material.metadata:
             strain = material.metadata["mean_abs_strain"]
             new_name += f", Strain {strain*100:.3f}%"

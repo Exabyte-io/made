@@ -452,6 +452,7 @@ def rotate_material(material: Material, axis: List[int], angle: float, wrap: boo
         material (Material): The material to rotate.
         axis (List[int]): The axis to rotate around, expressed as [x, y, z].
         angle (float): The angle of rotation in degrees.
+        wrap (bool): Whether to wrap the material to the unit cell.
     Returns:
         Atoms: The rotated material.
     """
