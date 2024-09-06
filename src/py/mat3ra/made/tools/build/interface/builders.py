@@ -210,7 +210,7 @@ class TwistedInterfaceConfiguration(BaseConfiguration):
     substrate: Material
     twist_angle: float = Field(..., description="Twist angle in degrees")
     distance_z: float = 3.0
-    supercell_type: SupercellTypes = SupercellTypes.orhogonal
+    supercell_type: SupercellTypes = SupercellTypes.orthogonal
 
     @property
     def _json(self):
@@ -247,17 +247,29 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
         return [final_material]
 
     @staticmethod
-    def _create_hex_supercell(film: Material, angle: float, merged_material_unrotated: Material) -> Material:
+    def _create_hex_supercell(film: Material, angle: float, merged_material: Material) -> Material:
+        """
+        Creates a hexagonal supercell for the twisted interface by filtering the atoms in the merged material
+        in the shape of two triangles that form a parallelogram.
+
+         Args:
+            film (Material): The film material.
+            angle (float): The twist angle in degrees.
+            merged_material (Material): The merged material.
+
+        Returns:
+            Material: The final material with the hexagonal supercell.
+        """
         p, q = calculate_moire_periodicity(film.lattice.a, film.lattice.b, angle)
 
         vertex_1 = [0, 0, 0]
         vertex_2 = [p / 2, np.sqrt(3) / 2 * q, 0]
         vertex_3 = [p, 0, 0]
         vertex_4 = [3 / 2 * p, np.sqrt(3) / 2 * q, 0]
-        height = merged_material_unrotated.lattice.c
+        height = merged_material.lattice.c
 
         new_atoms_1 = filter_by_triangle_projection(
-            merged_material_unrotated,
+            merged_material,
             coordinate_1=vertex_1,
             coordinate_2=vertex_2,
             coordinate_3=vertex_3,
@@ -265,7 +277,7 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
             use_cartesian_coordinates=True,
         )
         new_atoms_2 = filter_by_triangle_projection(
-            merged_material_unrotated,
+            merged_material,
             coordinate_1=vertex_2,
             coordinate_2=vertex_3,
             coordinate_3=vertex_4,
@@ -281,14 +293,24 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
         return final_material
 
     @staticmethod
-    def _create_orthogonal_supercell(
-        rotated_film: Material, angle: float, merged_material_unrotated: Material
-    ) -> Material:
-        p, q = calculate_moire_periodicity(rotated_film.lattice.b, rotated_film.lattice.a, angle)
+    def _create_orthogonal_supercell(film: Material, angle: float, merged_material: Material) -> Material:
+        """
+        Creates an orthogonal supercell for the twisted interface by filtering the atoms in the merged material
+        in the shape of a rectangular box with the sides equal to the Moire pattern periodicity vectors.
+
+        Args:
+            film (Material): The film material.
+            angle (float): The twist angle in degrees.
+            merged_material (Material): The merged material.
+
+        Returns:
+            Material: The final material with the orthogonal supercell.
+        """
+        p, q = calculate_moire_periodicity(film.lattice.b, film.lattice.a, angle)
         new_atoms = filter_by_box(
-            merged_material_unrotated,
+            merged_material,
             [0, 0, 0],
-            [p, q, merged_material_unrotated.lattice.c],
+            [p, q, merged_material.lattice.c],
             use_cartesian_coordinates=True,
         )
 
