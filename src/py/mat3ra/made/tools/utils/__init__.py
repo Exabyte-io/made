@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -185,13 +185,16 @@ def filter_and_translate(coordinates: np.ndarray, elements: np.ndarray, axis: in
     return translated_coordinates, filtered_elements
 
 
-def augment_material_with_periodic_images(material: Material, cutoff: float = 0.1):
+def augment_material_with_periodic_images(
+    material: Material, cutoff: float = 0.1, directions: Tuple[bool, bool, bool] = (True, True, True)
+):
     """
     Augment the material's dataset by adding atoms from periodic images near boundaries.
 
     Args:
         material (Material): The material to augment.
         cutoff (float): The cutoff value for filtering atoms near boundaries.
+        directions (List[bool]): The directions to augment (flags for (x, y, z)).
 
     Returns:
         Tuple[Material, int]: The augmented material and the original count of atoms.
@@ -203,10 +206,13 @@ def augment_material_with_periodic_images(material: Material, cutoff: float = 0.
     new_basis = augmented_material.basis.copy()
 
     for axis in range(3):
-        for direction in [-1, 1]:
-            translated_coords, translated_elems = filter_and_translate(coordinates, elements, axis, cutoff, direction)
-            for coord, elem in zip(translated_coords, translated_elems):
-                new_basis.add_atom(elem, coord)
+        if directions[axis]:
+            for direction in [-1, 1]:
+                translated_coords, translated_elems = filter_and_translate(
+                    coordinates, elements, axis, cutoff, direction
+                )
+                for coord, elem in zip(translated_coords, translated_elems):
+                    new_basis.add_atom(elem, coord)
 
     augmented_material.basis = new_basis
     return augmented_material, last_id
