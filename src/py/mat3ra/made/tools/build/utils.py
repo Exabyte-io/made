@@ -6,22 +6,29 @@ from mat3ra.made.material import Material
 from ...utils import ArrayWithIds
 
 
-def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.01) -> Basis:
+def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.1) -> Basis:
     """
     Find all atoms that are within distance tolerance and only keep the last one, remove other sites
+
+    Args:
+        basis (Basis): The basis to resolve.
+        distance_tolerance (float): The distance tolerance in angstroms.
     """
+    basis.to_cartesian()
     coordinates = np.array(basis.coordinates.values)
     tree = cKDTree(coordinates)
     colliding_pairs = tree.query_pairs(r=distance_tolerance)
 
     ids_to_remove = set()
     if len(colliding_pairs) == 0:
+        basis.to_crystal()
         return basis
     for index_1, index_2 in colliding_pairs:
         ids_to_remove.add(index_1)
 
     ids_to_keep = [id for id in basis.coordinates.ids if id not in ids_to_remove]
     basis = basis.filter_atoms_by_ids(ids_to_keep)
+    basis.to_crystal()
     return basis
 
 
