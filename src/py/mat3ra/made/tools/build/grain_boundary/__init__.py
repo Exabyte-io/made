@@ -1,8 +1,10 @@
+from typing import List
+
 from pydantic import BaseModel
 from mat3ra.made.material import Material
 from mat3ra.code.entity import InMemoryEntity
 
-from .. import BaseBuilder
+from .. import BaseBuilder, BaseSelectorParameters
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
 from ..supercell import create_supercell
 from ...analyze import get_chemical_formula
@@ -36,67 +38,52 @@ class GrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters
     selected_interface_index: int = 0
 
 
-class GrainBoundaryBuilder(BaseBuilder):
+class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
     _BuildParametersType = GrainBoundaryBuilderParameters
     _ConfigurationType: type(GrainBoundaryConfiguration) = GrainBoundaryConfiguration  # type: ignore
+    _GeneratedItemType: type(Material) = Material  # type: ignore
+    selector_parameters = GrainBoundaryBuilderParameters.selected_interface_index
 
-    def _generate(self, configuration: GrainBoundaryConfiguration):
-        interface = self._create_interface(configuration)
-        rotated_interface = create_supercell(interface, [[0, 0, 1], [0, 1, 0], [-1, 0, 0]])
-        slab_config = SlabConfiguration(
-            bulk=rotated_interface,
-            miller_indices=configuration.slab_configuration.miller_indices,
-            thickness=configuration.slab_configuration.thickness,
-            vacuum=configuration.slab_configuration.vacuum,
-            xy_supercell_matrix=configuration.slab_configuration.xy_supercell_matrix,
-            use_conventional_cell=True,
-            use_orthogonal_z=True,
-        )
-        slab_builder = SlabBuilder()
-        slab_termination = (
-            configuration.slab_termination if configuration.slab_termination else get_terminations(slab_config)[0]
-        )
-        final_slab = slab_builder.get_material(
-            configuration,
-            selector_parameters=SlabSelectorParameters(termination=slab_termination),
-        )
-
-        return [final_slab]
-
-    def _create_interface(self, configuration: GrainBoundaryConfiguration):
-        phase_1_config = configuration.phase_1_configuration
-        phase_2_config = configuration.phase_2_configuration
-        phase_1_termination = (
-            configuration.phase_1_termination
-            if configuration.phase_1_termination
-            else get_terminations(phase_1_config)[0]
-        )
-        phase_2_termination = (
-            configuration.phase_2_termination
-            if configuration.phase_2_termination
-            else get_terminations(phase_2_config)[0]
-        )
-
-        interface_configuration = InterfaceConfiguration(
-            film_configuration=phase_1_config,
-            substrate_configuration=phase_2_config,
-            film_termination=phase_1_termination,
-            substrate_termination=phase_2_termination,
+    def _generate(self, configuration: GrainBoundaryConfiguration) -> List[Material]:
+        interface_config = InterfaceConfiguration(
+            film_configuration=configuration.phase_1_configuration,
+            substrate_configuration=configuration.phase_2_configuration,
+            film_termination=configuration.phase_1_termination,
+            substrate_termination=configuration.phase_2_termination,
             distance_z=configuration.gap,
             vacuum=configuration.gap,
         )
+        interfaces = super()._generate(interface_config)
+        rot_90_degree_matrix = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
+        rotated_interfaces = [
+            create_supercell(interface, xy_supercell_matrix=rot_90_degree_matrix) for interface in interfaces
+        ]
+        return rotated_interfaces
 
-        zsl_parameters = self.build_parameters
-        matched_interfaces_builder = ZSLStrainMatchingInterfaceBuilder(
-            build_parameters=ZSLStrainMatchingInterfaceBuilderParameters(strain_matching_parameters=zsl_parameters)
-        )
+    def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
+        final_slabs = []
+        for interface in materials:
+            slab_config = SlabConfiguration(
+                bulk=interface,
+                miller_indices=configuration.slab_configuration.miller_indices,
+                thickness=configuration.slab_configuration.thickness,
+                vacuum=configuration.slab_configuration.vacuum,
+                xy_supercell_matrix=configuration.slab_configuration.xy_supercell_matrix,
+                use_conventional_cell=True,
+                use_orthogonal_z=True,
+            )
+            slab_builder = SlabBuilder()
+            slab_termination = (
+                configuration.slab_termination if configuration.slab_termination else get_terminations(slab_config)[0]
+            )
+            final_slab = slab_builder.get_material(
+                configuration,
+                selector_parameters=SlabSelectorParameters(termination=slab_termination),
+            )
+            final_slabs.append(final_slab)
 
-        interfaces_sorted_by_size_and_strain = matched_interfaces_builder.get_materials(
-            configuration=interface_configuration
-        )
-
-        selected_interface = interfaces_sorted_by_size_and_strain[self.build_parameters.selected_interface_index]
-        return selected_interface
+        materials = super()._finalize(final_slabs, configuration)
+        return materials
 
     def _update_material_name(self, material: Material, configuration: GrainBoundaryConfiguration) -> Material:
         phase_1_formula = get_chemical_formula(configuration.phase_1_configuration.bulk)
