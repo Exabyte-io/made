@@ -1,4 +1,3 @@
-from numpy.ma.setup import configuration
 from pydantic import BaseModel
 from mat3ra.made.material import Material
 from mat3ra.code.entity import InMemoryEntity
@@ -7,7 +6,7 @@ from .. import BaseBuilder
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
 from ..supercell import create_supercell
 from ...analyze import get_chemical_formula
-from ..interface.builders import InterfaceBuilder, ZSLStrainMatchingInterfaceBuilder
+from ..interface.builders import ZSLStrainMatchingInterfaceBuilder
 from ..slab import SlabConfiguration, Termination, get_terminations, SlabBuilder, SlabSelectorParameters
 
 
@@ -98,9 +97,6 @@ class GrainBoundaryBuilder(BaseBuilder):
 
         selected_interface = interfaces_sorted_by_size_and_strain[self.build_parameters.selected_interface_index]
         return selected_interface
-
-    def _create_slab(self, configuration: GrainBoundaryConfiguration):
-        pass
 
     def _update_material_name(self, material: Material, configuration: GrainBoundaryConfiguration) -> Material:
         phase_1_formula = get_chemical_formula(configuration.phase_1_configuration.bulk)
