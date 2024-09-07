@@ -5,6 +5,20 @@ from ..slab import SlabConfiguration, Termination
 
 
 class GrainBoundaryConfiguration(BaseModel, InMemoryEntity):
+    """
+    Configuration for a grain boundary in a slab material.
+
+    Attributes:
+    phase_1_configuration: SlabConfiguration
+    phase_2_configuration: SlabConfiguration
+    phase_1_termination: Termination
+    phase_2_termination: Termination
+    gap: float
+    slab_configuration: SlabConfiguration
+    slab_termination
+
+    """
+
     phase_1_configuration: SlabConfiguration
     phase_2_configuration: SlabConfiguration
     phase_1_termination: Termination

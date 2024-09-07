@@ -15,6 +15,15 @@ class GrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters
 
 
 class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
+    """
+    A builder for creating grain boundaries.
+
+    The grain boundary is created by:
+    1. creating an interface between two phases,
+    2. then rotating the interface by 90 degrees.
+    3. Finally, creating a slab from the rotated interface.
+    """
+
     _BuildParametersType = GrainBoundaryBuilderParameters
     _ConfigurationType: type(GrainBoundaryConfiguration) = GrainBoundaryConfiguration  # type: ignore
     _GeneratedItemType: type(Material) = Material  # type: ignore
