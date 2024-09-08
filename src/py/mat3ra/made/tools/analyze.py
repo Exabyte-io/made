@@ -277,7 +277,9 @@ def get_nearest_neighbors_atom_indices(
     Args:
         material (Material): The material object to find neighbors in.
         coordinate (List[float]): The position to find neighbors for.
-        cutoff (float): The cutoff radius for identifying neighbors.
+        tolerance (float): tolerance parameter for near-neighbor finding. Faces that are smaller than tol fraction
+            of the largest face are not included in the tessellation. (default: 0.1).
+        cutoff (float): The cutoff radius for identifying neighbors, in angstroms.
 
     Returns:
         List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
@@ -342,11 +344,35 @@ def get_atomic_coordinates_extremum(
     return getattr(np, extremum)(values)
 
 
-def height_check(z: float, z_extremum: float, depth: float, surface: SurfaceTypes):
+def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: SurfaceTypes) -> bool:
+    """
+    Check if the height of an atom is within the specified limits.
+
+    Args:
+        z (float): The z-coordinate of the atom.
+        z_extremum (float): The extremum z-coordinate of the surface.
+        depth (float): The depth from the surface to look for exposed atoms.
+        surface (SurfaceTypes): The surface type (top or bottom).
+
+    Returns:
+        bool: True if the height is within the limits, False otherwise.
+    """
     return (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
 
 
-def shadowing_check(z: float, neighbors_indices: List[int], surface: SurfaceTypes, coordinates: np.ndarray):
+def shadowing_check(z: float, neighbors_indices: List[int], surface: SurfaceTypes, coordinates: np.ndarray) -> bool:
+    """
+    Check if the atom is shadowed by its neighbors from the surface.
+
+    Args:
+        z (float): The z-coordinate of the atom.
+        neighbors_indices (List[int]): List of indices of neighboring atoms.
+        surface (SurfaceTypes): The surface type (top or bottom).
+        coordinates (np.ndarray): The coordinates of the atoms.
+
+    Returns:
+        bool: True if the atom is not shadowed, False otherwise.
+    """
     return not any(
         (coordinates[n][2] > z if surface == SurfaceTypes.TOP else coordinates[n][2] < z) for n in neighbors_indices
     )
@@ -378,7 +404,7 @@ def get_surface_atom_indices(
 
     exposed_atoms_indices = []
     for idx, (x, y, z) in enumerate(coordinates):
-        if height_check(z, z_extremum, depth, surface):
+        if is_height_within_limits(z, z_extremum, depth, surface):
             neighbors_indices = kd_tree.query_ball_point([x, y, z], r=shadowing_radius)
             if shadowing_check(z, neighbors_indices, surface, coordinates):
                 exposed_atoms_indices.append(ids[idx])
