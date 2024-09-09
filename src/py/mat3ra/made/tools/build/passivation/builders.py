@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -77,7 +77,8 @@ class SurfacePassivationBuilder(PassivationBuilder):
     Detects surface atoms looking along Z axis and passivates either the top or bottom surface or both.
     """
 
-    build_parameters: Optional[SurfacePassivationBuilderParameters] = SurfacePassivationBuilderParameters()
+    build_parameters: SurfacePassivationBuilderParameters
+    _DefaultBuildParameters = SurfacePassivationBuilderParameters()
     _ConfigurationType = PassivationConfiguration
 
     def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
