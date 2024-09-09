@@ -551,13 +551,15 @@ GRAPHENE_FILM_CONFIGURATION = SlabConfiguration(
     bulk=Material(GRAPHENE),
     miller_indices=(0, 0, 1),
     thickness=1,
+    use_orthogonal_z=True,
 )
 
 NICKEL_SLAB_CONFIGURATION = SlabConfiguration(
     bulk=Material(NICKEL),
     miller_indices=(1, 1, 1),
     thickness=3,
-    vacuum=1,
+    vacuum=3,
+    use_orthogonal_z=True,
 )
 
 GRAPHENE_FILM_TERMINATION = get_terminations(GRAPHENE_FILM_CONFIGURATION)[0]
@@ -567,6 +569,8 @@ GRAPHENE_NICKEL_INTERFACE_CONFIGURATION = InterfaceConfiguration(
     substrate_configuration=NICKEL_SLAB_CONFIGURATION,
     film_termination=GRAPHENE_FILM_TERMINATION,
     substrate_termination=NICKEL_SLAB_TERMINATION,
+    distance_z=3.0,
+    vacuum=5.0,
 )
 
 ZSL_BUILDER = ZSLStrainMatchingInterfaceBuilder(

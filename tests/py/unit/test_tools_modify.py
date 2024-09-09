@@ -187,5 +187,6 @@ def test_displace_interface():
     displaced_material = displace_interface(
         material, [0.1, 0.2, 0.3], InterfacePartsEnum.FILM, use_cartesian_coordinates=False
     )
+    print(displaced_material.to_json())
     assertion_utils.assert_deep_almost_equal(expected_coordinates, displaced_material.basis.coordinates.to_dict())
     assertion_utils.assert_deep_almost_equal(expected_labels, displaced_material.basis.labels.to_dict())
