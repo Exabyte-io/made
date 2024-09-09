@@ -79,7 +79,10 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     def add_atom(self, element="Si", coordinate=None, force=False):
         if coordinate is None:
             coordinate = [0, 0, 0]
-        if get_overlapping_coordinates(coordinate, self.coordinates.values, threshold=0.01):
+        cartesian_basis = self.copy()
+        cartesian_basis.to_cartesian()
+        cartesian_coordinate = self.cell.convert_point_to_cartesian(coordinate)
+        if get_overlapping_coordinates(cartesian_coordinate, cartesian_basis.coordinates.values, threshold=0.1):
             if force:
                 print(f"Warning: Overlapping coordinates found for {coordinate}. Adding atom anyway.")
             else:
