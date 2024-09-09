@@ -470,7 +470,7 @@ def displace_interface(
     interface: Material,
     displacement: List[float],
     label: InterfacePartsEnum = InterfacePartsEnum.FILM,
-    use_cartesian_coordinates=False,
+    use_cartesian_coordinates=True,
 ) -> Material:
     """
     Displace atoms in an interface along a certain direction.
