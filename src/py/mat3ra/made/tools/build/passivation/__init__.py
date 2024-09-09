@@ -2,7 +2,7 @@ from typing import Union
 
 from mat3ra.made.material import Material
 from .configuration import PassivationConfiguration
-from .builders import PassivationBuilder, SurfacePassivationBuilder, UndercoordinationPassivationBuilder
+from .builders import SurfacePassivationBuilder, UndercoordinationPassivationBuilder
 
 
 def create_passivation(

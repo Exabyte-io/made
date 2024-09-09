@@ -1,6 +1,6 @@
 from mat3ra.made.material import Material
 
-from .enums import SurfaceTypes
+from ...enums import SurfaceTypes
 from ...build import BaseConfiguration
 
 

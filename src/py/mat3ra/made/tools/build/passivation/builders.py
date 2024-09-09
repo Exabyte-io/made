@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
 from pydantic import BaseModel
 
-from .enums import SurfaceTypes
+from ...enums import SurfaceTypes
 from ...analyze import (
     get_surface_atom_indices,
     get_undercoordinated_atom_indices,
@@ -77,7 +77,7 @@ class SurfacePassivationBuilder(PassivationBuilder):
     Detects surface atoms looking along Z axis and passivates either the top or bottom surface or both.
     """
 
-    build_parameters: SurfacePassivationBuilderParameters = SurfacePassivationBuilderParameters()
+    build_parameters: Optional[SurfacePassivationBuilderParameters] = SurfacePassivationBuilderParameters()
     _ConfigurationType = PassivationConfiguration
 
     def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
