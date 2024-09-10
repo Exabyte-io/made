@@ -428,11 +428,10 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
             use_cartesian_coordinates=use_cartesian_coordinates,
         )
         # Filter atoms in the added layers between the original and added layers
-        a, b, c = material.lattice.a, material.lattice.b, material.lattice.c
         island_material = filter_by_box(
             material=atoms_within_island,
             min_coordinate=[0, 0, original_max_z],
-            max_coordinate=[a, b, added_layers_max_z],
+            max_coordinate=[material.lattice.a, material.lattice.b, added_layers_max_z],
             use_cartesian_coordinates=True,
         )
 
