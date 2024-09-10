@@ -59,11 +59,13 @@ class PassivationBuilder(BaseBuilder):
 
 class SurfacePassivationBuilderParameters(BaseModel):
     """
-    Parameters for the SurfacePassivationBuilder.
+    Parameters for the SurfacePassivationBuilder, defining how atoms near the surface are
+    detected and passivated.
 
     Args:
-        shadowing_radius (float): Radius for atoms shadowing underlying from passivation, in Angstroms.
-        depth (float): Depth from the top to look for exposed surface atoms to passivate, in Angstroms.
+        shadowing_radius (float): Radius around each surface atom to exclude underlying atoms from passivation.
+        depth (float): Depth from the topmost (or bottommost) atom into the material to consider for passivation,
+                       accounting for features like islands, adatoms, and terraces.
     """
 
     shadowing_radius: float = 2.5
