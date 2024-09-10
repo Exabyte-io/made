@@ -13,7 +13,7 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     elements: ArrayWithIds = ArrayWithIds(values=["Si"])
     coordinates: ArrayWithIds = ArrayWithIds(values=[0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
-    cell: Optional[Cell] = None
+    cell: Cell = Cell()
     labels: Optional[ArrayWithIds] = ArrayWithIds(values=[])
     constraints: Optional[ArrayWithIds] = ArrayWithIds(values=[])
 
@@ -76,12 +76,28 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         self.coordinates.map_array_in_place(self.cell.convert_point_to_crystal)
         self.units = AtomicCoordinateUnits.crystal
 
-    def add_atom(self, element="Si", coordinate=None, force=False):
+    def add_atom(
+        self,
+        element="Si",
+        coordinate: Optional[List[float]] = None,
+        use_cartesian_coordinates: bool = False,
+        force: bool = False,
+    ):
         if coordinate is None:
             coordinate = [0, 0, 0]
-        cartesian_coordinates = [self.cell.convert_point_to_cartesian(coord) for coord in self.coordinates.values]
-        cartesian_coordinate = self.cell.convert_point_to_cartesian(coordinate)
-        if get_overlapping_coordinates(cartesian_coordinate, cartesian_coordinates, threshold=0.01):
+        if use_cartesian_coordinates:
+            if self.is_in_crystal_units:
+                coordinate = self.cell.convert_point_to_crystal(coordinate)
+        else:
+            if self.is_in_cartesian_units:
+                coordinate = self.cell.convert_point_to_cartesian(coordinate)
+        cartesian_coordinates_for_overlap_check = [
+            self.cell.convert_point_to_cartesian(coord) for coord in self.coordinates.values
+        ]
+        cartesian_coordinate_for_overlap_check = self.cell.convert_point_to_cartesian(coordinate)
+        if get_overlapping_coordinates(
+            cartesian_coordinate_for_overlap_check, cartesian_coordinates_for_overlap_check, threshold=0.01
+        ):
             if force:
                 print(f"Warning: Overlapping coordinates found for {coordinate}. Adding atom anyway.")
             else:
