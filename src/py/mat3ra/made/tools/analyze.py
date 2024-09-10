@@ -279,6 +279,7 @@ def get_nearest_neighbors_atom_indices(
         coordinate (List[float]): The position to find neighbors for.
         tolerance (float): tolerance parameter for near-neighbor finding. Faces that are smaller than tol fraction
             of the largest face are not included in the tessellation. (default: 0.1).
+            as per: https://pymatgen.org/pymatgen.analysis.html#pymatgen.analysis.local_env.VoronoiNN
         cutoff (float): The cutoff radius for identifying neighbors, in angstroms.
 
     Returns:
@@ -300,7 +301,6 @@ def get_nearest_neighbors_atom_indices(
     if site_index is None:
         structure.append("X", coordinate, validate_proximity=False)
         site_index = len(structure.sites) - 1
-
         remove_dummy_atom = True
     try:
         neighbors = voronoi_nn.get_nn_info(structure, site_index)
