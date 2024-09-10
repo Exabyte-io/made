@@ -124,6 +124,8 @@ def test_create_island():
         thickness=1,
     )
 
+    print(SLAB_111.to_json())
+
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
     print(defect.to_json())
 
