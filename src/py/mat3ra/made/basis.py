@@ -85,12 +85,10 @@ class Basis(RoundNumericValuesMixin, BaseModel):
     ):
         if coordinate is None:
             coordinate = [0, 0, 0]
-        if use_cartesian_coordinates:
-            if self.is_in_crystal_units:
-                coordinate = self.cell.convert_point_to_crystal(coordinate)
-        else:
-            if self.is_in_cartesian_units:
-                coordinate = self.cell.convert_point_to_cartesian(coordinate)
+        if use_cartesian_coordinates and self.is_in_crystal_units:
+            coordinate = self.cell.convert_point_to_crystal(coordinate)
+        if not use_cartesian_coordinates and self.is_in_cartesian_units:
+            coordinate = self.cell.convert_point_to_cartesian(coordinate)
         cartesian_coordinates_for_overlap_check = [
             self.cell.convert_point_to_cartesian(coord) for coord in self.coordinates.values
         ]
