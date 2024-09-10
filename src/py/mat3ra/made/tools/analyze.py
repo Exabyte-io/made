@@ -360,9 +360,11 @@ def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: 
     return (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
 
 
-def shadowing_check(z: float, neighbors_indices: List[int], surface: SurfaceTypes, coordinates: np.ndarray) -> bool:
+def is_shadowed_by_neighbors_from_surface(
+    z: float, neighbors_indices: List[int], surface: SurfaceTypes, coordinates: np.ndarray
+) -> bool:
     """
-    Check if the atom is shadowed by its neighbors from the surface.
+    Check if any one of the neighboring atoms shadow the atom from the surface by being closer to the specified surface.
 
     Args:
         z (float): The z-coordinate of the atom.
@@ -406,7 +408,7 @@ def get_surface_atom_indices(
     for idx, (x, y, z) in enumerate(coordinates):
         if is_height_within_limits(z, z_extremum, depth, surface):
             neighbors_indices = kd_tree.query_ball_point([x, y, z], r=shadowing_radius)
-            if shadowing_check(z, neighbors_indices, surface, coordinates):
+            if is_shadowed_by_neighbors_from_surface(z, neighbors_indices, surface, coordinates):
                 exposed_atoms_indices.append(ids[idx])
 
     return exposed_atoms_indices
