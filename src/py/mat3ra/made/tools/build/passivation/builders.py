@@ -123,25 +123,25 @@ class SurfacePassivationBuilder(PassivationBuilder):
         return (np.array(surface_atoms_coordinates) + np.array(passivant_bond_vector_crystal)).tolist()
 
 
-class UndercoordinationPassivationBuilderParameters(SurfacePassivationBuilderParameters):
+class CoordinationBasedPassivationBuilderParameters(SurfacePassivationBuilderParameters):
     """
-    Parameters for the  UndercoordinationPassivationBuilder.
+    Parameters for the  CoordinationPassivationBuilder.
     Args:
-        coordination_threshold (int): The coordination threshold for undercoordination.
+        coordination_threshold (int): The coordination number threshold for atom to be considered undercoordinated.
     """
 
     coordination_threshold: int = 3
 
 
-class UndercoordinationPassivationBuilder(PassivationBuilder):
+class CoordinationBasedPassivationBuilder(PassivationBuilder):
     """
-    Builder for passivating material based on undercoordination of atoms.
+    Builder for passivating material based on coordination number of each atom.
 
     Detects atoms with coordination number below a threshold and passivates them.
     """
 
-    _BuildParametersType = UndercoordinationPassivationBuilderParameters
-    _DefaultBuildParameters = UndercoordinationPassivationBuilderParameters()
+    _BuildParametersType = CoordinationBasedPassivationBuilderParameters
+    _DefaultBuildParameters = CoordinationBasedPassivationBuilderParameters()
 
     def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
         material = super().create_passivated_material(configuration)
