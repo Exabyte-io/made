@@ -125,6 +125,7 @@ def test_create_island():
     )
 
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
+    print(defect.to_json())
 
     # Only 2 atoms in the island were added for this configuration
     NUMBER_OF_ATOMS_IN_ISLAND = 2
