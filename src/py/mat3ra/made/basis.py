@@ -83,6 +83,17 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         use_cartesian_coordinates: bool = False,
         force: bool = False,
     ):
+        """
+        Add an atom to the basis.
+
+        Before adding the atom at the specified coordinate, checks that no other atom is overlapping within a threshold.
+
+        Args:
+            element (str): Element symbol of the atom to be added.
+            coordinate (List[float]): Coordinate of the atom to be added.
+            use_cartesian_coordinates (bool): Whether the coordinate is in Cartesian units (or crystal by default).
+            force (bool): Whether to force adding the atom even if it overlaps with another atom.
+        """
         if coordinate is None:
             coordinate = [0, 0, 0]
         if use_cartesian_coordinates and self.is_in_crystal_units:
