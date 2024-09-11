@@ -6,14 +6,14 @@ from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel
 
 from .cell import Cell
-from .utils import ArrayWithIds
+from .utils import ArrayWithIds, get_overlapping_coordinates
 
 
 class Basis(RoundNumericValuesMixin, BaseModel):
     elements: ArrayWithIds = ArrayWithIds(values=["Si"])
     coordinates: ArrayWithIds = ArrayWithIds(values=[0, 0, 0])
     units: str = AtomicCoordinateUnits.crystal
-    cell: Optional[Cell] = None
+    cell: Cell = Cell()
     labels: Optional[ArrayWithIds] = ArrayWithIds(values=[])
     constraints: Optional[ArrayWithIds] = ArrayWithIds(values=[])
 
@@ -76,7 +76,42 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         self.coordinates.map_array_in_place(self.cell.convert_point_to_crystal)
         self.units = AtomicCoordinateUnits.crystal
 
-    def add_atom(self, element="Si", coordinate=[0.5, 0.5, 0.5]):
+    def add_atom(
+        self,
+        element="Si",
+        coordinate: Optional[List[float]] = None,
+        use_cartesian_coordinates: bool = False,
+        force: bool = False,
+    ):
+        """
+        Add an atom to the basis.
+
+        Before adding the atom at the specified coordinate, checks that no other atom is overlapping within a threshold.
+
+        Args:
+            element (str): Element symbol of the atom to be added.
+            coordinate (List[float]): Coordinate of the atom to be added.
+            use_cartesian_coordinates (bool): Whether the coordinate is in Cartesian units (or crystal by default).
+            force (bool): Whether to force adding the atom even if it overlaps with another atom.
+        """
+        if coordinate is None:
+            coordinate = [0, 0, 0]
+        if use_cartesian_coordinates and self.is_in_crystal_units:
+            coordinate = self.cell.convert_point_to_crystal(coordinate)
+        if not use_cartesian_coordinates and self.is_in_cartesian_units:
+            coordinate = self.cell.convert_point_to_cartesian(coordinate)
+        cartesian_coordinates_for_overlap_check = [
+            self.cell.convert_point_to_cartesian(coord) for coord in self.coordinates.values
+        ]
+        cartesian_coordinate_for_overlap_check = self.cell.convert_point_to_cartesian(coordinate)
+        if get_overlapping_coordinates(
+            cartesian_coordinate_for_overlap_check, cartesian_coordinates_for_overlap_check, threshold=0.01
+        ):
+            if force:
+                print(f"Warning: Overlapping coordinates found for {coordinate}. Adding atom anyway.")
+            else:
+                print(f"Warning: Overlapping coordinates found for {coordinate}. Not adding atom.")
+                return
         self.elements.add_item(element)
         self.coordinates.add_item(coordinate)
 

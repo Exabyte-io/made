@@ -115,19 +115,20 @@ def test_create_crystal_site_adatom():
 
 def test_create_island():
     condition = CoordinateCondition.CylinderCoordinateCondition(
-        center_position=[0.625, 0.5], radius=0.25, min_z=0, max_z=1
+        center_position=[0.5, 0.5], radius=0.15, min_z=0, max_z=1
     )
     island_config = IslandSlabDefectConfiguration(
-        crystal=SLAB_111,
+        crystal=SLAB_001,
         defect_type="island",
         condition=condition,
-        thickness=1,
+        number_of_added_layers=1,
     )
 
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
 
-    # Only one atom is in the island for this configuration
-    assert len(defect.basis.elements.values) == len(SLAB_111.basis.elements.values) + 1
+    # Only 1 atoms in the island were added for this configuration with 001 slab orientation
+    NUMBER_OF_ATOMS_IN_ISLAND = 1
+    assert len(defect.basis.elements.values) == len(SLAB_001.basis.elements.values) + NUMBER_OF_ATOMS_IN_ISLAND
     assert defect.basis.elements.values[-1] == "Si"
 
 
