@@ -1,5 +1,6 @@
 from typing import Callable, List, Literal, Optional, Union
 
+import numpy as np
 from mat3ra.made.material import Material
 
 from .analyze import (
@@ -8,6 +9,7 @@ from .analyze import (
     get_atomic_coordinates_extremum,
 )
 from .convert import from_ase, to_ase
+from .convert.utils import InterfacePartsEnum
 from .third_party import ase_add_vacuum
 from .utils.coordinate import (
     is_coordinate_in_box,
@@ -462,3 +464,39 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     atoms.wrap()
 
     return Material(from_ase(atoms))
+
+
+def displace_interface(
+    interface: Material,
+    displacement: List[float],
+    label: InterfacePartsEnum = InterfacePartsEnum.FILM,
+    use_cartesian_coordinates=True,
+) -> Material:
+    """
+    Displace atoms in an interface along a certain direction.
+
+    Args:
+        interface (Material): The interface Material object.
+        displacement (List[float]): The displacement vector in angstroms or crystal coordinates.
+        label (InterfacePartsEnum): The label of the atoms to displace ("substrate" or "film").
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
+
+    Returns:
+        Material: The displaced material object.
+    """
+    new_material = interface.clone()
+    if use_cartesian_coordinates:
+        new_material.to_cartesian()
+    labels_array = new_material.basis.labels.to_array_of_values_with_ids()
+    displaced_label_ids = [_label.id for _label in labels_array if _label.value == int(label)]
+
+    new_coordinates_values = new_material.basis.coordinates.values
+    for atom_id in displaced_label_ids:
+        current_coordinate = new_material.basis.coordinates.get_element_value_by_index(atom_id)
+        new_atom_coordinate = np.array(current_coordinate) + np.array(displacement)
+        new_coordinates_values[atom_id] = new_atom_coordinate
+
+    new_material.set_coordinates(new_coordinates_values)
+    new_material.to_crystal()
+    new_material = wrap_to_unit_cell(new_material)
+    return new_material
