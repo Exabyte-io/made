@@ -357,9 +357,6 @@ def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: 
     Returns:
         bool: True if the height is within the limits, False otherwise.
     """
-
-
-def height_check(z: float, z_extremum: float, depth: float, surface: SurfaceTypes):
     return (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
 
 
