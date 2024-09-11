@@ -9,7 +9,7 @@ from .build.interface.utils import get_slab
 from .build.passivation.enums import SurfaceTypes
 from .convert import decorator_convert_material_args_kwargs_to_atoms
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
-from .utils import get_norm_of_distances_between_coordinates, decorator_handle_periodic_boundary_conditions
+from .utils import decorator_handle_periodic_boundary_conditions, get_norm_of_distances_between_coordinates
 
 
 @decorator_convert_material_args_kwargs_to_atoms
