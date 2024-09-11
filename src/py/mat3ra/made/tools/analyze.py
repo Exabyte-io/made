@@ -511,42 +511,43 @@ def get_local_extremum_atom_index(
     return extremum_z_atom[0]
 
 
-def get_optimal_displacements(
+def calculate_on_xy_grid(
     material: Material,
-    grid_size: Tuple[int, int] = (10, 10),
-    search_range: Tuple[float, float] = (-1.0, 1.0),
-    shadowing_radius: float = 2.5,
-) -> List[List[float]]:
+    modifier: Callable,
+    calculator: Callable,
+    calculator_parameters: dict,
+    grid_size_xy: Tuple[int, int],
+    grid_offset_position: List[float],
+    grid_range_x=(-0.5, 0.5),
+    grid_range_y=(-0.5, 0.5),
+    use_cartesian_coordinates=False,
+):
     """
-    Return all optimal displacements for the interface material by calculating
-    the norm of distances for each film atom to substrate atoms within a certain radius.
-    The displacement is done on a grid and the displacement that yields minimum norm is returned.
+    Calculate a property on a grid of x-y positions.
 
     Args:
-        material (Material): The interface Material object.
-        grid_size (Tuple[int, int]): The size of the grid.
-        search_range (Tuple[float, float]): The range to search for optimal displacements.
-        shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
+        material (Material): The material object.
+        modifier (Callable): The modifier function to apply to the material.
+        calculator (Callable): The calculator to use for the property calculation.
+        calculator_parameters (Dict[str, Any]): The parameters to pass to the calculator.
+        grid_size_xy (Tuple[int, int]): The size of the grid in x and y directions.
+        grid_offset_position (List[float]): The offset position of the grid, in Angstroms or crystal coordinates.
+        grid_range_x (Tuple[float, float]): The range to search in x direction, in Angstroms or crystal coordinates.
+        grid_range_y (Tuple[float, float]): The range to search in y direction, in Angstroms or crystal coordinates.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
 
     Returns:
-        List[List[float]]: The optimal displacements.
+        List[List[float]]: The calculated values on the grid.
     """
-    from .calculate import calculate_norm_of_distances
-    from .modify import displace_interface
+    x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
+    y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
 
-    x_values = np.linspace(search_range[0], search_range[1], grid_size[0])
-    y_values = np.linspace(search_range[0], search_range[1], grid_size[1])
-
-    norms = np.zeros(grid_size)
+    results_matrix = np.zeros(grid_size_xy)
 
     for i, x in enumerate(x_values):
         for j, y in enumerate(y_values):
-            displaced_material = displace_interface(material, [x, y, 0], use_cartesian_coordinates=True)
-            norm = calculate_norm_of_distances(displaced_material, shadowing_radius)
-            norms[i, j] = norm
+            modified_material = modifier(material, [x, y, 0], use_cartesian_coordinates=use_cartesian_coordinates)
+            result = calculator(modified_material, **calculator_parameters)
+            results_matrix[i, j] = result
 
-    min_norm = np.min(norms)
-    min_positions = np.argwhere(norms == min_norm)
-
-    displacements_with_min_norm = [[x_values[pos[0]], y_values[pos[1]], 0] for pos in min_positions]
-    return displacements_with_min_norm
+    return results_matrix
