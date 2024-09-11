@@ -469,3 +469,43 @@ def get_undercoordinated_atom_indices(
     coordination_numbers = get_coordination_numbers(material, indices, cutoff)
     undercoordinated_atoms_indices = [i for i, cn in enumerate(coordination_numbers) if cn <= coordination_threshold]
     return undercoordinated_atoms_indices
+
+
+def get_local_extremum_atom_index(
+    material: Material,
+    coordinate: List[float],
+    extremum: Literal["max", "min"] = "max",
+    vicinity: float = 1.0,
+    use_cartesian_coordinates: bool = False,
+) -> int:
+    """
+    Return the id of the atom with the minimum or maximum z-coordinate
+    within a certain vicinity of a given (x, y) coordinate.
+
+    Args:
+        material (Material): Material object.
+        coordinate (List[float]): (x, y, z) coordinate to find the local extremum atom index for.
+        extremum (str): "min" or "max".
+        vicinity (float): Radius of the vicinity, in Angstroms.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
+
+    Returns:
+        int: id of the atom with the minimum or maximum z-coordinate.
+    """
+    new_material = material.clone()
+    new_material.to_cartesian()
+    if not use_cartesian_coordinates:
+        coordinate = new_material.basis.cell.convert_point_to_cartesian(coordinate)
+
+    coordinates = np.array(new_material.basis.coordinates.values)
+    ids = np.array(new_material.basis.coordinates.ids)
+    tree = cKDTree(coordinates[:, :2])
+    indices = tree.query_ball_point(coordinate[:2], vicinity)
+    z_values = [(id, coord[2]) for id, coord in zip(ids[indices], coordinates[indices])]
+
+    if extremum == "max":
+        extremum_z_atom = max(z_values, key=lambda item: item[1])
+    else:
+        extremum_z_atom = min(z_values, key=lambda item: item[1])
+
+    return extremum_z_atom[0]
