@@ -65,21 +65,22 @@ def get_distance_between_coordinates(coordinate1: List[float], coordinate2: List
     return float(np.linalg.norm(np.array(coordinate1) - np.array(coordinate2)))
 
 
-def calculate_norm_of_distances_between_coordinates(coords1: np.ndarray, coords2: np.ndarray) -> float:
+def get_norm_of_distances_between_coordinates(coordinates_1: np.ndarray, coordinates_2: np.ndarray) -> float:
     """
     Calculate the norm of distances between two sets of coordinates.
+    The norm is calculated as the sum of distances between each pair of coordinates.
 
     Args:
-        coords1 (np.ndarray): The first set of coordinates.
-        coords2 (np.ndarray): The second set of coordinates.
+        coordinates_1 (np.ndarray): The first set of coordinates.
+        coordinates_2 (np.ndarray): The second set of coordinates.
 
     Returns:
         float: The calculated norm.
     """
-    tree = cKDTree(coords2)
-    distances, _ = tree.query(coords1)
-    distances = distances[~np.isinf(distances)]
-    return float(np.linalg.norm(distances))
+    diff = coordinates_1[:, np.newaxis, :] - coordinates_2[np.newaxis, :, :]
+    distances = np.linalg.norm(diff, axis=2)
+    norm_of_distances = np.sum(distances)
+    return float(norm_of_distances)
 
 
 def get_norm(vector: List[float]) -> float:

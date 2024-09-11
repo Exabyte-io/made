@@ -9,7 +9,7 @@ from .build.interface.utils import get_slab
 from .build.passivation.enums import SurfaceTypes
 from .convert import decorator_convert_material_args_kwargs_to_atoms
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
-from .utils import calculate_norm_of_distances_between_coordinates, decorator_handle_periodic_boundary_conditions
+from .utils import get_norm_of_distances_between_coordinates, decorator_handle_periodic_boundary_conditions
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -166,4 +166,4 @@ def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.
     film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
     substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
 
-    return calculate_norm_of_distances_between_coordinates(film_coordinates_values, substrate_coordinates_values)
+    return get_norm_of_distances_between_coordinates(film_coordinates_values, substrate_coordinates_values)
