@@ -358,6 +358,7 @@ def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: 
         bool: True if the height is within the limits, False otherwise.
     """
 
+
 def height_check(z: float, z_extremum: float, depth: float, surface: SurfaceTypes):
     return (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
 
@@ -486,7 +487,7 @@ def get_local_extremum_atom_index(
 
     Args:
         material (Material): Material object.
-        coordinate (List[float]): (x, y, z) coordinate to find the local extremum.
+        coordinate (List[float]): (x, y, z) coordinate to find the local extremum atom index for.
         extremum (str): "min" or "max".
         vicinity (float): Radius of the vicinity, in Angstroms.
         use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
