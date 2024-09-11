@@ -59,7 +59,9 @@ def get_center_of_coordinates(coordinates: List[List[float]]) -> List[float]:
 
 
 def get_overlapping_coordinates(
-    coordinate: List[float], coordinates: List[List[float]], threshold: float = 0.01
+    coordinate: List[float],
+    coordinates: List[List[float]],
+    threshold: float = 0.01,
 ) -> List[List[float]]:
     """
     Find coordinates that are within a certain threshold of a given coordinate.
@@ -67,7 +69,7 @@ def get_overlapping_coordinates(
     Args:
         coordinate (List[float]): The coordinate.
         coordinates (List[List[float]]): The list of coordinates.
-        threshold (float): The threshold.
+        threshold (float): The threshold for the distance, in the units of the coordinates.
 
     Returns:
         List[List[float]]: The list of overlapping coordinates.
