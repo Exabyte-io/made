@@ -9,14 +9,6 @@ from mat3ra.made.tools.convert import from_ase
 from pymatgen.analysis.elasticity.strain import Strain
 from pymatgen.core.interface import Interface
 
-from mat3ra.made.tools.build.interface import (
-    create_interface,
-    InterfaceConfiguration,
-    ZSLStrainMatchingInterfaceBuilder,
-    ZSLStrainMatchingInterfaceBuilderParameters,
-)
-
-from mat3ra.made.tools.build.interface import ZSLStrainMatchingParameters
 from .utils import atoms_to_interface_structure
 
 # ASE Atoms fixtures
@@ -516,67 +508,177 @@ GRAPHENE_ARMCHAIR_NANORIBBON = {
     "isUpdated": True,
 }
 
-NICKEL = {
-    "name": "Ni, Nickel, FCC (Fm-3m) 3D (Bulk), mp-23",
+
+GRAPHENE_NICKEL_INTERFACE = {
+    "name": "C2(001)-Ni4(111), Interface, Strain 0.105pct",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Ni"},
+            {"id": 1, "value": "Ni"},
+            {"id": 2, "value": "Ni"},
+            {"id": 3, "value": "C"},
+            {"id": 4, "value": "C"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.666666667, 0.666666667, 0.350869517]},
+            {"id": 1, "value": [1.0, 0.0, 0.425701769]},
+            {"id": 2, "value": [0.333333333, 0.333333333, 0.500534021]},
+            {"id": 3, "value": [0.333333333, 0.333333333, 0.611447347]},
+            {"id": 4, "value": [0.666666667, 0.666666667, 0.611447347]},
+        ],
+        "units": "crystal",
+        "cell": [[2.478974, 0.0, 0.0], [1.239487, 2.14685446, 0.0], [0.0, 0.0, 27.048147591]],
+        "constraints": [],
+        "labels": [
+            {"id": 0, "value": 0},
+            {"id": 1, "value": 0},
+            {"id": 2, "value": 0},
+            {"id": 3, "value": 1},
+            {"id": 4, "value": 1},
+        ],
+    },
     "lattice": {
         "a": 2.478974,
         "b": 2.478974,
-        "c": 2.478974,
-        "alpha": 60,
-        "beta": 60,
-        "gamma": 60,
+        "c": 27.048147591,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 60.0,
         "units": {"length": "angstrom", "angle": "degree"},
-        "type": "FCC",
+        "type": "TRI",
         "vectors": {
-            "a": [2.146854, 0, 1.239487],
-            "b": [0.7156182, 2.024074, 1.239487],
-            "c": [0, 0, 2.478974],
+            "a": [2.478974, 0.0, 0.0],
+            "b": [1.239487, 2.14685446, 0.0],
+            "c": [0.0, 0.0, 27.048147591],
             "alat": 1,
             "units": "angstrom",
         },
     },
-    "basis": {
-        "elements": [{"id": 0, "value": "Ni"}],
-        "coordinates": [{"id": 0, "value": [0, 0, 0]}],
-        "units": "crystal",
-        "cell": [[2.146854, 0, 1.239487], [0.7156182, 2.024074, 1.239487], [0, 0, 2.478974]],
-        "constraints": [],
-    },
     "isNonPeriodic": False,
+    "_id": "",
+    "metadata": {
+        "interface_properties": {
+            "film_sl_vectors": [[2.467291, 0.0, 0.0], [1.2336455, -2.136736685, -0.0]],
+            "substrate_sl_vectors": [[-1.752899326, 1.752899326, 0.0], [-1.752899326, 0.0, 1.752899326]],
+            "film_vectors": [[2.467291, 0.0, 0.0], [-1.2336455, 2.136736685, 0.0]],
+            "substrate_vectors": [[-1.752899326, 1.752899326, 0.0], [-1.752899326, 0.0, 1.752899326]],
+            "film_transformation": [[1.0, 0.0], [0.0, 1.0]],
+            "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
+            "strain": [[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, -0.0], [-0.0, -0.0, 0.0]],
+            "von_mises_strain": 0.003164242537164297,
+            "termination": "('C_P6/mmm_2', 'Ni_R-3m_1')",
+            "film_thickness": 1,
+            "substrate_thickness": 3,
+            "mean_abs_strain": 0.0010500000000000002,
+        },
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "mean_abs_strain": 0.0010500000000000002,
+        "build": {
+            "configuration": {
+                "type": "InterfaceConfiguration",
+                "film_configuration": {
+                    "type": "SlabConfiguration",
+                    "bulk": {
+                        "name": "C2",
+                        "basis": {
+                            "elements": [{"id": 0, "value": "C"}, {"id": 1, "value": "C"}],
+                            "coordinates": [
+                                {"id": 0, "value": [0.333333333, 0.666666667, 0.0]},
+                                {"id": 1, "value": [0.666666667, 0.333333333, 0.0]},
+                            ],
+                            "units": "crystal",
+                            "cell": [[1.2336455, -2.136736685, 0.0], [1.2336455, 2.136736685, 0.0], [0.0, 0.0, 20.0]],
+                            "constraints": [],
+                            "labels": [],
+                        },
+                        "lattice": {
+                            "a": 2.467291,
+                            "b": 2.467291,
+                            "c": 20.0,
+                            "alpha": 90.0,
+                            "beta": 90.0,
+                            "gamma": 120.0,
+                            "units": {"length": "angstrom", "angle": "degree"},
+                            "type": "TRI",
+                            "vectors": {
+                                "a": [1.2336455, -2.136736685, 0.0],
+                                "b": [1.2336455, 2.136736685, 0.0],
+                                "c": [0.0, 0.0, 20.0],
+                                "alat": 1,
+                                "units": "angstrom",
+                            },
+                        },
+                        "isNonPeriodic": False,
+                        "_id": "",
+                        "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+                        "isUpdated": True,
+                    },
+                    "miller_indices": [0, 0, 1],
+                    "thickness": 1,
+                    "vacuum": 0,
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                    "use_conventional_cell": True,
+                    "use_orthogonal_z": True,
+                    "make_primitive": False,
+                },
+                "substrate_configuration": {
+                    "type": "SlabConfiguration",
+                    "bulk": {
+                        "name": "Ni4",
+                        "basis": {
+                            "elements": [
+                                {"id": 0, "value": "Ni"},
+                                {"id": 1, "value": "Ni"},
+                                {"id": 2, "value": "Ni"},
+                                {"id": 3, "value": "Ni"},
+                            ],
+                            "coordinates": [
+                                {"id": 0, "value": [0.0, 0.0, 0.0]},
+                                {"id": 1, "value": [0.0, 0.5, 0.5]},
+                                {"id": 2, "value": [0.5, 0.0, 0.5]},
+                                {"id": 3, "value": [0.5, 0.5, 0.0]},
+                            ],
+                            "units": "crystal",
+                            "cell": [[3.505798652, 0.0, 0.0], [-0.0, 3.505798652, 0.0], [0.0, 0.0, 3.505798652]],
+                            "constraints": [],
+                            "labels": [],
+                        },
+                        "lattice": {
+                            "a": 3.505798652,
+                            "b": 3.505798652,
+                            "c": 3.505798652,
+                            "alpha": 90.0,
+                            "beta": 90.0,
+                            "gamma": 90.0,
+                            "units": {"length": "angstrom", "angle": "degree"},
+                            "type": "TRI",
+                            "vectors": {
+                                "a": [3.505798652, 0.0, 0.0],
+                                "b": [-0.0, 3.505798652, 0.0],
+                                "c": [0.0, 0.0, 3.505798652],
+                                "alat": 1,
+                                "units": "angstrom",
+                            },
+                        },
+                        "isNonPeriodic": False,
+                        "_id": "",
+                        "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+                        "isUpdated": True,
+                    },
+                    "miller_indices": [1, 1, 1],
+                    "thickness": 3,
+                    "vacuum": 3,
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                    "use_conventional_cell": True,
+                    "use_orthogonal_z": True,
+                    "make_primitive": False,
+                },
+                "film_termination": "C_P6/mmm_2",
+                "substrate_termination": "Ni_P6/mmm_4",
+                "distance_z": 3.0,
+                "vacuum": 20.0,
+            }
+        },
+    },
     "isUpdated": True,
 }
-
-
-GRAPHENE_FILM_CONFIGURATION = SlabConfiguration(
-    bulk=Material(GRAPHENE),
-    miller_indices=(0, 0, 1),
-    thickness=1,
-    use_orthogonal_z=True,
-)
-
-NICKEL_SLAB_CONFIGURATION = SlabConfiguration(
-    bulk=Material(NICKEL),
-    miller_indices=(1, 1, 1),
-    thickness=3,
-    vacuum=3,
-    use_orthogonal_z=True,
-)
-
-GRAPHENE_FILM_TERMINATION = get_terminations(GRAPHENE_FILM_CONFIGURATION)[0]
-NICKEL_SLAB_TERMINATION = get_terminations(NICKEL_SLAB_CONFIGURATION)[0]
-GRAPHENE_NICKEL_INTERFACE_CONFIGURATION = InterfaceConfiguration(
-    film_configuration=GRAPHENE_FILM_CONFIGURATION,
-    substrate_configuration=NICKEL_SLAB_CONFIGURATION,
-    film_termination=GRAPHENE_FILM_TERMINATION,
-    substrate_termination=NICKEL_SLAB_TERMINATION,
-    distance_z=3.0,
-    vacuum=5.0,
-)
-
-ZSL_BUILDER = ZSLStrainMatchingInterfaceBuilder(
-    build_parameters=ZSLStrainMatchingInterfaceBuilderParameters(
-        strain_matching_parameters=ZSLStrainMatchingParameters()
-    )
-)
-
-GRAPHENE_NICKEL_INTERFACE = create_interface(GRAPHENE_NICKEL_INTERFACE_CONFIGURATION, ZSL_BUILDER).to_json()
