@@ -185,7 +185,9 @@ def test_displace_interface():
         {"id": 4, "value": [0.766666667, 0.866666667, 0.911447347]},
     ]
     expected_labels = GRAPHENE_NICKEL_INTERFACE["basis"]["labels"]
-    displaced_material = displace_interface(material, [0.1, 0.2, 0.3], InterfacePartsEnum.FILM)
+    displaced_material = displace_interface(
+        material, [0.1, 0.2, 0.3], InterfacePartsEnum.FILM, use_cartesian_coordinates=False
+    )
     assertion_utils.assert_deep_almost_equal(expected_coordinates, displaced_material.basis.coordinates.to_dict())
     assertion_utils.assert_deep_almost_equal(expected_labels, displaced_material.basis.labels.to_dict())
 

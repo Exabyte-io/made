@@ -162,36 +162,14 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
     return decorator
 
 
-def filter_and_translate(coordinates: np.ndarray, elements: np.ndarray, axis: int, cutoff: float, direction: int):
-    """
-    Filter and translate atom coordinates based on the axis and direction.
-
-    Args:
-        coordinates (np.ndarray): The coordinates of the atoms.
-        elements (np.ndarray): The elements of the atoms.
-        axis (int): The axis to filter and translate.
-        cutoff (float): The cutoff value for filtering.
-        direction (int): The direction to translate.
-
-    Returns:
-        Tuple[np.ndarray, np.ndarray]: The filtered and translated coordinates and elements.
-    """
-    mask = (coordinates[:, axis] < cutoff) if direction == 1 else (coordinates[:, axis] > (1 - cutoff))
-    filtered_coordinates = coordinates[mask]
-    filtered_elements = elements[mask]
-    translation_vector = np.zeros(3)
-    translation_vector[axis] = direction
-    translated_coordinates = filtered_coordinates + translation_vector
-    return translated_coordinates, filtered_elements
-
-
 def augment_material_with_periodic_images(material: Material, cutoff: float = 0.1):
     """
-    Augment the material's dataset by adding atoms from periodic images near boundaries.
+    Augment the material's dataset by adding atoms from periodic images within a cutoff distance from the boundaries by
+    copying them to the opposite side of the cell, translated by the cell vector beyond the boundary.
 
     Args:
         material (Material): The material to augment.
-        cutoff (float): The cutoff value for filtering atoms near boundaries.
+        cutoff (float): The cutoff value for filtering atoms near boundaries, in crystal coordinates.
 
     Returns:
         Tuple[Material, int]: The augmented material and the original count of atoms.
@@ -204,8 +182,13 @@ def augment_material_with_periodic_images(material: Material, cutoff: float = 0.
 
     for axis in range(3):
         for direction in [-1, 1]:
-            translated_coords, translated_elems = filter_and_translate(coordinates, elements, axis, cutoff, direction)
-            for coord, elem in zip(translated_coords, translated_elems):
+            mask = (coordinates[:, axis] < cutoff) if direction == 1 else (coordinates[:, axis] > (1 - cutoff))
+            filtered_coordinates = coordinates[mask]
+            filtered_elements = elements[mask]
+            translation_vector = np.zeros(3)
+            translation_vector[axis] = direction
+            translated_coordinates = filtered_coordinates + translation_vector
+            for coord, elem in zip(translated_coordinates, filtered_elements):
                 new_basis.add_atom(elem, coord)
 
     augmented_material.basis = new_basis

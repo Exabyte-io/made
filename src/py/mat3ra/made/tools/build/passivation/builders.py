@@ -4,7 +4,7 @@ import numpy as np
 from mat3ra.made.material import Material
 from pydantic import BaseModel
 
-from .enums import SurfaceTypes
+from ...enums import SurfaceTypes
 from ...analyze import (
     get_surface_atom_indices,
     get_undercoordinated_atom_indices,
@@ -59,11 +59,13 @@ class PassivationBuilder(BaseBuilder):
 
 class SurfacePassivationBuilderParameters(BaseModel):
     """
-    Parameters for the SurfacePassivationBuilder.
+    Parameters for the SurfacePassivationBuilder, defining how atoms near the surface are
+    detected and passivated.
 
     Args:
-        shadowing_radius (float): Radius for atoms shadowing underlying from passivation, in Angstroms.
-        depth (float): Depth from the top to look for exposed surface atoms to passivate, in Angstroms.
+        shadowing_radius (float): Radius around each surface atom to exclude underlying atoms from passivation.
+        depth (float): Depth from the topmost (or bottommost) atom into the material to consider for passivation,
+                       accounting for features like islands, adatoms, and terraces.
     """
 
     shadowing_radius: float = 2.5
@@ -77,7 +79,8 @@ class SurfacePassivationBuilder(PassivationBuilder):
     Detects surface atoms looking along Z axis and passivates either the top or bottom surface or both.
     """
 
-    build_parameters: SurfacePassivationBuilderParameters = SurfacePassivationBuilderParameters()
+    build_parameters: SurfacePassivationBuilderParameters
+    _DefaultBuildParameters = SurfacePassivationBuilderParameters()
     _ConfigurationType = PassivationConfiguration
 
     def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
@@ -122,25 +125,25 @@ class SurfacePassivationBuilder(PassivationBuilder):
         return (np.array(surface_atoms_coordinates) + np.array(passivant_bond_vector_crystal)).tolist()
 
 
-class UndercoordinationPassivationBuilderParameters(SurfacePassivationBuilderParameters):
+class CoordinationBasedPassivationBuilderParameters(SurfacePassivationBuilderParameters):
     """
-    Parameters for the  UndercoordinationPassivationBuilder.
+    Parameters for the  CoordinationPassivationBuilder.
     Args:
-        coordination_threshold (int): The coordination threshold for undercoordination.
+        coordination_threshold (int): The coordination number threshold for atom to be considered undercoordinated.
     """
 
     coordination_threshold: int = 3
 
 
-class UndercoordinationPassivationBuilder(PassivationBuilder):
+class CoordinationBasedPassivationBuilder(PassivationBuilder):
     """
-    Builder for passivating material based on undercoordination of atoms.
+    Builder for passivating material based on coordination number of each atom.
 
     Detects atoms with coordination number below a threshold and passivates them.
     """
 
-    _BuildParametersType = UndercoordinationPassivationBuilderParameters
-    _DefaultBuildParameters = UndercoordinationPassivationBuilderParameters()
+    _BuildParametersType = CoordinationBasedPassivationBuilderParameters
+    _DefaultBuildParameters = CoordinationBasedPassivationBuilderParameters()
 
     def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
         material = super().create_passivated_material(configuration)
@@ -194,9 +197,9 @@ class UndercoordinationPassivationBuilder(PassivationBuilder):
 
         return passivant_coordinates
 
-    def get_coordination_numbers(self, material: Material):
+    def get_unique_coordination_numbers(self, material: Material):
         """
-        Get the coordination numbers for all atoms in the material.
+        Get unique coordination numbers for all atoms in the material for current builder parameters.
 
         Args:
             material (Material): The material object.
@@ -208,5 +211,4 @@ class UndercoordinationPassivationBuilder(PassivationBuilder):
         coordination_numbers = set(
             get_coordination_numbers(material=material, cutoff=self.build_parameters.shadowing_radius)
         )
-        print("coordination numbers:", coordination_numbers)
         return coordination_numbers
