@@ -1,8 +1,8 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze import get_optimal_displacements
 from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
+from mat3ra.made.tools.build.interface import get_optimal_film_displacement
 from mat3ra.made.tools.modify import (
     add_vacuum,
     displace_interface,
@@ -17,6 +17,7 @@ from mat3ra.made.tools.modify import (
     translate_to_z_level,
 )
 from mat3ra.utils import assertion as assertion_utils
+
 
 from .fixtures import GRAPHENE_NICKEL_INTERFACE, SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
 
@@ -203,7 +204,9 @@ def test_displace_interface_optimized():
     ]
     expected_labels = GRAPHENE_NICKEL_INTERFACE["basis"]["labels"]
 
-    minima = get_optimal_displacements(material, grid_size=(10, 10), search_range=(-1.0, 1.0))
+    minima = get_optimal_film_displacement(
+        material, grid_size_xy=(10, 10), grid_range_x=(-0.5, 0.5), grid_range_y=(-0.5, 0.5)
+    )
     optimal_displacement = minima[0]
     displaced_material = displace_interface(material, optimal_displacement, use_cartesian_coordinates=True)
     assertion_utils.assert_deep_almost_equal(expected_coordinates, displaced_material.basis.coordinates.to_dict())
