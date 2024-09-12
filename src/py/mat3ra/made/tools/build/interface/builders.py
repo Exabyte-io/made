@@ -1,9 +1,9 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 import numpy as np
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.build.utils import merge_materials
-from mat3ra.made.tools.modify import (
+from ..supercell import create_supercell
+from ..utils import merge_materials
+from ...modify import (
     translate_to_z_level,
     rotate_material,
     translate_by_vector,
@@ -16,6 +16,8 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
 )
+
+from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ...third_party import PymatgenStructure
 
 from mat3ra.made.material import Material
@@ -208,7 +210,7 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
 class TwistedInterfaceConfiguration(BaseConfiguration):
     film: Material
     substrate: Material
-    twist_angle: float = Field(..., description="Twist angle in degrees")
+    twist_angle: float = Field(0, description="Twist angle in degrees")
     distance_z: float = 3.0
     supercell_type: SupercellTypes = SupercellTypes.orthogonal
 
@@ -262,7 +264,7 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
         """
         p, q = calculate_moire_periodicity(film.lattice.a, film.lattice.b, angle)
 
-        vertex_1 = [0, 0, 0]
+        vertex_1 = [0.0, 0, 0]
         vertex_2 = [p / 2, np.sqrt(3) / 2 * q, 0]
         vertex_3 = [p, 0, 0]
         vertex_4 = [3 / 2 * p, np.sqrt(3) / 2 * q, 0]
@@ -365,3 +367,138 @@ class TwistedInterfaceBuilder(InterfaceBuilder):
 
     def _post_process(self, items: List[PymatgenStructure], post_process_parameters=None) -> List[Material]:
         return [Material(from_pymatgen(structure)) for structure in items]
+
+
+class NanoRibbonTwistedInterfaceConfiguration(BaseConfiguration):
+    film: Material
+    substrate: Material
+    twist_angle: float = Field(..., description="Twist angle in degrees")
+    ribbon_width: int = Field(..., description="Width of the nanoribbon in unit cells")
+    ribbon_length: int = Field(..., description="Length of the nanoribbon in unit cells")
+    distance_z: float = Field(3.0, description="Vertical distance between layers in Angstroms")
+    vacuum_x: int = Field(2, description="Vacuum padding in x direction in unit cells")
+    vacuum_y: int = Field(2, description="Vacuum padding in y direction in unit cells")
+
+
+class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
+    _ConfigurationType = NanoRibbonTwistedInterfaceConfiguration
+
+    def _generate(self, configuration: NanoRibbonTwistedInterfaceConfiguration) -> List[Material]:
+        # Create bottom nanoribbon
+        bottom_ribbon = self._create_nanoribbon(
+            configuration.substrate,
+            configuration.ribbon_width,
+            configuration.ribbon_length,
+            configuration.vacuum_x,
+            configuration.vacuum_y,
+        )
+
+        # Create top nanoribbon and rotate it
+        top_ribbon = self._create_nanoribbon(
+            configuration.film,
+            configuration.ribbon_width,
+            configuration.ribbon_length,
+            configuration.vacuum_x,
+            configuration.vacuum_y,
+        )
+        top_ribbon = rotate_material(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
+
+        # Translate top ribbon
+        translation_vector = [0, 0, configuration.distance_z]
+        top_ribbon = translate_by_vector(top_ribbon, translation_vector)
+
+        # Merge ribbons
+        merged_material = merge_materials([bottom_ribbon, top_ribbon])
+
+        # Add vacuum
+        return [merged_material]
+
+    def _create_nanoribbon(self, material: Material, width: int, length: int, vacuum_width: int, vacuum_length: int):
+        nanoribbon_configuration = NanoribbonConfiguration(
+            material=material,
+            width=width,
+            length=length,
+            vacuum_width=vacuum_width,
+            vacuum_length=vacuum_length,
+        )
+        nanoribbon = create_nanoribbon(nanoribbon_configuration)
+        return nanoribbon
+
+    def _update_material_name(
+        self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
+    ) -> Material:
+        material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f}°)"
+        return material
+
+    def _update_material_metadata(
+        self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
+    ) -> Material:
+        material = super()._update_material_metadata(material, configuration)
+        material.metadata["build"]["twist_angle"] = configuration.twist_angle
+        material.metadata["build"]["ribbon_width"] = configuration.ribbon_width
+        material.metadata["build"]["ribbon_length"] = configuration.ribbon_length
+        return material
+
+
+class CommensurateSuperCellTwistedInterfaceConfiguration(BaseConfiguration):
+    film: Material
+    substrate: Material
+    target_angle: float = Field(..., description="Target twist angle in degrees")
+    max_supercell_size: int = Field(10, description="Maximum supercell size to consider")
+    distance_z: float = Field(3.0, description="Vertical distance between layers in Angstroms")
+
+
+class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
+    _ConfigurationType = CommensurateSuperCellTwistedInterfaceConfiguration
+
+    def _generate(self, configuration: CommensurateSuperCellTwistedInterfaceConfiguration) -> List[Material]:
+        n, m, p, q, actual_angle = self._find_commensurate_supercell(
+            configuration.film, configuration.target_angle, configuration.max_supercell_size
+        )
+
+        # Create bottom supercell
+        bottom_supercell = create_supercell(configuration.substrate, [[n, -m, 0], [m, n, 0], [0, 0, 1]])
+
+        # Create top supercell and rotate it
+        top_supercell = create_supercell(configuration.film, [[p, -q, 0], [q, p, 0], [0, 0, 1]])
+        top_supercell = rotate_material(top_supercell, [0, 0, 1], actual_angle, wrap=False)
+
+        # Translate top supercell
+        translation_vector = [0, 0, configuration.distance_z]
+        top_supercell = translate_by_vector(top_supercell, translation_vector)
+
+        # Merge supercells
+        final_material = merge_materials([bottom_supercell, top_supercell])
+
+        return [final_material]
+
+    def _find_commensurate_supercell(
+        self, material: Material, target_angle: float, max_size: int
+    ) -> Tuple[int, int, int, int, float]:
+        best_angle_diff = float("inf")
+        best_params = (1, 0, 1, 0, 0)
+
+        for n in range(1, max_size + 1):
+            for m in range(max_size + 1):
+                for p in range(1, max_size + 1):
+                    for q in range(max_size + 1):
+                        angle = np.degrees(np.arctan2(n * q - m * p, n * p + m * q))
+                        if abs(angle - target_angle) < best_angle_diff:
+                            best_angle_diff = abs(angle - target_angle)
+                            best_params = (n, m, p, q, angle)
+
+        return best_params
+
+    def _update_material_name(
+        self, material: Material, configuration: CommensurateSuperCellTwistedInterfaceConfiguration
+    ) -> Material:
+        material.name = f"Commensurate Twisted Interface (Target: {configuration.target_angle:.2f}°, Actual: {material.metadata['build']['actual_angle']:.2f}°)"
+        return material
+
+    def _update_material_metadata(
+        self, material: Material, configuration: CommensurateSuperCellTwistedInterfaceConfiguration
+    ) -> Material:
+        material = super()._update_material_metadata(material, configuration)
+        material.metadata["build"]["target_angle"] = configuration.target_angle
+        material.metadata["build"]["actual_angle"] = material.metadata["build"]["configuration"]["actual_angle"]
+        return material
