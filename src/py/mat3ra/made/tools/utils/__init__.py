@@ -67,10 +67,14 @@ def get_norm_of_distances_between_coordinates(coordinates_1: np.ndarray, coordin
     Returns:
         float: The calculated norm.
     """
-    diff = coordinates_1[:, np.newaxis, :] - coordinates_2[np.newaxis, :, :]
-    distances = np.linalg.norm(diff, axis=2)
-    norm_of_distances = np.sum(distances)
-    return float(norm_of_distances)
+
+    def distance_inverse_square(coord1, coord2):
+        return -1 / (np.linalg.norm(coord1 - coord2) ** 2)
+
+    def sum_distances_to_coord(coord):
+        return sum(distance_inverse_square(coord, other_coord) for other_coord in coordinates_2)
+
+    return sum(sum_distances_to_coord(coord) for coord in coordinates_1)
 
 
 def get_norm(vector: List[float]) -> float:
