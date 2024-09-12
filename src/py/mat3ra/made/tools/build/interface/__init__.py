@@ -4,7 +4,7 @@ import numpy as np
 
 from mat3ra.made.material import Material
 from ...calculate import calculate_norm_of_distances
-from ...modify import displace_interface
+from ...modify import displace_interface_part
 from ...analyze import calculate_on_xy_grid
 from .builders import (
     SimpleInterfaceBuilder,
@@ -41,7 +41,7 @@ def get_optimal_film_displacement(
 ):
     results_matrix = calculate_on_xy_grid(
         material,
-        modifier=displace_interface,
+        modifier=displace_interface_part,
         modifier_parameters={},
         calculator=calculate_norm_of_distances,
         calculator_parameters={"shadowing_radius": 2.5},

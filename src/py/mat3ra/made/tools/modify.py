@@ -466,7 +466,7 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     return Material(from_ase(atoms))
 
 
-def displace_interface(
+def displace_interface_part(
     interface: Material,
     displacement: List[float],
     label: InterfacePartsEnum = InterfacePartsEnum.FILM,
