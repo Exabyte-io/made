@@ -1,11 +1,11 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze import get_optimal_displacements
+from mat3ra.made.tools.build.interface import get_optimal_film_displacement
 from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
 from mat3ra.made.tools.modify import (
     add_vacuum,
-    displace_interface,
+    displace_interface_part,
     filter_by_circle_projection,
     filter_by_label,
     filter_by_layers,
@@ -175,7 +175,7 @@ def test_rotate_material():
     assertion_utils.assert_deep_almost_equal(material.lattice, rotated_material.lattice)
 
 
-def test_displace_interface():
+def test_displace_interface_part():
     material = Material(GRAPHENE_NICKEL_INTERFACE)
     expected_coordinates = [
         {"id": 0, "value": [0.666666667, 0.666666667, 0.350869517]},
@@ -185,7 +185,9 @@ def test_displace_interface():
         {"id": 4, "value": [0.766666667, 0.866666667, 0.911447347]},
     ]
     expected_labels = GRAPHENE_NICKEL_INTERFACE["basis"]["labels"]
-    displaced_material = displace_interface(material, [0.1, 0.2, 0.3], InterfacePartsEnum.FILM)
+    displaced_material = displace_interface_part(
+        material, [0.1, 0.2, 0.3], InterfacePartsEnum.FILM, use_cartesian_coordinates=False
+    )
     assertion_utils.assert_deep_almost_equal(expected_coordinates, displaced_material.basis.coordinates.to_dict())
     assertion_utils.assert_deep_almost_equal(expected_labels, displaced_material.basis.labels.to_dict())
 
@@ -194,15 +196,16 @@ def test_displace_interface_optimized():
     material = Material(GRAPHENE_NICKEL_INTERFACE)
     expected_coordinates = [
         {"id": 0, "value": [0.666666667, 0.666666667, 0.350869517]},
-        {"id": 1, "value": [0.0, 0.0, 0.425701769]},
+        {"id": 1, "value": [-0.0, 0.0, 0.425701769]},
         {"id": 2, "value": [0.333333333, 0.333333333, 0.500534021]},
-        {"id": 3, "value": [0.186859257, 0.17806738, 0.611447347]},
-        {"id": 4, "value": [0.520192591, 0.511400714, 0.611447347]},
+        {"id": 3, "value": [0.285973954, 0.203945038, 0.611447347]},
+        {"id": 4, "value": [0.619307288, 0.537278372, 0.611447347]},
     ]
     expected_labels = GRAPHENE_NICKEL_INTERFACE["basis"]["labels"]
 
-    minima = get_optimal_displacements(material, grid_size=(10, 10), search_range=(-1.0, 1.0))
-    optimal_displacement = minima[0]
-    displaced_material = displace_interface(material, optimal_displacement, use_cartesian_coordinates=True)
+    optimal_displacement, minimum = get_optimal_film_displacement(
+        material, grid_size_xy=(10, 10), grid_range_x=(-0.5, 0.5), grid_range_y=(-0.5, 0.5)
+    )
+    displaced_material = displace_interface_part(material, optimal_displacement, use_cartesian_coordinates=True)
     assertion_utils.assert_deep_almost_equal(expected_coordinates, displaced_material.basis.coordinates.to_dict())
     assertion_utils.assert_deep_almost_equal(expected_labels, displaced_material.basis.labels.to_dict())

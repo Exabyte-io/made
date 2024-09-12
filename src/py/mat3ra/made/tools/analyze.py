@@ -1,11 +1,11 @@
-from typing import Callable, List, Literal, Optional, Tuple
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
+from mat3ra.made.material import Material
 from scipy.spatial import cKDTree
 
-from ..material import Material
-from .build.passivation.enums import SurfaceTypes
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
+from .enums import SurfaceTypes
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
 from .utils import decorator_handle_periodic_boundary_conditions
 
@@ -277,7 +277,10 @@ def get_nearest_neighbors_atom_indices(
     Args:
         material (Material): The material object to find neighbors in.
         coordinate (List[float]): The position to find neighbors for.
-        cutoff (float): The cutoff radius for identifying neighbors.
+        tolerance (float): tolerance parameter for near-neighbor finding. Faces that are smaller than tol fraction
+            of the largest face are not included in the tessellation. (default: 0.1).
+            as per: https://pymatgen.org/pymatgen.analysis.html#pymatgen.analysis.local_env.VoronoiNN
+        cutoff (float): The cutoff radius for identifying neighbors, in angstroms.
 
     Returns:
         List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
@@ -298,7 +301,6 @@ def get_nearest_neighbors_atom_indices(
     if site_index is None:
         structure.append("X", coordinate, validate_proximity=False)
         site_index = len(structure.sites) - 1
-
         remove_dummy_atom = True
     try:
         neighbors = voronoi_nn.get_nn_info(structure, site_index)
@@ -342,51 +344,37 @@ def get_atomic_coordinates_extremum(
     return getattr(np, extremum)(values)
 
 
-def get_local_extremum_atom_index(
-    material: Material,
-    coordinate: List[float],
-    extremum: Literal["max", "min"] = "max",
-    vicinity: float = 1.0,
-    use_cartesian_coordinates: bool = False,
-) -> int:
+def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: SurfaceTypes) -> bool:
     """
-    Return the id of the atom with the minimum or maximum z-coordinate
-    within a certain vicinity of a given (x, y) coordinate.
+    Check if the height of an atom is within the specified limits.
 
     Args:
-        material (Material): Material object.
-        coordinate (List[float]): (x, y, z) coordinate to find the local extremum.
-        extremum (str): "min" or "max".
-        vicinity (float): Radius of the vicinity, in Angstroms.
-        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
+        z (float): The z-coordinate of the atom.
+        z_extremum (float): The extremum z-coordinate of the surface.
+        depth (float): The depth from the surface to look for exposed atoms.
+        surface (SurfaceTypes): The surface type (top or bottom).
 
     Returns:
-        int: id of the atom with the minimum or maximum z-coordinate.
+        bool: True if the height is within the limits, False otherwise.
     """
-    new_material = material.clone()
-    new_material.to_cartesian()
-    if not use_cartesian_coordinates:
-        coordinate = new_material.basis.cell.convert_point_to_cartesian(coordinate)
-
-    coordinates = np.array(new_material.basis.coordinates.values)
-    ids = np.array(new_material.basis.coordinates.ids)
-    tree = cKDTree(coordinates[:, :2])
-    indices = tree.query_ball_point(coordinate[:2], vicinity)
-    z_values = [(id, coord[2]) for id, coord in zip(ids[indices], coordinates[indices])]
-
-    if extremum == "max":
-        extremum_z_atom = max(z_values, key=lambda item: item[1])
-    else:
-        extremum_z_atom = min(z_values, key=lambda item: item[1])
-
-    return extremum_z_atom[0]
-
-
-def height_check(z: float, z_extremum: float, depth: float, surface: SurfaceTypes):
     return (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
 
 
-def shadowing_check(z: float, neighbors_indices: List[int], surface: SurfaceTypes, coordinates: np.ndarray):
+def is_shadowed_by_neighbors_from_surface(
+    z: float, neighbors_indices: List[int], surface: SurfaceTypes, coordinates: np.ndarray
+) -> bool:
+    """
+    Check if any one of the neighboring atoms shadow the atom from the surface by being closer to the specified surface.
+
+    Args:
+        z (float): The z-coordinate of the atom.
+        neighbors_indices (List[int]): List of indices of neighboring atoms.
+        surface (SurfaceTypes): The surface type (top or bottom).
+        coordinates (np.ndarray): The coordinates of the atoms.
+
+    Returns:
+        bool: True if the atom is not shadowed, False otherwise.
+    """
     return not any(
         (coordinates[n][2] > z if surface == SurfaceTypes.TOP else coordinates[n][2] < z) for n in neighbors_indices
     )
@@ -418,9 +406,9 @@ def get_surface_atom_indices(
 
     exposed_atoms_indices = []
     for idx, (x, y, z) in enumerate(coordinates):
-        if height_check(z, z_extremum, depth, surface):
+        if is_height_within_limits(z, z_extremum, depth, surface):
             neighbors_indices = kd_tree.query_ball_point([x, y, z], r=shadowing_radius)
-            if shadowing_check(z, neighbors_indices, surface, coordinates):
+            if is_shadowed_by_neighbors_from_surface(z, neighbors_indices, surface, coordinates):
                 exposed_atoms_indices.append(ids[idx])
 
     return exposed_atoms_indices
@@ -483,45 +471,98 @@ def get_undercoordinated_atom_indices(
     return undercoordinated_atoms_indices
 
 
-def get_optimal_displacements(
+def get_local_extremum_atom_index(
     material: Material,
-    grid_size: Tuple[int, int] = (10, 10),
-    search_range: Tuple[float, float] = (-1.0, 1.0),
-    shadowing_radius: float = 2.5,
-) -> List[List[float]]:
+    coordinate: List[float],
+    extremum: Literal["max", "min"] = "max",
+    vicinity: float = 1.0,
+    use_cartesian_coordinates: bool = False,
+) -> int:
     """
-    Return all optimal displacements for the interface material by calculating
-    the norm of distances for each film atom to substrate atoms within a certain radius.
-    The displacement is done on a grid and the displacement that yields minimum norm is returned.
+    Return the id of the atom with the minimum or maximum z-coordinate
+    within a certain vicinity of a given (x, y) coordinate.
 
     Args:
-        material (Material): The interface Material object.
-        grid_size (Tuple[int, int]): The size of the grid.
-        search_range (Tuple[float, float]): The range to search for optimal displacements.
-        shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
+        material (Material): Material object.
+        coordinate (List[float]): (x, y, z) coordinate to find the local extremum atom index for.
+        extremum (str): "min" or "max".
+        vicinity (float): Radius of the vicinity, in Angstroms.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
 
     Returns:
-        List[List[float]]: The optimal displacements.
+        int: id of the atom with the minimum or maximum z-coordinate.
     """
-    from .calculate import calculate_norm_of_distances
-    from .modify import displace_interface
+    new_material = material.clone()
+    new_material.to_cartesian()
+    if not use_cartesian_coordinates:
+        coordinate = new_material.basis.cell.convert_point_to_cartesian(coordinate)
 
-    x_values = np.linspace(search_range[0], search_range[1], grid_size[0])
-    y_values = np.linspace(search_range[0], search_range[1], grid_size[1])
+    coordinates = np.array(new_material.basis.coordinates.values)
+    ids = np.array(new_material.basis.coordinates.ids)
+    tree = cKDTree(coordinates[:, :2])
+    indices = tree.query_ball_point(coordinate[:2], vicinity)
+    z_values = [(id, coord[2]) for id, coord in zip(ids[indices], coordinates[indices])]
 
-    norms = np.zeros(grid_size)
+    if extremum == "max":
+        extremum_z_atom = max(z_values, key=lambda item: item[1])
+    else:
+        extremum_z_atom = min(z_values, key=lambda item: item[1])
+
+    return extremum_z_atom[0]
+
+
+def calculate_on_xy_grid(
+    material: Material,
+    modifier: Callable,
+    modifier_parameters: Dict[str, Any],
+    calculator: Callable,
+    calculator_parameters: Dict[str, Any],
+    grid_size_xy: Tuple[int, int] = (10, 10),
+    grid_offset_position: List[float] = [0, 0],
+    grid_range_x: Tuple[float, float] = (-0.5, 0.5),
+    grid_range_y: Tuple[float, float] = (-0.5, 0.5),
+    use_cartesian_coordinates: bool = False,
+) -> np.ndarray:
+    """
+    Calculate a property on a 2D grid of x-y positions by modifying the material and applying a calculator.
+
+     This function creates a 2D grid of x-y positions, applies a modifier function to the material
+     at each grid point, and then calculates a property using a provided calculator function.
+
+     Args:
+         material (Material): The initial material object to be modified at each grid point.
+         modifier (Callable): A function that modifies the material.
+         modifier_parameters (Dict[str, Any]): The parameters to pass to the modifier
+         calculator (Callable): A function that calculates a property of the modified material.
+         calculator_parameters (Dict[str, Any]): The parameters to pass to the calculator.
+         grid_size_xy (Tuple[int, int]): The size of the grid in x and y directions.
+         grid_offset_position (List[float]): An offset applied to all grid points, in Angstroms or crystal coordinates.
+         grid_range_x (Tuple[float, float]): The range to search in x direction, in Angstroms or crystal coordinates.
+         grid_range_y (Tuple[float, float]): The range to search in y direction, in Angstroms or crystal coordinates.
+         use_cartesian_coordinates (bool): If True, interpret grid ranges and offsets
+            in Cartesian coordinates. If False, interpret them in fractional crystal coordinates.
+            Defaults to False.
+
+     Returns:
+         np.ndarray: The calculated values on the grid.
+    """
+    x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
+    y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
+
+    results_matrix = np.zeros(grid_size_xy)
 
     for i, x in enumerate(x_values):
         for j, y in enumerate(y_values):
-            displaced_material = displace_interface(material, [x, y, 0], use_cartesian_coordinates=True)
-            norm = calculate_norm_of_distances(displaced_material, shadowing_radius)
-            norms[i, j] = norm
+            modified_material = modifier(
+                material,
+                displacement=[x, y, 0],
+                use_cartesian_coordinates=use_cartesian_coordinates,
+                **modifier_parameters,
+            )
+            result = calculator(modified_material, **calculator_parameters)
+            results_matrix[i, j] = result
 
-    min_norm = np.min(norms)
-    min_positions = np.argwhere(norms == min_norm)
-
-    displacements_with_min_norm = [[x_values[pos[0]], y_values[pos[1]], 0] for pos in min_positions]
-    return displacements_with_min_norm
+    return results_matrix
 
 
 def calculate_moire_periodicity(lattice_a: float, lattice_b: float, twist_angle: float) -> Tuple[float, float]:

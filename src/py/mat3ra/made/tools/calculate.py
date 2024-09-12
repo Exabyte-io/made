@@ -6,10 +6,10 @@ from mat3ra.made.tools.convert.utils import InterfacePartsEnum
 from ..material import Material
 from .analyze import get_surface_area, get_surface_atom_indices
 from .build.interface.utils import get_slab
-from .build.passivation.enums import SurfaceTypes
 from .convert import decorator_convert_material_args_kwargs_to_atoms, from_ase
+from .enums import SurfaceTypes
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT, ASEFixAtoms, ASEFixedPlane, ase_all_changes
-from .utils import calculate_norm_of_distances_between_coordinates, decorator_handle_periodic_boundary_conditions
+from .utils import decorator_handle_periodic_boundary_conditions, get_norm_of_distances_between_coordinates
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -166,7 +166,7 @@ def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.
     film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
     substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
 
-    return calculate_norm_of_distances_between_coordinates(film_coordinates_values, substrate_coordinates_values)
+    return get_norm_of_distances_between_coordinates(film_coordinates_values, substrate_coordinates_values)
 
 
 class SurfaceDistanceCalculator(ASECalculator):
