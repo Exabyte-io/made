@@ -1,9 +1,10 @@
-from typing import Callable, List, Literal, Optional, Tuple
+from typing import Callable, List, Literal, Optional, Tuple, Any, Dict
 
 import numpy as np
+
 from scipy.spatial import cKDTree
 
-from ..material import Material
+from mat3ra.made.material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from .enums import SurfaceTypes
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
@@ -514,14 +515,15 @@ def get_local_extremum_atom_index(
 def calculate_on_xy_grid(
     material: Material,
     modifier: Callable,
+    modifier_parameters: Dict[str, Any],
     calculator: Callable,
-    calculator_parameters: dict,
-    grid_size_xy: Tuple[int, int],
-    grid_offset_position: List[float],
-    grid_range_x=(-0.5, 0.5),
-    grid_range_y=(-0.5, 0.5),
-    use_cartesian_coordinates=False,
-):
+    calculator_parameters: Dict[str, Any],
+    grid_size_xy: Tuple[int, int] = (10, 10),
+    grid_offset_position: List[float] = [0, 0],
+    grid_range_x: Tuple[float, float] = (-0.5, 0.5),
+    grid_range_y: Tuple[float, float] = (-0.5, 0.5),
+    use_cartesian_coordinates: bool = False,
+) -> np.ndarray:
     """
     Calculate a property on a grid of x-y positions.
 
@@ -537,7 +539,7 @@ def calculate_on_xy_grid(
         use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
 
     Returns:
-        List[List[float]]: The calculated values on the grid.
+        np.ndarray: The calculated values on the grid.
     """
     x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
     y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
@@ -546,7 +548,12 @@ def calculate_on_xy_grid(
 
     for i, x in enumerate(x_values):
         for j, y in enumerate(y_values):
-            modified_material = modifier(material, [x, y, 0], use_cartesian_coordinates=use_cartesian_coordinates)
+            modified_material = modifier(
+                material,
+                displacement=[x, y, 0],
+                use_cartesian_coordinates=use_cartesian_coordinates,
+                **modifier_parameters,
+            )
             result = calculator(modified_material, **calculator_parameters)
             results_matrix[i, j] = result
 
