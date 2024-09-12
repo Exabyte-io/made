@@ -99,7 +99,7 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
     ids: List[int] = []
 
     @classmethod
-    def from_value(cls, values: List[Any]) -> "ArrayWithIds":
+    def from_values(cls, values: List[Any]) -> "ArrayWithIds":
         try:
             ids = list(range(len(values)))
             return cls(values=values, ids=ids)
