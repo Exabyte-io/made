@@ -38,7 +38,6 @@ expected_basis_layers_section = {
         {"id": 3, "value": [0.25, 0.75, 0.25]},
         {"id": 5, "value": [0.75, 0.25, 0.25]},
         {"id": 6, "value": [0.0, 0.5, 0.0]},
-        Ï,
     ],
     **COMMON_PART,
 }
