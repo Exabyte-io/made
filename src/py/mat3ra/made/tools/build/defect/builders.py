@@ -30,8 +30,7 @@ from ...analyze import (
     get_closest_site_id_from_coordinate_and_element,
 )
 from ....utils import get_center_of_coordinates
-from ...utils import transform_coordinate_to_supercell
-from ...utils import coordinate as CoordinateCondition
+from ...utils import transform_coordinate_to_supercell, coordinate as CoordinateCondition
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
@@ -415,23 +414,25 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
             The material with the island added.
         """
         new_material = material.clone()
-        original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=False)
+        original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
         material_with_additional_layers = self.create_material_with_additional_layers(new_material, thickness)
-        added_layers_max_z = get_atomic_coordinates_extremum(material_with_additional_layers)
+        added_layers_max_z = get_atomic_coordinates_extremum(
+            material_with_additional_layers, use_cartesian_coordinates=True
+        )
         if condition is None:
             condition = self._default_condition
 
-        thickness_nudge_value = (added_layers_max_z - original_max_z) / thickness
         atoms_within_island = filter_by_condition_on_coordinates(
             material=material_with_additional_layers,
             condition=condition,
             use_cartesian_coordinates=use_cartesian_coordinates,
         )
-        # Filter atoms in the added layers
+        # Filter atoms in the added layers between the original and added layers
         island_material = filter_by_box(
             material=atoms_within_island,
-            min_coordinate=[0, 0, original_max_z - thickness_nudge_value],
-            max_coordinate=[1, 1, added_layers_max_z],
+            min_coordinate=[0, 0, original_max_z],
+            max_coordinate=[material.lattice.a, material.lattice.b, added_layers_max_z],
+            use_cartesian_coordinates=True,
         )
 
         return self.merge_slab_and_defect(island_material, new_material)

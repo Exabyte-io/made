@@ -3,19 +3,9 @@ from typing import Callable, List, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.utils import ArrayWithIds
 from mat3ra.utils.matrix import convert_2x2_to_3x3
-from scipy.spatial import cKDTree
 
 from ..third_party import PymatgenStructure
-from .coordinate import (
-    is_coordinate_behind_plane,
-    is_coordinate_in_box,
-    is_coordinate_in_cylinder,
-    is_coordinate_in_sphere,
-    is_coordinate_in_triangular_prism,
-)
-from .factories import PerturbationFunctionHolderFactory
 
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
@@ -65,21 +55,26 @@ def get_distance_between_coordinates(coordinate1: List[float], coordinate2: List
     return float(np.linalg.norm(np.array(coordinate1) - np.array(coordinate2)))
 
 
-def calculate_norm_of_distances_between_coordinates(coords1: np.ndarray, coords2: np.ndarray) -> float:
+def get_norm_of_distances_between_coordinates(coordinates_1: np.ndarray, coordinates_2: np.ndarray) -> float:
     """
     Calculate the norm of distances between two sets of coordinates.
+    The norm is calculated as the sum of distances between each pair of coordinates.
 
     Args:
-        coords1 (np.ndarray): The first set of coordinates.
-        coords2 (np.ndarray): The second set of coordinates.
+        coordinates_1 (np.ndarray): The first set of coordinates.
+        coordinates_2 (np.ndarray): The second set of coordinates.
 
     Returns:
         float: The calculated norm.
     """
-    tree = cKDTree(coords2)
-    distances, _ = tree.query(coords1)
-    distances = distances[~np.isinf(distances)]
-    return float(np.linalg.norm(distances))
+
+    def distance_inverse_square(coord1, coord2):
+        return -1 / (np.linalg.norm(coord1 - coord2) ** 2)
+
+    def sum_distances_to_coord(coord):
+        return sum(distance_inverse_square(coord, other_coord) for other_coord in coordinates_2)
+
+    return sum(sum_distances_to_coord(coord) for coord in coordinates_1)
 
 
 def get_norm(vector: List[float]) -> float:
@@ -162,36 +157,14 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
     return decorator
 
 
-def filter_and_translate(coordinates: np.ndarray, elements: np.ndarray, axis: int, cutoff: float, direction: int):
-    """
-    Filter and translate atom coordinates based on the axis and direction.
-
-    Args:
-        coordinates (np.ndarray): The coordinates of the atoms.
-        elements (np.ndarray): The elements of the atoms.
-        axis (int): The axis to filter and translate.
-        cutoff (float): The cutoff value for filtering.
-        direction (int): The direction to translate.
-
-    Returns:
-        Tuple[np.ndarray, np.ndarray]: The filtered and translated coordinates and elements.
-    """
-    mask = (coordinates[:, axis] < cutoff) if direction == 1 else (coordinates[:, axis] > (1 - cutoff))
-    filtered_coordinates = coordinates[mask]
-    filtered_elements = elements[mask]
-    translation_vector = np.zeros(3)
-    translation_vector[axis] = direction
-    translated_coordinates = filtered_coordinates + translation_vector
-    return translated_coordinates, filtered_elements
-
-
 def augment_material_with_periodic_images(material: Material, cutoff: float = 0.1):
     """
-    Augment the material's dataset by adding atoms from periodic images near boundaries.
+    Augment the material's dataset by adding atoms from periodic images within a cutoff distance from the boundaries by
+    copying them to the opposite side of the cell, translated by the cell vector beyond the boundary.
 
     Args:
         material (Material): The material to augment.
-        cutoff (float): The cutoff value for filtering atoms near boundaries.
+        cutoff (float): The cutoff value for filtering atoms near boundaries, in crystal coordinates.
 
     Returns:
         Tuple[Material, int]: The augmented material and the original count of atoms.
@@ -204,8 +177,13 @@ def augment_material_with_periodic_images(material: Material, cutoff: float = 0.
 
     for axis in range(3):
         for direction in [-1, 1]:
-            translated_coords, translated_elems = filter_and_translate(coordinates, elements, axis, cutoff, direction)
-            for coord, elem in zip(translated_coords, translated_elems):
+            mask = (coordinates[:, axis] < cutoff) if direction == 1 else (coordinates[:, axis] > (1 - cutoff))
+            filtered_coordinates = coordinates[mask]
+            filtered_elements = elements[mask]
+            translation_vector = np.zeros(3)
+            translation_vector[axis] = direction
+            translated_coordinates = filtered_coordinates + translation_vector
+            for coord, elem in zip(translated_coordinates, filtered_elements):
                 new_basis.add_atom(elem, coord)
 
     augmented_material.basis = new_basis
