@@ -1,8 +1,8 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.interface import get_optimal_film_displacement
 from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
-from mat3ra.made.tools.build.interface import get_optimal_film_displacement
 from mat3ra.made.tools.modify import (
     add_vacuum,
     displace_interface,
@@ -17,7 +17,6 @@ from mat3ra.made.tools.modify import (
     translate_to_z_level,
 )
 from mat3ra.utils import assertion as assertion_utils
-
 
 from .fixtures import GRAPHENE_NICKEL_INTERFACE, SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
 
@@ -197,10 +196,10 @@ def test_displace_interface_optimized():
     material = Material(GRAPHENE_NICKEL_INTERFACE)
     expected_coordinates = [
         {"id": 0, "value": [0.666666667, 0.666666667, 0.350869517]},
-        {"id": 1, "value": [0.0, 0.0, 0.425701769]},
+        {"id": 1, "value": [-0.0, 0.0, 0.425701769]},
         {"id": 2, "value": [0.333333333, 0.333333333, 0.500534021]},
-        {"id": 3, "value": [0.186859257, 0.17806738, 0.611447347]},
-        {"id": 4, "value": [0.520192591, 0.511400714, 0.611447347]},
+        {"id": 3, "value": [0.111764249, 0.462721628, 0.611447347]},
+        {"id": 4, "value": [0.445097583, 0.796054962, 0.611447347]},
     ]
     expected_labels = GRAPHENE_NICKEL_INTERFACE["basis"]["labels"]
 

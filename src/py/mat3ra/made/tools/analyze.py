@@ -1,10 +1,9 @@
-from typing import Callable, List, Literal, Optional, Tuple, Any, Dict
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
-
+from mat3ra.made.material import Material
 from scipy.spatial import cKDTree
 
-from mat3ra.made.material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from .enums import SurfaceTypes
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
