@@ -492,7 +492,7 @@ class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
     def _update_material_name(
         self, material: Material, configuration: CommensurateSuperCellTwistedInterfaceConfiguration
     ) -> Material:
-        material.name = f"Commensurate Twisted Interface (Target: {configuration.target_angle:.2f}°, Actual: {material.metadata['build']['actual_angle']:.2f}°)"
+        material.name = f"Commensurate Twisted Interface : {material.metadata['build']['actual_angle']:.2f} degrees"
         return material
 
     def _update_material_metadata(
