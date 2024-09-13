@@ -395,17 +395,21 @@ class NanoRibbonTwistedInterfaceConfiguration(BaseConfiguration):
 
     @property
     def _json(self):
-        json_data = super()._json
-        json_data.update({"twist_angle": self.twist_angle})
-        json_data.update({"ribbon_width": self.ribbon_width})
-        json_data.update({"ribbon_length": self.ribbon_length})
-        json_data.update({"distance_z": self.distance_z})
-        json_data.update({"vacuum_x": self.vacuum_x})
-        json_data.update({"vacuum_y": self.vacuum_y})
-        return json_data
+        return {
+            "type": self.get_cls_name(),
+            "film": self.film.to_json(),
+            "substrate": self.substrate.to_json(),
+            "twist_angle": self.twist_angle,
+            "ribbon_width": self.ribbon_width,
+            "ribbon_length": self.ribbon_length,
+            "distance_z": self.distance_z,
+            "vacuum_x": self.vacuum_x,
+            "vacuum_y": self.vacuum_y,
+        }
 
 
 class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
+    _GeneratedItemType = Material
     _ConfigurationType = NanoRibbonTwistedInterfaceConfiguration
 
     def _generate(self, configuration: NanoRibbonTwistedInterfaceConfiguration) -> List[Material]:
@@ -450,11 +454,14 @@ class CommensurateSuperCellTwistedInterfaceConfiguration(BaseConfiguration):
 
     @property
     def _json(self):
-        json_data = super()._json
-        json_data.update({"target_angle": self.target_angle})
-        json_data.update({"max_supercell_size": self.max_supercell_size})
-        json_data.update({"distance_z": self.distance_z})
-        return json_data
+        return {
+            "type": self.get_cls_name(),
+            "film": self.film.to_json(),
+            "substrate": self.substrate.to_json(),
+            "target_angle": self.target_angle,
+            "max_supercell_size": self.max_supercell_size,
+            "distance_z": self.distance_z,
+        }
 
 
 class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
