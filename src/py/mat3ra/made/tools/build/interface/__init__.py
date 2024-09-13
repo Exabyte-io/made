@@ -1,9 +1,9 @@
-from typing import Union, List, Optional, Tuple
+from typing import Union, List, Optional, Tuple, Callable
 
 import numpy as np
 
 from mat3ra.made.material import Material
-from ...calculate import calculate_norm_of_distances
+from ...calculate import calculate_film_substrate_interaction_metric, InteractionCalculatorParameters
 from ...modify import displace_interface_part
 from ...analyze import calculate_on_xy_grid
 from .builders import (
@@ -14,6 +14,7 @@ from .builders import (
     ZSLStrainMatchingInterfaceBuilderParameters,
 )
 from .configuration import InterfaceConfiguration
+from ...utils import get_sum_of_inverse_distances_squared
 
 
 def create_interfaces(
@@ -38,13 +39,16 @@ def get_optimal_film_displacement(
     grid_range_x=(-0.5, 0.5),
     grid_range_y=(-0.5, 0.5),
     use_cartesian_coordinates=False,
+    calculator: Callable = calculate_film_substrate_interaction_metric,
+    calculator_parameters: InteractionCalculatorParameters = InteractionCalculatorParameters(),
 ):
-    results_matrix = calculate_on_xy_grid(
+    calculator_parameters_dict = calculator_parameters.dict()
+    x_values, y_values, results_matrix = calculate_on_xy_grid(
         material,
         modifier=displace_interface_part,
         modifier_parameters={},
-        calculator=calculate_norm_of_distances,
-        calculator_parameters={"shadowing_radius": 2.5},
+        calculator=calculator,
+        calculator_parameters=calculator_parameters_dict,
         grid_size_xy=grid_size_xy,
         grid_offset_position=grid_offset_position,
         grid_range_x=grid_range_x,
@@ -52,13 +56,8 @@ def get_optimal_film_displacement(
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
     min_index = np.unravel_index(np.argmin(results_matrix), results_matrix.shape)
-    min_value = results_matrix[min_index]
-
-    # Calculate the corresponding x, y coordinates
-    x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
-    y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
 
     optimal_x = x_values[min_index[0]]
     optimal_y = y_values[min_index[1]]
 
-    return [optimal_x, optimal_y, 0], min_value
+    return [optimal_x, optimal_y, 0]
