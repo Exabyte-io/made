@@ -3,7 +3,7 @@ from typing import Union, List, Optional, Tuple, Callable
 import numpy as np
 
 from mat3ra.made.material import Material
-from ...calculate import calculate_film_substrate_interaction_metric
+from ...calculate import calculate_film_substrate_interaction_metric, InteractionCalculatorParameters
 from ...modify import displace_interface_part
 from ...analyze import calculate_on_xy_grid
 from .builders import (
@@ -40,13 +40,15 @@ def get_optimal_film_displacement(
     grid_range_y=(-0.5, 0.5),
     use_cartesian_coordinates=False,
     calculator: Callable = calculate_film_substrate_interaction_metric,
+    calculator_parameters: InteractionCalculatorParameters = InteractionCalculatorParameters(),
 ):
+    calculator_parameters_dict = calculator_parameters.dict()
     x_values, y_values, results_matrix = calculate_on_xy_grid(
         material,
         modifier=displace_interface_part,
         modifier_parameters={},
         calculator=calculator,
-        calculator_parameters={"shadowing_radius": 2.5, "metric_function": get_sum_of_inverse_distances_squared},
+        calculator_parameters=calculator_parameters_dict,
         grid_size_xy=grid_size_xy,
         grid_offset_position=grid_offset_position,
         grid_range_x=grid_range_x,

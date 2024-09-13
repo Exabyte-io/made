@@ -2,6 +2,7 @@ from typing import Callable, Optional
 
 import numpy as np
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
+from pydantic import BaseModel
 
 from ..material import Material
 from .analyze import get_surface_area, get_surface_atom_indices
@@ -132,18 +133,23 @@ def calculate_interfacial_energy(
     return surface_energy_film + surface_energy_substrate - adhesion_energy
 
 
+class InteractionCalculatorParameters(BaseModel):
+    shadowing_radius: float = 2.5
+    interaction_function: Callable = get_sum_of_inverse_distances_squared
+
+
 @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
 def calculate_film_substrate_interaction_metric(
     material: Material,
     shadowing_radius: float = 2.5,
-    metric_function: Callable = get_sum_of_inverse_distances_squared,
+    interaction_function: Callable = get_sum_of_inverse_distances_squared,
 ) -> float:
     """
     Calculate the interaction metric between the film and substrate.
     Args:
         material (Material): The interface Material object.
         shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
-        metric_function (Callable): The metric function to use for the calculation of the interaction.
+        interaction_function (Callable): The metric function to use for the calculation of the interaction.
 
     Returns:
         float: The calculated norm.
@@ -170,4 +176,4 @@ def calculate_film_substrate_interaction_metric(
     film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
     substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
 
-    return metric_function(film_coordinates_values, substrate_coordinates_values)
+    return interaction_function(film_coordinates_values, substrate_coordinates_values)
