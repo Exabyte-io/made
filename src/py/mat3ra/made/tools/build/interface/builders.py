@@ -433,7 +433,7 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
         top_ribbon = rotate_material(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
 
         translation_vector = [0, 0, configuration.distance_z]
-        top_ribbon = translate_by_vector(top_ribbon, translation_vector)
+        top_ribbon = translate_by_vector(top_ribbon, translation_vector, use_cartesian_coordinates=True)
         merged_material = merge_materials([bottom_ribbon, top_ribbon])
 
         return [merged_material]
