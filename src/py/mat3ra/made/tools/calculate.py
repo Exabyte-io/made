@@ -9,6 +9,7 @@ from .analyze import get_surface_area, get_surface_atom_indices
 from .build.interface.utils import get_slab
 from .convert import decorator_convert_material_args_kwargs_to_atoms, from_ase
 from .enums import SurfaceTypes
+from .modify import get_interface_part
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT, ASEFixAtoms, ASEFixedPlane, ase_all_changes
 from .utils import decorator_handle_periodic_boundary_conditions, get_sum_of_inverse_distances_squared
 
@@ -154,13 +155,8 @@ def calculate_film_substrate_interaction_metric(
     Returns:
         float: The calculated norm.
     """
-    film_material = material.clone()
-    substrate_material = material.clone()
-    film_atoms_basis = film_material.basis.filter_atoms_by_labels([int(InterfacePartsEnum.FILM)])
-    substrate_atoms_basis = substrate_material.basis.filter_atoms_by_labels([int(InterfacePartsEnum.SUBSTRATE)])
-
-    film_material.basis = film_atoms_basis
-    substrate_material.basis = substrate_atoms_basis
+    film_material = get_interface_part(material, part=InterfacePartsEnum.FILM)
+    substrate_material = get_interface_part(material, part=InterfacePartsEnum.SUBSTRATE)
     film_atoms_surface_indices = get_surface_atom_indices(
         film_material, SurfaceTypes.BOTTOM, shadowing_radius=shadowing_radius
     )

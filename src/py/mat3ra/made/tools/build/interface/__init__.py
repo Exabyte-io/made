@@ -14,7 +14,6 @@ from .builders import (
     ZSLStrainMatchingInterfaceBuilderParameters,
 )
 from .configuration import InterfaceConfiguration
-from ...utils import get_sum_of_inverse_distances_squared
 
 
 def create_interfaces(
