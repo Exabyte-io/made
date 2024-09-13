@@ -180,6 +180,13 @@ class SurfaceDistanceCalculator(ASECalculator):
     ASE calculator that computes the norm of distances between interfacial gap facing atoms
     of the film and the substrate.
 
+    Args:
+        shadowing_radius (float): The radius for atom to shadow underlying from being considered surface, in Angstroms.
+        force_constant (float): The force constant for the finite difference approximation of the forces.
+        fix_substrate (bool): Whether to fix the substrate atoms.
+        fix_z (bool): Whether to fix atoms movement in the z direction.
+        symprec (float): The symmetry precision for the ASE calculator.
+
     Example usage:
     ```python
     from ase.optimize import BFGS
