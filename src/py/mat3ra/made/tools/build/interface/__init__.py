@@ -39,14 +39,14 @@ def get_optimal_film_displacement(
     grid_range_x=(-0.5, 0.5),
     grid_range_y=(-0.5, 0.5),
     use_cartesian_coordinates=False,
-    calculator: Callable = get_sum_of_inverse_distances_squared,
+    calculator: Callable = calculate_film_substrate_interaction_metric,
 ):
-    results_matrix = calculate_on_xy_grid(
+    x_values, y_values, results_matrix = calculate_on_xy_grid(
         material,
         modifier=displace_interface,
         modifier_parameters={},
         calculator=calculator,
-        calculator_parameters={},
+        calculator_parameters={"shadowing_radius": 2.5, "metric_function": get_sum_of_inverse_distances_squared},
         grid_size_xy=grid_size_xy,
         grid_offset_position=grid_offset_position,
         grid_range_x=grid_range_x,
@@ -54,13 +54,8 @@ def get_optimal_film_displacement(
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
     min_index = np.unravel_index(np.argmin(results_matrix), results_matrix.shape)
-    min_value = results_matrix[min_index]
-
-    # Calculate the corresponding x, y coordinates
-    x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
-    y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
 
     optimal_x = x_values[min_index[0]]
     optimal_y = y_values[min_index[1]]
 
-    return [optimal_x, optimal_y, 0], min_value
+    return [optimal_x, optimal_y, 0]

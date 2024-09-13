@@ -522,7 +522,7 @@ def calculate_on_xy_grid(
     grid_range_x: Tuple[float, float] = (-0.5, 0.5),
     grid_range_y: Tuple[float, float] = (-0.5, 0.5),
     use_cartesian_coordinates: bool = False,
-) -> np.ndarray:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate a property on a grid of x-y positions.
 
@@ -538,7 +538,7 @@ def calculate_on_xy_grid(
         use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
 
     Returns:
-        np.ndarray: The calculated values on the grid.
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: The x-values, y-values, and the results matrix.
     """
     x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
     y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
@@ -556,4 +556,4 @@ def calculate_on_xy_grid(
             result = calculator(modified_material, **calculator_parameters)
             results_matrix[i, j] = result
 
-    return results_matrix
+    return x_values, y_values, results_matrix
