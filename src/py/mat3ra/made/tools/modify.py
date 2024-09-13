@@ -461,7 +461,7 @@ def rotate_material(material: Material, axis: List[int], angle: float, wrap: boo
         crystal_basis.to_crystal()
         material.basis = crystal_basis
     atoms = to_ase(material)
-    atoms.rotate(v=axis, a=angle, center=(0.5, 0.5, 0.5))
+    atoms.rotate(v=axis, a=angle, center="COU")
     if wrap:
         atoms.wrap()
 

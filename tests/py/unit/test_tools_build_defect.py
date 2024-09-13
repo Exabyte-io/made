@@ -140,7 +140,7 @@ def test_create_terrace():
         number_of_added_layers=1,
     )
     new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
-    assertion_utils.assert_deep_almost_equal([0.047602354, 0.5, 0.458723277], new_slab.basis.coordinates.values[42])
+    assertion_utils.assert_deep_almost_equal([0.777786402, 0.5, 0.444543344], new_slab.basis.coordinates.values[42])
 
 
 def test_create_defect_pair():
