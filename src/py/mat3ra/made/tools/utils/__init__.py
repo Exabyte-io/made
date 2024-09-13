@@ -55,7 +55,7 @@ def get_distance_between_coordinates(coordinate1: List[float], coordinate2: List
     return float(np.linalg.norm(np.array(coordinate1) - np.array(coordinate2)))
 
 
-def get_norm_of_distances_between_coordinates(coordinates_1: np.ndarray, coordinates_2: np.ndarray) -> float:
+def get_sum_of_inverse_distances_squared(coordinates_1: np.ndarray, coordinates_2: np.ndarray) -> float:
     """
     Calculate the norm of distances between two sets of coordinates.
     The norm is calculated as the sum of distances between each pair of coordinates.

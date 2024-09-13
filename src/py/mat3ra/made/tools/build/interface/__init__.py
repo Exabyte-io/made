@@ -1,9 +1,9 @@
-from typing import Union, List, Optional, Tuple
+from typing import Union, List, Optional, Tuple, Callable
 
 import numpy as np
 
 from mat3ra.made.material import Material
-from ...calculate import calculate_norm_of_distances
+from ...calculate import calculate_film_substrate_interaction_metric
 from ...modify import displace_interface
 from ...analyze import calculate_on_xy_grid
 from .builders import (
@@ -14,6 +14,7 @@ from .builders import (
     ZSLStrainMatchingInterfaceBuilderParameters,
 )
 from .configuration import InterfaceConfiguration
+from ...utils import get_sum_of_inverse_distances_squared
 
 
 def create_interfaces(
@@ -38,13 +39,14 @@ def get_optimal_film_displacement(
     grid_range_x=(-0.5, 0.5),
     grid_range_y=(-0.5, 0.5),
     use_cartesian_coordinates=False,
+    calculator: Callable = get_sum_of_inverse_distances_squared,
 ):
     results_matrix = calculate_on_xy_grid(
         material,
         modifier=displace_interface,
         modifier_parameters={},
-        calculator=calculate_norm_of_distances,
-        calculator_parameters={"shadowing_radius": 2.5},
+        calculator=calculator,
+        calculator_parameters={},
         grid_size_xy=grid_size_xy,
         grid_offset_position=grid_offset_position,
         grid_range_x=grid_range_x,

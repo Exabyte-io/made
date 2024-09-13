@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Callable, Optional
 
 import numpy as np
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
@@ -9,7 +9,7 @@ from .build.interface.utils import get_slab
 from .convert import decorator_convert_material_args_kwargs_to_atoms
 from .enums import SurfaceTypes
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
-from .utils import decorator_handle_periodic_boundary_conditions, get_norm_of_distances_between_coordinates
+from .utils import decorator_handle_periodic_boundary_conditions, get_sum_of_inverse_distances_squared
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -133,13 +133,18 @@ def calculate_interfacial_energy(
 
 
 @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
-def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.5) -> float:
+def calculate_film_substrate_interaction_metric(
+    material: Material,
+    shadowing_radius: float = 2.5,
+    calculator: Callable = get_sum_of_inverse_distances_squared,
+) -> float:
     """
     Calculate the norm of distances between interfacial gap facing atoms of the film and the substrate.
 
     Args:
         material (Material): The interface Material object.
         shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
+        calculator (Callable): The calculator to use for the
 
     Returns:
         float: The calculated norm.
@@ -166,4 +171,4 @@ def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.
     film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
     substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
 
-    return get_norm_of_distances_between_coordinates(film_coordinates_values, substrate_coordinates_values)
+    return calculator(film_coordinates_values, substrate_coordinates_values)
