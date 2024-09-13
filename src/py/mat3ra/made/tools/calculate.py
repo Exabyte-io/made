@@ -136,15 +136,14 @@ def calculate_interfacial_energy(
 def calculate_film_substrate_interaction_metric(
     material: Material,
     shadowing_radius: float = 2.5,
-    calculator: Callable = get_sum_of_inverse_distances_squared,
+    metric_function: Callable = get_sum_of_inverse_distances_squared,
 ) -> float:
     """
-    Calculate the norm of distances between interfacial gap facing atoms of the film and the substrate.
-
+    Calculate the interaction metric between the film and substrate.
     Args:
         material (Material): The interface Material object.
         shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
-        calculator (Callable): The calculator to use for the
+        metric_function (Callable): The metric function to use for the calculation of the interaction.
 
     Returns:
         float: The calculated norm.
@@ -171,4 +170,4 @@ def calculate_film_substrate_interaction_metric(
     film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
     substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
 
-    return calculator(film_coordinates_values, substrate_coordinates_values)
+    return metric_function(film_coordinates_values, substrate_coordinates_values)
