@@ -522,29 +522,23 @@ def calculate_on_xy_grid(
     grid_range_x: Tuple[float, float] = (-0.5, 0.5),
     grid_range_y: Tuple[float, float] = (-0.5, 0.5),
     use_cartesian_coordinates: bool = False,
-) -> np.ndarray:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Calculate a property on a 2D grid of x-y positions by modifying the material and applying a calculator.
+    Calculate a property on a grid of x-y positions.
 
-     This function creates a 2D grid of x-y positions, applies a modifier function to the material
-     at each grid point, and then calculates a property using a provided calculator function.
+    Args:
+        material (Material): The material object.
+        modifier (Callable): The modifier function to apply to the material.
+        calculator (Callable): The calculator to use for the property calculation.
+        calculator_parameters (Dict[str, Any]): The parameters to pass to the calculator.
+        grid_size_xy (Tuple[int, int]): The size of the grid in x and y directions.
+        grid_offset_position (List[float]): The offset position of the grid, in Angstroms or crystal coordinates.
+        grid_range_x (Tuple[float, float]): The range to search in x direction, in Angstroms or crystal coordinates.
+        grid_range_y (Tuple[float, float]): The range to search in y direction, in Angstroms or crystal coordinates.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
 
-     Args:
-         material (Material): The initial material object to be modified at each grid point.
-         modifier (Callable): A function that modifies the material.
-         modifier_parameters (Dict[str, Any]): The parameters to pass to the modifier
-         calculator (Callable): A function that calculates a property of the modified material.
-         calculator_parameters (Dict[str, Any]): The parameters to pass to the calculator.
-         grid_size_xy (Tuple[int, int]): The size of the grid in x and y directions.
-         grid_offset_position (List[float]): An offset applied to all grid points, in Angstroms or crystal coordinates.
-         grid_range_x (Tuple[float, float]): The range to search in x direction, in Angstroms or crystal coordinates.
-         grid_range_y (Tuple[float, float]): The range to search in y direction, in Angstroms or crystal coordinates.
-         use_cartesian_coordinates (bool): If True, interpret grid ranges and offsets
-            in Cartesian coordinates. If False, interpret them in fractional crystal coordinates.
-            Defaults to False.
-
-     Returns:
-         np.ndarray: The calculated values on the grid.
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: The x-values, y-values, and the results matrix.
     """
     x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
     y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
@@ -562,7 +556,7 @@ def calculate_on_xy_grid(
             result = calculator(modified_material, **calculator_parameters)
             results_matrix[i, j] = result
 
-    return results_matrix
+    return x_values, y_values, results_matrix
 
 
 def calculate_moire_periodicity(lattice_a: float, lattice_b: float, twist_angle: float) -> Tuple[float, float]:

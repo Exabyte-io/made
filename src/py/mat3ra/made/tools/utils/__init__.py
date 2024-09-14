@@ -55,26 +55,26 @@ def get_distance_between_coordinates(coordinate1: List[float], coordinate2: List
     return float(np.linalg.norm(np.array(coordinate1) - np.array(coordinate2)))
 
 
-def get_norm_of_distances_between_coordinates(coordinates_1: np.ndarray, coordinates_2: np.ndarray) -> float:
+def get_sum_of_inverse_distances_squared(
+    coordinates_1: np.ndarray, coordinates_2: np.ndarray, epsilon: float = 1e-12
+) -> float:
     """
-    Calculate the norm of distances between two sets of coordinates.
-    The norm is calculated as the sum of distances between each pair of coordinates.
+    Calculate the sum of inverse squares of distances between two sets of coordinates.
 
     Args:
-        coordinates_1 (np.ndarray): The first set of coordinates.
-        coordinates_2 (np.ndarray): The second set of coordinates.
+        coordinates_1 (np.ndarray): The first set of coordinates, shape (N1, 3).
+        coordinates_2 (np.ndarray): The second set of coordinates, shape (N2, 3).
+        epsilon (float): Small value to prevent division by zero.
 
     Returns:
-        float: The calculated norm.
+        float: The calculated sum.
     """
-
-    def distance_inverse_square(coord1, coord2):
-        return -1 / (np.linalg.norm(coord1 - coord2) ** 2)
-
-    def sum_distances_to_coord(coord):
-        return sum(distance_inverse_square(coord, other_coord) for other_coord in coordinates_2)
-
-    return sum(sum_distances_to_coord(coord) for coord in coordinates_1)
+    differences = coordinates_1[:, np.newaxis, :] - coordinates_2[np.newaxis, :, :]  # Shape: (N1, N2, 3)
+    distances_squared = np.sum(differences**2, axis=2)  # Shape: (N1, N2)
+    distances_squared = np.where(distances_squared == 0, epsilon, distances_squared)
+    inv_distances_squared = -1 / distances_squared
+    total = np.sum(inv_distances_squared)
+    return float(total)
 
 
 def get_norm(vector: List[float]) -> float:

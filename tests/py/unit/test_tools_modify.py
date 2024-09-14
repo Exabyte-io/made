@@ -175,7 +175,7 @@ def test_rotate_material():
     assertion_utils.assert_deep_almost_equal(material.lattice, rotated_material.lattice)
 
 
-def test_displace_interface_part():
+def test_displace_interface():
     material = Material(GRAPHENE_NICKEL_INTERFACE)
     expected_coordinates = [
         {"id": 0, "value": [0.666666667, 0.666666667, 0.350869517]},
@@ -203,7 +203,7 @@ def test_displace_interface_optimized():
     ]
     expected_labels = GRAPHENE_NICKEL_INTERFACE["basis"]["labels"]
 
-    optimal_displacement, minimum = get_optimal_film_displacement(
+    optimal_displacement = get_optimal_film_displacement(
         material, grid_size_xy=(10, 10), grid_range_x=(-0.5, 0.5), grid_range_y=(-0.5, 0.5)
     )
     displaced_material = displace_interface_part(material, optimal_displacement, use_cartesian_coordinates=True)

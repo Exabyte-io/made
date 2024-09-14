@@ -1,15 +1,17 @@
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Union
 
 import numpy as np
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
+from pydantic import BaseModel
 
 from ..material import Material
 from .analyze import get_surface_area, get_surface_atom_indices
 from .build.interface.utils import get_slab
 from .convert import decorator_convert_material_args_kwargs_to_atoms, from_ase
 from .enums import SurfaceTypes
+from .modify import get_interface_part
 from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT, ASEFixAtoms, ASEFixedPlane, ase_all_changes
-from .utils import decorator_handle_periodic_boundary_conditions, get_norm_of_distances_between_coordinates
+from .utils import decorator_handle_periodic_boundary_conditions, get_sum_of_inverse_distances_squared
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -132,25 +134,29 @@ def calculate_interfacial_energy(
     return surface_energy_film + surface_energy_substrate - adhesion_energy
 
 
-@decorator_handle_periodic_boundary_conditions(cutoff=0.25)
-def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.5) -> float:
-    """
-    Calculate the norm of distances between interfacial gap facing atoms of the film and the substrate.
+class InteractionCalculatorParameters(BaseModel):
+    shadowing_radius: float = 2.5
+    interaction_function: Callable = get_sum_of_inverse_distances_squared
 
+
+@decorator_handle_periodic_boundary_conditions(cutoff=0.25)
+def calculate_film_substrate_interaction_metric(
+    material: Material,
+    shadowing_radius: float = 2.5,
+    interaction_function: Callable = get_sum_of_inverse_distances_squared,
+) -> float:
+    """
+    Calculate the interaction metric between the film and substrate.
     Args:
         material (Material): The interface Material object.
         shadowing_radius (float): The shadowing radius to detect the surface atoms, in Angstroms.
+        interaction_function (Callable): The metric function to use for the calculation of the interaction.
 
     Returns:
         float: The calculated norm.
     """
-    film_material = material.clone()
-    substrate_material = material.clone()
-    film_atoms_basis = film_material.basis.filter_atoms_by_labels([int(InterfacePartsEnum.FILM)])
-    substrate_atoms_basis = substrate_material.basis.filter_atoms_by_labels([int(InterfacePartsEnum.SUBSTRATE)])
-
-    film_material.basis = film_atoms_basis
-    substrate_material.basis = substrate_atoms_basis
+    film_material = get_interface_part(material, part=InterfacePartsEnum.FILM)
+    substrate_material = get_interface_part(material, part=InterfacePartsEnum.SUBSTRATE)
     film_atoms_surface_indices = get_surface_atom_indices(
         film_material, SurfaceTypes.BOTTOM, shadowing_radius=shadowing_radius
     )
@@ -166,13 +172,20 @@ def calculate_norm_of_distances(material: Material, shadowing_radius: float = 2.
     film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
     substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
 
-    return get_norm_of_distances_between_coordinates(film_coordinates_values, substrate_coordinates_values)
+    return interaction_function(film_coordinates_values, substrate_coordinates_values)
 
 
 class SurfaceDistanceCalculator(ASECalculator):
     """
     ASE calculator that computes the norm of distances between interfacial gap facing atoms
     of the film and the substrate.
+
+    Args:
+        shadowing_radius (float): The radius for atom to shadow underlying from being considered surface, in Angstroms.
+        force_constant (float): The force constant for the finite difference approximation of the forces.
+        fix_substrate (bool): Whether to fix the substrate atoms.
+        fix_z (bool): Whether to fix atoms movement in the z direction.
+        symprec (float): The symmetry precision for the ASE calculator.
 
     Example usage:
     ```python
@@ -225,7 +238,7 @@ class SurfaceDistanceCalculator(ASECalculator):
         atoms.set_constraint(constraints)
         return atoms
 
-    def _calculate_forces(self, atoms: ASEAtoms, norm: float) -> np.ndarray:
+    def _calculate_forces(self, atoms: ASEAtoms, energy: float) -> np.ndarray:
         forces = np.zeros((len(atoms), 3))
         dx = 0.01
         for i in range(len(atoms)):
@@ -233,9 +246,9 @@ class SurfaceDistanceCalculator(ASECalculator):
                 atoms_plus = atoms.copy()
                 atoms_plus.positions[i, j] += dx
                 material_plus = Material(from_ase(atoms_plus))
-                norm_plus = calculate_norm_of_distances(material_plus, self.shadowing_radius)
+                energy_plus = calculate_film_substrate_interaction_metric(material_plus, self.shadowing_radius)
 
-                forces[i, j] = -self.force_constant * (norm_plus - norm) / dx
+                forces[i, j] = -self.force_constant * (energy_plus - energy) / dx
 
         return forces
 
@@ -249,12 +262,12 @@ class SurfaceDistanceCalculator(ASECalculator):
 
         ASECalculator.calculate(self, atoms, properties, system_changes)
         material = Material(from_ase(atoms))
-        norm = calculate_norm_of_distances(material, self.shadowing_radius)
+        energy = calculate_film_substrate_interaction_metric(material, self.shadowing_radius)
 
-        self.results = {"energy": norm}
+        self.results = {"energy": energy}
 
         if "forces" in properties:
-            forces = self._calculate_forces(atoms, norm)
+            forces = self._calculate_forces(atoms, energy)
             for constraint in constraints:
                 constraint.adjust_forces(atoms, forces)
             self.results["forces"] = forces
