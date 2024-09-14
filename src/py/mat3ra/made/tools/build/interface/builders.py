@@ -7,8 +7,6 @@ from ...modify import (
     translate_to_z_level,
     rotate_material,
     translate_by_vector,
-    filter_by_triangle_projection,
-    filter_by_box,
 )
 from pydantic import BaseModel, Field
 from ase.build.tools import niggli_reduce
@@ -18,10 +16,9 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 )
 
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from ...third_party import PymatgenStructure
 
 from mat3ra.made.material import Material
-from .enums import StrainModes, SupercellTypes
+from .enums import StrainModes
 from .configuration import InterfaceConfiguration
 from .termination_pair import TerminationPair, safely_select_termination_pair
 from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
@@ -31,8 +28,8 @@ from ..mixins import (
 )
 from ..slab import create_slab, Termination
 from ..slab.configuration import SlabConfiguration
-from ...analyze import get_chemical_formula, calculate_moire_periodicity
-from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms, from_pymatgen
+from ...analyze import get_chemical_formula
+from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
 from ...build import BaseBuilder, BaseConfiguration
 
 
@@ -212,161 +209,16 @@ class TwistedInterfaceConfiguration(BaseConfiguration):
     substrate: Material
     twist_angle: float = Field(0, description="Twist angle in degrees")
     distance_z: float = 3.0
-    supercell_type: SupercellTypes = SupercellTypes.orthogonal
 
     @property
     def _json(self):
-        json_data = super()._json
-        json_data.update({"twist_angle": self.twist_angle})
-        json_data.update({"distance_z": self.distance_z})
-        json_data.update({"supercell_type": self.supercell_type})
-        return json_data
-
-
-class TwistedInterfaceBuilder(InterfaceBuilder):
-    _ConfigurationType = TwistedInterfaceConfiguration
-
-    def _generate(self, configuration: TwistedInterfaceConfiguration) -> List[Material]:
-        film = configuration.film
-        angle = configuration.twist_angle
-        n, m = self._calculate_supercell_size(angle, 30)
-
-        distance_z_vector_crystal = film.basis.cell.convert_point_to_crystal([0, 0, configuration.distance_z])
-        rotated_film = create_supercell(film, [[1, -1, 0], [1, 1, 0], [0, 0, 1]])
-        rotated_film_scaled = create_supercell(rotated_film, scaling_factor=[n, m, 1])
-        rotated_basis = rotate_material(rotated_film_scaled, [0, 0, 1], angle, wrap=False)
-        rotated_basis_translated = translate_by_vector(rotated_basis, distance_z_vector_crystal)
-
-        merged_material = merge_materials([rotated_film_scaled, rotated_basis_translated])
-
-        merged_material_unrotated = rotate_material(merged_material, [0, 0, 1], -angle, wrap=False)
-        if configuration.supercell_type == SupercellTypes.orthogonal:
-            final_material = self._create_orthogonal_supercell(rotated_film, angle, merged_material_unrotated)
-        elif configuration.supercell_type == SupercellTypes.hexagonal:
-            final_material = self._create_hex_supercell(film, angle, merged_material_unrotated)
-        else:
-            raise ValueError("Invalid supercell type")
-        return [final_material]
-
-    @staticmethod
-    def _create_hex_supercell(film: Material, angle: float, merged_material: Material) -> Material:
-        """
-        Creates a hexagonal supercell for the twisted interface by filtering the atoms in the merged material
-        in the shape of two triangles that form a parallelogram.
-
-         Args:
-            film (Material): The film material.
-            angle (float): The twist angle in degrees.
-            merged_material (Material): The merged material.
-
-        Returns:
-            Material: The final material with the hexagonal supercell.
-        """
-        p, q = calculate_moire_periodicity(film.lattice.a, film.lattice.b, angle)
-
-        vertex_1 = [0.0, 0, 0]
-        vertex_2 = [p / 2, np.sqrt(3) / 2 * q, 0]
-        vertex_3 = [p, 0, 0]
-        vertex_4 = [3 / 2 * p, np.sqrt(3) / 2 * q, 0]
-        height = merged_material.lattice.c
-
-        new_atoms_1 = filter_by_triangle_projection(
-            merged_material,
-            coordinate_1=vertex_1,
-            coordinate_2=vertex_2,
-            coordinate_3=vertex_3,
-            max_z=height,
-            use_cartesian_coordinates=True,
-        )
-        new_atoms_2 = filter_by_triangle_projection(
-            merged_material,
-            coordinate_1=vertex_2,
-            coordinate_2=vertex_3,
-            coordinate_3=vertex_4,
-            max_z=height,
-            use_cartesian_coordinates=True,
-        )
-
-        new_atoms = merge_materials([new_atoms_1, new_atoms_2])
-
-        final_material = new_atoms.clone()
-        final_material.set_new_lattice_vectors(vertex_2, vertex_3, [0, 0, height])
-
-        return final_material
-
-    @staticmethod
-    def _create_orthogonal_supercell(film: Material, angle: float, merged_material: Material) -> Material:
-        """
-        Creates an orthogonal supercell for the twisted interface by filtering the atoms in the merged material
-        in the shape of a rectangular box with the sides equal to the Moire pattern periodicity vectors.
-
-        Args:
-            film (Material): The film material.
-            angle (float): The twist angle in degrees.
-            merged_material (Material): The merged material.
-
-        Returns:
-            Material: The final material with the orthogonal supercell.
-        """
-        p, q = calculate_moire_periodicity(film.lattice.b, film.lattice.a, angle)
-        new_atoms = filter_by_box(
-            merged_material,
-            [0, 0, 0],
-            [p, q, merged_material.lattice.c],
-            use_cartesian_coordinates=True,
-        )
-
-        new_lattice = new_atoms.lattice
-        new_lattice.a = q
-        new_lattice.b = p
-
-        final_material = new_atoms.clone()
-        final_material.set_new_lattice_vectors([p, 0, 0], [0, q, 0], [0, 0, new_lattice.c])
-
-        return final_material
-
-    @staticmethod
-    def _calculate_supercell_size(angle: float, mod: float):
-        """
-        Reduces any given twist angle to the equivalent small angle.
-
-        Parameters:
-        angle (float): Twist angle in degrees.
-        mod (float): The modulo value of the symmetry.
-
-        Returns:
-        float: Reduced twist angle within
-        """
-        mod_angle = angle % mod
-
-        if mod_angle > mod / 2:
-            mod_angle = mod - mod_angle
-
-        n = np.round(1 / np.sin(np.deg2rad(mod_angle)))
-        m = 2 * n
-        return n, m
-
-    def _update_material_name(self, material: Material, configuration: TwistedInterfaceConfiguration) -> Material:
-        film_formula = get_chemical_formula(configuration.film_configuration.bulk)
-        substrate_formula = get_chemical_formula(configuration.substrate_configuration.bulk)
-        film_miller = "".join(map(str, configuration.film_configuration.miller_indices))
-        substrate_miller = "".join(map(str, configuration.substrate_configuration.miller_indices))
-        twist_str = f"Twist {configuration.twist_angle:.2f} degrees"
-        new_name = f"{film_formula}({film_miller})-{substrate_formula}({substrate_miller}), {twist_str}"
-        if "mean_abs_strain" in material.metadata:
-            strain = material.metadata["mean_abs_strain"]
-            new_name += f", Strain {strain*100:.3f}%"
-
-        material.name = new_name
-        return material
-
-    def _update_material_metadata(self, material: Material, configuration: TwistedInterfaceConfiguration) -> Material:
-        material = super()._update_material_metadata(material, configuration)
-        material.metadata["build"]["twist_angle"] = configuration.twist_angle
-        return material
-
-    def _post_process(self, items: List[PymatgenStructure], post_process_parameters=None) -> List[Material]:
-        return [Material(from_pymatgen(structure)) for structure in items]
+        return {
+            "type": self.get_cls_name(),
+            "film": self.film.to_json(),
+            "substrate": self.substrate.to_json(),
+            "twist_angle": self.twist_angle,
+            "distance_z": self.distance_z,
+        }
 
 
 class NanoRibbonTwistedInterfaceConfiguration(BaseConfiguration):
