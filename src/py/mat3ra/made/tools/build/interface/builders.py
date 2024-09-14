@@ -221,7 +221,7 @@ class TwistedInterfaceConfiguration(BaseConfiguration):
         }
 
 
-class NanoRibbonTwistedInterfaceConfiguration(BaseConfiguration):
+class NanoRibbonTwistedInterfaceConfiguration(TwistedInterfaceConfiguration):
     """
     Configuration for creating a twisted interface between two materials using nanoribbons.
 
@@ -236,25 +236,18 @@ class NanoRibbonTwistedInterfaceConfiguration(BaseConfiguration):
         vacuum_y (int): Vacuum padding in y direction in unit cells.
     """
 
-    film: Material
-    substrate: Material
-    twist_angle: float = 0
     ribbon_width: int = 1
     ribbon_length: int = 1
-    distance_z: float = 3.0
     vacuum_x: int = 2
     vacuum_y: int = 2
 
     @property
     def _json(self):
         return {
+            **super()._json,
             "type": self.get_cls_name(),
-            "film": self.film.to_json(),
-            "substrate": self.substrate.to_json(),
-            "twist_angle": self.twist_angle,
             "ribbon_width": self.ribbon_width,
             "ribbon_length": self.ribbon_length,
-            "distance_z": self.distance_z,
             "vacuum_x": self.vacuum_x,
             "vacuum_y": self.vacuum_y,
         }
@@ -297,22 +290,15 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
         return material
 
 
-class CommensurateSuperCellTwistedInterfaceConfiguration(BaseConfiguration):
-    film: Material
-    substrate: Material
-    target_angle: float = Field(..., description="Target twist angle in degrees")
+class CommensurateSuperCellTwistedInterfaceConfiguration(TwistedInterfaceConfiguration):
     max_supercell_size: int = Field(10, description="Maximum supercell size to consider")
-    distance_z: float = Field(3.0, description="Vertical distance between layers in Angstroms")
 
     @property
     def _json(self):
         return {
+            **super()._json,
             "type": self.get_cls_name(),
-            "film": self.film.to_json(),
-            "substrate": self.substrate.to_json(),
-            "target_angle": self.target_angle,
             "max_supercell_size": self.max_supercell_size,
-            "distance_z": self.distance_z,
         }
 
 
@@ -321,7 +307,7 @@ class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
 
     def _generate(self, configuration: CommensurateSuperCellTwistedInterfaceConfiguration) -> List[Material]:
         n, m, p, q, actual_angle = self._find_commensurate_supercell(
-            configuration.film, configuration.target_angle, configuration.max_supercell_size
+            configuration.film, configuration.twist_angle, configuration.max_supercell_size
         )
 
         # Create bottom supercell
