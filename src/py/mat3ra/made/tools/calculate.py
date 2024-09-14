@@ -238,7 +238,7 @@ class SurfaceDistanceCalculator(ASECalculator):
         atoms.set_constraint(constraints)
         return atoms
 
-    def _calculate_forces(self, atoms: ASEAtoms, norm: float) -> np.ndarray:
+    def _calculate_forces(self, atoms: ASEAtoms, energy: float) -> np.ndarray:
         forces = np.zeros((len(atoms), 3))
         dx = 0.01
         for i in range(len(atoms)):
@@ -246,9 +246,9 @@ class SurfaceDistanceCalculator(ASECalculator):
                 atoms_plus = atoms.copy()
                 atoms_plus.positions[i, j] += dx
                 material_plus = Material(from_ase(atoms_plus))
-                norm_plus = calculate_film_substrate_interaction_metric(material_plus, self.shadowing_radius)
+                energy_plus = calculate_film_substrate_interaction_metric(material_plus, self.shadowing_radius)
 
-                forces[i, j] = -self.force_constant * (norm_plus - norm) / dx
+                forces[i, j] = -self.force_constant * (energy_plus - energy) / dx
 
         return forces
 
@@ -262,12 +262,12 @@ class SurfaceDistanceCalculator(ASECalculator):
 
         ASECalculator.calculate(self, atoms, properties, system_changes)
         material = Material(from_ase(atoms))
-        norm = calculate_film_substrate_interaction_metric(material, self.shadowing_radius)
+        energy = calculate_film_substrate_interaction_metric(material, self.shadowing_radius)
 
-        self.results = {"energy": norm}
+        self.results = {"energy": energy}
 
         if "forces" in properties:
-            forces = self._calculate_forces(atoms, norm)
+            forces = self._calculate_forces(atoms, energy)
             for constraint in constraints:
                 constraint.adjust_forces(atoms, forces)
             self.results["forces"] = forces
