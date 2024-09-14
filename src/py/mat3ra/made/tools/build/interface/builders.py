@@ -303,27 +303,19 @@ class CommensurateSuperCellTwistedInterfaceConfiguration(TwistedInterfaceConfigu
 
 
 class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
+    _GeneratedItemType = Material
     _ConfigurationType = CommensurateSuperCellTwistedInterfaceConfiguration
 
     def _generate(self, configuration: CommensurateSuperCellTwistedInterfaceConfiguration) -> List[Material]:
         n, m, p, q, actual_angle = self._find_commensurate_supercell(
             configuration.film, configuration.twist_angle, configuration.max_supercell_size
         )
-
-        # Create bottom supercell
         bottom_supercell = create_supercell(configuration.substrate, [[n, -m, 0], [m, n, 0], [0, 0, 1]])
-
-        # Create top supercell and rotate it
         top_supercell = create_supercell(configuration.film, [[p, -q, 0], [q, p, 0], [0, 0, 1]])
         top_supercell = rotate_material(top_supercell, [0, 0, 1], actual_angle, wrap=False)
-
-        # Translate top supercell
         translation_vector = [0, 0, configuration.distance_z]
         top_supercell = translate_by_vector(top_supercell, translation_vector)
-
-        # Merge supercells
         final_material = merge_materials([bottom_supercell, top_supercell])
-
         return [final_material]
 
     def _find_commensurate_supercell(
