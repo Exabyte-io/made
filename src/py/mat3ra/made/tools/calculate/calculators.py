@@ -132,9 +132,12 @@ class SurfaceDistanceCalculator(ASECalculator):
     Args:
         shadowing_radius (float): The radius for atom to shadow underlying from being considered surface, in Angstroms.
         force_constant (float): The force constant for the finite difference approximation of the forces.
-        fix_substrate (bool): Whether to fix the substrate atoms.
-        fix_z (bool): Whether to fix atoms movement in the z direction.
-        symprec (float): The symmetry precision for the ASE calculator.
+        is_substrate_fixed (bool): Whether to fix the substrate atoms.
+        is_z_fixed (bool): Whether to fix atoms movement in the z direction.
+        symprec (float): The symmetry precision for the ASE calculator. This parameter determines the tolerance
+                         for symmetry operations, affecting the identification of equivalent atoms and the overall
+                         symmetry of the system. For more details, refer to the ASE documentation:
+                         https://wiki.fysik.dtu.dk/ase/ase/constraints.html#ase.constraints.FixSymmetry
 
     Example usage:
     ```python
@@ -150,7 +153,7 @@ class SurfaceDistanceCalculator(ASECalculator):
         shadowing_radius (float): Radius for atoms shadowing underlying from being treated as a surface, in Angstroms.
         force_constant (float): The force constant for the finite difference approximation of the
     Note:
-        Built following: https://wiki.fysik.dtu.dk/ase/development/calculators.html
+        Built following https://wiki.fysik.dtu.dk/ase/development/calculators.html
 
         The calculate method is responsible for computing the energy and forces (if requested).
         Forces are estimated using a finite difference method, which is a simple approximation
@@ -163,19 +166,19 @@ class SurfaceDistanceCalculator(ASECalculator):
         self,
         shadowing_radius: float = 2.5,
         force_constant: float = 1.0,
-        fix_substrate: bool = True,
-        fix_z: bool = True,
+        is_substrate_fixed: bool = True,
+        is_z_fixed: bool = True,
         symprec: float = 0.01,
-        calculator_parameters: MaterialCalculatorParameters = MaterialCalculatorParameters(),
+        material_calculator: Union[MaterialCalculator, InterfaceMaterialCalculator] = InterfaceMaterialCalculator(),
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.shadowing_radius = shadowing_radius
         self.force_constant = force_constant
-        self.fix_substrate = fix_substrate
-        self.fix_z = fix_z
+        self.fix_substrate = is_substrate_fixed
+        self.fix_z = is_z_fixed
         self.symprec = symprec
-        self.material_calculator = MaterialCalculator(calculator_parameters=calculator_parameters)
+        self.material_calculator = material_calculator
 
     def _add_constraints(self, atoms: ASEAtoms) -> ASEAtoms:
         constraints: List[Union[ASEFixAtoms, ASEFixedPlane]] = []
@@ -210,7 +213,7 @@ class SurfaceDistanceCalculator(ASECalculator):
         atoms = self._add_constraints(atoms)
         constraints = atoms.constraints
 
-        ASECalculator.calculate(self, atoms, properties, system_changes)
+        super().calculate(self, atoms, properties, system_changes)
         material = Material(from_ase(atoms))
         energy = self.material_calculator.get_energy(material)
 
