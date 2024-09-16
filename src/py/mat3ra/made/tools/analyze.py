@@ -515,8 +515,7 @@ def calculate_on_xy_grid(
     material: Material,
     modifier: Callable,
     modifier_parameters: Dict[str, Any],
-    calculator: Callable,
-    calculator_parameters: Dict[str, Any],
+    calculator_function: Callable,
     grid_size_xy: Tuple[int, int] = (10, 10),
     grid_offset_position: List[float] = [0, 0],
     grid_range_x: Tuple[float, float] = (-0.5, 0.5),
@@ -529,8 +528,8 @@ def calculate_on_xy_grid(
     Args:
         material (Material): The material object.
         modifier (Callable): The modifier function to apply to the material.
-        calculator (Callable): The calculator to use for the property calculation.
-        calculator_parameters (Dict[str, Any]): The parameters to pass to the calculator.
+        modifier_parameters (Dict[str, Any]): The parameters to pass to the modifier.
+        calculator_function (Callable): The calculator function to apply to the modified material.
         grid_size_xy (Tuple[int, int]): The size of the grid in x and y directions.
         grid_offset_position (List[float]): The offset position of the grid, in Angstroms or crystal coordinates.
         grid_range_x (Tuple[float, float]): The range to search in x direction, in Angstroms or crystal coordinates.
@@ -553,7 +552,7 @@ def calculate_on_xy_grid(
                 use_cartesian_coordinates=use_cartesian_coordinates,
                 **modifier_parameters,
             )
-            result = calculator(modified_material, **calculator_parameters)
+            result = calculator_function(modified_material)
             results_matrix[i, j] = result
 
     return x_values, y_values, results_matrix
