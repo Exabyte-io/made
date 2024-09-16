@@ -47,19 +47,19 @@ class InterfaceMaterialCalculator(MaterialCalculator):
         """
         film_material = get_interface_part(material, part=InterfacePartsEnum.FILM)
         substrate_material = get_interface_part(material, part=InterfacePartsEnum.SUBSTRATE)
-        film_atoms_surface_indices = get_surface_atom_indices(
+        film_surface_atom_indices = get_surface_atom_indices(
             film_material, SurfaceTypes.BOTTOM, shadowing_radius=shadowing_radius
         )
-        substrate_atoms_surface_indices = get_surface_atom_indices(
+        substrate_surface_atom_indices = get_surface_atom_indices(
             substrate_material, SurfaceTypes.TOP, shadowing_radius=shadowing_radius
         )
 
-        film_atoms_surface_coordinates = film_material.basis.coordinates
-        film_atoms_surface_coordinates.filter_by_ids(film_atoms_surface_indices)
-        substrate_atoms_surface_coordinates = substrate_material.basis.coordinates
-        substrate_atoms_surface_coordinates.filter_by_ids(substrate_atoms_surface_indices)
+        film_surface_atom_coordinates = film_material.basis.coordinates
+        film_surface_atom_coordinates.filter_by_ids(film_surface_atom_indices)
+        substrate_surface_atom_coordinates = substrate_material.basis.coordinates
+        substrate_surface_atom_coordinates.filter_by_ids(substrate_surface_atom_indices)
 
-        film_coordinates_values = np.array(film_atoms_surface_coordinates.values)
-        substrate_coordinates_values = np.array(substrate_atoms_surface_coordinates.values)
+        film_coordinates_values = np.array(film_surface_atom_coordinates.values)
+        substrate_coordinates_values = np.array(substrate_surface_atom_coordinates.values)
 
         return interaction_function(film_coordinates_values, substrate_coordinates_values)

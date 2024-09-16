@@ -5,7 +5,7 @@ import numpy as np
 from mat3ra.made.material import Material
 from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import displace_interface_part
-from ...analyze import calculate_on_xy_grid
+from ...analyze import evaluate_calculator_on_xy_grid
 from .builders import (
     SimpleInterfaceBuilder,
     SimpleInterfaceBuilderParameters,
@@ -40,7 +40,28 @@ def get_optimal_film_displacement(
     use_cartesian_coordinates=False,
     calculator: InterfaceMaterialCalculator = InterfaceMaterialCalculator(),
 ):
-    x_values, y_values, results_matrix = calculate_on_xy_grid(
+    """
+    Calculate the optimal displacement in of the film to minimize the interaction energy
+        between the film and the substrate. The displacement is calculated on a grid.
+
+    This function evaluates the interaction energy between the film and substrate
+    over a specified grid of (x,y) displacements. It returns the displacement vector that
+    results in the minimum interaction energy.
+
+    Args:
+        material (Material): The interface Material object.
+        grid_size_xy (Tuple[int, int]): The size of the grid to search for the optimal displacement.
+        grid_offset_position (List[float]): The offset position of the grid.
+        grid_range_x (Tuple[float, float]): The range of the grid in x.
+        grid_range_y (Tuple[float, float]): The range of the grid in y.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
+        calculator (InterfaceMaterialCalculator): The calculator to use for the calculation of the interaction energy.
+
+    Returns:
+        List[float]: The optimal displacement vector.
+
+    """
+    x_values, y_values, results_matrix = evaluate_calculator_on_xy_grid(
         material,
         modifier=displace_interface_part,
         modifier_parameters={},

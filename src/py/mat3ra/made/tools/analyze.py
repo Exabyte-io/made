@@ -511,7 +511,7 @@ def get_local_extremum_atom_index(
     return extremum_z_atom[0]
 
 
-def calculate_on_xy_grid(
+def evaluate_calculator_on_xy_grid(
     material: Material,
     modifier: Callable,
     modifier_parameters: Dict[str, Any],
