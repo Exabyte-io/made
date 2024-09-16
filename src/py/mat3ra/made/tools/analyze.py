@@ -511,26 +511,25 @@ def get_local_extremum_atom_index(
     return extremum_z_atom[0]
 
 
-def calculate_on_xy_grid(
+def evaluate_calculator_on_xy_grid(
     material: Material,
-    modifier: Callable,
-    modifier_parameters: Dict[str, Any],
-    calculator: Callable,
-    calculator_parameters: Dict[str, Any],
+    calculator_function: Callable[[Material], Any],
+    modifier: Optional[Callable] = None,
+    modifier_parameters: Dict[str, Any] = {},
     grid_size_xy: Tuple[int, int] = (10, 10),
     grid_offset_position: List[float] = [0, 0],
     grid_range_x: Tuple[float, float] = (-0.5, 0.5),
     grid_range_y: Tuple[float, float] = (-0.5, 0.5),
     use_cartesian_coordinates: bool = False,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[List[np.ndarray], np.ndarray]:
     """
     Calculate a property on a grid of x-y positions.
 
     Args:
         material (Material): The material object.
         modifier (Callable): The modifier function to apply to the material.
-        calculator (Callable): The calculator to use for the property calculation.
-        calculator_parameters (Dict[str, Any]): The parameters to pass to the calculator.
+        modifier_parameters (Dict[str, Any]): The parameters to pass to the modifier.
+        calculator_function (Callable): The calculator function to apply to the modified material.
         grid_size_xy (Tuple[int, int]): The size of the grid in x and y directions.
         grid_offset_position (List[float]): The offset position of the grid, in Angstroms or crystal coordinates.
         grid_range_x (Tuple[float, float]): The range to search in x direction, in Angstroms or crystal coordinates.
@@ -538,22 +537,26 @@ def calculate_on_xy_grid(
         use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
 
     Returns:
-        Tuple[np.ndarray, np.ndarray, np.ndarray]: The x-values, y-values, and the results matrix.
+        Tuple[List[np.ndarray[float]], np.ndarray[float]]: The x-y positions and the calculated property values.
     """
     x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
     y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
 
+    xy_matrix = [x_values, y_values]
     results_matrix = np.zeros(grid_size_xy)
 
     for i, x in enumerate(x_values):
         for j, y in enumerate(y_values):
-            modified_material = modifier(
-                material,
-                displacement=[x, y, 0],
-                use_cartesian_coordinates=use_cartesian_coordinates,
-                **modifier_parameters,
-            )
-            result = calculator(modified_material, **calculator_parameters)
+            if modifier is None:
+                modified_material = material
+            else:
+                modified_material = modifier(
+                    material,
+                    displacement=[x, y, 0],
+                    use_cartesian_coordinates=use_cartesian_coordinates,
+                    **modifier_parameters,
+                )
+            result = calculator_function(modified_material)
             results_matrix[i, j] = result
 
-    return x_values, y_values, results_matrix
+    return xy_matrix, results_matrix
