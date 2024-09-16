@@ -521,7 +521,7 @@ def evaluate_calculator_on_xy_grid(
     grid_range_x: Tuple[float, float] = (-0.5, 0.5),
     grid_range_y: Tuple[float, float] = (-0.5, 0.5),
     use_cartesian_coordinates: bool = False,
-) -> Tuple[List[np.ndarray[float]], np.ndarray[float]]:
+) -> Tuple[List[np.ndarray], np.ndarray]:
     """
     Calculate a property on a grid of x-y positions.
 
