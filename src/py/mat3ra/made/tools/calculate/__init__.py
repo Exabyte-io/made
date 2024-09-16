@@ -4,14 +4,14 @@ import numpy as np
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
 from pydantic import BaseModel
 
-from ..material import Material
-from .analyze import get_surface_area, get_surface_atom_indices
-from .build.interface.utils import get_slab
-from .convert import decorator_convert_material_args_kwargs_to_atoms
-from .enums import SurfaceTypes
-from .modify import get_interface_part
-from .third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
-from .utils import decorator_handle_periodic_boundary_conditions, get_sum_of_inverse_distances_squared
+from ...material import Material
+from ..analyze import get_surface_area, get_surface_atom_indices
+from ..build.interface.utils import get_slab
+from ..convert import decorator_convert_material_args_kwargs_to_atoms
+from ..enums import SurfaceTypes
+from ..modify import get_interface_part
+from ..third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
+from ..utils import decorator_handle_periodic_boundary_conditions, get_sum_of_inverse_distances_squared
 
 
 @decorator_convert_material_args_kwargs_to_atoms
