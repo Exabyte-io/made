@@ -61,7 +61,7 @@ def get_optimal_film_displacement(
         List[float]: The optimal displacement vector.
 
     """
-    x_values, y_values, results_matrix = evaluate_calculator_on_xy_grid(
+    xy_matrix, results_matrix = evaluate_calculator_on_xy_grid(
         material=material,
         calculator_function=calculator.get_energy,
         modifier=displace_interface_part,
@@ -74,7 +74,7 @@ def get_optimal_film_displacement(
     )
     min_index = np.unravel_index(np.argmin(results_matrix), results_matrix.shape)
 
-    optimal_x = x_values[min_index[0]]
-    optimal_y = y_values[min_index[1]]
+    optimal_x = xy_matrix[0][min_index[0]]
+    optimal_y = xy_matrix[1][min_index[1]]
 
     return [optimal_x, optimal_y, 0]

@@ -513,7 +513,7 @@ def get_local_extremum_atom_index(
 
 def evaluate_calculator_on_xy_grid(
     material: Material,
-    calculator_function: Callable,
+    calculator_function: Callable[[Material], Any],
     modifier: Optional[Callable] = None,
     modifier_parameters: Dict[str, Any] = {},
     grid_size_xy: Tuple[int, int] = (10, 10),
@@ -521,7 +521,7 @@ def evaluate_calculator_on_xy_grid(
     grid_range_x: Tuple[float, float] = (-0.5, 0.5),
     grid_range_y: Tuple[float, float] = (-0.5, 0.5),
     use_cartesian_coordinates: bool = False,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[List[np.ndarray[float]], np.ndarray[float]]:
     """
     Calculate a property on a grid of x-y positions.
 
@@ -537,11 +537,12 @@ def evaluate_calculator_on_xy_grid(
         use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
 
     Returns:
-        Tuple[np.ndarray, np.ndarray, np.ndarray]: The x-values, y-values, and the results matrix.
+        Tuple[List[np.ndarray[float]], np.ndarray[float]]: The x-y positions and the calculated property values.
     """
     x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
     y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
 
+    xy_matrix = [x_values, y_values]
     results_matrix = np.zeros(grid_size_xy)
 
     for i, x in enumerate(x_values):
@@ -558,4 +559,4 @@ def evaluate_calculator_on_xy_grid(
             result = calculator_function(modified_material)
             results_matrix[i, j] = result
 
-    return x_values, y_values, results_matrix
+    return xy_matrix, results_matrix

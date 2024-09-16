@@ -8,7 +8,6 @@ from ..analyze import get_surface_atom_indices
 from ..convert.utils import InterfacePartsEnum
 from ..enums import SurfaceTypes
 from ..modify import get_interface_part
-from ..utils import decorator_handle_periodic_boundary_conditions
 from .interaction_functions import sum_of_inverse_distances_squared
 
 
@@ -28,7 +27,6 @@ class MaterialCalculator(BaseModel):
 
 
 class InterfaceMaterialCalculator(MaterialCalculator):
-    @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
     def get_energy(
         self,
         material: Material,
