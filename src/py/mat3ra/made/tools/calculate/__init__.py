@@ -11,7 +11,8 @@ from ..convert import decorator_convert_material_args_kwargs_to_atoms
 from ..enums import SurfaceTypes
 from ..modify import get_interface_part
 from ..third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
-from ..utils import decorator_handle_periodic_boundary_conditions, get_sum_of_inverse_distances_squared
+from ..utils import decorator_handle_periodic_boundary_conditions
+from .interaction_functions import sum_of_inverse_distances_squared
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -136,14 +137,14 @@ def calculate_interfacial_energy(
 
 class InteractionCalculatorParameters(BaseModel):
     shadowing_radius: float = 2.5
-    interaction_function: Callable = get_sum_of_inverse_distances_squared
+    interaction_function: Callable = sum_of_inverse_distances_squared
 
 
 @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
 def calculate_film_substrate_interaction_metric(
     material: Material,
     shadowing_radius: float = 2.5,
-    interaction_function: Callable = get_sum_of_inverse_distances_squared,
+    interaction_function: Callable = sum_of_inverse_distances_squared,
 ) -> float:
     """
     Calculate the interaction metric between the film and substrate.
