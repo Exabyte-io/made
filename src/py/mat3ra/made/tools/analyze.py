@@ -513,9 +513,9 @@ def get_local_extremum_atom_index(
 
 def evaluate_calculator_on_xy_grid(
     material: Material,
-    modifier: Callable,
-    modifier_parameters: Dict[str, Any],
     calculator_function: Callable,
+    modifier: Optional[Callable] = None,
+    modifier_parameters: Dict[str, Any] = {},
     grid_size_xy: Tuple[int, int] = (10, 10),
     grid_offset_position: List[float] = [0, 0],
     grid_range_x: Tuple[float, float] = (-0.5, 0.5),
@@ -546,12 +546,15 @@ def evaluate_calculator_on_xy_grid(
 
     for i, x in enumerate(x_values):
         for j, y in enumerate(y_values):
-            modified_material = modifier(
-                material,
-                displacement=[x, y, 0],
-                use_cartesian_coordinates=use_cartesian_coordinates,
-                **modifier_parameters,
-            )
+            if modifier is None:
+                modified_material = material
+            else:
+                modified_material = modifier(
+                    material,
+                    displacement=[x, y, 0],
+                    use_cartesian_coordinates=use_cartesian_coordinates,
+                    **modifier_parameters,
+                )
             result = calculator_function(modified_material)
             results_matrix[i, j] = result
 

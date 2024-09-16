@@ -62,10 +62,10 @@ def get_optimal_film_displacement(
 
     """
     x_values, y_values, results_matrix = evaluate_calculator_on_xy_grid(
-        material,
+        material=material,
+        calculator_function=calculator.get_energy,
         modifier=displace_interface_part,
         modifier_parameters={},
-        calculator_function=calculator.get_energy,
         grid_size_xy=grid_size_xy,
         grid_offset_position=grid_offset_position,
         grid_range_x=grid_range_x,
