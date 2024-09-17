@@ -124,15 +124,38 @@ class InterfaceMaterialCalculator(MaterialCalculator):
         return interaction_function(film_coordinates_values, substrate_coordinates_values)
 
 
-class FixFilmRigidXY(BaseModel):
+class InterfaceConstraint(BaseModel):
     """
-    Custom constraint to allow only rigid translation in x and y for film atoms.
-
-    Created following https://wiki.fysik.dtu.dk/ase/ase/constraints.html#making-your-own-constraint-class
+    Based on  https://wiki.fysik.dtu.dk/ase/ase/constraints.html#making-your-own-constraint-class
     """
 
     class Config:
         arbitrary_types_allowed = True
+
+    def adjust_positions(self, atoms: ASEAtoms, new_positions: np.ndarray) -> None:
+        """
+        Adjust the positions of the atoms in the system.
+
+        Args:
+            atoms (ASEAtoms): The ASE Atoms object.
+            new_positions (numpy.ndarray): The new positions to adjust in place.
+        """
+        raise NotImplementedError
+
+    def adjust_forces(self, forces: np.ndarray) -> None:
+        """
+        Adjust the forces on the atoms in the system.
+
+        Args:
+            forces (numpy.ndarray): The forces array to adjust in place.
+        """
+        raise NotImplementedError
+
+
+class RigidFilmXYConstraint(InterfaceConstraint):
+    """
+    Custom constraint to allow only rigid translation in x and y for film atoms.
+    """
 
     film_indices: List[int] = []
     initial_positions: Optional[np.ndarray] = None
@@ -186,7 +209,7 @@ class FixFilmRigidXY(BaseModel):
             forces[idx, 1] = distributed_force_y
 
 
-class FilmSubstrateDistanceCalculator(ASECalculator):
+class FilmSubstrateDistanceASECalculator(ASECalculator):
     """
     ASE calculator that calculates the interaction energy between a film and substrate in an interface material.
 
@@ -240,7 +263,7 @@ class FilmSubstrateDistanceCalculator(ASECalculator):
         self.material_calculator = material_calculator
 
     def _add_constraints(self, atoms: ASEAtoms) -> ASEAtoms:
-        constraints: List[Union[ASEFixAtoms, ASEFixedPlane, FixFilmRigidXY]] = []
+        constraints: List[Union[ASEFixAtoms, ASEFixedPlane, RigidFilmXYConstraint]] = []
         if self.fix_substrate:
             substrate_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 0]
             constraints.append(ASEFixAtoms(indices=substrate_indices))
@@ -250,7 +273,7 @@ class FilmSubstrateDistanceCalculator(ASECalculator):
 
         film_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 1]
         if film_indices:
-            constraints.append(FixFilmRigidXY(film_indices=film_indices))
+            constraints.append(RigidFilmXYConstraint(film_indices=film_indices))
 
         atoms.set_constraint(constraints)
         return atoms
