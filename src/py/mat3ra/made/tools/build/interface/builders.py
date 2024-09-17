@@ -305,14 +305,16 @@ class CommensurateSuperCellTwistedInterfaceConfiguration(TwistedInterfaceConfigu
 class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
     _GeneratedItemType = Material
     _ConfigurationType = CommensurateSuperCellTwistedInterfaceConfiguration
+    __actual_angle: float
 
     def _generate(self, configuration: CommensurateSuperCellTwistedInterfaceConfiguration) -> List[Material]:
-        M1, M2, strain = self.find_csl_matrices(
+        M1, M2, strain, angle_actual = self.find_csl_matrices(
             configuration.twist_angle,
             max_index=configuration.max_supercell_size,
             angle_tolerance=0.5,
             strain_tolerance=0.05,
         )
+        self.__actual_angle = angle_actual
 
         film_1 = create_supercell(configuration.substrate, M1)
         film_2 = create_supercell(configuration.film, M2)
@@ -330,9 +332,27 @@ class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
     def find_csl_matrices(
         self, angle: float, max_index: int = 10, angle_tolerance: float = 0.1, strain_tolerance: float = 0.01
     ):
+        """
+        Find the approximate CSL matrices for the given twist angle.
+
+        This method uses the brute force approach to find the approximate CSL matrices for the given twist angle.
+        The method iterates over all possible supercell sizes up to the given maximum index and calculates the
+        strain between the actual and approximate CSL matrices. The best approximate CSL matrices are returned
+        based on the strain and angle tolerance.
+
+        Args:
+            angle (float): The twist angle in degrees.
+            max_index (int): The maximum supercell size to consider.
+            angle_tolerance (float): The angle tolerance in degrees.
+            strain_tolerance (float): The strain tolerance.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray, float]: The approximate CSL matrices M1 and M2 and the strain.
+        """
         R_target = self.__rotation_matrix_2d(angle)
         best_strain = float("inf")
         best_M1 = best_M2 = None
+        best_angle_actual = None
 
         for i in range(1, max_index + 1):
             for j in range(max_index + 1):
@@ -350,14 +370,19 @@ class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
                     best_strain = strain
                     best_M1 = np.array([[i, -j, 0], [j, i, 0], [0, 0, 1]])
                     best_M2 = np.array([M2[0, 0], M2[0, 1], 0, M2[1, 0], M2[1, 1], 0, 0, 0, 1]).reshape(3, 3)
+                    best_angle_actual = angle_actual
 
         if best_M1 is None:
             raise ValueError(f"No approximate CSL found for angle {angle} within tolerances")
 
-        return best_M1, best_M2, best_strain
+        return best_M1, best_M2, best_strain, best_angle_actual
+
+    def _update_material_metadata(self, material, configuration) -> Material:
+        configuration["twist_angle"] = self.__actual_angle
+        return super()._update_material_metadata(material, configuration)
 
     def _update_material_name(
         self, material: Material, configuration: CommensurateSuperCellTwistedInterfaceConfiguration
     ) -> Material:
-        material.name = f"Commensurate Twisted Interface : {material.metadata['build']['actual_angle']:.2f} degrees"
+        material.name = f"Commensurate Twisted Interface ({self.__actual_angle:.2f} degrees)"
         return material
