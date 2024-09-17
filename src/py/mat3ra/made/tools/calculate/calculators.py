@@ -9,7 +9,7 @@ from ..convert import from_ase
 from ..convert.utils import InterfacePartsEnum
 from ..enums import SurfaceTypes
 from ..modify import get_interface_part
-from ..third_party import ASEAtoms, ASECalculator, ASEFixAtoms, ASEFixedPlane, ase_all_changes
+from ..third_party import ASEAtoms, ASECalculator, ASEFixAtoms, ASEFixBondLengths, ASEFixedPlane, ase_all_changes
 from .interaction_functions import sum_of_inverse_distances_squared
 
 
@@ -124,16 +124,15 @@ class InterfaceMaterialCalculator(MaterialCalculator):
         return interaction_function(film_coordinates_values, substrate_coordinates_values)
 
 
-class SurfaceDistanceCalculator(ASECalculator):
+class FilmSubstrateDistanceCalculator(ASECalculator):
     """
-    ASE calculator that computes the norm of distances between interfacial gap facing atoms
-    of the film and the substrate.
+    ASE calculator that calculates the interaction energy between a film and substrate in an interface material.
 
     Args:
         shadowing_radius (float): The radius for atom to shadow underlying from being considered surface, in Angstroms.
         force_constant (float): The force constant for the finite difference approximation of the forces.
         is_substrate_fixed (bool): Whether to fix the substrate atoms.
-        is_z_fixed (bool): Whether to fix atoms movement in the z direction.
+        is_z_axis_fixed (bool): Whether to fix atoms movement in the z direction.
         symprec (float): The symmetry precision for the ASE calculator. This parameter determines the tolerance
                          for symmetry operations, affecting the identification of equivalent atoms and the overall
                          symmetry of the system. For more details, refer to the ASE documentation:
@@ -167,7 +166,7 @@ class SurfaceDistanceCalculator(ASECalculator):
         shadowing_radius: float = 2.5,
         force_constant: float = 1.0,
         is_substrate_fixed: bool = True,
-        is_z_fixed: bool = True,
+        is_z_axis_fixed: bool = True,
         symprec: float = 0.01,
         material_calculator: Union[MaterialCalculator, InterfaceMaterialCalculator] = InterfaceMaterialCalculator(),
         **kwargs,
@@ -176,12 +175,12 @@ class SurfaceDistanceCalculator(ASECalculator):
         self.shadowing_radius = shadowing_radius
         self.force_constant = force_constant
         self.fix_substrate = is_substrate_fixed
-        self.fix_z = is_z_fixed
+        self.fix_z = is_z_axis_fixed
         self.symprec = symprec
         self.material_calculator = material_calculator
 
     def _add_constraints(self, atoms: ASEAtoms) -> ASEAtoms:
-        constraints: List[Union[ASEFixAtoms, ASEFixedPlane]] = []
+        constraints: List[Union[ASEFixAtoms, ASEFixedPlane, ASEFixBondLengths]] = []
         if self.fix_substrate:
             substrate_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 0]
             constraints.append(ASEFixAtoms(indices=substrate_indices))
@@ -213,7 +212,7 @@ class SurfaceDistanceCalculator(ASECalculator):
         atoms = self._add_constraints(atoms)
         constraints = atoms.constraints
 
-        super().calculate(self, atoms, properties, system_changes)
+        super().calculate(atoms, properties, system_changes)
         material = Material(from_ase(atoms))
         energy = self.material_calculator.get_energy(material)
 
