@@ -127,6 +127,8 @@ class InterfaceMaterialCalculator(MaterialCalculator):
 class FixFilmRigidXY:
     """
     Custom constraint to allow only rigid translation in x and y for film atoms.
+
+    Created following https://wiki.fysik.dtu.dk/ase/ase/constraints.html#making-your-own-constraint-class
     """
 
     def __init__(self, film_indices):

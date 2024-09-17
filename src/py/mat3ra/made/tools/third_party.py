@@ -5,7 +5,6 @@ from ase.calculators.calculator import Calculator as ASECalculator
 from ase.calculators.calculator import all_changes as ase_all_changes
 from ase.calculators.emt import EMT as ASECalculatorEMT
 from ase.constraints import FixAtoms as ASEFixAtoms
-from ase.constraints import FixBondLengths as ASEFixBondLengths
 from ase.constraints import FixedPlane as ASEFixedPlane
 from pymatgen.analysis.defects.core import Interstitial as PymatgenInterstitial
 from pymatgen.analysis.defects.core import Substitution as PymatgenSubstitution
@@ -31,7 +30,6 @@ __all__ = [
     "ASECalculatorEMT",
     "ASEFixAtoms",
     "ASEFixedPlane",
-    "ASEFixBondLengths",
     "ase_all_changes",
     "PymatgenLattice",
     "PymatgenStructure",
