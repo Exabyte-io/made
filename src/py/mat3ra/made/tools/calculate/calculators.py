@@ -9,7 +9,7 @@ from ..convert import from_ase
 from ..convert.utils import InterfacePartsEnum
 from ..enums import SurfaceTypes
 from ..modify import get_interface_part
-from ..third_party import ASEAtoms, ASECalculator, ASEFixAtoms, ASEFixBondLengths, ASEFixedPlane, ase_all_changes
+from ..third_party import ASEAtoms, ASECalculator, ASEFixAtoms, ASEFixedPlane, ase_all_changes
 from .interaction_functions import sum_of_inverse_distances_squared
 
 
@@ -124,6 +124,70 @@ class InterfaceMaterialCalculator(MaterialCalculator):
         return interaction_function(film_coordinates_values, substrate_coordinates_values)
 
 
+class FixFilmRigidXY:
+    """
+    Custom constraint to allow only rigid translation in x and y for film atoms.
+    """
+
+    def __init__(self, film_indices):
+        """
+        Initialize the constraint with the indices of film atoms.
+
+        Args:
+            film_indices (list): List of atom indices that belong to the film.
+        """
+        self.film_indices = film_indices
+        self.initial_positions = None
+        self.reference_center = None
+
+    def adjust_positions(self, atoms, new_positions):
+        """
+        Adjust the positions of film atoms to maintain rigidity in x and y.
+
+        Args:
+            atoms (ase.Atoms): The ASE Atoms object.
+            new_positions (numpy.ndarray): The new positions to adjust in place.
+        """
+        if self.initial_positions is None:
+            self.initial_positions = atoms.positions[self.film_indices].copy()
+            self.reference_center = self.initial_positions.mean(axis=0)
+
+        current_center = new_positions[self.film_indices].mean(axis=0)
+        desired_translation = current_center - self.reference_center
+        desired_translation[2] = 0.0
+
+        # Update positions to maintain rigid body translation in x and y
+        for i, idx in enumerate(self.film_indices):
+            new_positions[idx, 0] = self.initial_positions[i, 0] + desired_translation[0]
+            new_positions[idx, 1] = self.initial_positions[i, 1] + desired_translation[1]
+
+    def adjust_forces(self, forces):
+        """
+        Adjust the forces on film atoms to ensure rigidity.
+
+        Args:
+            forces (numpy.ndarray): The forces array to adjust in place.
+        """
+        if self.initial_positions is None:
+            return  # No adjustment needed if initial positions are not set
+
+        # Project forces onto x and y for collective translation
+        net_force_x = np.sum(forces[self.film_indices, 0])
+        net_force_y = np.sum(forces[self.film_indices, 1])
+
+        # Distribute the net force equally to all film atoms to maintain rigidity
+        num_film_atoms = len(self.film_indices)
+        if num_film_atoms == 0:
+            return  # Avoid division by zero
+
+        distributed_force_x = net_force_x / num_film_atoms
+        distributed_force_y = net_force_y / num_film_atoms
+
+        for idx in self.film_indices:
+            forces[idx, 0] = distributed_force_x
+            forces[idx, 1] = distributed_force_y
+
+
 class FilmSubstrateDistanceCalculator(ASECalculator):
     """
     ASE calculator that calculates the interaction energy between a film and substrate in an interface material.
@@ -180,13 +244,17 @@ class FilmSubstrateDistanceCalculator(ASECalculator):
         self.material_calculator = material_calculator
 
     def _add_constraints(self, atoms: ASEAtoms) -> ASEAtoms:
-        constraints: List[Union[ASEFixAtoms, ASEFixedPlane, ASEFixBondLengths]] = []
+        constraints: List[Union[ASEFixAtoms, ASEFixedPlane, FixFilmRigidXY]] = []
         if self.fix_substrate:
             substrate_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 0]
             constraints.append(ASEFixAtoms(indices=substrate_indices))
         if self.fix_z:
             all_indices = list(range(len(atoms)))
             constraints.append(ASEFixedPlane(indices=all_indices, direction=[0, 0, 1]))
+
+        film_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 1]
+        if film_indices:
+            constraints.append(FixFilmRigidXY(film_indices))
 
         atoms.set_constraint(constraints)
         return atoms
