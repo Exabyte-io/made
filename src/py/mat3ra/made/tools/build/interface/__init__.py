@@ -5,7 +5,7 @@ import numpy as np
 from mat3ra.made.material import Material
 from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import displace_interface_part
-from ...analyze import evaluate_calculator_on_xy_grid
+from ...optimize import evaluate_calculator_on_xy_grid
 from .builders import (
     SimpleInterfaceBuilder,
     SimpleInterfaceBuilderParameters,
