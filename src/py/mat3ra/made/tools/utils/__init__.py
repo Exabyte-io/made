@@ -3,18 +3,9 @@ from typing import Callable, List, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.utils import ArrayWithIds
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 
 from ..third_party import PymatgenStructure
-from .coordinate import (
-    is_coordinate_behind_plane,
-    is_coordinate_in_box,
-    is_coordinate_in_cylinder,
-    is_coordinate_in_sphere,
-    is_coordinate_in_triangular_prism,
-)
-from .factories import PerturbationFunctionHolderFactory
 
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR

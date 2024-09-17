@@ -466,7 +466,7 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
     return Material(from_ase(atoms))
 
 
-def displace_interface(
+def displace_interface_part(
     interface: Material,
     displacement: List[float],
     label: InterfacePartsEnum = InterfacePartsEnum.FILM,
@@ -500,3 +500,15 @@ def displace_interface(
     new_material.to_crystal()
     new_material = wrap_to_unit_cell(new_material)
     return new_material
+
+
+def get_interface_part(
+    interface: Material,
+    part: InterfacePartsEnum = InterfacePartsEnum.FILM,
+) -> Material:
+    if interface.metadata["build"]["configuration"]["type"] != "InterfaceConfiguration":
+        raise ValueError("The material is not an interface.")
+    interface_part_material = interface.clone()
+    film_atoms_basis = interface_part_material.basis.filter_atoms_by_labels([int(part)])
+    interface_part_material.basis = film_atoms_basis
+    return interface_part_material
