@@ -124,25 +124,18 @@ class InterfaceMaterialCalculator(MaterialCalculator):
         return interaction_function(film_coordinates_values, substrate_coordinates_values)
 
 
-class FixFilmRigidXY:
+class FixFilmRigidXY(BaseModel):
     """
     Custom constraint to allow only rigid translation in x and y for film atoms.
 
     Created following https://wiki.fysik.dtu.dk/ase/ase/constraints.html#making-your-own-constraint-class
     """
 
-    def __init__(self, film_indices):
-        """
-        Initialize the constraint with the indices of film atoms.
+    film_indices: List[int] = []
+    initial_positions: Optional[np.ndarray] = None
+    reference_center: Optional[np.ndarray] = None
 
-        Args:
-            film_indices (list): List of atom indices that belong to the film.
-        """
-        self.film_indices = film_indices
-        self.initial_positions = None
-        self.reference_center = None
-
-    def adjust_positions(self, atoms, new_positions):
+    def adjust_positions(self, atoms: ASEAtoms, new_positions: np.ndarray) -> None:
         """
         Adjust the positions of film atoms to maintain rigidity in x and y.
 
@@ -163,7 +156,7 @@ class FixFilmRigidXY:
             new_positions[idx, 0] = self.initial_positions[i, 0] + desired_translation[0]
             new_positions[idx, 1] = self.initial_positions[i, 1] + desired_translation[1]
 
-    def adjust_forces(self, forces):
+    def adjust_forces(self, forces: np.ndarray) -> None:
         """
         Adjust the forces on film atoms to ensure rigidity.
 
@@ -230,7 +223,6 @@ class FilmSubstrateDistanceCalculator(ASECalculator):
     def __init__(
         self,
         shadowing_radius: float = 2.5,
-        force_constant: float = 1.0,
         is_substrate_fixed: bool = True,
         is_z_axis_fixed: bool = True,
         symprec: float = 0.01,
@@ -239,7 +231,6 @@ class FilmSubstrateDistanceCalculator(ASECalculator):
     ):
         super().__init__(**kwargs)
         self.shadowing_radius = shadowing_radius
-        self.force_constant = force_constant
         self.fix_substrate = is_substrate_fixed
         self.fix_z = is_z_axis_fixed
         self.symprec = symprec
@@ -256,7 +247,7 @@ class FilmSubstrateDistanceCalculator(ASECalculator):
 
         film_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 1]
         if film_indices:
-            constraints.append(FixFilmRigidXY(film_indices))
+            constraints.append(FixFilmRigidXY(film_indices=film_indices))
 
         atoms.set_constraint(constraints)
         return atoms
@@ -271,7 +262,7 @@ class FilmSubstrateDistanceCalculator(ASECalculator):
                 material_plus = Material(from_ase(atoms_plus))
                 energy_plus = self.material_calculator.get_energy(material_plus)
 
-                forces[i, j] = -self.force_constant * (energy_plus - energy) / dx
+                forces[i, j] = -(energy_plus - energy) / dx
 
         return forces
 
