@@ -131,6 +131,9 @@ class FixFilmRigidXY(BaseModel):
     Created following https://wiki.fysik.dtu.dk/ase/ase/constraints.html#making-your-own-constraint-class
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     film_indices: List[int] = []
     initial_positions: Optional[np.ndarray] = None
     reference_center: Optional[np.ndarray] = None
