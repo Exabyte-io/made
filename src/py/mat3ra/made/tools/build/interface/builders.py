@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional
 
 import numpy as np
 from ..supercell import create_supercell
@@ -307,33 +307,54 @@ class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
     _ConfigurationType = CommensurateSuperCellTwistedInterfaceConfiguration
 
     def _generate(self, configuration: CommensurateSuperCellTwistedInterfaceConfiguration) -> List[Material]:
-        n, m, p, q, actual_angle = self._find_commensurate_supercell(
-            configuration.film, configuration.twist_angle, configuration.max_supercell_size
+        M1, M2, strain = self.find_csl_matrices(
+            configuration.twist_angle,
+            max_index=configuration.max_supercell_size,
+            angle_tolerance=0.5,
+            strain_tolerance=0.05,
         )
-        bottom_supercell = create_supercell(configuration.substrate, [[n, -m, 0], [m, n, 0], [0, 0, 1]])
-        top_supercell = create_supercell(configuration.film, [[p, -q, 0], [q, p, 0], [0, 0, 1]])
-        top_supercell = rotate_material(top_supercell, [0, 0, 1], actual_angle, wrap=False)
-        translation_vector = [0, 0, configuration.distance_z]
-        top_supercell = translate_by_vector(top_supercell, translation_vector)
-        final_material = merge_materials([bottom_supercell, top_supercell])
-        return [final_material]
 
-    def _find_commensurate_supercell(
-        self, material: Material, target_angle: float, max_size: int
-    ) -> Tuple[int, int, int, int, float]:
-        best_angle_diff = float("inf")
-        best_params = (1, 0, 1, 0, 0)
+        film_1 = create_supercell(configuration.substrate, M1)
+        film_2 = create_supercell(configuration.film, M2)
+        film_2 = translate_by_vector(film_2, [0, 0, configuration.distance_z], use_cartesian_coordinates=True)
 
-        for n in range(1, max_size + 1):
-            for m in range(max_size + 1):
-                for p in range(1, max_size + 1):
-                    for q in range(max_size + 1):
-                        angle = np.degrees(np.arctan2(n * q - m * p, n * p + m * q))
-                        if abs(angle - target_angle) < best_angle_diff:
-                            best_angle_diff = abs(angle - target_angle)
-                            best_params = (n, m, p, q, angle)
+        bilayer = merge_materials([film_2, film_1], merge_dangerously=True)
+        return [bilayer]
 
-        return best_params
+    @staticmethod
+    def __rotation_matrix_2d(angle: float) -> np.ndarray:
+        """Create a 2D rotation matrix for the given angle in degrees."""
+        theta = np.radians(angle)
+        return np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+
+    def find_csl_matrices(
+        self, angle: float, max_index: int = 10, angle_tolerance: float = 0.1, strain_tolerance: float = 0.01
+    ):
+        R_target = self.__rotation_matrix_2d(angle)
+        best_strain = float("inf")
+        best_M1 = best_M2 = None
+
+        for i in range(1, max_index + 1):
+            for j in range(max_index + 1):
+                M1 = np.array([[i, -j], [j, i]])
+                M2_approx = R_target @ M1
+                M2 = np.round(M2_approx).astype(int)
+                R_actual = M2 @ np.linalg.inv(M1)
+
+                angle_actual = np.degrees(np.arctan2(R_actual[1, 0], R_actual[0, 0]))
+                if abs(angle_actual - angle) > angle_tolerance:
+                    continue
+
+                strain = np.linalg.norm(M2_approx - M2) / np.linalg.norm(M2_approx)
+                if strain < strain_tolerance and strain < best_strain:
+                    best_strain = strain
+                    best_M1 = np.array([[i, -j, 0], [j, i, 0], [0, 0, 1]])
+                    best_M2 = np.array([M2[0, 0], M2[0, 1], 0, M2[1, 0], M2[1, 1], 0, 0, 0, 1]).reshape(3, 3)
+
+        if best_M1 is None:
+            raise ValueError(f"No approximate CSL found for angle {angle} within tolerances")
+
+        return best_M1, best_M2, best_strain
 
     def _update_material_name(
         self, material: Material, configuration: CommensurateSuperCellTwistedInterfaceConfiguration
