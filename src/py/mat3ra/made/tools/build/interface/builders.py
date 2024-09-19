@@ -1,7 +1,6 @@
 from typing import Any, List, Optional
 
 import numpy as np
-from ..supercell import create_supercell
 from ..utils import merge_materials
 from ...modify import (
     translate_to_z_level,
@@ -287,102 +286,4 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
         self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
     ) -> Material:
         material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f}°)"
-        return material
-
-
-class CommensurateSuperCellTwistedInterfaceConfiguration(TwistedInterfaceConfiguration):
-    max_supercell_size: int = Field(10, description="Maximum supercell size to consider")
-
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "max_supercell_size": self.max_supercell_size,
-        }
-
-
-class CommensurateSuperCellTwistedInterfaceBuilder(BaseBuilder):
-    _GeneratedItemType = Material
-    _ConfigurationType = CommensurateSuperCellTwistedInterfaceConfiguration
-    __actual_angle: float
-
-    def _generate(self, configuration: CommensurateSuperCellTwistedInterfaceConfiguration) -> List[Material]:
-        M1, M2, strain, angle_actual = self.find_csl_matrices(
-            configuration.twist_angle,
-            max_index=configuration.max_supercell_size,
-            angle_tolerance=0.5,
-            strain_tolerance=0.05,
-        )
-        self.__actual_angle = angle_actual
-
-        film_1 = create_supercell(configuration.substrate, M1)
-        film_2 = create_supercell(configuration.film, M2)
-        film_2 = translate_by_vector(film_2, [0, 0, configuration.distance_z], use_cartesian_coordinates=True)
-
-        bilayer = merge_materials([film_2, film_1], merge_dangerously=True)
-        return [bilayer]
-
-    @staticmethod
-    def __rotation_matrix_2d(angle: float) -> np.ndarray:
-        """Create a 2D rotation matrix for the given angle in degrees."""
-        theta = np.radians(angle)
-        return np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-
-    def find_csl_matrices(
-        self, angle: float, max_index: int = 10, angle_tolerance: float = 0.1, strain_tolerance: float = 0.01
-    ):
-        """
-        Find the approximate CSL matrices for the given twist angle.
-
-        This method uses the brute force approach to find the approximate CSL matrices for the given twist angle.
-        The method iterates over all possible supercell sizes up to the given maximum index and calculates the
-        strain between the actual and approximate CSL matrices. The best approximate CSL matrices are returned
-        based on the strain and angle tolerance.
-
-        Args:
-            angle (float): The twist angle in degrees.
-            max_index (int): The maximum supercell size to consider.
-            angle_tolerance (float): The angle tolerance in degrees.
-            strain_tolerance (float): The strain tolerance.
-
-        Returns:
-            Tuple[np.ndarray, np.ndarray, float]: The approximate CSL matrices M1 and M2 and the strain.
-        """
-        R_target = self.__rotation_matrix_2d(angle)
-        best_strain = float("inf")
-        best_M1 = best_M2 = None
-        best_angle_actual = None
-
-        for i in range(1, max_index + 1):
-            for j in range(max_index + 1):
-                M1 = np.array([[i, -j], [j, i]])
-                M2_approx = R_target @ M1
-                M2 = np.round(M2_approx).astype(int)
-                R_actual = M2 @ np.linalg.inv(M1)
-
-                angle_actual = np.degrees(np.arctan2(R_actual[1, 0], R_actual[0, 0]))
-                if abs(angle_actual - angle) > angle_tolerance:
-                    continue
-
-                strain = np.linalg.norm(M2_approx - M2) / np.linalg.norm(M2_approx)
-                if strain < strain_tolerance and strain < best_strain:
-                    best_strain = strain
-                    best_M1 = np.array([[i, -j, 0], [j, i, 0], [0, 0, 1]])
-                    best_M2 = np.array([M2[0, 0], M2[0, 1], 0, M2[1, 0], M2[1, 1], 0, 0, 0, 1]).reshape(3, 3)
-                    best_angle_actual = angle_actual
-
-        if best_M1 is None:
-            raise ValueError(f"No approximate CSL found for angle {angle} within tolerances")
-
-        return best_M1, best_M2, best_strain, best_angle_actual
-
-    def _update_material_metadata(self, material, configuration) -> Material:
-        configuration["twist_angle"] = self.__actual_angle
-        return super()._update_material_metadata(material, configuration)
-
-    def _update_material_name(
-        self, material: Material, configuration: CommensurateSuperCellTwistedInterfaceConfiguration
-    ) -> Material:
-        material.name = f"Commensurate Twisted Interface ({self.__actual_angle:.2f} degrees)"
         return material
