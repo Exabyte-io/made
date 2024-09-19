@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from mat3ra.code.constants import AtomicCoordinateUnits
 from mat3ra.utils.mixins import RoundNumericValuesMixin
@@ -115,20 +115,20 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         self.elements.add_item(element)
         self.coordinates.add_item(coordinate)
 
-    def remove_atom_by_id(self, id=None):
+    def remove_atom_by_id(self, id: int):
         self.elements.remove_item(id)
         self.coordinates.remove_item(id)
-        if len(self.labels.values) > 0:
+        if self.labels is not None:
             self.labels.remove_item(id)
 
-    def filter_atoms_by_ids(self, ids) -> "Basis":
+    def filter_atoms_by_ids(self, ids: Union[List[int], int]) -> "Basis":
         self.elements.filter_by_ids(ids)
         self.coordinates.filter_by_ids(ids)
         if self.labels is not None:
             self.labels.filter_by_ids(ids)
         return self
 
-    def filter_atoms_by_labels(self, labels) -> "Basis":
+    def filter_atoms_by_labels(self, labels: Union[List[str], str]) -> "Basis":
         if self.labels is None:
             return self
         self.labels.filter_by_values(labels)
