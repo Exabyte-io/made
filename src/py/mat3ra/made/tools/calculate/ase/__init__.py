@@ -4,9 +4,24 @@ import numpy as np
 from mat3ra.made.material import Material
 
 from ...convert import from_ase
+from ...convert.utils import INTERFACE_LABELS_MAP, InterfacePartsEnum
 from ...third_party import ASEAtoms, ASECalculator, ASEFixAtoms, ASEFixedPlane, ase_all_changes
 from ..calculators import InterfaceMaterialCalculator, MaterialCalculator
 from .constraints import RigidFilmXYInterfaceConstraint
+
+
+def get_interface_part_indices(atoms: ASEAtoms, part: InterfacePartsEnum) -> List[int]:
+    """
+    Get the indices of the atoms in the interface part.
+
+    Args:
+        atoms (ASEAtoms): The ASE Atoms object.
+        part (str): The interface part to get the indices of.
+
+    Returns:
+        List[int]: The indices of the atoms in the interface part.
+    """
+    return [i for i, tag in enumerate(atoms.get_tags()) if tag == INTERFACE_LABELS_MAP[part]]
 
 
 class FilmSubstrateDistanceASECalculator(ASECalculator):
@@ -65,13 +80,13 @@ class FilmSubstrateDistanceASECalculator(ASECalculator):
     def _add_constraints(self, atoms: ASEAtoms) -> ASEAtoms:
         constraints: List[Union[ASEFixAtoms, ASEFixedPlane, RigidFilmXYInterfaceConstraint]] = []
         if self.fix_substrate:
-            substrate_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 0]
+            substrate_indices = get_interface_part_indices(atoms, InterfacePartsEnum.SUBSTRATE)
             constraints.append(ASEFixAtoms(indices=substrate_indices))
         if self.fix_z:
             all_indices = list(range(len(atoms)))
             constraints.append(ASEFixedPlane(indices=all_indices, direction=[0, 0, 1]))
 
-        film_indices = [i for i, tag in enumerate(atoms.get_tags()) if tag == 1]
+        film_indices = get_interface_part_indices(atoms, InterfacePartsEnum.FILM)
         if film_indices:
             constraints.append(RigidFilmXYInterfaceConstraint(film_indices=film_indices))
 
