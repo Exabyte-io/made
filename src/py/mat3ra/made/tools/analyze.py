@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
+from typing import Callable, List, Literal, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -509,74 +509,3 @@ def get_local_extremum_atom_index(
         extremum_z_atom = min(z_values, key=lambda item: item[1])
 
     return extremum_z_atom[0]
-
-
-def calculate_on_xy_grid(
-    material: Material,
-    modifier: Callable,
-    modifier_parameters: Dict[str, Any],
-    calculator: Callable,
-    calculator_parameters: Dict[str, Any],
-    grid_size_xy: Tuple[int, int] = (10, 10),
-    grid_offset_position: List[float] = [0, 0],
-    grid_range_x: Tuple[float, float] = (-0.5, 0.5),
-    grid_range_y: Tuple[float, float] = (-0.5, 0.5),
-    use_cartesian_coordinates: bool = False,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Calculate a property on a grid of x-y positions.
-
-    Args:
-        material (Material): The material object.
-        modifier (Callable): The modifier function to apply to the material.
-        calculator (Callable): The calculator to use for the property calculation.
-        calculator_parameters (Dict[str, Any]): The parameters to pass to the calculator.
-        grid_size_xy (Tuple[int, int]): The size of the grid in x and y directions.
-        grid_offset_position (List[float]): The offset position of the grid, in Angstroms or crystal coordinates.
-        grid_range_x (Tuple[float, float]): The range to search in x direction, in Angstroms or crystal coordinates.
-        grid_range_y (Tuple[float, float]): The range to search in y direction, in Angstroms or crystal coordinates.
-        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
-
-    Returns:
-        Tuple[np.ndarray, np.ndarray, np.ndarray]: The x-values, y-values, and the results matrix.
-    """
-    x_values = np.linspace(grid_range_x[0], grid_range_x[1], grid_size_xy[0]) + grid_offset_position[0]
-    y_values = np.linspace(grid_range_y[0], grid_range_y[1], grid_size_xy[1]) + grid_offset_position[1]
-
-    results_matrix = np.zeros(grid_size_xy)
-
-    for i, x in enumerate(x_values):
-        for j, y in enumerate(y_values):
-            modified_material = modifier(
-                material,
-                displacement=[x, y, 0],
-                use_cartesian_coordinates=use_cartesian_coordinates,
-                **modifier_parameters,
-            )
-            result = calculator(modified_material, **calculator_parameters)
-            results_matrix[i, j] = result
-
-    return x_values, y_values, results_matrix
-
-
-def calculate_moire_periodicity(lattice_a: float, lattice_b: float, twist_angle: float) -> Tuple[float, float]:
-    """
-    Calculate the periodicity of the Moiré pattern considering X and Y independently.
-
-    Args:
-        lattice_a (float): Lattice constant of the first material.
-        lattice_b (float): Lattice constant of the second material.
-        twist_angle (float): Twist angle between the two materials.
-
-    Returns:
-        Tuple[float, float]: Periodicity of the Moiré pattern in X and Y directions in Angstroms.
-    """
-    theta = np.deg2rad(twist_angle)
-
-    moire_wavelength_x = lattice_a / (2 * np.sin(theta / 2))
-    moire_wavelength_y = lattice_b / (2 * np.sin(theta / 2))
-
-    p = moire_wavelength_x
-    q = moire_wavelength_y
-
-    return p, q
