@@ -1,6 +1,8 @@
 from typing import Any, List, Optional
 
 import numpy as np
+from mat3ra.made.tools.build.supercell import create_supercell
+
 from ..utils import merge_materials
 from ...modify import (
     translate_to_z_level,
@@ -292,20 +294,21 @@ class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
 
 class CommensurateLatticeInterfaceBuilder(BaseBuilder):
     _GeneratedItemType = Material
-    _ConfigurationType = InterfaceConfiguration
+    _ConfigurationType = TwistedInterfaceConfiguration
 
-    def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
-        film = configuration.film_configuration.bulk
-        substrate = configuration.substrate_configuration.bulk
+    def _generate(self, configuration: TwistedInterfaceConfiguration) -> List[Material]:
+        film = configuration.film
+        substrate = configuration.substrate
         max_search = self.build_parameters.max_search
-        a1 = film.lattice.matrix[0]
-        a2 = film.lattice.matrix[1]
+        a1 = film.lattice.vector_arrays[0][:2]
+        a2 = film.lattice.vector_arrays[1][:2]
         commensurate_lattices = self.__generate_commensurate_lattices(a1, a2, max_search)
         interfaces = []
         for lattice in commensurate_lattices:
-            substrate_copy = substrate.copy()
-            substrate_copy.modify_lattice(lattice)
-            interface = merge_materials([film, substrate_copy])
+            new_substrate = create_supercell(film, lattice["matrix1"])
+            new_film = create_supercell(substrate, lattice["matrix2"])
+            new_film = translate_by_vector(new_film, [0, 0, configuration.distance_z], use_cartesian_coordinates=True)
+            interface = merge_materials([new_substrate, new_film])
             interfaces.append(interface)
         return interfaces
 
@@ -346,7 +349,7 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
 
         return angle_deg
 
-    def __generate_commensurate_lattices(self, a1: List[int], a2: List[int], max_search: int = 10):
+    def __generate_commensurate_lattices(self, a1: List[float], a2: List[float], max_search: int = 10):
         """
         Generate all commensurate lattices for a given search range.
         """
