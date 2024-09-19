@@ -3,7 +3,7 @@ from typing import List, Optional
 import numpy as np
 from pydantic import BaseModel
 
-from ..third_party import ASEAtoms
+from ...third_party import ASEAtoms
 
 
 class InterfaceConstraint(BaseModel):
@@ -34,7 +34,7 @@ class InterfaceConstraint(BaseModel):
         raise NotImplementedError
 
 
-class RigidFilmXYConstraint(InterfaceConstraint):
+class RigidFilmXYInterfaceConstraint(InterfaceConstraint):
     """
     Custom constraint to allow only rigid translation in x and y for film atoms.
     """
