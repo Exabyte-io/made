@@ -287,3 +287,88 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
     ) -> Material:
         material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f}°)"
         return material
+
+
+class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
+    max_search: int = 10
+
+
+class CommensurateLatticeInterfaceBuilder(BaseBuilder):
+    _GeneratedItemType = Material
+    _ConfigurationType = InterfaceConfiguration
+
+    def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
+        film = configuration.film_configuration.bulk
+        substrate = configuration.substrate_configuration.bulk
+        max_search = self.build_parameters.max_search
+        a1 = film.lattice.matrix[0]
+        a2 = film.lattice.matrix[1]
+        commensurate_lattices = self.__generate_commensurate_lattices(a1, a2, max_search)
+        interfaces = []
+        for lattice in commensurate_lattices:
+            substrate_copy = substrate.copy()
+            substrate_copy.modify_lattice(lattice)
+            interface = merge_materials([film, substrate_copy])
+            interfaces.append(interface)
+        return interfaces
+
+    @staticmethod
+    def __create_matrices(max_search: int):
+        matrices = []
+        for s11 in range(-max_search, max_search + 1):
+            for s12 in range(-max_search, max_search + 1):
+                for s21 in range(-max_search, max_search + 1):
+                    for s22 in range(-max_search, max_search + 1):
+                        # Non-zero area constraint
+                        matrix = np.array([[s11, s12], [s21, s22]])
+                        determinant = np.linalg.det(matrix)
+                        # If matrices are degenerate or contain mirroring, skip
+                        if determinant == 0 or determinant < 0:
+                            continue
+                        matrices.append(matrix)
+        return matrices
+
+    @staticmethod
+    def __solve_angle_from_rotation_matrix(matrix, zero_tolerance=1e-6, round_digits=3):
+        if matrix.shape != (2, 2):
+            raise ValueError("Input matrix must be 2x2")
+        if np.abs(np.linalg.det(matrix) - 1) > zero_tolerance:
+            raise ValueError("Matrix must be orthogonal (determinant = 1)")
+        if not np.all(np.abs(matrix) <= 1):
+            raise ValueError("Matrix have all elements less than 1")
+
+        # Extract the elements of the matrix
+        cos_theta = matrix[0, 0]
+        sin_theta = matrix[1, 0]
+
+        # Calculate the angle in radians
+        angle_rad = np.arctan2(sin_theta, cos_theta)
+
+        # Convert the angle to degrees
+        angle_deg = np.round(np.degrees(angle_rad), round_digits)
+
+        return angle_deg
+
+    def __generate_commensurate_lattices(self, a1: List[int], a2: List[int], max_search: int = 10):
+        """
+        Generate all commensurate lattices for a given search range.
+        """
+        matrices = self.__create_matrices(max_search)
+        matrix_a1a2 = np.array([a1, a2])
+        matrix_a1a2_inverse = np.linalg.inv(matrix_a1a2)
+
+        solutions = []
+        for index1, matrix1 in enumerate(matrices):
+            for index2, matrix2 in enumerate(matrices[0 : index1 + 1]):
+                matrix2_inverse = np.linalg.inv(matrix2)
+                intermediate_product = matrix2_inverse @ matrix1
+                product = matrix_a1a2_inverse @ intermediate_product @ matrix_a1a2
+                try:
+                    angle = self.__solve_angle_from_rotation_matrix(product)
+                    size_metric = np.linalg.det(matrix_a1a2_inverse @ matrix1 @ matrix_a1a2)
+                    solutions.append(
+                        {"matrix1": matrix1, "matrix2": matrix2, "angle": angle, "size_metric": size_metric}
+                    )
+                except ValueError:
+                    continue
+        return solutions
