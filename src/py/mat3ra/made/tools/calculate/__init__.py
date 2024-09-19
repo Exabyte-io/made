@@ -1,9 +1,9 @@
-from typing import Optional
+from typing import List, Optional, Union
 
 from ...material import Material
 from ..analyze import get_surface_area
 from ..build.interface.utils import get_slab
-from ..convert import decorator_convert_material_args_kwargs_to_atoms
+from ..convert import decorator_convert_material_args_kwargs_to_atoms, from_ase
 from ..third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
 from .interaction_functions import sum_of_inverse_distances_squared
 
