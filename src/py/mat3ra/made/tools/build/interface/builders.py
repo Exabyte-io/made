@@ -27,7 +27,7 @@ from ..mixins import (
 )
 from ..slab import create_slab, Termination
 from ..slab.configuration import SlabConfiguration
-from ...analyze import get_chemical_formula
+from ...analyze import get_chemical_formula, get_atomic_coordinates_extremum
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
 from ...build import BaseBuilder, BaseConfiguration
 
@@ -231,14 +231,14 @@ class NanoRibbonTwistedInterfaceConfiguration(TwistedInterfaceConfiguration):
         ribbon_width (int): Width of the nanoribbon in unit cells.
         ribbon_length (int): Length of the nanoribbon in unit cells.
         distance_z (float): Vertical distance between layers in Angstroms.
-        vacuum_x (int): Vacuum padding in x direction in unit cells.
-        vacuum_y (int): Vacuum padding in y direction in unit cells.
+        vacuum_x (float): Vacuum along x in Angstroms.
+        vacuum_y (float): Vacuum along y in Angstroms.
     """
 
     ribbon_width: int = 1
     ribbon_length: int = 1
-    vacuum_x: int = 2
-    vacuum_y: int = 2
+    vacuum_x: float = 5.0
+    vacuum_y: float = 5.0
 
     @property
     def _json(self):
@@ -261,8 +261,6 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
             material=configuration.substrate,
             width=configuration.ribbon_width,
             length=configuration.ribbon_length,
-            vacuum_width=configuration.vacuum_x,
-            vacuum_length=configuration.vacuum_y,
         )
         bottom_ribbon = create_nanoribbon(bottom_nanoribbon_configuration)
 
@@ -270,8 +268,6 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
             material=configuration.film,
             width=configuration.ribbon_width,
             length=configuration.ribbon_length,
-            vacuum_width=configuration.vacuum_x,
-            vacuum_length=configuration.vacuum_y,
         )
         top_ribbon = create_nanoribbon(top_ribbon_configuration)
         top_ribbon = rotate_material(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
@@ -279,6 +275,23 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
         translation_vector = [0, 0, configuration.distance_z]
         top_ribbon = translate_by_vector(top_ribbon, translation_vector, use_cartesian_coordinates=True)
         merged_material = merge_materials([bottom_ribbon, top_ribbon])
+
+        min_x = get_atomic_coordinates_extremum(merged_material, "min", "x", use_cartesian_coordinates=True)
+        max_x = get_atomic_coordinates_extremum(merged_material, "max", "x", use_cartesian_coordinates=True)
+        min_y = get_atomic_coordinates_extremum(merged_material, "min", "y", use_cartesian_coordinates=True)
+        max_y = get_atomic_coordinates_extremum(merged_material, "max", "y", use_cartesian_coordinates=True)
+
+        new_x_length = max_x - min_x + 2 * configuration.vacuum_x
+        new_y_length = max_y - min_y + 2 * configuration.vacuum_y
+
+        lattice_c = merged_material.lattice.vector_arrays[2]
+        merged_material.set_new_lattice_vectors([new_x_length, 0, 0], [0, new_y_length, 0], lattice_c)
+
+        merged_material = translate_by_vector(
+            merged_material,
+            [-min_x + configuration.vacuum_x, -min_y + configuration.vacuum_y, 0],
+            use_cartesian_coordinates=True,
+        )
 
         return [merged_material]
 
