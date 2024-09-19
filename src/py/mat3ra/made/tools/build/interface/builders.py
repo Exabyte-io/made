@@ -6,6 +6,7 @@ from ...modify import (
     translate_to_z_level,
     rotate_material,
     translate_by_vector,
+    add_vacuum_sides,
 )
 from pydantic import BaseModel, Field
 from ase.build.tools import niggli_reduce
@@ -27,7 +28,7 @@ from ..mixins import (
 )
 from ..slab import create_slab, Termination
 from ..slab.configuration import SlabConfiguration
-from ...analyze import get_chemical_formula, get_atomic_coordinates_extremum
+from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
 from ...build import BaseBuilder, BaseConfiguration
 
@@ -276,24 +277,14 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
         top_ribbon = translate_by_vector(top_ribbon, translation_vector, use_cartesian_coordinates=True)
         merged_material = merge_materials([bottom_ribbon, top_ribbon])
 
-        min_x = get_atomic_coordinates_extremum(merged_material, "min", "x", use_cartesian_coordinates=True)
-        max_x = get_atomic_coordinates_extremum(merged_material, "max", "x", use_cartesian_coordinates=True)
-        min_y = get_atomic_coordinates_extremum(merged_material, "min", "y", use_cartesian_coordinates=True)
-        max_y = get_atomic_coordinates_extremum(merged_material, "max", "y", use_cartesian_coordinates=True)
-
-        new_x_length = max_x - min_x + 2 * configuration.vacuum_x
-        new_y_length = max_y - min_y + 2 * configuration.vacuum_y
-
-        lattice_c = merged_material.lattice.vector_arrays[2]
-        merged_material.set_new_lattice_vectors([new_x_length, 0, 0], [0, new_y_length, 0], lattice_c)
-
-        merged_material = translate_by_vector(
+        merged_material_vacuum_x = add_vacuum_sides(
             merged_material,
-            [-min_x + configuration.vacuum_x, -min_y + configuration.vacuum_y, 0],
-            use_cartesian_coordinates=True,
+            configuration.vacuum_x,
+            on_x=True,
         )
+        merged_material_vacuum_xy = add_vacuum_sides(merged_material_vacuum_x, configuration.vacuum_y, on_y=True)
 
-        return [merged_material]
+        return [merged_material_vacuum_xy]
 
     def _update_material_name(
         self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
