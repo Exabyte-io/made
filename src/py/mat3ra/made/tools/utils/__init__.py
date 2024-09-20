@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 from mat3ra.made.material import Material
