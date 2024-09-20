@@ -290,6 +290,7 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
 
 class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
     max_search: int = 10
+    angle_tolerance: float = 1.0
 
 
 class CommensurateLatticeInterfaceBuilder(BaseBuilder):
@@ -303,13 +304,21 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
         a1 = film.lattice.vector_arrays[0][:2]
         a2 = film.lattice.vector_arrays[1][:2]
         commensurate_lattices = self.__generate_commensurate_lattices(a1, a2, max_search)
+        commensurate_lattices_with_angle = [
+            lattice
+            for lattice in commensurate_lattices
+            if np.abs(lattice["angle"] - configuration.twist_angle) < self.build_parameters.angle_tolerance
+        ]
         interfaces = []
-        for lattice in commensurate_lattices:
-            new_substrate = create_supercell(film, lattice["matrix1"])
-            new_film = create_supercell(substrate, lattice["matrix2"])
+        for lattice in commensurate_lattices_with_angle:
+            new_substrate = create_supercell(film, lattice["matrix1"].tolist())
+            new_film = create_supercell(substrate, lattice["matrix2"].tolist())
             new_film = translate_by_vector(new_film, [0, 0, configuration.distance_z], use_cartesian_coordinates=True)
-            interface = merge_materials([new_substrate, new_film])
-            interfaces.append(interface)
+            try:
+                interface = merge_materials([new_substrate, new_film])
+                interfaces.append(interface)
+            except Exception as e:
+                print(e)
         return interfaces
 
     @staticmethod
@@ -322,7 +331,6 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
                         # Non-zero area constraint
                         matrix = np.array([[s11, s12], [s21, s22]])
                         determinant = np.linalg.det(matrix)
-                        # If matrices are degenerate or contain mirroring, skip
                         if determinant == 0 or determinant < 0:
                             continue
                         matrices.append(matrix)
@@ -336,15 +344,9 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
             raise ValueError("Matrix must be orthogonal (determinant = 1)")
         if not np.all(np.abs(matrix) <= 1):
             raise ValueError("Matrix have all elements less than 1")
-
-        # Extract the elements of the matrix
         cos_theta = matrix[0, 0]
         sin_theta = matrix[1, 0]
-
-        # Calculate the angle in radians
         angle_rad = np.arctan2(sin_theta, cos_theta)
-
-        # Convert the angle to degrees
         angle_deg = np.round(np.degrees(angle_rad), round_digits)
 
         return angle_deg
