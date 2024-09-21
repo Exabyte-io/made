@@ -306,16 +306,16 @@ class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
 
 
 class CommensurateLatticeInterfaceBuilder(BaseBuilder):
-    _GeneratedItemType = CommensurateLatticePair
-    _ConfigurationType = TwistedInterfaceConfiguration
+    _GeneratedItemType: type(CommensurateLatticePair) = CommensurateLatticePair  # type: ignore
+    _ConfigurationType: type(TwistedInterfaceConfiguration) = TwistedInterfaceConfiguration  # type: ignore
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         film = configuration.film
-        substrate = configuration.substrate
+        # substrate = configuration.substrate
         max_search = self.build_parameters.max_search
-        a1 = film.lattice.vector_arrays[0][:2]
-        a2 = film.lattice.vector_arrays[1][:2]
-        commensurate_lattices = self.__generate_commensurate_lattices(a1, a2, max_search, configuration.twist_angle)
+        a = film.lattice.vector_arrays[0][:2]
+        b = film.lattice.vector_arrays[1][:2]
+        commensurate_lattices = self.__generate_commensurate_lattices(a, b, max_search, configuration.twist_angle)
         commensurate_lattice_pairs = [
             CommensurateLatticePair(configuration=configuration, **lattice) for lattice in commensurate_lattices
         ]
@@ -393,9 +393,7 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
                                 / (np.linalg.norm(product2[0]) * np.linalg.norm(product2[1]))
                             )
                             if np.isclose(angle1, angle2, atol=0.01):
-                                print(
-                                    f"Found commensurate lattice with angle {angle} and size metric {size_metric} !!!!!!!"
-                                )
+                                print(f"Found commensurate lattice with angle {angle} and size metric {size_metric}")
                                 solutions.append(
                                     {"matrix1": matrix1, "matrix2": matrix2, "angle": angle, "size_metric": size_metric}
                                 )
@@ -406,7 +404,9 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
         return solutions
 
     def _post_process(
-        self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType]
+        self,
+        items: List[_GeneratedItemType],
+        post_process_parameters: Optional[BaseBuilder._PostProcessParametersType] = None,
     ) -> List[Material]:
         interfaces = []
         for item in items:
