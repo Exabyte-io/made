@@ -288,38 +288,38 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
         return material
 
 
+class CommensurateLatticePair(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    configuration: TwistedInterfaceConfiguration
+    matrix1: np.ndarray
+    matrix2: np.ndarray
+    angle: float
+    size_metric: float
+
+
 class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
     max_search: int = 10
-    angle_tolerance: float = 1.0
+    angle_tolerance: float = 0.1
+    return_first_match: bool = False
 
 
 class CommensurateLatticeInterfaceBuilder(BaseBuilder):
-    _GeneratedItemType = Material
+    _GeneratedItemType = CommensurateLatticePair
     _ConfigurationType = TwistedInterfaceConfiguration
 
-    def _generate(self, configuration: TwistedInterfaceConfiguration) -> List[Material]:
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         film = configuration.film
         substrate = configuration.substrate
         max_search = self.build_parameters.max_search
         a1 = film.lattice.vector_arrays[0][:2]
         a2 = film.lattice.vector_arrays[1][:2]
-        commensurate_lattices = self.__generate_commensurate_lattices(a1, a2, max_search)
-        commensurate_lattices_with_angle = [
-            lattice
-            for lattice in commensurate_lattices
-            if np.abs(lattice["angle"] - configuration.twist_angle) < self.build_parameters.angle_tolerance
+        commensurate_lattices = self.__generate_commensurate_lattices(a1, a2, max_search, configuration.twist_angle)
+        commensurate_lattice_pairs = [
+            CommensurateLatticePair(configuration=configuration, **lattice) for lattice in commensurate_lattices
         ]
-        interfaces = []
-        for lattice in commensurate_lattices_with_angle:
-            new_substrate = create_supercell(film, lattice["matrix1"].tolist())
-            new_film = create_supercell(substrate, lattice["matrix2"].tolist())
-            new_film = translate_by_vector(new_film, [0, 0, configuration.distance_z], use_cartesian_coordinates=True)
-            try:
-                interface = merge_materials([new_substrate, new_film])
-                interfaces.append(interface)
-            except Exception as e:
-                print(e)
-        return interfaces
+        return commensurate_lattice_pairs
 
     @staticmethod
     def __create_matrices(max_search: int):
@@ -351,7 +351,9 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
 
         return angle_deg
 
-    def __generate_commensurate_lattices(self, a1: List[float], a2: List[float], max_search: int = 10):
+    def __generate_commensurate_lattices(
+        self, a1: List[float], a2: List[float], max_search: int = 10, target_angle: float = 0.0
+    ):
         """
         Generate all commensurate lattices for a given search range.
         """
@@ -368,9 +370,54 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
                 try:
                     angle = self.__solve_angle_from_rotation_matrix(product)
                     size_metric = np.linalg.det(matrix_a1a2_inverse @ matrix1 @ matrix_a1a2)
-                    solutions.append(
-                        {"matrix1": matrix1, "matrix2": matrix2, "angle": angle, "size_metric": size_metric}
-                    )
+
+                    if np.abs(angle - target_angle) < self.build_parameters.angle_tolerance:
+                        # We need to check if lattices of two materials will be the same by norm and angle
+                        product1 = matrix1 @ matrix_a1a2
+                        product2 = matrix2 @ matrix_a1a2
+
+                        norm_a1 = np.linalg.norm(product1[0])
+                        norm_b1 = np.linalg.norm(product1[1])
+                        norm_a2 = np.linalg.norm(product2[0])
+                        norm_b2 = np.linalg.norm(product2[1])
+
+                        if np.isclose(norm_a1, norm_a2, atol=0.01) and np.isclose(norm_b1, norm_b2, atol=0.01):
+                            print(matrix1, matrix2)
+                            # let's check angle between a1 and b1 and a2 and b2, they should be the same
+                            angle1 = np.arccos(
+                                np.dot(product1[0], product1[1])
+                                / (np.linalg.norm(product1[0]) * np.linalg.norm(product1[1]))
+                            )
+                            angle2 = np.arccos(
+                                np.dot(product2[0], product2[1])
+                                / (np.linalg.norm(product2[0]) * np.linalg.norm(product2[1]))
+                            )
+                            if np.isclose(angle1, angle2, atol=0.01):
+                                print(
+                                    f"Found commensurate lattice with angle {angle} and size metric {size_metric} !!!!!!!"
+                                )
+                                solutions.append(
+                                    {"matrix1": matrix1, "matrix2": matrix2, "angle": angle, "size_metric": size_metric}
+                                )
+                                if self.build_parameters.return_first_match:
+                                    return solutions
                 except ValueError:
                     continue
         return solutions
+
+    def _post_process(
+        self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType]
+    ) -> List[Material]:
+        interfaces = []
+        for item in items:
+            new_substrate = create_supercell(item.configuration.film, item.matrix1.tolist())
+            new_film = create_supercell(item.configuration.substrate, item.matrix2.tolist())
+            new_film = translate_by_vector(
+                new_film, [0, 0, item.configuration.distance_z], use_cartesian_coordinates=True
+            )
+            try:
+                interface = merge_materials([new_substrate, new_film])
+                interfaces.append(interface)
+            except Exception as e:
+                print(e)
+        return interfaces
