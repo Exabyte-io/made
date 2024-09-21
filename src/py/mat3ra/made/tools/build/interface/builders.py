@@ -344,6 +344,9 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
             raise ValueError("Matrix must be orthogonal (determinant = 1)")
         if not np.all(np.abs(matrix) <= 1):
             raise ValueError("Matrix have all elements less than 1")
+        # Check if it's in form of rotation matrix [cos(theta), -sin(theta); sin(theta), cos(theta)]
+        if not np.allclose(matrix @ matrix.T, np.eye(2), atol=zero_tolerance):
+            raise ValueError("Matrix must be a pure rotation (no scaling or shearing)")
         cos_theta = matrix[0, 0]
         sin_theta = matrix[1, 0]
         angle_rad = np.arctan2(sin_theta, cos_theta)
@@ -372,33 +375,12 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
                     size_metric = np.linalg.det(matrix_a1a2_inverse @ matrix1 @ matrix_a1a2)
 
                     if np.abs(angle - target_angle) < self.build_parameters.angle_tolerance:
-                        # We need to check if lattices of two materials will be the same by norm and angle
-                        product1 = matrix1 @ matrix_a1a2
-                        product2 = matrix2 @ matrix_a1a2
-
-                        norm_a1 = np.linalg.norm(product1[0])
-                        norm_b1 = np.linalg.norm(product1[1])
-                        norm_a2 = np.linalg.norm(product2[0])
-                        norm_b2 = np.linalg.norm(product2[1])
-
-                        if np.isclose(norm_a1, norm_a2, atol=0.01) and np.isclose(norm_b1, norm_b2, atol=0.01):
-                            print(matrix1, matrix2)
-                            # let's check angle between a1 and b1 and a2 and b2, they should be the same
-                            angle1 = np.arccos(
-                                np.dot(product1[0], product1[1])
-                                / (np.linalg.norm(product1[0]) * np.linalg.norm(product1[1]))
-                            )
-                            angle2 = np.arccos(
-                                np.dot(product2[0], product2[1])
-                                / (np.linalg.norm(product2[0]) * np.linalg.norm(product2[1]))
-                            )
-                            if np.isclose(angle1, angle2, atol=0.01):
-                                print(f"Found commensurate lattice with angle {angle} and size metric {size_metric}")
-                                solutions.append(
-                                    {"matrix1": matrix1, "matrix2": matrix2, "angle": angle, "size_metric": size_metric}
-                                )
-                                if self.build_parameters.return_first_match:
-                                    return solutions
+                        print(f"Found commensurate lattice with angle {angle} and size metric {size_metric}")
+                        solutions.append(
+                            {"matrix1": matrix1, "matrix2": matrix2, "angle": angle, "size_metric": size_metric}
+                        )
+                        if self.build_parameters.return_first_match:
+                            return solutions
                 except ValueError:
                     continue
         return solutions
