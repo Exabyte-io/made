@@ -77,6 +77,28 @@ def get_overlapping_coordinates(
     return [c for c in coordinates if np.linalg.norm(np.array(c) - np.array(coordinate)) < threshold]
 
 
+def create_2d_supercell_matrices(max_search: int) -> List[np.ndarray]:
+    """
+    Create a list of 2D supercell matrices within a maximum search range.
+    Args:
+        max_search: The maximum search range.
+    Returns:
+        List[np.ndarray]: The list of supercell matrices.
+    """
+    matrices = []
+    for s11 in range(-max_search, max_search + 1):
+        for s12 in range(-max_search, max_search + 1):
+            for s21 in range(-max_search, max_search + 1):
+                for s22 in range(-max_search, max_search + 1):
+                    # Non-zero area constraint
+                    matrix = np.array([[s11, s12], [s21, s22]])
+                    determinant = np.linalg.det(matrix)
+                    if determinant == 0 or determinant < 0:
+                        continue
+                    matrices.append(matrix)
+    return matrices
+
+
 class ValueWithId(RoundNumericValuesMixin, BaseModel):
     id: int = 0
     value: Any = None

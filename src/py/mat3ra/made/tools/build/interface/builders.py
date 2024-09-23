@@ -3,6 +3,7 @@ from typing import Any, List, Optional
 import numpy as np
 from mat3ra.made.tools.build.supercell import create_supercell
 
+from ....utils import create_2d_supercell_matrices
 from ..utils import merge_materials
 from ...modify import (
     translate_to_z_level,
@@ -322,21 +323,6 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
         return commensurate_lattice_pairs
 
     @staticmethod
-    def __create_matrices(max_search: int):
-        matrices = []
-        for s11 in range(-max_search, max_search + 1):
-            for s12 in range(-max_search, max_search + 1):
-                for s21 in range(-max_search, max_search + 1):
-                    for s22 in range(-max_search, max_search + 1):
-                        # Non-zero area constraint
-                        matrix = np.array([[s11, s12], [s21, s22]])
-                        determinant = np.linalg.det(matrix)
-                        if determinant == 0 or determinant < 0:
-                            continue
-                        matrices.append(matrix)
-        return matrices
-
-    @staticmethod
     def __solve_angle_from_rotation_matrix(matrix, zero_tolerance=1e-6, round_digits=3):
         if matrix.shape != (2, 2):
             raise ValueError("Input matrix must be 2x2")
@@ -360,7 +346,7 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
         """
         Generate all commensurate lattices for a given search range.
         """
-        matrices = self.__create_matrices(max_search)
+        matrices = create_2d_supercell_matrices(max_search)
         matrix_a1a2 = np.array([a1, a2])
         matrix_a1a2_inverse = np.linalg.inv(matrix_a1a2)
 
