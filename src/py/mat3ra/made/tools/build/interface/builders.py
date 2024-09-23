@@ -374,7 +374,7 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
     def _post_process(
         self,
         items: List[_GeneratedItemType],
-        post_process_parameters: Optional[BaseBuilder._PostProcessParametersType] = None,
+        post_process_parameters=None,
     ) -> List[Material]:
         interfaces = []
         for item in items:
