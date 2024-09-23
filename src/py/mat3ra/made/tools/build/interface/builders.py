@@ -1,16 +1,6 @@
 from typing import Any, List, Optional
 
 import numpy as np
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.material import Material
-
-from ....utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix
-from ...modify import (
-    translate_to_z_level,
-    rotate_material,
-    translate_by_vector,
-    add_vacuum_sides,
-)
 from pydantic import BaseModel, Field
 from ase.build.tools import niggli_reduce
 from pymatgen.analysis.interfaces.coherent_interfaces import (
@@ -18,22 +8,30 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
     ZSLGenerator,
 )
 
-from ..utils import merge_materials
+from mat3ra.made.material import Material
+from ....utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix
+from ...modify import (
+    translate_to_z_level,
+    rotate_material,
+    translate_by_vector,
+    add_vacuum_sides,
+)
+from ...analyze import get_chemical_formula
+from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
+from ...build import BaseBuilder, BaseConfiguration
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
+from ..supercell import create_supercell
+from ..slab import create_slab, Termination, SlabConfiguration
+from ..utils import merge_materials
+from ..mixins import (
+    ConvertGeneratedItemsASEAtomsMixin,
+    ConvertGeneratedItemsPymatgenStructureMixin,
+)
 
 from .enums import StrainModes
 from .configuration import InterfaceConfiguration
 from .termination_pair import TerminationPair, safely_select_termination_pair
 from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
-from ..mixins import (
-    ConvertGeneratedItemsASEAtomsMixin,
-    ConvertGeneratedItemsPymatgenStructureMixin,
-)
-from ..slab import create_slab, Termination
-from ..slab.configuration import SlabConfiguration
-from ...analyze import get_chemical_formula
-from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
-from ...build import BaseBuilder, BaseConfiguration
 
 
 class InterfaceBuilderParameters(BaseModel):
