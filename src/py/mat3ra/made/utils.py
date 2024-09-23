@@ -112,24 +112,20 @@ def get_angle_from_rotation_matrix(
     Returns:
         Union[float, None]: The angle in degrees if it's a pure rotation matrix, otherwise None.
     """
-    try:
-        if matrix.shape != (2, 2):
-            raise ValueError("Input matrix must be 2x2")
-        if np.abs(np.linalg.det(matrix) - 1) > zero_tolerance:
-            raise ValueError("Matrix must be orthogonal (determinant = 1)")
-        if not np.all(np.abs(matrix) <= 1):
-            raise ValueError("Matrix have all elements less than 1")
-        # Check if it's in form of rotation matrix [cos(theta), -sin(theta); sin(theta), cos(theta)]
-        if not np.allclose(matrix @ matrix.T, np.eye(2), atol=zero_tolerance):
-            raise ValueError("Matrix must be a pure rotation (no scaling or shearing)")
-        cos_theta = matrix[0, 0]
-        sin_theta = matrix[1, 0]
-        angle_rad = np.arctan2(sin_theta, cos_theta)
-        angle_deg = np.round(np.degrees(angle_rad), round_digits)
-        return angle_deg
-    except ValueError as e:
-        print(f"Error: {e}")
+    if matrix.shape != (2, 2):
         return None
+    if np.abs(np.linalg.det(matrix) - 1) > zero_tolerance:
+        return None
+    if not np.all(np.abs(matrix) <= 1):
+        return None
+    # Check if it's in form of rotation matrix [cos(theta), -sin(theta); sin(theta), cos(theta)]
+    if not np.allclose(matrix @ matrix.T, np.eye(2), atol=zero_tolerance):
+        return None
+    cos_theta = matrix[0, 0]
+    sin_theta = matrix[1, 0]
+    angle_rad = np.arctan2(sin_theta, cos_theta)
+    angle_deg = np.round(np.degrees(angle_rad), round_digits)
+    return angle_deg
 
 
 class ValueWithId(RoundNumericValuesMixin, BaseModel):
