@@ -103,7 +103,7 @@ def create_2d_supercell_matrices(max_search: int) -> List[np.ndarray]:
     return matrices
 
 
-def get_angle_from_rotation_matrix(
+def get_angle_from_rotation_matrix_2d(
     matrix: np.ndarray, zero_tolerance: float = 1e-6, round_digits: int = 3
 ) -> Union[float, None]:
     """

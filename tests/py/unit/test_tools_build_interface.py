@@ -72,7 +72,9 @@ def test_create_commensurate_supercell_twisted_interface():
     film = Material(GRAPHENE)
     substrate = Material(GRAPHENE)
     config = TwistedInterfaceConfiguration(film=film, substrate=substrate, twist_angle=13, distance_z=3.0)
-    params = CommensurateLatticeInterfaceBuilderParameters(max_search=5, angle_tolerance=0.5, return_first_match=True)
+    params = CommensurateLatticeInterfaceBuilderParameters(
+        max_repetition_int=5, angle_tolerance=0.5, return_first_match=True
+    )
     builder = CommensurateLatticeInterfaceBuilder(build_parameters=params)
     interfaces = builder.get_materials(config, post_process_parameters=config)
     assert len(interfaces) == 1
