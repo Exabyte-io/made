@@ -314,36 +314,56 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
         max_search = self.build_parameters.max_search
         a = film.lattice.vector_arrays[0][:2]
         b = film.lattice.vector_arrays[1][:2]
-        commensurate_lattices = self.__generate_commensurate_lattices(a, b, max_search, configuration.twist_angle)
-        commensurate_lattice_pairs = [
-            CommensurateLatticePair(configuration=configuration, **lattice) for lattice in commensurate_lattices
-        ]
+        commensurate_lattice_pairs = self.__generate_commensurate_lattices(
+            configuration, a, b, max_search, configuration.twist_angle
+        )
         return commensurate_lattice_pairs
 
     def __generate_commensurate_lattices(
-        self, a1: List[float], a2: List[float], max_search: int = 10, target_angle: float = 0.0
-    ):
+        self,
+        configuration: TwistedInterfaceConfiguration,
+        a: List[float],
+        b: List[float],
+        max_search: int = 10,
+        target_angle: float = 0.0,
+    ) -> List[CommensurateLatticePair]:
         """
-        Generate all commensurate lattices for a given search range.
+        Generate all commensurate lattices for a given search range and filter by closeness to target angle.
+
+        Args:
+            configuration (TwistedInterfaceConfiguration): The configuration for the twisted interface.
+            a (List[float]): The a lattice vector.
+            b (List[float]): The b lattice vector.
+            max_search (int): The maximum search range.
+            target_angle (float): The target angle.
+
+        Returns:
+            List[CommensurateLatticePair]: The list of commensurate lattice pairs
         """
         matrices = create_2d_supercell_matrices(max_search)
-        matrix_a1a2 = np.array([a1, a2])
-        matrix_a1a2_inverse = np.linalg.inv(matrix_a1a2)
+        matrix_ab = np.array([a, b])
+        matrix_ab_inverse = np.linalg.inv(matrix_ab)
 
-        solutions = []
+        solutions: List[CommensurateLatticePair] = []
         for index1, matrix1 in enumerate(matrices):
             for index2, matrix2 in enumerate(matrices[0 : index1 + 1]):
                 matrix2_inverse = np.linalg.inv(matrix2)
                 intermediate_product = matrix2_inverse @ matrix1
-                product = matrix_a1a2_inverse @ intermediate_product @ matrix_a1a2
+                product = matrix_ab_inverse @ intermediate_product @ matrix_ab
                 angle = get_angle_from_rotation_matrix(product)
                 if angle is not None:
-                    size_metric = np.linalg.det(matrix_a1a2_inverse @ matrix1 @ matrix_a1a2)
+                    size_metric = np.linalg.det(matrix_ab_inverse @ matrix1 @ matrix_ab)
 
                     if np.abs(angle - target_angle) < self.build_parameters.angle_tolerance:
                         print(f"Found commensurate lattice with angle {angle} and size metric {size_metric}")
                         solutions.append(
-                            {"matrix1": matrix1, "matrix2": matrix2, "angle": angle, "size_metric": size_metric}
+                            CommensurateLatticePair(
+                                configuration=configuration,
+                                matrix1=matrix1,
+                                matrix2=matrix2,
+                                angle=angle,
+                                size_metric=size_metric,
+                            )
                         )
                         if self.build_parameters.return_first_match:
                             return solutions
