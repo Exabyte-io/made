@@ -2,9 +2,9 @@ from typing import Any, List, Optional
 
 import numpy as np
 from mat3ra.made.tools.build.supercell import create_supercell
+from mat3ra.made.material import Material
 
-from ....utils import create_2d_supercell_matrices
-from ..utils import merge_materials
+from ....utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix
 from ...modify import (
     translate_to_z_level,
     rotate_material,
@@ -18,9 +18,9 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
     ZSLGenerator,
 )
 
+from ..utils import merge_materials
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 
-from mat3ra.made.material import Material
 from .enums import StrainModes
 from .configuration import InterfaceConfiguration
 from .termination_pair import TerminationPair, safely_select_termination_pair
@@ -322,24 +322,6 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
         ]
         return commensurate_lattice_pairs
 
-    @staticmethod
-    def __solve_angle_from_rotation_matrix(matrix, zero_tolerance=1e-6, round_digits=3):
-        if matrix.shape != (2, 2):
-            raise ValueError("Input matrix must be 2x2")
-        if np.abs(np.linalg.det(matrix) - 1) > zero_tolerance:
-            raise ValueError("Matrix must be orthogonal (determinant = 1)")
-        if not np.all(np.abs(matrix) <= 1):
-            raise ValueError("Matrix have all elements less than 1")
-        # Check if it's in form of rotation matrix [cos(theta), -sin(theta); sin(theta), cos(theta)]
-        if not np.allclose(matrix @ matrix.T, np.eye(2), atol=zero_tolerance):
-            raise ValueError("Matrix must be a pure rotation (no scaling or shearing)")
-        cos_theta = matrix[0, 0]
-        sin_theta = matrix[1, 0]
-        angle_rad = np.arctan2(sin_theta, cos_theta)
-        angle_deg = np.round(np.degrees(angle_rad), round_digits)
-
-        return angle_deg
-
     def __generate_commensurate_lattices(
         self, a1: List[float], a2: List[float], max_search: int = 10, target_angle: float = 0.0
     ):
@@ -357,7 +339,7 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
                 intermediate_product = matrix2_inverse @ matrix1
                 product = matrix_a1a2_inverse @ intermediate_product @ matrix_a1a2
                 try:
-                    angle = self.__solve_angle_from_rotation_matrix(product)
+                    angle = get_angle_from_rotation_matrix(product)
                     size_metric = np.linalg.det(matrix_a1a2_inverse @ matrix1 @ matrix_a1a2)
 
                     if np.abs(angle - target_angle) < self.build_parameters.angle_tolerance:
