@@ -1,7 +1,7 @@
 from typing import Any, List, Optional
 
 import numpy as np
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from ase.build.tools import niggli_reduce
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
@@ -18,7 +18,7 @@ from ...modify import (
 )
 from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
-from ...build import BaseBuilder, BaseConfiguration
+from ...build import BaseBuilder
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..supercell import create_supercell
 from ..slab import create_slab, Termination, SlabConfiguration
@@ -29,7 +29,12 @@ from ..mixins import (
 )
 
 from .enums import StrainModes
-from .configuration import InterfaceConfiguration
+from .configuration import (
+    InterfaceConfiguration,
+    NanoRibbonTwistedInterfaceConfiguration,
+    TwistedInterfaceConfiguration,
+)
+from .commensurate_lattice_pair import CommensurateLatticePair
 from .termination_pair import TerminationPair, safely_select_termination_pair
 from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
 
@@ -203,60 +208,15 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
 ########################################################################################
 #                       Twisted Interface Builders                                     #
 ########################################################################################
-class TwistedInterfaceConfiguration(BaseConfiguration):
-    film: Material
-    substrate: Material
-    twist_angle: float = Field(0, description="Twist angle in degrees")
-    distance_z: float = 3.0
-
-    @property
-    def _json(self):
-        return {
-            "type": self.get_cls_name(),
-            "film": self.film.to_json(),
-            "substrate": self.substrate.to_json(),
-            "twist_angle": self.twist_angle,
-            "distance_z": self.distance_z,
-        }
-
-
-class NanoRibbonTwistedInterfaceConfiguration(TwistedInterfaceConfiguration):
-    """
-    Configuration for creating a twisted interface between two nano ribbons with specified twist angle.
-
-    Args:
-        film (Material): The film material.
-        substrate (Material): The substrate material.
-        twist_angle (float): Twist angle in degrees.
-        ribbon_width (int): Width of the nanoribbon in unit cells.
-        ribbon_length (int): Length of the nanoribbon in unit cells.
-        distance_z (float): Vertical distance between layers in Angstroms.
-        vacuum_x (float): Vacuum along x on both sides, in Angstroms.
-        vacuum_y (float): Vacuum along y on both sides, in Angstroms.
-    """
-
-    ribbon_width: int = 1
-    ribbon_length: int = 1
-    vacuum_x: float = 5.0
-    vacuum_y: float = 5.0
-
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "ribbon_width": self.ribbon_width,
-            "ribbon_length": self.ribbon_length,
-            "vacuum_x": self.vacuum_x,
-            "vacuum_y": self.vacuum_y,
-        }
 
 
 class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
     _GeneratedItemType = Material
-    _ConfigurationType = NanoRibbonTwistedInterfaceConfiguration
+    _ConfigurationType: type(  # type: ignore
+        NanoRibbonTwistedInterfaceConfiguration
+    ) = NanoRibbonTwistedInterfaceConfiguration  # type: ignore
 
-    def _generate(self, configuration: NanoRibbonTwistedInterfaceConfiguration) -> List[Material]:
+    def _generate(self, configuration: _ConfigurationType) -> List[Material]:
         bottom_nanoribbon_configuration = NanoribbonConfiguration(
             material=configuration.substrate,
             width=configuration.ribbon_width,
@@ -285,17 +245,6 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
     ) -> Material:
         material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f}°)"
         return material
-
-
-class CommensurateLatticePair(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
-    configuration: TwistedInterfaceConfiguration
-    matrix1: np.ndarray
-    matrix2: np.ndarray
-    angle: float
-    size_metric: float
 
 
 class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
