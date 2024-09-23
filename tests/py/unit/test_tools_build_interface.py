@@ -80,5 +80,6 @@ def test_create_commensurate_supercell_twisted_interface():
     assert len(interfaces) == 1
     interface = interfaces[0]
     expected_cell_vectors = [[-9.869164, -4.273473, 0.0], [-1.233646, -10.683683, 0.0], [0.0, 0.0, 20.0]]
-
     assertion_utils.assert_deep_almost_equal(expected_cell_vectors, interface.basis.cell.vectors_as_array)
+    expected_angle = 13.174
+    assert interface.metadata["build"]["configuration"]["actual_twist_angle"] == expected_angle

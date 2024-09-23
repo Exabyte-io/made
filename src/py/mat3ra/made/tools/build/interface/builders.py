@@ -342,5 +342,14 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
                 new_film, [0, 0, item.configuration.distance_z], use_cartesian_coordinates=True
             )
             interface = merge_materials([new_substrate, new_film])
+            interface.metadata["actual_twist_angle"] = item.angle
             interfaces.append(interface)
         return interfaces
+
+    def _update_material_metadata(self, material, configuration) -> Material:
+        updated_material = super()._update_material_metadata(material, configuration)
+        if "actual_twist_angle" in material.metadata:
+            updated_material.metadata["build"]["configuration"]["actual_twist_angle"] = material.metadata[
+                "actual_twist_angle"
+            ]
+        return updated_material
