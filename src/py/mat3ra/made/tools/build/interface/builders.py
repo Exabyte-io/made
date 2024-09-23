@@ -248,7 +248,16 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
 
 
 class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
-    max_search: int = 10
+    """
+    Parameters for the commensurate lattice interface builder.
+
+    Args:
+        max_repetition_int (int): The maximum search range for commensurate lattices.
+        angle_tolerance (float): The tolerance for the angle between the commensurate lattice and the target angle.
+        return_first_match (bool): Whether to return the first match or all matches.
+    """
+
+    max_repetition_int: int = 10
     angle_tolerance: float = 0.1
     return_first_match: bool = False
 
@@ -260,7 +269,7 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         film = configuration.film
         # substrate = configuration.substrate
-        max_search = self.build_parameters.max_search
+        max_search = self.build_parameters.max_repetition_int
         a = film.lattice.vector_arrays[0][:2]
         b = film.lattice.vector_arrays[1][:2]
         commensurate_lattice_pairs = self.__generate_commensurate_lattices(
@@ -332,9 +341,6 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
             new_film = translate_by_vector(
                 new_film, [0, 0, item.configuration.distance_z], use_cartesian_coordinates=True
             )
-            try:
-                interface = merge_materials([new_substrate, new_film])
-                interfaces.append(interface)
-            except Exception as e:
-                print(e)
+            interface = merge_materials([new_substrate, new_film])
+            interfaces.append(interface)
         return interfaces
