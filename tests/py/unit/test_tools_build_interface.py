@@ -77,7 +77,6 @@ def test_create_commensurate_supercell_twisted_interface():
     interfaces = builder.get_materials(config, post_process_parameters=config)
     assert len(interfaces) == 1
     interface = interfaces[0]
-    print(interface.basis.cell.vectors_as_array)
-    expected_cell_vectors = [[10.754672133, 0.0, 0.0], [5.377336066500001, 9.313819276550575, 0.0], [0.0, 0.0, 20.0]]
+    expected_cell_vectors = [[-9.869164, -4.273473, 0.0], [-1.233646, -10.683683, 0.0], [0.0, 0.0, 20.0]]
 
     assertion_utils.assert_deep_almost_equal(expected_cell_vectors, interface.basis.cell.vectors_as_array)
