@@ -336,8 +336,8 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
                 matrix2_inverse = np.linalg.inv(matrix2)
                 intermediate_product = matrix2_inverse @ matrix1
                 product = matrix_a1a2_inverse @ intermediate_product @ matrix_a1a2
-                try:
-                    angle = get_angle_from_rotation_matrix(product)
+                angle = get_angle_from_rotation_matrix(product)
+                if angle is not None:
                     size_metric = np.linalg.det(matrix_a1a2_inverse @ matrix1 @ matrix_a1a2)
 
                     if np.abs(angle - target_angle) < self.build_parameters.angle_tolerance:
@@ -347,7 +347,7 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
                         )
                         if self.build_parameters.return_first_match:
                             return solutions
-                except ValueError:
+                else:
                     continue
         return solutions
 

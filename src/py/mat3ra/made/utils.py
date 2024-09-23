@@ -99,7 +99,9 @@ def create_2d_supercell_matrices(max_search: int) -> List[np.ndarray]:
     return matrices
 
 
-def get_angle_from_rotation_matrix(matrix: np.ndarray, zero_tolerance: float = 1e-6, round_digits: int = 3):
+def get_angle_from_rotation_matrix(
+    matrix: np.ndarray, zero_tolerance: float = 1e-6, round_digits: int = 3
+) -> Union[float, None]:
     """
     Get the angle from a 2x2 rotation matrix in degrees if it's a pure rotation matrix.
     Args:
@@ -108,23 +110,26 @@ def get_angle_from_rotation_matrix(matrix: np.ndarray, zero_tolerance: float = 1
         round_digits: The number of digits to round the angle.
 
     Returns:
-        float: The angle in degrees.
+        Union[float, None]: The angle in degrees if it's a pure rotation matrix, otherwise None.
     """
-    if matrix.shape != (2, 2):
-        raise ValueError("Input matrix must be 2x2")
-    if np.abs(np.linalg.det(matrix) - 1) > zero_tolerance:
-        raise ValueError("Matrix must be orthogonal (determinant = 1)")
-    if not np.all(np.abs(matrix) <= 1):
-        raise ValueError("Matrix have all elements less than 1")
-    # Check if it's in form of rotation matrix [cos(theta), -sin(theta); sin(theta), cos(theta)]
-    if not np.allclose(matrix @ matrix.T, np.eye(2), atol=zero_tolerance):
-        raise ValueError("Matrix must be a pure rotation (no scaling or shearing)")
-    cos_theta = matrix[0, 0]
-    sin_theta = matrix[1, 0]
-    angle_rad = np.arctan2(sin_theta, cos_theta)
-    angle_deg = np.round(np.degrees(angle_rad), round_digits)
-
-    return angle_deg
+    try:
+        if matrix.shape != (2, 2):
+            raise ValueError("Input matrix must be 2x2")
+        if np.abs(np.linalg.det(matrix) - 1) > zero_tolerance:
+            raise ValueError("Matrix must be orthogonal (determinant = 1)")
+        if not np.all(np.abs(matrix) <= 1):
+            raise ValueError("Matrix have all elements less than 1")
+        # Check if it's in form of rotation matrix [cos(theta), -sin(theta); sin(theta), cos(theta)]
+        if not np.allclose(matrix @ matrix.T, np.eye(2), atol=zero_tolerance):
+            raise ValueError("Matrix must be a pure rotation (no scaling or shearing)")
+        cos_theta = matrix[0, 0]
+        sin_theta = matrix[1, 0]
+        angle_rad = np.arctan2(sin_theta, cos_theta)
+        angle_deg = np.round(np.degrees(angle_rad), round_digits)
+        return angle_deg
+    except ValueError as e:
+        print(f"Error: {e}")
+        return None
 
 
 class ValueWithId(RoundNumericValuesMixin, BaseModel):
