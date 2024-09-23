@@ -130,7 +130,7 @@ class ZSLStrainMatchingParameters(BaseModel):
 
 
 class ZSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilderParameters):
-    strain_matching_parameters: ZSLStrainMatchingParameters
+    strain_matching_parameters: ZSLStrainMatchingParameters = ZSLStrainMatchingParameters()
 
 
 class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMixin, StrainMatchingInterfaceBuilder):

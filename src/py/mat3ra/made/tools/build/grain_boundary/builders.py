@@ -7,7 +7,7 @@ from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceCo
 from ..interface.builders import ZSLStrainMatchingInterfaceBuilder
 from ..supercell import create_supercell
 from ..slab import SlabConfiguration, get_terminations, SlabBuilder, SlabSelectorParameters
-from . import GrainBoundaryConfiguration
+from .configuration import GrainBoundaryConfiguration
 
 
 class GrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters):
@@ -27,9 +27,11 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
     _BuildParametersType = GrainBoundaryBuilderParameters
     _ConfigurationType: type(GrainBoundaryConfiguration) = GrainBoundaryConfiguration  # type: ignore
     _GeneratedItemType: type(Material) = Material  # type: ignore
-    selector_parameters = GrainBoundaryBuilderParameters.selected_interface_index
+    selector_parameters: type(  # type: ignore
+        GrainBoundaryBuilderParameters
+    ) = GrainBoundaryBuilderParameters().selected_interface_index  # type: ignore
 
-    def _generate(self, configuration: GrainBoundaryConfiguration) -> List[Material]:
+    def _generate(self, configuration: _ConfigurationType) -> List[Material]:
         interface_config = InterfaceConfiguration(
             film_configuration=configuration.phase_1_configuration,
             substrate_configuration=configuration.phase_2_configuration,
@@ -70,7 +72,7 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         materials = super()._finalize(final_slabs, configuration)
         return materials
 
-    def _update_material_name(self, material: Material, configuration: GrainBoundaryConfiguration) -> Material:
+    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         phase_1_formula = get_chemical_formula(configuration.phase_1_configuration.bulk)
         phase_2_formula = get_chemical_formula(configuration.phase_2_configuration.bulk)
         phase_1_miller_indices = "".join([str(i) for i in configuration.phase_1_configuration.miller_indices])
