@@ -57,6 +57,9 @@ class BaseBuilder(BaseModel):
     - `_PostProcessParametersType`: The data structure model for the post-process parameters.
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     build_parameters: Any = None
     _BuildParametersType: Any = None
     _DefaultBuildParameters: Any = None

@@ -11,7 +11,7 @@ from .configuration import GrainBoundaryConfiguration
 
 
 class GrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters):
-    selected_interface_index: int = 0
+    default_index: int = 0
 
 
 class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
@@ -29,7 +29,7 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
     _GeneratedItemType: type(Material) = Material  # type: ignore
     selector_parameters: type(  # type: ignore
         GrainBoundaryBuilderParameters
-    ) = GrainBoundaryBuilderParameters().selected_interface_index  # type: ignore
+    ) = GrainBoundaryBuilderParameters()  # type: ignore
 
     def _generate(self, configuration: _ConfigurationType) -> List[Material]:
         interface_config = InterfaceConfiguration(

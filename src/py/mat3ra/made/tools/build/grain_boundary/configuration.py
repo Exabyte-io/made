@@ -26,7 +26,7 @@ class GrainBoundaryConfiguration(BaseConfiguration):
     phase_2_termination: Termination
     gap: float = 3.0
     slab_configuration: SlabConfiguration
-    slab_termination: Optional[Termination]
+    slab_termination: Optional[Termination] = None
 
     @property
     def _json(self):
