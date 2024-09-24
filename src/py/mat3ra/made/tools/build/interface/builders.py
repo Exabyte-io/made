@@ -22,7 +22,7 @@ from ..slab import create_slab, Termination
 from ..slab.configuration import SlabConfiguration
 from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
-from ...build import BaseBuilder
+from ...build import BaseBuilder, BaseBuilderParameters
 
 
 class InterfaceBuilderParameters(BaseModel):
@@ -106,7 +106,7 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
 ########################################################################################
 #                       Strain Matching Interface Builders                             #
 ########################################################################################
-class StrainMatchingInterfaceBuilderParameters(BaseModel):
+class StrainMatchingInterfaceBuilderParameters(BaseBuilderParameters):
     strain_matching_parameters: Optional[Any] = None
 
 

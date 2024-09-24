@@ -27,6 +27,11 @@ class BaseSelectorParameters(BaseModel):
     default_index: int = 0
 
 
+class BaseBuilderParameters(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class BaseBuilder(BaseModel):
     """
     Base class for material builders.

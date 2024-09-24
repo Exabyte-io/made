@@ -24,7 +24,7 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
     3. Finally, creating a slab from the rotated interface.
     """
 
-    _BuildParametersType = GrainBoundaryBuilderParameters
+    _BuildParametersType: type(GrainBoundaryBuilderParameters) = GrainBoundaryBuilderParameters  # type: ignore
     _ConfigurationType: type(GrainBoundaryConfiguration) = GrainBoundaryConfiguration  # type: ignore
     _GeneratedItemType: type(Material) = Material  # type: ignore
     selector_parameters: type(  # type: ignore

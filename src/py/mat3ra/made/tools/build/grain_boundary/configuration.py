@@ -1,11 +1,11 @@
-from pydantic import BaseModel
-from mat3ra.code.entity import InMemoryEntity
+from typing import Optional
 
+from .. import BaseConfiguration
 from ..slab.configuration import SlabConfiguration
 from ..slab.termination import Termination
 
 
-class GrainBoundaryConfiguration(BaseModel, InMemoryEntity):
+class GrainBoundaryConfiguration(BaseConfiguration):
     """
     Configuration for a grain boundary in a slab material.
 
@@ -26,7 +26,7 @@ class GrainBoundaryConfiguration(BaseModel, InMemoryEntity):
     phase_2_termination: Termination
     gap: float = 3.0
     slab_configuration: SlabConfiguration
-    slab_termination: Termination
+    slab_termination: Optional[Termination]
 
     @property
     def _json(self):
