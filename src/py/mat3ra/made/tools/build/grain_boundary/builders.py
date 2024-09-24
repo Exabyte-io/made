@@ -31,7 +31,9 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         GrainBoundaryBuilderParameters
     ) = GrainBoundaryBuilderParameters()  # type: ignore
 
-    def _generate(self, configuration: _ConfigurationType) -> List[Material]:
+    def _generate(
+        self, configuration: _ConfigurationType
+    ) -> List[ZSLStrainMatchingInterfaceBuilder._GeneratedItemType]:
         interface_config = InterfaceConfiguration(
             film_configuration=configuration.phase_1_configuration,
             substrate_configuration=configuration.phase_2_configuration,
@@ -40,16 +42,15 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
             distance_z=configuration.gap,
             vacuum=configuration.gap,
         )
-        interfaces = super()._generate(interface_config)
-        rot_90_degree_matrix = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
-        rotated_interfaces = [
-            create_supercell(interface, xy_supercell_matrix=rot_90_degree_matrix) for interface in interfaces
-        ]
-        return rotated_interfaces
+        return super()._generate(interface_config)
 
     def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
+        rot_90_degree_matrix = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
+        rotated_interfaces = [
+            create_supercell(material, supercell_matrix=rot_90_degree_matrix) for material in materials
+        ]
         final_slabs = []
-        for interface in materials:
+        for interface in rotated_interfaces:
             slab_config = SlabConfiguration(
                 bulk=interface,
                 miller_indices=configuration.slab_configuration.miller_indices,
