@@ -253,7 +253,8 @@ class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
 
     Args:
         max_repetition_int (int): The maximum search range for commensurate lattices.
-        angle_tolerance (float): The tolerance for the angle between the commensurate lattice and the target angle.
+        angle_tolerance (float): The tolerance for the angle between the commensurate lattices
+            and the target angle, in degrees.
         return_first_match (bool): Whether to return the first match or all matches.
     """
 
@@ -293,7 +294,7 @@ class CommensurateLatticeInterfaceBuilder(BaseBuilder):
             a (List[float]): The a lattice vector.
             b (List[float]): The b lattice vector.
             max_search (int): The maximum search range.
-            target_angle (float): The target angle.
+            target_angle (float): The target angle, in degrees.
 
         Returns:
             List[CommensurateLatticePair]: The list of commensurate lattice pairs
