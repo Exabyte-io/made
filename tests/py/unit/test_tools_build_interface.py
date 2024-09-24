@@ -1,5 +1,6 @@
 import platform
 
+from mat3ra.made.material import Material
 from mat3ra.made.tools.build.interface import (
     InterfaceConfiguration,
     ZSLStrainMatchingInterfaceBuilder,
@@ -7,8 +8,13 @@ from mat3ra.made.tools.build.interface import (
     ZSLStrainMatchingParameters,
     create_interfaces,
 )
+from mat3ra.made.tools.build.interface.builders import (
+    NanoRibbonTwistedInterfaceBuilder,
+    NanoRibbonTwistedInterfaceConfiguration,
+)
+from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import FILM_CONFIGURATION, INTERFACE_NAME, INTERFACE_TERMINATION_PAIR, SUBSTRATE_CONFIGURATION
+from .fixtures import FILM_CONFIGURATION, GRAPHENE, INTERFACE_NAME, INTERFACE_TERMINATION_PAIR, SUBSTRATE_CONFIGURATION
 
 MAX_AREA = 100
 # pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2
@@ -35,3 +41,25 @@ def test_create_interfaces():
 
     assert len(interfaces) == EXPECTED_NUMBER_OF_INTERFACES
     assert interfaces[0].name == INTERFACE_NAME
+
+
+def test_create_twisted_nanoribbon_interface():
+    film = Material(GRAPHENE)
+    configuration = NanoRibbonTwistedInterfaceConfiguration(
+        film=film,
+        substrate=film,
+        twist_angle=60,
+        distance_z=3.0,
+        ribbon_width=3,
+        ribbon_length=5,
+        vacuum_x=2.0,
+        vacuum_y=2.0,
+    )
+
+    builder = NanoRibbonTwistedInterfaceBuilder()
+    interface = builder.get_material(configuration)
+
+    exected_cell_vectors = [[15.102810734, 0.0, 0.0], [-0.0, 16.108175208, 0.0], [0.0, 0.0, 20.0]]
+    expected_coordinate = [0.704207885, 0.522108183, 0.65]
+    assertion_utils.assert_deep_almost_equal(exected_cell_vectors, interface.basis.cell.vectors_as_array)
+    assertion_utils.assert_deep_almost_equal(expected_coordinate, interface.basis.coordinates.values[42])

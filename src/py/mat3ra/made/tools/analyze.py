@@ -1,10 +1,13 @@
 from typing import Callable, List, Literal, Optional
 
 import numpy as np
+from mat3ra.made.material import Material
+from scipy.spatial import cKDTree
 
-from ..material import Material
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
+from .enums import SurfaceTypes
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
+from .utils import decorator_handle_periodic_boundary_conditions
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -265,6 +268,8 @@ def get_atom_indices_with_condition_on_coordinates(
 def get_nearest_neighbors_atom_indices(
     material: Material,
     coordinate: Optional[List[float]] = None,
+    tolerance: float = 0.1,
+    cutoff: float = 13.0,
 ) -> Optional[List[int]]:
     """
     Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
@@ -272,6 +277,10 @@ def get_nearest_neighbors_atom_indices(
     Args:
         material (Material): The material object to find neighbors in.
         coordinate (List[float]): The position to find neighbors for.
+        tolerance (float): tolerance parameter for near-neighbor finding. Faces that are smaller than tol fraction
+            of the largest face are not included in the tessellation. (default: 0.1).
+            as per: https://pymatgen.org/pymatgen.analysis.html#pymatgen.analysis.local_env.VoronoiNN
+        cutoff (float): The cutoff radius for identifying neighbors, in angstroms.
 
     Returns:
         List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
@@ -280,17 +289,26 @@ def get_nearest_neighbors_atom_indices(
         coordinate = [0, 0, 0]
     structure = to_pymatgen(material)
     voronoi_nn = PymatgenVoronoiNN(
-        tol=0.5,
-        cutoff=15.0,
-        allow_pathological=False,
+        tol=tolerance,
+        cutoff=cutoff,
         weight="solid_angle",
-        extra_nn_info=True,
+        extra_nn_info=False,
         compute_adj_neighbors=True,
     )
-    structure.append("X", coordinate, validate_proximity=False)
-    neighbors = voronoi_nn.get_nn_info(structure, len(structure.sites) - 1)
+    coordinates = material.basis.coordinates
+    site_index = coordinates.get_element_id_by_value(coordinate)
+    remove_dummy_atom = False
+    if site_index is None:
+        structure.append("X", coordinate, validate_proximity=False)
+        site_index = len(structure.sites) - 1
+        remove_dummy_atom = True
+    try:
+        neighbors = voronoi_nn.get_nn_info(structure, site_index)
+    except ValueError:
+        return None
     neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
-    structure.remove_sites([-1])
+    if remove_dummy_atom:
+        structure.remove_sites([-1])
 
     all_coordinates = material.basis.coordinates
     all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
@@ -324,3 +342,170 @@ def get_atomic_coordinates_extremum(
     coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
     values = [coord.value[{"x": 0, "y": 1, "z": 2}[axis]] for coord in coordinates]
     return getattr(np, extremum)(values)
+
+
+def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: SurfaceTypes) -> bool:
+    """
+    Check if the height of an atom is within the specified limits.
+
+    Args:
+        z (float): The z-coordinate of the atom.
+        z_extremum (float): The extremum z-coordinate of the surface.
+        depth (float): The depth from the surface to look for exposed atoms.
+        surface (SurfaceTypes): The surface type (top or bottom).
+
+    Returns:
+        bool: True if the height is within the limits, False otherwise.
+    """
+    return (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
+
+
+def is_shadowed_by_neighbors_from_surface(
+    z: float, neighbors_indices: List[int], surface: SurfaceTypes, coordinates: np.ndarray
+) -> bool:
+    """
+    Check if any one of the neighboring atoms shadow the atom from the surface by being closer to the specified surface.
+
+    Args:
+        z (float): The z-coordinate of the atom.
+        neighbors_indices (List[int]): List of indices of neighboring atoms.
+        surface (SurfaceTypes): The surface type (top or bottom).
+        coordinates (np.ndarray): The coordinates of the atoms.
+
+    Returns:
+        bool: True if the atom is not shadowed, False otherwise.
+    """
+    return not any(
+        (coordinates[n][2] > z if surface == SurfaceTypes.TOP else coordinates[n][2] < z) for n in neighbors_indices
+    )
+
+
+@decorator_handle_periodic_boundary_conditions(cutoff=0.1)
+def get_surface_atom_indices(
+    material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, shadowing_radius: float = 2.5, depth: float = 5
+) -> List[int]:
+    """
+    Identify exposed atoms on the top or bottom surface of the material.
+
+    Args:
+        material (Material): Material object to get surface atoms from.
+        surface (SurfaceTypes): Specify "top" or "bottom" to detect the respective surface atoms.
+        shadowing_radius (float): Radius for atoms shadowing underlying from detecting as exposed.
+        depth (float): Depth from the surface to look for exposed atoms.
+
+    Returns:
+        List[int]: List of indices of exposed surface atoms.
+    """
+    new_material = material.clone()
+    new_material.to_cartesian()
+    coordinates = np.array(new_material.basis.coordinates.values)
+    ids = new_material.basis.coordinates.ids
+    kd_tree = cKDTree(coordinates)
+
+    z_extremum = np.max(coordinates[:, 2]) if surface == SurfaceTypes.TOP else np.min(coordinates[:, 2])
+
+    exposed_atoms_indices = []
+    for idx, (x, y, z) in enumerate(coordinates):
+        if is_height_within_limits(z, z_extremum, depth, surface):
+            neighbors_indices = kd_tree.query_ball_point([x, y, z], r=shadowing_radius)
+            if is_shadowed_by_neighbors_from_surface(z, neighbors_indices, surface, coordinates):
+                exposed_atoms_indices.append(ids[idx])
+
+    return exposed_atoms_indices
+
+
+def get_coordination_numbers(
+    material: Material,
+    indices: Optional[List[int]] = None,
+    cutoff: float = 3.0,
+) -> List[int]:
+    """
+    Calculate the coordination numbers of atoms in the material.
+
+    Args:
+        material (Material): Material object to calculate coordination numbers for.
+        indices (List[int]): List of atom indices to calculate coordination numbers for.
+        cutoff (float): The cutoff radius for identifying neighbors.
+
+    Returns:
+        List[int]: List of coordination numbers for each atom in the material.
+    """
+    new_material = material.clone()
+    new_material.to_cartesian()
+    if indices is not None:
+        new_material.basis.coordinates.filter_by_indices(indices)
+    coordinates = np.array(new_material.basis.coordinates.values)
+    kd_tree = cKDTree(coordinates)
+
+    coordination_numbers = []
+    for idx, (x, y, z) in enumerate(coordinates):
+        neighbors = kd_tree.query_ball_point([x, y, z], r=cutoff)
+        # Explicitly remove the atom itself from the list of neighbors
+        neighbors = [n for n in neighbors if n != idx]
+        coordination_numbers.append(len(neighbors))
+
+    return coordination_numbers
+
+
+@decorator_handle_periodic_boundary_conditions(cutoff=0.1)
+def get_undercoordinated_atom_indices(
+    material: Material,
+    indices: List[int],
+    cutoff: float = 3.0,
+    coordination_threshold: int = 3,
+) -> List[int]:
+    """
+    Identify undercoordinated atoms among the specified indices in the material.
+
+    Args:
+        material (Material): Material object to identify undercoordinated atoms in.
+        indices (List[int]): List of atom indices to check for undercoordination.
+        cutoff (float): The cutoff radius for identifying neighbors.
+        coordination_threshold (int): The coordination number threshold for undercoordination.
+
+    Returns:
+        List[int]: List of indices of undercoordinated atoms.
+    """
+    coordination_numbers = get_coordination_numbers(material, indices, cutoff)
+    undercoordinated_atoms_indices = [i for i, cn in enumerate(coordination_numbers) if cn <= coordination_threshold]
+    return undercoordinated_atoms_indices
+
+
+def get_local_extremum_atom_index(
+    material: Material,
+    coordinate: List[float],
+    extremum: Literal["max", "min"] = "max",
+    vicinity: float = 1.0,
+    use_cartesian_coordinates: bool = False,
+) -> int:
+    """
+    Return the id of the atom with the minimum or maximum z-coordinate
+    within a certain vicinity of a given (x, y) coordinate.
+
+    Args:
+        material (Material): Material object.
+        coordinate (List[float]): (x, y, z) coordinate to find the local extremum atom index for.
+        extremum (str): "min" or "max".
+        vicinity (float): Radius of the vicinity, in Angstroms.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
+
+    Returns:
+        int: id of the atom with the minimum or maximum z-coordinate.
+    """
+    new_material = material.clone()
+    new_material.to_cartesian()
+    if not use_cartesian_coordinates:
+        coordinate = new_material.basis.cell.convert_point_to_cartesian(coordinate)
+
+    coordinates = np.array(new_material.basis.coordinates.values)
+    ids = np.array(new_material.basis.coordinates.ids)
+    tree = cKDTree(coordinates[:, :2])
+    indices = tree.query_ball_point(coordinate[:2], vicinity)
+    z_values = [(id, coord[2]) for id, coord in zip(ids[indices], coordinates[indices])]
+
+    if extremum == "max":
+        extremum_z_atom = max(z_values, key=lambda item: item[1])
+    else:
+        extremum_z_atom = min(z_values, key=lambda item: item[1])
+
+    return extremum_z_atom[0]

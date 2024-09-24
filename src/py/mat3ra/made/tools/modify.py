@@ -1,5 +1,6 @@
 from typing import Callable, List, Literal, Optional, Union
 
+import numpy as np
 from mat3ra.made.material import Material
 
 from .analyze import (
@@ -8,6 +9,7 @@ from .analyze import (
     get_atomic_coordinates_extremum,
 )
 from .convert import from_ase, to_ase
+from .convert.utils import InterfacePartsEnum
 from .third_party import ase_add_vacuum
 from .utils.coordinate import (
     is_coordinate_in_box,
@@ -409,6 +411,44 @@ def add_vacuum(material: Material, vacuum: float = 5.0, on_top=True, to_bottom=F
     return new_material
 
 
+def add_vacuum_sides(material: Material, vacuum: float = 5.0, on_x=False, on_y=False) -> Material:
+    """
+    Add vacuum to the material along the x-axis and/or y-axis.
+    On x, on y, or both.
+
+    Args:
+        material (Material): The material object to add vacuum to.
+        vacuum (float): The thickness of the vacuum to add in angstroms.
+        on_x (bool): Whether to add vacuum on the x-axis.
+        on_y (bool): Whether to add vacuum on the y-axis.
+
+    Returns:
+        Material: The material object with vacuum added.
+    """
+    new_material = material.clone()
+    min_x = get_atomic_coordinates_extremum(new_material, "min", "x", use_cartesian_coordinates=True)
+    max_x = get_atomic_coordinates_extremum(new_material, "max", "x", use_cartesian_coordinates=True)
+    min_y = get_atomic_coordinates_extremum(new_material, "min", "y", use_cartesian_coordinates=True)
+    max_y = get_atomic_coordinates_extremum(new_material, "max", "y", use_cartesian_coordinates=True)
+
+    new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector = new_material.lattice.vector_arrays
+    if on_x:
+        new_x_length = max_x - min_x + 2 * vacuum
+        new_lattice_a_vector = [new_x_length, 0, 0]
+    if on_y:
+        new_y_length = max_y - min_y + 2 * vacuum
+        new_lattice_b_vector = [0, new_y_length, 0]
+
+    new_material.set_new_lattice_vectors(new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector)
+    new_material = translate_by_vector(
+        new_material,
+        [-min_x + vacuum if on_x else 0, -min_y + vacuum if on_y else 0, 0],
+        use_cartesian_coordinates=True,
+    )
+
+    return new_material
+
+
 def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_padding=1.0) -> Material:
     """
     Remove vacuum from the material along the c-axis.
@@ -442,7 +482,7 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
     return new_material
 
 
-def rotate_material(material: Material, axis: List[int], angle: float) -> Material:
+def rotate_material(material: Material, axis: List[int], angle: float, wrap: bool = True) -> Material:
     """
     Rotate the material around a given axis by a specified angle.
 
@@ -450,6 +490,7 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
         material (Material): The material to rotate.
         axis (List[int]): The axis to rotate around, expressed as [x, y, z].
         angle (float): The angle of rotation in degrees.
+        wrap (bool): Whether to wrap the material to the unit cell.
     Returns:
         Atoms: The rotated material.
     """
@@ -458,7 +499,56 @@ def rotate_material(material: Material, axis: List[int], angle: float) -> Materi
         crystal_basis.to_crystal()
         material.basis = crystal_basis
     atoms = to_ase(material)
-    atoms.rotate(v=axis, a=angle, center="COM")
-    atoms.wrap()
+    atoms.rotate(v=axis, a=angle, center="COU")
+    if wrap:
+        atoms.wrap()
 
     return Material(from_ase(atoms))
+
+
+def displace_interface_part(
+    interface: Material,
+    displacement: List[float],
+    label: InterfacePartsEnum = InterfacePartsEnum.FILM,
+    use_cartesian_coordinates=True,
+) -> Material:
+    """
+    Displace atoms in an interface along a certain direction.
+
+    Args:
+        interface (Material): The interface Material object.
+        displacement (List[float]): The displacement vector in angstroms or crystal coordinates.
+        label (InterfacePartsEnum): The label of the atoms to displace ("substrate" or "film").
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
+
+    Returns:
+        Material: The displaced material object.
+    """
+    new_material = interface.clone()
+    if use_cartesian_coordinates:
+        new_material.to_cartesian()
+    labels_array = new_material.basis.labels.to_array_of_values_with_ids()
+    displaced_label_ids = [_label.id for _label in labels_array if _label.value == int(label)]
+
+    new_coordinates_values = new_material.basis.coordinates.values
+    for atom_id in displaced_label_ids:
+        current_coordinate = new_material.basis.coordinates.get_element_value_by_index(atom_id)
+        new_atom_coordinate = np.array(current_coordinate) + np.array(displacement)
+        new_coordinates_values[atom_id] = new_atom_coordinate
+
+    new_material.set_coordinates(new_coordinates_values)
+    new_material.to_crystal()
+    new_material = wrap_to_unit_cell(new_material)
+    return new_material
+
+
+def get_interface_part(
+    interface: Material,
+    part: InterfacePartsEnum = InterfacePartsEnum.FILM,
+) -> Material:
+    if interface.metadata["build"]["configuration"]["type"] != "InterfaceConfiguration":
+        raise ValueError("The material is not an interface.")
+    interface_part_material = interface.clone()
+    film_atoms_basis = interface_part_material.basis.filter_atoms_by_labels([int(part)])
+    interface_part_material.basis = film_atoms_basis
+    return interface_part_material

@@ -132,11 +132,11 @@ class BaseBuilder(BaseModel):
             self.selector_parameters.default_index
         ]
 
-    def _update_material_name(self, material, configuration):
+    def _update_material_name(self, material, configuration) -> Material:
         # Do nothing by default
         return material
 
-    def _update_material_metadata(self, material, configuration):
+    def _update_material_metadata(self, material, configuration) -> Material:
         if "build" not in material.metadata:
             material.metadata["build"] = {}
         material.metadata["build"]["configuration"] = configuration.to_json()

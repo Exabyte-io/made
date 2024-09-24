@@ -226,6 +226,66 @@ SI_SLAB: Dict[str, Any] = {
     "isUpdated": True,
 }
 
+
+SI_SLAB_PASSIVATED = {
+    "name": "Si8(001), termination Si_P4/mmm_1, Slab H-passivated",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+            {"id": 4, "value": "H"},
+            {"id": 5, "value": "H"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.5, 0.312499993]},
+            {"id": 1, "value": [0.5, 0.0, 0.437499993]},
+            {"id": 2, "value": [0.0, 0.0, 0.562499993]},
+            {"id": 3, "value": [0.0, 0.5, 0.687499993]},
+            {"id": 4, "value": [0.5, 0.5, 0.177186054]},
+            {"id": 5, "value": [0.0, 0.5, 0.822813932]},
+        ],
+        "units": "crystal",
+        "cell": [[3.867, 0.0, 0.0], [-0.0, 3.867, 0.0], [0.0, 0.0, 10.937528]],
+        "labels": [],
+    },
+    "lattice": {
+        "a": 3.867,
+        "b": 3.867,
+        "c": 10.937527692,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+        "vectors": {
+            "a": [3.867, 0.0, 0.0],
+            "b": [-0.0, 3.867, 0.0],
+            "c": [0.0, 0.0, 10.937527692],
+            "alat": 1,
+            "units": "angstrom",
+        },
+    },
+    "isNonPeriodic": False,
+    "_id": "",
+    "metadata": {
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "build": {
+            "configuration": {
+                "type": "PassivationConfiguration",
+                "slab": SI_SLAB,
+                "passivant": "H",
+                "bond_length": 1.48,
+                "surface": "both",
+            },
+            "termination": "Si_P4/mmm_1",
+        },
+    },
+    "isUpdated": True,
+}
+
+
 SI_SLAB_VACUUM = copy.deepcopy(SI_SLAB)
 SI_SLAB_VACUUM["basis"]["coordinates"] = [
     {"id": 0, "value": [0.5, 0.5, 0.386029718]},
@@ -442,6 +502,147 @@ GRAPHENE_ARMCHAIR_NANORIBBON = {
                 "vacuum_width": 3,
                 "vacuum_length": 0,
                 "edge_type": "armchair",
+            }
+        },
+    },
+    "isUpdated": True,
+}
+
+
+GRAPHENE_NICKEL_INTERFACE = {
+    "name": "C2(001)-Ni4(111), Interface, Strain 0.105pct",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Ni"},
+            {"id": 1, "value": "Ni"},
+            {"id": 2, "value": "Ni"},
+            {"id": 3, "value": "C"},
+            {"id": 4, "value": "C"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.666666667, 0.666666667, 0.350869517]},
+            {"id": 1, "value": [1.0, 0.0, 0.425701769]},
+            {"id": 2, "value": [0.333333333, 0.333333333, 0.500534021]},
+            {"id": 3, "value": [0.333333333, 0.333333333, 0.611447347]},
+            {"id": 4, "value": [0.666666667, 0.666666667, 0.611447347]},
+        ],
+        "units": "crystal",
+        "cell": [[2.478974, 0.0, 0.0], [1.239487, 2.14685446, 0.0], [0.0, 0.0, 27.048147591]],
+        "constraints": [],
+        "labels": [
+            {"id": 0, "value": 0},
+            {"id": 1, "value": 0},
+            {"id": 2, "value": 0},
+            {"id": 3, "value": 1},
+            {"id": 4, "value": 1},
+        ],
+    },
+    "lattice": {
+        "a": 2.478974,
+        "b": 2.478974,
+        "c": 27.048147591,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 60.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+        "vectors": {
+            "a": [2.478974, 0.0, 0.0],
+            "b": [1.239487, 2.14685446, 0.0],
+            "c": [0.0, 0.0, 27.048147591],
+            "alat": 1,
+            "units": "angstrom",
+        },
+    },
+    "isNonPeriodic": False,
+    "_id": "",
+    "metadata": {
+        "interface_properties": {
+            "film_sl_vectors": [[2.467291, 0.0, 0.0], [1.2336455, -2.136736685, -0.0]],
+            "substrate_sl_vectors": [[-1.752899326, 1.752899326, 0.0], [-1.752899326, 0.0, 1.752899326]],
+            "film_vectors": [[2.467291, 0.0, 0.0], [-1.2336455, 2.136736685, 0.0]],
+            "substrate_vectors": [[-1.752899326, 1.752899326, 0.0], [-1.752899326, 0.0, 1.752899326]],
+            "film_transformation": [[1.0, 0.0], [0.0, 1.0]],
+            "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
+            "strain": [[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, -0.0], [-0.0, -0.0, 0.0]],
+            "von_mises_strain": 0.003164242537164297,
+            "termination": "('C_P6/mmm_2', 'Ni_R-3m_1')",
+            "film_thickness": 1,
+            "substrate_thickness": 3,
+            "mean_abs_strain": 0.0010500000000000002,
+        },
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "mean_abs_strain": 0.0010500000000000002,
+        "build": {
+            "configuration": {
+                "type": "InterfaceConfiguration",
+                "film_configuration": {
+                    "type": "SlabConfiguration",
+                    "bulk": {**GRAPHENE, "name": "C2"},
+                    "miller_indices": [0, 0, 1],
+                    "thickness": 1,
+                    "vacuum": 0,
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                    "use_conventional_cell": True,
+                    "use_orthogonal_z": True,
+                    "make_primitive": False,
+                },
+                "substrate_configuration": {
+                    "type": "SlabConfiguration",
+                    "bulk": {
+                        "name": "Ni4",
+                        "basis": {
+                            "elements": [
+                                {"id": 0, "value": "Ni"},
+                                {"id": 1, "value": "Ni"},
+                                {"id": 2, "value": "Ni"},
+                                {"id": 3, "value": "Ni"},
+                            ],
+                            "coordinates": [
+                                {"id": 0, "value": [0.0, 0.0, 0.0]},
+                                {"id": 1, "value": [0.0, 0.5, 0.5]},
+                                {"id": 2, "value": [0.5, 0.0, 0.5]},
+                                {"id": 3, "value": [0.5, 0.5, 0.0]},
+                            ],
+                            "units": "crystal",
+                            "cell": [[3.505798652, 0.0, 0.0], [-0.0, 3.505798652, 0.0], [0.0, 0.0, 3.505798652]],
+                            "constraints": [],
+                            "labels": [],
+                        },
+                        "lattice": {
+                            "a": 3.505798652,
+                            "b": 3.505798652,
+                            "c": 3.505798652,
+                            "alpha": 90.0,
+                            "beta": 90.0,
+                            "gamma": 90.0,
+                            "units": {"length": "angstrom", "angle": "degree"},
+                            "type": "TRI",
+                            "vectors": {
+                                "a": [3.505798652, 0.0, 0.0],
+                                "b": [-0.0, 3.505798652, 0.0],
+                                "c": [0.0, 0.0, 3.505798652],
+                                "alat": 1,
+                                "units": "angstrom",
+                            },
+                        },
+                        "isNonPeriodic": False,
+                        "_id": "",
+                        "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+                        "isUpdated": True,
+                    },
+                    "miller_indices": [1, 1, 1],
+                    "thickness": 3,
+                    "vacuum": 3,
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                    "use_conventional_cell": True,
+                    "use_orthogonal_z": True,
+                    "make_primitive": False,
+                },
+                "film_termination": "C_P6/mmm_2",
+                "substrate_termination": "Ni_P6/mmm_4",
+                "distance_z": 3.0,
+                "vacuum": 20.0,
             }
         },
     },

@@ -1,13 +1,21 @@
 from typing import Any, List, Optional
 
 import numpy as np
-from mat3ra.made.tools.modify import translate_to_z_level
-from pydantic import BaseModel
+from ..utils import merge_materials
+from ...modify import (
+    translate_to_z_level,
+    rotate_material,
+    translate_by_vector,
+    add_vacuum_sides,
+)
+from pydantic import BaseModel, Field
 from ase.build.tools import niggli_reduce
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
 )
+
+from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 
 from mat3ra.made.material import Material
 from .enums import StrainModes
@@ -22,7 +30,7 @@ from ..slab import create_slab, Termination
 from ..slab.configuration import SlabConfiguration
 from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
-from ...build import BaseBuilder, BaseBuilderParameters
+from ...build import BaseBuilder, BaseConfiguration, BaseBuilderParameters
 
 
 class InterfaceBuilderParameters(BaseModel):
@@ -189,3 +197,90 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
         for material, strain in zip(materials, strains):
             material.metadata["mean_abs_strain"] = strain
         return materials
+
+
+########################################################################################
+#                       Twisted Interface Builders                                     #
+########################################################################################
+class TwistedInterfaceConfiguration(BaseConfiguration):
+    film: Material
+    substrate: Material
+    twist_angle: float = Field(0, description="Twist angle in degrees")
+    distance_z: float = 3.0
+
+    @property
+    def _json(self):
+        return {
+            "type": self.get_cls_name(),
+            "film": self.film.to_json(),
+            "substrate": self.substrate.to_json(),
+            "twist_angle": self.twist_angle,
+            "distance_z": self.distance_z,
+        }
+
+
+class NanoRibbonTwistedInterfaceConfiguration(TwistedInterfaceConfiguration):
+    """
+    Configuration for creating a twisted interface between two nano ribbons with specified twist angle.
+
+    Args:
+        film (Material): The film material.
+        substrate (Material): The substrate material.
+        twist_angle (float): Twist angle in degrees.
+        ribbon_width (int): Width of the nanoribbon in unit cells.
+        ribbon_length (int): Length of the nanoribbon in unit cells.
+        distance_z (float): Vertical distance between layers in Angstroms.
+        vacuum_x (float): Vacuum along x on both sides, in Angstroms.
+        vacuum_y (float): Vacuum along y on both sides, in Angstroms.
+    """
+
+    ribbon_width: int = 1
+    ribbon_length: int = 1
+    vacuum_x: float = 5.0
+    vacuum_y: float = 5.0
+
+    @property
+    def _json(self):
+        return {
+            **super()._json,
+            "type": self.get_cls_name(),
+            "ribbon_width": self.ribbon_width,
+            "ribbon_length": self.ribbon_length,
+            "vacuum_x": self.vacuum_x,
+            "vacuum_y": self.vacuum_y,
+        }
+
+
+class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
+    _GeneratedItemType = Material
+    _ConfigurationType = NanoRibbonTwistedInterfaceConfiguration
+
+    def _generate(self, configuration: NanoRibbonTwistedInterfaceConfiguration) -> List[Material]:
+        bottom_nanoribbon_configuration = NanoribbonConfiguration(
+            material=configuration.substrate,
+            width=configuration.ribbon_width,
+            length=configuration.ribbon_length,
+        )
+        bottom_ribbon = create_nanoribbon(bottom_nanoribbon_configuration)
+        top_ribbon_configuration = NanoribbonConfiguration(
+            material=configuration.film,
+            width=configuration.ribbon_width,
+            length=configuration.ribbon_length,
+        )
+        top_ribbon = create_nanoribbon(top_ribbon_configuration)
+        top_ribbon = rotate_material(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
+
+        translation_vector = [0, 0, configuration.distance_z]
+        top_ribbon = translate_by_vector(top_ribbon, translation_vector, use_cartesian_coordinates=True)
+
+        merged_material = merge_materials([bottom_ribbon, top_ribbon])
+        merged_material_vacuum_x = add_vacuum_sides(merged_material, configuration.vacuum_x, on_x=True)
+        merged_material_vacuum_xy = add_vacuum_sides(merged_material_vacuum_x, configuration.vacuum_y, on_y=True)
+
+        return [merged_material_vacuum_xy]
+
+    def _update_material_name(
+        self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
+    ) -> Material:
+        material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f}°)"
+        return material

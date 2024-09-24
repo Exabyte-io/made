@@ -115,19 +115,20 @@ def test_create_crystal_site_adatom():
 
 def test_create_island():
     condition = CoordinateCondition.CylinderCoordinateCondition(
-        center_position=[0.625, 0.5], radius=0.25, min_z=0, max_z=1
+        center_position=[0.5, 0.5], radius=0.15, min_z=0, max_z=1
     )
     island_config = IslandSlabDefectConfiguration(
-        crystal=SLAB_111,
+        crystal=SLAB_001,
         defect_type="island",
         condition=condition,
-        thickness=1,
+        number_of_added_layers=1,
     )
 
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
 
-    # Only one atom is in the island for this configuration
-    assert len(defect.basis.elements.values) == len(SLAB_111.basis.elements.values) + 1
+    # Only 1 atoms in the island were added for this configuration with 001 slab orientation
+    NUMBER_OF_ATOMS_IN_ISLAND = 1
+    assert len(defect.basis.elements.values) == len(SLAB_001.basis.elements.values) + NUMBER_OF_ATOMS_IN_ISLAND
     assert defect.basis.elements.values[-1] == "Si"
 
 
@@ -139,7 +140,7 @@ def test_create_terrace():
         number_of_added_layers=1,
     )
     new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
-    assertion_utils.assert_deep_almost_equal([0.720082355, 0.5, 0.461401798], new_slab.basis.coordinates.values[42])
+    assertion_utils.assert_deep_almost_equal([0.777786402, 0.5, 0.444543344], new_slab.basis.coordinates.values[42])
 
 
 def test_create_defect_pair():
