@@ -1,13 +1,15 @@
 from typing import List
 
+import numpy as np
 from mat3ra.made.material import Material
 
 from ...analyze import get_chemical_formula
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
 from ..interface.builders import ZSLStrainMatchingInterfaceBuilder
 from ..supercell import create_supercell
-from ..slab import SlabConfiguration, get_terminations, SlabBuilder, SlabSelectorParameters
 from .configuration import GrainBoundaryConfiguration
+from ...modify import add_vacuum
+from ...third_party import PymatgenInterface
 
 
 class GrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters):
@@ -26,7 +28,7 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
 
     _BuildParametersType: type(GrainBoundaryBuilderParameters) = GrainBoundaryBuilderParameters  # type: ignore
     _ConfigurationType: type(GrainBoundaryConfiguration) = GrainBoundaryConfiguration  # type: ignore
-    _GeneratedItemType: type(Material) = Material  # type: ignore
+    _GeneratedItemType: type(PymatgenInterface) = PymatgenInterface  # type: ignore
     selector_parameters: type(  # type: ignore
         GrainBoundaryBuilderParameters
     ) = GrainBoundaryBuilderParameters()  # type: ignore
@@ -49,29 +51,22 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         rotated_interfaces = [
             create_supercell(material, supercell_matrix=rot_90_degree_matrix) for material in materials
         ]
-        final_slabs = []
+        final_slabs: Material = []
         for interface in rotated_interfaces:
-            slab_config = SlabConfiguration(
-                bulk=interface,
-                miller_indices=configuration.slab_configuration.miller_indices,
-                thickness=configuration.slab_configuration.thickness,
-                vacuum=configuration.slab_configuration.vacuum,
-                xy_supercell_matrix=configuration.slab_configuration.xy_supercell_matrix,
-                use_conventional_cell=True,
-                use_orthogonal_z=True,
-            )
-            slab_builder = SlabBuilder()
-            slab_termination = (
-                configuration.slab_termination if configuration.slab_termination else get_terminations(slab_config)[0]
-            )
-            final_slab = slab_builder.get_material(
-                configuration,
-                selector_parameters=SlabSelectorParameters(termination=slab_termination),
-            )
-            final_slabs.append(final_slab)
+            rot_90_degree_matrix = [[0, 0, 1], [0, 1, 0], [-1, 0, 0]]
+            rotated_interfaces = [
+                create_supercell(material, supercell_matrix=rot_90_degree_matrix) for material in materials
+            ]
+            final_slabs = []
+            for interface in rotated_interfaces:
+                supercell_matrix = np.zeros((3, 3))
+                supercell_matrix[:2, :2] = configuration.slab_configuration.xy_supercell_matrix
+                supercell_matrix[2, 2] = configuration.slab_configuration.thickness
+                final_slab = create_supercell(interface, supercell_matrix=supercell_matrix)
+                final_slab_with_vacuum = add_vacuum(final_slab, vacuum=configuration.slab_configuration.vacuum)
+                final_slabs.append(final_slab_with_vacuum)
 
-        materials = super()._finalize(final_slabs, configuration)
-        return materials
+        return super()._finalize(final_slabs, configuration)
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         phase_1_formula = get_chemical_formula(configuration.phase_1_configuration.bulk)
