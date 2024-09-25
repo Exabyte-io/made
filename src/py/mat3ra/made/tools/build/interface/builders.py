@@ -1,36 +1,42 @@
 from typing import Any, List, Optional
 
 import numpy as np
-from ..utils import merge_materials
-from ...modify import (
-    translate_to_z_level,
-    rotate_material,
-    translate_by_vector,
-    add_vacuum_sides,
-)
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from ase.build.tools import niggli_reduce
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
 )
 
-from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-
 from mat3ra.made.material import Material
-from .enums import StrainModes
-from .configuration import InterfaceConfiguration
-from .termination_pair import TerminationPair, safely_select_termination_pair
-from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
+from ....utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
+from ...modify import (
+    translate_to_z_level,
+    rotate_material,
+    translate_by_vector,
+    add_vacuum_sides,
+)
+from ...analyze import get_chemical_formula
+from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
+from ...build import BaseBuilder
+from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
+from ..supercell import create_supercell
+from ..slab import create_slab, Termination, SlabConfiguration
+from ..utils import merge_materials
 from ..mixins import (
     ConvertGeneratedItemsASEAtomsMixin,
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
-from ..slab import create_slab, Termination
-from ..slab.configuration import SlabConfiguration
-from ...analyze import get_chemical_formula
-from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
-from ...build import BaseBuilder, BaseConfiguration
+
+from .enums import StrainModes
+from .configuration import (
+    InterfaceConfiguration,
+    NanoRibbonTwistedInterfaceConfiguration,
+    TwistedInterfaceConfiguration,
+)
+from .commensurate_lattice_pair import CommensurateLatticePair
+from .termination_pair import TerminationPair, safely_select_termination_pair
+from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
 
 
 class InterfaceBuilderParameters(BaseModel):
@@ -202,60 +208,15 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
 ########################################################################################
 #                       Twisted Interface Builders                                     #
 ########################################################################################
-class TwistedInterfaceConfiguration(BaseConfiguration):
-    film: Material
-    substrate: Material
-    twist_angle: float = Field(0, description="Twist angle in degrees")
-    distance_z: float = 3.0
-
-    @property
-    def _json(self):
-        return {
-            "type": self.get_cls_name(),
-            "film": self.film.to_json(),
-            "substrate": self.substrate.to_json(),
-            "twist_angle": self.twist_angle,
-            "distance_z": self.distance_z,
-        }
-
-
-class NanoRibbonTwistedInterfaceConfiguration(TwistedInterfaceConfiguration):
-    """
-    Configuration for creating a twisted interface between two nano ribbons with specified twist angle.
-
-    Args:
-        film (Material): The film material.
-        substrate (Material): The substrate material.
-        twist_angle (float): Twist angle in degrees.
-        ribbon_width (int): Width of the nanoribbon in unit cells.
-        ribbon_length (int): Length of the nanoribbon in unit cells.
-        distance_z (float): Vertical distance between layers in Angstroms.
-        vacuum_x (float): Vacuum along x on both sides, in Angstroms.
-        vacuum_y (float): Vacuum along y on both sides, in Angstroms.
-    """
-
-    ribbon_width: int = 1
-    ribbon_length: int = 1
-    vacuum_x: float = 5.0
-    vacuum_y: float = 5.0
-
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "ribbon_width": self.ribbon_width,
-            "ribbon_length": self.ribbon_length,
-            "vacuum_x": self.vacuum_x,
-            "vacuum_y": self.vacuum_y,
-        }
 
 
 class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
     _GeneratedItemType = Material
-    _ConfigurationType = NanoRibbonTwistedInterfaceConfiguration
+    _ConfigurationType: type(  # type: ignore
+        NanoRibbonTwistedInterfaceConfiguration
+    ) = NanoRibbonTwistedInterfaceConfiguration  # type: ignore
 
-    def _generate(self, configuration: NanoRibbonTwistedInterfaceConfiguration) -> List[Material]:
+    def _generate(self, configuration: _ConfigurationType) -> List[Material]:
         bottom_nanoribbon_configuration = NanoribbonConfiguration(
             material=configuration.substrate,
             width=configuration.ribbon_width,
@@ -284,3 +245,112 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
     ) -> Material:
         material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f}°)"
         return material
+
+
+class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
+    """
+    Parameters for the commensurate lattice interface builder.
+
+    Args:
+        max_repetition_int (int): The maximum search range for commensurate lattices.
+        angle_tolerance (float): The tolerance for the angle between the commensurate lattices
+            and the target angle, in degrees.
+        return_first_match (bool): Whether to return the first match or all matches.
+    """
+
+    max_repetition_int: int = 10
+    angle_tolerance: float = 0.1
+    return_first_match: bool = False
+
+
+class CommensurateLatticeInterfaceBuilder(BaseBuilder):
+    _GeneratedItemType: type(CommensurateLatticePair) = CommensurateLatticePair  # type: ignore
+    _ConfigurationType: type(TwistedInterfaceConfiguration) = TwistedInterfaceConfiguration  # type: ignore
+
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
+        film = configuration.film
+        # substrate = configuration.substrate
+        max_search = self.build_parameters.max_repetition_int
+        a = film.lattice.vector_arrays[0][:2]
+        b = film.lattice.vector_arrays[1][:2]
+        commensurate_lattice_pairs = self.__generate_commensurate_lattices(
+            configuration, a, b, max_search, configuration.twist_angle
+        )
+        return commensurate_lattice_pairs
+
+    def __generate_commensurate_lattices(
+        self,
+        configuration: TwistedInterfaceConfiguration,
+        a: List[float],
+        b: List[float],
+        max_search: int = 10,
+        target_angle: float = 0.0,
+    ) -> List[CommensurateLatticePair]:
+        """
+        Generate all commensurate lattices for a given search range and filter by closeness to target angle.
+
+        Args:
+            configuration (TwistedInterfaceConfiguration): The configuration for the twisted interface.
+            a (List[float]): The a lattice vector.
+            b (List[float]): The b lattice vector.
+            max_search (int): The maximum search range.
+            target_angle (float): The target angle, in degrees.
+
+        Returns:
+            List[CommensurateLatticePair]: The list of commensurate lattice pairs
+        """
+        matrices = create_2d_supercell_matrices(max_search)
+        matrix_ab = np.array([a, b])
+        matrix_ab_inverse = np.linalg.inv(matrix_ab)
+
+        solutions: List[CommensurateLatticePair] = []
+        for index1, matrix1 in enumerate(matrices):
+            for index2, matrix2 in enumerate(matrices[0 : index1 + 1]):
+                matrix2_inverse = np.linalg.inv(matrix2)
+                intermediate_product = matrix2_inverse @ matrix1
+                product = matrix_ab_inverse @ intermediate_product @ matrix_ab
+                angle = get_angle_from_rotation_matrix_2d(product)
+                if angle is not None:
+                    size_metric = np.linalg.det(matrix_ab_inverse @ matrix1 @ matrix_ab)
+
+                    if np.abs(angle - target_angle) < self.build_parameters.angle_tolerance:
+                        print(f"Found commensurate lattice with angle {angle} and size metric {size_metric}")
+                        solutions.append(
+                            CommensurateLatticePair(
+                                configuration=configuration,
+                                matrix1=matrix1,
+                                matrix2=matrix2,
+                                angle=angle,
+                                size_metric=size_metric,
+                            )
+                        )
+                        if self.build_parameters.return_first_match:
+                            return solutions
+                else:
+                    continue
+        return solutions
+
+    def _post_process(
+        self,
+        items: List[_GeneratedItemType],
+        post_process_parameters=None,
+    ) -> List[Material]:
+        interfaces = []
+        for item in items:
+            new_substrate = create_supercell(item.configuration.film, item.matrix1.tolist())
+            new_film = create_supercell(item.configuration.substrate, item.matrix2.tolist())
+            new_film = translate_by_vector(
+                new_film, [0, 0, item.configuration.distance_z], use_cartesian_coordinates=True
+            )
+            interface = merge_materials([new_substrate, new_film])
+            interface.metadata["actual_twist_angle"] = item.angle
+            interfaces.append(interface)
+        return interfaces
+
+    def _update_material_metadata(self, material, configuration) -> Material:
+        updated_material = super()._update_material_metadata(material, configuration)
+        if "actual_twist_angle" in material.metadata:
+            updated_material.metadata["build"]["configuration"]["actual_twist_angle"] = material.metadata[
+                "actual_twist_angle"
+            ]
+        return updated_material
