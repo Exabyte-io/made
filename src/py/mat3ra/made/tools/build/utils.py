@@ -78,6 +78,17 @@ def merge_materials(
     distance_tolerance: float = 0.01,
     merge_dangerously=False,
 ) -> Material:
+    """
+    Merge multiple materials into a single material.
+
+    Args:
+        materials (List[Material]): List of materials to merge.
+        material_name (Optional[str]): Name of the merged material.
+        distance_tolerance (float): Distance tolerance to replace close coordinates with the last one, in angstroms.
+        merge_dangerously (bool): If True, the lattices are merged "as is" with no sanity checks.
+    Returns:
+
+    """
     merged_material = materials[0]
     for material in materials[1:]:
         merged_material = merge_two_materials(
