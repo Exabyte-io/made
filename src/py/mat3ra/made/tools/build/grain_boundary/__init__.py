@@ -85,7 +85,9 @@ class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
                 phase_2_material, [item.configuration.gap / 2, 0, 0], use_cartesian_coordinates=True
             )
 
-            interface = merge_materials([phase_1_material, phase_2_material], distance_tolerance=0.1)
+            interface = merge_materials(
+                [phase_1_material, phase_2_material], distance_tolerance=self.build_parameters.distance_tolerance
+            )
             grain_boundaries.append(interface)
 
         return grain_boundaries
