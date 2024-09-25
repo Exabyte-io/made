@@ -3,6 +3,9 @@ from scipy.spatial import cKDTree
 from typing import List, Optional
 from mat3ra.made.basis import Basis
 from mat3ra.made.material import Material
+
+from .supercell import create_supercell
+from ..modify import filter_by_box, translate_by_vector
 from ...utils import ArrayWithIds
 
 
@@ -96,3 +99,34 @@ def merge_materials(
         )
 
     return merged_material
+
+
+def merge_two_materials_laterally(
+    phase_1_material_initial: Material, phase_2_material_initial: Material, gap: float, distance_tolerance: float = 1.0
+) -> Material:
+    phase_1_material_doubled = create_supercell(phase_1_material_initial, scaling_factor=[2, 1, 1])
+    phase_1_material = filter_by_box(phase_1_material_doubled, [0, 0, 0], [0.5, 1, 1])
+
+    phase_2_material_doubled = create_supercell(phase_2_material_initial, scaling_factor=[2, 1, 1])
+    phase_2_material = filter_by_box(phase_2_material_doubled, [0.5, 0, 0], [1, 1, 1])
+
+    new_lattice_vectors_1 = phase_1_material.lattice.vector_arrays
+    new_lattice_vectors_1[0][0] += gap
+
+    new_lattice_vectors_2 = phase_2_material.lattice.vector_arrays
+    new_lattice_vectors_2[0][0] += gap
+
+    phase_1_material.set_new_lattice_vectors(
+        lattice_vector1=new_lattice_vectors_1[0],
+        lattice_vector2=new_lattice_vectors_1[1],
+        lattice_vector3=new_lattice_vectors_1[2],
+    )
+    phase_2_material.set_new_lattice_vectors(
+        lattice_vector1=new_lattice_vectors_2[0],
+        lattice_vector2=new_lattice_vectors_2[1],
+        lattice_vector3=new_lattice_vectors_2[2],
+    )
+
+    phase_2_material = translate_by_vector(phase_2_material, [gap / 2, 0, 0], use_cartesian_coordinates=True)
+    interface = merge_materials([phase_1_material, phase_2_material], distance_tolerance=distance_tolerance)
+    return interface
