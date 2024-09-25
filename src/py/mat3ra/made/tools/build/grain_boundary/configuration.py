@@ -7,17 +7,16 @@ from ..slab.termination import Termination
 
 class GrainBoundaryConfiguration(BaseConfiguration):
     """
-    Configuration for a grain boundary in a slab material.
+    Configuration for a grain boundary between two phases with different surfaces facing each other.
 
     Attributes:
-        phase_1_configuration: SlabConfiguration
-        phase_2_configuration: SlabConfiguration
-        phase_1_termination: Termination
-        phase_2_termination: Termination
-        gap: float
-        slab_configuration: SlabConfiguration
-        slab_termination: Termination
-
+        phase_1_configuration (SlabConfiguration): The configuration of the first phase.
+        phase_2_configuration (SlabConfiguration): The configuration of the second phase.
+        phase_1_termination (Termination): The termination of the first phase.
+        phase_2_termination (Termination): The termination of the second phase.
+        gap (float): The gap between the two phases, in Angstroms.
+        slab_configuration (SlabConfiguration): The configuration of the grain boundary slab.
+        slab_termination (Optional[Termination]): The termination of the grain boundary slab.
     """
 
     phase_1_configuration: SlabConfiguration
