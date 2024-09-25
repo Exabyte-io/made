@@ -5,12 +5,15 @@ from mat3ra.made.tools.build import BaseConfiguration
 
 from mat3ra.made.material import Material
 
-from mat3ra.made.tools.build.interface.builders import CommensurateLatticeTwistedInterfaceBuilder
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.build.utils import merge_materials
-from mat3ra.made.tools.modify import filter_by_box, add_vacuum_sides, translate_by_vector
+from ..interface.builders import (
+    CommensurateLatticeTwistedInterfaceBuilder,
+    CommensurateLatticeTwistedInterfaceBuilderParameters,
+)
+from ..supercell import create_supercell
+from ..utils import merge_materials
+from ...modify import filter_by_box, add_vacuum_sides, translate_by_vector
 
-from mat3ra.made.tools.build.interface.configuration import TwistedInterfaceConfiguration
+from ..interface.configuration import TwistedInterfaceConfiguration
 
 
 class SurfaceGrainBoundaryConfiguration(TwistedInterfaceConfiguration):
@@ -33,18 +36,28 @@ class SurfaceGrainBoundaryConfiguration(TwistedInterfaceConfiguration):
         }
 
 
+class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceBuilderParameters):
+    """
+    Parameters for creating a surface grain boundary.
+
+    Args:
+        distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
+    """
+
+    distance_tolerance: float = 0.1
+
+
 class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
     _ConfigurationType: type(SurfaceGrainBoundaryConfiguration) = SurfaceGrainBoundaryConfiguration  # type: ignore
+    _BuildParametersType = SurfaceGrainBoundaryBuilderParameters
+    _DefaultBuildParameters = SurfaceGrainBoundaryBuilderParameters()
 
     def _post_process(self, items: List[Material], post_process_parameters=None) -> List[Material]:
         grain_boundaries = []
         for item in items:
-            if item.configuration.xy_supercell_matrix is not None:
-                matrix1 = np.dot(np.matrix(item.configuration.xy_supercell_matrix), item.configuration.matrix1)
-                matrix2 = np.dot(np.matrix(item.configuration.xy_supercell_matrix), item.configuration.matrix2)
-            else:
-                matrix1 = item.configuration.matrix1
-                matrix2 = item.configuration.matrix2
+            matrix1 = np.dot(np.array(item.configuration.xy_supercell_matrix), item.matrix1)
+            matrix2 = np.dot(np.array(item.configuration.xy_supercell_matrix), item.matrix2)
+            # TODO: isolate placing side by side with a gap into a separate function (in interface.utils folder?)
             phase_1_material_initial = create_supercell(item.configuration.film, matrix1.tolist())
             phase_1_material_doubled = create_supercell(phase_1_material_initial, scaling_factor=[2, 1, 1])
             phase_1_material = filter_by_box(phase_1_material_doubled, [0, 0, 0], [0.5, 1, 1])
@@ -72,7 +85,7 @@ class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
                 phase_2_material, [item.configuration.gap / 2, 0, 0], use_cartesian_coordinates=True
             )
 
-            interface = merge_materials([phase_1_material, phase_2_material])
+            interface = merge_materials([phase_1_material, phase_2_material], distance_tolerance=0.1)
             grain_boundaries.append(interface)
 
         return grain_boundaries
