@@ -47,24 +47,18 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         return super()._generate(interface_config)
 
     def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
-        rot_90_degree_matrix = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]
+        rot_90_degree_matrix = [[0, 0, 1], [0, 1, 0], [-1, 0, 0]]
         rotated_interfaces = [
             create_supercell(material, supercell_matrix=rot_90_degree_matrix) for material in materials
         ]
-        final_slabs: Material = []
+        final_slabs: List[Material] = []
         for interface in rotated_interfaces:
-            rot_90_degree_matrix = [[0, 0, 1], [0, 1, 0], [-1, 0, 0]]
-            rotated_interfaces = [
-                create_supercell(material, supercell_matrix=rot_90_degree_matrix) for material in materials
-            ]
-            final_slabs = []
-            for interface in rotated_interfaces:
-                supercell_matrix = np.zeros((3, 3))
-                supercell_matrix[:2, :2] = configuration.slab_configuration.xy_supercell_matrix
-                supercell_matrix[2, 2] = configuration.slab_configuration.thickness
-                final_slab = create_supercell(interface, supercell_matrix=supercell_matrix)
-                final_slab_with_vacuum = add_vacuum(final_slab, vacuum=configuration.slab_configuration.vacuum)
-                final_slabs.append(final_slab_with_vacuum)
+            supercell_matrix = np.zeros((3, 3))
+            supercell_matrix[:2, :2] = configuration.slab_configuration.xy_supercell_matrix
+            supercell_matrix[2, 2] = configuration.slab_configuration.thickness
+            final_slab = create_supercell(interface, supercell_matrix=supercell_matrix)
+            final_slab_with_vacuum = add_vacuum(final_slab, vacuum=configuration.slab_configuration.vacuum)
+            final_slabs.append(final_slab_with_vacuum)
 
         return super()._finalize(final_slabs, configuration)
 
