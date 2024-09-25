@@ -90,7 +90,7 @@ def merge_materials(
         distance_tolerance (float): Distance tolerance to replace close coordinates with the last one, in angstroms.
         merge_dangerously (bool): If True, the lattices are merged "as is" with no sanity checks.
     Returns:
-
+        Material: The merged material.
     """
     merged_material = materials[0]
     for material in materials[1:]:
@@ -102,12 +102,23 @@ def merge_materials(
 
 
 def merge_two_materials_laterally(
-    phase_1_material_initial: Material, phase_2_material_initial: Material, gap: float, distance_tolerance: float = 1.0
+    phase_1_material: Material, phase_2_material: Material, gap: float, distance_tolerance: float = 1.0
 ) -> Material:
-    phase_1_material_doubled = create_supercell(phase_1_material_initial, scaling_factor=[2, 1, 1])
+    """
+    Merge two materials laterally with translation along x axis with a gap between them.
+    Args:
+        phase_1_material (Material): The first material.
+        phase_2_material (Material): The second material.
+        gap (float): The gap between the two materials, in angstroms.
+        distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
+
+    Returns:
+        Material: The merged material.
+    """
+    phase_1_material_doubled = create_supercell(phase_1_material, scaling_factor=[2, 1, 1])
     phase_1_material = filter_by_box(phase_1_material_doubled, [0, 0, 0], [0.5, 1, 1])
 
-    phase_2_material_doubled = create_supercell(phase_2_material_initial, scaling_factor=[2, 1, 1])
+    phase_2_material_doubled = create_supercell(phase_2_material, scaling_factor=[2, 1, 1])
     phase_2_material = filter_by_box(phase_2_material_doubled, [0.5, 0, 0], [1, 1, 1])
 
     new_lattice_vectors_1 = phase_1_material.lattice.vector_arrays

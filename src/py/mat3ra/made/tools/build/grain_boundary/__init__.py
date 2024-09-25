@@ -19,6 +19,7 @@ class SurfaceGrainBoundaryConfiguration(TwistedInterfaceConfiguration):
 
     Args:
         gap (float): The gap between the two phases.
+        xy_supercell_matrix (List[List[int]]): The supercell matrix to apply for both phases.
     """
 
     gap: float = 0.0
@@ -35,13 +36,13 @@ class SurfaceGrainBoundaryConfiguration(TwistedInterfaceConfiguration):
 
 class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceBuilderParameters):
     """
-    Parameters for creating a surface grain boundary.
+    Parameters for creating a grain boundary between two surface phases.
 
     Args:
         distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
     """
 
-    distance_tolerance: float = 0.1
+    distance_tolerance: float = 1.0
 
 
 class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
