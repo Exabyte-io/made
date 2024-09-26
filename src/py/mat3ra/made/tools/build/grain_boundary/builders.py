@@ -9,7 +9,6 @@ from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceCo
 from ..interface.builders import ZSLStrainMatchingInterfaceBuilder
 from ..supercell import create_supercell
 from .configuration import SlabGrainBoundaryConfiguration
-from ...third_party import PymatgenInterface
 
 
 class SlabGrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters):
@@ -28,7 +27,6 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
 
     _BuildParametersType: type(SlabGrainBoundaryBuilderParameters) = SlabGrainBoundaryBuilderParameters  # type: ignore
     _ConfigurationType: type(SlabGrainBoundaryConfiguration) = SlabGrainBoundaryConfiguration  # type: ignore
-    _GeneratedItemType: type(PymatgenInterface) = PymatgenInterface  # type: ignore
     selector_parameters: type(  # type: ignore
         SlabGrainBoundaryBuilderParameters
     ) = SlabGrainBoundaryBuilderParameters()  # type: ignore
