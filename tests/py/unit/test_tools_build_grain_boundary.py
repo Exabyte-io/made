@@ -1,10 +1,12 @@
-from mat3ra.made.tools.build.grain_boundary import GrainBoundaryBuilder, GrainBoundaryConfiguration
+from mat3ra.made.material import Material
+from mat3ra.made.tools.build.grain_boundary import (
+    GrainBoundaryBuilder,
+    GrainBoundaryConfiguration,
+    create_grain_boundary,
+)
+from mat3ra.made.tools.build.interface import ZSLStrainMatchingInterfaceBuilderParameters
 from mat3ra.made.tools.build.slab import SlabConfiguration, get_terminations
 from mat3ra.utils import assertion as assertion_utils
-
-from src.py.mat3ra.made.material import Material
-from src.py.mat3ra.made.tools.build.grain_boundary import create_grain_boundary
-from src.py.mat3ra.made.tools.build.interface import ZSLStrainMatchingInterfaceBuilderParameters
 
 
 def test_slab_grain_boundary_builder():
