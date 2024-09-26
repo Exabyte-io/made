@@ -22,7 +22,7 @@ def test_slab_grain_boundary_builder():
         bulk=material,
         vacuum=0,
         thickness=2,
-        miller_indices=(1, 0, 0),
+        miller_indices=(0, 0, 1),
     )
 
     termination1 = get_terminations(phase_1_configuration)[0]
