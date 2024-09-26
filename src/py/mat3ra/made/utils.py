@@ -77,6 +77,61 @@ def get_overlapping_coordinates(
     return [c for c in coordinates if np.linalg.norm(np.array(c) - np.array(coordinate)) < threshold]
 
 
+def create_2d_supercell_matrices(max_search: int) -> List[np.ndarray]:
+    """
+    Create a list of 2D supercell matrices within a maximum search range.
+
+    Filtering conditions:
+    - Non-zero area constraint
+    - Positive determinant (to exclude mirroring transformations)
+
+    Args:
+        max_search: The maximum search range.
+    Returns:
+        List[np.ndarray]: The list of supercell matrices.
+    """
+    matrices = []
+    for s11 in range(-max_search, max_search + 1):
+        for s12 in range(-max_search, max_search + 1):
+            for s21 in range(-max_search, max_search + 1):
+                for s22 in range(-max_search, max_search + 1):
+                    matrix = np.array([[s11, s12], [s21, s22]])
+                    determinant = np.linalg.det(matrix)
+                    if determinant == 0 or determinant < 0:
+                        continue
+                    matrices.append(matrix)
+    return matrices
+
+
+def get_angle_from_rotation_matrix_2d(
+    matrix: np.ndarray, zero_tolerance: float = 1e-6, round_digits: int = 3
+) -> Union[float, None]:
+    """
+    Get the angle from a 2x2 rotation matrix in degrees if it's a pure rotation matrix.
+    Args:
+        matrix: The 2x2 rotation matrix.
+        zero_tolerance: The zero tolerance for the determinant.
+        round_digits: The number of digits to round the angle.
+
+    Returns:
+        Union[float, None]: The angle in degrees if it's a pure rotation matrix, otherwise None.
+    """
+    if matrix.shape != (2, 2):
+        return None
+    if np.abs(np.linalg.det(matrix) - 1) > zero_tolerance:
+        return None
+    if not np.all(np.abs(matrix) <= 1):
+        return None
+    # Check if it's in form of rotation matrix [cos(theta), -sin(theta); sin(theta), cos(theta)]
+    if not np.allclose(matrix @ matrix.T, np.eye(2), atol=zero_tolerance):
+        return None
+    cos_theta = matrix[0, 0]
+    sin_theta = matrix[1, 0]
+    angle_rad = np.arctan2(sin_theta, cos_theta)
+    angle_deg = np.round(np.degrees(angle_rad), round_digits)
+    return angle_deg
+
+
 class ValueWithId(RoundNumericValuesMixin, BaseModel):
     id: int = 0
     value: Any = None

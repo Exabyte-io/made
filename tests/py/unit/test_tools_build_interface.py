@@ -9,8 +9,11 @@ from mat3ra.made.tools.build.interface import (
     create_interfaces,
 )
 from mat3ra.made.tools.build.interface.builders import (
+    CommensurateLatticeInterfaceBuilder,
+    CommensurateLatticeInterfaceBuilderParameters,
     NanoRibbonTwistedInterfaceBuilder,
     NanoRibbonTwistedInterfaceConfiguration,
+    TwistedInterfaceConfiguration,
 )
 from mat3ra.utils import assertion as assertion_utils
 
@@ -63,3 +66,20 @@ def test_create_twisted_nanoribbon_interface():
     expected_coordinate = [0.704207885, 0.522108183, 0.65]
     assertion_utils.assert_deep_almost_equal(exected_cell_vectors, interface.basis.cell.vectors_as_array)
     assertion_utils.assert_deep_almost_equal(expected_coordinate, interface.basis.coordinates.values[42])
+
+
+def test_create_commensurate_supercell_twisted_interface():
+    film = Material(GRAPHENE)
+    substrate = Material(GRAPHENE)
+    config = TwistedInterfaceConfiguration(film=film, substrate=substrate, twist_angle=13, distance_z=3.0)
+    params = CommensurateLatticeInterfaceBuilderParameters(
+        max_repetition_int=5, angle_tolerance=0.5, return_first_match=True
+    )
+    builder = CommensurateLatticeInterfaceBuilder(build_parameters=params)
+    interfaces = builder.get_materials(config, post_process_parameters=config)
+    assert len(interfaces) == 1
+    interface = interfaces[0]
+    expected_cell_vectors = [[-9.869164, -4.273473, 0.0], [-1.233646, -10.683683, 0.0], [0.0, 0.0, 20.0]]
+    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, interface.basis.cell.vectors_as_array)
+    expected_angle = 13.174
+    assert interface.metadata["build"]["configuration"]["actual_twist_angle"] == expected_angle
