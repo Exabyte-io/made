@@ -9,6 +9,7 @@ from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceCo
 from ..interface.builders import ZSLStrainMatchingInterfaceBuilder
 from ..supercell import create_supercell
 from .configuration import SlabGrainBoundaryConfiguration
+from ...third_party import PymatgenInterface
 
 
 class SlabGrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters):
@@ -27,13 +28,12 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
 
     _BuildParametersType: type(SlabGrainBoundaryBuilderParameters) = SlabGrainBoundaryBuilderParameters  # type: ignore
     _ConfigurationType: type(SlabGrainBoundaryConfiguration) = SlabGrainBoundaryConfiguration  # type: ignore
+    _GeneratedItemType: PymatgenInterface = PymatgenInterface  # type: ignore
     selector_parameters: type(  # type: ignore
         SlabGrainBoundaryBuilderParameters
     ) = SlabGrainBoundaryBuilderParameters()  # type: ignore
 
-    def _generate(
-        self, configuration: _ConfigurationType
-    ) -> List[ZSLStrainMatchingInterfaceBuilder._GeneratedItemType]:
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         interface_config = InterfaceConfiguration(
             film_configuration=configuration.phase_1_configuration,
             substrate_configuration=configuration.phase_2_configuration,
