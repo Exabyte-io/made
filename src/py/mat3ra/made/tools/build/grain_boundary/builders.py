@@ -3,12 +3,12 @@ from typing import List
 import numpy as np
 from mat3ra.made.material import Material
 
+from ..slab import SlabConfiguration, get_terminations, create_slab
 from ...analyze import get_chemical_formula
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
 from ..interface.builders import ZSLStrainMatchingInterfaceBuilder
 from ..supercell import create_supercell
 from .configuration import GrainBoundaryConfiguration
-from ...modify import add_vacuum
 from ...third_party import PymatgenInterface
 
 
@@ -56,9 +56,17 @@ class GrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
             supercell_matrix = np.zeros((3, 3))
             supercell_matrix[:2, :2] = configuration.slab_configuration.xy_supercell_matrix
             supercell_matrix[2, 2] = configuration.slab_configuration.thickness
-            final_slab = create_supercell(interface, supercell_matrix=supercell_matrix)
-            final_slab_with_vacuum = add_vacuum(final_slab, vacuum=configuration.slab_configuration.vacuum)
-            final_slabs.append(final_slab_with_vacuum)
+            final_slab_config = SlabConfiguration(
+                bulk=interface,
+                vacuum=configuration.slab_configuration.vacuum,
+                miller_indices=configuration.slab_configuration.miller_indices,
+                thickness=configuration.slab_configuration.thickness,
+                use_conventional_cell=False,  # Keep false to prevent Pymatgen from simplifying the interface
+                use_orthogonal_z=True,
+            )
+            termination = configuration.slab_termination or get_terminations(final_slab_config)[0]
+            final_slab = create_slab(final_slab_config, termination)
+            final_slabs.append(final_slab)
 
         return super()._finalize(final_slabs, configuration)
 
