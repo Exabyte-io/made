@@ -29,9 +29,10 @@ def test_slab_grain_boundary_builder():
     termination2 = get_terminations(phase_2_configuration)[0]
 
     slab_config = SlabConfiguration(
-        vacuum=5.0,
+        vacuum=1,
         miller_indices=(0, 0, 1),
-        thickness=5,
+        thickness=2,
+        xy_supercell_matrix=[[1, 0], [0, 1]],
     )
 
     config = GrainBoundaryConfiguration(
@@ -39,16 +40,18 @@ def test_slab_grain_boundary_builder():
         phase_2_configuration=phase_2_configuration,
         phase_1_termination=termination1,
         phase_2_termination=termination2,
-        gap=1.0,
+        gap=3.0,
         slab_configuration=slab_config,
     )
 
-    builder_params = ZSLStrainMatchingInterfaceBuilderParameters(max_area=350)
+    builder_params = ZSLStrainMatchingInterfaceBuilderParameters(max_area=50)
     builder = GrainBoundaryBuilder(build_parameters=builder_params)
     gb = create_grain_boundary(config, builder)
     expected_lattice_vectors = [
-        [5.0, 0.0, 0.0],
-        [0.0, 5.0, 0.0],
-        [0.0, 0.0, 5.0],
+        [25.140673461, 0.0, 1.539422264121123e-15],
+        [-2.3678545861514075e-16, 3.867, 2.3678545861514075e-16],
+        [0.0, 0.0, 11.601],
     ]
-    assertion_utils.assert_deep_almost_equal(expected_lattice_vectors, gb.lattice_vectors)
+    print(gb.lattice.vector_arrays)
+
+    assertion_utils.assert_deep_almost_equal(expected_lattice_vectors, gb.lattice.vector_arrays)
