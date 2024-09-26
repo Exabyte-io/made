@@ -48,8 +48,8 @@ def test_slab_grain_boundary_builder():
     builder = GrainBoundaryBuilder(build_parameters=builder_params)
     gb = create_grain_boundary(config, builder)
     expected_lattice_vectors = [
-        [25.140673461, 0.0, 1.539422264121123e-15],
-        [-2.3678545861514075e-16, 3.867, 2.3678545861514075e-16],
+        [25.140673461, 0.0, 0.0],
+        [0.0, 3.867, 0.0],
         [0.0, 0.0, 11.601],
     ]
     expected_coordinate_15 = [0.777190818, 0.5, 0.25]
