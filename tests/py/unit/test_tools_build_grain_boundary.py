@@ -1,7 +1,7 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.grain_boundary import (
-    GrainBoundaryBuilder,
-    GrainBoundaryConfiguration,
+    SlabGrainBoundaryBuilder,
+    SlabGrainBoundaryConfiguration,
     create_grain_boundary,
 )
 from mat3ra.made.tools.build.interface import ZSLStrainMatchingInterfaceBuilderParameters
@@ -35,7 +35,7 @@ def test_slab_grain_boundary_builder():
         xy_supercell_matrix=[[1, 0], [0, 1]],
     )
 
-    config = GrainBoundaryConfiguration(
+    config = SlabGrainBoundaryConfiguration(
         phase_1_configuration=phase_1_configuration,
         phase_2_configuration=phase_2_configuration,
         phase_1_termination=termination1,
@@ -45,7 +45,7 @@ def test_slab_grain_boundary_builder():
     )
 
     builder_params = ZSLStrainMatchingInterfaceBuilderParameters(max_area=50)
-    builder = GrainBoundaryBuilder(build_parameters=builder_params)
+    builder = SlabGrainBoundaryBuilder(build_parameters=builder_params)
     gb = create_grain_boundary(config, builder)
     expected_lattice_vectors = [
         [25.140673461, 0.0, 0.0],
