@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from mat3ra.made.material import Material
 
@@ -10,8 +10,8 @@ from .configuration import (
 
 
 def create_grain_boundary(
-    configuration: SlabGrainBoundaryConfiguration,
-    builder: Optional[SlabGrainBoundaryBuilder] = None,
+    configuration: Union[SlabGrainBoundaryConfiguration, SurfaceGrainBoundaryConfiguration],
+    builder: Union[SlabGrainBoundaryBuilder, SurfaceGrainBoundaryBuilder, None] = None,
 ) -> Material:
     """
     Create a grain boundary according to provided configuration with selected builder.

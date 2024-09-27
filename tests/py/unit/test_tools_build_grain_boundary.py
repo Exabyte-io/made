@@ -7,7 +7,7 @@ from mat3ra.made.tools.build.grain_boundary import (
     SurfaceGrainBoundaryConfiguration,
     create_grain_boundary,
 )
-from mat3ra.made.tools.build.interface import ZSLStrainMatchingInterfaceBuilderParameters
+from mat3ra.made.tools.build.grain_boundary.builders import SlabGrainBoundaryBuilderParameters
 from mat3ra.made.tools.build.slab import SlabConfiguration, get_terminations
 from mat3ra.utils import assertion as assertion_utils
 
@@ -49,7 +49,7 @@ def test_slab_grain_boundary_builder():
         slab_configuration=slab_config,
     )
 
-    builder_params = ZSLStrainMatchingInterfaceBuilderParameters(max_area=50)
+    builder_params = SlabGrainBoundaryBuilderParameters(max_area=50)
     builder = SlabGrainBoundaryBuilder(build_parameters=builder_params)
     gb = create_grain_boundary(config, builder)
     expected_lattice_vectors = [
