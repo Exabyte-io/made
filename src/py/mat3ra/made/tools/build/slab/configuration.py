@@ -1,16 +1,15 @@
 from typing import List, Tuple, Any
 
 import numpy as np
-from pydantic import BaseModel
-
-from mat3ra.code.entity import InMemoryEntity
 
 from mat3ra.made.material import Material
+
+from .. import BaseConfiguration
 from ...third_party import PymatgenSpacegroupAnalyzer
 from ...convert import to_pymatgen, from_pymatgen
 
 
-class SlabConfiguration(BaseModel, InMemoryEntity):
+class SlabConfiguration(BaseConfiguration):
     """
     Configuration for building a slab.
 
