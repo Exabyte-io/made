@@ -84,10 +84,13 @@ def merge_materials(
     """
     Merge multiple materials into a single material.
 
+    If some of the atoms are considered too close within a tolerance, only the last atom is kept.
+
     Args:
         materials (List[Material]): List of materials to merge.
         material_name (Optional[str]): Name of the merged material.
-        distance_tolerance (float): Distance tolerance to replace close coordinates with the last one, in angstroms.
+        distance_tolerance (float): The tolerance to replace atoms that are considered too close with respect
+            to the coordinates in the last material in the list, in angstroms.
         merge_dangerously (bool): If True, the lattices are merged "as is" with no sanity checks.
     Returns:
         Material: The merged material.
