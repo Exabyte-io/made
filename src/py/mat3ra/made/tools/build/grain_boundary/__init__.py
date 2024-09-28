@@ -1,27 +1,27 @@
-from typing import Union
+from typing import Optional, Union
 
-from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
-from .builders import (
-    SurfaceGrainBoundaryBuilder,
-    SurfaceGrainBoundaryBuilderParameters,
-    SlabGrainBoundaryBuilder,
-    SlabGrainBoundaryBuilderParameters,
+from mat3ra.made.material import Material
+
+from .builders import SlabGrainBoundaryBuilder, SurfaceGrainBoundaryBuilder, SurfaceGrainBoundaryBuilderParameters
+from .configuration import (
+    SlabGrainBoundaryConfiguration,
+    SurfaceGrainBoundaryConfiguration,
 )
 
 
 def create_grain_boundary(
-    configuration: Union[SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration],
-    builder_parameters: Union[SurfaceGrainBoundaryBuilderParameters, SlabGrainBoundaryBuilderParameters, None] = None,
-):
+    configuration: Union[SlabGrainBoundaryConfiguration, SurfaceGrainBoundaryConfiguration],
+    builder: Union[SlabGrainBoundaryBuilder, SurfaceGrainBoundaryBuilder, None] = None,
+) -> Material:
     """
-    Create a grain boundary between two surface phases.
-
+    Create a grain boundary according to provided configuration with selected builder.
     Args:
-        configuration: The configuration of the grain boundary to be created.
-        builder_parameters: The parameters to be used by the grain boundary builder.
-
+        configuration (SlabGrainBoundaryConfiguration): The configuration of the grain boundary.
+        builder (Optional[SlabGrainBoundaryBuilder]): The builder to use for creating the grain boundary.
     Returns:
-        The material with the grain boundary added.
+        Material: The material with the grain boundary.
+
     """
-    builder = SurfaceGrainBoundaryBuilder(build_parameters=builder_parameters)
-    return builder.get_materials(configuration)
+    if builder is None:
+        builder = SlabGrainBoundaryBuilder()
+    return builder.get_material(configuration)

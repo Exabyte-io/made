@@ -84,10 +84,13 @@ def merge_materials(
     """
     Merge multiple materials into a single material.
 
+    If some of the atoms are considered too close within a tolerance, only the last atom is kept.
+
     Args:
         materials (List[Material]): List of materials to merge.
         material_name (Optional[str]): Name of the merged material.
-        distance_tolerance (float): Distance tolerance to replace close coordinates with the last one, in angstroms.
+        distance_tolerance (float): The tolerance to replace atoms that are considered too close with respect
+            to the coordinates in the last material in the list, in angstroms.
         merge_dangerously (bool): If True, the lattices are merged "as is" with no sanity checks.
     Returns:
         Material: The merged material.
@@ -102,7 +105,11 @@ def merge_materials(
 
 
 def merge_two_materials_laterally(
-    phase_1_material: Material, phase_2_material: Material, gap: float, distance_tolerance: float = 1.0
+    phase_1_material: Material,
+    phase_2_material: Material,
+    gap: float,
+    cut_tolerance: Optional[float] = None,
+    distance_tolerance: float = 1.0,
 ) -> Material:
     """
     Merge two materials laterally with translation along x axis with a gap between them.
@@ -110,16 +117,20 @@ def merge_two_materials_laterally(
         phase_1_material (Material): The first material.
         phase_2_material (Material): The second material.
         gap (float): The gap between the two materials, in angstroms.
+        cut_tolerance (float): The cut tolerance to include atoms on the edge of cut, in crystal coordinates.
         distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
 
     Returns:
         Material: The merged material.
     """
+    # Default cut tolerance is half of the gap to allow atoms to fill the gap if they are on the edge
+    cut_tolerance = cut_tolerance or phase_1_material.basis.cell.convert_point_to_cartesian([gap, 0, 0])[2] / 2
+
     phase_1_material_doubled = create_supercell(phase_1_material, scaling_factor=[2, 1, 1])
-    phase_1_material = filter_by_box(phase_1_material_doubled, [0, 0, 0], [0.5, 1, 1])
+    phase_1_material = filter_by_box(phase_1_material_doubled, [0 - cut_tolerance, 0, 0], [0.5, 1, 1])
 
     phase_2_material_doubled = create_supercell(phase_2_material, scaling_factor=[2, 1, 1])
-    phase_2_material = filter_by_box(phase_2_material_doubled, [0.5, 0, 0], [1, 1, 1])
+    phase_2_material = filter_by_box(phase_2_material_doubled, [0.5 - cut_tolerance, 0, 0], [1, 1, 1])
 
     new_lattice_vectors_1 = phase_1_material.lattice.vector_arrays
     new_lattice_vectors_1[0][0] += gap

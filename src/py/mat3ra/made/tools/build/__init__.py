@@ -23,6 +23,15 @@ class BaseConfiguration(BaseModel, InMemoryEntity):
         raise NotImplementedError
 
 
+class BaseSelectorParameters(BaseModel):
+    default_index: int = 0
+
+
+class BaseBuilderParameters(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class BaseBuilder(BaseModel):
     """
     Base class for material builders.
@@ -48,6 +57,9 @@ class BaseBuilder(BaseModel):
     - `_PostProcessParametersType`: The data structure model for the post-process parameters.
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
     build_parameters: Any = None
     _BuildParametersType: Any = None
     _DefaultBuildParameters: Any = None
@@ -56,6 +68,7 @@ class BaseBuilder(BaseModel):
     _GeneratedItemType: Any = Any
     _SelectorParametersType: Any = None
     _PostProcessParametersType: Any = None
+    selector_parameters: Any = BaseSelectorParameters()
 
     def __init__(self, build_parameters: _BuildParametersType = None):
         super().__init__(build_parameters=build_parameters)
@@ -115,7 +128,9 @@ class BaseBuilder(BaseModel):
         selector_parameters: Optional[_SelectorParametersType] = None,
         post_process_parameters: Optional[_PostProcessParametersType] = None,
     ) -> Material:
-        return self.get_materials(configuration, selector_parameters, post_process_parameters)[0]
+        return self.get_materials(configuration, selector_parameters, post_process_parameters)[
+            self.selector_parameters.default_index
+        ]
 
     def _update_material_name(self, material, configuration) -> Material:
         # Do nothing by default

@@ -18,7 +18,7 @@ from ...modify import (
 )
 from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
-from ...build import BaseBuilder
+from ...build import BaseBuilder, BaseBuilderParameters
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..supercell import create_supercell
 from ..slab import create_slab, Termination, SlabConfiguration
@@ -120,7 +120,7 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
 ########################################################################################
 #                       Strain Matching Interface Builders                             #
 ########################################################################################
-class StrainMatchingInterfaceBuilderParameters(BaseModel):
+class StrainMatchingInterfaceBuilderParameters(BaseBuilderParameters):
     strain_matching_parameters: Optional[Any] = None
 
 
@@ -144,7 +144,7 @@ class ZSLStrainMatchingParameters(BaseModel):
 
 
 class ZSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilderParameters):
-    strain_matching_parameters: ZSLStrainMatchingParameters
+    strain_matching_parameters: ZSLStrainMatchingParameters = ZSLStrainMatchingParameters()
 
 
 class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMixin, StrainMatchingInterfaceBuilder):
