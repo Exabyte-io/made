@@ -33,6 +33,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
     """
 
     _BuildParametersType: type(SlabGrainBoundaryBuilderParameters) = SlabGrainBoundaryBuilderParameters  # type: ignore
+    _DefaultBuildParameters = SlabGrainBoundaryBuilderParameters()
     _ConfigurationType: type(SlabGrainBoundaryConfiguration) = SlabGrainBoundaryConfiguration  # type: ignore
     _GeneratedItemType: PymatgenInterface = PymatgenInterface  # type: ignore
     selector_parameters: type(  # type: ignore
@@ -83,6 +84,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
             f"{phase_1_formula}({phase_1_miller_indices})-{phase_2_formula}({phase_2_miller_indices}), Grain Boundary"
         )
         material.name = new_name
+        return material
 
 
 class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceBuilderParameters):

@@ -49,7 +49,7 @@ def test_slab_grain_boundary_builder():
         slab_configuration=slab_config,
     )
 
-    builder_params = SlabGrainBoundaryBuilderParameters(max_area=50)
+    builder_params = SlabGrainBoundaryBuilderParameters()
     builder = SlabGrainBoundaryBuilder(build_parameters=builder_params)
     gb = create_grain_boundary(config, builder)
     expected_lattice_vectors = [
