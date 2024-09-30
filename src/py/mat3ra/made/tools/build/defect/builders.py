@@ -28,6 +28,7 @@ from ...analyze import (
     get_atomic_coordinates_extremum,
     get_closest_site_id_from_coordinate,
     get_closest_site_id_from_coordinate_and_element,
+    get_local_extremum_atom_index,
 )
 from ....utils import get_center_of_coordinates
 from ...utils import transform_coordinate_to_supercell, coordinate as CoordinateCondition
@@ -174,7 +175,11 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
-        max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=False)
+        # max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=False)
+        max_z_id = get_local_extremum_atom_index(
+            material, position_on_surface, "max", vicinity=3.0, use_cartesian_coordinates=False
+        )
+        max_z = material.basis.coordinates.get_element_value_by_index(max_z_id)[2]
         distance_in_crystal_units = distance_z / material.lattice.c
         return [position_on_surface[0], position_on_surface[1], max_z + distance_in_crystal_units]
 
