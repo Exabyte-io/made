@@ -118,7 +118,7 @@ def double_and_filter_material(material: Material, start: List[float], end: List
     return filter_by_box(material_doubled, start, end)
 
 
-def expand_lattice_vectors(material: Material, gap: float, direction: int = 0) -> None:
+def expand_lattice_vectors(material: Material, gap: float, direction: int = 0) -> Material:
     """
     Expand the lattice vectors of the material in the specified direction by the given gap.
 
@@ -134,6 +134,7 @@ def expand_lattice_vectors(material: Material, gap: float, direction: int = 0) -
         lattice_vector2=new_lattice_vectors[1],
         lattice_vector3=new_lattice_vectors[2],
     )
+    return material
 
 
 def merge_two_materials_laterally(
@@ -169,8 +170,8 @@ def merge_two_materials_laterally(
         phase_2_material, [0.5 - edge_inclusion_tolerance_crystal, 0, 0], [1 + edge_inclusion_tolerance_crystal, 1, 1]
     )
 
-    expand_lattice_vectors(phase_1_material, gap)
-    expand_lattice_vectors(phase_2_material, gap)
+    phase_1_material = expand_lattice_vectors(phase_1_material, gap)
+    phase_2_material = expand_lattice_vectors(phase_2_material, gap)
 
     phase_2_material = translate_by_vector(phase_2_material, [gap / 2, 0, 0], use_cartesian_coordinates=True)
     interface = merge_materials([phase_1_material, phase_2_material], distance_tolerance=distance_tolerance)
