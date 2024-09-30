@@ -92,9 +92,11 @@ class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceB
     Parameters for creating a grain boundary between two surface phases.
 
     Args:
+        edge_inclusion_tolerance (float): The tolerance to include atoms on the edge of each phase, in angstrom
         distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
     """
 
+    edge_inclusion_tolerance: float = 1.0
     distance_tolerance: float = 1.0
 
 
@@ -115,6 +117,7 @@ class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
                 phase_1_material_initial,
                 phase_2_material_initial,
                 gap=item.configuration.gap,
+                edge_inclusion_tolerance=self.build_parameters.edge_inclusion_tolerance,
                 distance_tolerance=self.build_parameters.distance_tolerance,
             )
             grain_boundaries.append(interface)
