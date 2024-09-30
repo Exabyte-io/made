@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from mat3ra.made.material import Material
 
+from ...modify import add_vacuum
 from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 from ...analyze import get_chemical_formula
 from ...convert import to_pymatgen
@@ -28,7 +29,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,
             min_slab_size=configuration.thickness,
-            min_vacuum_size=configuration.vacuum,
+            min_vacuum_size=0,
             in_unit_planes=True,
             reorient_lattice=True,
             primitive=configuration.make_primitive,
@@ -47,12 +48,13 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = super()._post_process(items, post_process_parameters)
         materials = [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
-        for idx, material in enumerate(materials):
+        materials_with_vacuum = [add_vacuum(material, self.__configuration.vacuum) for material in materials]
+        for idx, material in enumerate(materials_with_vacuum):
             if "build" not in material.metadata:
                 material.metadata["build"] = {}
             material.metadata["build"]["termination"] = label_pymatgen_slab_termination(items[idx])
 
-        return materials
+        return materials_with_vacuum
 
     def get_terminations(self, configuration: _ConfigurationType) -> List[Termination]:
         return [

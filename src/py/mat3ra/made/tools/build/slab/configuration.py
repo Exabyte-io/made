@@ -1,4 +1,4 @@
-from typing import List, Tuple, Any
+from typing import List, Tuple
 
 import numpy as np
 
@@ -17,18 +17,17 @@ class SlabConfiguration(BaseConfiguration):
         bulk (Material): The bulk material.
         miller_indices (Tuple[int, int, int]): The Miller indices of the slab.
         thickness (int): The thickness of the slab.
-        vacuum (float): The vacuum thickness.
+        vacuum (float): The vacuum thickness, in Angstroms.
         xy_supercell_matrix (List[List[int]]): The supercell matrix for the xy plane.
         use_conventional_cell (bool): Whether to use the conventional cell.
         use_orthogonal_z (bool): Whether to use orthogonal z.
         make_primitive (bool): Whether to try to find primitive cell for the created slab.
     """
 
-    # TODO: fix arbitrary_types_allowed error and set Material class type
-    bulk: Any
+    bulk: Material
     miller_indices: Tuple[int, int, int] = (0, 0, 1)
     thickness: int = 1
-    vacuum: int = 1
+    vacuum: float = 5.0
     xy_supercell_matrix: List[List[int]] = np.eye(2).tolist()
     use_conventional_cell: bool = True
     use_orthogonal_z: bool = False
