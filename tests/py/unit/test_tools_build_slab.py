@@ -12,11 +12,12 @@ def test_build_slab():
         bulk=material,
         miller_indices=(0, 0, 1),
         thickness=1,
-        vacuum=1,
+        vacuum=5.0,
         xy_supercell_matrix=[[1, 0], [0, 1]],
         use_orthogonal_z=True,
         make_primitive=True,
     )
     termination = get_terminations(slab_config)[0]
     slab = create_slab(slab_config, termination)
+    print(slab.to_json())
     assertion_utils.assert_deep_almost_equal(SI_SLAB, slab.to_json())
