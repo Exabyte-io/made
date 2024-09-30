@@ -108,31 +108,40 @@ def merge_two_materials_laterally(
     phase_1_material: Material,
     phase_2_material: Material,
     gap: float,
-    edge_inclusion_tolerance: Optional[float] = None,
+    edge_inclusion_tolerance: Optional[float] = 1.0,
     distance_tolerance: float = 1.0,
 ) -> Material:
     """
     Merge two materials laterally with translation along x-axis with a gap between them.
-    Args:
+
+    Works correctly only for materials with the same lattice vectors (commensurate lattices).
+     Args:
         phase_1_material (Material): The first material.
         phase_2_material (Material): The second material.
         gap (float): The gap between the two materials, in angstroms.
-        edge_inclusion_tolerance (float): The tolerance to include atoms on the edge of the phase, crystal coordinates.
+        edge_inclusion_tolerance (float): The tolerance to include atoms on the edge of the phase, in angstroms.
         distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
 
     Returns:
         Material: The merged material.
     """
-    # Default cut tolerance is half of the gap to allow atoms to fill the gap if they are on the edge
-    edge_inclusion_tolerance = (
-        edge_inclusion_tolerance or phase_1_material.basis.cell.convert_point_to_crystal([gap, 0, 0])[0] / 2
+    edge_inclusion_tolerance_crystal = abs(
+        phase_1_material.basis.cell.convert_point_to_crystal([edge_inclusion_tolerance, 0, 0])[0]
     )
 
     phase_1_material_doubled = create_supercell(phase_1_material, scaling_factor=[2, 1, 1])
-    phase_1_material = filter_by_box(phase_1_material_doubled, [0 - edge_inclusion_tolerance, 0, 0], [0.5, 1, 1])
+    phase_1_material = filter_by_box(
+        phase_1_material_doubled,
+        [0 - edge_inclusion_tolerance_crystal, 0, 0],
+        [0.5 + edge_inclusion_tolerance_crystal, 1, 1],
+    )
 
     phase_2_material_doubled = create_supercell(phase_2_material, scaling_factor=[2, 1, 1])
-    phase_2_material = filter_by_box(phase_2_material_doubled, [0.5 - edge_inclusion_tolerance, 0, 0], [1, 1, 1])
+    phase_2_material = filter_by_box(
+        phase_2_material_doubled,
+        [0.5 - edge_inclusion_tolerance_crystal, 0, 0],
+        [1 + edge_inclusion_tolerance_crystal, 1, 1],
+    )
 
     new_lattice_vectors_1 = phase_1_material.lattice.vector_arrays
     new_lattice_vectors_1[0][0] += gap
