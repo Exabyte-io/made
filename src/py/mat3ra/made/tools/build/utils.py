@@ -124,7 +124,7 @@ def merge_two_materials_laterally(
         Material: The merged material.
     """
     # Default cut tolerance is half of the gap to allow atoms to fill the gap if they are on the edge
-    cut_tolerance = cut_tolerance or phase_1_material.basis.cell.convert_point_to_cartesian([gap, 0, 0])[2] / 2
+    cut_tolerance = cut_tolerance or phase_1_material.basis.cell.convert_point_to_crystal([gap, 0, 0])[0] / 2
 
     phase_1_material_doubled = create_supercell(phase_1_material, scaling_factor=[2, 1, 1])
     phase_1_material = filter_by_box(phase_1_material_doubled, [0 - cut_tolerance, 0, 0], [0.5, 1, 1])
