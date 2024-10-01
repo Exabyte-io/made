@@ -145,7 +145,7 @@ def stack_two_materials_xy(
     distance_tolerance: float = 1.0,
 ) -> Material:
     """
-    Merge two materials laterally with translation along x-axis with a gap between them.
+    Stack two materials laterally with translation along x-axis with a gap between them.
 
     Works correctly only for materials with the same lattice vectors (commensurate lattices).
      Args:
