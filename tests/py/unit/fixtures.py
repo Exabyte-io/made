@@ -280,7 +280,7 @@ SI_SLAB: Dict[str, Any] = {
 
 
 SI_SLAB_PASSIVATED = {
-    "name": "Si8(001), termination Si_P4/mmm_1, Slab H-passivated",
+    "name": "Si8(001), termination Si_P6/mmm_1, Slab H-passivated",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
