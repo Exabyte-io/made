@@ -340,14 +340,12 @@ SI_SLAB_PASSIVATED = {
 
 SI_SLAB_VACUUM = copy.deepcopy(SI_SLAB)
 SI_SLAB_VACUUM["basis"]["coordinates"] = [
-    {"id": 0, "value": [0.5, 0.5, 0.386029718]},
-    {"id": 1, "value": [0.5, 0.0, 0.4718141]},
-    {"id": 2, "value": [0.0, 0.0, 0.557598482]},
-    {"id": 3, "value": [-0.0, 0.5, 0.643382864]},
+    {"id": 0, "value": [0.583333333, 0.833333333, 0.149981861]},
+    {"id": 1, "value": [0.25, 0.5, 0.089989116]},
 ]
-SI_SLAB_VACUUM["basis"]["cell"] = [[3.867, 0.0, 0.0], [-0.0, 3.867, 0.0], [0.0, 0.0, 15.937527692]]
-SI_SLAB_VACUUM["lattice"]["c"] = 15.937527692
-SI_SLAB_VACUUM["lattice"]["vectors"]["c"] = [0.0, 0.0, 15.937527692]
+SI_SLAB_VACUUM["basis"]["cell"] = [[3.867, 0.0, 0.0], [1.9335, 3.348920236, 0.0], [0.0, 0.0, 13.157392279]]
+SI_SLAB_VACUUM["lattice"]["c"] = 13.157392279
+SI_SLAB_VACUUM["lattice"]["vectors"]["c"] = [0.0, 0.0, 13.157392279]
 
 
 clean_material = Material.create(Material.default_config)
