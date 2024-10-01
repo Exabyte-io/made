@@ -247,7 +247,7 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
         return material
 
 
-class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
+class CommensurateLatticeTwistedInterfaceBuilderParameters(BaseModel):
     """
     Parameters for the commensurate lattice interface builder.
 
@@ -263,7 +263,7 @@ class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
     return_first_match: bool = False
 
 
-class CommensurateLatticeInterfaceBuilder(BaseBuilder):
+class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
     _GeneratedItemType: type(CommensurateLatticePair) = CommensurateLatticePair  # type: ignore
     _ConfigurationType: type(TwistedInterfaceConfiguration) = TwistedInterfaceConfiguration  # type: ignore
 

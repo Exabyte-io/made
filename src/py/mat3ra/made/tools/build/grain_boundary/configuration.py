@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import Optional, List
 
 from .. import BaseConfiguration
 from ..slab.configuration import SlabConfiguration
 from ..slab.termination import Termination
+from ..interface.configuration import TwistedInterfaceConfiguration
 
 
 class SlabGrainBoundaryConfiguration(BaseConfiguration):
@@ -37,4 +38,25 @@ class SlabGrainBoundaryConfiguration(BaseConfiguration):
             "phase_2_termination": str(self.phase_2_termination),
             "gap": self.gap,
             "slab_configuration": self.slab_configuration.to_json(),
+        }
+
+
+class SurfaceGrainBoundaryConfiguration(TwistedInterfaceConfiguration):
+    """
+    Configuration for creating a surface grain boundary.
+
+    Args:
+        gap (float): The gap between the two phases.
+        xy_supercell_matrix (List[List[int]]): The supercell matrix to apply for both phases.
+    """
+
+    gap: float = 0.0
+    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
+
+    @property
+    def _json(self):
+        return {
+            "type": self.get_cls_name(),
+            "gap": self.gap,
+            "xy_supercell_matrix": self.xy_supercell_matrix,
         }

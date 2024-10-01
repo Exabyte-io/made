@@ -3,13 +3,19 @@ from typing import List
 import numpy as np
 from mat3ra.made.material import Material
 
-from ..slab import SlabConfiguration, get_terminations, create_slab
-from ...analyze import get_chemical_formula
-from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
-from ..interface.builders import ZSLStrainMatchingInterfaceBuilder
-from ..supercell import create_supercell
-from .configuration import SlabGrainBoundaryConfiguration
 from ...third_party import PymatgenInterface
+from ...analyze import get_chemical_formula
+from ..slab import SlabConfiguration, get_terminations, create_slab
+from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
+
+from ..interface.builders import (
+    ZSLStrainMatchingInterfaceBuilder,
+    CommensurateLatticeTwistedInterfaceBuilder,
+    CommensurateLatticeTwistedInterfaceBuilderParameters,
+)
+from ..supercell import create_supercell
+from ..utils import stack_two_materials_xy
+from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
 
 
 class SlabGrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters):
@@ -27,6 +33,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
     """
 
     _BuildParametersType: type(SlabGrainBoundaryBuilderParameters) = SlabGrainBoundaryBuilderParameters  # type: ignore
+    _DefaultBuildParameters = SlabGrainBoundaryBuilderParameters()
     _ConfigurationType: type(SlabGrainBoundaryConfiguration) = SlabGrainBoundaryConfiguration  # type: ignore
     _GeneratedItemType: PymatgenInterface = PymatgenInterface  # type: ignore
     selector_parameters: type(  # type: ignore
@@ -76,5 +83,48 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         new_name = (
             f"{phase_1_formula}({phase_1_miller_indices})-{phase_2_formula}({phase_2_miller_indices}), Grain Boundary"
         )
+        material.name = new_name
+        return material
+
+
+class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceBuilderParameters):
+    """
+    Parameters for creating a grain boundary between two surface phases.
+
+    Args:
+        edge_inclusion_tolerance (float): The tolerance to include atoms on the edge of each phase, in angstroms.
+        distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
+    """
+
+    edge_inclusion_tolerance: float = 1.0
+    distance_tolerance: float = 1.0
+
+
+class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
+    _ConfigurationType: type(SurfaceGrainBoundaryConfiguration) = SurfaceGrainBoundaryConfiguration  # type: ignore
+    _BuildParametersType = SurfaceGrainBoundaryBuilderParameters
+    _DefaultBuildParameters = SurfaceGrainBoundaryBuilderParameters()
+
+    def _post_process(self, items: List[Material], post_process_parameters=None) -> List[Material]:
+        grain_boundaries = []
+        for item in items:
+            matrix1 = np.dot(np.array(item.configuration.xy_supercell_matrix), item.matrix1)
+            matrix2 = np.dot(np.array(item.configuration.xy_supercell_matrix), item.matrix2)
+            phase_1_material_initial = create_supercell(item.configuration.film, matrix1.tolist())
+            phase_2_material_initial = create_supercell(item.configuration.film, matrix2.tolist())
+
+            interface = stack_two_materials_xy(
+                phase_1_material_initial,
+                phase_2_material_initial,
+                gap=item.configuration.gap,
+                edge_inclusion_tolerance=self.build_parameters.edge_inclusion_tolerance,
+                distance_tolerance=self.build_parameters.distance_tolerance,
+            )
+            grain_boundaries.append(interface)
+
+        return grain_boundaries
+
+    def _update_material_name(self, material: Material, configuration: SurfaceGrainBoundaryConfiguration) -> Material:
+        new_name = f"{configuration.film.name}, Grain Boundary ({configuration.twist_angle:.2f}°)"
         material.name = new_name
         return material

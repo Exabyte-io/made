@@ -1,3 +1,5 @@
+from typing import Optional
+
 from mat3ra.code.entity import InMemoryEntity
 from pydantic import BaseModel
 
@@ -35,7 +37,7 @@ class InterfaceConfiguration(BaseModel, InMemoryEntity):
 
 class TwistedInterfaceConfiguration(BaseConfiguration):
     film: Material
-    substrate: Material
+    substrate: Optional[Material] = None
     twist_angle: float = 0.0
     distance_z: float = 3.0
 
@@ -44,7 +46,7 @@ class TwistedInterfaceConfiguration(BaseConfiguration):
         return {
             "type": self.get_cls_name(),
             "film": self.film.to_json(),
-            "substrate": self.substrate.to_json(),
+            "substrate": self.substrate.to_json() if self.substrate else None,
             "twist_angle": self.twist_angle,
             "distance_z": self.distance_z,
         }
