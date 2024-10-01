@@ -137,7 +137,7 @@ def expand_lattice_vectors(material: Material, gap: float, direction: int = 0) -
     return material
 
 
-def merge_two_materials_laterally(
+def stack_two_materials_xy(
     phase_1_material: Material,
     phase_2_material: Material,
     gap: float,

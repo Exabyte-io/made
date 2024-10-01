@@ -14,7 +14,7 @@ from ..interface.builders import (
     CommensurateLatticeTwistedInterfaceBuilderParameters,
 )
 from ..supercell import create_supercell
-from ..utils import merge_two_materials_laterally
+from ..utils import stack_two_materials_xy
 from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
 
 
@@ -113,7 +113,7 @@ class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
             phase_1_material_initial = create_supercell(item.configuration.film, matrix1.tolist())
             phase_2_material_initial = create_supercell(item.configuration.film, matrix2.tolist())
 
-            interface = merge_two_materials_laterally(
+            interface = stack_two_materials_xy(
                 phase_1_material_initial,
                 phase_2_material_initial,
                 gap=item.configuration.gap,
