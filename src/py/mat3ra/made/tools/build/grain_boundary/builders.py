@@ -92,7 +92,7 @@ class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceB
     Parameters for creating a grain boundary between two surface phases.
 
     Args:
-        edge_inclusion_tolerance (float): The tolerance to include atoms on the edge of each phase, in angstrom
+        edge_inclusion_tolerance (float): The tolerance to include atoms on the edge of each phase, in angstroms.
         distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
     """
 
@@ -125,5 +125,6 @@ class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
         return grain_boundaries
 
     def _update_material_name(self, material: Material, configuration: SurfaceGrainBoundaryConfiguration) -> Material:
-        material.name = f"Surface Grain Boundary ({configuration.twist_angle:.2f}°)"
+        new_name = f"{configuration.film.name}, Grain Boundary ({configuration.twist_angle:.2f}°)"
+        material.name = new_name
         return material
