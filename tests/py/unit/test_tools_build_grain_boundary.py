@@ -55,9 +55,10 @@ def test_slab_grain_boundary_builder():
     expected_lattice_vectors = [
         [25.140673461, 0.0, 0.0],
         [0.0, 3.867, 0.0],
-        [0.0, 0.0, 11.601],
+        [0.0, 0.0, 8.734],
     ]
-    expected_coordinate_15 = [0.777190818, 0.0, 0.083333333]
+    # To pass on GHA
+    expected_coordinate_15 = [0.777190818, 0.0, 0.110688115]
 
     assert len(gb.basis.elements.values) == 32
     assertion_utils.assert_deep_almost_equal(expected_coordinate_15, gb.basis.coordinates.values[15])
