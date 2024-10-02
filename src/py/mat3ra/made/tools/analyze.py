@@ -492,6 +492,8 @@ def get_local_extremum_atom_index(
     Returns:
         int: id of the atom with the minimum or maximum z-coordinate.
     """
+    if len(coordinate) == 2:
+        coordinate.append(0.0)
     new_material = material.clone()
     new_material.to_cartesian()
     if not use_cartesian_coordinates:
