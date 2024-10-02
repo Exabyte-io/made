@@ -12,7 +12,7 @@ from mat3ra.made.material import Material
 from ....utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from ...modify import (
     translate_to_z_level,
-    rotate_material,
+    rotate,
     translate_by_vector,
     add_vacuum_sides,
 )
@@ -229,7 +229,7 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
             length=configuration.ribbon_length,
         )
         top_ribbon = create_nanoribbon(top_ribbon_configuration)
-        top_ribbon = rotate_material(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
+        top_ribbon = rotate(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
 
         translation_vector = [0, 0, configuration.distance_z]
         top_ribbon = translate_by_vector(top_ribbon, translation_vector, use_cartesian_coordinates=True)

@@ -15,11 +15,11 @@ from ...third_party import (
 
 from ...modify import (
     add_vacuum,
-    filter_material_by_ids,
+    filter_by_ids,
     filter_by_box,
     filter_by_condition_on_coordinates,
     translate_to_z_level,
-    rotate_material,
+    rotate,
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
@@ -295,7 +295,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             closest_site_id = get_closest_site_id_from_coordinate_and_element(
                 material, approximate_adatom_coordinate_cartesian, chemical_element
             )
-        only_adatom_material = filter_material_by_ids(material, [closest_site_id])
+        only_adatom_material = filter_by_ids(material, [closest_site_id])
         return only_adatom_material
 
     def create_adatom(
@@ -617,7 +617,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
 
         if rotate_to_match_pbc:
             adjusted_material = self._increase_lattice_size(result_material, delta_length, normalized_direction_vector)
-            result_material = rotate_material(material=adjusted_material, axis=normalized_rotation_axis, angle=angle)
+            result_material = rotate(material=adjusted_material, axis=normalized_rotation_axis, angle=angle)
         return result_material
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
