@@ -7,7 +7,7 @@ from scipy.spatial import cKDTree
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from .enums import SurfaceTypes
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
-from .utils import decorator_handle_periodic_boundary_conditions
+from .utils import decorator_convert_position_to_coordinate, decorator_handle_periodic_boundary_conditions
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -471,6 +471,7 @@ def get_undercoordinated_atom_indices(
     return undercoordinated_atoms_indices
 
 
+@decorator_convert_position_to_coordinate
 def get_local_extremum_atom_index(
     material: Material,
     coordinate: List[float],
@@ -492,8 +493,6 @@ def get_local_extremum_atom_index(
     Returns:
         int: id of the atom with the minimum or maximum z-coordinate.
     """
-    if len(coordinate) == 2:
-        coordinate.append(0.0)
     new_material = material.clone()
     new_material.to_cartesian()
     if not use_cartesian_coordinates:

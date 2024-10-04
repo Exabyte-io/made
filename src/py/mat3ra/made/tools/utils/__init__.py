@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -38,6 +38,35 @@ def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         new_args = [convert_2x2_to_3x3(arg) if isinstance(arg, list) and len(arg) == 2 else arg for arg in args]
         return func(*new_args, **kwargs)
+
+    return wrapper
+
+
+def decorator_convert_position_to_coordinate(func: Callable) -> Callable:
+    """
+    A decorator that converts a 2D position [x,y] to a 3D coordinate [x,y,0.0].
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if "coordinate" in kwargs:
+            coordinate = kwargs["coordinate"]
+        else:
+            # Find the position of the 'coordinate' argument and get its value
+            coordinate_index = func.__code__.co_varnames.index("coordinate")
+            coordinate = args[coordinate_index]
+
+        if len(coordinate) == 2:
+            coordinate = [coordinate[0], coordinate[1], 0.0]
+
+        if "coordinate" in kwargs:
+            kwargs["coordinate"] = coordinate
+        else:
+            args = list(args)
+            args[coordinate_index] = coordinate
+            args = tuple(args)
+
+        return func(*args, **kwargs)
 
     return wrapper
 
