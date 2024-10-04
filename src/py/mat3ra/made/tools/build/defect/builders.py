@@ -175,7 +175,6 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
-        # max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=False)
         max_z_id = get_local_extremum_atom_index(
             material, position_on_surface, "max", vicinity=3.0, use_cartesian_coordinates=False
         )

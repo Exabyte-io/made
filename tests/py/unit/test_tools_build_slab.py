@@ -19,5 +19,4 @@ def test_build_slab():
     )
     termination = get_terminations(slab_config)[0]
     slab = create_slab(slab_config, termination)
-    print(slab.to_json())
     assertion_utils.assert_deep_almost_equal(SI_SLAB, slab.to_json())
