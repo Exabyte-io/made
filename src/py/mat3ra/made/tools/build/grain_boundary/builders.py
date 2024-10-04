@@ -14,7 +14,7 @@ from ..interface.builders import (
     CommensurateLatticeTwistedInterfaceBuilderParameters,
 )
 from ..supercell import create_supercell
-from ..utils import merge_two_materials_laterally
+from ..utils import stack_two_materials_xy
 from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
 
 
@@ -92,9 +92,11 @@ class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceB
     Parameters for creating a grain boundary between two surface phases.
 
     Args:
+        edge_inclusion_tolerance (float): The tolerance to include atoms on the edge of each phase, in angstroms.
         distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
     """
 
+    edge_inclusion_tolerance: float = 1.0
     distance_tolerance: float = 1.0
 
 
@@ -111,10 +113,11 @@ class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
             phase_1_material_initial = create_supercell(item.configuration.film, matrix1.tolist())
             phase_2_material_initial = create_supercell(item.configuration.film, matrix2.tolist())
 
-            interface = merge_two_materials_laterally(
+            interface = stack_two_materials_xy(
                 phase_1_material_initial,
                 phase_2_material_initial,
                 gap=item.configuration.gap,
+                edge_inclusion_tolerance=self.build_parameters.edge_inclusion_tolerance,
                 distance_tolerance=self.build_parameters.distance_tolerance,
             )
             grain_boundaries.append(interface)
@@ -122,5 +125,6 @@ class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
         return grain_boundaries
 
     def _update_material_name(self, material: Material, configuration: SurfaceGrainBoundaryConfiguration) -> Material:
-        material.name = f"Surface Grain Boundary ({configuration.twist_angle:.2f}°)"
+        new_name = f"{configuration.film.name}, Grain Boundary ({configuration.twist_angle:.2f}°)"
+        material.name = new_name
         return material
