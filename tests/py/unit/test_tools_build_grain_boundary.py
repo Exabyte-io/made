@@ -57,7 +57,7 @@ def test_slab_grain_boundary_builder():
         [0.0, 3.867, 0.0],
         [0.0, 0.0, 8.734],
     ]
-    # To pass on GHA
+    # Adjusted expected value to pass tests on GHA due to slab generation differences between GHA and local
     expected_coordinate_15 = [0.777190818, 0.0, 0.110688115]
 
     assert len(gb.basis.elements.values) == 32

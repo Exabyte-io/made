@@ -4,7 +4,7 @@ import numpy as np
 
 from mat3ra.made.material import Material
 from ...calculate.calculators import InterfaceMaterialCalculator
-from ...modify import displace_interface_part
+from ...modify import interface_displace_part
 from ...optimize import evaluate_calculator_on_xy_grid
 from .builders import (
     SimpleInterfaceBuilder,
@@ -64,7 +64,7 @@ def get_optimal_film_displacement(
     xy_matrix, results_matrix = evaluate_calculator_on_xy_grid(
         material=material,
         calculator_function=calculator.get_energy,
-        modifier=displace_interface_part,
+        modifier=interface_displace_part,
         modifier_parameters={},
         grid_size_xy=grid_size_xy,
         grid_offset_position=grid_offset_position,

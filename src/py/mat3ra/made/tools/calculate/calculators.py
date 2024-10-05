@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from ..analyze import get_surface_atom_indices
 from ..convert.utils import InterfacePartsEnum
 from ..enums import SurfaceTypes
-from ..modify import get_interface_part
+from ..modify import interface_get_part
 from .interaction_functions import sum_of_inverse_distances_squared
 
 
@@ -101,8 +101,8 @@ class InterfaceMaterialCalculator(MaterialCalculator):
         Returns:
             float: The calculated interaction energy between the film and substrate.
         """
-        film_material = get_interface_part(material, part=InterfacePartsEnum.FILM)
-        substrate_material = get_interface_part(material, part=InterfacePartsEnum.SUBSTRATE)
+        film_material = interface_get_part(material, part=InterfacePartsEnum.FILM)
+        substrate_material = interface_get_part(material, part=InterfacePartsEnum.SUBSTRATE)
 
         film_surface_atom_indices = get_surface_atom_indices(
             film_material, SurfaceTypes.BOTTOM, shadowing_radius=shadowing_radius

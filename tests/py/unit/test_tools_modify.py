@@ -5,15 +5,15 @@ from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
 from mat3ra.made.tools.modify import (
     add_vacuum,
-    displace_interface_part,
     filter_by_circle_projection,
     filter_by_label,
     filter_by_layers,
     filter_by_rectangle_projection,
     filter_by_sphere,
     filter_by_triangle_projection,
+    interface_displace_part,
     remove_vacuum,
-    rotate_material,
+    rotate,
     translate_to_z_level,
 )
 from mat3ra.utils import assertion as assertion_utils
@@ -164,11 +164,11 @@ def test_remove_vacuum():
     assertion_utils.assert_deep_almost_equal(material_down.to_json(), material_with_set_vacuum.to_json())
 
 
-def test_rotate_material():
+def test_rotate():
     material = Material(SI_SLAB)
     # Rotation around Z and X axis will be equivalent for the original material for hist basis in terms of coordinates
-    rotated_material = rotate_material(material, [0, 0, 1], 180)
-    rotated_material = rotate_material(rotated_material, [1, 0, 0], 180)
+    rotated_material = rotate(material, [0, 0, 1], 180)
+    rotated_material = rotate(rotated_material, [1, 0, 0], 180)
     assertion_utils.assert_deep_almost_equal(
         material.basis.coordinates.values.sort(), rotated_material.basis.coordinates.values.sort()
     )
@@ -185,7 +185,7 @@ def test_displace_interface():
         {"id": 4, "value": [0.766666667, 0.866666667, 0.911447347]},
     ]
     expected_labels = GRAPHENE_NICKEL_INTERFACE["basis"]["labels"]
-    displaced_material = displace_interface_part(
+    displaced_material = interface_displace_part(
         material, [0.1, 0.2, 0.3], InterfacePartsEnum.FILM, use_cartesian_coordinates=False
     )
     assertion_utils.assert_deep_almost_equal(expected_coordinates, displaced_material.basis.coordinates.to_dict())
@@ -206,6 +206,6 @@ def test_displace_interface_optimized():
     optimal_displacement = get_optimal_film_displacement(
         material, grid_size_xy=(10, 10), grid_range_x=(-0.5, 0.5), grid_range_y=(-0.5, 0.5)
     )
-    displaced_material = displace_interface_part(material, optimal_displacement, use_cartesian_coordinates=True)
+    displaced_material = interface_displace_part(material, optimal_displacement, use_cartesian_coordinates=True)
     assertion_utils.assert_deep_almost_equal(expected_coordinates, displaced_material.basis.coordinates.to_dict())
     assertion_utils.assert_deep_almost_equal(expected_labels, displaced_material.basis.labels.to_dict())

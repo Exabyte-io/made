@@ -128,7 +128,7 @@ def wrap_to_unit_cell(material: Material) -> Material:
     return Material(from_ase(atoms))
 
 
-def filter_material_by_ids(material: Material, ids: List[int], invert: bool = False) -> Material:
+def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> Material:
     """
     Filter out only atoms corresponding to the ids.
 
@@ -174,7 +174,7 @@ def filter_by_condition_on_coordinates(
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
 
-    new_material = filter_material_by_ids(new_material, ids, invert=invert_selection)
+    new_material = filter_by_ids(new_material, ids, invert=invert_selection)
     return new_material
 
 
@@ -234,7 +234,7 @@ def filter_by_sphere(
         coordinate=center_coordinate,
         radius=radius,
     )
-    return filter_material_by_ids(material, ids, invert=invert)
+    return filter_by_ids(material, ids, invert=invert)
 
 
 def filter_by_circle_projection(
@@ -482,7 +482,7 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
     return new_material
 
 
-def rotate_material(material: Material, axis: List[int], angle: float, wrap: bool = True) -> Material:
+def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True, rotate_cell=False) -> Material:
     """
     Rotate the material around a given axis by a specified angle.
 
@@ -491,6 +491,7 @@ def rotate_material(material: Material, axis: List[int], angle: float, wrap: boo
         axis (List[int]): The axis to rotate around, expressed as [x, y, z].
         angle (float): The angle of rotation in degrees.
         wrap (bool): Whether to wrap the material to the unit cell.
+        rotate_cell (bool): Whether to rotate the cell.
     Returns:
         Atoms: The rotated material.
     """
@@ -499,14 +500,14 @@ def rotate_material(material: Material, axis: List[int], angle: float, wrap: boo
         crystal_basis.to_crystal()
         material.basis = crystal_basis
     atoms = to_ase(material)
-    atoms.rotate(v=axis, a=angle, center="COU")
+    atoms.rotate(v=axis, a=angle, center="COU", rotate_cell=rotate_cell)
     if wrap:
         atoms.wrap()
 
     return Material(from_ase(atoms))
 
 
-def displace_interface_part(
+def interface_displace_part(
     interface: Material,
     displacement: List[float],
     label: InterfacePartsEnum = InterfacePartsEnum.FILM,
@@ -542,7 +543,7 @@ def displace_interface_part(
     return new_material
 
 
-def get_interface_part(
+def interface_get_part(
     interface: Material,
     part: InterfacePartsEnum = InterfacePartsEnum.FILM,
 ) -> Material:

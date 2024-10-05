@@ -107,7 +107,7 @@ def test_create_crystal_site_adatom():
 
     assert defect.basis.elements.values[-1] == "Si"
     assertion_utils.assert_deep_almost_equal(
-        # TO pass on GHA
+        # Adjusted expected value to pass tests on GHA due to slab generation differences between GHA and local
         [0.083333333, 0.458333333, 0.561569594],
         defect.basis.coordinates.values[-1],
     )

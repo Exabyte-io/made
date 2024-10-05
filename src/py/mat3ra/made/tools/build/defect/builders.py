@@ -15,11 +15,11 @@ from ...third_party import (
 
 from ...modify import (
     add_vacuum,
-    filter_material_by_ids,
+    filter_by_ids,
     filter_by_box,
     filter_by_condition_on_coordinates,
     translate_to_z_level,
-    rotate_material,
+    rotate,
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
@@ -28,6 +28,7 @@ from ...analyze import (
     get_atomic_coordinates_extremum,
     get_closest_site_id_from_coordinate,
     get_closest_site_id_from_coordinate_and_element,
+    get_local_extremum_atom_index,
 )
 from ....utils import get_center_of_coordinates
 from ...utils import transform_coordinate_to_supercell, coordinate as CoordinateCondition
@@ -174,7 +175,10 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
-        max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=False)
+        max_z_id = get_local_extremum_atom_index(
+            material, position_on_surface, "max", vicinity=3.0, use_cartesian_coordinates=False
+        )
+        max_z = material.basis.coordinates.get_element_value_by_index(max_z_id)[2]
         distance_in_crystal_units = distance_z / material.lattice.c
         return [position_on_surface[0], position_on_surface[1], max_z + distance_in_crystal_units]
 
@@ -290,7 +294,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
             closest_site_id = get_closest_site_id_from_coordinate_and_element(
                 material, approximate_adatom_coordinate_cartesian, chemical_element
             )
-        only_adatom_material = filter_material_by_ids(material, [closest_site_id])
+        only_adatom_material = filter_by_ids(material, [closest_site_id])
         return only_adatom_material
 
     def create_adatom(
@@ -612,7 +616,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
 
         if rotate_to_match_pbc:
             adjusted_material = self._increase_lattice_size(result_material, delta_length, normalized_direction_vector)
-            result_material = rotate_material(material=adjusted_material, axis=normalized_rotation_axis, angle=angle)
+            result_material = rotate(material=adjusted_material, axis=normalized_rotation_axis, angle=angle)
         return result_material
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
