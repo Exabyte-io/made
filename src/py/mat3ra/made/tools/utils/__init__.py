@@ -44,7 +44,7 @@ def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
 
 def decorator_convert_position_to_coordinate(func: Callable) -> Callable:
     """
-    A decorator that converts a 2D position [x,y] to a 3D coordinate [x,y,0.0].
+    A decorator that converts a 2D position [x, y] to a 3D coordinate [x, y, 0.0].
     """
 
     @wraps(func)
