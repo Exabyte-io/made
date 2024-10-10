@@ -78,7 +78,8 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuil
             coords=configuration.coordinate,
             lattice=pymatgen_structure.lattice,
         )
-        defect = self._generator(pymatgen_structure, pymatgen_periodic_site)
+        # oxi_state set to 0 to allow for 2D materials, otherwise oxi_state search takes infinite loop in pymatgen
+        defect = self._generator(pymatgen_structure, pymatgen_periodic_site, oxi_state=0)
         defect_structure = defect.defect_structure.copy()
         defect_structure.remove_oxidation_states()
         return [defect_structure]
