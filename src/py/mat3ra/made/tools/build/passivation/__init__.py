@@ -16,3 +16,10 @@ def create_passivation(
     if builder is None:
         builder = SurfacePassivationBuilder(build_parameters=SurfacePassivationBuilderParameters())
     return builder.get_material(configuration)
+
+
+def get_unique_coordination_numbers(configuration: PassivationConfiguration) -> set:
+    """
+    Get the unique coordination numbers for the provided configuration as a set type.
+    """
+    return CoordinationBasedPassivationBuilder().get_unique_coordination_numbers(material=configuration.material)
