@@ -97,10 +97,27 @@ For usability purposes, we provide top-level functions that allow for the creati
 
 [//]: # (Explain the helper functions and their purpose `create_interface`.)
 
+The function with plural name takes in Configuration and Builder as arguments and returns the Result Materials list when multiple results are possible.
+
+- `create_interfaces` 
+- `create_defects`
+
+
+The function with singular name takes in Configuration and Builder as arguments and returns single Result Material object when only one result is possible, or the first, most optimal one, from the list of results ordered by some criteria.
+
 - `create_interface`
 - `create_defect`
+- `create_slab_defect`
+- `create_slab`
 - `create_perturbation`
+- `create_passivation`
+- `create_nanoribbon`
+- `create_grain_boundary`
 
+Some of the top-level functions are helpers that allow to get additional properties from configuration to refine the build process, such as:
+- `get_termaintions` for slab
+- `get_unique_coordination_numbers` for passivation
+- `get_optimal_film_displacement` for interface
 
 
 ## 3. Usage
