@@ -68,6 +68,18 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
             crystal=crystal, defect_type=defect_type, site_id=closest_site_id, chemical_element=chemical_element
         )
 
+    @classmethod
+    def from_dict(cls, crystal: Material, data: dict):
+        if "site_id" in data:
+            config = PointDefectConfiguration.from_site_id(crystal=crystal, **data)
+        elif "coordinate" in data:
+            config = PointDefectConfiguration(crystal=crystal, **data)
+        elif "approximate_coordinate" in data:
+            config = PointDefectConfiguration.from_approximate_position(crystal=crystal, **data)
+        else:
+            raise ValueError(f"Invalid defect configuration: {data}")
+        return config
+
     @property
     def _json(self):
         return {
