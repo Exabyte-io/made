@@ -7,6 +7,7 @@ from mat3ra.made.tools.build.defect import (
     PointDefectConfiguration,
     PointDefectTypeEnum,
     create_defect,
+    create_defects,
     create_slab_defect,
 )
 from mat3ra.made.tools.build.defect.builders import (
@@ -70,6 +71,25 @@ def test_create_defect_from_site_id():
 
     assert material_with_defect.basis.elements.to_dict() == [
         {"id": 0, "value": "Si"},
+        {"id": 1, "value": "Ge"},
+    ]
+
+
+def test_create_defects():
+    # Substitution of Ge in place of Si at site_id=1
+    defect_configuration1 = PointDefectConfiguration.from_site_id(
+        crystal=clean_material, defect_type=PointDefectTypeEnum.SUBSTITUTION, chemical_element="Ge", site_id=1
+    )
+    defect_configuration2 = PointDefectConfiguration.from_site_id(
+        crystal=clean_material, defect_type=PointDefectTypeEnum.SUBSTITUTION, chemical_element="Ge", site_id=0
+    )
+    defect_builder_parameters = PointDefectBuilderParameters(center_defect=False)
+    material_with_defect = create_defects(
+        builder_parameters=defect_builder_parameters, configurations=[defect_configuration1, defect_configuration2]
+    )
+
+    assert material_with_defect.basis.elements.to_dict() == [
+        {"id": 0, "value": "Ge"},
         {"id": 1, "value": "Ge"},
     ]
 
