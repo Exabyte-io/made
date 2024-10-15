@@ -76,6 +76,7 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuil
         pymatgen_periodic_site = PymatgenPeriodicSite(
             species=self._get_species(configuration),
             coords=configuration.coordinate,
+            coords_are_cartesian=configuration.use_cartesian_coordinates,
             lattice=pymatgen_structure.lattice,
         )
         # oxi_state set to 0 to allow for 2D materials, otherwise oxi_state search takes infinite loop in pymatgen

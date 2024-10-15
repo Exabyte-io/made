@@ -41,8 +41,9 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     """
 
     defect_type: PointDefectTypeEnum
-    coordinate: List[float] = [0, 0, 0]  # crystal coordinates
+    coordinate: List[float] = [0, 0, 0]
     chemical_element: Optional[str] = None
+    use_cartesian_coordinates: bool = False
 
     @classmethod
     def from_site_id(
@@ -60,10 +61,15 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         defect_type: PointDefectTypeEnum,
         approximate_coordinate: List[float],
         chemical_element: Optional[str] = None,
+        use_cartesian_coordinates: bool = False,
     ):
         if not crystal:
             raise RuntimeError("Crystal is not defined")
-        closest_site_id = get_closest_site_id_from_coordinate(crystal, approximate_coordinate)
+        closest_site_id = get_closest_site_id_from_coordinate(
+            material=crystal,
+            coordinate=approximate_coordinate,
+            use_cartesian_coordinates=use_cartesian_coordinates,
+        )
         return cls.from_site_id(
             crystal=crystal, defect_type=defect_type, site_id=closest_site_id, chemical_element=chemical_element
         )
