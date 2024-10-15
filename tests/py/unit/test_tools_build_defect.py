@@ -144,7 +144,7 @@ def test_create_terrace():
 
 
 def test_create_defect_pair():
-    defect1_config = PointDefectConfiguration.from_approximate_position(
+    defect1_config = PointDefectConfiguration.from_approximate_coordinate(
         crystal=SLAB_001,
         defect_type=PointDefectTypeEnum.VACANCY,
         approximate_coordinate=[0.5, 0.5, 0.25],

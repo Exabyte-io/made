@@ -55,7 +55,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         return cls(crystal=crystal, defect_type=defect_type, coordinate=coordinate, chemical_element=chemical_element)
 
     @classmethod
-    def from_approximate_position(
+    def from_approximate_coordinate(
         cls,
         crystal: Material,
         defect_type: PointDefectTypeEnum,
@@ -81,7 +81,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         elif "coordinate" in data:
             config = PointDefectConfiguration(crystal=crystal, **data)
         elif "approximate_coordinate" in data:
-            config = PointDefectConfiguration.from_approximate_position(crystal=crystal, **data)
+            config = PointDefectConfiguration.from_approximate_coordinate(crystal=crystal, **data)
         else:
             raise ValueError(f"Invalid defect configuration: {data}")
         return config
