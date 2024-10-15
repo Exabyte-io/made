@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300">
+  <defs>
+    <style>
+      .background { fill: #1e1e1e; }
+      .section { fill: #2d2d2d; stroke: #3a3a3a; stroke-width: 2; }
+      .box { stroke: #505050; stroke-width: 2; }
+      .material { fill: #264f78; }
+      .feature { fill: #1e4d2b; }
+      .builder { fill: #2d2d2d; }
+      .metadata { fill: #3c3c3c; }
+      .text { font-family: Arial, sans-serif; font-size: 14px; fill: #d4d4d4; }
+      .arrow { fill: none; stroke: #d4d4d4; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" class="background"/>
+
+  <!-- Input Section -->
+  <rect x="10" y="10" width="250" height="280" class="section"/>
+  <text x="135" y="35" class="text" text-anchor="middle">Input</text>
+  <rect x="20" y="50" width="230" height="230" rx="20" ry="20" class="box"/>
+  <text x="135" y="75" class="text" text-anchor="middle">Configuration</text>
+
+  <rect x="30" y="90" width="210" height="30" class="material"/>
+  <text x="135" y="110" class="text" text-anchor="middle">Material</text>
+
+  <rect x="30" y="130" width="210" height="30" class="material"/>
+  <text x="135" y="150" class="text" text-anchor="middle">Material</text>
+
+  <text x="135" y="190" class="text" text-anchor="middle">...</text>
+
+  <rect x="30" y="220" width="210" height="50" class="feature"/>
+  <text x="135" y="250" class="text" text-anchor="middle">Feature Description</text>
+
+  <!-- Workflow Section -->
+  <rect x="270" y="10" width="250" height="280" class="section"/>
+  <text x="395" y="35" class="text" text-anchor="middle">Workflow</text>
+
+  <rect x="280" y="50" width="230" height="60" rx="20" ry="20" class="box"/>
+  <text x="395" y="85" class="text" text-anchor="middle">Builder Parameters</text>
+
+  <rect x="280" y="160" width="230" height="100" class="box"/>
+  <text x="395" y="215" class="text" text-anchor="middle">Builder</text>
+
+  <!-- Output Section -->
+  <rect x="530" y="10" width="250" height="280" class="section"/>
+  <text x="655" y="35" class="text" text-anchor="middle">Output</text>
+  <rect x="540" y="50" width="230" height="230" rx="20" ry="20" class="box"/>
+  <text x="655" y="75" class="text" text-anchor="middle">(Result)</text>
+
+  <rect x="550" y="90" width="210" height="30" class="material"/>
+  <text x="655" y="110" class="text" text-anchor="middle">Material</text>
+
+  <rect x="550" y="120" width="210" height="30" class="metadata"/>
+  <text x="655" y="140" class="text" text-anchor="middle">Metadata</text>
+
+  <rect x="550" y="160" width="210" height="30" class="material"/>
+  <text x="655" y="180" class="text" text-anchor="middle">Material</text>
+
+  <rect x="550" y="190" width="210" height="30" class="metadata"/>
+  <text x="655" y="210" class="text" text-anchor="middle">Metadata</text>
+
+  <text x="655" y="250" class="text" text-anchor="middle">...</text>
+
+  <!-- Arrows -->
+  <path d="M250 180 H280" class="arrow" marker-end="url(#arrowhead)"/>
+  <path d="M395 110 V160" class="arrow" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+  <path d="M510 210 H540" class="arrow" marker-end="url(#arrowhead)"/>
+
+  <!-- Arrowhead marker -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#d4d4d4"/>
+    </marker>
+  </defs>
+</svg>

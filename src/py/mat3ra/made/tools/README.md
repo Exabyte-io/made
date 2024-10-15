@@ -72,7 +72,7 @@ One can think about the process of a creation of a new materials as a workflow, 
 - (Result) Materials: the output of the Builders (e.g. point defect in Silicon, graphene nanoribbon etc.).
 
 [//]: # (a diagram that explains the relationships between entities)
-![Made Tools](images/made-tools.png)
+![Made Tools](../../../../../images/made/tools/tools_diagram.svg)
 
 for a specific case of the creation of an interface:
 
@@ -124,7 +124,7 @@ Some of the top-level functions are helpers that allow to get additional propert
 
 ### 3.1. Installation
 
-See top-level [README](LINK) for installation instructions.
+See top-level [README](../../../../../README.md) for installation instructions.
 
 ### 3.2. Usage in Python
 
