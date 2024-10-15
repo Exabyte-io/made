@@ -99,7 +99,7 @@ For usability purposes, we provide top-level functions that allow for the creati
 
 The function with plural name takes in Configuration and Builder as arguments and returns the Result Materials list when multiple results are possible.
 
-- `create_interfaces` 
+- `create_interfaces`
 - `create_defects`
 
 
@@ -115,7 +115,7 @@ The function with singular name takes in Configuration and Builder as arguments 
 - `create_grain_boundary`
 
 Some of the top-level functions are helpers that allow to get additional properties from configuration to refine the build process, such as:
-- `get_termaintions` for slab
+- `get_terminations` for slab
 - `get_unique_coordination_numbers` for passivation
 - `get_optimal_film_displacement` for interface
 
@@ -155,7 +155,7 @@ or, alternatively, use the top-level function:
 ```python
 from mat3ra.made.tools import create_perturbation
 
-perturbed_slab = create_perturbation(perturbation_config, 
+perturbed_slab = create_perturbation(perturbation_config,
                                      builder=SlabPerturbationBuilder)
 ```
 
