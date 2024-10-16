@@ -71,13 +71,12 @@ One can think about the process of a creation of a new materials as a workflow, 
 - BuilderParameters: specific parameters of the digital representation of the transformations.
 - (Result) Materials: the output of the Builders (e.g. point defect in Silicon, graphene nanoribbon etc.).
 
-[//]: # (a diagram that explains the relationships between entities)
-![Made Tools](../../../../../images/made/tools/tools_diagram.svg)
+![Diagram](../../../../../images/made/tools/tools_diagram_general.png)
 
 for a specific case of the creation of an interface:
 
 [//]: # (a diagram that explains the relationships for an Interface)
-![Made Tools](images/made-tools.png)
+![Made Tools](../../../../../images/made/tools/tools_diagram_interface.png)
 
 
 ## 2. Code Structure.
