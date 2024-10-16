@@ -77,25 +77,34 @@ def get_chemical_formula(atoms: ASEAtoms):
     return atoms.get_chemical_formula()
 
 
-def get_closest_site_id_from_coordinate(material: Material, coordinate: List[float]) -> int:
+def get_closest_site_id_from_coordinate(
+    material: Material, coordinate: List[float], use_cartesian_coordinates: bool = False
+) -> int:
     """
     Get the site ID of the closest site to a given coordinate in the crystal.
 
     Args:
         material (Material): The material object to find the closest site in.
         coordinate (List[float]): The coordinate to find the closest site to.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates for the calculation.
 
     Returns:
         int: The site ID of the closest site.
     """
-    coordinates = np.array(material.coordinates_array)
+    new_material = material.clone()
+    if use_cartesian_coordinates:
+        new_material.to_cartesian()
+    coordinates = np.array(new_material.coordinates_array)
     coordinate = np.array(coordinate)  # type: ignore
     distances = np.linalg.norm(coordinates - coordinate, axis=1)
     return int(np.argmin(distances))
 
 
 def get_closest_site_id_from_coordinate_and_element(
-    material: Material, coordinate: List[float], chemical_element: Optional[str] = None
+    material: Material,
+    coordinate: List[float],
+    chemical_element: Optional[str] = None,
+    use_cartesian_coordinates: bool = False,
 ) -> int:
     """
     Get the site ID of the closest site with a given element to a given coordinate in the crystal.
@@ -104,16 +113,20 @@ def get_closest_site_id_from_coordinate_and_element(
         material (Material): The material object to find the closest site in.
         coordinate (List[float]): The coordinate to find the closest site to.
         chemical_element (str): The element of the site to find.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates for the calculation.
 
     Returns:
         int: The site ID of the closest site with the given element.
     """
-    coordinates = np.array(material.basis.coordinates.values)
+    new_material = material.clone()
+    if use_cartesian_coordinates:
+        new_material.to_cartesian()
+    coordinates = np.array(new_material.basis.coordinates.values)
     coordinate = np.array(coordinate)  # type: ignore
     distances = np.linalg.norm(coordinates - coordinate, axis=1)
 
     if chemical_element is not None:
-        elements = np.array(material.basis.elements.values)
+        elements = np.array(new_material.basis.elements.values)
         element_indices = np.where(elements == chemical_element)[0]
         distances = distances[element_indices]
         return int(element_indices[np.argmin(distances)])

@@ -197,7 +197,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
 
         return passivant_coordinates
 
-    def get_unique_coordination_numbers(self, material: Material):
+    def get_unique_coordination_numbers(self, material: Material) -> set:
         """
         Get unique coordination numbers for all atoms in the material for current builder parameters.
 

@@ -33,16 +33,24 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     """
     Configuration for a point defect.
 
+    Defect spatial arrangement can be set in the following ways:
+    1. **Using Exact Coordinates**: Directly specify the exact coordinates of the defect in the crystal.
+    2. **Using Approximate Coordinates**: Provide an approximate coordinate using from_approximate_coordinate method.
+    3. **Using Site ID**: Specify the defect by providing a site ID using from_site_id method.
+
+
     Args:
         crystal (Material): The Material object.
         defect_type (PointDefectTypeEnum): The type of the defect.
-        coordinate (List[float]): The crystal coordinate of the defect.
+        coordinate (Optional[List[float]]): The crystal coordinate of the defect.
         chemical_element (Optional[str]): The chemical element.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates for coordinates.
     """
 
     defect_type: PointDefectTypeEnum
-    coordinate: List[float] = [0, 0, 0]  # crystal coordinates
+    coordinate: List[float] = [0, 0, 0]
     chemical_element: Optional[str] = None
+    use_cartesian_coordinates: bool = False
 
     @classmethod
     def from_site_id(
@@ -54,19 +62,35 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         return cls(crystal=crystal, defect_type=defect_type, coordinate=coordinate, chemical_element=chemical_element)
 
     @classmethod
-    def from_approximate_position(
+    def from_approximate_coordinate(
         cls,
         crystal: Material,
         defect_type: PointDefectTypeEnum,
         approximate_coordinate: List[float],
         chemical_element: Optional[str] = None,
+        use_cartesian_coordinates: bool = False,
     ):
         if not crystal:
             raise RuntimeError("Crystal is not defined")
-        closest_site_id = get_closest_site_id_from_coordinate(crystal, approximate_coordinate)
+        closest_site_id = get_closest_site_id_from_coordinate(
+            material=crystal,
+            coordinate=approximate_coordinate,
+            use_cartesian_coordinates=use_cartesian_coordinates,
+        )
         return cls.from_site_id(
             crystal=crystal, defect_type=defect_type, site_id=closest_site_id, chemical_element=chemical_element
         )
+
+    @classmethod
+    def from_dict(cls, crystal: Material, data: dict):
+        if "site_id" in data:
+            return cls.from_site_id(crystal=crystal, **data)
+        elif "coordinate" in data:
+            return cls(crystal=crystal, **data)
+        elif "approximate_coordinate" in data:
+            return cls.from_approximate_coordinate(crystal=crystal, **data)
+        else:
+            raise ValueError(f"Invalid defect configuration: {data}")
 
     @property
     def _json(self):

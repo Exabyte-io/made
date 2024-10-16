@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from mat3ra.made.material import Material
 
 
+from mat3ra.made.utils import get_center_of_coordinates
 from ...third_party import (
     PymatgenStructure,
     PymatgenPeriodicSite,
@@ -30,7 +31,6 @@ from ...analyze import (
     get_closest_site_id_from_coordinate_and_element,
     get_local_extremum_atom_index,
 )
-from ....utils import get_center_of_coordinates
 from ...utils import transform_coordinate_to_supercell, coordinate as CoordinateCondition
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
@@ -76,9 +76,11 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuil
         pymatgen_periodic_site = PymatgenPeriodicSite(
             species=self._get_species(configuration),
             coords=configuration.coordinate,
+            coords_are_cartesian=configuration.use_cartesian_coordinates,
             lattice=pymatgen_structure.lattice,
         )
-        defect = self._generator(pymatgen_structure, pymatgen_periodic_site)
+        # oxi_state set to 0 to allow for 2D materials, otherwise oxi_state search takes infinite loop in pymatgen
+        defect = self._generator(pymatgen_structure, pymatgen_periodic_site, oxi_state=0)
         defect_structure = defect.defect_structure.copy()
         defect_structure.remove_oxidation_states()
         return [defect_structure]

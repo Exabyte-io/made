@@ -7,6 +7,7 @@ from mat3ra.made.tools.build.defect import (
     PointDefectConfiguration,
     PointDefectTypeEnum,
     create_defect,
+    create_defects,
     create_slab_defect,
 )
 from mat3ra.made.tools.build.defect.builders import (
@@ -47,7 +48,7 @@ def test_create_substitution():
 def test_create_interstitial():
     # Interstitial Ge at 0.5, 0.5, 0.5 position
     configuration = PointDefectConfiguration(
-        crystal=clean_material, defect_type="interstitial", chemical_element="Ge", position=[0.5, 0.5, 0.5]
+        crystal=clean_material, defect_type="interstitial", chemical_element="Ge", coordinate=[0.5, 0.5, 0.5]
     )
     defect = create_defect(configuration)
 
@@ -70,6 +71,25 @@ def test_create_defect_from_site_id():
 
     assert material_with_defect.basis.elements.to_dict() == [
         {"id": 0, "value": "Si"},
+        {"id": 1, "value": "Ge"},
+    ]
+
+
+def test_create_defects():
+    # Substitution of Ge in place of Si at site_id=1
+    defect_configuration1 = PointDefectConfiguration.from_site_id(
+        crystal=clean_material, defect_type=PointDefectTypeEnum.SUBSTITUTION, chemical_element="Ge", site_id=1
+    )
+    defect_configuration2 = PointDefectConfiguration.from_site_id(
+        crystal=clean_material, defect_type=PointDefectTypeEnum.SUBSTITUTION, chemical_element="Ge", site_id=0
+    )
+    defect_builder_parameters = PointDefectBuilderParameters(center_defect=False)
+    material_with_defect = create_defects(
+        builder_parameters=defect_builder_parameters, configurations=[defect_configuration1, defect_configuration2]
+    )
+
+    assert material_with_defect.basis.elements.to_dict() == [
+        {"id": 0, "value": "Ge"},
         {"id": 1, "value": "Ge"},
     ]
 
@@ -144,7 +164,7 @@ def test_create_terrace():
 
 
 def test_create_defect_pair():
-    defect1_config = PointDefectConfiguration.from_approximate_position(
+    defect1_config = PointDefectConfiguration.from_approximate_coordinate(
         crystal=SLAB_001,
         defect_type=PointDefectTypeEnum.VACANCY,
         approximate_coordinate=[0.5, 0.5, 0.25],

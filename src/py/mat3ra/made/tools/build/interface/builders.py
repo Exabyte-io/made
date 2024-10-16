@@ -9,7 +9,7 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 )
 
 from mat3ra.made.material import Material
-from ....utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
+from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from ...modify import (
     translate_to_z_level,
     rotate,
