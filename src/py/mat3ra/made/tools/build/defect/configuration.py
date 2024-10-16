@@ -33,52 +33,24 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     """
     Configuration for a point defect.
 
+    Defect spatial arrangement can be set in the following ways:
+    1. **Using Exact Coordinates**: Directly specify the exact coordinates of the defect in the crystal.
+    2. **Using Approximate Coordinates**: Provide an approximate coordinate using from_approximate_coordinate method.
+    3. **Using Site ID**: Specify the defect by providing a site ID using from_site_id method.
+
+
     Args:
         crystal (Material): The Material object.
         defect_type (PointDefectTypeEnum): The type of the defect.
         coordinate (Optional[List[float]]): The crystal coordinate of the defect.
-        approximate_coordinate (Optional[List[float]]): Approximate coordinate for the defect.
-            Ignored, if coordinate is provided.
-        site_id (Optional[int]): The site ID for the defect in the crystal. Ignored, if coordinate is provided.
         chemical_element (Optional[str]): The chemical element.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates for coordinates.
     """
 
     defect_type: PointDefectTypeEnum
-    coordinate: Optional[List[float]] = None
-    approximate_coordinate: Optional[List[float]] = None
-    site_id: Optional[int] = None
+    coordinate: List[float] = [0, 0, 0]
     chemical_element: Optional[str] = None
     use_cartesian_coordinates: bool = False
-
-    def __init__(
-        self,
-        crystal: Material,
-        defect_type: PointDefectTypeEnum,
-        coordinate: Optional[List[float]] = None,
-        site_id: Optional[int] = None,
-        approximate_coordinate: Optional[List[float]] = None,
-        chemical_element: Optional[str] = None,
-        use_cartesian_coordinates: bool = False,
-    ):
-        if coordinate is not None:
-            self.crystal = crystal
-            self.defect_type = defect_type
-            self.coordinate = coordinate
-            self.chemical_element = chemical_element
-        elif site_id is not None:
-            self.from_site_id(
-                crystal=crystal, defect_type=defect_type, site_id=site_id, chemical_element=chemical_element
-            )
-        elif approximate_coordinate is not None:
-            self.from_approximate_coordinate(
-                crystal=crystal,
-                defect_type=defect_type,
-                approximate_coordinate=approximate_coordinate,
-                chemical_element=chemical_element,
-                use_cartesian_coordinates=use_cartesian_coordinates,
-            )
-        else:
-            raise ValueError("At least one of site_id, coordinate, or approximate_coordinate must be provided.")
 
     @classmethod
     def from_site_id(
@@ -87,13 +59,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         if not crystal:
             raise RuntimeError("Crystal is not defined")
         coordinate = crystal.coordinates_array[site_id]
-        return cls(
-            crystal=crystal,
-            defect_type=defect_type,
-            site_id=site_id,
-            coordinate=coordinate,
-            chemical_element=chemical_element,
-        )
+        return cls(crystal=crystal, defect_type=defect_type, coordinate=coordinate, chemical_element=chemical_element)
 
     @classmethod
     def from_approximate_coordinate(
@@ -114,6 +80,17 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         return cls.from_site_id(
             crystal=crystal, defect_type=defect_type, site_id=closest_site_id, chemical_element=chemical_element
         )
+
+    @classmethod
+    def from_dict(cls, crystal: Material, data: dict):
+        if "site_id" in data:
+            return cls.from_site_id(crystal=crystal, **data)
+        elif "coordinate" in data:
+            return cls(crystal=crystal, **data)
+        elif "approximate_coordinate" in data:
+            return cls.from_approximate_coordinate(crystal=crystal, **data)
+        else:
+            raise ValueError(f"Invalid defect configuration: {data}")
 
     @property
     def _json(self):
