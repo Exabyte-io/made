@@ -168,10 +168,6 @@ print(perturbed_slab.to_json())
 
 ## Links
 
-1. [Exabyte Source of Schemas and Examples (ESSE), Github Repository](https://github.com/exabyte-io/exabyte-esse)
-2. [ECMAScript 2015 Language Specifications](https://www.ecma-international.org/ecma-262/6.0/)
-3. [POSCAR file format, official website](https://cms.mpi.univie.ac.at/vasp/guide/node59.html)
-4. [XYZ file format, Wikipedia](https://en.wikipedia.org/wiki/XYZ_file_format)
-5. [Quantum ESPRESSO, Official Website](https://www.quantum-espresso.org/)
-6. [Mocha, Official Website](https://mochajs.org/)
-7. [Git LFS, Official Website](https://git-lfs.github.com/)
+1. [Exabyte Source of Schemas and Examples (ESSE), Github Repository](https://arxiv.org/abs/1902.10838, "Exabyte Source of Schemas and Examples (ESSE), Github Repository")
+2. [ASE](https://wiki.fysik.dtu.dk/ase/, "ASE")
+3. [Pymatgen](https://pymatgen.org/, "Pymatgen")
