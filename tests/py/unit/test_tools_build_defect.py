@@ -48,7 +48,7 @@ def test_create_substitution():
 def test_create_interstitial():
     # Interstitial Ge at 0.5, 0.5, 0.5 position
     configuration = PointDefectConfiguration(
-        crystal=clean_material, defect_type="interstitial", chemical_element="Ge", position=[0.5, 0.5, 0.5]
+        crystal=clean_material, defect_type="interstitial", chemical_element="Ge", coordinate=[0.5, 0.5, 0.5]
     )
     defect = create_defect(configuration)
 
