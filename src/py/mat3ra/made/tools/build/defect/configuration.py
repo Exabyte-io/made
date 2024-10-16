@@ -37,7 +37,8 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         crystal (Material): The Material object.
         defect_type (PointDefectTypeEnum): The type of the defect.
         coordinate (Optional[List[float]]): The crystal coordinate of the defect.
-        approximate_coordinate (Optional[List[float]]): Approximate coordinate for the defect. Ignored, if coordinate is provided.
+        approximate_coordinate (Optional[List[float]]): Approximate coordinate for the defect.
+            Ignored, if coordinate is provided.
         site_id (Optional[int]): The site ID for the defect in the crystal. Ignored, if coordinate is provided.
         chemical_element (Optional[str]): The chemical element.
     """
