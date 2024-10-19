@@ -137,6 +137,7 @@ class SlabDefectBuilder(DefectBuilder):
             material_name=material.name,
             merge_dangerously=True,
         )
+        new_material = add_vacuum(new_material, self.build_parameters.vacuum_thickness)
         return new_material
 
 
