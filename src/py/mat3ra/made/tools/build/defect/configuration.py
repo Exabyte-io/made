@@ -109,10 +109,10 @@ class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
 
     Args:
         crystal (Material): The Material object.
-        number_of_added_layers (int): The number of added layers.
+        number_of_added_layers (Union[int, float]): The number of added layers to the slab.
     """
 
-    number_of_added_layers: int = 1
+    number_of_added_layers: Union[int, float] = 1
 
     @property
     def _json(self):
