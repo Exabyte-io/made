@@ -1,4 +1,4 @@
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Generic, TypeVar
 from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
@@ -10,9 +10,10 @@ from ...utils.coordinate import (
     SphereCoordinateCondition,
     BoxCoordinateCondition,
     TriangularPrismCoordinateCondition,
-    PlaneCoordinateCondition,
+    PlaneCoordinateCondition, CoordinateCondition,
 )
-from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum, ComplexDefectTypeEnum
+from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum, ComplexDefectTypeEnum, \
+    CoordinatesShapeEnum
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -188,6 +189,9 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
         }
 
 
+CoordinateConditionType = TypeVar('CoordinateConditionType', bound=CoordinateCondition)
+
+
 class IslandSlabDefectConfiguration(SlabDefectConfiguration):
     """
     Configuration for an island slab defect.
@@ -207,7 +211,45 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
         BoxCoordinateCondition,
         TriangularPrismCoordinateCondition,
         PlaneCoordinateCondition,
+        CoordinateConditionType
     ] = CylinderCoordinateCondition()
+
+    @classmethod
+    def from_dict(cls, crystal: Material, data: dict):
+        if "condition" in data:
+            condition = cls.get_coordinate_condition(data["condition"]["shape"], data["condition"]["params"])
+            return cls(crystal=crystal, condition=condition, **data)
+        else:
+            return cls(crystal=crystal, **data)
+
+    def get_coordinate_condition(self, shape: CoordinatesShapeEnum, dict_params: dict):
+        if shape == CoordinatesShapeEnum.CYLINDER:
+            return CylinderCoordinateCondition(
+                center_position=dict_params['center_position'],
+                radius=dict_params['radius'],
+                min_z=dict_params['min_z'],
+                max_z=dict_params['max_z']
+            )
+        elif shape == 'sphere':
+            return SphereCoordinateCondition(
+                center_position=dict_params['center_position'],
+                radius=dict_params['radius']
+            )
+        elif shape == 'box':
+            return BoxCoordinateCondition(
+                min_coordinates=dict_params['min_coordinates'],
+                max_coordinates=dict_params['max_coordinates']
+            )
+        elif shape == 'triangular_prism':
+            return TriangularPrismCoordinateCondition(
+                position_on_surface_1=dict_params['position_on_surface_1'],
+                position_on_surface_2=dict_params['position_on_surface_2'],
+                position_on_surface_3=dict_params['position_on_surface_3'],
+                min_z=dict_params['min_z'],
+                max_z=dict_params['max_z']
+            )
+        else:
+            raise ValueError(f"Unsupported island shape: {shape}")
 
     @property
     def _json(self):
