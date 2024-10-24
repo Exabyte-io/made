@@ -183,21 +183,42 @@ class SlabDefectBuilder(DefectBuilder):
             material_with_additional_layers = material.clone()
 
         if fractional_part > 0.0:
-            material_with_additional_layers = self.create_material_with_additional_layers_int(
-                material_with_additional_layers, 1
+            material_with_additional_layers = self.add_fractional_layer(
+                material_with_additional_layers, whole_layers, fractional_part
             )
-            new_c = material_with_additional_layers.lattice.c
-            layer_height = (new_c - material.lattice.c) / (whole_layers + 1)
-            original_max_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=True)
-            added_layers_max_z = original_max_z + added_thickness * layer_height
-            added_layers_max_z_crystal = material_with_additional_layers.basis.cell.convert_point_to_crystal(
-                [0, 0, added_layers_max_z]
-            )[2]
 
-            material_with_additional_layers = filter_by_box(
-                material=material_with_additional_layers,
-                max_coordinate=[1, 1, added_layers_max_z_crystal],
-            )
+        return material_with_additional_layers
+
+    def add_fractional_layer(
+        self,
+        material: Material,
+        whole_layers: int,
+        fractional_thickness: float,
+    ) -> Material:
+        """
+        Adds a fractional layer to the material.
+
+        Args:
+            material: The original material.
+            fractional_thickness: The fractional thickness to add.
+
+        Returns:
+            A new Material instance with the fractional layer added.
+        """
+        material_with_additional_layers = self.create_material_with_additional_layers_int(material, 1)
+        new_c = material_with_additional_layers.lattice.c
+        layer_height = (new_c - material.lattice.c) / (whole_layers + 1)
+        original_max_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=True)
+        added_layers_max_z = original_max_z + (whole_layers + fractional_thickness) * layer_height
+        added_layers_max_z_crystal = material_with_additional_layers.basis.cell.convert_point_to_crystal(
+            [0, 0, added_layers_max_z]
+        )[2]
+
+        material_with_additional_layers = filter_by_box(
+            material=material_with_additional_layers,
+            max_coordinate=[1, 1, added_layers_max_z_crystal],
+        )
+
         return material_with_additional_layers
 
     def merge_slab_and_defect(self, material: Material, isolated_defect: Material) -> Material:
@@ -209,8 +230,9 @@ class SlabDefectBuilder(DefectBuilder):
             material_name=material.name,
             merge_dangerously=True,
         )
-        new_material = add_vacuum(new_material, self.build_parameters.vacuum_thickness)
-        return new_material
+        new_material.to_crystal()
+        new_material_with_vacuum = add_vacuum(new_material, self.build_parameters.vacuum_thickness)
+        return new_material_with_vacuum
 
 
 class AdatomSlabDefectBuilder(SlabDefectBuilder):
