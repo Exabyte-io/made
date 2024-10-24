@@ -231,8 +231,9 @@ class SlabDefectBuilder(DefectBuilder):
             merge_dangerously=True,
         )
         new_material.to_crystal()
-        new_material_with_vacuum = add_vacuum(new_material, self.build_parameters.vacuum_thickness)
-        return new_material_with_vacuum
+        if self.build_parameters.auto_add_vacuum and get_atomic_coordinates_extremum(new_material, "max", "z") > 1:
+            new_material = add_vacuum(new_material, self.build_parameters.vacuum_thickness)
+        return new_material
 
 
 class AdatomSlabDefectBuilder(SlabDefectBuilder):
