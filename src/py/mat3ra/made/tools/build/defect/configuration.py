@@ -1,4 +1,4 @@
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Generic, TypeVar
 from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
@@ -11,8 +11,15 @@ from ...utils.coordinate import (
     BoxCoordinateCondition,
     TriangularPrismCoordinateCondition,
     PlaneCoordinateCondition,
+    CoordinateCondition,
 )
-from .enums import PointDefectTypeEnum, SlabDefectTypeEnum, AtomPlacementMethodEnum, ComplexDefectTypeEnum
+from .enums import (
+    PointDefectTypeEnum,
+    SlabDefectTypeEnum,
+    AtomPlacementMethodEnum,
+    ComplexDefectTypeEnum,
+    CoordinatesShapeEnum,
+)
 
 
 class BaseDefectConfiguration(BaseModel):
@@ -109,10 +116,10 @@ class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
 
     Args:
         crystal (Material): The Material object.
-        number_of_added_layers (int): The number of added layers.
+        number_of_added_layers (Union[int, float]): The number of added layers to the slab.
     """
 
-    number_of_added_layers: int = 1
+    number_of_added_layers: Union[int, float] = 1
 
     @property
     def _json(self):
@@ -188,7 +195,10 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
         }
 
 
-class IslandSlabDefectConfiguration(SlabDefectConfiguration):
+CoordinateConditionType = TypeVar("CoordinateConditionType", bound=CoordinateCondition)
+
+
+class IslandSlabDefectConfiguration(SlabDefectConfiguration, Generic[CoordinateConditionType]):
     """
     Configuration for an island slab defect.
 
@@ -207,7 +217,59 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration):
         BoxCoordinateCondition,
         TriangularPrismCoordinateCondition,
         PlaneCoordinateCondition,
+        CoordinateConditionType,
     ] = CylinderCoordinateCondition()
+
+    @classmethod
+    def from_dict(cls, crystal: Material, condition: dict, **kwargs):
+        """
+        Creates an IslandSlabDefectConfiguration instance from a dictionary.
+
+        Args:
+            crystal (Material): The material object.
+            condition (dict): The dictionary with shape and other parameters for the condition.
+            kwargs: Other configuration parameters (like number_of_added_layers).
+        """
+        condition_obj = cls.get_coordinate_condition(shape=condition["shape"], dict_params=condition)
+        return cls(crystal=crystal, condition=condition_obj, **kwargs)
+
+    @staticmethod
+    def get_coordinate_condition(shape: CoordinatesShapeEnum, dict_params: dict):
+        """
+        Returns the appropriate coordinate condition based on the shape provided.
+
+        Args:
+            shape (CoordinatesShapeEnum): Shape of the island (e.g., cylinder, box, etc.).
+            dict_params (dict): Parameters for the shape condition.
+
+        Returns:
+            CoordinateCondition: The appropriate condition object.
+        """
+        if shape == "cylinder":
+            return CylinderCoordinateCondition(
+                center_position=dict_params.get("center_position", [0.5, 0.5]),
+                radius=dict_params["radius"],
+                min_z=dict_params["min_z"],
+                max_z=dict_params["max_z"],
+            )
+        elif shape == "sphere":
+            return SphereCoordinateCondition(
+                center_position=dict_params.get("center_position", [0.5, 0.5]), radius=dict_params["radius"]
+            )
+        elif shape == "box":
+            return BoxCoordinateCondition(
+                min_coordinate=dict_params["min_coordinate"], max_coordinate=dict_params["max_coordinate"]
+            )
+        elif shape == "triangular_prism":
+            return TriangularPrismCoordinateCondition(
+                position_on_surface_1=dict_params["position_on_surface_1"],
+                position_on_surface_2=dict_params["position_on_surface_2"],
+                position_on_surface_3=dict_params["position_on_surface_3"],
+                min_z=dict_params["min_z"],
+                max_z=dict_params["max_z"],
+            )
+        else:
+            raise ValueError(f"Unsupported island shape: {shape}")
 
     @property
     def _json(self):

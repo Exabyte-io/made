@@ -115,18 +115,111 @@ class SlabDefectBuilder(DefectBuilder):
     _BuildParametersType = SlabDefectBuilderParameters
     _DefaultBuildParameters = SlabDefectBuilderParameters()
 
-    def create_material_with_additional_layers(self, material: Material, added_thickness: int = 1) -> Material:
+    def create_material_with_additional_layers(
+        self, material: Material, added_thickness: Union[int, float] = 1
+    ) -> Material:
+        """
+        Adds a number of layers to the material.
+
+        Args:
+            material: The original material.
+            added_thickness: The thickness to add.
+
+        Returns:
+            A new Material instance with the added layers.
+        """
+        if isinstance(added_thickness, int):
+            return self.create_material_with_additional_layers_int(material, added_thickness)
+        elif isinstance(added_thickness, float):
+            return self.create_material_with_additional_layers_float(material, added_thickness)
+        else:
+            raise TypeError("added_thickness must be an integer or float for this method.")
+
+    def create_material_with_additional_layers_int(self, material: Material, added_thickness: int = 1) -> Material:
+        """
+        Adds an integer number of layers to the material.
+
+        Args:
+            material: The original material.
+            added_thickness: The number of whole layers to add.
+
+        Returns:
+            A new Material instance with the added layers.
+        """
+
         new_material = material.clone()
         termination = Termination.from_string(new_material.metadata.get("build").get("termination"))
         build_config = new_material.metadata.get("build").get("configuration")
+
         if build_config["type"] != "SlabConfiguration":
             raise ValueError("Material is not a slab.")
         build_config.pop("type")
         build_config["thickness"] = build_config["thickness"] + added_thickness
-        new_slab_config = SlabConfiguration(**build_config)
-        material_with_additional_layer = create_slab(new_slab_config, termination)
 
-        return material_with_additional_layer
+        new_slab_config = SlabConfiguration(**build_config)
+        material_with_additional_layers = create_slab(new_slab_config, termination)
+
+        return material_with_additional_layers
+
+    def create_material_with_additional_layers_float(
+        self, material: Material, added_thickness: float = 1.0
+    ) -> Material:
+        """
+        Adds a fractional number of layers to the material.
+
+        Args:
+            material: The original material.
+            added_thickness: The fractional thickness to add.
+
+        Returns:
+            A new Material instance with the fractional layer added.
+        """
+        whole_layers = int(added_thickness)
+        fractional_part = added_thickness - whole_layers
+
+        if whole_layers > 0:
+            material_with_additional_layers = self.create_material_with_additional_layers_int(material, whole_layers)
+        else:
+            material_with_additional_layers = material.clone()
+
+        if fractional_part > 0.0:
+            material_with_additional_layers = self.add_fractional_layer(
+                material_with_additional_layers, whole_layers, fractional_part
+            )
+
+        return material_with_additional_layers
+
+    def add_fractional_layer(
+        self,
+        material: Material,
+        whole_layers: int,
+        fractional_thickness: float,
+    ) -> Material:
+        """
+        Adds a fractional layer to the material.
+
+        Args:
+            material: The original material.
+            fractional_thickness: The fractional thickness to add.
+
+        Returns:
+            A new Material instance with the fractional layer added.
+        """
+        material_with_additional_layers = self.create_material_with_additional_layers_int(material, 1)
+        new_c = material_with_additional_layers.lattice.c
+        layer_height = (new_c - material.lattice.c) / (whole_layers + 1)
+        original_max_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=True)
+        added_layers_max_z = original_max_z + (whole_layers + fractional_thickness) * layer_height
+        added_layers_max_z_crystal = material_with_additional_layers.basis.cell.convert_point_to_crystal(
+            [0, 0, added_layers_max_z]
+        )[2]
+
+        material_with_additional_layers = filter_by_box(
+            material=material_with_additional_layers,
+            max_coordinate=[1, 1, added_layers_max_z_crystal],
+        )
+
+        return material_with_additional_layers
 
     def merge_slab_and_defect(self, material: Material, isolated_defect: Material) -> Material:
         new_vacuum = isolated_defect.lattice.c - material.lattice.c
@@ -137,6 +230,9 @@ class SlabDefectBuilder(DefectBuilder):
             material_name=material.name,
             merge_dangerously=True,
         )
+        new_material.to_crystal()
+        if self.build_parameters.auto_add_vacuum and get_atomic_coordinates_extremum(new_material, "max", "z") > 1:
+            new_material = add_vacuum(new_material, self.build_parameters.vacuum_thickness)
         return new_material
 
 
