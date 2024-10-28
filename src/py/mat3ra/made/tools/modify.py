@@ -321,8 +321,10 @@ def filter_by_rectangle_projection(
     Returns:
         Material: The filtered material object.
     """
-    min_coordinate = min_coordinate[:2] + [0]
-    max_coordinate = max_coordinate[:2] + [1]
+    min_z = get_atomic_coordinates_extremum(material, "min", "z", use_cartesian_coordinates=use_cartesian_coordinates)
+    max_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=use_cartesian_coordinates)
+    min_coordinate = min_coordinate[:2] + [min_z]
+    max_coordinate = max_coordinate[:2] + [max_z]
 
     def condition(coordinate):
         return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
