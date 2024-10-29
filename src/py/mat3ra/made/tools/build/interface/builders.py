@@ -270,36 +270,67 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         film = configuration.film
         # substrate = configuration.substrate
-        max_search = self.build_parameters.max_repetition_int
         a = film.lattice.vector_arrays[0][:2]
         b = film.lattice.vector_arrays[1][:2]
+        max_int = self.__determine_max_int(a, b, configuration.twist_angle)
         commensurate_lattice_pairs = self.__generate_commensurate_lattices(
-            configuration, a, b, max_search, configuration.twist_angle
+            configuration, a, b, max_int, configuration.twist_angle
         )
         return commensurate_lattice_pairs
+
+    def __determine_max_int(self, a: List[float], b: List[float], target_angle: float) -> int:
+        """
+        Determine the maximum integer for the transformation matrices based on the target angle.
+
+        Args:
+            a (List[float]): The a lattice vector.
+            b (List[float]): The b lattice vector.
+            target_angle (float): The target twist angle, in degrees.
+
+        Returns:
+            int: The maximum integer for the transformation matrices.
+        """
+        # Compute the average length of the in-plane lattice vectors
+        length_a = np.linalg.norm(a)
+        length_b = np.linalg.norm(b)
+        average_length = (length_a + length_b) / 2
+
+        # Convert the target angle to radians
+        theta_rad = np.radians(target_angle)
+
+        # Predict the necessary maximum integer for the transformation matrices
+        if theta_rad == 0:
+            max_int = self.build_parameters.max_repetition_int
+        else:
+            max_int = int(np.ceil(average_length / theta_rad))
+
+        # Optional: Limit max_int to a predefined maximum
+        max_int = min(max_int, self.build_parameters.max_repetition_int)
+        return max_int
 
     def __generate_commensurate_lattices(
         self,
         configuration: TwistedInterfaceConfiguration,
         a: List[float],
         b: List[float],
-        max_search: int = 10,
+        max_int: int,
         target_angle: float = 0.0,
     ) -> List[CommensurateLatticePair]:
         """
-        Generate all commensurate lattices for a given search range and filter by closeness to target angle.
+        Generate all commensurate lattices for a given target angle and filter by closeness to target angle.
 
         Args:
             configuration (TwistedInterfaceConfiguration): The configuration for the twisted interface.
             a (List[float]): The a lattice vector.
             b (List[float]): The b lattice vector.
-            max_search (int): The maximum search range.
-            target_angle (float): The target angle, in degrees.
+            max_int (int): The maximum integer for the transformation matrices.
+            target_angle (float): The target twist angle, in degrees.
 
         Returns:
             List[CommensurateLatticePair]: The list of commensurate lattice pairs
         """
-        matrices = create_2d_supercell_matrices(max_search)
+        # Generate the supercell matrices using the calculated max_int
+        matrices = create_2d_supercell_matrices(max_int)
         matrix_ab = np.array([a, b])
         matrix_ab_inverse = np.linalg.inv(matrix_ab)
 
@@ -342,7 +373,7 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
             new_film = translate_by_vector(
                 new_film, [0, 0, item.configuration.distance_z], use_cartesian_coordinates=True
             )
-            interface = merge_materials([new_substrate, new_film])
+            interface = merge_materials([new_substrate, new_film], merge_dangerously=True)
             interface.metadata["actual_twist_angle"] = item.angle
             interfaces.append(interface)
         return interfaces
