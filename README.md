@@ -3,11 +3,11 @@
 
 # Made
 
-Made is a library for **MA**terials **DE**sign in JavaScript/TypeScript and Python. It allows for the creation and manipulation of material structures from atoms up on the web. The library is aimed to be used for the development of web applications, both on the client (web browser) and server (eg. Node.js) side.
+Made is a library for **MA**terials **DE**sign. It allows for creating and manipulating material structures from atoms up. The library is aimed to be used for the development of web applications, both on the client (web browser) and server (eg. Node.js) side. It has implementations in Python (including Pyodide) and JavaScript/TypeScript.
 
 ## 1. Overview
 
-The package provides a software environment for interacting with Materials-related data structures from ESSE Data Convention [[1]](#links) for use on the web.
+The package provides software concepts for interacting with Materials-related data structures. The concepts follow the ESSE Data Convention [[1]](#links).
 
 ## 2. Installation
 
