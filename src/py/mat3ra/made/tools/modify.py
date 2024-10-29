@@ -1,4 +1,4 @@
-from typing import Callable, List, Literal, Optional, Union
+from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -209,6 +209,32 @@ def filter_by_layers(
     return filter_by_condition_on_coordinates(material, condition, invert_selection=invert_selection)
 
 
+def get_default_min_max(material: Material, use_cartesian_coordinates: bool) -> Tuple[List[float], List[float]]:
+    """
+    Get default min and max coordinates for the material based on the coordinate system (crystal or cartesian).
+
+    Args:
+        material (Material): The material object.
+        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
+
+    Returns:
+        Tuple[List[float], List[float]]: Default min and max coordinates.
+    """
+    axes: List[Literal["x", "y", "z"]] = ["x", "y", "z"]
+    min_coords = []
+    max_coords = []
+    for axis in axes:
+        min_val = get_atomic_coordinates_extremum(
+            material, "min", axis, use_cartesian_coordinates=use_cartesian_coordinates
+        )
+        max_val = get_atomic_coordinates_extremum(
+            material, "max", axis, use_cartesian_coordinates=use_cartesian_coordinates
+        )
+        min_coords.append(min_val)
+        max_coords.append(max_val)
+    return min_coords, max_coords
+
+
 def filter_by_sphere(
     material: Material,
     center_coordinate: List[float] = [0, 0, 0],
@@ -270,9 +296,9 @@ def filter_by_circle_projection(
 
 def filter_by_cylinder(
     material: Material,
-    center_position: List[float] = [0.5, 0.5],
-    min_z: float = 0,
-    max_z: float = 1,
+    center_position: Optional[List[float]] = None,
+    min_z: Optional[float] = None,
+    max_z: Optional[float] = None,
     radius: float = 0.25,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
@@ -282,16 +308,27 @@ def filter_by_cylinder(
 
     Args:
         material (Material): The material object to filter.
-        center_position (List[float]): The coordinates of the center position.
+        center_position (List[float], optional): The center position of the cylinder. Defaults to material's center.
+        min_z (float, optional): Lower limit of z-coordinate. Defaults to material's min z.
+        max_z (float, optional): Upper limit of z-coordinate. Defaults to material's max z.
         radius (float): The radius of the cylinder.
-        min_z (float): Lower limit of z-coordinate.
-        max_z (float): Upper limit of z-coordinate.
-        use_cartesian_coordinates (bool): Whether to use cartesian coordinates
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
         invert_selection (bool): Whether to invert the selection.
 
     Returns:
         Material: The filtered material object.
     """
+    if center_position is None:
+        default_min, default_max = get_default_min_max(material, use_cartesian_coordinates)
+        center_position = [(min_c + max_c) / 2 for min_c, max_c in zip(default_min, default_max)]
+
+    if min_z is None or max_z is None:
+        min_z = get_atomic_coordinates_extremum(
+            material, "min", "z", use_cartesian_coordinates=use_cartesian_coordinates
+        )
+        max_z = get_atomic_coordinates_extremum(
+            material, "max", "z", use_cartesian_coordinates=use_cartesian_coordinates
+        )
 
     def condition(coordinate):
         return is_coordinate_in_cylinder(coordinate, center_position, radius, min_z, max_z)
@@ -321,8 +358,10 @@ def filter_by_rectangle_projection(
     Returns:
         Material: The filtered material object.
     """
-    min_coordinate = min_coordinate[:2] + [0]
-    max_coordinate = max_coordinate[:2] + [1]
+    min_z = get_atomic_coordinates_extremum(material, "min", "z", use_cartesian_coordinates=use_cartesian_coordinates)
+    max_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=use_cartesian_coordinates)
+    min_coordinate = min_coordinate[:2] + [min_z]
+    max_coordinate = max_coordinate[:2] + [max_z]
 
     def condition(coordinate):
         return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
@@ -334,14 +373,28 @@ def filter_by_rectangle_projection(
 
 def filter_by_box(
     material: Material,
-    min_coordinate: List[float] = [0.0, 0.0, 0.0],
-    max_coordinate: List[float] = [1.0, 1.0, 1.0],
+    min_coordinate: Optional[List[float]] = None,
+    max_coordinate: Optional[List[float]] = None,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
     """
     Get material with atoms that are within or outside an XYZ box.
+
+    Args:
+        material (Material): The material to filter.
+        min_coordinate (List[float], optional): The minimum coordinate of the box. Defaults to material's min.
+        max_coordinate (List[float], optional): The maximum coordinate of the box. Defaults to material's max.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
+        invert_selection (bool): Whether to invert the selection.
+
+    Returns:
+        Material: The filtered material object.
     """
+    if min_coordinate is None or max_coordinate is None:
+        default_min, default_max = get_default_min_max(material, use_cartesian_coordinates)
+        min_coordinate = min_coordinate if min_coordinate is not None else default_min
+        max_coordinate = max_coordinate if max_coordinate is not None else default_max
 
     def condition(coordinate):
         return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
@@ -353,30 +406,44 @@ def filter_by_box(
 
 def filter_by_triangle_projection(
     material: Material,
-    coordinate_1: List[float] = [0, 0],
-    coordinate_2: List[float] = [0, 1],
-    coordinate_3: List[float] = [1, 0],
-    min_z: float = 0,
-    max_z: float = 1,
+    coordinate_1: Optional[List[float]] = None,
+    coordinate_2: Optional[List[float]] = None,
+    coordinate_3: Optional[List[float]] = None,
+    min_z: Optional[float] = None,
+    max_z: Optional[float] = None,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
     """
-    Get material with atoms that are within or outside a prism formed by triangle projection.
+    Get material with atoms that are within or outside a triangular prism.
 
     Args:
         material (Material): The material object to filter.
-        coordinate_1 (List[float]): The coordinate of the first vertex.
-        coordinate_2 (List[float]): The coordinate of the second vertex.
-        coordinate_3 (List[float]): The coordinate of the third vertex.
-        min_z (float): Lower limit of z-coordinate.
-        max_z (float): Upper limit of z-coordinate.
-        use_cartesian_coordinates (bool): Whether to use cartesian coordinates
+        coordinate_1 (List[float], optional): First vertex of the triangle. Defaults to material's corner.
+        coordinate_2 (List[float], optional): Second vertex of the triangle. Defaults to material's corner.
+        coordinate_3 (List[float], optional): Third vertex of the triangle. Defaults to material's corner.
+        min_z (float, optional): Lower z-limit. Defaults to material's min z.
+        max_z (float, optional): Upper z-limit. Defaults to material's max z.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
         invert_selection (bool): Whether to invert the selection.
 
     Returns:
         Material: The filtered material object.
     """
+    if coordinate_1 is None or coordinate_2 is None or coordinate_3 is None:
+        default_min, default_max = get_default_min_max(material, use_cartesian_coordinates)
+        coordinate_1 = coordinate_1 if coordinate_1 is not None else [default_min[0], default_min[1]]
+        coordinate_2 = coordinate_2 if coordinate_2 is not None else [default_min[0], default_max[1]]
+        coordinate_3 = coordinate_3 if coordinate_3 is not None else [default_max[0], default_min[1]]
+
+    if min_z is None:
+        min_z = get_atomic_coordinates_extremum(
+            material, "min", "z", use_cartesian_coordinates=use_cartesian_coordinates
+        )
+    if max_z is None:
+        max_z = get_atomic_coordinates_extremum(
+            material, "max", "z", use_cartesian_coordinates=use_cartesian_coordinates
+        )
 
     def condition(coordinate):
         return is_coordinate_in_triangular_prism(coordinate, coordinate_1, coordinate_2, coordinate_3, min_z, max_z)
