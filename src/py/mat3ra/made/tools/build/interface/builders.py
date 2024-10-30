@@ -252,13 +252,14 @@ class CommensurateLatticeTwistedInterfaceBuilderParameters(BaseModel):
     Parameters for the commensurate lattice interface builder.
 
     Args:
-        max_repetition_int (int): The maximum search range for commensurate lattices.
+        max_repetition_int (Optional[int]): The maximum integer for the transformation matrices. If not provided, it
+            will be determined based on the target angle and the lattice vectors automatically.
         angle_tolerance (float): The tolerance for the angle between the commensurate lattices
             and the target angle, in degrees.
         return_first_match (bool): Whether to return the first match or all matches.
     """
 
-    max_repetition_int: int = 10
+    max_repetition_int: Optional[int] = None
     angle_tolerance: float = 0.1
     return_first_match: bool = False
 
@@ -272,10 +273,14 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         # substrate = configuration.substrate
         a = film.lattice.vector_arrays[0][:2]
         b = film.lattice.vector_arrays[1][:2]
-        max_int = self.__determine_max_int(a, b, configuration.twist_angle)
-        commensurate_lattice_pairs = self.__generate_commensurate_lattices(
-            configuration, a, b, max_int, configuration.twist_angle
-        )
+        max_int = self.build_parameters.max_repetition_int or self.__determine_max_int(a, b, configuration.twist_angle)
+        commensurate_lattice_pairs: List[CommensurateLatticePair] = []
+        while not commensurate_lattice_pairs:
+            commensurate_lattice_pairs = self.__generate_commensurate_lattices(
+                configuration, a, b, max_int, configuration.twist_angle
+            )
+            max_int += 1
+
         return commensurate_lattice_pairs
 
     def __determine_max_int(self, a: List[float], b: List[float], target_angle: float) -> int:
@@ -296,11 +301,9 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         theta_rad = np.radians(target_angle)
 
         if theta_rad == 0:
-            max_int = self.build_parameters.max_repetition_int
+            max_int = 1
         else:
             max_int = int(np.ceil(average_length / theta_rad))
-
-        max_int = max(max_int, self.build_parameters.max_repetition_int)
         return max_int
 
     def __generate_commensurate_lattices(
