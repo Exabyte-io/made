@@ -243,7 +243,7 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
     def _update_material_name(
         self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
     ) -> Material:
-        material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f}°)"
+        material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f} degrees)"
         return material
 
 
@@ -383,3 +383,9 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
                 "actual_twist_angle"
             ]
         return updated_material
+
+    def _update_material_name(
+        self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
+    ) -> Material:
+        material.name = f"Twisted Bilayer Interface ({configuration.actual_twist_angle:.2f} degrees)"
+        return material
