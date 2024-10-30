@@ -290,22 +290,17 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         Returns:
             int: The maximum integer for the transformation matrices.
         """
-        # Compute the average length of the in-plane lattice vectors
         length_a = np.linalg.norm(a)
         length_b = np.linalg.norm(b)
         average_length = (length_a + length_b) / 2
-
-        # Convert the target angle to radians
         theta_rad = np.radians(target_angle)
 
-        # Predict the necessary maximum integer for the transformation matrices
         if theta_rad == 0:
             max_int = self.build_parameters.max_repetition_int
         else:
             max_int = int(np.ceil(average_length / theta_rad))
 
-        # Optional: Limit max_int to a predefined maximum
-        max_int = min(max_int, self.build_parameters.max_repetition_int)
+        max_int = max(max_int, self.build_parameters.max_repetition_int)
         return max_int
 
     def __generate_commensurate_lattices(
