@@ -40,6 +40,7 @@ class TwistedInterfaceConfiguration(BaseConfiguration):
     substrate: Optional[Material] = None
     twist_angle: float = 0.0
     distance_z: float = 3.0
+    vacuum: float = 0.0
 
     @property
     def _json(self):

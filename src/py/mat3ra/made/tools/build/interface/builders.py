@@ -15,6 +15,7 @@ from ...modify import (
     rotate,
     translate_by_vector,
     add_vacuum_sides,
+    add_vacuum,
 )
 from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
@@ -373,6 +374,8 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
             )
             interface = merge_materials([new_substrate, new_film], merge_dangerously=True)
             interface.metadata["actual_twist_angle"] = item.angle
+            if item.configuration.vacuum != 0:
+                interface = add_vacuum(interface, item.configuration.vacuum)
             interfaces.append(interface)
         return interfaces
 
