@@ -274,7 +274,7 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         # substrate = configuration.substrate
         a = film.lattice.vector_arrays[0][:2]
         b = film.lattice.vector_arrays[1][:2]
-        max_int = self.build_parameters.max_repetition_int or self.__determine_max_int(a, b, configuration.twist_angle)
+        max_int = self.build_parameters.max_repetition_int or self.__determine_max_int(film, configuration.twist_angle)
         commensurate_lattice_pairs: List[CommensurateLatticePair] = []
         while not commensurate_lattice_pairs:
             commensurate_lattice_pairs = self.__generate_commensurate_lattices(
@@ -284,7 +284,7 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
 
         return commensurate_lattice_pairs
 
-    def __determine_max_int(self, a: List[float], b: List[float], target_angle: float) -> int:
+    def __determine_max_int(self, film, target_angle: float) -> int:
         """
         Determine the maximum integer for the transformation matrices based on the target angle.
 
@@ -296,13 +296,22 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         Returns:
             int: The maximum integer for the transformation matrices.
         """
+        a = film.lattice.vector_arrays[0][:2]
+        b = film.lattice.vector_arrays[1][:2]
         length_a = np.linalg.norm(a)
         length_b = np.linalg.norm(b)
         average_length = (length_a + length_b) / 2
         theta_rad = np.radians(target_angle)
 
+        # Factor in both the lattice length and twist angle, ensuring a minimum of 1 for very small angles
         if theta_rad == 0:
             max_int = 1
+        if film.lattice.type == "HEX":
+            from .enums import angle_to_lmpq
+
+            closest_match = min(angle_to_lmpq, key=lambda x: abs(x[0] - target_angle))
+            l, m, p, q = closest_match[1]  # type: ignore
+            max_int = max(l, m, p, q)
         else:
             max_int = int(np.ceil(average_length / theta_rad))
         return max_int
