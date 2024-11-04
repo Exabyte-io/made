@@ -274,9 +274,11 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         # substrate = configuration.substrate
         a = film.lattice.vector_arrays[0][:2]
         b = film.lattice.vector_arrays[1][:2]
-        max_int = self.build_parameters.max_repetition_int or self.__determine_max_int(film, configuration.twist_angle)
+        max_int = self.build_parameters.max_repetition_int or self.__get_initial_guess_for_max_int(
+            film, configuration.twist_angle
+        )
         commensurate_lattice_pairs: List[CommensurateLatticePair] = []
-        while not commensurate_lattice_pairs:
+        while not commensurate_lattice_pairs and max_int < 42:
             commensurate_lattice_pairs = self.__generate_commensurate_lattices(
                 configuration, a, b, max_int, configuration.twist_angle
             )
@@ -284,7 +286,7 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
 
         return commensurate_lattice_pairs
 
-    def __determine_max_int(self, film, target_angle: float) -> int:
+    def __get_initial_guess_for_max_int(self, film, target_angle: float) -> int:
         """
         Determine the maximum integer for the transformation matrices based on the target angle.
 
@@ -307,11 +309,10 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         if theta_rad == 0:
             max_int = 1
         if film.lattice.type == "HEX":
-            from .enums import angle_to_lmpq
+            from .enums import angle_to_lmpq_hex
 
-            closest_match = min(angle_to_lmpq, key=lambda x: abs(x[0] - target_angle))
-            l, m, p, q = closest_match[1]  # type: ignore
-            max_int = max(l, m, p, q)
+            closest_match = min(angle_to_lmpq_hex, key=lambda x: abs(x[0] - target_angle))
+            max_int = max(closest_match[1])
         else:
             max_int = int(np.ceil(average_length / theta_rad))
         return max_int
