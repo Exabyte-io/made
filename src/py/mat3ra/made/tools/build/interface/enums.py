@@ -13,7 +13,7 @@ class SupercellTypes(str, Enum):
 
 
 # Tabulation from https://github.com/qtm-iisc/Twister/blob/474156a2a59f2b9d59350b32de56864a9496f848/examples/Homobilayer_hex/hex.table
-angle_to_lmpq_hex = [
+angle_to_supercell_matrix_values_for_hex = [
     (60.0, [0, 1, -1, 1]),
     (21.7867892983, [1, 2, -2, 3]),
     (13.1735511073, [2, 3, -3, 5]),
