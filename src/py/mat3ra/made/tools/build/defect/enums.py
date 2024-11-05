@@ -26,6 +26,12 @@ class AtomPlacementMethodEnum(str, Enum):
     EQUIDISTANT = "equidistant"
     # Places the atom at the existing or extrapolated crystal site closest to the given coordinate.
     CRYSTAL_SITE = "crystal_site"
+    # Places the atom at the hollow site of the surface (for HEX)
+    HOLLOW_SITE = "hollow"
+    # Places the atom at the bridge site of the surface (for HEX)
+    BRIDGE_SITE = "bridge"
+    # Places the atom at the on-top site of the surface (for HEX)
+    ON_TOP_SITE = "on_top"
 
 
 class CoordinatesShapeEnum(str, Enum):

@@ -44,6 +44,7 @@ from .configuration import (
     PointDefectPairConfiguration,
 )
 from .factories import DefectBuilderFactory
+from pymatgen.analysis.adsorption import AdsorbateSiteFinder
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -432,6 +433,36 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         )
 
         return self.merge_slab_and_defect(new_material, only_adatom_material)
+
+
+class HollowSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
+    """
+    Builder class for generating adatoms at hollow sites.
+
+    The adatom is placed at the hollow site closest to the specified position on the surface of the material.
+
+    """
+
+    def _calculate_coordinate_from_position_and_distance(
+        self, material: Material, position_on_surface: List[float], distance_z: float
+    ) -> List[float]:
+        coordinate = super()._calculate_coordinate_from_position_and_distance(material, position_on_surface, distance_z)
+        pymatgen_structure = to_pymatgen(material)
+        asf = AdsorbateSiteFinder(pymatgen_structure)
+
+        sites = asf.find_adsorption_sites(
+            positions=[
+                "hollow",
+            ],
+            no_obtuse_hollow=False,
+        )
+        hollow_coordinates = [array.tolist() for array in sites["hollow"]]
+        print(hollow_coordinates)
+        closest_hollow_site_coordinate = min(
+            hollow_coordinates, key=lambda x: np.linalg.norm(np.array(x) - np.array(coordinate))
+        )
+        print(closest_hollow_site_coordinate[0:2] + [coordinate[2]])
+        return closest_hollow_site_coordinate[0:2] + [coordinate[2]]
 
 
 class DefectPairBuilder(DefectBuilder):
