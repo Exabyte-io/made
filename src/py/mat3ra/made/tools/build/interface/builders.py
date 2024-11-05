@@ -301,14 +301,12 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         Returns:
             int: The maximum integer for the transformation matrices.
         """
-        if np.isclose(target_angle, 0.0, atol=0.01):
-            max_int = 1
         if film.lattice.type == "HEX":
             tabulated_matrix_match_for_given_angle = min(
                 angle_to_supercell_matrix_values_for_hex, key=lambda x: abs(x[0] - target_angle)
             )
-            max_int = max(tabulated_matrix_match_for_given_angle[1])
-        return max_int
+            return max(tabulated_matrix_match_for_given_angle[1])
+        return 1
 
     def __generate_commensurate_lattices(
         self,
