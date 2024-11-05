@@ -80,11 +80,19 @@ def create_slab_defect(
 
     Args:
         configuration: The configuration of the defect to be added.
-        builder: The builder to be used to create the defect.
+        builder: Optional builder to be used to create the defect.
+            If None, builder will be selected based on configuration.
 
     Returns:
         The material with the defect added.
     """
     if builder is None:
-        builder = AdatomSlabDefectBuilder(build_parameters=SlabDefectBuilderParameters())
+        if configuration.defect_type == PointDefectTypeEnum.ADATOM:
+            builder_key = f"adatom:{configuration.placement_method.lower()}"
+        else:
+            builder_key = configuration.defect_type.lower()
+
+        BuilderClass = DefectBuilderFactory.get_class_by_name(builder_key)
+        builder = BuilderClass(build_parameters=SlabDefectBuilderParameters())
+
     return builder.get_material(configuration)
