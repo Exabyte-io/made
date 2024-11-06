@@ -15,6 +15,7 @@ from ...modify import (
     rotate,
     translate_by_vector,
     add_vacuum_sides,
+    add_vacuum,
 )
 from ...analyze import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
@@ -28,7 +29,7 @@ from ..mixins import (
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 
-from .enums import StrainModes
+from .enums import StrainModes, angle_to_supercell_matrix_values_for_hex
 from .configuration import (
     InterfaceConfiguration,
     NanoRibbonTwistedInterfaceConfiguration,
@@ -243,7 +244,7 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
     def _update_material_name(
         self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
     ) -> Material:
-        material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f}°)"
+        material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f} degrees)"
         return material
 
 
@@ -252,13 +253,16 @@ class CommensurateLatticeTwistedInterfaceBuilderParameters(BaseModel):
     Parameters for the commensurate lattice interface builder.
 
     Args:
-        max_repetition_int (int): The maximum search range for commensurate lattices.
+        max_supercell_matrix_int (Optional[int]): The maximum integer for the transformation matrices.
+            If not provided, it will be determined based on the target angle and the lattice vectors automatically.
+        limit_max_int (Optional[int]): The limit for the maximum integer for the transformation matrices when searching
         angle_tolerance (float): The tolerance for the angle between the commensurate lattices
             and the target angle, in degrees.
         return_first_match (bool): Whether to return the first match or all matches.
     """
 
-    max_repetition_int: int = 10
+    max_supercell_matrix_int: Optional[int] = None
+    limit_max_int: Optional[int] = 42
     angle_tolerance: float = 0.1
     return_first_match: bool = False
 
@@ -270,36 +274,65 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
         film = configuration.film
         # substrate = configuration.substrate
-        max_search = self.build_parameters.max_repetition_int
         a = film.lattice.vector_arrays[0][:2]
         b = film.lattice.vector_arrays[1][:2]
-        commensurate_lattice_pairs = self.__generate_commensurate_lattices(
-            configuration, a, b, max_search, configuration.twist_angle
+        max_int = self.build_parameters.max_supercell_matrix_int or self.__get_initial_guess_for_max_int(
+            film, configuration.twist_angle
         )
+        commensurate_lattice_pairs: List[CommensurateLatticePair] = []
+        while not commensurate_lattice_pairs and max_int < self.build_parameters.limit_max_int:
+            print(f"Trying max_int = {max_int}")
+            commensurate_lattice_pairs = self.__generate_commensurate_lattices(
+                configuration, a, b, max_int, configuration.twist_angle
+            )
+            max_int += 1
+
         return commensurate_lattice_pairs
+
+    def __get_initial_guess_for_max_int(self, film, target_angle: float) -> int:
+        """
+        Determine the maximum integer for the transformation matrices based on the target angle.
+
+        Args:
+            a (List[float]): The a lattice vector.
+            b (List[float]): The b lattice vector.
+            target_angle (float): The target twist angle, in degrees.
+
+        Returns:
+            int: The maximum integer for the transformation matrices.
+        """
+        if film.lattice.type == "HEX":
+            # getting max int of the matrix that has angle closest to target angle
+            xy_supercell_matrix_for_closest_angle = min(
+                angle_to_supercell_matrix_values_for_hex, key=lambda x: abs(x["angle"] - target_angle)
+            )
+            # Get maximum absolute value from the supercell matrix values
+            return max(abs(x) for row in xy_supercell_matrix_for_closest_angle["xy_supercell"] for x in row)
+        return 1
 
     def __generate_commensurate_lattices(
         self,
         configuration: TwistedInterfaceConfiguration,
         a: List[float],
         b: List[float],
-        max_search: int = 10,
+        max_supercell_matrix_element_int: int,
         target_angle: float = 0.0,
     ) -> List[CommensurateLatticePair]:
         """
-        Generate all commensurate lattices for a given search range and filter by closeness to target angle.
+        Generate all commensurate lattices for a given target angle and filter by closeness to target angle.
 
         Args:
             configuration (TwistedInterfaceConfiguration): The configuration for the twisted interface.
             a (List[float]): The a lattice vector.
             b (List[float]): The b lattice vector.
-            max_search (int): The maximum search range.
-            target_angle (float): The target angle, in degrees.
+            max_supercell_matrix_element_int (int): The maximum integer for the transformation matrices.
+            target_angle (float): The target twist angle, in degrees.
 
         Returns:
             List[CommensurateLatticePair]: The list of commensurate lattice pairs
         """
-        matrices = create_2d_supercell_matrices(max_search)
+        # Generate the supercell matrices using the calculated max_supercell_matrix_element_int
+        matrices = create_2d_supercell_matrices(max_supercell_matrix_element_int)
         matrix_ab = np.array([a, b])
         matrix_ab_inverse = np.linalg.inv(matrix_ab)
 
@@ -342,8 +375,10 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
             new_film = translate_by_vector(
                 new_film, [0, 0, item.configuration.distance_z], use_cartesian_coordinates=True
             )
-            interface = merge_materials([new_substrate, new_film])
+            interface = merge_materials([new_substrate, new_film], merge_dangerously=True)
             interface.metadata["actual_twist_angle"] = item.angle
+            if item.configuration.vacuum != 0:
+                interface = add_vacuum(interface, item.configuration.vacuum)
             interfaces.append(interface)
         return interfaces
 
@@ -354,3 +389,9 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
                 "actual_twist_angle"
             ]
         return updated_material
+
+    def _update_material_name(
+        self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
+    ) -> Material:
+        material.name = f"Twisted Bilayer Interface ({material.metadata['actual_twist_angle']:.2f} degrees)"
+        return material
