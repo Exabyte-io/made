@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import TypedDict, List
 
 
 class StrainModes(str, Enum):
@@ -12,9 +13,14 @@ class SupercellTypes(str, Enum):
     orthogonal = "orthogonal"
 
 
+class SupercellMatrix(TypedDict):
+    angle: float
+    xy_supercell: List[List[int]]
+
+
 # Tabulation from https://github.com/qtm-iisc/Twister/blob/474156a2a59f2b9d59350b32de56864a9496f848/examples/Homobilayer_hex/hex.table
 # Maps twist angle to supercell matrix values for homo-material hexagonal supercells bilayer
-angle_to_supercell_matrix_values_for_hex = [
+angle_to_supercell_matrix_values_for_hex: List[SupercellMatrix] = [
     {"angle": 60.0, "xy_supercell": [[0, 1], [-1, 1]]},
     {"angle": 21.7867892983, "xy_supercell": [[1, 2], [-2, 3]]},
     {"angle": 13.1735511073, "xy_supercell": [[2, 3], [-3, 5]]},
