@@ -33,7 +33,7 @@
         "@babel/register": "^7.22.15",
         "@babel/runtime-corejs3": "^7.16.8",
         "@exabyte-io/eslint-config": "^2023.8.29-1",
-        "@mat3ra/code": "2024.6.4-0",
+        "@mat3ra/code": "2024.10.4-0",
         "@mat3ra/esse": "2024.6.4-1",
         "@mat3ra/tsconfig": "2024.6.3-0",
         "@types/crypto-js": "^4.2.2",

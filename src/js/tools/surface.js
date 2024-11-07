@@ -107,7 +107,7 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
  * @return {Number[][]}
  */
 function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, thickness, vx, vy) {
-    const transformationMatrix = math.eye(3).toArray();
+    const transformationMatrix = math.identity(3).toArray();
     const vxIndex = outOfPlaneAxisIndex === 2 ? 0 : outOfPlaneAxisIndex + 1;
     const vyIndex = vxIndex === 2 ? 0 : vxIndex + 1;
 

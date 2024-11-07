@@ -29,7 +29,7 @@ from ..mixins import (
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 
-from .enums import StrainModes
+from .enums import StrainModes, angle_to_supercell_matrix_values_for_hex
 from .configuration import (
     InterfaceConfiguration,
     NanoRibbonTwistedInterfaceConfiguration,
@@ -253,14 +253,16 @@ class CommensurateLatticeTwistedInterfaceBuilderParameters(BaseModel):
     Parameters for the commensurate lattice interface builder.
 
     Args:
-        max_repetition_int (Optional[int]): The maximum integer for the transformation matrices. If not provided, it
-            will be determined based on the target angle and the lattice vectors automatically.
+        max_supercell_matrix_int (Optional[int]): The maximum integer for the transformation matrices.
+            If not provided, it will be determined based on the target angle and the lattice vectors automatically.
+        limit_max_int (Optional[int]): The limit for the maximum integer for the transformation matrices when searching
         angle_tolerance (float): The tolerance for the angle between the commensurate lattices
             and the target angle, in degrees.
         return_first_match (bool): Whether to return the first match or all matches.
     """
 
-    max_repetition_int: Optional[int] = None
+    max_supercell_matrix_int: Optional[int] = None
+    limit_max_int: Optional[int] = 42
     angle_tolerance: float = 0.1
     return_first_match: bool = False
 
@@ -274,11 +276,12 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         # substrate = configuration.substrate
         a = film.lattice.vector_arrays[0][:2]
         b = film.lattice.vector_arrays[1][:2]
-        max_int = self.build_parameters.max_repetition_int or self.__get_initial_guess_for_max_int(
+        max_int = self.build_parameters.max_supercell_matrix_int or self.__get_initial_guess_for_max_int(
             film, configuration.twist_angle
         )
         commensurate_lattice_pairs: List[CommensurateLatticePair] = []
-        while not commensurate_lattice_pairs and max_int < 42:
+        while not commensurate_lattice_pairs and max_int < self.build_parameters.limit_max_int:
+            print(f"Trying max_int = {max_int}")
             commensurate_lattice_pairs = self.__generate_commensurate_lattices(
                 configuration, a, b, max_int, configuration.twist_angle
             )
@@ -298,31 +301,21 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         Returns:
             int: The maximum integer for the transformation matrices.
         """
-        a = film.lattice.vector_arrays[0][:2]
-        b = film.lattice.vector_arrays[1][:2]
-        length_a = np.linalg.norm(a)
-        length_b = np.linalg.norm(b)
-        average_length = (length_a + length_b) / 2
-        theta_rad = np.radians(target_angle)
-
-        # Factor in both the lattice length and twist angle, ensuring a minimum of 1 for very small angles
-        if theta_rad == 0:
-            max_int = 1
         if film.lattice.type == "HEX":
-            from .enums import angle_to_lmpq_hex
-
-            closest_match = min(angle_to_lmpq_hex, key=lambda x: abs(x[0] - target_angle))
-            max_int = max(closest_match[1])
-        else:
-            max_int = int(np.ceil(average_length / theta_rad))
-        return max_int
+            # getting max int of the matrix that has angle closest to target angle
+            xy_supercell_matrix_for_closest_angle = min(
+                angle_to_supercell_matrix_values_for_hex, key=lambda x: abs(x["angle"] - target_angle)
+            )
+            # Get maximum absolute value from the supercell matrix values
+            return max(abs(x) for row in xy_supercell_matrix_for_closest_angle["xy_supercell"] for x in row)
+        return 1
 
     def __generate_commensurate_lattices(
         self,
         configuration: TwistedInterfaceConfiguration,
         a: List[float],
         b: List[float],
-        max_int: int,
+        max_supercell_matrix_element_int: int,
         target_angle: float = 0.0,
     ) -> List[CommensurateLatticePair]:
         """
@@ -332,14 +325,14 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
             configuration (TwistedInterfaceConfiguration): The configuration for the twisted interface.
             a (List[float]): The a lattice vector.
             b (List[float]): The b lattice vector.
-            max_int (int): The maximum integer for the transformation matrices.
+            max_supercell_matrix_element_int (int): The maximum integer for the transformation matrices.
             target_angle (float): The target twist angle, in degrees.
 
         Returns:
             List[CommensurateLatticePair]: The list of commensurate lattice pairs
         """
-        # Generate the supercell matrices using the calculated max_int
-        matrices = create_2d_supercell_matrices(max_int)
+        # Generate the supercell matrices using the calculated max_supercell_matrix_element_int
+        matrices = create_2d_supercell_matrices(max_supercell_matrix_element_int)
         matrix_ab = np.array([a, b])
         matrix_ab_inverse = np.linalg.inv(matrix_ab)
 
