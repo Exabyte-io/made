@@ -452,7 +452,8 @@ class DefectPairBuilder(DefectBuilder):
         """
         primary_material = self.create_isolated_defect(primary_defect_configuration)
         # Remove metadata to allow for independent defect creation
-        primary_material.metadata["build"] = primary_defect_configuration.crystal.metadata["build"]
+        if hasattr(primary_defect_configuration.crystal.metadata, "build"):
+            primary_material.metadata["build"] = primary_defect_configuration.crystal.metadata["build"]
         primary_material.name = primary_defect_configuration.crystal.name
         secondary_defect_configuration.crystal = primary_material
         secondary_material = self.create_isolated_defect(secondary_defect_configuration)
