@@ -8,6 +8,15 @@ from ...utils.perturbation import SineWavePerturbationFunctionHolder, Perturbati
 
 
 class PerturbationConfiguration(BaseModel, InMemoryEntity):
+    """
+    Configuration for a geometrical perturbation.
+
+    Args:
+        material (Material): The Material object.
+        perturbation_function_holder (PerturbationFunctionHolder): The perturbation function holder.
+        use_cartesian_coordinates (bool): Whether to use cartesian coordinates
+    """
+
     material: Material
     perturbation_function_holder: Union[
         SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
