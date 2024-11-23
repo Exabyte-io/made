@@ -11,6 +11,18 @@ from ..slab.configuration import SlabConfiguration
 
 
 class InterfaceConfiguration(BaseModel, InMemoryEntity):
+    """
+    Configuration for an interface between two slabs.
+
+    Args:
+        film_configuration (SlabConfiguration): The configuration of the film slab.
+        substrate_configuration (SlabConfiguration): The configuration of the substrate slab.
+        film_termination (Termination): The termination of the film.
+        substrate_termination (Termination): The termination of the substrate.
+        distance_z (float): The distance between the film and the substrate in Angstroms.
+        vacuum (float): The vacuum thickness, in Angstroms.
+    """
+
     film_configuration: SlabConfiguration
     substrate_configuration: SlabConfiguration
     film_termination: Termination
@@ -36,6 +48,17 @@ class InterfaceConfiguration(BaseModel, InMemoryEntity):
 
 
 class TwistedInterfaceConfiguration(BaseConfiguration):
+    """
+    Configuration for creating a twisted interface between two slabs with specified twist angle.
+
+    Args:
+        film (Material): The film material.
+        substrate (Material): The substrate material.
+        twist_angle (float): Twist angle in degrees.
+        distance_z (float): Vertical distance between layers in Angstroms.
+        vacuum (float): Vacuum thickness, in Angstroms.
+    """
+
     film: Material
     substrate: Optional[Material] = None
     twist_angle: float = 0.0
