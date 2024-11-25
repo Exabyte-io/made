@@ -14,3 +14,11 @@ def create_slab(configuration: SlabConfiguration, termination: Optional[Terminat
     builder = SlabBuilder()
     termination = termination or builder.get_terminations(configuration)[0]
     return builder.get_material(configuration, selector_parameters=SlabSelectorParameters(termination=termination))
+
+
+def create_slab_if_not(material: Material, default_slab_configuration: SlabConfiguration):
+    slab = material
+    if not slab.metadata or slab.metadata["build"]["configuration"]["type"] != SlabConfiguration.__name__:
+        print("The material is not a slab. Creating a new slab...")
+        slab = create_slab(default_slab_configuration)
+    return slab
