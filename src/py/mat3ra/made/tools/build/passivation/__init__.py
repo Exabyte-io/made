@@ -22,4 +22,4 @@ def get_unique_coordination_numbers(configuration: PassivationConfiguration) -> 
     """
     Get the unique coordination numbers for the provided configuration as a set type.
     """
-    return CoordinationBasedPassivationBuilder().get_unique_coordination_numbers(material=configuration.material)
+    return CoordinationBasedPassivationBuilder().get_unique_coordination_numbers(material=configuration.slab)
