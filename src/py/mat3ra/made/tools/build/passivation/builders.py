@@ -147,15 +147,16 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
 
     def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
         material = super().create_passivated_material(configuration)
-        surface_atoms_indices = get_surface_atom_indices(
-            material=material,
-            surface=SurfaceTypes.TOP,
-            shadowing_radius=self.build_parameters.shadowing_radius,
-            depth=self.build_parameters.depth,
-        )
+        # surface_atoms_indices = get_surface_atom_indices(
+        #     material=material,
+        #     surface=SurfaceTypes.TOP,
+        #     shadowing_radius=self.build_parameters.shadowing_radius,
+        #     depth=self.build_parameters.depth,
+        # )
+        all_indices = material.basis.coordinates.ids
         undercoordinated_atoms_indices = get_undercoordinated_atom_indices(
             material=material,
-            indices=surface_atoms_indices,
+            indices=all_indices,
             cutoff=self.build_parameters.shadowing_radius,
             coordination_threshold=self.build_parameters.coordination_threshold,
         )
