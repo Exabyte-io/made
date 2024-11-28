@@ -24,11 +24,15 @@ def get_unique_coordination_numbers(
     builder_parameters: Optional[CoordinationBasedPassivationBuilderParameters] = None,
 ) -> set:
     """
-    Get the unique coordination numbers for the provided configuration as a set type.
+    Get the unique coordination numbers for the provided passivation configuration as a set type.
+        Considers the coordination threshold and shadowing radius from the builder parameters if provided.
 
     Args:
         configuration (PassivationConfiguration): The configuration object.
         builder_parameters (CoordinationBasedPassivationBuilderParameters): The builder parameters.
+
+    Returns:
+        set: The unique coordination numbers.
     """
     if builder_parameters is None:
         builder_parameters = CoordinationBasedPassivationBuilderParameters()
