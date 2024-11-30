@@ -460,7 +460,7 @@ def get_coordination_numbers(
     return coordination_numbers
 
 
-@decorator_handle_periodic_boundary_conditions(cutoff=0.1)
+@decorator_handle_periodic_boundary_conditions(cutoff=0.25)
 def get_undercoordinated_atom_indices(
     material: Material,
     indices: List[int],
