@@ -433,17 +433,19 @@ def get_coordination_numbers_array(
     material: Material,
     indices: Optional[List[int]] = None,
     cutoff: float = 3.0,
+    nearest_only: bool = True,
 ) -> ArrayWithIds:
     """
-    Calculate the coordination numbers of atoms in the material.
+    Calculate the coordination numbers of atoms in the material, considering only nearest neighbors.
 
     Args:
         material (Material): Material object to calculate coordination numbers for.
         indices (List[int]): List of atom indices to calculate coordination numbers for.
-        cutoff (float): The cutoff radius for identifying neighbors.
+        cutoff (float): The maximum cutoff radius for identifying neighbors.
+        nearest_only (bool): If True, only consider the first shell of neighbors.
 
     Returns:
-        List[int]: List of coordination numbers for each atom in the material.
+        ArrayWithIds: Array of coordination numbers for each atom in the material.
     """
     new_material = material.clone()
     new_material.to_cartesian()
@@ -453,10 +455,42 @@ def get_coordination_numbers_array(
     kd_tree = cKDTree(coordinates)
 
     coordination_numbers_array = ArrayWithIds()
+
     for idx, (x, y, z) in enumerate(coordinates):
-        neighbors = kd_tree.query_ball_point([x, y, z], r=cutoff)
-        # Explicitly remove the atom itself from the list of neighbors
-        neighbors = [n for n in neighbors if n != idx]
+        # Get all neighbors within cutoff
+        distances, neighbors = kd_tree.query(
+            [x, y, z], k=len(coordinates), distance_upper_bound=cutoff  # Get all possible neighbors
+        )
+
+        if nearest_only:
+            # Remove the first distance (distance to self = 0)
+            distances = distances[1:]
+            neighbors = neighbors[1:]
+
+            # Remove infinite distances (no more neighbors found)
+            valid_indices = distances != np.inf
+            distances = distances[valid_indices]
+            neighbors = neighbors[valid_indices]
+
+            if len(distances) > 0:
+                # Find the first shell by analyzing distance distribution
+                # Get the first significant gap in distances
+                sorted_distances = np.sort(distances)
+                distance_gaps = sorted_distances[1:] - sorted_distances[:-1]
+
+                # Find the first significant gap (you might need to adjust this threshold)
+                gap_threshold = 0.5  # Å
+                significant_gaps = np.where(distance_gaps > gap_threshold)[0]
+
+                if len(significant_gaps) > 0:
+                    # Use only neighbors before the first significant gap
+                    first_gap_idx = significant_gaps[0] + 1
+                    neighbors = neighbors[:first_gap_idx]
+        else:
+            # Remove self and infinite distances for regular coordination counting
+            valid_indices = (distances != np.inf) & (distances != 0)
+            neighbors = neighbors[valid_indices]
+
         coordination_numbers_array.add_item(len(neighbors), new_material.basis.coordinates.ids[idx])
 
     return coordination_numbers_array
@@ -472,7 +506,7 @@ def get_undercoordinated_atom_indices(
         material (Material): Material object to identify undercoordinated atoms in.
         indices (List[int]): List of atom indices to check for undercoordination.
         cutoff (float): The cutoff radius for identifying neighbors.
-        coordination_threshold (int): The coordination number threshold for undercoordination.
+        coordination_threshold (int): The minimum coordination number to consider an atom as undercoordinated.
 
     Returns:
         List[int]: List of indices of undercoordinated atoms.
@@ -480,10 +514,11 @@ def get_undercoordinated_atom_indices(
     coordination_numbers_array = get_coordination_numbers_array(material, indices, cutoff)
     if coordination_threshold is None:
         coordination_threshold = np.min(list(coordination_numbers_array.values))
+    # minimal_coordination = np.min(list(coordination_numbers_array.values)) + coordination_threshold
     undercoordinated_atoms_indices = [
         item.id
         for item in coordination_numbers_array.to_array_of_values_with_ids()
-        if item.value < coordination_threshold
+        if item.value <= coordination_threshold
     ]
     return undercoordinated_atoms_indices
 
