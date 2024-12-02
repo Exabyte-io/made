@@ -4,6 +4,7 @@ import numpy as np
 from mat3ra.made.material import Material
 from scipy.spatial import cKDTree
 
+from ..utils import ArrayWithIds
 from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from .enums import SurfaceTypes
 from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
@@ -393,7 +394,7 @@ def is_shadowed_by_neighbors_from_surface(
     )
 
 
-@decorator_handle_periodic_boundary_conditions(cutoff=0.1)
+@decorator_handle_periodic_boundary_conditions(cutoff=0.25)
 def get_surface_atom_indices(
     material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, shadowing_radius: float = 2.5, depth: float = 5
 ) -> List[int]:
@@ -427,11 +428,12 @@ def get_surface_atom_indices(
     return exposed_atoms_indices
 
 
-def get_coordination_numbers(
+@decorator_handle_periodic_boundary_conditions(0.25)
+def get_coordination_numbers_array(
     material: Material,
     indices: Optional[List[int]] = None,
     cutoff: float = 3.0,
-) -> List[int]:
+) -> ArrayWithIds:
     """
     Calculate the coordination numbers of atoms in the material.
 
@@ -450,22 +452,18 @@ def get_coordination_numbers(
     coordinates = np.array(new_material.basis.coordinates.values)
     kd_tree = cKDTree(coordinates)
 
-    coordination_numbers = []
+    coordination_numbers_array = ArrayWithIds()
     for idx, (x, y, z) in enumerate(coordinates):
         neighbors = kd_tree.query_ball_point([x, y, z], r=cutoff)
         # Explicitly remove the atom itself from the list of neighbors
         neighbors = [n for n in neighbors if n != idx]
-        coordination_numbers.append(len(neighbors))
+        coordination_numbers_array.add_item(len(neighbors), new_material.basis.coordinates.ids[idx])
 
-    return coordination_numbers
+    return coordination_numbers_array
 
 
-@decorator_handle_periodic_boundary_conditions(cutoff=0.25)
 def get_undercoordinated_atom_indices(
-    material: Material,
-    indices: List[int],
-    cutoff: float = 3.0,
-    coordination_threshold: int = 3,
+    material: Material, indices: List[int], cutoff: float = 3.0, coordination_threshold: Optional[int] = None
 ) -> List[int]:
     """
     Identify undercoordinated atoms among the specified indices in the material.
@@ -479,8 +477,14 @@ def get_undercoordinated_atom_indices(
     Returns:
         List[int]: List of indices of undercoordinated atoms.
     """
-    coordination_numbers = get_coordination_numbers(material, indices, cutoff)
-    undercoordinated_atoms_indices = [i for i, cn in enumerate(coordination_numbers) if cn <= coordination_threshold]
+    coordination_numbers_array = get_coordination_numbers_array(material, indices, cutoff)
+    if coordination_threshold is None:
+        coordination_threshold = np.min(list(coordination_numbers_array.values))
+    undercoordinated_atoms_indices = [
+        item.id
+        for item in coordination_numbers_array.to_array_of_values_with_ids()
+        if item.value < coordination_threshold
+    ]
     return undercoordinated_atoms_indices
 
 

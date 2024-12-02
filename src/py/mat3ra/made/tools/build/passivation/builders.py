@@ -9,7 +9,7 @@ from ...analyze import (
     get_surface_atom_indices,
     get_undercoordinated_atom_indices,
     get_nearest_neighbors_atom_indices,
-    get_coordination_numbers,
+    get_coordination_numbers_array,
 )
 from ...modify import translate_to_z_level
 from ...build import BaseBuilder
@@ -210,6 +210,6 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         """
 
         coordination_numbers = set(
-            get_coordination_numbers(material=material, cutoff=self.build_parameters.shadowing_radius)
+            get_coordination_numbers_array(material=material, cutoff=self.build_parameters.shadowing_radius).values
         )
         return coordination_numbers
