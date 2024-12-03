@@ -166,9 +166,18 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
 
         atom_vectors = nearest_neighbors_vectors_array
         atom_elements = material.basis.elements
-        reconstructed_bonds = self.analyze_crystal_structure(
-            atom_vectors, atom_elements, symmetry_tolerance=0.1, distance_tolerance=0.1
+
+        symmetry_tolerance = 0.1
+        distance_tolerance = 0.1
+
+        templates = self.find_coordination_templates(atom_vectors, atom_elements, symmetry_tolerance=symmetry_tolerance)
+
+        missing_bonds = self.reconstruct_missing_bonds(
+            atom_vectors, atom_elements, templates, distance_tolerance=distance_tolerance
         )
+
+        # Convert numpy arrays back to lists for return
+        reconstructed_bonds = {atom_id: vectors.tolist() for atom_id, vectors in missing_bonds.items()}
 
         passivant_coordinates_values = self._get_passivant_coordinates(
             material,
@@ -199,11 +208,16 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         # Calculate rotation matrix
         rotation_matrix = Vt.T @ U.T
 
+        # Ensure a right-handed coordinate system (det(rotation) == 1)
+        if np.linalg.det(rotation_matrix) < 0:
+            Vt[-1, :] *= -1
+            rotation_matrix = Vt.T @ U.T
+
         # Apply rotation
         aligned_vectors = vectors2_centered @ rotation_matrix.T + centroid1
 
-        # Calculate RMSD
-        rmsd = np.sqrt(np.mean(np.sum((vectors1 - aligned_vectors) ** 2, axis=1)))
+        # Calculate RMSD (only for the overlapping subset)
+        rmsd = np.sqrt(np.mean(np.sum((vectors1_centered - aligned_vectors[: len(vectors1)]) ** 2, axis=1)))
 
         return rmsd, rotation_matrix
 
@@ -313,36 +327,6 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
 
         return missing_bonds
 
-    def analyze_crystal_structure(
-        self,
-        atom_vectors: ArrayWithIds,
-        atom_elements: ArrayWithIds,
-        symmetry_tolerance: float = 0.1,
-        distance_tolerance: float = 0.1,
-    ) -> Dict[int, List[List[float]]]:
-        """
-        Main function to analyze crystal structure and reconstruct missing bonds.
-
-        Parameters:
-        - atom_vectors: ArrayWithIds containing vectors for each atom
-        - atom_elements: ArrayWithIds containing element types for each atom
-        - symmetry_tolerance: Maximum RMSD for considering vectors symmetric
-        - distance_tolerance: Maximum distance for matching vectors
-
-        Returns:
-        - Dictionary of atom_id -> list of reconstructed vectors
-        """
-        # Find coordination templates
-        templates = self.find_coordination_templates(atom_vectors, atom_elements, symmetry_tolerance=symmetry_tolerance)
-
-        # Reconstruct missing bonds
-        missing_bonds = self.reconstruct_missing_bonds(
-            atom_vectors, atom_elements, templates, distance_tolerance=distance_tolerance
-        )
-
-        # Convert numpy arrays back to lists for return
-        return {atom_id: vectors.tolist() for atom_id, vectors in missing_bonds.items()}
-
     def _get_passivant_coordinates(
         self,
         material: Material,
@@ -365,16 +349,12 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
 
         for idx in undercoordinated_atoms_indices:
             if idx in reconstructed_bonds:
-                # Use reconstructed bonds for positioning passivants
                 for bond_vector in reconstructed_bonds[idx]:
-                    # Normalize bond vector and scale to desired bond length
-                    bond_vector = np.array(bond_vector)
+                    bond_vector = -np.array(bond_vector)
                     normalized_bond = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
 
-                    # Convert to crystal coordinates
                     passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(normalized_bond)
 
-                    # Add passivant coordinate
                     passivant_coordinates.append(
                         material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
                     )
