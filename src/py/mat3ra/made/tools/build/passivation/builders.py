@@ -164,8 +164,8 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
             material=material, indices=all_indices, cutoff=self.build_parameters.shadowing_radius
         )
 
-        atom_vectors = self.convert_to_analysis_format(nearest_neighbors_vectors_array)
-        atom_elements = {idx: material.basis.elements.get_element_value_by_index(idx) for idx in all_indices}
+        atom_vectors = nearest_neighbors_vectors_array
+        atom_elements = material.basis.elements
         reconstructed_bonds = self.analyze_crystal_structure(
             atom_vectors, atom_elements, symmetry_tolerance=0.1, distance_tolerance=0.1
         )
@@ -178,45 +178,6 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
             reconstructed_bonds,
         )
         return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
-
-    def convert_to_analysis_format(self, array_with_ids: ArrayWithIds) -> Dict[int, List[List[float]]]:
-        """
-        Converts ArrayWithIds format to the format needed for crystal structure analysis.
-
-        Expected input format:
-        - array_with_ids.values contains list of tuples/lists where:
-            - Each item is (vector_list, element)
-            - vector_list is a list of 3D vectors
-
-        Returns:
-        - atom_vectors: Dict[int, List[List[float]]] - mapping of atom ID to its vectors
-        """
-        atom_vectors = {}
-
-        for atom_id, vectors in zip(array_with_ids.ids, array_with_ids.values):
-            # Convert vectors to list of lists if they're not already
-            if isinstance(vectors, np.ndarray):
-                vectors = vectors.tolist()
-            elif not isinstance(vectors, list):
-                vectors = [vectors]
-
-            # Ensure vectors are in the correct format
-            formatted_vectors = []
-            for vec in vectors:
-                if isinstance(vec, (list, tuple, np.ndarray)):
-                    formatted_vectors.append([float(v) for v in vec])
-                else:
-                    raise ValueError(f"Invalid vector format for atom {atom_id}: {vec}")
-
-            atom_vectors[atom_id] = formatted_vectors
-
-        return atom_vectors
-
-    @dataclass
-    class AtomData:
-        id: int
-        element: str
-        vectors: np.ndarray  # Shape: (N, 3) where N is number of vectors
 
     def align_vectors(self, vectors1: np.ndarray, vectors2: np.ndarray) -> Tuple[float, np.ndarray]:
         """
@@ -247,7 +208,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         return rmsd, rotation_matrix
 
     def find_coordination_templates(
-        self, atoms_data: List[AtomData], symmetry_tolerance: float = 0.1
+        self, atom_vectors: ArrayWithIds, atom_elements: ArrayWithIds, symmetry_tolerance: float = 0.1
     ) -> Dict[str, np.ndarray]:
         """
         Find ideal coordination templates for each element.
@@ -255,32 +216,34 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         """
         # Group atoms by element
         element_groups = defaultdict(list)
-        for atom in atoms_data:
-            element_groups[atom.element].append(atom)
+        for idx, (vectors, element) in enumerate(zip(atom_vectors.values, atom_elements.values)):
+            if vectors:  # Only consider atoms with existing vectors
+                element_groups[element].append((idx, vectors))
 
         templates = {}
 
-        for element, atoms in element_groups.items():
+        for element, atom_data in element_groups.items():
             # Find atom with maximum number of vectors
-            max_vectors_atom = max(atoms, key=lambda x: len(x.vectors))
-            max_coords = len(max_vectors_atom.vectors)
+            max_vectors_atom = max(atom_data, key=lambda x: len(x[1]))
+            max_coords = len(max_vectors_atom[1])
 
             # Find all atoms with same number of vectors
-            template_candidates = [atom for atom in atoms if len(atom.vectors) == max_coords]
+            template_candidates = [(idx, vectors) for idx, vectors in atom_data if len(vectors) == max_coords]
 
             # If only one candidate, use its vectors as template
             if len(template_candidates) == 1:
-                templates[element] = max_vectors_atom.vectors
+                templates[element] = np.array(template_candidates[0][1])
                 continue
 
             # Align all candidates and check symmetry
-            reference_vectors = template_candidates[0].vectors
+            reference_vectors = np.array(template_candidates[0][1])
             aligned_sets = [reference_vectors]
 
-            for candidate in template_candidates[1:]:
-                rmsd, rotation = self.align_vectors(reference_vectors, candidate.vectors)
+            for _, candidate_vectors in template_candidates[1:]:
+                candidate_vectors = np.array(candidate_vectors)
+                rmsd, rotation = self.align_vectors(reference_vectors, candidate_vectors)
                 if rmsd <= symmetry_tolerance:
-                    aligned_vectors = candidate.vectors @ rotation.T
+                    aligned_vectors = candidate_vectors @ rotation.T
                     aligned_sets.append(aligned_vectors)
 
             # Average the aligned vector sets
@@ -289,7 +252,11 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         return templates
 
     def reconstruct_missing_bonds(
-        self, atoms_data: List[AtomData], templates: Dict[str, np.ndarray], distance_tolerance: float = 0.1
+        self,
+        atom_vectors: ArrayWithIds,
+        atom_elements: ArrayWithIds,
+        templates: Dict[str, np.ndarray],
+        distance_tolerance: float = 0.1,
     ) -> Dict[int, np.ndarray]:
         """
         Reconstruct missing bonds based on templates, accounting for existing bonds.
@@ -297,31 +264,35 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         """
         missing_bonds = {}
 
-        for atom in atoms_data:
-            template = templates[atom.element]
+        for idx, (vectors, element) in enumerate(zip(atom_vectors.values, atom_elements.values)):
+            if element not in templates:
+                continue
+
+            template = templates[element]
             expected_coords = len(template)
-            current_coords = len(atom.vectors)
+            current_coords = len(vectors)
 
             # Only proceed if we have fewer bonds than expected
             if current_coords < expected_coords:
                 # For atoms with existing bonds, align template with them
                 if current_coords > 0:
                     # Use existing bonds to align template
-                    rmsd, rotation = self.align_vectors(template[:current_coords], atom.vectors)
+                    vectors_array = np.array(vectors)
+                    rmsd, rotation = self.align_vectors(template[:current_coords], vectors_array)
                     template_rotated = template @ rotation.T
                 else:
                     # No existing bonds, use template as is
                     template_rotated = template
 
                 # Check each template vector against existing vectors
-                existing_vectors = atom.vectors
                 missing = []
 
                 for template_vector in template_rotated:
                     # Flag to check if this template vector matches any existing vector
                     is_new_direction = True
 
-                    for existing_vector in existing_vectors:
+                    for existing_vector in vectors:
+                        existing_vector = np.array(existing_vector)
                         # Calculate angular difference between vectors
                         cos_angle = np.dot(template_vector, existing_vector) / (
                             np.linalg.norm(template_vector) * np.linalg.norm(existing_vector)
@@ -338,14 +309,14 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
                         missing.append(template_vector)
 
                 if missing:
-                    missing_bonds[atom.id] = np.array(missing)
+                    missing_bonds[atom_vectors.ids[idx]] = np.array(missing)
 
         return missing_bonds
 
     def analyze_crystal_structure(
         self,
-        atom_vectors: Dict[int, List[List[float]]],
-        atom_elements: Dict[int, str],
+        atom_vectors: ArrayWithIds,
+        atom_elements: ArrayWithIds,
         symmetry_tolerance: float = 0.1,
         distance_tolerance: float = 0.1,
     ) -> Dict[int, List[List[float]]]:
@@ -353,25 +324,21 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         Main function to analyze crystal structure and reconstruct missing bonds.
 
         Parameters:
-        - atom_vectors: Dictionary of atom_id -> list of vectors
-        - atom_elements: Dictionary of atom_id -> chemical element
+        - atom_vectors: ArrayWithIds containing vectors for each atom
+        - atom_elements: ArrayWithIds containing element types for each atom
         - symmetry_tolerance: Maximum RMSD for considering vectors symmetric
         - distance_tolerance: Maximum distance for matching vectors
 
         Returns:
         - Dictionary of atom_id -> list of reconstructed vectors
         """
-        # Convert input data to internal format
-        atoms_data = [
-            self.AtomData(id=atom_id, element=atom_elements[atom_id], vectors=np.array(vectors))
-            for atom_id, vectors in atom_vectors.items()
-        ]
-
         # Find coordination templates
-        templates = self.find_coordination_templates(atoms_data, symmetry_tolerance=symmetry_tolerance)
+        templates = self.find_coordination_templates(atom_vectors, atom_elements, symmetry_tolerance=symmetry_tolerance)
 
         # Reconstruct missing bonds
-        missing_bonds = self.reconstruct_missing_bonds(atoms_data, templates, distance_tolerance=distance_tolerance)
+        missing_bonds = self.reconstruct_missing_bonds(
+            atom_vectors, atom_elements, templates, distance_tolerance=distance_tolerance
+        )
 
         # Convert numpy arrays back to lists for return
         return {atom_id: vectors.tolist() for atom_id, vectors in missing_bonds.items()}
@@ -411,16 +378,16 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
                     passivant_coordinates.append(
                         material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
                     )
-            else:
-                # Fallback to original method if no reconstructed bonds (shouldn't happen for undercoordinated atoms)
-                vectors = nearest_neighbors_coordinates[idx]
-                bond_vector = -np.mean(vectors, axis=0)
-                bond_vector = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
-                passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
-
-                passivant_coordinates.append(
-                    material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
-                )
+            # else:
+            #     # Fallback to original method if no reconstructed bonds (shouldn't happen for undercoordinated atoms)
+            #     vectors = nearest_neighbors_coordinates[idx]
+            #     bond_vector = -np.mean(vectors, axis=0)
+            #     bond_vector = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
+            #     passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
+            #
+            #     passivant_coordinates.append(
+            #         material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
+            #     )
 
         return passivant_coordinates
 
