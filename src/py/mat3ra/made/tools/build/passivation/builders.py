@@ -169,15 +169,8 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
 
         symmetry_tolerance = 0.1
         distance_tolerance = 0.1
-
-        templates = self.find_coordination_templates(atom_vectors, atom_elements, symmetry_tolerance=symmetry_tolerance)
-
-        missing_bonds = self.reconstruct_missing_bonds(
-            atom_vectors, atom_elements, templates, distance_tolerance=distance_tolerance
-        )
-
+        reconstructed_bonds = self.reconstruct_missing_bonds(atom_vectors, atom_elements, symmetry_tolerance)
         # Convert numpy arrays back to lists for return
-        reconstructed_bonds = {atom_id: vectors.tolist() for atom_id, vectors in missing_bonds.items()}
 
         passivant_coordinates_values = self._get_passivant_coordinates(
             material,
@@ -188,144 +181,94 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         )
         return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
 
-    def align_vectors(self, vectors1: np.ndarray, vectors2: np.ndarray) -> Tuple[float, np.ndarray]:
+    def get_distinct_vectors(self, vectors: np.ndarray, angle_tolerance: float = 0.1) -> np.ndarray:
         """
-        Align two sets of vectors using Kabsch algorithm.
-        Returns RMSD and rotation matrix.
+        Get list of distinct vector orientations within given angle tolerance.
         """
-        # Center both vector sets
-        centroid1 = np.mean(vectors1, axis=0)
-        centroid2 = np.mean(vectors2, axis=0)
-        vectors1_centered = vectors1 - centroid1
-        vectors2_centered = vectors2 - centroid2
+        distinct = []
+        for v in vectors:
+            v_norm = v / np.linalg.norm(v)
+            is_new = True
 
-        # Calculate covariance matrix
-        covariance_matrix = vectors1_centered.T @ vectors2_centered
+            for existing in distinct:
+                # Check both parallel and antiparallel alignment
+                cos_angle = np.dot(v_norm, existing)
+                if abs(cos_angle) > np.cos(angle_tolerance):
+                    is_new = False
+                    break
 
-        # SVD decomposition
-        U, _, Vt = np.linalg.svd(covariance_matrix)
+            if is_new:
+                distinct.append(v_norm)
 
-        # Calculate rotation matrix
-        rotation_matrix = Vt.T @ U.T
+        return np.array(distinct)
 
-        # Ensure a right-handed coordinate system (det(rotation) == 1)
-        if np.linalg.det(rotation_matrix) < 0:
-            Vt[-1, :] *= -1
-            rotation_matrix = Vt.T @ U.T
-
-        # Apply rotation
-        aligned_vectors = vectors2_centered @ rotation_matrix.T + centroid1
-
-        # Calculate RMSD (only for the overlapping subset)
-        rmsd = np.sqrt(np.mean(np.sum((vectors1_centered - aligned_vectors[: len(vectors1)]) ** 2, axis=1)))
-
-        return rmsd, rotation_matrix
-
-    def find_coordination_templates(
-        self, atom_vectors: ArrayWithIds, atom_elements: ArrayWithIds, symmetry_tolerance: float = 0.1
-    ) -> Dict[str, np.ndarray]:
+    def find_template_vectors(self, atom_vectors: ArrayWithIds, atom_elements: ArrayWithIds) -> Dict[str, np.ndarray]:
         """
-        Find ideal coordination templates for each element.
-        Returns a dictionary of element -> template vectors.
+        Create template of distinct vector orientations for each element type,
+        using atoms with maximum coordination.
         """
-        # Group atoms by element
-        element_groups = defaultdict(list)
+        # Group vectors by element
+        element_vectors = defaultdict(list)
         for idx, (vectors, element) in enumerate(zip(atom_vectors.values, atom_elements.values)):
-            if vectors:  # Only consider atoms with existing vectors
-                element_groups[element].append((idx, vectors))
+            element_vectors[element].append(vectors)
 
+        # Find max coordination and get distinct vectors for each element
         templates = {}
+        for element, vector_lists in element_vectors.items():
+            # Find vectors from atoms with maximum coordination
+            max_coord = max(len(v) for v in vector_lists)
+            max_coord_vectors = [v for v in vector_lists if len(v) == max_coord]
 
-        for element, atom_data in element_groups.items():
-            # Find atom with maximum number of vectors
-            max_vectors_atom = max(atom_data, key=lambda x: len(x[1]))
-            max_coords = len(max_vectors_atom[1])
-
-            # Find all atoms with same number of vectors
-            template_candidates = [(idx, vectors) for idx, vectors in atom_data if len(vectors) == max_coords]
-
-            # If only one candidate, use its vectors as template
-            if len(template_candidates) == 1:
-                templates[element] = np.array(template_candidates[0][1])
-                continue
-
-            # Align all candidates and check symmetry
-            reference_vectors = np.array(template_candidates[0][1])
-            aligned_sets = [reference_vectors]
-
-            for _, candidate_vectors in template_candidates[1:]:
-                candidate_vectors = np.array(candidate_vectors)
-                rmsd, rotation = self.align_vectors(reference_vectors, candidate_vectors)
-                if rmsd <= symmetry_tolerance:
-                    aligned_vectors = candidate_vectors @ rotation.T
-                    aligned_sets.append(aligned_vectors)
-
-            # Average the aligned vector sets
-            templates[element] = np.mean(aligned_sets, axis=0)
+            # Combine all vectors and get distinct orientations
+            all_vectors = np.vstack([np.array(v) for v in max_coord_vectors])
+            templates[element] = self.get_distinct_vectors(all_vectors)
 
         return templates
 
     def reconstruct_missing_bonds(
-        self,
-        atom_vectors: ArrayWithIds,
-        atom_elements: ArrayWithIds,
-        templates: Dict[str, np.ndarray],
-        distance_tolerance: float = 0.1,
-    ) -> Dict[int, np.ndarray]:
+        self, atom_vectors: ArrayWithIds, atom_elements: ArrayWithIds, angle_tolerance: float = 0.1
+    ) -> Dict[int, List[List[float]]]:
         """
-        Reconstruct missing bonds based on templates, accounting for existing bonds.
-        Returns dictionary of atom_id -> reconstructed vectors.
+        Reconstruct missing bonds by matching existing bonds against template orientations.
         """
+        # Get template vectors for each element
+        templates = self.find_template_vectors(atom_vectors, atom_elements)
         missing_bonds = {}
 
+        # Process each atom
         for idx, (vectors, element) in enumerate(zip(atom_vectors.values, atom_elements.values)):
             if element not in templates:
                 continue
 
             template = templates[element]
-            expected_coords = len(template)
-            current_coords = len(vectors)
+            existing_vectors = np.array(vectors) if vectors else np.empty((0, 3))
 
-            # Only proceed if we have fewer bonds than expected
-            if current_coords < expected_coords:
-                # For atoms with existing bonds, align template with them
-                if current_coords > 0:
-                    # Use existing bonds to align template
-                    vectors_array = np.array(vectors)
-                    rmsd, rotation = self.align_vectors(template[:current_coords], vectors_array)
-                    template_rotated = template @ rotation.T
-                else:
-                    # No existing bonds, use template as is
-                    template_rotated = template
+            # Skip if we already have enough bonds
+            if len(existing_vectors) >= len(template):
+                continue
 
-                # Check each template vector against existing vectors
-                missing = []
+            # Normalize existing vectors
+            if len(existing_vectors) > 0:
+                existing_vectors = existing_vectors / np.linalg.norm(existing_vectors, axis=1)[:, None]
 
-                for template_vector in template_rotated:
-                    # Flag to check if this template vector matches any existing vector
-                    is_new_direction = True
+            # Find which template vectors aren't matched by existing vectors
+            missing = []
+            for template_vector in template:
+                is_missing = True
 
-                    for existing_vector in vectors:
-                        existing_vector = np.array(existing_vector)
-                        # Calculate angular difference between vectors
-                        cos_angle = np.dot(template_vector, existing_vector) / (
-                            np.linalg.norm(template_vector) * np.linalg.norm(existing_vector)
-                        )
-                        cos_angle = np.clip(cos_angle, -1.0, 1.0)  # Handle numerical errors
-                        angle = np.arccos(cos_angle)
+                for existing_vector in existing_vectors:
+                    cos_angle = np.dot(template_vector, existing_vector)
+                    if abs(cos_angle) > np.cos(angle_tolerance):
+                        is_missing = False
+                        break
 
-                        # If vectors are nearly parallel or antiparallel, consider them matching
-                        if angle < distance_tolerance or abs(angle - np.pi) < distance_tolerance:
-                            is_new_direction = False
-                            break
+                if is_missing:
+                    missing.append(template_vector)
 
-                    if is_new_direction:
-                        missing.append(template_vector)
+            if missing:
+                missing_bonds[atom_vectors.ids[idx]] = np.array(missing)
 
-                if missing:
-                    missing_bonds[atom_vectors.ids[idx]] = np.array(missing)
-
-        return missing_bonds
+        return {k: v.tolist() for k, v in missing_bonds.items()}
 
     def _get_passivant_coordinates(
         self,
@@ -350,7 +293,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         for idx in undercoordinated_atoms_indices:
             if idx in reconstructed_bonds:
                 for bond_vector in reconstructed_bonds[idx]:
-                    bond_vector = -np.array(bond_vector)
+                    bond_vector = np.array(bond_vector)
                     normalized_bond = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
 
                     passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(normalized_bond)
