@@ -429,14 +429,14 @@ def get_surface_atom_indices(
 
 
 @decorator_handle_periodic_boundary_conditions(0.25)
-def get_coordination_numbers_array(
+def get_nearest_neighbors_vectors(
     material: Material,
     indices: Optional[List[int]] = None,
     cutoff: float = 3.0,
     nearest_only: bool = True,
 ) -> ArrayWithIds:
     """
-    Calculate the coordination numbers of atoms in the material, considering only nearest neighbors.
+    Calculate the vectors to the nearest neighbors for each atom in the material.
 
     Args:
         material (Material): Material object to calculate coordination numbers for.
@@ -445,7 +445,7 @@ def get_coordination_numbers_array(
         nearest_only (bool): If True, only consider the first shell of neighbors.
 
     Returns:
-        ArrayWithIds: Array of coordination numbers for each atom in the material.
+        ArrayWithIds: Array of vectors to the nearest neighbors for each atom.
     """
     new_material = material.clone()
     new_material.to_cartesian()
@@ -454,8 +454,7 @@ def get_coordination_numbers_array(
     coordinates = np.array(new_material.basis.coordinates.values)
     kd_tree = cKDTree(coordinates)
 
-    coordination_numbers_array = ArrayWithIds()
-
+    nearest_neighbors_vectors = ArrayWithIds()
     for idx, (x, y, z) in enumerate(coordinates):
         # Get all neighbors within cutoff
         distances, neighbors = kd_tree.query(
@@ -490,10 +489,32 @@ def get_coordination_numbers_array(
             # Remove self and infinite distances for regular coordination counting
             valid_indices = (distances != np.inf) & (distances != 0)
             neighbors = neighbors[valid_indices]
+        vectors = [coordinates[neighbor] - [x, y, z] for neighbor in neighbors]
+        nearest_neighbors_vectors.add_item(vectors, idx)
 
-        coordination_numbers_array.add_item(len(neighbors), new_material.basis.coordinates.ids[idx])
+    return nearest_neighbors_vectors
 
-    return coordination_numbers_array
+
+def get_coordination_numbers(
+    material: Material, indices: Optional[List[int]] = None, cutoff: float = 3.0, nearest_only: bool = True
+) -> ArrayWithIds:
+    """
+    Calculate the coordination numbers for each atom in the material.
+
+    Args:
+        material (Material): Material object to calculate coordination numbers for.
+        indices (List[int]): List of atom indices to calculate coordination numbers for.
+        cutoff (float): The maximum cutoff radius for identifying neighbors.
+        nearest_only (bool): If True, only consider the first shell of neighbors.
+
+    Returns:
+        ArrayWithIds: Array of coordination numbers for each atom.
+    """
+    nearest_neighbors_vectors = get_nearest_neighbors_vectors(material, indices, cutoff, nearest_only)
+    coordination_numbers = ArrayWithIds()
+    for idx, neighbors in nearest_neighbors_vectors.to_array_of_values_with_ids():
+        coordination_numbers.add_item(len(neighbors), idx)
+    return coordination_numbers
 
 
 def get_undercoordinated_atom_indices(
@@ -511,15 +532,15 @@ def get_undercoordinated_atom_indices(
     Returns:
         List[int]: List of indices of undercoordinated atoms.
     """
-    coordination_numbers_array = get_coordination_numbers_array(material, indices, cutoff)
+    average_nearest_neighbors_vectors_array = get_nearest_neighbors_vectors(material, indices, cutoff)
     if coordination_threshold is None:
-        coordination_threshold = np.min(list(coordination_numbers_array.values))
-    # minimal_coordination = np.min(list(coordination_numbers_array.values)) + coordination_threshold
+        coordination_threshold = min(len(item) for item in average_nearest_neighbors_vectors_array.values)
     undercoordinated_atoms_indices = [
         item.id
-        for item in coordination_numbers_array.to_array_of_values_with_ids()
-        if item.value <= coordination_threshold
+        for item in average_nearest_neighbors_vectors_array.to_array_of_values_with_ids()
+        if len(item.value) <= coordination_threshold
     ]
+    average_nearest_neighbors_vectors_array.filter_by_indices(undercoordinated_atoms_indices)
     return undercoordinated_atoms_indices
 
 
