@@ -512,8 +512,8 @@ def get_coordination_numbers(
     """
     nearest_neighbors_vectors = get_nearest_neighbors_vectors(material, indices, cutoff, nearest_only)
     coordination_numbers = ArrayWithIds()
-    for idx, neighbors in nearest_neighbors_vectors.to_array_of_values_with_ids():
-        coordination_numbers.add_item(len(neighbors), idx)
+    for value_with_id in nearest_neighbors_vectors.to_array_of_values_with_ids():
+        coordination_numbers.add_item(len(value_with_id.value), value_with_id.id)
     return coordination_numbers
 
 
