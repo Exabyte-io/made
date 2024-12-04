@@ -176,8 +176,9 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         )
 
         reconstructed_bonds = self.reconstruct_missing_bonds(
-            atom_vectors=nearest_neighbors_vectors_array,
-            atom_elements=material.basis.elements,
+            nearest_neighbor_vectors_array=nearest_neighbors_vectors_array,
+            chemical_elements_array=material.basis.elements,
+            max_bonds_to_passivate=self.build_parameters.bonds_to_passivate,
             angle_tolerance=self.build_parameters.symmetry_tolerance,
         )
 
@@ -190,13 +191,15 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         )
         return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
 
-    def vectors_are_similar(self, vec1: np.ndarray, vec2: np.ndarray, tolerance: float = 0.1) -> bool:
+    @staticmethod
+    def vectors_are_similar(vec1: np.ndarray, vec2: np.ndarray, tolerance: float = 0.1) -> bool:
         """Check if two vectors are similar within tolerance."""
         dot_product = np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
         angle = np.arccos(np.clip(dot_product, -1.0, 1.0))
         return angle < tolerance
 
-    def bonds_templates_are_similar(self, template1: np.ndarray, template2: np.ndarray, tolerance: float = 0.1) -> bool:
+    @staticmethod
+    def bonds_templates_are_similar(template1: np.ndarray, template2: np.ndarray, tolerance: float = 0.1) -> bool:
         """Check if two templates are similar."""
         if len(template1) != len(template2):
             return False
@@ -221,7 +224,16 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
     def find_template_vectors(
         self, atom_vectors: ArrayWithIds, atom_elements: ArrayWithIds
     ) -> Dict[str, List[np.ndarray]]:
-        """Find unique template vector sets with maximum coordination for each element."""
+        """
+        Find unique templates (set of vectors to the nearest neighbor for fully coordinated atoms) for each element type
+
+        Args:
+            atom_vectors (ArrayWithIds): Array with atom vectors.
+            atom_elements (ArrayWithIds): Array with atom elements.
+
+        Returns:
+            Dict[str, List[np.ndarray]]: Dictionary with element type as key and list of unique templates as value.
+        """
         element_templates = {}
 
         for element in set(atom_elements.values):
@@ -241,58 +253,65 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         return element_templates
 
     def reconstruct_missing_bonds(
-        self, atom_vectors: ArrayWithIds, atom_elements: ArrayWithIds, angle_tolerance: float = 0.1
+        self,
+        nearest_neighbor_vectors_array: ArrayWithIds,
+        chemical_elements_array: ArrayWithIds,
+        max_bonds_to_passivate: int = 2,
+        angle_tolerance: float = 0.1,
     ) -> Dict[int, List[List[float]]]:
         """
-        Find missing bonds using template matching, limiting the number of bonds to passivate.
+        Reconstruct missing bonds for undercoordinated atoms based on templates and existing bonds.
+
+        Args:
+            nearest_neighbor_vectors_array (ArrayWithIds): Array with nearest neighbor vectors for each atom.
+            chemical_elements_array (ArrayWithIds): Array with chemical elements for each atom.
+            max_bonds_to_passivate (int): Maximum number of bonds to passivate for each undercoordinated atom.
+            angle_tolerance (float): Tolerance for symmetry comparison of vectors for bonds.
+
+        Returns:
+            Dict[int, List[List[float]]]: Dict with atom indices as keys and list of missing bond vectors as values.
         """
-        templates = self.find_template_vectors(atom_vectors, atom_elements)
+        templates = self.find_template_vectors(nearest_neighbor_vectors_array, chemical_elements_array)
         missing_bonds = {}
 
-        for idx, (vectors, element) in enumerate(zip(atom_vectors.values, atom_elements.values)):
+        for idx, (vectors, element) in enumerate(
+            zip(nearest_neighbor_vectors_array.values, chemical_elements_array.values)
+        ):
             if element not in templates:
                 continue
+            existing_vectors = np.array(vectors) if vectors else np.empty((0, 3))
+            max_coordination = len(templates[element][0])
 
-            # Skip if we have max coordination
-            if len(vectors) >= len(templates[element][0]):
+            if len(existing_vectors) >= max_coordination:
                 continue
 
-            existing_vectors = np.array(vectors) if vectors else np.empty((0, 3))
-
-            # Try each template to find best match
             best_missing = None
             best_match_count = -1
 
             for template in templates[element]:
-                current_missing = []
-                current_match_count = 0
+                dot_matrix = np.dot(template, existing_vectors.T)
+                cosine_matrix = dot_matrix / (
+                    np.linalg.norm(template, axis=1)[:, None] * np.linalg.norm(existing_vectors, axis=1)
+                )
+                angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
 
-                for template_v in template:
-                    # Check if template vector matches any existing vector
-                    has_match = False
-                    for existing_v in existing_vectors:
-                        if self.vectors_are_similar(template_v, existing_v, angle_tolerance):
-                            has_match = True
-                            current_match_count += 1
-                            break
+                matches = np.any(angles_matrix < angle_tolerance, axis=1)
+                match_count = np.sum(matches)
+                missing = template[~matches]
 
-                    if not has_match:
-                        current_missing.append(template_v)
+                if match_count > best_match_count:
+                    best_match_count = match_count
+                    best_missing = missing
 
-                if current_match_count > best_match_count:
-                    best_match_count = current_match_count
-                    best_missing = current_missing
-
-            if best_missing:
-                # Limit the number of bonds to passivate
+            if best_missing is not None:
                 num_bonds_to_add = min(
                     len(best_missing),
-                    self.build_parameters.bonds_to_passivate,
-                    len(templates[element][0]) - len(vectors),  # Don't exceed max coordination
+                    max_bonds_to_passivate,
+                    max_coordination - len(existing_vectors),
                 )
-                missing_bonds[atom_vectors.ids[idx]] = best_missing[:num_bonds_to_add]
+                missing_bonds[nearest_neighbor_vectors_array.ids[idx]] = best_missing[:num_bonds_to_add].tolist()
 
-        return {k: [v.tolist() for v in vectors] for k, vectors in missing_bonds.items()}
+        return missing_bonds
 
     def _get_passivant_coordinates(
         self,
@@ -311,6 +330,9 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
             undercoordinated_atoms_indices (list): Indices of undercoordinated atoms.
             nearest_neighbors_coordinates (list): List of nearest neighbor vectors for each atom.
             reconstructed_bonds (Dict[int, List[List[float]]]): Dictionary of reconstructed bonds for each atom.
+
+        Returns:
+            list: Coordinates where passivants should be added.
         """
         passivant_coordinates = []
 
