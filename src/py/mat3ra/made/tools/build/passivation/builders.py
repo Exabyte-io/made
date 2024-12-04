@@ -129,22 +129,40 @@ class CoordinationBasedPassivationBuilderParameters(SurfacePassivationBuilderPar
     Parameters for the  CoordinationPassivationBuilder.
     Args:
         coordination_threshold (int): The coordination number threshold for atom to be considered undercoordinated.
+        bonds_to_passivate (int): The maximum number of bonds to passivate for each undercoordinated atom.
+        symmetry_tolerance (float): The tolerance for symmetry comparison of vectors for bonds.
     """
 
     coordination_threshold: int = 3
+    bonds_to_passivate: int = 1
+    symmetry_tolerance: float = 0.1
 
 
 class CoordinationBasedPassivationBuilder(PassivationBuilder):
     """
-    Builder for passivating material based on coordination number of each atom.
+    Builder for passivating material surfaces based on coordination number analysis.
 
-    Detects atoms with coordination number below a threshold and passivates them.
+        This builder analyzes atomic coordination environments and reconstructs missing bonds
+        using templates derived from fully coordinated atoms. It works by:
+
+        1. Finding undercoordinated atoms that need passivation
+        2. Creating bond vector templates for each element type by:
+            - Collecting vectors from atoms with the highest valid coordination
+            - Grouping similar vector arrangements into unique templates
+        3. Reconstructing missing bonds by:
+            - Matching existing bonds against templates
+            - Finding the best-matching template for each atom
+            - Adding missing bond vectors from the template
+        4. Placing passivant atoms (typically H) along the reconstructed bond vectors
     """
 
     _BuildParametersType = CoordinationBasedPassivationBuilderParameters
     _DefaultBuildParameters = CoordinationBasedPassivationBuilderParameters()
 
     def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
+        """
+        Create a passivated material based on the configuration.
+        """
         material = super().create_passivated_material(configuration)
         all_indices = material.basis.coordinates.ids
         undercoordinated_atoms_indices = get_undercoordinated_atom_indices(
@@ -157,12 +175,11 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
             material=material, indices=all_indices, cutoff=self.build_parameters.shadowing_radius
         )
 
-        atom_vectors = nearest_neighbors_vectors_array
-        atom_elements = material.basis.elements
-        symmetry_tolerance = 0.1
-
-        reconstructed_bonds = self.reconstruct_missing_bonds(atom_vectors, atom_elements, symmetry_tolerance)
-        # Convert numpy arrays back to lists for return
+        reconstructed_bonds = self.reconstruct_missing_bonds(
+            atom_vectors=nearest_neighbors_vectors_array,
+            atom_elements=material.basis.elements,
+            angle_tolerance=self.build_parameters.symmetry_tolerance,
+        )
 
         passivant_coordinates_values = self._get_passivant_coordinates(
             material,
@@ -205,18 +222,14 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         element_templates = {}
 
         for element in set(atom_elements.values):
-            # Get all vectors for this element
             element_indices = [i for i, e in enumerate(atom_elements.values) if e == element]
             element_vector_lists = [np.array(atom_vectors.values[i]) for i in element_indices]
 
-            # Find max coordination
             max_coord = max(len(vectors) for vectors in element_vector_lists)
             max_coord_vectors = [v for v in element_vector_lists if len(v) == max_coord]
 
-            # Group similar templates
             unique_templates: List[np.ndarray] = []
             for template in max_coord_vectors:
-                # Check if similar template exists
                 template_exists = False
                 for existing in unique_templates:
                     if self.templates_are_similar(template, existing):
@@ -232,7 +245,9 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
     def reconstruct_missing_bonds(
         self, atom_vectors: ArrayWithIds, atom_elements: ArrayWithIds, angle_tolerance: float = 0.1
     ) -> Dict[int, List[List[float]]]:
-        """Find missing bonds using template matching."""
+        """
+        Find missing bonds using template matching, limiting the number of bonds to passivate.
+        """
         templates = self.find_template_vectors(atom_vectors, atom_elements)
         missing_bonds = {}
 
@@ -271,7 +286,13 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
                     best_missing = current_missing
 
             if best_missing:
-                missing_bonds[atom_vectors.ids[idx]] = best_missing
+                # Limit the number of bonds to passivate
+                num_bonds_to_add = min(
+                    len(best_missing),
+                    self.build_parameters.bonds_to_passivate,
+                    len(templates[element][0]) - len(vectors),  # Don't exceed max coordination
+                )
+                missing_bonds[atom_vectors.ids[idx]] = best_missing[:num_bonds_to_add]
 
         return {k: [v.tolist() for v in vectors] for k, vectors in missing_bonds.items()}
 
@@ -300,22 +321,19 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
                 for bond_vector in reconstructed_bonds[idx]:
                     bond_vector = np.array(bond_vector)
                     normalized_bond = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
-
                     passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(normalized_bond)
-
                     passivant_coordinates.append(
                         material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
                     )
-            # else:
-            #     # Fallback to original method if no reconstructed bonds (shouldn't happen for undercoordinated atoms)
-            #     vectors = nearest_neighbors_coordinates[idx]
-            #     bond_vector = -np.mean(vectors, axis=0)
-            #     bond_vector = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
-            #     passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
-            #
-            #     passivant_coordinates.append(
-            #         material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
-            #     )
+            else:
+                # Fallback to nearest neighbors average vector method if no reconstructed bonds found
+                vectors = nearest_neighbors_coordinates[idx]
+                bond_vector = -np.mean(vectors, axis=0)
+                bond_vector = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
+                passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
+                passivant_coordinates.append(
+                    material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
+                )
 
         return passivant_coordinates
 
