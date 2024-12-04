@@ -192,27 +192,30 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
 
     def vectors_are_similar(self, vec1: np.ndarray, vec2: np.ndarray, tolerance: float = 0.1) -> bool:
         """Check if two vectors are similar within tolerance."""
-        v1_norm = vec1 / np.linalg.norm(vec1)
-        v2_norm = vec2 / np.linalg.norm(vec2)
-        angle = np.arccos(np.clip(np.dot(v1_norm, v2_norm), -1.0, 1.0))
+        dot_product = np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+        angle = np.arccos(np.clip(dot_product, -1.0, 1.0))
         return angle < tolerance
 
-    def templates_are_similar(self, template1: np.ndarray, template2: np.ndarray, tolerance: float = 0.1) -> bool:
-        """Check if two templates are similar (have similar vectors)."""
+    def bonds_templates_are_similar(self, template1: np.ndarray, template2: np.ndarray, tolerance: float = 0.1) -> bool:
+        """Check if two templates are similar."""
         if len(template1) != len(template2):
             return False
 
-        # Check if all vectors in template1 have a match in template2
+        # Calculate pairwise angles between vectors in both templates
+        dot_matrix = np.dot(template1, template2.T)
+        norms1 = np.linalg.norm(template1, axis=1)
+        norms2 = np.linalg.norm(template2, axis=1)
+        cosine_matrix = dot_matrix / np.outer(norms1, norms2)
+        angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
+
+        # Check if every vector in template1 matches a vector in template2
         unmatched = list(range(len(template2)))
-        for v1 in template1:
-            found_match = False
-            for i in unmatched:
-                if self.vectors_are_similar(v1, template2[i], tolerance):
-                    unmatched.remove(i)
-                    found_match = True
-                    break
-            if not found_match:
+        for i, angle_row in enumerate(angles_matrix):
+            matches = np.where(angle_row < tolerance)[0]
+            if len(matches) == 0:
                 return False
+            unmatched.remove(matches.tolist()[0])
+
         return True
 
     def find_template_vectors(
@@ -230,12 +233,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
 
             unique_templates: List[np.ndarray] = []
             for template in max_coord_vectors:
-                template_exists = False
-                for existing in unique_templates:
-                    if self.templates_are_similar(template, existing):
-                        template_exists = True
-                        break
-                if not template_exists:
+                if not any(self.bonds_templates_are_similar(template, existing) for existing in unique_templates):
                     unique_templates.append(template)
 
             element_templates[element] = unique_templates
