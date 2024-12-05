@@ -199,7 +199,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         return angle < tolerance
 
     @staticmethod
-    def bonds_templates_are_similar(template1: np.ndarray, template2: np.ndarray, tolerance: float = 0.1) -> bool:
+    def are_bonds_templates_similar(template1: np.ndarray, template2: np.ndarray, tolerance: float = 0.1) -> bool:
         """Check if two templates are similar."""
         if len(template1) != len(template2):
             return False
@@ -245,7 +245,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
 
             unique_templates: List[np.ndarray] = []
             for template in max_coord_vectors:
-                if not any(self.bonds_templates_are_similar(template, existing) for existing in unique_templates):
+                if not any(self.are_bonds_templates_similar(template, existing) for existing in unique_templates):
                     unique_templates.append(template)
 
             element_templates[element] = unique_templates
