@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union
 
 from mat3ra.made.material import Material
 from .configuration import PassivationConfiguration
@@ -7,6 +7,7 @@ from .builders import (
     CoordinationBasedPassivationBuilder,
     SurfacePassivationBuilderParameters,
     CoordinationBasedPassivationBuilderParameters,
+    CoordinationAnalyzer,
 )
 
 
@@ -21,7 +22,7 @@ def create_passivation(
 
 def get_unique_coordination_numbers(
     configuration: PassivationConfiguration,
-    builder_parameters: Optional[CoordinationBasedPassivationBuilderParameters] = None,
+    cutoff: float = 3.0,
 ) -> set:
     """
     Get the unique coordination numbers for the provided passivation configuration as a set type.
@@ -34,8 +35,5 @@ def get_unique_coordination_numbers(
     Returns:
         set: The unique coordination numbers.
     """
-    if builder_parameters is None:
-        builder_parameters = CoordinationBasedPassivationBuilderParameters()
-    return CoordinationBasedPassivationBuilder(builder_parameters).get_unique_coordination_numbers(
-        material=configuration.slab
-    )
+    coordination_analyzer = CoordinationAnalyzer(cutoff=cutoff)
+    return coordination_analyzer.get_unique_coordination_numbers(configuration.slab)
