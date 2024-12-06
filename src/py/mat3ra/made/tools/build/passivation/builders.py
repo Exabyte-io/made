@@ -1,4 +1,4 @@
-from typing import Dict, List, Set
+from typing import Dict, List
 from mat3ra.made.material import Material
 from pydantic import BaseModel, Field
 import numpy as np
@@ -281,7 +281,7 @@ class CoordinationAnalyzer(BaseModel):
         coordination_numbers = self.get_coordination_numbers(material)
         return [idx for idx, number in coordination_numbers.items() if number <= self.coordination_threshold]
 
-    def get_unique_coordination_numbers(self, material: Material) -> Set[int]:
+    def get_unique_coordination_numbers(self, material: Material) -> List[int]:
         """
         Get the unique coordination numbers for all atoms in the material.
 
@@ -292,7 +292,7 @@ class CoordinationAnalyzer(BaseModel):
             Set[int]: A set of unique coordination numbers present in the material.
         """
         coordination_numbers = self.get_coordination_numbers(material)
-        return set(coordination_numbers.values())
+        return sorted(list(set(coordination_numbers.values())))
 
     angle_tolerance: float = Field(0.1, description="Tolerance for comparing angles between bond vectors.")
     max_bonds_to_passivate: int = Field(

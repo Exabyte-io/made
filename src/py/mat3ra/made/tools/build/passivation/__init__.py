@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 
 from mat3ra.made.material import Material
 from .configuration import PassivationConfiguration
@@ -23,7 +23,7 @@ def create_passivation(
 def get_unique_coordination_numbers(
     configuration: PassivationConfiguration,
     cutoff: float = 3.0,
-) -> set:
+) -> List[int]:
     """
     Get the unique coordination numbers for the provided passivation configuration as a set type.
         Considers the coordination threshold and shadowing radius from the builder parameters if provided.
