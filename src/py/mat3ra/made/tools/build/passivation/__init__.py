@@ -7,8 +7,8 @@ from .builders import (
     CoordinationBasedPassivationBuilder,
     SurfacePassivationBuilderParameters,
     CoordinationBasedPassivationBuilderParameters,
-    CoordinationAnalyzer,
 )
+from .coordination import CoordinationAnalyzer
 
 
 def create_passivation(
@@ -25,13 +25,11 @@ def get_unique_coordination_numbers(
     cutoff: float = 3.0,
 ) -> List[int]:
     """
-    Get the unique coordination numbers for the provided passivation configuration as a set type.
-        Considers the coordination threshold and shadowing radius from the builder parameters if provided.
+    Get the unique coordination numbers for the provided passivation configuration and cutoff radius.
 
     Args:
         configuration (PassivationConfiguration): The configuration object.
-        builder_parameters (CoordinationBasedPassivationBuilderParameters): The builder parameters.
-
+        cutoff (float): The cutoff radius for defining neighbors.
     Returns:
         set: The unique coordination numbers.
     """
