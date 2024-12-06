@@ -1,6 +1,7 @@
 from typing import Union, List
 
 from mat3ra.made.material import Material
+from ...analyze.coordination import CoordinationAnalyzer
 from .configuration import PassivationConfiguration
 from .builders import (
     SurfacePassivationBuilder,
@@ -8,7 +9,6 @@ from .builders import (
     SurfacePassivationBuilderParameters,
     CoordinationBasedPassivationBuilderParameters,
 )
-from .coordination import CoordinationAnalyzer
 
 
 def create_passivation(
