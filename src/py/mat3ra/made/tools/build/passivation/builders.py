@@ -3,12 +3,12 @@ from mat3ra.made.material import Material
 from pydantic import BaseModel, Field
 import numpy as np
 
-from .coordination import CoordinationAnalyzer
 from ...enums import SurfaceTypes
 from ...analyze import (
     get_surface_atom_indices,
     get_nearest_neighbors_vectors,
 )
+from ...analyze.coordination import CoordinationAnalyzer
 from ...modify import translate_to_z_level
 from ...build import BaseBuilder
 from .configuration import (
