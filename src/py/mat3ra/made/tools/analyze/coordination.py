@@ -1,10 +1,9 @@
 from typing import Dict, List
 
 import numpy as np
-from pydantic import BaseModel, Field
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze import get_nearest_neighbors_vectors
+from pydantic import BaseModel, Field
 
 
 class CoordinationAnalyzer(BaseModel):

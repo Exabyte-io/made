@@ -2,13 +2,15 @@ from typing import Callable, List, Literal, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
+from mat3ra.made.tools.convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
+from mat3ra.made.tools.enums import SurfaceTypes
+from mat3ra.made.tools.third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
+from mat3ra.made.tools.utils import (
+    decorator_convert_position_to_coordinate,
+    decorator_handle_periodic_boundary_conditions,
+)
+from mat3ra.made.utils import ArrayWithIds
 from scipy.spatial import cKDTree
-
-from ..utils import ArrayWithIds
-from .convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
-from .enums import SurfaceTypes
-from .third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
-from .utils import decorator_convert_position_to_coordinate, decorator_handle_periodic_boundary_conditions
 
 
 @decorator_convert_material_args_kwargs_to_atoms
