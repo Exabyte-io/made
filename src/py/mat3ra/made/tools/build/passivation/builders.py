@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 from mat3ra.made.material import Material
 from pydantic import BaseModel, Field
 import numpy as np
@@ -6,9 +6,8 @@ import numpy as np
 from ...enums import SurfaceTypes
 from ...analyze import (
     get_surface_atom_indices,
-    get_nearest_neighbors_vectors,
 )
-from ...analyze.coordination import CoordinationAnalyzer
+from ...analyze.coordination import CoordinationAnalyzer, get_nearest_neighbors_vectors
 from ...modify import translate_to_z_level
 from ...build import BaseBuilder
 from .configuration import (
@@ -133,13 +132,15 @@ class CoordinationBasedPassivationBuilderParameters(SurfacePassivationBuilderPar
         symmetry_tolerance (float): The tolerance for symmetry comparison of vectors for bonds.
     """
 
-    coordination_threshold: int = Field(
+    coordination_threshold: Optional[int] = Field(
         3, description="The coordination number threshold for an atom to be considered undercoordinated."
     )
-    bonds_to_passivate: int = Field(
+    bonds_to_passivate: Optional[int] = Field(
         1, description="The maximum number of bonds to passivate for each undercoordinated atom."
     )
-    symmetry_tolerance: float = Field(0.1, description="The tolerance for symmetry comparison of vectors for bonds.")
+    symmetry_tolerance: Optional[float] = Field(
+        0.1, description="The tolerance for symmetry comparison of vectors for bonds."
+    )
 
 
 class CoordinationBasedPassivationBuilder(PassivationBuilder):

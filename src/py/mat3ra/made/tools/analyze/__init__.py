@@ -4,11 +4,11 @@ import numpy as np
 from mat3ra.made.material import Material
 from scipy.spatial import cKDTree
 
-from ...utils import ArrayWithIds
 from ..convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from ..enums import SurfaceTypes
-from ..third_party import ASEAtoms, PymatgenIStructure, PymatgenVoronoiNN
+from ..third_party import ASEAtoms, PymatgenIStructure
 from ..utils import decorator_convert_position_to_coordinate, decorator_handle_periodic_boundary_conditions
+from .coordination import get_voronoi_nearest_neighbors_atom_indices
 
 
 @decorator_convert_material_args_kwargs_to_atoms
@@ -279,56 +279,6 @@ def get_atom_indices_with_condition_on_coordinates(
     return selected_indices
 
 
-def get_nearest_neighbors_atom_indices(
-    material: Material,
-    coordinate: Optional[List[float]] = None,
-    tolerance: float = 0.1,
-    cutoff: float = 13.0,
-) -> Optional[List[int]]:
-    """
-    Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
-
-    Args:
-        material (Material): The material object to find neighbors in.
-        coordinate (List[float]): The position to find neighbors for.
-        tolerance (float): tolerance parameter for near-neighbor finding. Faces that are smaller than tol fraction
-            of the largest face are not included in the tessellation. (default: 0.1).
-            as per: https://pymatgen.org/pymatgen.analysis.html#pymatgen.analysis.local_env.VoronoiNN
-        cutoff (float): The cutoff radius for identifying neighbors, in angstroms.
-
-    Returns:
-        List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
-    """
-    if coordinate is None:
-        coordinate = [0, 0, 0]
-    structure = to_pymatgen(material)
-    voronoi_nn = PymatgenVoronoiNN(
-        tol=tolerance,
-        cutoff=cutoff,
-        weight="solid_angle",
-        extra_nn_info=False,
-        compute_adj_neighbors=True,
-    )
-    coordinates = material.basis.coordinates
-    site_index = coordinates.get_element_id_by_value(coordinate)
-    remove_dummy_atom = False
-    if site_index is None:
-        structure.append("X", coordinate, validate_proximity=False)
-        site_index = len(structure.sites) - 1
-        remove_dummy_atom = True
-    try:
-        neighbors = voronoi_nn.get_nn_info(structure, site_index)
-    except ValueError:
-        return None
-    neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
-    if remove_dummy_atom:
-        structure.remove_sites([-1])
-
-    all_coordinates = material.basis.coordinates
-    all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
-    return all_coordinates.ids
-
-
 def get_atomic_coordinates_extremum(
     material: Material,
     extremum: Literal["max", "min"] = "max",
@@ -426,122 +376,6 @@ def get_surface_atom_indices(
                 exposed_atoms_indices.append(ids[idx])
 
     return exposed_atoms_indices
-
-
-@decorator_handle_periodic_boundary_conditions(0.25)
-def get_nearest_neighbors_vectors(
-    material: Material,
-    indices: Optional[List[int]] = None,
-    cutoff: float = 3.0,
-    nearest_only: bool = True,
-) -> ArrayWithIds:
-    """
-    Calculate the vectors to the nearest neighbors for each atom in the material.
-
-    Args:
-        material (Material): Material object to calculate coordination numbers for.
-        indices (List[int]): List of atom indices to calculate coordination numbers for.
-        cutoff (float): The maximum cutoff radius for identifying neighbors.
-        nearest_only (bool): If True, only consider the first shell of neighbors.
-
-    Returns:
-        ArrayWithIds: Array of vectors to the nearest neighbors for each atom.
-    """
-    new_material = material.clone()
-    new_material.to_cartesian()
-    if indices is not None:
-        new_material.basis.coordinates.filter_by_indices(indices)
-    coordinates = np.array(new_material.basis.coordinates.values)
-    kd_tree = cKDTree(coordinates)
-
-    nearest_neighbors_vectors = ArrayWithIds()
-    for idx, (x, y, z) in enumerate(coordinates):
-        # Get all neighbors within cutoff
-        distances, neighbors = kd_tree.query(
-            [x, y, z], k=len(coordinates), distance_upper_bound=cutoff  # Get all possible neighbors
-        )
-
-        if nearest_only:
-            # Remove the first distance (distance to self = 0)
-            distances = distances[1:]
-            neighbors = neighbors[1:]
-
-            # Remove infinite distances (no more neighbors found)
-            valid_indices = distances != np.inf
-            distances = distances[valid_indices]
-            neighbors = neighbors[valid_indices]
-
-            if len(distances) > 0:
-                # Find the first shell by analyzing distance distribution
-                # Get the first significant gap in distances
-                sorted_distances = np.sort(distances)
-                distance_gaps = sorted_distances[1:] - sorted_distances[:-1]
-
-                # Find the first significant gap (you might need to adjust this threshold)
-                gap_threshold = 0.5  # Å
-                significant_gaps = np.where(distance_gaps > gap_threshold)[0]
-
-                if len(significant_gaps) > 0:
-                    # Use only neighbors before the first significant gap
-                    first_gap_idx = significant_gaps[0] + 1
-                    neighbors = neighbors[:first_gap_idx]
-        else:
-            # Remove self and infinite distances for regular coordination counting
-            valid_indices = (distances != np.inf) & (distances != 0)
-            neighbors = neighbors[valid_indices]
-        vectors = [coordinates[neighbor] - [x, y, z] for neighbor in neighbors]
-        nearest_neighbors_vectors.add_item(vectors, idx)
-
-    return nearest_neighbors_vectors
-
-
-def get_coordination_numbers(
-    material: Material, indices: Optional[List[int]] = None, cutoff: float = 3.0, nearest_only: bool = True
-) -> ArrayWithIds:
-    """
-    Calculate the coordination numbers for each atom in the material.
-
-    Args:
-        material (Material): Material object to calculate coordination numbers for.
-        indices (List[int]): List of atom indices to calculate coordination numbers for.
-        cutoff (float): The maximum cutoff radius for identifying neighbors.
-        nearest_only (bool): If True, only consider the first shell of neighbors.
-
-    Returns:
-        ArrayWithIds: Array of coordination numbers for each atom.
-    """
-    nearest_neighbors_vectors = get_nearest_neighbors_vectors(material, indices, cutoff, nearest_only)
-    coordination_numbers = ArrayWithIds()
-    for value_with_id in nearest_neighbors_vectors.to_array_of_values_with_ids():
-        coordination_numbers.add_item(len(value_with_id.value), value_with_id.id)
-    return coordination_numbers
-
-
-def get_undercoordinated_atom_indices(
-    material: Material, indices: List[int], cutoff: float = 3.0, coordination_threshold: Optional[int] = None
-) -> List[int]:
-    """
-    Identify undercoordinated atoms among the specified indices in the material.
-
-    Args:
-        material (Material): Material object to identify undercoordinated atoms in.
-        indices (List[int]): List of atom indices to check for undercoordination.
-        cutoff (float): The cutoff radius for identifying neighbors.
-        coordination_threshold (int): The minimum coordination number to consider an atom as undercoordinated.
-
-    Returns:
-        List[int]: List of indices of undercoordinated atoms.
-    """
-    average_nearest_neighbors_vectors_array = get_nearest_neighbors_vectors(material, indices, cutoff)
-    if coordination_threshold is None:
-        coordination_threshold = min(len(item) for item in average_nearest_neighbors_vectors_array.values)
-    undercoordinated_atoms_indices = [
-        item.id
-        for item in average_nearest_neighbors_vectors_array.to_array_of_values_with_ids()
-        if len(item.value) <= coordination_threshold
-    ]
-    average_nearest_neighbors_vectors_array.filter_by_indices(undercoordinated_atoms_indices)
-    return undercoordinated_atoms_indices
 
 
 @decorator_convert_position_to_coordinate

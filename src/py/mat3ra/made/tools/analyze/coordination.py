@@ -1,9 +1,130 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze import get_nearest_neighbors_vectors
 from pydantic import BaseModel, Field
+from scipy.spatial._ckdtree import cKDTree
+
+from ..convert import to_pymatgen
+from ..third_party import PymatgenVoronoiNN
+from ..utils import ArrayWithIds, decorator_handle_periodic_boundary_conditions
+
+
+def get_voronoi_nearest_neighbors_atom_indices(
+    material: Material,
+    coordinate: Optional[List[float]] = None,
+    tolerance: float = 0.1,
+    cutoff: float = 13.0,
+) -> Optional[List[int]]:
+    """
+    Returns the indices of direct neighboring atoms to a specified position in the material using Voronoi tessellation.
+
+    Args:
+        material (Material): The material object to find neighbors in.
+        coordinate (List[float]): The position to find neighbors for.
+        tolerance (float): tolerance parameter for near-neighbor finding. Faces that are smaller than tol fraction
+            of the largest face are not included in the tessellation. (default: 0.1).
+            as per: https://pymatgen.org/pymatgen.analysis.html#pymatgen.analysis.local_env.VoronoiNN
+        cutoff (float): The cutoff radius for identifying neighbors, in angstroms.
+
+    Returns:
+        List[int]: A list of indices of neighboring atoms, or an empty list if no neighbors are found.
+    """
+    if coordinate is None:
+        coordinate = [0, 0, 0]
+    structure = to_pymatgen(material)
+    voronoi_nn = PymatgenVoronoiNN(
+        tol=tolerance,
+        cutoff=cutoff,
+        weight="solid_angle",
+        extra_nn_info=False,
+        compute_adj_neighbors=True,
+    )
+    coordinates = material.basis.coordinates
+    site_index = coordinates.get_element_id_by_value(coordinate)
+    remove_dummy_atom = False
+    if site_index is None:
+        structure.append("X", coordinate, validate_proximity=False)
+        site_index = len(structure.sites) - 1
+        remove_dummy_atom = True
+    try:
+        neighbors = voronoi_nn.get_nn_info(structure, site_index)
+    except ValueError:
+        return None
+    neighboring_atoms_pymatgen_ids = [n["site_index"] for n in neighbors]
+    if remove_dummy_atom:
+        structure.remove_sites([-1])
+
+    all_coordinates = material.basis.coordinates
+    all_coordinates.filter_by_indices(neighboring_atoms_pymatgen_ids)
+    return all_coordinates.ids
+
+
+@decorator_handle_periodic_boundary_conditions(0.25)
+def get_nearest_neighbors_vectors(
+    material: Material,
+    indices: Optional[List[int]] = None,
+    cutoff: float = 3.0,
+    nearest_only: bool = True,
+) -> ArrayWithIds:
+    """
+    Calculate the vectors to the nearest neighbors for each atom in the material.
+
+    Args:
+        material (Material): Material object to calculate coordination numbers for.
+        indices (List[int]): List of atom indices to calculate coordination numbers for.
+        cutoff (float): The maximum cutoff radius for identifying neighbors.
+        nearest_only (bool): If True, only consider the first shell of neighbors.
+
+    Returns:
+        ArrayWithIds: Array of vectors to the nearest neighbors for each atom.
+    """
+    new_material = material.clone()
+    new_material.to_cartesian()
+    if indices is not None:
+        new_material.basis.coordinates.filter_by_indices(indices)
+    coordinates = np.array(new_material.basis.coordinates.values)
+    kd_tree = cKDTree(coordinates)
+
+    nearest_neighbors_vectors = ArrayWithIds()
+    for idx, (x, y, z) in enumerate(coordinates):
+        # Get all neighbors within cutoff
+        distances, neighbors = kd_tree.query(
+            [x, y, z], k=len(coordinates), distance_upper_bound=cutoff  # Get all possible neighbors
+        )
+
+        if nearest_only:
+            # Remove the first distance (distance to self = 0)
+            distances = distances[1:]
+            neighbors = neighbors[1:]
+
+            # Remove infinite distances (no more neighbors found)
+            valid_indices = distances != np.inf
+            distances = distances[valid_indices]
+            neighbors = neighbors[valid_indices]
+
+            if len(distances) > 0:
+                # Find the first shell by analyzing distance distribution
+                # Get the first significant gap in distances
+                sorted_distances = np.sort(distances)
+                distance_gaps = sorted_distances[1:] - sorted_distances[:-1]
+
+                # Find the first significant gap (you might need to adjust this threshold)
+                gap_threshold = 0.5  # Å
+                significant_gaps = np.where(distance_gaps > gap_threshold)[0]
+
+                if len(significant_gaps) > 0:
+                    # Use only neighbors before the first significant gap
+                    first_gap_idx = significant_gaps[0] + 1
+                    neighbors = neighbors[:first_gap_idx]
+        else:
+            # Remove self and infinite distances for regular coordination counting
+            valid_indices = (distances != np.inf) & (distances != 0)
+            neighbors = neighbors[valid_indices]
+        vectors = [coordinates[neighbor] - [x, y, z] for neighbor in neighbors]
+        nearest_neighbors_vectors.add_item(vectors, idx)
+
+    return nearest_neighbors_vectors
 
 
 class CoordinationAnalyzer(BaseModel):
