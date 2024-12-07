@@ -1,13 +1,14 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 from mat3ra.made.material import Material
 from pydantic import BaseModel, Field
 import numpy as np
 
+from ...analyze.coordination import get_nearest_neighbors_vectors
 from ...enums import SurfaceTypes
 from ...analyze import (
     get_surface_atom_indices,
 )
-from ...analyze.coordination import CoordinationAnalyzer, get_nearest_neighbors_vectors
+from ...analyze import coordination
 from ...modify import translate_to_z_level
 from ...build import BaseBuilder
 from .configuration import (
@@ -132,15 +133,13 @@ class CoordinationBasedPassivationBuilderParameters(SurfacePassivationBuilderPar
         symmetry_tolerance (float): The tolerance for symmetry comparison of vectors for bonds.
     """
 
-    coordination_threshold: Optional[int] = Field(
+    coordination_threshold: int = Field(
         3, description="The coordination number threshold for an atom to be considered undercoordinated."
     )
-    bonds_to_passivate: Optional[int] = Field(
+    bonds_to_passivate: int = Field(
         1, description="The maximum number of bonds to passivate for each undercoordinated atom."
     )
-    symmetry_tolerance: Optional[float] = Field(
-        0.1, description="The tolerance for symmetry comparison of vectors for bonds."
-    )
+    symmetry_tolerance: float = Field(0.1, description="The tolerance for symmetry comparison of vectors for bonds.")
 
 
 class CoordinationBasedPassivationBuilder(PassivationBuilder):
@@ -170,21 +169,23 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         Create a passivated material based on the configuration.
         """
         material = super().create_passivated_material(configuration)
-        coordination_analyzer = CoordinationAnalyzer(
+        undercoordinated_atoms_indices = coordination.get_undercoordinated_atom_indices(
+            material,
             cutoff=self.build_parameters.shadowing_radius,
             coordination_threshold=self.build_parameters.coordination_threshold,
         )
-        undercoordinated_atoms_indices = coordination_analyzer.get_undercoordinated_atom_indices(material)
         nearest_neighbors_vectors_array = get_nearest_neighbors_vectors(
             material=material, cutoff=self.build_parameters.shadowing_radius
         )
-        templates = coordination_analyzer.find_template_vectors(
+        templates = coordination.find_template_vectors(
             nearest_neighbors_vectors_array.values, material.basis.elements.values
         )
-        reconstructed_bonds = coordination_analyzer.reconstruct_missing_bonds(
-            nearest_neighbors_vectors_array.values, material.basis.elements.values, templates
+        reconstructed_bonds = coordination.reconstruct_missing_bonds(
+            nearest_neighbors_vectors_array.values,
+            material.basis.elements.values,
+            templates,
+            max_bonds_to_passivate=self.build_parameters.bonds_to_passivate,
         )
-
         passivant_coordinates_values = self._get_passivant_coordinates(
             material,
             configuration,

@@ -2,7 +2,6 @@ from typing import Dict, List, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
-from pydantic import BaseModel, Field
 from scipy.spatial._ckdtree import cKDTree
 
 from ..convert import to_pymatgen
@@ -127,189 +126,211 @@ def get_nearest_neighbors_vectors(
     return nearest_neighbors_vectors
 
 
-class CoordinationAnalyzer(BaseModel):
+def get_coordination_numbers(material: Material, cutoff: float) -> Dict[int, int]:
     """
-    Class to handle coordination number analysis for atoms in a material.
-    Including vectors to nearest neighbors and identifying undercoordinated atoms.
+    Calculate the coordination numbers for all atoms in the material.
 
     Args:
-        cutoff (float): Cutoff radius for defining neighbors.
-        coordination_threshold (int): Minimum coordination number for an atom to be considered fully coordinated.
+        material (Material): The material object.
+        cutoff (float): The cutoff radius for identifying neighbors.
+
+    Returns:
+        Dict[int, int]: A dictionary mapping atom indices to their coordination numbers.
     """
+    nearest_neighbors = get_nearest_neighbors_vectors(material=material, cutoff=cutoff)
+    coordination_numbers = {idx: len(vectors) for idx, vectors in enumerate(nearest_neighbors.values)}
+    return coordination_numbers
 
-    cutoff: float = 3.0
-    coordination_threshold: int = 3
 
-    def get_coordination_numbers(self, material: Material) -> Dict[int, int]:
-        """
-        Calculate the coordination numbers for all atoms in the material.
+def get_undercoordinated_atom_indices(material: Material, cutoff: float, coordination_threshold: int) -> List[int]:
+    """
+    Identify undercoordinated atoms based on the coordination threshold (inclusive).
 
-        Args:
-            material (Material): Material object.
+    Args:
+        material (Material): The material object.
+        cutoff (float): The cutoff radius for identifying neighbors.
+        coordination_threshold (int): The coordination number threshold for an atom to be considered undercoordinated.
 
-        Returns:
-            Dict[int, int]: A dictionary mapping atom indices to their coordination numbers.
-        """
-        nearest_neighbors = get_nearest_neighbors_vectors(material=material, cutoff=self.cutoff)
-        coordination_numbers = {idx: len(vectors) for idx, vectors in enumerate(nearest_neighbors.values)}
-        return coordination_numbers
+    Returns:
+        List[int]: List of indices of undercoordinated atoms.
+    """
+    coordination_numbers = get_coordination_numbers(material, cutoff)
+    return [idx for idx, number in coordination_numbers.items() if number <= coordination_threshold]
 
-    def get_undercoordinated_atom_indices(self, material: Material) -> List[int]:
-        """
-        Identify undercoordinated atoms based on the coordination threshold (inclusive).
 
-        Args:
-            material (Material): Material object.
+def get_unique_coordination_numbers(material: Material, cutoff: float) -> List[int]:
+    """
+    Get the unique coordination numbers for all atoms in the material.
 
-        Returns:
-            List[int]: List of indices of undercoordinated atoms.
-        """
-        coordination_numbers = self.get_coordination_numbers(material)
-        return [idx for idx, number in coordination_numbers.items() if number <= self.coordination_threshold]
+    Args:
+        material (Material): The material object.
+        cutoff (float): The cutoff radius for identifying neighbors.
 
-    def get_unique_coordination_numbers(self, material: Material) -> List[int]:
-        """
-        Get the unique coordination numbers for all atoms in the material.
+    Returns:
+        List[int]: A list of unique coordination numbers present in the material.
+    """
+    coordination_numbers = get_coordination_numbers(material, cutoff)
+    return sorted(list(set(coordination_numbers.values())))
 
-        Args:
-            material (Material): Material object.
 
-        Returns:
-            Set[int]: A set of unique coordination numbers present in the material.
-        """
-        coordination_numbers = self.get_coordination_numbers(material)
-        return sorted(list(set(coordination_numbers.values())))
+def are_bonds_templates_similar(template1: np.ndarray, template2: np.ndarray, tolerance: float = 0.1) -> bool:
+    """
+    Check if two bond templates are similar.
 
-    angle_tolerance: float = Field(0.1, description="Tolerance for comparing angles between bond vectors.")
-    max_bonds_to_passivate: int = Field(
-        2, description="Maximum number of bonds to passivate for each undercoordinated atom."
-    )
+    Args:
+        template1 (np.ndarray): First template of bond vectors.
+        template2 (np.ndarray): Second template of bond vectors.
+        tolerance (float): Angle tolerance for comparison.
 
-    @staticmethod
-    def are_bonds_templates_similar(template1: np.ndarray, template2: np.ndarray, tolerance: float = 0.1) -> bool:
-        """
-        Check if two bond templates are similar.
+    Returns:
+        bool: True if the templates are similar, False otherwise.
+    """
+    if len(template1) != len(template2):
+        return False
 
-        Args:
-            template1 (np.ndarray): First template of bond vectors.
-            template2 (np.ndarray): Second template of bond vectors.
-            tolerance (float): Angle tolerance for comparison.
+    dot_matrix = np.dot(template1, template2.T)
+    norms1 = np.linalg.norm(template1, axis=1)
+    norms2 = np.linalg.norm(template2, axis=1)
+    cosine_matrix = dot_matrix / np.outer(norms1, norms2)
+    angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
 
-        Returns:
-            bool: True if the templates are similar, False otherwise.
-        """
-        if len(template1) != len(template2):
+    unmatched = list(range(len(template2)))
+    for angle_row in angles_matrix:
+        matches = np.where(angle_row < tolerance)[0]
+        if len(matches) == 0:
             return False
+        unmatched.remove(matches.tolist()[0])
 
-        dot_matrix = np.dot(template1, template2.T)
-        norms1 = np.linalg.norm(template1, axis=1)
-        norms2 = np.linalg.norm(template2, axis=1)
-        cosine_matrix = dot_matrix / np.outer(norms1, norms2)
-        angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
+    return True
 
-        unmatched = list(range(len(template2)))
-        for angle_row in angles_matrix:
-            matches = np.where(angle_row < tolerance)[0]
-            if len(matches) == 0:
-                return False
-            unmatched.remove(matches.tolist()[0])
 
-        return True
+def find_template_vectors(
+    atom_vectors: List[List[np.ndarray]], atom_elements: List[str], angle_tolerance: float = 0.1
+) -> Dict[str, List[np.ndarray]]:
+    """
+    Find unique bond templates for each element type.
 
-    def find_template_vectors(
-        self, atom_vectors: List[List[np.ndarray]], atom_elements: List[str]
-    ) -> Dict[str, List[np.ndarray]]:
-        """
-        Find unique bond templates for each element type.
+    Args:
+        atom_vectors (List[List[np.ndarray]]): List of bond vectors for each atom.
+        atom_elements (List[str]): List of chemical elements for each atom.
+        angle_tolerance (float): Tolerance for comparing angles between bond vectors.
 
-        Args:
-            atom_vectors (List[List[np.ndarray]]): List of bond vectors for each atom.
-            atom_elements (List[str]): List of chemical elements for each atom.
+    Returns:
+        Dict[str, List[np.ndarray]]: Dictionary mapping element types to unique bond templates.
+    """
+    element_templates = {}
 
-        Returns:
-            Dict[str, List[np.ndarray]]: Dictionary mapping element types to unique bond templates.
-        """
-        element_templates = {}
+    for element in set(atom_elements):
+        element_indices = [i for i, e in enumerate(atom_elements) if e == element]
+        element_vector_lists = [np.array(atom_vectors[i]) for i in element_indices]
 
-        for element in set(atom_elements):
-            element_indices = [i for i, e in enumerate(atom_elements) if e == element]
-            element_vector_lists = [np.array(atom_vectors[i]) for i in element_indices]
+        if not element_vector_lists:
+            continue
 
-            if not element_vector_lists:
-                continue
+        max_coord = max(len(vectors) for vectors in element_vector_lists)
+        max_coord_vectors = [v for v in element_vector_lists if len(v) == max_coord]
 
-            max_coord = max(len(vectors) for vectors in element_vector_lists)
-            max_coord_vectors = [v for v in element_vector_lists if len(v) == max_coord]
+        unique_templates: List[np.ndarray] = []
+        for template in max_coord_vectors:
+            if not any(
+                are_bonds_templates_similar(template, existing, angle_tolerance) for existing in unique_templates
+            ):
+                unique_templates.append(template)
 
-            unique_templates: List[np.ndarray] = []
-            for template in max_coord_vectors:
-                if not any(
-                    self.are_bonds_templates_similar(template, existing, self.angle_tolerance)
-                    for existing in unique_templates
-                ):
-                    unique_templates.append(template)
+        element_templates[element] = unique_templates
 
-            element_templates[element] = unique_templates
+    return element_templates
 
-        return element_templates
 
-    def reconstruct_missing_bonds(
-        self,
-        nearest_neighbor_vectors: List[List[np.ndarray]],
-        chemical_elements: List[str],
-        templates: Dict[str, List[np.ndarray]],
-    ) -> Dict[int, List[List[float]]]:
-        """
-        Reconstruct missing bonds for undercoordinated atoms.
+def reconstruct_missing_bonds_for_element(
+    vectors: List[np.ndarray],
+    element: str,
+    templates: Dict[str, List[np.ndarray]],
+    angle_tolerance: float = 0.1,
+    max_bonds_to_passivate: int = 1,
+) -> List[List[float]]:
+    """
+    Reconstruct missing bonds for a single element.
 
-        Args:
-            nearest_neighbor_vectors (List[List[np.ndarray]]): List of bond vectors for each atom.
-            chemical_elements (List[str]): List of chemical elements for each atom.
-            templates (Dict[str, List[np.ndarray]]): Dictionary of bond templates for each element.
+    Args:
+        vectors (List[np.ndarray]): List of bond vectors for the atom.
+        element (str): Chemical element of the atom.
+        templates (Dict[str, List[np.ndarray]]): Dictionary of bond templates for each element.
+        angle_tolerance (float): Tolerance for comparing angles between bond vectors.
+        max_bonds_to_passivate (int): Maximum number of bonds to passivate for the atom.
 
-        Returns:
-            Dict[int, List[List[float]]]: Dictionary mapping atom indices to reconstructed bond vectors.
-        """
-        missing_bonds = {}
+    Returns:
+        List[List[float]]: List of reconstructed bond vectors.
+    """
+    if element not in templates:
+        return []
 
-        for idx, (vectors, element) in enumerate(zip(nearest_neighbor_vectors, chemical_elements)):
-            if element not in templates:
-                continue
+    existing_vectors = np.array(vectors) if vectors else np.empty((0, 3))
+    max_coordination = len(templates[element][0])
 
-            existing_vectors = np.array(vectors) if vectors else np.empty((0, 3))
-            max_coordination = len(templates[element][0])
+    if len(existing_vectors) >= max_coordination:
+        return []
 
-            if len(existing_vectors) >= max_coordination:
-                continue
+    best_missing = None
+    best_match_count = -1
 
-            best_missing = None
-            best_match_count = -1
+    for template in templates[element]:
+        if existing_vectors.size == 0:
+            match_count = 0
+        else:
+            dot_matrix = np.dot(template, existing_vectors.T)
+            cosine_matrix = dot_matrix / (
+                np.linalg.norm(template, axis=1)[:, None] * np.linalg.norm(existing_vectors, axis=1)
+            )
+            angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
 
-            for template in templates[element]:
-                if existing_vectors.size == 0:
-                    match_count = 0
-                else:
-                    dot_matrix = np.dot(template, existing_vectors.T)
-                    cosine_matrix = dot_matrix / (
-                        np.linalg.norm(template, axis=1)[:, None] * np.linalg.norm(existing_vectors, axis=1)
-                    )
-                    angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
+            matches = np.any(angles_matrix < angle_tolerance, axis=1)
+            match_count = np.sum(matches)
 
-                    matches = np.any(angles_matrix < self.angle_tolerance, axis=1)
-                    match_count = np.sum(matches)
+        missing = template[~matches] if existing_vectors.size != 0 else template
 
-                missing = template[~matches] if existing_vectors.size != 0 else template
+        if match_count > best_match_count:
+            best_match_count = match_count
+            best_missing = missing
 
-                if match_count > best_match_count:
-                    best_match_count = match_count
-                    best_missing = missing
+    if best_missing is not None:
+        num_bonds_to_add = min(
+            len(best_missing),
+            max_bonds_to_passivate,
+            max_coordination - len(existing_vectors),
+        )
+        return best_missing[:num_bonds_to_add].tolist()
 
-            if best_missing is not None:
-                num_bonds_to_add = min(
-                    len(best_missing),
-                    self.max_bonds_to_passivate,
-                    max_coordination - len(existing_vectors),
-                )
-                missing_bonds[idx] = best_missing[:num_bonds_to_add].tolist()
+    return []
 
-        return missing_bonds
+
+def reconstruct_missing_bonds(
+    nearest_neighbor_vectors: List[List[np.ndarray]],
+    chemical_elements: List[str],
+    templates: Dict[str, List[np.ndarray]],
+    angle_tolerance: float = 0.1,
+    max_bonds_to_passivate: int = 1,
+) -> Dict[int, List[List[float]]]:
+    """
+    Reconstruct missing bonds for all undercoordinated atoms.
+
+    Args:
+        nearest_neighbor_vectors (List[List[np.ndarray]]): List of bond vectors for each atom.
+        chemical_elements (List[str]): List of chemical elements for each atom.
+        templates (Dict[str, List[np.ndarray]]): Dictionary of bond templates for each element.
+        angle_tolerance (float): Tolerance for comparing angles between bond vectors.
+        max_bonds_to_passivate (int): Maximum number of bonds to passivate for each undercoordinated atom.
+
+    Returns:
+        Dict[int, List[List[float]]]: Dictionary mapping atom indices to reconstructed bond vectors.
+    """
+    missing_bonds = {}
+
+    for idx, (vectors, element) in enumerate(zip(nearest_neighbor_vectors, chemical_elements)):
+        reconstructed_bonds = reconstruct_missing_bonds_for_element(
+            vectors, element, templates, angle_tolerance, max_bonds_to_passivate
+        )
+        if reconstructed_bonds:
+            missing_bonds[idx] = reconstructed_bonds
+
+    return missing_bonds

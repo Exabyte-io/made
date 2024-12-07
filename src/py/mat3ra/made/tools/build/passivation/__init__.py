@@ -1,7 +1,7 @@
 from typing import Union, List
 
 from mat3ra.made.material import Material
-from ...analyze.coordination import CoordinationAnalyzer
+from ...analyze import coordination
 from .configuration import PassivationConfiguration
 from .builders import (
     SurfacePassivationBuilder,
@@ -33,5 +33,4 @@ def get_unique_coordination_numbers(
     Returns:
         set: The unique coordination numbers.
     """
-    coordination_analyzer = CoordinationAnalyzer(cutoff=cutoff)
-    return coordination_analyzer.get_unique_coordination_numbers(configuration.slab)
+    return coordination.get_unique_coordination_numbers(material=configuration.slab, cutoff=cutoff)
