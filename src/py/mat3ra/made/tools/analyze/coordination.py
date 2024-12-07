@@ -1,12 +1,202 @@
-from typing import Dict, List, Optional
+from enum import Enum
 
+from pydantic import BaseModel
 import numpy as np
+from typing import Dict, List, Optional
 from mat3ra.made.material import Material
 from scipy.spatial._ckdtree import cKDTree
 
+from . import BaseMaterialAnalyzer
 from ..convert import to_pymatgen
 from ..third_party import PymatgenVoronoiNN
 from ..utils import ArrayWithIds, decorator_handle_periodic_boundary_conditions
+
+
+class BondDirectionsTemplatesEnum(List, Enum):
+    OCTAHEDRAL = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]
+    TETRAHEDRAL = [[1, 1, 1], [-1, -1, 1], [1, -1, -1], [-1, 1, -1]]
+    PLANAR = [[1, 0, 0], [-1, 2, 0], [-1, -2, 0]]
+    LINEAR = [[1, 0, 0], [-1, 0, 0]]
+
+
+class BondDirections(np.ndarray):
+    def __eq__(self, other):
+        if not isinstance(other, BondDirections):
+            return False
+        return self.are_bond_directions_similar(self, other)
+
+    @staticmethod
+    def are_bond_directions_similar(directions1: np.ndarray, directions2: np.ndarray, tolerance: float = 0.1) -> bool:
+        """
+        Check if two bond templates are similar.
+
+        Args:
+            directions1 (np.ndarray): First template of bond vectors.
+            directions2 (np.ndarray): Second template of bond vectors.
+            tolerance (float): Angle tolerance for comparison.
+
+        Returns:
+            bool: True if the templates are similar, False otherwise.
+        """
+        if len(directions1) != len(directions2):
+            return False
+
+        dot_matrix = np.dot(directions1, directions2.T)
+        norms1 = np.linalg.norm(directions1, axis=1)
+        norms2 = np.linalg.norm(directions2, axis=1)
+        cosine_matrix = dot_matrix / np.outer(norms1, norms2)
+        angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
+
+        unmatched = list(range(len(directions2)))
+        for angle_row in angles_matrix:
+            matches = np.where(angle_row < tolerance)[0]
+            if len(matches) == 0:
+                return False
+            unmatched.remove(matches.tolist()[0])
+
+        return True
+
+
+class CrystalSite(BaseModel):
+    # element: str
+    # coordinate: List[float]
+    nearest_neighbor_vectors: []
+    # coordination_number: int = 0
+    # see https://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list for an example
+    wyckoff_letter: Optional[str] = None
+
+    @property
+    def coordination_number(self):
+        return len(self.nearest_neighbor_vectors)
+
+
+class CrystalSiteList(ArrayWithIds):
+    values: List[CrystalSite]
+
+
+class MaterialWithCrystalSites(Material):
+    crystal_sites: CrystalSiteList = CrystalSiteList()
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.nearest_neighbor_vectors = self.get_nearest_neighbors_vectors()
+        self.crystal_sites = CrystalSiteList(nearest_neighbor_vectors=self.nearest_neighbor_vectors)
+
+    @property
+    def coordinates_as_kdtree(self):
+        return cKDTree(self.basis.coordinates.values)
+
+    @decorator_handle_periodic_boundary_conditions(0.25)
+    def get_nearest_neighbors_vectors(
+        self,
+        cutoff: float = 3.0,
+        nearest_only: bool = True,
+    ) -> ArrayWithIds:
+        """
+        Calculate the vectors to the nearest neighbors for each atom in the material.
+
+        Args:
+            material (Material): Material object to calculate coordination numbers for.
+            indices (List[int]): List of atom indices to calculate coordination numbers for.
+            cutoff (float): The maximum cutoff radius for identifying neighbors.
+            nearest_only (bool): If True, only consider the first shell of neighbors.
+
+        Returns:
+            ArrayWithIds: Array of vectors to the nearest neighbors for each atom.
+        """
+        new_material = self.clone()
+        new_material.to_cartesian()
+        coordinates = np.array(new_material.basis.coordinates.values)
+        kd_tree = cKDTree(coordinates)
+
+        nearest_neighbors = self.get_nearest_neighbors_for_all_sites()
+        vectors = [
+            coordinates[neighbor.id] - coordinates[neighbor.id]
+            for neighbor in nearest_neighbors.to_array_of_values_with_ids()
+        ]
+        return ArrayWithIds(values=vectors, ids=nearest_neighbors.ids)
+
+    def get_neighbors_vectors_for_site(
+        self, site_index: int, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
+    ):
+        coordinates = self.basis.coordinates.values
+        neighbors, distances = self.get_neighbors_for_site(site_index, cutoff, max_number_of_neighbors)
+        vectors = [coordinates[neighbor] - coordinates[site_index] for neighbor in neighbors]
+        return vectors
+
+    def get_neighbors_vectors_for_all_sites(self, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None):
+        nearest_neighbors = ArrayWithIds()
+        for site_index in range(len(self.basis.coordinates.values)):
+            vectors = self.get_neighbors_vectors_for_site(site_index, cutoff, max_number_of_neighbors)
+            nearest_neighbors.add_item(vectors, site_index)
+        return nearest_neighbors
+
+    @decorator_handle_periodic_boundary_conditions(0.25)
+    def get_neighbors_for_site(
+        self,
+        site_index: int,
+        cutoff: float = 3.0,
+        max_number_of_neighbors: Optional[int] = None,
+        nearest_only: bool = True,
+    ):
+        """
+        Get the nearest neighbors for a specific site.
+
+        Args:
+            site_index (int): The index of the site to
+            cutoff (float): The maximum cutoff radius for identifying neighbors.
+            max_number_of_neighbors (int): The max number of neighbors possible.
+            nearest_only (bool): If True, only consider the first shell of neighbors.
+            distance_tolerance (float): The tolerance for identifying nearest_neighbors.
+        """
+        coordinates = self.basis.coordinates.values
+        max_number_of_neighbors = len(coordinates) if max_number_of_neighbors is None else max_number_of_neighbors
+        coordinate = coordinates[site_index]
+        distances, neighbors = self.coordinates_as_kdtree.query(
+            coordinate, k=max_number_of_neighbors, distance_upper_bound=cutoff
+        )
+
+        valid_indices = (distances != np.inf) & (distances != 0)
+        distances = distances[valid_indices]
+        neighbors = neighbors[valid_indices]
+
+        if nearest_only:
+            rdf = RadicalDistributionFunction.from_material(self)
+            valid_indices = np.where([rdf.is_within_first_peak(distance) for distance in distances])
+            distances = distances[valid_indices]
+            neighbors = neighbors[valid_indices]
+        return neighbors, distances
+
+    @decorator_handle_periodic_boundary_conditions(0.25)
+    def get_nearest_neighbors_for_all_sites(
+        self, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
+    ) -> ArrayWithIds:
+        """
+        Get the nearest neighbors for all sites.
+
+        Args:
+            cutoff (float): The maximum cutoff radius for identifying neighbors.
+            max_number_of_neighbors (int): The max number of neighbors possible.
+        """
+        nearest_neighbors = ArrayWithIds()
+        for site_index in range(len(self.basis.coordinates.values)):
+            neighbors, distances = self.get_neighbors_for_site(site_index, cutoff, max_number_of_neighbors)
+            nearest_neighbors.add_item(neighbors, site_index)
+        return nearest_neighbors
+
+    def get_coordination_numbers(self, cutoff: float = 3.0):
+        """
+        Calculate the coordination numbers for all atoms in the material.
+
+        Args:
+            cutoff (float): The cutoff radius for identifying neighbors.
+
+        Returns:
+            Dict[int, int]: A dictionary mapping atom indices to their coordination numbers.
+        """
+        nearest_neighbors = self.get_nearest_neighbors_for_all_sites(cutoff)
+        coordination_numbers = ArrayWithIds(values=nearest_neighbors)
+        return coordination_numbers
 
 
 def get_voronoi_nearest_neighbors_atom_indices(
@@ -59,89 +249,6 @@ def get_voronoi_nearest_neighbors_atom_indices(
     return all_coordinates.ids
 
 
-@decorator_handle_periodic_boundary_conditions(0.25)
-def get_nearest_neighbors_vectors(
-    material: Material,
-    indices: Optional[List[int]] = None,
-    cutoff: float = 3.0,
-    nearest_only: bool = True,
-) -> ArrayWithIds:
-    """
-    Calculate the vectors to the nearest neighbors for each atom in the material.
-
-    Args:
-        material (Material): Material object to calculate coordination numbers for.
-        indices (List[int]): List of atom indices to calculate coordination numbers for.
-        cutoff (float): The maximum cutoff radius for identifying neighbors.
-        nearest_only (bool): If True, only consider the first shell of neighbors.
-
-    Returns:
-        ArrayWithIds: Array of vectors to the nearest neighbors for each atom.
-    """
-    new_material = material.clone()
-    new_material.to_cartesian()
-    if indices is not None:
-        new_material.basis.coordinates.filter_by_indices(indices)
-    coordinates = np.array(new_material.basis.coordinates.values)
-    kd_tree = cKDTree(coordinates)
-
-    nearest_neighbors_vectors = ArrayWithIds()
-    for idx, (x, y, z) in enumerate(coordinates):
-        # Get all neighbors within cutoff
-        distances, neighbors = kd_tree.query(
-            [x, y, z], k=len(coordinates), distance_upper_bound=cutoff  # Get all possible neighbors
-        )
-
-        if nearest_only:
-            # Remove the first distance (distance to self = 0)
-            distances = distances[1:]
-            neighbors = neighbors[1:]
-
-            # Remove infinite distances (no more neighbors found)
-            valid_indices = distances != np.inf
-            distances = distances[valid_indices]
-            neighbors = neighbors[valid_indices]
-
-            if len(distances) > 0:
-                # Find the first shell by analyzing distance distribution
-                # Get the first significant gap in distances
-                sorted_distances = np.sort(distances)
-                distance_gaps = sorted_distances[1:] - sorted_distances[:-1]
-
-                # Find the first significant gap (you might need to adjust this threshold)
-                gap_threshold = 0.5  # Å
-                significant_gaps = np.where(distance_gaps > gap_threshold)[0]
-
-                if len(significant_gaps) > 0:
-                    # Use only neighbors before the first significant gap
-                    first_gap_idx = significant_gaps[0] + 1
-                    neighbors = neighbors[:first_gap_idx]
-        else:
-            # Remove self and infinite distances for regular coordination counting
-            valid_indices = (distances != np.inf) & (distances != 0)
-            neighbors = neighbors[valid_indices]
-        vectors = [coordinates[neighbor] - [x, y, z] for neighbor in neighbors]
-        nearest_neighbors_vectors.add_item(vectors, idx)
-
-    return nearest_neighbors_vectors
-
-
-def get_coordination_numbers(material: Material, cutoff: float) -> Dict[int, int]:
-    """
-    Calculate the coordination numbers for all atoms in the material.
-
-    Args:
-        material (Material): The material object.
-        cutoff (float): The cutoff radius for identifying neighbors.
-
-    Returns:
-        Dict[int, int]: A dictionary mapping atom indices to their coordination numbers.
-    """
-    nearest_neighbors = get_nearest_neighbors_vectors(material=material, cutoff=cutoff)
-    coordination_numbers = {idx: len(vectors) for idx, vectors in enumerate(nearest_neighbors.values)}
-    return coordination_numbers
-
-
 def get_undercoordinated_atom_indices(material: Material, cutoff: float, coordination_threshold: int) -> List[int]:
     """
     Identify undercoordinated atoms based on the coordination threshold (inclusive).
@@ -173,38 +280,7 @@ def get_unique_coordination_numbers(material: Material, cutoff: float) -> List[i
     return sorted(list(set(coordination_numbers.values())))
 
 
-def are_bonds_templates_similar(template1: np.ndarray, template2: np.ndarray, tolerance: float = 0.1) -> bool:
-    """
-    Check if two bond templates are similar.
-
-    Args:
-        template1 (np.ndarray): First template of bond vectors.
-        template2 (np.ndarray): Second template of bond vectors.
-        tolerance (float): Angle tolerance for comparison.
-
-    Returns:
-        bool: True if the templates are similar, False otherwise.
-    """
-    if len(template1) != len(template2):
-        return False
-
-    dot_matrix = np.dot(template1, template2.T)
-    norms1 = np.linalg.norm(template1, axis=1)
-    norms2 = np.linalg.norm(template2, axis=1)
-    cosine_matrix = dot_matrix / np.outer(norms1, norms2)
-    angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
-
-    unmatched = list(range(len(template2)))
-    for angle_row in angles_matrix:
-        matches = np.where(angle_row < tolerance)[0]
-        if len(matches) == 0:
-            return False
-        unmatched.remove(matches.tolist()[0])
-
-    return True
-
-
-def find_template_vectors(material: Material, angle_tolerance: float = 0.1) -> Dict[str, List[np.ndarray]]:
+def find_unique_bond_directions(material: Material, angle_tolerance: float = 0.1) -> Dict[str, List[np.ndarray]]:
     """
     Find unique bond templates for each element type.
 
@@ -219,12 +295,12 @@ def find_template_vectors(material: Material, angle_tolerance: float = 0.1) -> D
     element_templates = {}
 
     for element in set(material.basis.elements.values):
-        element_templates[element] = find_template_vectors_for_element(material, element, angle_tolerance)
+        element_templates[element] = find_bond_directions_for_element(material, element, angle_tolerance)
 
     return element_templates
 
 
-def find_template_vectors_for_element(
+def find_bond_directions_for_element(
     material: Material, element: str, angle_tolerance: float = 0.1
 ) -> List[np.ndarray]:
     """
@@ -252,7 +328,7 @@ def find_template_vectors_for_element(
 
     unique_templates: List[np.ndarray] = []
     for template in max_coordination_number_vectors:
-        if not any(are_bonds_templates_similar(template, existing, angle_tolerance) for existing in unique_templates):
+        if all(template != existing for existing in unique_templates):
             unique_templates.append(template)
 
     return unique_templates
@@ -350,3 +426,74 @@ def reconstruct_missing_bonds(
             missing_bonds[idx] = reconstructed_bonds
 
     return missing_bonds
+
+
+####################################################################################################
+# Radial Distribution Function (RDF) Analysis
+####################################################################################################
+
+
+class RadicalDistributionFunction(BaseModel):
+    rdf: np.ndarray
+    bin_centers: np.ndarray
+
+    @classmethod
+    def from_material(cls, material: Material, cutoff: float = 10.0, bin_size: float = 0.1):
+        analyzer = BaseMaterialAnalyzer(material)
+        distances = analyzer.pairwise_distances()
+        density = analyzer.atomic_density
+        distances = distances[distances <= cutoff]
+
+        # Bin distances into a histogram
+        bins = np.arange(0, cutoff + bin_size, bin_size)  # Bin edges
+        hist, bin_edges = np.histogram(distances, bins=bins, density=False)
+
+        # Convert to radial distribution function
+        bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+        shell_volumes = (
+            (4 / 3) * np.pi * (np.power(bin_edges[1:], 3) - np.power(bin_edges[:-1], 3))
+        )  # Volume of spherical shells
+
+        rdf = hist / (shell_volumes * density)
+
+        return cls(rdf=rdf, bin_centers=bin_centers)
+
+    @property
+    def first_peak_index(self):
+        return np.argmax(self.rdf[1:]) + 1
+
+    @property
+    def first_peak_value(self):
+        return self.rdf[self.first_peak_index]
+
+    @property
+    def first_peak_width(self):
+        half_max = 0.5 * self.first_peak_value
+
+        # Find left boundary
+        left_index = self.first_peak_index
+        while left_index > 0 and self.rdf[left_index] > half_max:
+            left_index -= 1
+
+        # Find right boundary
+        right_index = self.first_peak_index
+        while right_index < len(self.rdf) - 1 and self.rdf[right_index] > half_max:
+            right_index += 1
+
+        # Compute the width
+        left_boundary = self.bin_centers[left_index]
+        right_boundary = self.bin_centers[right_index]
+        first_peak_width = right_boundary - left_boundary
+
+        return float(first_peak_width)
+
+    @property
+    def first_peak_distance(self):
+        return self.bin_centers[self.first_peak_index]
+
+    def is_within_first_peak(self, distance: float):
+        return (
+            self.first_peak_distance - 0.5 * self.first_peak_width
+            < distance
+            < self.first_peak_distance + 0.5 * self.first_peak_width
+        )
