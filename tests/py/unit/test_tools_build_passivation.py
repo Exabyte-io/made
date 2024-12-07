@@ -29,7 +29,7 @@ def test_get_unique_coordination_numbers():
     assert unique_coordination_numbers == [2, 3]
 
 
-def test_passivate_edge():
+def test_passivate_coordination_based():
     config = PassivationConfiguration(slab=Material(GRAPHENE_ZIGZAG_NANORIBBON), passivant="H", bond_length=1.48)
     params = CoordinationBasedPassivationBuilderParameters(
         shadowing_radius=2.5, coordination_threshold=2, bonds_to_passivate=1

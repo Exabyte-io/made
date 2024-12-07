@@ -204,9 +204,7 @@ def are_bonds_templates_similar(template1: np.ndarray, template2: np.ndarray, to
     return True
 
 
-def find_template_vectors(
-    atom_vectors: List[List[np.ndarray]], atom_elements: List[str], angle_tolerance: float = 0.1
-) -> Dict[str, List[np.ndarray]]:
+def find_template_vectors(material: Material, angle_tolerance: float = 0.1) -> Dict[str, List[np.ndarray]]:
     """
     Find unique bond templates for each element type.
 
@@ -220,26 +218,44 @@ def find_template_vectors(
     """
     element_templates = {}
 
-    for element in set(atom_elements):
-        element_indices = [i for i, e in enumerate(atom_elements) if e == element]
-        element_vector_lists = [np.array(atom_vectors[i]) for i in element_indices]
-
-        if not element_vector_lists:
-            continue
-
-        max_coord = max(len(vectors) for vectors in element_vector_lists)
-        max_coord_vectors = [v for v in element_vector_lists if len(v) == max_coord]
-
-        unique_templates: List[np.ndarray] = []
-        for template in max_coord_vectors:
-            if not any(
-                are_bonds_templates_similar(template, existing, angle_tolerance) for existing in unique_templates
-            ):
-                unique_templates.append(template)
-
-        element_templates[element] = unique_templates
+    for element in set(material.basis.elements.values):
+        element_templates[element] = find_template_vectors_for_element(material, element, angle_tolerance)
 
     return element_templates
+
+
+def find_template_vectors_for_element(
+    material: Material, element: str, angle_tolerance: float = 0.1
+) -> List[np.ndarray]:
+    """
+    Find unique bond templates for a single element type.
+
+    Args:
+        material (Material): The material object.
+        element (str): Chemical element to find templates for.
+        angle_tolerance (float): Tolerance for comparing angles between bond vectors.
+
+    Returns:
+        List[np.ndarray]: List of unique bond templates for the element.
+    """
+    atom_vectors = get_nearest_neighbors_vectors(material).values
+    atom_elements = material.basis.elements.values
+
+    element_indices = [i for i, e in enumerate(atom_elements) if e == element]
+    element_vector_lists = [np.array(atom_vectors[i]) for i in element_indices]
+
+    if not element_vector_lists:
+        return []
+
+    max_coordination_number = max(len(vectors) for vectors in element_vector_lists)
+    max_coordination_number_vectors = [v for v in element_vector_lists if len(v) == max_coordination_number]
+
+    unique_templates: List[np.ndarray] = []
+    for template in max_coordination_number_vectors:
+        if not any(are_bonds_templates_similar(template, existing, angle_tolerance) for existing in unique_templates):
+            unique_templates.append(template)
+
+    return unique_templates
 
 
 def reconstruct_missing_bonds_for_element(
@@ -266,9 +282,9 @@ def reconstruct_missing_bonds_for_element(
         return []
 
     existing_vectors = np.array(vectors) if vectors else np.empty((0, 3))
-    max_coordination = len(templates[element][0])
+    max_coordination_number = len(templates[element][0])
 
-    if len(existing_vectors) >= max_coordination:
+    if len(existing_vectors) >= max_coordination_number:
         return []
 
     best_missing = None
@@ -297,7 +313,7 @@ def reconstruct_missing_bonds_for_element(
         num_bonds_to_add = min(
             len(best_missing),
             max_bonds_to_passivate,
-            max_coordination - len(existing_vectors),
+            max_coordination_number - len(existing_vectors),
         )
         return best_missing[:num_bonds_to_add].tolist()
 

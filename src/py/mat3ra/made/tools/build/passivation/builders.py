@@ -177,9 +177,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         nearest_neighbors_vectors_array = get_nearest_neighbors_vectors(
             material=material, cutoff=self.build_parameters.shadowing_radius
         )
-        templates = coordination.find_template_vectors(
-            nearest_neighbors_vectors_array.values, material.basis.elements.values
-        )
+        templates = coordination.find_template_vectors(material)
         reconstructed_bonds = coordination.reconstruct_missing_bonds(
             nearest_neighbors_vectors_array.values,
             material.basis.elements.values,
