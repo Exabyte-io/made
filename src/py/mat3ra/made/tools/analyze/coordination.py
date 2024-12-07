@@ -1,15 +1,15 @@
 from enum import Enum
-
-from pydantic import BaseModel
-import numpy as np
 from typing import Dict, List, Optional
+
+import numpy as np
 from mat3ra.made.material import Material
+from pydantic import BaseModel
 from scipy.spatial._ckdtree import cKDTree
 
-from . import BaseMaterialAnalyzer
 from ..convert import to_pymatgen
 from ..third_party import PymatgenVoronoiNN
 from ..utils import ArrayWithIds, decorator_handle_periodic_boundary_conditions
+from . import BaseMaterialAnalyzer
 
 
 class BondDirectionsTemplatesEnum(List, Enum):
