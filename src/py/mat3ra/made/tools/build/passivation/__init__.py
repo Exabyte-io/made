@@ -9,6 +9,7 @@ from .builders import (
     SurfacePassivationBuilderParameters,
     CoordinationBasedPassivationBuilderParameters,
 )
+from ...analyze.coordination import MaterialWithCrystalSites
 
 
 def create_passivation(
@@ -33,4 +34,5 @@ def get_unique_coordination_numbers(
     Returns:
         set: The unique coordination numbers.
     """
-    return coordination.get_unique_coordination_numbers(material=configuration.slab, cutoff=cutoff)
+    material_with_crystal_sites = MaterialWithCrystalSites.from_material(configuration.slab)
+    return coordination.get_unique_coordination_numbers(material=material_with_crystal_sites, cutoff=cutoff)
