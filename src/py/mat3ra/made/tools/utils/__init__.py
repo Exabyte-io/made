@@ -5,6 +5,7 @@ import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 
+from ...utils import ArrayWithIds
 from ..third_party import PymatgenStructure
 
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
@@ -151,7 +152,9 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
         def wrapper(material, *args, **kwargs):
             augmented_material, last_id = augment_material_with_periodic_images(material, cutoff)
             result = func(augmented_material, *args, **kwargs)
-
+            original_ids = material.basis.coordinates.ids
+            if isinstance(result, ArrayWithIds):
+                result.filter_by_ids(original_ids)
             if isinstance(result, list):
                 if all(isinstance(x, int) for x in result):
                     result = [id for id in result if id <= last_id]
@@ -164,7 +167,7 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
     return decorator
 
 
-def augment_material_with_periodic_images(material: Material, cutoff: float = 0.1):
+def augment_material_with_periodic_images(material: Material, cutoff: float = 1.0):
     """
     Augment the material's dataset by adding atoms from periodic images within a cutoff distance from the boundaries by
     copying them to the opposite side of the cell, translated by the cell vector beyond the boundary.

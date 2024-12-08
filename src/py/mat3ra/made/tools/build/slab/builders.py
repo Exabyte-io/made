@@ -5,7 +5,7 @@ from mat3ra.made.material import Material
 
 from ...modify import add_vacuum
 from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
-from ...analyze import get_chemical_formula
+from ...analyze.other import get_chemical_formula
 from ...convert import to_pymatgen
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
