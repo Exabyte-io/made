@@ -147,7 +147,8 @@ class MaterialWithCrystalSites(Material):
         super().__init__(config=data)
         self.nearest_neighbor_vectors = self.get_neighbors_vectors_for_all_sites(cutoff=3.0)
         self.crystal_sites = CrystalSiteList(
-            values=[CrystalSite(nearest_neighbor_vectors=vectors) for vectors in self.nearest_neighbor_vectors]
+            values=[CrystalSite(nearest_neighbor_vectors=item) for item in self.nearest_neighbor_vectors.values],
+            ids=self.nearest_neighbor_vectors.ids,
         )
 
     @classmethod
