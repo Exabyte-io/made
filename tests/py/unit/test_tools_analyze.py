@@ -1,6 +1,6 @@
 import numpy as np
 from ase.build import bulk
-from mat3ra.made.tools.analyze import get_average_interlayer_distance, get_surface_area
+from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
 
 from .fixtures import INTERFACE_ATOMS
 

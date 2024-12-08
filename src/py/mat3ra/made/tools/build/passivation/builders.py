@@ -3,9 +3,9 @@ from mat3ra.made.material import Material
 from pydantic import BaseModel, Field
 import numpy as np
 
-from ...analyze.coordination import get_nearest_neighbors_vectors
+from ...analyze.coordination import MaterialWithCrystalSites
 from ...enums import SurfaceTypes
-from ...analyze import (
+from ...analyze.other import (
     get_surface_atom_indices,
 )
 from ...analyze import coordination
@@ -169,16 +169,18 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         Create a passivated material based on the configuration.
         """
         material = super().create_passivated_material(configuration)
+        material_with_crystal_sites = MaterialWithCrystalSites.from_material(material)
+
         undercoordinated_atoms_indices = coordination.get_undercoordinated_atom_indices(
             material,
             cutoff=self.build_parameters.shadowing_radius,
             coordination_threshold=self.build_parameters.coordination_threshold,
         )
-        nearest_neighbors_vectors_array = get_nearest_neighbors_vectors(
+        nearest_neighbors_vectors_array = material_with_crystal_sites.nearest_neighbor_vectors(
             material=material, cutoff=self.build_parameters.shadowing_radius
         )
         templates = coordination.find_unique_bond_directions(material)
-        reconstructed_bonds = coordination.reconstruct_missing_bonds(
+        reconstructed_bonds = material_with_crystal_sites.find_missing_bonds_for_all_sites(
             nearest_neighbors_vectors_array.values,
             material.basis.elements.values,
             templates,

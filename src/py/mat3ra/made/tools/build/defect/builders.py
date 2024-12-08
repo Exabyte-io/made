@@ -24,13 +24,13 @@ from ...modify import (
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
-from ...analyze import (
-    get_voronoi_nearest_neighbors_atom_indices,
+from ...analyze.other import (
     get_atomic_coordinates_extremum,
     get_closest_site_id_from_coordinate,
     get_closest_site_id_from_coordinate_and_element,
     get_local_extremum_atom_index,
 )
+from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
 from ...utils import transform_coordinate_to_supercell, coordinate as CoordinateCondition
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
