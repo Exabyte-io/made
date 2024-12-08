@@ -93,6 +93,7 @@ class BondDirections(np.ndarray):
             if existing_vectors.size == 0:
                 match_count = 0
             else:
+                # TODO: optimize
                 dot_matrix = np.dot(template, existing_vectors.T)
                 cosine_matrix = dot_matrix / (
                     np.linalg.norm(template, axis=1)[:, None] * np.linalg.norm(existing_vectors, axis=1)
@@ -145,7 +146,9 @@ class MaterialWithCrystalSites(Material):
     def __init__(self, **data):
         super().__init__(config=data)
         self.nearest_neighbor_vectors = self.get_neighbors_vectors_for_all_sites(cutoff=3.0)
-        self.crystal_sites = CrystalSiteList(nearest_neighbor_vectors=self.nearest_neighbor_vectors)
+        self.crystal_sites = CrystalSiteList(
+            values=[CrystalSite(nearest_neighbor_vectors=vectors) for vectors in self.nearest_neighbor_vectors]
+        )
 
     @classmethod
     def from_material(cls, material: Material):
@@ -156,16 +159,18 @@ class MaterialWithCrystalSites(Material):
     def coordinates_as_kdtree(self):
         return cKDTree(self.basis.coordinates.values)
 
-    @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
+    # @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
     def get_neighbors_vectors_for_site(
         self, site_index: int, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
-    ):
+    ) -> List[np.ndarray]:
         coordinates = self.basis.coordinates.values
         neighbors, distances = self.get_neighbors_for_site(site_index, cutoff, max_number_of_neighbors)
-        vectors = [coordinates[neighbor] - coordinates[site_index] for neighbor in neighbors]
+        vectors = [np.array(coordinates[neighbor]) - np.array(coordinates[site_index]) for neighbor in neighbors]
         return vectors
 
-    def get_neighbors_vectors_for_all_sites(self, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None):
+    def get_neighbors_vectors_for_all_sites(
+        self, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
+    ) -> ArrayWithIds:
         nearest_neighbors = ArrayWithIds()
         for site_index in range(len(self.basis.coordinates.values)):
             vectors = self.get_neighbors_vectors_for_site(site_index, cutoff, max_number_of_neighbors)
@@ -224,7 +229,7 @@ class MaterialWithCrystalSites(Material):
             nearest_neighbors.add_item(neighbors, site_index)
         return nearest_neighbors
 
-    def get_coordination_numbers(self, cutoff: float = 3.0):
+    def get_coordination_numbers(self, cutoff: float = 3.0) -> ArrayWithIds:
         """
         Calculate the coordination numbers for all atoms in the material.
 
@@ -329,7 +334,7 @@ def get_unique_coordination_numbers(material: MaterialWithCrystalSites, cutoff: 
         List[int]: A list of unique coordination numbers present in the material.
     """
     coordination_numbers = material.get_coordination_numbers(cutoff)
-    return sorted(list(set(coordination_numbers.values())))
+    return sorted(list(set(coordination_numbers.values)))
 
 
 def find_unique_bond_directions(
@@ -402,7 +407,7 @@ class RadicalDistributionFunction(BaseModel):
     @classmethod
     def from_material(cls, material: Material, cutoff: float = 10.0, bin_size: float = 0.1):
         analyzer = BaseMaterialAnalyzer(material)
-        distances = analyzer.pairwise_distances()
+        distances = analyzer.pairwise_distances
         density = analyzer.atomic_density
         distances = distances[distances <= cutoff]
 
