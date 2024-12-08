@@ -1,3 +1,4 @@
+import numpy as np
 from mat3ra.made.material import Material
 from scipy.spatial.distance import pdist
 
@@ -8,11 +9,12 @@ class BaseMaterialAnalyzer:
 
     @property
     def volume(self):
-        return self.material.lattice.volume
+        return self.material.basis.cell.volume
 
     @property
     def atomic_density(self):
-        return len(self.material.coordinates_array) / self.volume()
+        return len(self.material.coordinates_array) / self.volume
 
+    @property
     def pairwise_distances(self):
-        return pdist(self.material.coordinates_array)
+        return pdist(np.array(self.material.coordinates_array))
