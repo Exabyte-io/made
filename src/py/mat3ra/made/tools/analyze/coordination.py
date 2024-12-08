@@ -143,9 +143,14 @@ class MaterialWithCrystalSites(Material):
     crystal_sites: CrystalSiteList = CrystalSiteList(values=[])
 
     def __init__(self, **data):
-        super().__init__(**data)
+        super().__init__(config=data)
         self.nearest_neighbor_vectors = self.get_neighbors_vectors_for_all_sites(cutoff=3.0)
         self.crystal_sites = CrystalSiteList(nearest_neighbor_vectors=self.nearest_neighbor_vectors)
+
+    @classmethod
+    def from_material(cls, material: Material):
+        config = material.to_json()
+        return cls(**config)
 
     @property
     def coordinates_as_kdtree(self):
@@ -234,7 +239,6 @@ class MaterialWithCrystalSites(Material):
         return coordination_numbers
 
     def find_missing_bonds_for_all_sites(self, templates: Dict[str, List[np.ndarray]]) -> Dict[int, List[List[float]]]:
-
         missing_bonds = {}
         for idx, (vectors) in enumerate(self.nearest_neighbor_vectors):
             reconstructed_bonds = BondDirections.find_missing_directions(
@@ -295,44 +299,47 @@ def get_voronoi_nearest_neighbors_atom_indices(
     return all_coordinates.ids
 
 
-def get_undercoordinated_atom_indices(material: Material, cutoff: float, coordination_threshold: int) -> List[int]:
+def get_undercoordinated_atom_indices(
+    material: MaterialWithCrystalSites, cutoff: float, coordination_threshold: int
+) -> List[int]:
     """
     Identify undercoordinated atoms based on the coordination threshold (inclusive).
 
     Args:
-        material (Material): The material object.
+        material (MaterialWithCrystalSites): The material object with crystal sites.
         cutoff (float): The cutoff radius for identifying neighbors.
         coordination_threshold (int): The coordination number threshold for an atom to be considered undercoordinated.
 
     Returns:
         List[int]: List of indices of undercoordinated atoms.
     """
-    coordination_numbers = get_coordination_numbers(material, cutoff)
+    coordination_numbers = material.get_coordination_numbers(cutoff)
     return [idx for idx, number in coordination_numbers.items() if number <= coordination_threshold]
 
 
-def get_unique_coordination_numbers(material: Material, cutoff: float) -> List[int]:
+def get_unique_coordination_numbers(material: MaterialWithCrystalSites, cutoff: float) -> List[int]:
     """
     Get the unique coordination numbers for all atoms in the material.
 
     Args:
-        material (Material): The material object.
+        material (MaterialWithCrystalSites): The material object with crystal sites.
         cutoff (float): The cutoff radius for identifying neighbors.
 
     Returns:
         List[int]: A list of unique coordination numbers present in the material.
     """
-    coordination_numbers = get_coordination_numbers(material, cutoff)
+    coordination_numbers = material.get_coordination_numbers(cutoff)
     return sorted(list(set(coordination_numbers.values())))
 
 
-def find_unique_bond_directions(material: Material, angle_tolerance: float = 0.1) -> Dict[str, List[np.ndarray]]:
+def find_unique_bond_directions(
+    material: MaterialWithCrystalSites, angle_tolerance: float = 0.1
+) -> Dict[str, List[np.ndarray]]:
     """
     Find unique bond templates for each element type.
 
     Args:
-        atom_vectors (List[List[np.ndarray]]): List of bond vectors for each atom.
-        atom_elements (List[str]): List of chemical elements for each atom.
+        material (Material): The material object.
         angle_tolerance (float): Tolerance for comparing angles between bond vectors.
 
     Returns:
@@ -347,20 +354,20 @@ def find_unique_bond_directions(material: Material, angle_tolerance: float = 0.1
 
 
 def find_bond_directions_for_element(
-    material: Material, element: str, angle_tolerance: float = 0.1
+    material: MaterialWithCrystalSites, element: str, angle_tolerance: float = 0.1
 ) -> List[np.ndarray]:
     """
     Find unique bond templates for a single element type.
 
     Args:
-        material (Material): The material object.
+        material (MaterialWithCrystalSites): The material object with crystal sites.
         element (str): Chemical element to find templates for.
         angle_tolerance (float): Tolerance for comparing angles between bond vectors.
 
     Returns:
         List[np.ndarray]: List of unique bond templates for the element.
     """
-    atom_vectors = get_nearest_neighbors_vectors(material).values
+    atom_vectors = material.nearest_neighbor_vectors
     atom_elements = material.basis.elements.values
 
     element_indices = [i for i, e in enumerate(atom_elements) if e == element]
