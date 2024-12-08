@@ -3,7 +3,7 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 import numpy as np
 from mat3ra.made.material import Material
 
-from .analyze import (
+from .analyze.other import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,

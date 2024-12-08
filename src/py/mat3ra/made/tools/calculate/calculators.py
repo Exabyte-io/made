@@ -4,7 +4,7 @@ import numpy as np
 from mat3ra.made.material import Material
 from pydantic import BaseModel
 
-from ..analyze import get_surface_atom_indices
+from ..analyze.other import get_surface_atom_indices
 from ..convert.utils import InterfacePartsEnum
 from ..enums import SurfaceTypes
 from ..modify import interface_get_part
