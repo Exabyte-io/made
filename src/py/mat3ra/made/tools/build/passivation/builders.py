@@ -1,6 +1,6 @@
 from typing import Dict, List
 from mat3ra.made.material import Material
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 import numpy as np
 
 from ...analyze.material import MaterialWithCrystalSites
@@ -128,13 +128,9 @@ class CoordinationBasedPassivationBuilderParameters(SurfacePassivationBuilderPar
         symmetry_tolerance (float): The tolerance for symmetry comparison of vectors for bonds.
     """
 
-    coordination_threshold: int = Field(
-        3, description="The coordination number threshold for an atom to be considered undercoordinated."
-    )
-    bonds_to_passivate: int = Field(
-        1, description="The maximum number of bonds to passivate for each undercoordinated atom."
-    )
-    symmetry_tolerance: float = Field(0.1, description="The tolerance for symmetry comparison of vectors for bonds.")
+    coordination_threshold: int = 3  # The coordination number threshold for an atom to be considered undercoordinated.
+    bonds_to_passivate: int = 1  # The maximum number of bonds to passivate for each undercoordinated atom.
+    symmetry_tolerance: float = 0.1  # The tolerance for symmetry comparison of vectors for bonds.
 
 
 class CoordinationBasedPassivationBuilder(PassivationBuilder):
@@ -172,9 +168,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         )
         # TODO: bonds_templates will be passed from the configuration in the "controlled" version of this class
         bonds_templates = material_with_crystal_sites.find_unique_bond_directions()
-        reconstructed_bonds = material_with_crystal_sites.find_missing_bonds_for_all_sites(
-            bonds_templates,
-        )
+        reconstructed_bonds = material_with_crystal_sites.find_missing_bonds_for_all_sites(bonds_templates)
         passivant_coordinates_values = self._get_passivant_coordinates(
             material,
             configuration,
