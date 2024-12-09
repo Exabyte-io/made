@@ -42,7 +42,9 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
     return decorator
 
 
-def augment_material_with_periodic_images(material: Union[Material, "MaterialWithCrystalSites"], cutoff: float = 1.0):  # type: ignore
+def augment_material_with_periodic_images(
+    material: Union[Material, "MaterialWithCrystalSites"], cutoff: float = 1.0  # type: ignore
+):
     """
     Augment the material's dataset by adding atoms from periodic images within a cutoff distance from the boundaries by
     copying them to the opposite side of the cell, translated by the cell vector beyond the boundary.
