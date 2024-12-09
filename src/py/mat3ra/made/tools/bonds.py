@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Dict, List
+from typing import List
 
 import numpy as np
+from pydantic import BaseModel, ConfigDict
 
 
 class BondDirectionsTemplatesEnum(list, Enum):
@@ -48,56 +49,44 @@ class BondDirections(np.ndarray):
 
         return True
 
-    @staticmethod
     def find_missing_directions(
-        vectors: List[np.ndarray],
-        # TODO: remove element
-        element: str,
-        # TODO: single template
+        self,
         templates: List[np.ndarray],
         angle_tolerance: float = 0.1,
-        max_bonds_to_passivate: int = 1,
-    ) -> List[List[float]]:
+        max_bonds_to_add: int = 1,
+    ) -> "BondDirections":
         """
-        Reconstruct missing bonds for a single element.
+        Reconstruct missing bonds for the atom based on the bond template best matching with the existing bonds.
 
         Args:
-            vectors (List[np.ndarray]): List of bond vectors for the atom.
-            element (str): Chemical element of the atom.
-            templates (Dict[str, List[np.ndarray]]): Dictionary of bond templates for each element.
+            templates (List[np.ndarray]): List of bond templates to match against.
             angle_tolerance (float): Tolerance for comparing angles between bond vectors.
-            max_bonds_to_passivate (int): Maximum number of bonds to passivate for the atom.
+            max_bonds_to_add (int): Maximum number of bonds to add.
 
         Returns:
             List[List[float]]: List of reconstructed bond vectors.
         """
-        if element not in templates:
-            return []
+        max_coordination_number = len(templates)
 
-        existing_vectors = np.array(vectors) if vectors else np.empty((0, 3))
-        max_coordination_number = len(templates[element][0])
-
-        if len(existing_vectors) >= max_coordination_number:
-            return []
+        if len(self) >= max_coordination_number:
+            return BondDirections([])
 
         best_missing = None
         best_match_count = -1
 
-        for template in templates[element]:
-            if existing_vectors.size == 0:
+        for template in templates:
+            if self.size == 0:
                 match_count = 0
             else:
                 # TODO: optimize
-                dot_matrix = np.dot(template, existing_vectors.T)
-                cosine_matrix = dot_matrix / (
-                    np.linalg.norm(template, axis=1)[:, None] * np.linalg.norm(existing_vectors, axis=1)
-                )
+                dot_matrix = np.dot(template, self.T)
+                cosine_matrix = dot_matrix / (np.linalg.norm(template, axis=1)[:, None] * np.linalg.norm(self, axis=1))
                 angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
 
                 matches = np.any(angles_matrix < angle_tolerance, axis=1)
                 match_count = np.sum(matches)
 
-            missing = template[~matches] if existing_vectors.size != 0 else template
+            missing = template[~matches] if self.size != 0 else template
 
             if match_count > best_match_count:
                 best_match_count = match_count
@@ -106,18 +95,24 @@ class BondDirections(np.ndarray):
         if best_missing is not None:
             num_bonds_to_add = min(
                 len(best_missing),
-                max_bonds_to_passivate,
-                max_coordination_number - len(existing_vectors),
+                max_bonds_to_add,
+                max_coordination_number - len(self),
             )
-            return best_missing[:num_bonds_to_add].tolist()
+            return BondDirections(best_missing[:num_bonds_to_add].tolist())
 
-        return []
+        return BondDirections([])
 
 
-class BondDirectionForElement:
-    bond_directions: BondDirections
+class BondDirectionsTemplatesForElement(BaseModel):
+    bond_directions_templates: List[BondDirections]
     element: str
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-class BondDirectionForElementList(List[BondDirectionForElement]):
-    values: List[BondDirectionForElement]
+    @property
+    def to_ndarray(self):
+        return np.array(self.bond_directions_templates)
+
+
+class BondDirectionsForElementList(List[BondDirectionsTemplatesForElement]):
+    pass
