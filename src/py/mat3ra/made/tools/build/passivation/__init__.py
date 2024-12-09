@@ -1,7 +1,6 @@
 from typing import Union, List
 
 from mat3ra.made.material import Material
-from ...analyze import coordination
 from .configuration import PassivationConfiguration
 from .builders import (
     SurfacePassivationBuilder,
