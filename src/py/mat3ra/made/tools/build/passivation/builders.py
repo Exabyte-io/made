@@ -3,7 +3,7 @@ from mat3ra.made.material import Material
 from pydantic import BaseModel, Field
 import numpy as np
 
-from ...analyze.coordination import MaterialWithCrystalSites
+from ...analyze.material import MaterialWithCrystalSites
 from ...enums import SurfaceTypes
 from ...analyze.other import (
     get_surface_atom_indices,

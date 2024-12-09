@@ -1,9 +1,8 @@
 from typing import List, Optional
 
 import numpy as np
+from mat3ra.made.utils import ArrayWithIds
 from pydantic import BaseModel
-
-from src.py.mat3ra.made.utils import ArrayWithIds
 
 
 class CrystalSite(BaseModel):
