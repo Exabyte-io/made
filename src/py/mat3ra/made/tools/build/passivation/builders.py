@@ -5,15 +5,10 @@ import numpy as np
 
 from ...analyze.material import MaterialWithCrystalSites
 from ...enums import SurfaceTypes
-from ...analyze.other import (
-    get_surface_atom_indices,
-)
-from ...analyze import coordination
+from ...analyze.other import get_surface_atom_indices
 from ...modify import translate_to_z_level
 from ...build import BaseBuilder
-from .configuration import (
-    PassivationConfiguration,
-)
+from .configuration import PassivationConfiguration
 
 
 class PassivationBuilder(BaseBuilder):
@@ -171,26 +166,19 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         material = super().create_passivated_material(configuration)
         material_with_crystal_sites = MaterialWithCrystalSites.from_material(material)
 
-        undercoordinated_atoms_indices = coordination.get_undercoordinated_atom_indices(
-            material_with_crystal_sites,
+        undercoordinated_atoms_indices = material_with_crystal_sites.get_undercoordinated_atom_indices(
             cutoff=self.build_parameters.shadowing_radius,
             coordination_threshold=self.build_parameters.coordination_threshold,
         )
-        nearest_neighbors_vectors_array = material_with_crystal_sites.nearest_neighbor_vectors(
-            material=material, cutoff=self.build_parameters.shadowing_radius
-        )
-        templates = coordination.find_unique_bond_directions(material)
+        # TODO: bonds_templates will be passed from the configuration in the "controlled" version of this class
+        bonds_templates = material_with_crystal_sites.find_unique_bond_directions()
         reconstructed_bonds = material_with_crystal_sites.find_missing_bonds_for_all_sites(
-            nearest_neighbors_vectors_array.values,
-            material.basis.elements.values,
-            templates,
-            max_bonds_to_passivate=self.build_parameters.bonds_to_passivate,
+            bonds_templates,
         )
         passivant_coordinates_values = self._get_passivant_coordinates(
             material,
             configuration,
             undercoordinated_atoms_indices,
-            nearest_neighbors_vectors_array.values,
             reconstructed_bonds,
         )
         return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
@@ -200,7 +188,6 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         material: Material,
         configuration: PassivationConfiguration,
         undercoordinated_atoms_indices: list,
-        nearest_neighbors_coordinates: list,
         reconstructed_bonds: Dict[int, List[List[float]]],
     ):
         """
@@ -210,7 +197,6 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
             material (Material): Material to passivate.
             configuration (PassivationConfiguration): Configuration for passivation.
             undercoordinated_atoms_indices (list): Indices of undercoordinated atoms.
-            nearest_neighbors_coordinates (list): List of nearest neighbor vectors for each atom.
             reconstructed_bonds (Dict[int, List[List[float]]]): Dictionary of reconstructed bonds for each atom.
 
         Returns:
@@ -219,27 +205,14 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         passivant_coordinates = []
 
         for idx in undercoordinated_atoms_indices:
-            if idx in reconstructed_bonds:
-                for bond_vector in reconstructed_bonds[idx]:
-                    bond_vector = np.array(bond_vector)
-                    if np.linalg.norm(bond_vector) == 0:
-                        continue  # Avoid division by zero
-                    normalized_bond = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
-                    passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(normalized_bond)
-                    passivant_coordinates.append(
-                        material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
-                    )
-            else:
-                # Fallback to nearest neighbors average vector method if no reconstructed bonds found
-                vectors = nearest_neighbors_coordinates[idx]
-                if vectors:
-                    bond_vector = -np.mean(vectors, axis=0)
-                    if np.linalg.norm(bond_vector) == 0:
-                        continue  # Avoid division by zero
-                    bond_vector = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
-                    passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
-                    passivant_coordinates.append(
-                        material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
-                    )
+            for bond_vector in reconstructed_bonds[idx]:
+                bond_vector_np = np.array(bond_vector)
+                if np.linalg.norm(bond_vector_np) == 0:
+                    continue  # Avoid division by zero
+                normalized_bond = bond_vector_np / np.linalg.norm(bond_vector_np) * configuration.bond_length
+                passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(normalized_bond)
+                passivant_coordinates.append(
+                    material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
+                )
 
         return passivant_coordinates
