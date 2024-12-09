@@ -1,11 +1,11 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.utils import ArrayWithIds
 from scipy.spatial._ckdtree import cKDTree
 
-from ..bonds import BondDirections
+from ..bonds import BondDirections, BondDirectionsTemplatesForElement
 from ..site import CrystalSite, CrystalSiteList
 from .rdf import RadicalDistributionFunction
 from .utils import decorator_handle_periodic_boundary_conditions
@@ -115,14 +115,6 @@ class MaterialWithCrystalSites(Material):
         coordination_numbers = ArrayWithIds(values=nearest_neighbors)
         return coordination_numbers
 
-    def find_missing_bonds_for_all_sites(self, templates: Dict[str, List[np.ndarray]]) -> Dict[int, List[List[float]]]:
-        missing_bonds = {}
-        for idx, (vectors) in enumerate(self.nearest_neighbor_vectors):
-            reconstructed_bonds = BondDirections.find_missing_directions(vectors, templates)
-            if reconstructed_bonds:
-                missing_bonds[idx] = reconstructed_bonds
-        return missing_bonds
-
     def get_undercoordinated_atom_indices(self, cutoff: float, coordination_threshold: int) -> List[int]:
         """
         Identify undercoordinated atoms based on the coordination threshold (inclusive).
@@ -130,7 +122,8 @@ class MaterialWithCrystalSites(Material):
         Args:
             material (MaterialWithCrystalSites): The material object with crystal sites.
             cutoff (float): The cutoff radius for identifying neighbors.
-            coordination_threshold (int): The coordination number threshold for an atom to be considered undercoordinated.
+            coordination_threshold (int): The coordination number threshold for an atom
+                to be considered undercoordinated, inclusive.
 
         Returns:
             List[int]: List of indices of undercoordinated atoms.
@@ -152,35 +145,63 @@ class MaterialWithCrystalSites(Material):
         coordination_numbers = self.get_coordination_numbers(cutoff)
         return sorted(list(set(coordination_numbers.values)))
 
-    def find_unique_bond_directions(self, angle_tolerance: float = 0.1) -> Dict[str, List[BondDirections]]:
+    def find_missing_bonds_for_all_sites(
+        self, bond_templates_list: List[BondDirectionsTemplatesForElement]
+    ) -> List[BondDirections]:
+        """
+        Find missing bonds for all sites in the material.
+
+        Args:
+            self (MaterialWithCrystalSites): The material object with crystal sites.
+            bond_templates_list (List[BondDirectionsTemplatesForElement]): List of bond templates for each element.
+
+        Returns:
+            List[BondDirections]: List of missing bonds for each site.
+        """
+        missing_bonds: List[BondDirections] = []
+        for id, coordinate in self.basis.coordinates.to_array_of_values_with_ids():
+            existing_bond_directions = BondDirections(self.get_neighbors_vectors_for_site(id, cutoff=3.0))
+            bond_templates = next((b for b in bond_templates_list if b.element == self.basis.elements.values[id]), None)
+            if bond_templates is None:
+                continue
+
+            missing_bonds_for_site = existing_bond_directions.find_missing_directions(
+                templates=bond_templates.to_ndarray(), angle_tolerance=0.1, max_bonds_to_add=1
+            )
+            missing_bonds.append(BondDirections(missing_bonds_for_site))
+
+        return missing_bonds
+
+    def find_unique_bond_directions(self) -> List[BondDirectionsTemplatesForElement]:
         """
         Find unique bond templates for each element type.
 
         Args:
             self (Material): The material object.
-            angle_tolerance (float): Tolerance for comparing angles between bond vectors.
 
         Returns:
-            Dict[str, List[np.ndarray]]: Dictionary mapping element types to unique bond templates.
+            List[BondDirectionsTemplatesForElement]: List of unique bond templates for each element.
+
+        Example schematic structure for Graphene with 2 unique bond directions:
+            {"C": [[0, 1, 0], [-2, -1, 0], [2, -1, 0]], [[0,-1,0], [-2, 1, 0], [2, 1, 0]]}
         """
-        element_templates = {}
+        element_templates: List[BondDirectionsTemplatesForElement] = []
 
         for element in set(self.basis.elements.values):
-            element_templates[element] = self.find_bond_directions_for_element(element, angle_tolerance)
+            element_templates.append(self.find_bond_directions_for_element(element))
 
         return element_templates
 
-    def find_bond_directions_for_element(self, element: str, angle_tolerance: float = 0.1) -> List[BondDirections]:
+    def find_bond_directions_for_element(self, element: str) -> BondDirectionsTemplatesForElement:
         """
-        Find unique bond templates for a single element type.
+        Find bond directions templates for each element.
 
         Args:
             self (MaterialWithCrystalSites): The material object with crystal sites.
             element (str): Chemical element to find templates for.
-            angle_tolerance (float): Tolerance for comparing angles between bond vectors.
 
         Returns:
-            List[BondDirections]: List of unique bond templates for the element.
+            List[BondDirectionsTemplatesForElement]: List of unique bond templates for the element.
         """
         atom_vectors = self.nearest_neighbor_vectors
         atom_elements = self.basis.elements.values
@@ -189,15 +210,17 @@ class MaterialWithCrystalSites(Material):
         element_vector_lists = [np.array(atom_vectors[i]) for i in element_indices]
 
         if not element_vector_lists:
-            return []
+            return BondDirectionsTemplatesForElement(bond_directions_templates=[], element=element)
 
         max_coordination_number = max(len(vectors) for vectors in element_vector_lists)
         max_coordination_number_vectors = [v for v in element_vector_lists if len(v) == max_coordination_number]
 
-        unique_templates: List[BondDirections] = []
+        unique_templates: BondDirectionsTemplatesForElement = BondDirectionsTemplatesForElement(
+            bond_directions_templates=[], element=element
+        )
         for template in max_coordination_number_vectors:
             bond_direction = BondDirections(template)
             if all(bond_direction != existing for existing in unique_templates):
-                unique_templates.append(bond_direction)
+                unique_templates.bond_directions_templates.append(bond_direction)
 
         return unique_templates
