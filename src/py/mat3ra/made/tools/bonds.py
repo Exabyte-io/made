@@ -13,9 +13,25 @@ class BondDirectionsTemplatesEnum(list, Enum):
 
 
 class BondDirections(np.ndarray):
+    def __new__(cls, input_array, *args, **kwargs):
+        """
+        Create a new instance of BondDirections from an input array.
+
+        Args:
+            input_array (array-like): Input data to initialize the array.
+
+        Returns:
+            BondDirections: A new BondDirections instance.
+        """
+        # Convert input_array to an ndarray of the same subclass
+        obj = np.asarray(input_array).view(cls)
+        return obj
+
     def __eq__(self, other):
         if not isinstance(other, BondDirections):
             return False
+        if self.shape != other.shape:
+            return False  # Prevents shape mismatches
         return self.are_bond_directions_similar(self, other)
 
     @staticmethod
@@ -109,7 +125,6 @@ class BondDirectionsTemplatesForElement(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    @property
     def to_ndarray(self):
         return np.array(self.bond_directions_templates)
 

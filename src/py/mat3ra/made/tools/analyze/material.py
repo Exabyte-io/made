@@ -62,7 +62,6 @@ class MaterialWithCrystalSites(Material):
         nearest_neighbors = ArrayWithIds()
         for site_index in self.basis.coordinates.ids:
             neighbors, distances = self.get_neighbors_for_site(site_index, cutoff, max_number_of_neighbors)
-            print(site_index, neighbors, distances)
             nearest_neighbors.add_item(neighbors, site_index)
         return nearest_neighbors
 
@@ -81,7 +80,6 @@ class MaterialWithCrystalSites(Material):
             cutoff (float): The maximum cutoff radius for identifying neighbors.
             max_number_of_neighbors (int): The max number of neighbors possible.
             nearest_only (bool): If True, only consider the first shell of neighbors.
-            distance_tolerance (float): The tolerance for identifying nearest_neighbors.
         """
         coordinates = self.basis.coordinates
         max_number_of_neighbors = (
@@ -165,9 +163,11 @@ class MaterialWithCrystalSites(Material):
             List[BondDirections]: List of missing bonds for each site.
         """
         missing_bonds: List[BondDirections] = []
-        for id, coordinate in self.basis.coordinates.to_array_of_values_with_ids():
-            existing_bond_directions = BondDirections(self.get_neighbors_vectors_for_site(id, cutoff=3.0))
-            bond_templates = next((b for b in bond_templates_list if b.element == self.basis.elements.values[id]), None)
+        for coordinate in self.basis.coordinates.to_array_of_values_with_ids():
+            existing_bond_directions = BondDirections(self.get_neighbors_vectors_for_site(coordinate.id, cutoff=3.0))
+            bond_templates = next(
+                (b for b in bond_templates_list if b.element == self.basis.elements.values[coordinate.id]), None
+            )
             if bond_templates is None:
                 continue
 
@@ -226,7 +226,7 @@ class MaterialWithCrystalSites(Material):
         )
         for template in max_coordination_number_vectors:
             bond_direction = BondDirections(template)
-            if all(bond_direction != existing for existing in unique_templates):
+            if not any(bond_direction == existing for existing in unique_templates.bond_directions_templates):
                 unique_templates.bond_directions_templates.append(bond_direction)
 
         return unique_templates
