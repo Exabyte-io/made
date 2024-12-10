@@ -14,7 +14,7 @@ from .utils import decorator_handle_periodic_boundary_conditions
 class MaterialWithCrystalSites(Material):
     crystal_sites: CrystalSiteList = CrystalSiteList(values=[])
 
-    def __init__(self, **data):
+    def __init__(self, data):
         super().__init__(config=data)
         self.nearest_neighbor_vectors = self.get_neighbors_vectors_for_all_sites(cutoff=3.0)
         self.crystal_sites = CrystalSiteList(
@@ -25,7 +25,7 @@ class MaterialWithCrystalSites(Material):
     @classmethod
     def from_material(cls, material: Material):
         config = material.to_json()
-        return cls(**config)
+        return cls(config)
 
     @property
     def coordinates_as_kdtree(self):
