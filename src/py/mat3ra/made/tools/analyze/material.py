@@ -32,6 +32,15 @@ class MaterialWithCrystalSites(Material):
         return cKDTree(self.basis.coordinates.values)
 
     @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
+    def get_neighbors_vectors_for_all_sites(
+        self, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
+    ) -> ArrayWithIds:
+        nearest_neighbors = ArrayWithIds()
+        for site_index in range(len(self.basis.coordinates.values)):
+            vectors = self.get_neighbors_vectors_for_site(site_index, cutoff, max_number_of_neighbors)
+            nearest_neighbors.add_item(vectors, site_index)
+        return nearest_neighbors
+
     def get_neighbors_vectors_for_site(
         self, site_index: int, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
     ) -> List[np.ndarray]:
@@ -40,13 +49,20 @@ class MaterialWithCrystalSites(Material):
         vectors = [np.array(coordinates[neighbor]) - np.array(coordinates[site_index]) for neighbor in neighbors]
         return vectors
 
-    def get_neighbors_vectors_for_all_sites(
+    def get_nearest_neighbors_for_all_sites(
         self, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
     ) -> ArrayWithIds:
+        """
+        Get the nearest neighbors for all sites.
+
+        Args:
+            cutoff (float): The maximum cutoff radius for identifying neighbors.
+            max_number_of_neighbors (int): The max number of neighbors possible.
+        """
         nearest_neighbors = ArrayWithIds()
         for site_index in range(len(self.basis.coordinates.values)):
-            vectors = self.get_neighbors_vectors_for_site(site_index, cutoff, max_number_of_neighbors)
-            nearest_neighbors.add_item(vectors, site_index)
+            neighbors, distances = self.get_neighbors_for_site(site_index, cutoff, max_number_of_neighbors)
+            nearest_neighbors.add_item(neighbors, site_index)
         return nearest_neighbors
 
     def get_neighbors_for_site(
@@ -83,23 +99,6 @@ class MaterialWithCrystalSites(Material):
             distances = distances[valid_indices]
             neighbors = neighbors[valid_indices]
         return neighbors, distances
-
-    @decorator_handle_periodic_boundary_conditions(0.25)
-    def get_nearest_neighbors_for_all_sites(
-        self, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
-    ) -> ArrayWithIds:
-        """
-        Get the nearest neighbors for all sites.
-
-        Args:
-            cutoff (float): The maximum cutoff radius for identifying neighbors.
-            max_number_of_neighbors (int): The max number of neighbors possible.
-        """
-        nearest_neighbors = ArrayWithIds()
-        for site_index in range(len(self.basis.coordinates.values)):
-            neighbors, distances = self.get_neighbors_for_site(site_index, cutoff, max_number_of_neighbors)
-            nearest_neighbors.add_item(neighbors, site_index)
-        return nearest_neighbors
 
     def get_coordination_numbers(self, cutoff: float = 3.0) -> ArrayWithIds:
         """
