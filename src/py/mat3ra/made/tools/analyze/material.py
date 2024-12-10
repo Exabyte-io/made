@@ -7,31 +7,31 @@ from scipy.spatial._ckdtree import cKDTree
 
 from ..bonds import BondDirections, BondDirectionsTemplatesForElement
 from ..site import CrystalSite, CrystalSiteList
-from .rdf import RadicalDistributionFunction
+from .rdf import RadialDistributionFunction
 from .utils import decorator_handle_periodic_boundary_conditions
 
 
 class MaterialWithCrystalSites(Material):
     crystal_sites: CrystalSiteList = CrystalSiteList(values=[])
 
-    def __init__(self, data):
-        super().__init__(config=data)
+    @classmethod
+    def from_material(cls, material: Material):
+        material.to_cartesian()
+        config = material.to_json()
+        return cls(config)
+
+    def analyze(self):
         self.nearest_neighbor_vectors = self.get_neighbors_vectors_for_all_sites(cutoff=3.0)
         self.crystal_sites = CrystalSiteList(
             values=[CrystalSite(nearest_neighbor_vectors=item) for item in self.nearest_neighbor_vectors.values],
             ids=self.nearest_neighbor_vectors.ids,
         )
 
-    @classmethod
-    def from_material(cls, material: Material):
-        config = material.to_json()
-        return cls(config)
-
     @property
     def coordinates_as_kdtree(self):
         return cKDTree(self.basis.coordinates.values)
 
-    # @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
+    @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
     def get_neighbors_vectors_for_site(
         self, site_index: int, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
     ) -> List[np.ndarray]:
@@ -78,7 +78,7 @@ class MaterialWithCrystalSites(Material):
         neighbors = neighbors[valid_indices]
 
         if nearest_only:
-            rdf = RadicalDistributionFunction.from_material(self)
+            rdf = RadialDistributionFunction.from_material(self)
             valid_indices = np.where([rdf.is_within_first_peak(distance) for distance in distances])
             distances = distances[valid_indices]
             neighbors = neighbors[valid_indices]
@@ -112,8 +112,8 @@ class MaterialWithCrystalSites(Material):
             Dict[int, int]: A dictionary mapping atom indices to their coordination numbers.
         """
         nearest_neighbors = self.get_nearest_neighbors_for_all_sites(cutoff)
-        coordination_numbers = ArrayWithIds(values=nearest_neighbors)
-        return coordination_numbers
+        coordination_numbers = [len(neighbors) for neighbors in nearest_neighbors.values]
+        return ArrayWithIds(values=coordination_numbers, ids=nearest_neighbors.ids)
 
     def get_undercoordinated_atom_indices(self, cutoff: float, coordination_threshold: int) -> List[int]:
         """
@@ -129,7 +129,11 @@ class MaterialWithCrystalSites(Material):
             List[int]: List of indices of undercoordinated atoms.
         """
         coordination_numbers = self.get_coordination_numbers(cutoff)
-        return [idx for idx, number in coordination_numbers.items() if number <= coordination_threshold]
+        return [
+            item.id
+            for item in coordination_numbers.to_array_of_values_with_ids()
+            if item.value <= coordination_threshold
+        ]
 
     def get_unique_coordination_numbers(self, cutoff: float) -> List[int]:
         """
@@ -207,7 +211,7 @@ class MaterialWithCrystalSites(Material):
         atom_elements = self.basis.elements.values
 
         element_indices = [i for i, e in enumerate(atom_elements) if e == element]
-        element_vector_lists = [np.array(atom_vectors[i]) for i in element_indices]
+        element_vector_lists = [np.array(atom_vectors.get_element_value_by_index(i)) for i in element_indices]
 
         if not element_vector_lists:
             return BondDirectionsTemplatesForElement(bond_directions_templates=[], element=element)

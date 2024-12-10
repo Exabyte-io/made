@@ -161,6 +161,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         """
         material = super().create_passivated_material(configuration)
         material_with_crystal_sites = MaterialWithCrystalSites.from_material(material)
+        material_with_crystal_sites.analyze()
 
         undercoordinated_atoms_indices = material_with_crystal_sites.get_undercoordinated_atom_indices(
             cutoff=self.build_parameters.shadowing_radius,

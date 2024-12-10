@@ -6,6 +6,7 @@ from scipy.spatial.distance import pdist
 class BaseMaterialAnalyzer:
     def __init__(self, material: Material):
         self.material = material
+        self.material.to_cartesian()
 
     @property
     def volume(self):

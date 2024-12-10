@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from . import BaseMaterialAnalyzer
 
 
-class RadicalDistributionFunction(BaseModel):
+class RadialDistributionFunction(BaseModel):
     rdf: np.ndarray
     bin_centers: np.ndarray
 

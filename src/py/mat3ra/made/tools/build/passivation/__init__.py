@@ -34,4 +34,5 @@ def get_unique_coordination_numbers(
         set: The unique coordination numbers.
     """
     material_with_crystal_sites = MaterialWithCrystalSites.from_material(configuration.slab)
+    material_with_crystal_sites.analyze()
     return material_with_crystal_sites.get_unique_coordination_numbers(cutoff=cutoff)
