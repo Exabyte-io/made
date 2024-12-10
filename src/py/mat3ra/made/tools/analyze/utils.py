@@ -25,8 +25,13 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
     def decorator(func):
         @wraps(func)
         def wrapper(material, *args, **kwargs):
+            original_basis_is_in_cartesian = material.basis.is_in_cartesian_units
+            if original_basis_is_in_cartesian:
+                material.to_crystal()
             augmented_material, last_id = augment_material_with_periodic_images(material, cutoff)
             result = func(augmented_material, *args, **kwargs)
+            if original_basis_is_in_cartesian:
+                material.to_cartesian()
             original_ids = material.basis.coordinates.ids
             if isinstance(result, ArrayWithIds):
                 result.filter_by_ids(original_ids)
