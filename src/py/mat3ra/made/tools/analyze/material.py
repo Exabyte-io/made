@@ -60,8 +60,9 @@ class MaterialWithCrystalSites(Material):
             max_number_of_neighbors (int): The max number of neighbors possible.
         """
         nearest_neighbors = ArrayWithIds()
-        for site_index in range(len(self.basis.coordinates.values)):
+        for site_index in self.basis.coordinates.ids:
             neighbors, distances = self.get_neighbors_for_site(site_index, cutoff, max_number_of_neighbors)
+            print(site_index, neighbors, distances)
             nearest_neighbors.add_item(neighbors, site_index)
         return nearest_neighbors
 
@@ -82,13 +83,14 @@ class MaterialWithCrystalSites(Material):
             nearest_only (bool): If True, only consider the first shell of neighbors.
             distance_tolerance (float): The tolerance for identifying nearest_neighbors.
         """
-        coordinates = self.basis.coordinates.values
-        max_number_of_neighbors = len(coordinates) if max_number_of_neighbors is None else max_number_of_neighbors
-        coordinate = coordinates[site_index]
+        coordinates = self.basis.coordinates
+        max_number_of_neighbors = (
+            len(coordinates.values) if max_number_of_neighbors is None else max_number_of_neighbors
+        )
+        coordinate = coordinates.get_element_value_by_index(site_index)
         distances, neighbors = self.coordinates_as_kdtree.query(
             coordinate, k=max_number_of_neighbors, distance_upper_bound=cutoff
         )
-
         valid_indices = (distances != np.inf) & (distances != 0)
         distances = distances[valid_indices]
         neighbors = neighbors[valid_indices]
