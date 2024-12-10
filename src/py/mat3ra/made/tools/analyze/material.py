@@ -100,6 +100,7 @@ class MaterialWithCrystalSites(Material):
             neighbors = neighbors[valid_indices]
         return neighbors, distances
 
+    @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
     def get_coordination_numbers(self, cutoff: float = 3.0) -> ArrayWithIds:
         """
         Calculate the coordination numbers for all atoms in the material.
