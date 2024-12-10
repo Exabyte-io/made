@@ -6,7 +6,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.utils import ArrayWithIds
 
 if TYPE_CHECKING:
-    from mat3ra.made.tools.analyze.material import MaterialWithCrystalSites
+    from .material import MaterialWithCrystalSites
 
 
 def decorator_handle_periodic_boundary_conditions(cutoff):
