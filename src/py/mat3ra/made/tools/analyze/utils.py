@@ -1,9 +1,12 @@
 from functools import wraps
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.utils import ArrayWithIds
+
+if TYPE_CHECKING:
+    from mat3ra.made.tools.analyze.material import MaterialWithCrystalSites
 
 
 def decorator_handle_periodic_boundary_conditions(cutoff):
