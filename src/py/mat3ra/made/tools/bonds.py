@@ -80,7 +80,7 @@ class BondDirections(np.ndarray):
             max_bonds_to_add (int): Maximum number of bonds to add.
 
         Returns:
-            List[List[float]]: List of reconstructed bond vectors.
+            BondDirections: List of reconstructed bond vectors.
         """
         max_coordination_number = max(len(bond_direction) for template in templates for bond_direction in template)
 
@@ -94,15 +94,13 @@ class BondDirections(np.ndarray):
             if self.size == 0:
                 match_count = 0
             else:
-                # TODO: optimize
-                dot_matrix = np.dot(template, self.T)
-                cosine_matrix = dot_matrix / (np.linalg.norm(template, axis=1)[:, None] * np.linalg.norm(self, axis=1))
-                angles_matrix = np.arccos(np.clip(cosine_matrix, -1.0, 1.0))
+                matches = [
+                    any(BondDirections(existing) == BondDirections(candidate) for existing in self)
+                    for candidate in template
+                ]
+                match_count = sum(matches)
 
-                matches = np.any(angles_matrix < angle_tolerance, axis=1)
-                match_count = np.sum(matches)
-
-            missing = template[~matches] if self.size != 0 else template
+            missing = [candidate for candidate, match in zip(template, matches) if not match]
 
             if match_count > best_match_count:
                 best_match_count = match_count
@@ -114,7 +112,7 @@ class BondDirections(np.ndarray):
                 max_bonds_to_add,
                 max_coordination_number - len(self),
             )
-            return BondDirections(best_missing[:num_bonds_to_add].tolist())
+            return BondDirections(best_missing[:num_bonds_to_add])
 
         return BondDirections([])
 
