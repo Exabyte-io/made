@@ -149,6 +149,7 @@ class MaterialWithCrystalSites(Material):
         coordination_numbers = self.get_coordination_numbers(cutoff)
         return sorted(list(set(coordination_numbers.values)))
 
+    @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
     def find_missing_bonds_for_all_sites(
         self, bond_templates_list: List[BondDirectionsTemplatesForElement]
     ) -> List[BondDirections]:
