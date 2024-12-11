@@ -180,7 +180,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
             undercoordinated_atoms_indices,
             reconstructed_bonds,
         )
-        return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant, True)
+        return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant, False)
 
     def _get_passivant_coordinates(
         self,
@@ -209,8 +209,9 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
                 if np.linalg.norm(bond_vector_np) == 0:
                     continue  # Avoid division by zero
                 normalized_bond = bond_vector_np / np.linalg.norm(bond_vector_np) * configuration.bond_length
+                normalized_bond_crystal = material.basis.cell.convert_point_to_crystal(normalized_bond)
                 passivant_coordinates.append(
-                    material.basis.coordinates.get_element_value_by_index(idx) + normalized_bond
+                    material.basis.coordinates.get_element_value_by_index(idx) + normalized_bond_crystal
                 )
 
         return passivant_coordinates

@@ -16,8 +16,9 @@ class MaterialWithCrystalSites(Material):
 
     @classmethod
     def from_material(cls, material: Material):
-        material.to_cartesian()
-        config = material.to_json()
+        new_material = material.clone()
+        new_material.to_cartesian()
+        config = new_material.to_json()
         return cls(config)
 
     def analyze(self):
