@@ -230,7 +230,9 @@ class MaterialWithCrystalSites(Material):
         )
         for template in max_coordination_number_vectors:
             bond_direction = BondDirections(template)
-            if not any(bond_direction == existing for existing in unique_templates.bond_directions_templates):
+            if not any(
+                np.array_equal(bond_direction, existing) for existing in unique_templates.bond_directions_templates
+            ):
                 unique_templates.bond_directions_templates.append(bond_direction)
 
         return unique_templates

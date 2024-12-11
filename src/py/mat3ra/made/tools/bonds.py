@@ -23,7 +23,6 @@ class BondDirections(np.ndarray):
         Returns:
             BondDirections: A new BondDirections instance.
         """
-        # Convert input_array to an ndarray of the same subclass
         obj = np.asarray(input_array).view(cls)
         return obj
 
@@ -37,7 +36,7 @@ class BondDirections(np.ndarray):
     @staticmethod
     def are_bond_directions_similar(directions1: np.ndarray, directions2: np.ndarray, tolerance: float = 0.1) -> bool:
         """
-        Check if two bond templates are similar.
+        Check if two bond direction templates are similar.
 
         Args:
             directions1 (np.ndarray): First template of bond vectors.
@@ -72,10 +71,11 @@ class BondDirections(np.ndarray):
         max_bonds_to_add: int = 1,
     ) -> "BondDirections":
         """
-        Reconstruct missing bonds for the atom based on the bond template best matching with the existing bonds.
+        Reconstruct missing bonds for the atom based on the bond template that matches most of the existing bonds.
 
         Args:
             bond_templates (List[np.ndarray]): List of bond templates to match against.
+            angle_tolerance (float): Tolerance for comparing angles between bond vectors.
             max_bonds_to_add (int): Maximum number of bonds to add.
 
         Returns:
@@ -83,7 +83,6 @@ class BondDirections(np.ndarray):
         """
         max_coordination_number = max(len(template) for template in bond_templates)
 
-        # If the atom is already fully coordinated, return no missing directions
         if len(self) >= max_coordination_number:
             return BondDirections([])
 
@@ -92,20 +91,19 @@ class BondDirections(np.ndarray):
 
         bond_templates = self._flatten_bond_templates(bond_templates)
 
-        # Iterate over each bond template
         for bond_template in bond_templates:
-            if self.size == 0:
-                current_match_count = 0
-                missing_directions = bond_template
-            else:
-                is_matched = [
-                    any(existing_bond == candidate_bond for existing_bond in self) for candidate_bond in bond_template
-                ]
-                current_match_count = sum(is_matched)
-                missing_directions = [
-                    candidate_bond for candidate_bond, matched in zip(bond_template, is_matched) if not matched
-                ]
+            # Check which existing bonds match the template bonds
+            is_matched = [
+                any(self._are_vectors_similar(existing_bond, candidate_bond, angle_tolerance) for existing_bond in self)
+                for candidate_bond in bond_template
+            ]
 
+            current_match_count = sum(is_matched)
+            missing_directions = [
+                candidate_bond for candidate_bond, matched in zip(bond_template, is_matched) if not matched
+            ]
+
+            # Select the template with the highest match count
             if current_match_count > highest_match_count:
                 highest_match_count = current_match_count
                 best_missing_directions = missing_directions
@@ -116,10 +114,28 @@ class BondDirections(np.ndarray):
                 max_bonds_to_add,
                 max_coordination_number - len(self),
             )
-            # Return only the required number of missing directions
             return BondDirections(best_missing_directions[:num_bonds_to_add])
 
         return BondDirections([])
+
+    @staticmethod
+    def _are_vectors_similar(vector1: np.ndarray, vector2: np.ndarray, tolerance: float = 0.1) -> bool:
+        """
+        Check if two bond vectors are similar.
+
+        Args:
+            vector1 (np.ndarray): First bond vector.
+            vector2 (np.ndarray): Second bond vector.
+            tolerance (float): Angle tolerance for comparison.
+
+        Returns:
+            bool: True if the bond vectors are similar, False otherwise.
+        """
+        dot_product = np.dot(vector1, vector2)
+        norms = np.linalg.norm(vector1) * np.linalg.norm(vector2)
+        cosine_angle = dot_product / norms if norms != 0 else 0.0
+        angle = np.arccos(np.clip(cosine_angle, -1.0, 1.0))
+        return angle < tolerance
 
     @staticmethod
     def _flatten_bond_templates(bond_templates: List[np.ndarray]) -> List[np.ndarray]:
