@@ -109,7 +109,7 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
         lattice = Lattice.from_vectors_array([lattice_vector1, lattice_vector2, lattice_vector3])
         self.lattice = lattice
 
-    def add_atom(self, element: str, coordinate: List[float]) -> None:
+    def add_atom(self, element: str, coordinate: List[float], use_cartesian_coordinates=False) -> None:
         new_basis = self.basis.copy()
-        new_basis.add_atom(element, coordinate)
+        new_basis.add_atom(element, coordinate, use_cartesian_coordinates)
         self.basis = new_basis

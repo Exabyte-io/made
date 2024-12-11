@@ -160,6 +160,9 @@ def is_coordinate_behind_plane(
 
 
 class CoordinateCondition(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
     def condition(self, coordinate: List[float]) -> bool:
         raise NotImplementedError
 

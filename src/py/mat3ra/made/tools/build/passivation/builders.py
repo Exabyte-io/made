@@ -1,21 +1,15 @@
 from typing import List
-
-import numpy as np
 from mat3ra.made.material import Material
+from mat3ra.made.tools.bonds import BondDirections
 from pydantic import BaseModel
+import numpy as np
 
+from ...analyze.material import MaterialWithCrystalSites
 from ...enums import SurfaceTypes
-from ...analyze import (
-    get_surface_atom_indices,
-    get_undercoordinated_atom_indices,
-    get_nearest_neighbors_atom_indices,
-    get_coordination_numbers,
-)
+from ...analyze.other import get_surface_atom_indices
 from ...modify import translate_to_z_level
 from ...build import BaseBuilder
-from .configuration import (
-    PassivationConfiguration,
-)
+from .configuration import PassivationConfiguration
 
 
 class PassivationBuilder(BaseBuilder):
@@ -40,7 +34,9 @@ class PassivationBuilder(BaseBuilder):
         material = translate_to_z_level(configuration.slab, "center")
         return material
 
-    def _add_passivant_atoms(self, material: Material, coordinates: list, passivant: str) -> Material:
+    def _add_passivant_atoms(
+        self, material: Material, coordinates: list, passivant: str, use_cartesian_coordinates=False
+    ) -> Material:
         """
         Add passivant atoms to the provided coordinates in the material.
 
@@ -48,12 +44,13 @@ class PassivationBuilder(BaseBuilder):
             material (Material): The material object to add passivant atoms to.
             coordinates (list): The coordinates to add passivant atoms to.
             passivant (str): The chemical symbol of the passivating atom (e.g., 'H').
+            use_cartesian_coordinates (bool): Whether the coordinates are in Cartesian units (or crystal by default).
 
         Returns:
             Material: The material object with passivation atoms added.
         """
         for coord in coordinates:
-            material.add_atom(passivant, coord)
+            material.add_atom(passivant, coord, use_cartesian_coordinates)
         return material
 
 
@@ -127,88 +124,98 @@ class SurfacePassivationBuilder(PassivationBuilder):
 
 class CoordinationBasedPassivationBuilderParameters(SurfacePassivationBuilderParameters):
     """
-    Parameters for the  CoordinationPassivationBuilder.
+    Parameters for the CoordinationPassivationBuilder.
+
     Args:
         coordination_threshold (int): The coordination number threshold for atom to be considered undercoordinated.
+        bonds_to_passivate (int): The maximum number of bonds to passivate for each undercoordinated atom.
+        symmetry_tolerance (float): The tolerance for symmetry comparison of vectors for bonds.
     """
 
-    coordination_threshold: int = 3
+    coordination_threshold: int = 3  # The coordination number threshold for an atom to be considered undercoordinated.
+    bonds_to_passivate: int = 1  # The maximum number of bonds to passivate for each undercoordinated atom.
+    symmetry_tolerance: float = 0.1  # The tolerance for symmetry comparison of vectors for bonds.
 
 
 class CoordinationBasedPassivationBuilder(PassivationBuilder):
     """
-    Builder for passivating material based on coordination number of each atom.
+    Builder for passivating material surfaces based on coordination number analysis.
 
-    Detects atoms with coordination number below a threshold and passivates them.
+        This builder analyzes atomic coordination environments and reconstructs missing bonds
+        using templates derived from fully coordinated atoms. It works by:
+
+        1. Finding undercoordinated atoms that need passivation
+        2. Creating bond vector templates for each element type by:
+            - Collecting vectors from atoms with the highest valid coordination
+            - Grouping similar vector arrangements into unique templates
+        3. Reconstructing missing bonds by:
+            - Matching existing bonds against templates
+            - Finding the best-matching template for each atom
+            - Adding missing bond vectors from the template
+        4. Placing passivant atoms (typically H) along the reconstructed bond vectors
     """
 
-    _BuildParametersType = CoordinationBasedPassivationBuilderParameters
+    build_parameters: CoordinationBasedPassivationBuilderParameters
     _DefaultBuildParameters = CoordinationBasedPassivationBuilderParameters()
+    _ConfigurationType = PassivationConfiguration
 
     def create_passivated_material(self, configuration: PassivationConfiguration) -> Material:
+        """
+        Create a passivated material based on the configuration.
+        """
         material = super().create_passivated_material(configuration)
-        surface_atoms_indices = get_surface_atom_indices(
-            material=material,
-            surface=SurfaceTypes.TOP,
-            shadowing_radius=self.build_parameters.shadowing_radius,
-            depth=self.build_parameters.depth,
-        )
-        undercoordinated_atoms_indices = get_undercoordinated_atom_indices(
-            material=material,
-            indices=surface_atoms_indices,
+        material_with_crystal_sites = MaterialWithCrystalSites.from_material(material)
+        material_with_crystal_sites.analyze()
+
+        undercoordinated_atoms_indices = material_with_crystal_sites.get_undercoordinated_atom_indices(
             cutoff=self.build_parameters.shadowing_radius,
             coordination_threshold=self.build_parameters.coordination_threshold,
         )
-        passivant_coordinates_values = self._get_passivant_coordinates(
-            material, configuration, undercoordinated_atoms_indices
+        # TODO: bonds_templates will be passed from the configuration in the "controlled" version of this class
+        bonds_templates = material_with_crystal_sites.find_unique_bond_directions()
+        reconstructed_bonds = material_with_crystal_sites.find_missing_bonds_for_all_sites(
+            bond_templates_list=bonds_templates,
+            max_bonds_to_add=self.build_parameters.bonds_to_passivate,
+            angle_tolerance=self.build_parameters.symmetry_tolerance,
         )
-        return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
+        passivant_coordinates_values = self._get_passivant_coordinates(
+            material,
+            configuration,
+            undercoordinated_atoms_indices,
+            reconstructed_bonds,
+        )
+        return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant, False)
 
     def _get_passivant_coordinates(
-        self, material: Material, configuration: PassivationConfiguration, undercoordinated_atoms_indices: list
+        self,
+        material: Material,
+        configuration: PassivationConfiguration,
+        undercoordinated_atoms_indices: list,
+        reconstructed_bonds: List[BondDirections],
     ):
         """
-        Calculate the coordinates for placing passivating atoms based on the specified edge type.
+        Calculate the coordinates for placing passivating atoms based on reconstructed bonds.
 
         Args:
             material (Material): Material to passivate.
-            configuration (SurfacePassivationConfiguration): Configuration for passivation.
+            configuration (PassivationConfiguration): Configuration for passivation.
             undercoordinated_atoms_indices (list): Indices of undercoordinated atoms.
-        """
-        passivant_coordinates = []
-        for idx in undercoordinated_atoms_indices:
-            nearest_neighbors = get_nearest_neighbors_atom_indices(
-                material=material,
-                coordinate=material.basis.coordinates.get_element_value_by_index(idx),
-                cutoff=self.build_parameters.shadowing_radius,
-            )
-            if nearest_neighbors is None:
-                continue
-            average_coordinate = np.mean(
-                [material.basis.coordinates.get_element_value_by_index(i) for i in nearest_neighbors], axis=0
-            )
-            bond_vector = material.basis.coordinates.get_element_value_by_index(idx) - average_coordinate
-            bond_vector = bond_vector / np.linalg.norm(bond_vector) * configuration.bond_length
-            passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(bond_vector)
-
-            passivant_coordinates.append(
-                material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
-            )
-
-        return passivant_coordinates
-
-    def get_unique_coordination_numbers(self, material: Material) -> set:
-        """
-        Get unique coordination numbers for all atoms in the material for current builder parameters.
-
-        Args:
-            material (Material): The material object.
+            reconstructed_bonds (List[BondDirections]): Reconstructed bond directions.
 
         Returns:
-            set: The coordination numbers for all atoms in the material.
+            list: Coordinates where passivants should be added.
         """
+        passivant_coordinates = []
 
-        coordination_numbers = set(
-            get_coordination_numbers(material=material, cutoff=self.build_parameters.shadowing_radius)
-        )
-        return coordination_numbers
+        for idx in undercoordinated_atoms_indices:
+            for bond_vector in reconstructed_bonds[idx]:
+                bond_vector_np = np.array(bond_vector)
+                if np.linalg.norm(bond_vector_np) == 0:
+                    continue  # Avoid division by zero
+                normalized_bond = bond_vector_np / np.linalg.norm(bond_vector_np) * configuration.bond_length
+                normalized_bond_crystal = material.basis.cell.convert_point_to_crystal(normalized_bond)
+                passivant_coordinates.append(
+                    material.basis.coordinates.get_element_value_by_index(idx) + normalized_bond_crystal
+                )
+
+        return passivant_coordinates
