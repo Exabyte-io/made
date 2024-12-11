@@ -184,7 +184,10 @@ class MaterialWithCrystalSites(Material):
 
     @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
     def find_missing_bonds_for_all_sites(
-        self, bond_templates_list: List[BondDirectionsTemplatesForElement]
+        self,
+        bond_templates_list: List[BondDirectionsTemplatesForElement],
+        max_bonds_to_add: int = 1,
+        angle_tolerance: float = 0.1,
     ) -> List[BondDirections]:
         """
         Find missing bonds for all sites in the material.
@@ -209,8 +212,8 @@ class MaterialWithCrystalSites(Material):
                 continue
             missing_bonds_for_site = existing_bond_directions.find_missing_directions(
                 bond_templates=bond_templates,
-                angle_tolerance=0.1,
-                max_bonds_to_add=1,
+                angle_tolerance=angle_tolerance,
+                max_bonds_to_add=max_bonds_to_add,
             )
             missing_bonds.append(BondDirections(missing_bonds_for_site))
 

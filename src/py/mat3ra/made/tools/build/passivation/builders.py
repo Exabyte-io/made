@@ -173,7 +173,11 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         )
         # TODO: bonds_templates will be passed from the configuration in the "controlled" version of this class
         bonds_templates = material_with_crystal_sites.find_unique_bond_directions()
-        reconstructed_bonds = material_with_crystal_sites.find_missing_bonds_for_all_sites(bonds_templates)
+        reconstructed_bonds = material_with_crystal_sites.find_missing_bonds_for_all_sites(
+            bond_templates_list=bonds_templates,
+            max_bonds_to_add=self.build_parameters.bonds_to_passivate,
+            angle_tolerance=self.build_parameters.symmetry_tolerance,
+        )
         passivant_coordinates_values = self._get_passivant_coordinates(
             material,
             configuration,
