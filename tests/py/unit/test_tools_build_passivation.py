@@ -36,5 +36,4 @@ def test_passivate_coordination_based():
     )
     builder = CoordinationBasedPassivationBuilder(build_parameters=params)
     passivated_material = builder.get_material(config)
-    passivated_material.to_crystal()
     assertion_utils.assert_deep_almost_equal(GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED, passivated_material.to_json())
