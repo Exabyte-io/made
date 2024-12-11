@@ -174,7 +174,7 @@ class MaterialWithCrystalSites(Material):
             if bond_templates is None:
                 continue
             missing_bonds_for_site = existing_bond_directions.find_missing_directions(
-                templates=bond_templates,
+                bond_templates=bond_templates,
                 angle_tolerance=0.1,
                 max_bonds_to_add=1,
             )

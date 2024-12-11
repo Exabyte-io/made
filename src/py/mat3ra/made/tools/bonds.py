@@ -67,7 +67,7 @@ class BondDirections(np.ndarray):
 
     def find_missing_directions(
         self,
-        templates: List[np.ndarray],
+        bond_templates: List[np.ndarray],
         angle_tolerance: float = 0.1,
         max_bonds_to_add: int = 1,
     ) -> "BondDirections":
@@ -75,46 +75,72 @@ class BondDirections(np.ndarray):
         Reconstruct missing bonds for the atom based on the bond template best matching with the existing bonds.
 
         Args:
-            templates (List[np.ndarray]): List of bond templates to match against.
-            angle_tolerance (float): Tolerance for comparing angles between bond vectors.
+            bond_templates (List[np.ndarray]): List of bond templates to match against.
             max_bonds_to_add (int): Maximum number of bonds to add.
 
         Returns:
             BondDirections: List of reconstructed bond vectors.
         """
-        max_coordination_number = max(len(bond_direction) for template in templates for bond_direction in template)
+        max_coordination_number = max(len(template) for template in bond_templates)
 
+        # If the atom is already fully coordinated, return no missing directions
         if len(self) >= max_coordination_number:
             return BondDirections([])
 
-        best_missing = None
-        best_match_count = -1
+        best_missing_directions = None
+        highest_match_count = -1
 
-        for template in templates:
+        bond_templates = self._flatten_bond_templates(bond_templates)
+
+        # Iterate over each bond template
+        for bond_template in bond_templates:
             if self.size == 0:
-                match_count = 0
+                current_match_count = 0
+                missing_directions = bond_template
             else:
-                matches = [
-                    any(BondDirections(existing) == BondDirections(candidate) for existing in self)
-                    for candidate in template
+                is_matched = [
+                    any(existing_bond == candidate_bond for existing_bond in self) for candidate_bond in bond_template
                 ]
-                match_count = sum(matches)
+                current_match_count = sum(is_matched)
+                missing_directions = [
+                    candidate_bond for candidate_bond, matched in zip(bond_template, is_matched) if not matched
+                ]
 
-            missing = [candidate for candidate, match in zip(template, matches) if not match]
+            if current_match_count > highest_match_count:
+                highest_match_count = current_match_count
+                best_missing_directions = missing_directions
 
-            if match_count > best_match_count:
-                best_match_count = match_count
-                best_missing = missing
-
-        if best_missing is not None:
+        if best_missing_directions is not None:
             num_bonds_to_add = min(
-                len(best_missing),
+                len(best_missing_directions),
                 max_bonds_to_add,
                 max_coordination_number - len(self),
             )
-            return BondDirections(best_missing[:num_bonds_to_add])
+            # Return only the required number of missing directions
+            return BondDirections(best_missing_directions[:num_bonds_to_add])
 
         return BondDirections([])
+
+    @staticmethod
+    def _flatten_bond_templates(bond_templates: List[np.ndarray]) -> List[np.ndarray]:
+        """
+        Ensure that bond_templates is a list of np.ndarray with no extra nesting.
+
+        Args:
+            bond_templates (list): List of bond templates to preprocess.
+
+        Returns:
+            list: Flattened list of bond templates (np.ndarray).
+        """
+        flattened_templates = []
+        for template in bond_templates:
+            if isinstance(template, list) and all(isinstance(sub_template, np.ndarray) for sub_template in template):
+                # If the template is a list of np.ndarray, extend the flattened list
+                flattened_templates.extend(template)
+            else:
+                # Otherwise, add the template directly
+                flattened_templates.append(template)
+        return flattened_templates
 
 
 class BondDirectionsTemplatesForElement(BaseModel):
