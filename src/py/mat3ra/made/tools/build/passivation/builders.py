@@ -1,5 +1,6 @@
-from typing import Dict, List
+from typing import List
 from mat3ra.made.material import Material
+from mat3ra.made.tools.bonds import BondDirections
 from pydantic import BaseModel
 import numpy as np
 
@@ -183,7 +184,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
         material: Material,
         configuration: PassivationConfiguration,
         undercoordinated_atoms_indices: list,
-        reconstructed_bonds: Dict[int, List[List[float]]],
+        reconstructed_bonds: List[BondDirections],
     ):
         """
         Calculate the coordinates for placing passivating atoms based on reconstructed bonds.
@@ -192,7 +193,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
             material (Material): Material to passivate.
             configuration (PassivationConfiguration): Configuration for passivation.
             undercoordinated_atoms_indices (list): Indices of undercoordinated atoms.
-            reconstructed_bonds (Dict[int, List[List[float]]]): Dictionary of reconstructed bonds for each atom.
+            reconstructed_bonds (List[BondDirections]): Reconstructed bond directions.
 
         Returns:
             list: Coordinates where passivants should be added.

@@ -82,7 +82,7 @@ class BondDirections(np.ndarray):
         Returns:
             List[List[float]]: List of reconstructed bond vectors.
         """
-        max_coordination_number = len(templates)
+        max_coordination_number = max(len(bond_direction) for template in templates for bond_direction in template)
 
         if len(self) >= max_coordination_number:
             return BondDirections([])
@@ -126,7 +126,7 @@ class BondDirectionsTemplatesForElement(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def to_ndarray(self):
-        return np.array(self.bond_directions_templates)
+        return [np.array(template) for template in self.bond_directions_templates]
 
 
 class BondDirectionsForElementList(List[BondDirectionsTemplatesForElement]):

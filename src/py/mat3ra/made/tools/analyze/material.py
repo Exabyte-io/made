@@ -165,14 +165,18 @@ class MaterialWithCrystalSites(Material):
         missing_bonds: List[BondDirections] = []
         for coordinate in self.basis.coordinates.to_array_of_values_with_ids():
             existing_bond_directions = BondDirections(self.get_neighbors_vectors_for_site(coordinate.id, cutoff=3.0))
-            bond_templates = next(
-                (b for b in bond_templates_list if b.element == self.basis.elements.values[coordinate.id]), None
-            )
+            element = self.basis.elements.get_element_value_by_index(coordinate.id)
+            bond_templates = [
+                bond_templates_for_element.to_ndarray()
+                for bond_templates_for_element in bond_templates_list
+                if bond_templates_for_element.element == element
+            ]
             if bond_templates is None:
                 continue
-
             missing_bonds_for_site = existing_bond_directions.find_missing_directions(
-                templates=bond_templates.to_ndarray(), angle_tolerance=0.1, max_bonds_to_add=1
+                templates=bond_templates,
+                angle_tolerance=0.1,
+                max_bonds_to_add=1,
             )
             missing_bonds.append(BondDirections(missing_bonds_for_site))
 
