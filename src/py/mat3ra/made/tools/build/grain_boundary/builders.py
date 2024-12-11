@@ -4,7 +4,7 @@ import numpy as np
 from mat3ra.made.material import Material
 
 from ...third_party import PymatgenInterface
-from ...analyze import get_chemical_formula
+from ...analyze.other import get_chemical_formula
 from ..slab import SlabConfiguration, get_terminations, create_slab
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
 

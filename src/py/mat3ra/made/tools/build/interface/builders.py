@@ -17,7 +17,7 @@ from ...modify import (
     add_vacuum_sides,
     add_vacuum,
 )
-from ...analyze import get_chemical_formula
+from ...analyze.other import get_chemical_formula
 from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
 from ...build import BaseBuilder, BaseBuilderParameters
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
