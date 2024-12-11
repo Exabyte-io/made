@@ -34,7 +34,9 @@ class PassivationBuilder(BaseBuilder):
         material = translate_to_z_level(configuration.slab, "center")
         return material
 
-    def _add_passivant_atoms(self, material: Material, coordinates: list, passivant: str) -> Material:
+    def _add_passivant_atoms(
+        self, material: Material, coordinates: list, passivant: str, use_cartesian_coordinates=False
+    ) -> Material:
         """
         Add passivant atoms to the provided coordinates in the material.
 
@@ -42,12 +44,13 @@ class PassivationBuilder(BaseBuilder):
             material (Material): The material object to add passivant atoms to.
             coordinates (list): The coordinates to add passivant atoms to.
             passivant (str): The chemical symbol of the passivating atom (e.g., 'H').
+            use_cartesian_coordinates (bool): Whether the coordinates are in Cartesian units (or crystal by default).
 
         Returns:
             Material: The material object with passivation atoms added.
         """
         for coord in coordinates:
-            material.add_atom(passivant, coord)
+            material.add_atom(passivant, coord, use_cartesian_coordinates)
         return material
 
 
@@ -177,7 +180,7 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
             undercoordinated_atoms_indices,
             reconstructed_bonds,
         )
-        return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant)
+        return self._add_passivant_atoms(material, passivant_coordinates_values, configuration.passivant, True)
 
     def _get_passivant_coordinates(
         self,
@@ -206,9 +209,8 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
                 if np.linalg.norm(bond_vector_np) == 0:
                     continue  # Avoid division by zero
                 normalized_bond = bond_vector_np / np.linalg.norm(bond_vector_np) * configuration.bond_length
-                passivant_bond_vector_crystal = material.basis.cell.convert_point_to_crystal(normalized_bond)
                 passivant_coordinates.append(
-                    material.basis.coordinates.get_element_value_by_index(idx) + passivant_bond_vector_crystal
+                    material.basis.coordinates.get_element_value_by_index(idx) + normalized_bond
                 )
 
         return passivant_coordinates
