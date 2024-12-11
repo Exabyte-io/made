@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -21,6 +21,12 @@ class MaterialWithCrystalSites(Material):
         return cls(config)
 
     def analyze(self):
+        """
+        Analyze the material in place and generate the crystal sites with properties.
+
+        Generated properties:
+            - nearest_neighbor_vectors: The nearest neighbor vectors for all sites.
+        """
         self.nearest_neighbor_vectors = self.get_neighbors_vectors_for_all_sites(cutoff=3.0)
         self.crystal_sites = CrystalSiteList(
             values=[CrystalSite(nearest_neighbor_vectors=item) for item in self.nearest_neighbor_vectors.values],
@@ -34,6 +40,17 @@ class MaterialWithCrystalSites(Material):
     def get_neighbors_vectors_for_site(
         self, site_index: int, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
     ) -> List[np.ndarray]:
+        """
+        Get the nearest neighbor vectors for a specific site.
+
+        Args:
+            site_index (int): The index of the site to
+            cutoff (float): The maximum cutoff radius for identifying neighbors.
+            max_number_of_neighbors (int): The max number of neighbors possible.
+
+        Returns:
+            List[np.ndarray]: List of vectors to the nearest neighbors.
+        """
         coordinates = self.basis.coordinates.values
         neighbors, distances = self.get_neighbors_for_site(site_index, cutoff, max_number_of_neighbors)
         vectors = [np.array(coordinates[neighbor]) - np.array(coordinates[site_index]) for neighbor in neighbors]
@@ -43,6 +60,16 @@ class MaterialWithCrystalSites(Material):
     def get_neighbors_vectors_for_all_sites(
         self, cutoff: float = 3.0, max_number_of_neighbors: Optional[int] = None
     ) -> ArrayWithIds:
+        """
+        Get the nearest neighbor vectors for all sites.
+
+        Args:
+            cutoff (float): The maximum cutoff radius for identifying neighbors.
+            max_number_of_neighbors (int): The max number of neighbors possible.
+
+        Returns:
+            ArrayWithIds: Array with the nearest neighbor vectors for all sites.
+        """
         nearest_neighbors = ArrayWithIds()
         for site_index in range(len(self.basis.coordinates.values)):
             vectors = self.get_neighbors_vectors_for_site(site_index, cutoff, max_number_of_neighbors)
@@ -55,7 +82,7 @@ class MaterialWithCrystalSites(Material):
         cutoff: float = 3.0,
         max_number_of_neighbors: Optional[int] = None,
         nearest_only: bool = True,
-    ):
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Get the nearest neighbors for a specific site.
 
@@ -64,6 +91,9 @@ class MaterialWithCrystalSites(Material):
             cutoff (float): The maximum cutoff radius for identifying neighbors.
             max_number_of_neighbors (int): The max number of neighbors possible.
             nearest_only (bool): If True, only consider the first shell of neighbors.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: Tuple of neighbors and distances.
         """
         coordinates = self.basis.coordinates
         max_number_of_neighbors = (
@@ -93,6 +123,9 @@ class MaterialWithCrystalSites(Material):
         Args:
             cutoff (float): The maximum cutoff radius for identifying neighbors.
             max_number_of_neighbors (int): The max number of neighbors possible.
+
+        Returns:
+            ArrayWithIds: Array with the nearest neighbors for all sites.
         """
         nearest_neighbors = ArrayWithIds()
         for site_index in self.basis.coordinates.ids:
@@ -109,7 +142,7 @@ class MaterialWithCrystalSites(Material):
             cutoff (float): The cutoff radius for identifying neighbors.
 
         Returns:
-            Dict[int, int]: A dictionary mapping atom indices to their coordination numbers.
+            ArrayWithIds: Array with the coordination numbers for all sites.
         """
         nearest_neighbors = self.get_nearest_neighbors_for_all_sites(cutoff)
         coordination_numbers = [len(neighbors) for neighbors in nearest_neighbors.values]
@@ -120,7 +153,6 @@ class MaterialWithCrystalSites(Material):
         Identify undercoordinated atoms based on the coordination threshold (inclusive).
 
         Args:
-            material (MaterialWithCrystalSites): The material object with crystal sites.
             cutoff (float): The cutoff radius for identifying neighbors.
             coordination_threshold (int): The coordination number threshold for an atom
                 to be considered undercoordinated, inclusive.
