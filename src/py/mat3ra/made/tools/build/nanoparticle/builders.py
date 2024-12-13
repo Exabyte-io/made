@@ -9,24 +9,24 @@ from ase.cluster import (
     HexagonalClosedPacked,
 )
 from ase.cluster.wulff import wulff_construction
-from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
-from mat3ra.made.tools.convert import from_ase
+from mat3ra.made.tools.build.mixins import ConvertGeneratedItemsASEAtomsMixin
 
 from .configuration import NanoparticleConfiguration
 from .enums import NanoparticleShapes
+from ...third_party import ASEAtoms
 
 
-class NanoparticleBuilder(BaseBuilder):
+class NanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseBuilder):
     """
     Generalized builder for creating nanoparticles based on ASE cluster tools.
     Passes configuration parameters directly to the ASE constructors.
     """
 
     _ConfigurationType: type(NanoparticleConfiguration) = NanoparticleConfiguration  # type: ignore
-    _GeneratedItemType: Material = Material
+    _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 
-    def create_nanoparticle(self, config: NanoparticleConfiguration) -> Material:
+    def create_nanoparticle(self, config: NanoparticleConfiguration) -> _GeneratedItemType:
         shape = config.shape
         element = config.element
 
@@ -59,8 +59,10 @@ class NanoparticleBuilder(BaseBuilder):
             nanoparticle = wulff_construction(**parameters)
         else:
             raise ValueError(f"Unsupported shape: {shape}")
-
-        return Material(from_ase(nanoparticle))
+        box_size = 2 * max(abs(nanoparticle.positions).max(axis=0)) + config.vacuum_padding
+        nanoparticle.set_cell([box_size, box_size, box_size], scale_atoms=False)
+        nanoparticle.center()
+        return nanoparticle
 
     def _generate(self, configuration: NanoparticleConfiguration) -> List[_GeneratedItemType]:
         nanoparticle = self.create_nanoparticle(configuration)

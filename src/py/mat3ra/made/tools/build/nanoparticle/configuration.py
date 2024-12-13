@@ -2,6 +2,12 @@ from typing import Dict, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
+from mat3ra.made.tools.convert import decorator_convert_material_args_kwargs_to_structure
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
+from ...convert import from_pymatgen
+from ...third_party import PymatgenStructure
+
 from .enums import NanoparticleShapes
 from ...build import BaseConfiguration
 
@@ -28,7 +34,13 @@ class NanoparticleConfiguration(BaseConfiguration):
 
     @property
     def lattice_constant(self) -> float:
-        lattice_constants = [self.material.lattice.a, self.material.lattice.b, self.material.lattice.c]
+        material = self.material
+        conventional_material = NanoparticleConfiguration.convert_to_conventional(material)
+        lattice_constants = [
+            conventional_material.lattice.a,
+            conventional_material.lattice.b,
+            conventional_material.lattice.c,
+        ]
         # If lattice constants are not equal within a tolerance, raise an error
         if not np.all(np.isclose(lattice_constants, lattice_constants[0], atol=1e-6)):
             raise ValueError("Lattice constants must be equal for isotropic materials")
@@ -37,7 +49,7 @@ class NanoparticleConfiguration(BaseConfiguration):
 
     @property
     def element(self) -> str:
-        return self.material.basis.elements[0]
+        return self.material.basis.elements.get_element_value_by_index(0)
 
     @property
     def _json(self):
@@ -47,3 +59,22 @@ class NanoparticleConfiguration(BaseConfiguration):
             "parameters": self.parameters,
             "vacuum_padding": self.vacuum_padding,
         }
+
+    # TODO: move to a separate module
+    @staticmethod
+    @decorator_convert_material_args_kwargs_to_structure
+    def convert_to_primitive(structure: PymatgenStructure) -> Material:
+        """
+        Convert a structure to its primitive cell.
+        """
+        analyzer = SpacegroupAnalyzer(structure)
+        return Material(from_pymatgen(analyzer.get_primitive_standard_structure()))
+
+    @staticmethod
+    @decorator_convert_material_args_kwargs_to_structure
+    def convert_to_conventional(structure: PymatgenStructure) -> Material:
+        """
+        Convert a structure to its conventional cell.
+        """
+        analyzer = SpacegroupAnalyzer(structure)
+        return Material(from_pymatgen(analyzer.get_conventional_standard_structure()))
