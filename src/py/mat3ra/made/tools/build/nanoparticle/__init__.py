@@ -10,4 +10,4 @@ def create_nanoparticle(
     configuration: Union[NanoparticleConfiguration, ASENanoparticleConfiguration],
     builder: Union[NanoparticleBuilder, ASEBasedNanoparticleBuilder] = NanoparticleBuilder(),
 ) -> Material:
-    return builder.create_nanoparticle(configuration)
+    return builder.get_material(configuration)
