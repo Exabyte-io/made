@@ -21,7 +21,7 @@ from ..slab import create_slab
 from ...third_party import ASEAtoms
 
 
-class NanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseBuilder):
+class NanoparticleBuilder(BaseBuilder):
     """
     Builder for creating nanoparticles by cutting from bulk materials supercells.
     """
