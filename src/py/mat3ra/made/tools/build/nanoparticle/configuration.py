@@ -23,7 +23,7 @@ class BaseNanoparticleConfiguration(BaseConfiguration):
     @property
     def lattice_constant(self) -> float:
         material = self.material
-        conventional_material = ASENanoparticleConfiguration.convert_to_conventional(material)
+        conventional_material = ASEBasedNanoparticleConfiguration.convert_to_conventional(material)
         lattice_constants = [
             conventional_material.lattice.a,
             conventional_material.lattice.b,
@@ -81,7 +81,7 @@ class NanoparticleConfiguration(BaseNanoparticleConfiguration):
         }
 
 
-class ASENanoparticleConfiguration(BaseNanoparticleConfiguration):
+class ASEBasedNanoparticleConfiguration(BaseNanoparticleConfiguration):
     """
     Configuration for building a nanoparticle.
 

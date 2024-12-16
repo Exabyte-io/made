@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable, Dict
 from ase.cluster import (
     SimpleCubic,
     BodyCenteredCubic,
@@ -10,15 +10,27 @@ from ase.cluster import (
 )
 from ase.cluster.wulff import wulff_construction
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.other import get_chemical_formula
 from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.mixins import ConvertGeneratedItemsASEAtomsMixin
 from mat3ra.made.tools.build.slab import SlabConfiguration
 from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
 
-from .configuration import ASENanoparticleConfiguration, NanoparticleConfiguration
+from .configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
 from .enums import NanoparticleShapes
 from ..slab import create_slab
 from ...third_party import ASEAtoms
+
+SHAPE_TO_CONSTRUCTOR: Dict[str, Callable[..., ASEAtoms]] = {
+    NanoparticleShapes.ICOSAHEDRON: Icosahedron,
+    NanoparticleShapes.OCTAHEDRON: Octahedron,
+    NanoparticleShapes.DECAHEDRON: Decahedron,
+    NanoparticleShapes.SIMPLE_CUBIC: SimpleCubic,
+    NanoparticleShapes.FACE_CENTERED_CUBIC: FaceCenteredCubic,
+    NanoparticleShapes.BODY_CENTERED_CUBIC: BodyCenteredCubic,
+    NanoparticleShapes.HEXAGONAL_CLOSED_PACKED: HexagonalClosedPacked,
+    NanoparticleShapes.WULFF: wulff_construction,
+}
 
 
 class NanoparticleBuilder(BaseBuilder):
@@ -51,6 +63,11 @@ class NanoparticleBuilder(BaseBuilder):
         nanoparticle = filter_by_condition_on_coordinates(slab, lambda vector: vector.norm() <= radius)
         return nanoparticle
 
+    def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
+        for material in materials:
+            material.name = f"{get_chemical_formula(material)} {configuration.shape.value.capitalize()}"
+        return materials
+
 
 class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, NanoparticleBuilder):
     """
@@ -58,47 +75,28 @@ class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, Nanopartic
     Passes configuration parameters directly to the ASE constructors.
     """
 
-    _ConfigurationType: type(ASENanoparticleConfiguration) = ASENanoparticleConfiguration  # type: ignore
+    _ConfigurationType: type(ASEBasedNanoparticleConfiguration) = ASEBasedNanoparticleConfiguration  # type: ignore
     _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 
-    def create_nanoparticle(self, config: ASENanoparticleConfiguration) -> _GeneratedItemType:
-        shape = config.shape
-        element = config.element
-
-        lattice_constant = config.lattice_constant
-
-        # Ensure parameters dictionary exists
+    def create_nanoparticle(self, config: ASEBasedNanoparticleConfiguration) -> _GeneratedItemType:
+        constructor = SHAPE_TO_CONSTRUCTOR.get(config.shape.value)
+        if not constructor:
+            raise ValueError(f"Unsupported shape: {config.shape}")
         parameters = config.parameters or {}
-
-        # Add common parameters
-        parameters["symbol"] = element
-        if "latticeconstant" not in parameters:
-            parameters["latticeconstant"] = lattice_constant
-        # TODO: adjust parameters for octahedron based on type (cuboctahedron, regular octahedron, etc.)
-        # Shape-specific factory logic
-        if shape == NanoparticleShapes.CUBOCTAHEDRON:
-            nanoparticle = FaceCenteredCubic(**parameters)
-        elif shape == NanoparticleShapes.ICOSAHEDRON:
-            nanoparticle = Icosahedron(**parameters)
-        elif shape == NanoparticleShapes.OCTAHEDRON:
-            nanoparticle = Octahedron(**parameters)
-        elif shape == NanoparticleShapes.DECAHEDRON:
-            nanoparticle = Decahedron(**parameters)
-        elif shape == NanoparticleShapes.SIMPLE_CUBIC:
-            nanoparticle = SimpleCubic(**parameters)
-        elif shape == NanoparticleShapes.BODY_CENTERED_CUBIC:
-            nanoparticle = BodyCenteredCubic(**parameters)
-        elif shape == NanoparticleShapes.HEXAGONAL_CLOSED_PACKED:
-            nanoparticle = HexagonalClosedPacked(**parameters)
-        elif shape == NanoparticleShapes.WULFF:
-            nanoparticle = wulff_construction(**parameters)
-        else:
-            raise ValueError(f"Unsupported shape: {shape}")
+        parameters["symbol"] = config.element
+        parameters.setdefault("latticeconstant", config.lattice_constant)
+        nanoparticle = constructor(**parameters)
         box_size = 2 * max(abs(nanoparticle.positions).max(axis=0)) + config.vacuum_padding
         nanoparticle.set_cell([box_size, box_size, box_size], scale_atoms=False)
         nanoparticle.center()
+
         return nanoparticle
 
-    def _generate(self, configuration: ASENanoparticleConfiguration) -> List[_GeneratedItemType]:
+    def _generate(self, configuration: ASEBasedNanoparticleConfiguration) -> List[_GeneratedItemType]:
         nanoparticle = self.create_nanoparticle(configuration)
         return [nanoparticle]
+
+    def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
+        for material in materials:
+            material.name = f"{get_chemical_formula(material)} {configuration.shape.value.capitalize()}"
+        return materials
