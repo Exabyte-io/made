@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -12,20 +12,8 @@ from .enums import NanoparticleShapes
 from ...build import BaseConfiguration
 
 
-class NanoparticleConfiguration(BaseConfiguration):
-    """
-    Configuration for building a nanoparticle.
-
-    Attributes:
-        material (Material): The base material for the nanoparticle.
-        shape (NanoparticleShapes): The desired shape of the nanoparticle.
-        parameters (dict): Dictionary of parameters to pass to the corresponding ASE constructor.
-        vacuum_padding (float): Vacuum padding around the nanoparticle.
-    """
-
-    material: Material
-    shape: NanoparticleShapes
-    parameters: Optional[Dict] = None  # Shape-specific parameters (e.g., layers, size)
+class BaseNanoparticleConfiguration(BaseConfiguration):
+    material: Material  # Material to use for the nanoparticle
     vacuum_padding: float = 10.0  # Padding for vacuum space around the nanoparticle
 
     @property
@@ -35,7 +23,7 @@ class NanoparticleConfiguration(BaseConfiguration):
     @property
     def lattice_constant(self) -> float:
         material = self.material
-        conventional_material = NanoparticleConfiguration.convert_to_conventional(material)
+        conventional_material = ASENanoparticleConfiguration.convert_to_conventional(material)
         lattice_constants = [
             conventional_material.lattice.a,
             conventional_material.lattice.b,
@@ -55,8 +43,6 @@ class NanoparticleConfiguration(BaseConfiguration):
     def _json(self):
         return {
             "material": self.material.to_json(),
-            "shape": self.shape.value,
-            "parameters": self.parameters,
             "vacuum_padding": self.vacuum_padding,
         }
 
@@ -78,3 +64,41 @@ class NanoparticleConfiguration(BaseConfiguration):
         """
         analyzer = SpacegroupAnalyzer(structure)
         return Material(from_pymatgen(analyzer.get_conventional_standard_structure()))
+
+
+class NanoparticleConfiguration(BaseNanoparticleConfiguration):
+    shape: NanoparticleShapes = NanoparticleShapes.ICOSAHEDRON  # Shape of the nanoparticle
+    orientation_z: Tuple[int, int, int] = (0, 0, 1)  # Orientation of the crystallographic axis in the z-direction
+    radius: float = 5.0  # Radius of the nanoparticle (largest feature size for a shape), in Angstroms
+
+    @property
+    def _json(self):
+        return {
+            **super()._json,
+            "shape": self.shape.value,
+            "orientation_z": self.orientation_z,
+            "radius": self.radius,
+        }
+
+
+class ASENanoparticleConfiguration(BaseNanoparticleConfiguration):
+    """
+    Configuration for building a nanoparticle.
+
+    Attributes:
+        material (Material): The base material for the nanoparticle.
+        shape (NanoparticleShapes): The desired shape of the nanoparticle.
+        parameters (dict): Dictionary of parameters to pass to the corresponding ASE constructor.
+        vacuum_padding (float): Vacuum padding around the nanoparticle.
+    """
+
+    shape: NanoparticleShapes
+    parameters: Optional[Dict] = None  # Shape-specific parameters (e.g., layers, size)
+
+    @property
+    def _json(self):
+        return {
+            **super()._json,
+            "shape": self.shape.value,
+            "parameters": self.parameters,
+        }
