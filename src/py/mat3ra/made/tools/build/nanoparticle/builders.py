@@ -1,14 +1,5 @@
 from typing import List, Callable, Dict
-from ase.cluster import (
-    SimpleCubic,
-    BodyCenteredCubic,
-    FaceCenteredCubic,
-    Icosahedron,
-    Octahedron,
-    Decahedron,
-    HexagonalClosedPacked,
-)
-from ase.cluster.wulff import wulff_construction
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.other import get_chemical_formula
 from mat3ra.made.tools.build import BaseBuilder
@@ -17,72 +8,73 @@ from mat3ra.made.tools.build.slab import SlabConfiguration
 from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
 from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition
 
-from .configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
-from .enums import NanoparticleShapes
+from .configuration import ASEBasedNanoparticleConfiguration, SphereSlabBasedNanoparticleConfiguration
+from .enums import ASENanoparticleShapesEnum
 from ..slab import create_slab
 from ...analyze.other import get_closest_site_id_from_coordinate
 from ...third_party import ASEAtoms
 
-SHAPE_TO_CONSTRUCTOR: Dict[str, Callable[..., ASEAtoms]] = {
-    NanoparticleShapes.ICOSAHEDRON: Icosahedron,
-    NanoparticleShapes.OCTAHEDRON: Octahedron,
-    NanoparticleShapes.DECAHEDRON: Decahedron,
-    NanoparticleShapes.SIMPLE_CUBIC: SimpleCubic,
-    NanoparticleShapes.FACE_CENTERED_CUBIC: FaceCenteredCubic,
-    NanoparticleShapes.BODY_CENTERED_CUBIC: BodyCenteredCubic,
-    NanoparticleShapes.HEXAGONAL_CLOSED_PACKED: HexagonalClosedPacked,
-    NanoparticleShapes.WULFF: wulff_construction,
-}
 
-
-class NanoparticleBuilder(BaseBuilder):
+class SlabBasedNanoparticleBuilder(BaseBuilder):
     """
     Builder for creating nanoparticles by cutting from bulk materials supercells.
     """
 
-    _ConfigurationType: type(NanoparticleConfiguration) = NanoparticleConfiguration  # type: ignore
+    _ConfigurationType: type(ASEBasedNanoparticleConfiguration) = ASEBasedNanoparticleConfiguration  # type: ignore
     _GeneratedItemType: type(Material) = Material  # type: ignore
 
     def create_nanoparticle(self, config: _ConfigurationType) -> _GeneratedItemType:
-        material = config.material
-        # shape = config.shape
-        orientation_z = config.orientation_z
-        radius = config.radius
+        slab = self._create_slab(config)
+        center_coordinate = self._find_slab_center_coordinate(slab)
+        condition = self._build_coordinate_condition(config, center_coordinate)
+        nanoparticle = filter_by_condition_on_coordinates(slab, condition, use_cartesian_coordinates=True)
+        return nanoparticle
 
-        # Get the conventional structure
-        conventional_material = self._ConfigurationType.convert_to_conventional(material)
-        thickness_in_layers = (2 * radius + config.vacuum_padding) / conventional_material.lattice_constant
+    def _build_coordinate_condition(self, config: _ConfigurationType, center_coordinate: List[float]) -> Callable:
+        coordinate_condition = config.condition_builder(center_coordinate)
+        return coordinate_condition.condition
+
+    def _create_slab(self, config: _ConfigurationType) -> Material:
         slab_config = SlabConfiguration(
-            bulk=conventional_material.structure,
-            miller_indices=orientation_z,
-            thickness=thickness_in_layers,
+            bulk=config.material,
+            miller_indices=config.orientation_z,
+            thickness=config.supercell_size,
             use_conventional_cell=True,
             use_orthogonal_z=True,
             make_primitive=False,
+            vacuum=0,
+            xy_supercell_matrix=[[config.supercell_size, 0], [0, config.supercell_size]],
         )
         slab = create_slab(slab_config)
+        return slab
+
+    def _find_slab_center_coordinate(self, slab: Material) -> List[float]:
         slab.to_cartesian()
         center_coordinate = slab.basis.cell.convert_point_to_cartesian([0.5, 0.5, 0.5])
         center_id_at_site = get_closest_site_id_from_coordinate(slab, center_coordinate, use_cartesian_coordinates=True)
         center_coordinate_at_site = slab.basis.coordinates.get_element_value_by_index(center_id_at_site)
-        condition = self._get_condition_by_shape(config.shape, center_coordinate_at_site, radius)
-        nanoparticle = filter_by_condition_on_coordinates(slab, condition, use_cartesian_coordinates=True)
-        return nanoparticle
-
-    def _get_condition_by_shape(
-        self, shape: NanoparticleShapes, center_coordinate: List[float], radius: float
-    ) -> Callable[[List[float]], bool]:
-        if shape == NanoparticleShapes.SPHERE:
-            return SphereCoordinateCondition(center_position=center_coordinate, radius=radius).condition
-        raise ValueError(f"Unsupported shape: {shape}")
+        return center_coordinate_at_site
 
     def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
         for material in materials:
-            material.name = f"{get_chemical_formula(material)} {configuration.shape.value.capitalize()}"
+            material.name = f"{get_chemical_formula(material)} Nanoparticle"
         return materials
 
 
-class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, NanoparticleBuilder):
+class SphereSlabBasedNanoparticleBuilder(SlabBasedNanoparticleBuilder):
+    """
+    Builder for creating spherical nanoparticles by cutting from bulk materials supercells.
+    """
+
+    _ConfigurationType: type(SphereSlabBasedNanoparticleConfiguration) = (  # type: ignore
+        SphereSlabBasedNanoparticleConfiguration
+    )
+
+    def _build_coordinate_condition(self, config: _ConfigurationType, center_coordinate: List[float]) -> Callable:
+        return SphereCoordinateCondition(center_position=center_coordinate, radius=config.radius).condition
+
+
+class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseBuilder):
     """
     Generalized builder for creating nanoparticles based on ASE cluster tools.
     Passes configuration parameters directly to the ASE constructors.
@@ -92,18 +84,35 @@ class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, Nanopartic
     _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 
     def create_nanoparticle(self, config: ASEBasedNanoparticleConfiguration) -> _GeneratedItemType:
-        constructor = SHAPE_TO_CONSTRUCTOR.get(config.shape.value)
-        if not constructor:
-            raise ValueError(f"Unsupported shape: {config.shape}")
+        parameters = self._get_ase_nanoparticle_parameters(config)
+        constructor = self._get_ase_nanoparticle_constructor(config)
+        nanoparticle_without_cell = constructor(**parameters)
+        nanoparticle = self._set_ase_cell(nanoparticle_without_cell, config.vacuum_padding)
+
+        return nanoparticle
+
+    @staticmethod
+    def _get_ase_nanoparticle_parameters(config: ASEBasedNanoparticleConfiguration) -> Dict:
         parameters = config.parameters or {}
         parameters["symbol"] = config.element
         parameters.setdefault("latticeconstant", config.lattice_constant)
-        nanoparticle = constructor(**parameters)
-        box_size = 2 * max(abs(nanoparticle.positions).max(axis=0)) + config.vacuum_padding
-        nanoparticle.set_cell([box_size, box_size, box_size], scale_atoms=False)
-        nanoparticle.center()
+        return parameters
 
-        return nanoparticle
+    @classmethod
+    def _get_ase_nanoparticle_constructor(cls, config: ASEBasedNanoparticleConfiguration) -> Callable[..., ASEAtoms]:
+        constructor = ASENanoparticleShapesEnum.get_ase_constructor(config.shape.value)
+        return constructor
+
+    @staticmethod
+    def _set_ase_cell(atoms: ASEAtoms, vacuum: float) -> _GeneratedItemType:
+        """
+        Set the cell of an ASE atoms object to a cubic box with vacuum padding around the nanoparticle.
+        """
+        max_dimension_along_x = abs(atoms.positions[:, 0]).max()
+        box_size = 2 * max_dimension_along_x + vacuum
+        atoms.set_cell([box_size, box_size, box_size], scale_atoms=False)
+        atoms.center()
+        return atoms
 
     def _generate(self, configuration: ASEBasedNanoparticleConfiguration) -> List[_GeneratedItemType]:
         nanoparticle = self.create_nanoparticle(configuration)
