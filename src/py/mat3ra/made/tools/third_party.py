@@ -4,6 +4,14 @@ from ase.build.supercells import make_supercell as ase_make_supercell
 from ase.calculators.calculator import Calculator as ASECalculator
 from ase.calculators.calculator import all_changes as ase_all_changes
 from ase.calculators.emt import EMT as ASECalculatorEMT
+from ase.cluster import BodyCenteredCubic as ASEBodyCenteredCubic
+from ase.cluster import Decahedron as ASEDecahedron
+from ase.cluster import FaceCenteredCubic as ASEFaceCenteredCubic
+from ase.cluster import HexagonalClosedPacked as ASEHexagonalClosedPacked
+from ase.cluster import Icosahedron as ASEIcosahedron
+from ase.cluster import Octahedron as ASEOctahedron
+from ase.cluster import SimpleCubic as ASESimpleCubic
+from ase.cluster.wulff import wulff_construction as ASEWulffConstruction
 from ase.constraints import FixAtoms as ASEFixAtoms
 from ase.constraints import FixedPlane as ASEFixedPlane
 from pymatgen.analysis.defects.core import Interstitial as PymatgenInterstitial
@@ -48,4 +56,12 @@ __all__ = [
     "PymatgenAseAtomsAdaptor",
     "PymatgenPoscar",
     "PymatgenVoronoiNN",
+    "ASESimpleCubic",
+    "ASEBodyCenteredCubic",
+    "ASEFaceCenteredCubic",
+    "ASEIcosahedron",
+    "ASEOctahedron",
+    "ASEDecahedron",
+    "ASEHexagonalClosedPacked",
+    "ASEWulffConstruction",
 ]
