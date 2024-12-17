@@ -1,18 +1,17 @@
 from typing import List, Callable, Dict
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.other import get_chemical_formula
-from mat3ra.made.tools.build import BaseBuilder
-from mat3ra.made.tools.build.mixins import ConvertGeneratedItemsASEAtomsMixin
-from mat3ra.made.tools.build.slab import SlabConfiguration
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
-from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition
-
-from .configuration import ASEBasedNanoparticleConfiguration, SphereSlabBasedNanoparticleConfiguration
-from .enums import ASENanoparticleShapesEnum
-from ..slab import create_slab
+from ...analyze.other import get_chemical_formula
+from ...build import BaseBuilder
+from ...build.mixins import ConvertGeneratedItemsASEAtomsMixin
+from ...build.slab import SlabConfiguration
+from ...modify import filter_by_condition_on_coordinates
+from ...utils.coordinate import SphereCoordinateCondition
 from ...analyze.other import get_closest_site_id_from_coordinate
 from ...third_party import ASEAtoms
+from ..slab import create_slab
+from .configuration import ASEBasedNanoparticleConfiguration, SphereSlabBasedNanoparticleConfiguration
+from .enums import ASENanoparticleShapesEnum
 
 
 class SlabBasedNanoparticleBuilder(BaseBuilder):
