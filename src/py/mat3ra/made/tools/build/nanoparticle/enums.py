@@ -6,6 +6,7 @@ class NanoparticleShapes(str, Enum):
     Enum for supported nanoparticle shapes.
     """
 
+    SPHERE = "sphere"
     ICOSAHEDRON = "icosahedron"
     OCTAHEDRON = "octahedron"
     DECAHEDRON = "decahedron"

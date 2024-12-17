@@ -15,10 +15,12 @@ from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.mixins import ConvertGeneratedItemsASEAtomsMixin
 from mat3ra.made.tools.build.slab import SlabConfiguration
 from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
+from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition
 
 from .configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
 from .enums import NanoparticleShapes
 from ..slab import create_slab
+from ...analyze.other import get_closest_site_id_from_coordinate
 from ...third_party import ASEAtoms
 
 SHAPE_TO_CONSTRUCTOR: Dict[str, Callable[..., ASEAtoms]] = {
@@ -59,9 +61,20 @@ class NanoparticleBuilder(BaseBuilder):
             make_primitive=False,
         )
         slab = create_slab(slab_config)
-        # TODO: switch condition based on shape
-        nanoparticle = filter_by_condition_on_coordinates(slab, lambda vector: vector.norm() <= radius)
+        slab.to_cartesian()
+        center_coordinate = slab.basis.cell.convert_point_to_cartesian([0.5, 0.5, 0.5])
+        center_id_at_site = get_closest_site_id_from_coordinate(slab, center_coordinate, use_cartesian_coordinates=True)
+        center_coordinate_at_site = slab.basis.coordinates.get_element_value_by_index(center_id_at_site)
+        condition = self._get_condition_by_shape(config.shape, center_coordinate_at_site, radius)
+        nanoparticle = filter_by_condition_on_coordinates(slab, condition, use_cartesian_coordinates=True)
         return nanoparticle
+
+    def _get_condition_by_shape(
+        self, shape: NanoparticleShapes, center_coordinate: List[float], radius: float
+    ) -> Callable[[List[float]], bool]:
+        if shape == NanoparticleShapes.SPHERE:
+            return SphereCoordinateCondition(center_position=center_coordinate, radius=radius).condition
+        raise ValueError(f"Unsupported shape: {shape}")
 
     def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
         for material in materials:
