@@ -1,13 +1,11 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
-from mat3ra.made.tools.convert import from_pymatgen
-from ..third_party import PymatgenSpacegroupAnalyzer
+from mat3ra.made.tools.convert import from_pymatgen, to_pymatgen
 
-from mat3ra.made.tools.convert import to_pymatgen
+from ..third_party import PymatgenSpacegroupAnalyzer
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
-
     def __init__(self, material: Material):
         super().__init__(material)
         self.spacegroup_analyzer = PymatgenSpacegroupAnalyzer(to_pymatgen(self.material))

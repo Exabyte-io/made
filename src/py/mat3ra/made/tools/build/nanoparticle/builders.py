@@ -1,4 +1,4 @@
-from typing import List, Callable, Dict
+from typing import List, Callable, Dict, Type
 
 from mat3ra.made.material import Material
 from ...analyze.other import get_chemical_formula
@@ -65,9 +65,11 @@ class SphereSlabBasedNanoparticleBuilder(SlabBasedNanoparticleBuilder):
     Builder for creating spherical nanoparticles by cutting from bulk materials supercells.
     """
 
-    _ConfigurationType: type(SphereSlabBasedNanoparticleConfiguration) = SphereSlabBasedNanoparticleConfiguration
+    _ConfigurationType: Type[ASEBasedNanoparticleConfiguration] = SphereSlabBasedNanoparticleConfiguration
 
-    def _build_coordinate_condition(self, config: _ConfigurationType, center_coordinate: List[float]) -> Callable:
+    def _build_coordinate_condition(
+        self, config: SphereSlabBasedNanoparticleConfiguration, center_coordinate: List[float]
+    ) -> Callable:
         return SphereCoordinateCondition(center_position=center_coordinate, radius=config.radius).condition
 
 

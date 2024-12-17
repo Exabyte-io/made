@@ -40,7 +40,7 @@ class BaseNanoparticleConfiguration(BaseConfiguration):
 
 
 class SlabBasedNanoparticleConfiguration(BaseNanoparticleConfiguration):
-    condition_builder: Callable  # Function of the center coordinate to build the condition for filtering the slab that returns function of the coordinates
+    condition_builder: Callable  # Function of the center coordinate to build the condition for filtering the slab
     supercell_size: int = 1  # Size of the supercell in the xy-plane
     orientation_z: Tuple[int, int, int] = (0, 0, 1)  # Orientation of the crystallographic axis in the z-direction
 
