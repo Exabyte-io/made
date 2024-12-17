@@ -1,14 +1,10 @@
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Callable
 
 import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.tools.convert import decorator_convert_material_args_kwargs_to_structure
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from ...convert import from_pymatgen
-from ...third_party import PymatgenStructure
 
-from .enums import NanoparticleShapes
+from .enums import ASENanoparticleShapesEnum
 from ...build import BaseConfiguration
 
 
@@ -36,40 +32,17 @@ class BaseNanoparticleConfiguration(BaseConfiguration):
         return lattice_constant
 
     @property
-    def element(self) -> str:
-        return self.material.basis.elements.get_element_value_by_index(0)
-
-    @property
     def _json(self):
         return {
             "material": self.material.to_json(),
             "vacuum_padding": self.vacuum_padding,
         }
 
-    # TODO: move to a separate module
-    @staticmethod
-    @decorator_convert_material_args_kwargs_to_structure
-    def convert_to_primitive(structure: PymatgenStructure) -> Material:
-        """
-        Convert a structure to its primitive cell.
-        """
-        analyzer = SpacegroupAnalyzer(structure)
-        return Material(from_pymatgen(analyzer.get_primitive_standard_structure()))
 
-    @staticmethod
-    @decorator_convert_material_args_kwargs_to_structure
-    def convert_to_conventional(structure: PymatgenStructure) -> Material:
-        """
-        Convert a structure to its conventional cell.
-        """
-        analyzer = SpacegroupAnalyzer(structure)
-        return Material(from_pymatgen(analyzer.get_conventional_standard_structure()))
-
-
-class NanoparticleConfiguration(BaseNanoparticleConfiguration):
-    shape: NanoparticleShapes = NanoparticleShapes.ICOSAHEDRON  # Shape of the nanoparticle
+class SlabBasedNanoparticleConfiguration(BaseNanoparticleConfiguration):
+    condition_builder: Callable  # Function of the center coordinate to build the condition for filtering the slab that returns function of the coordinates
+    supercell_size: int = 1  # Size of the supercell in the xy-plane
     orientation_z: Tuple[int, int, int] = (0, 0, 1)  # Orientation of the crystallographic axis in the z-direction
-    radius: float = 5.0  # Radius of the nanoparticle (largest feature size for a shape), in Angstroms
 
     @property
     def _json(self):
@@ -77,6 +50,16 @@ class NanoparticleConfiguration(BaseNanoparticleConfiguration):
             **super()._json,
             "shape": self.shape.value,
             "orientation_z": self.orientation_z,
+        }
+
+
+class SphereSlabBasedNanoparticleConfiguration(SlabBasedNanoparticleConfiguration):
+    radius: float = 5.0  # Radius of the nanoparticle, in Angstroms
+
+    @property
+    def _json(self):
+        return {
+            **super()._json,
             "radius": self.radius,
         }
 
@@ -92,8 +75,12 @@ class ASEBasedNanoparticleConfiguration(BaseNanoparticleConfiguration):
         vacuum_padding (float): Vacuum padding around the nanoparticle.
     """
 
-    shape: NanoparticleShapes
+    shape: ASENanoparticleShapesEnum
     parameters: Optional[Dict] = None  # Shape-specific parameters (e.g., layers, size)
+
+    @property
+    def element(self) -> str:
+        return self.material.basis.elements.get_element_value_by_index(0)
 
     @property
     def _json(self):
