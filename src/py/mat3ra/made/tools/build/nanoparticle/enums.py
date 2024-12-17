@@ -1,18 +1,16 @@
 from enum import Enum
 from typing import Callable
-from ...third_party import ASEAtoms
-
-# TODO: import from 3rd party
-from ase.cluster import (
-    SimpleCubic,
-    BodyCenteredCubic,
-    FaceCenteredCubic,
-    Icosahedron,
-    Octahedron,
-    Decahedron,
-    HexagonalClosedPacked,
+from ...third_party import (
+    ASEAtoms,
+    ASESimpleCubic,
+    ASEBodyCenteredCubic,
+    ASEFaceCenteredCubic,
+    ASEIcosahedron,
+    ASEOctahedron,
+    ASEDecahedron,
+    ASEHexagonalClosedPacked,
+    ASEWulffConstruction,
 )
-from ase.cluster.wulff import wulff_construction
 
 
 class ASENanoparticleShapesEnum(str, Enum):
@@ -32,12 +30,12 @@ class ASENanoparticleShapesEnum(str, Enum):
     @staticmethod
     def get_ase_constructor(shape: str) -> Callable[..., ASEAtoms]:
         return {
-            "icosahedron": Icosahedron,
-            "octahedron": Octahedron,
-            "decahedron": Decahedron,
-            "simple_cubic": SimpleCubic,
-            "face_centered_cubic": FaceCenteredCubic,
-            "body_centered_cubic": BodyCenteredCubic,
-            "hexagonal_closed_packed": HexagonalClosedPacked,
-            "wulff_construction": wulff_construction,
+            "icosahedron": ASEIcosahedron,
+            "octahedron": ASEOctahedron,
+            "decahedron": ASEDecahedron,
+            "simple_cubic": ASESimpleCubic,
+            "face_centered_cubic": ASEFaceCenteredCubic,
+            "body_centered_cubic": ASEBodyCenteredCubic,
+            "hexagonal_closed_packed": ASEHexagonalClosedPacked,
+            "ase_wulff_construction": ASEWulffConstruction,
         }[shape]

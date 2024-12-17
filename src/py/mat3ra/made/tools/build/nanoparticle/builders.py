@@ -66,9 +66,7 @@ class SphereSlabBasedNanoparticleBuilder(SlabBasedNanoparticleBuilder):
     Builder for creating spherical nanoparticles by cutting from bulk materials supercells.
     """
 
-    _ConfigurationType: type(
-        SphereSlabBasedNanoparticleConfiguration
-    ) = SphereSlabBasedNanoparticleConfiguration  # type: ignore
+    _ConfigurationType: type(SphereSlabBasedNanoparticleConfiguration) = SphereSlabBasedNanoparticleConfiguration
 
     def _build_coordinate_condition(self, config: _ConfigurationType, center_coordinate: List[float]) -> Callable:
         return SphereCoordinateCondition(center_position=center_coordinate, radius=config.radius).condition
