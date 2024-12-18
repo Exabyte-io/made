@@ -22,14 +22,14 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     _ConfigurationType: type(SlabConfiguration) = SlabConfiguration  # type: ignore
     _GeneratedItemType: PymatgenSlab = PymatgenSlab  # type: ignore
     _SelectorParametersType: type(SlabSelectorParameters) = SlabSelectorParameters  # type: ignore
-    __configuration: SlabConfiguration = SlabConfiguration()
+    __configuration: SlabConfiguration
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,
             min_slab_size=configuration.thickness,
-            min_vacuum_size=1,
+            min_vacuum_size=0,
             in_unit_planes=True,
             reorient_lattice=True,
             primitive=configuration.make_primitive,
