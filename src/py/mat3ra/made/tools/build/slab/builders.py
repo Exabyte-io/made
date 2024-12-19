@@ -35,6 +35,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             primitive=configuration.make_primitive,
         )
         raw_slabs = generator.get_slabs(
+            # We need to preserve symmetric slabs for different terminations at the surface
             filter_out_sym_slabs=False,
         )
         self.__configuration = configuration
