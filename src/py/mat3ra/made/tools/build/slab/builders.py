@@ -34,7 +34,10 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             reorient_lattice=True,
             primitive=configuration.make_primitive,
         )
-        raw_slabs = generator.get_slabs()
+        raw_slabs = generator.get_slabs(
+            # We need to preserve symmetric slabs for different terminations at the surface
+            filter_out_sym_slabs=False,
+        )
         self.__configuration = configuration
 
         return [self.__conditionally_convert_slab_to_orthogonal_pymatgen(slab) for slab in raw_slabs]
