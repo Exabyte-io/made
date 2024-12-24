@@ -178,7 +178,7 @@ SI_SLAB_CONFIGURATION: Dict[str, Any] = {
 }
 
 SI_SLAB: Dict[str, Any] = {
-    "name": "Si8(001), termination Si_P6/mmm_1, Slab",
+    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
     "basis": {
         "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
         "coordinates": [
@@ -211,14 +211,14 @@ SI_SLAB: Dict[str, Any] = {
     "_id": "",
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {"configuration": SI_SLAB_CONFIGURATION, "termination": "Si_P6/mmm_1"},
+        "build": {"configuration": SI_SLAB_CONFIGURATION, "termination": "Si_P4/mmm_1"},
     },
     "isUpdated": True,
 }
 
 
 SI_SLAB_PASSIVATED = {
-    "name": "Si8(001), termination Si_P6/mmm_1, Slab H-passivated",
+    "name": "Si8(001), termination Si_P4/mmm_1, Slab H-passivated",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -265,7 +265,7 @@ SI_SLAB_PASSIVATED = {
                 "bond_length": 1.48,
                 "surface": "both",
             },
-            "termination": "Si_P6/mmm_1",
+            "termination": "Si_P4/mmm_1",
         },
     },
     "isUpdated": True,
