@@ -22,6 +22,7 @@ class PymatgenSlabGeneratorParameters(BaseModel):
     min_vacuum_size: int = 1
     in_unit_planes: bool = True
     reorient_lattice: bool = True
+    symmetrize: bool = True
 
 
 class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
@@ -44,7 +45,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         )
         raw_slabs = generator.get_slabs(
             # We need to preserve symmetric slabs for different terminations at the surface
-            symmetrize=True
+            symmetrize=build_parameters.symmetrize
         )
         self.__configuration = configuration
 
