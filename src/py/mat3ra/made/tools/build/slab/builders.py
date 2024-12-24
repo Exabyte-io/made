@@ -59,7 +59,17 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = super()._post_process(items, post_process_parameters)
         materials = [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
-        materials_with_vacuum = [add_vacuum(material, self.__configuration.vacuum) for material in materials]
+        build_parameters = self.build_parameters or PymatgenSlabGeneratorParameters()
+
+        # Adding total vacuum to be exactly as specified in configuration, including already added vacuum
+        added_vacuum = (
+            build_parameters.min_vacuum_size * self.__configuration.bulk.lattice.c
+            if build_parameters.in_unit_planes
+            else build_parameters.min_vacuum_size
+        )
+        vacuum_to_add = self.__configuration.vacuum - added_vacuum
+
+        materials_with_vacuum = [add_vacuum(material, vacuum_to_add) for material in materials]
         for idx, material in enumerate(materials_with_vacuum):
             if "build" not in material.metadata:
                 material.metadata["build"] = {}
