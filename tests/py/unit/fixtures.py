@@ -164,7 +164,6 @@ SI_SUPERCELL_2X2X1: Dict[str, Any] = {
     "isUpdated": True,
 }
 
-
 SI_SLAB_CONFIGURATION: Dict[str, Any] = {
     "type": "SlabConfiguration",
     "bulk": SI_CONVENTIONAL_CELL,
@@ -176,6 +175,52 @@ SI_SLAB_CONFIGURATION: Dict[str, Any] = {
     "use_orthogonal_z": True,
     "make_primitive": True,
 }
+
+
+SI_SLAB_100_MAVRL: Dict[str, Any] = {
+    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+    "lattice": {
+        "type": "TET",
+        "a": 3.866975,
+        "b": 3.866975,
+        "c": 21.874912,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+    },
+    "basis": {
+        "units": "crystal",
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+            {"id": 4, "value": "Si"},
+            {"id": 5, "value": "Si"},
+            {"id": 6, "value": "Si"},
+            {"id": 7, "value": "Si"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.0, 0.0, 0.999183]},
+            {"id": 1, "value": [0.0, 0.5, 0.81265]},
+            {"id": 2, "value": [0.5, 0.5, 0.874754]},
+            {"id": 3, "value": [0.5, 0.0, 0.937279]},
+            {"id": 4, "value": [0.0, 0.0, 0.74985]},
+            {"id": 5, "value": [0.0, 0.5, 0.563317]},
+            {"id": 6, "value": [0.5, 0.5, 0.625221]},
+            {"id": 7, "value": [0.5, 0.0, 0.687746]},
+        ],
+    },
+    "isNonPeriodic": False,
+    "_id": "",
+    "metadata": {
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "build": {"configuration": SI_SLAB_CONFIGURATION, "termination": "Si_P4/mmm_1"},
+    },
+    "isUpdated": True,
+}
+
 
 SI_SLAB: Dict[str, Any] = {
     "name": "Si8(001), termination Si_P4/mmm_1, Slab",

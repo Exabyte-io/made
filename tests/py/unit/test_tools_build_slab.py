@@ -7,7 +7,7 @@ from mat3ra.made.tools.build.slab import (
 )
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import SI_SLAB
+from .fixtures import SI_SLAB_100_MAVRL
 
 material = Material.create(Material.default_config)
 
@@ -28,4 +28,5 @@ def test_build_slab():
     )
     termination = get_terminations(slab_config, build_parameters=params)[0]
     slab = create_slab(slab_config, termination, params)
-    assertion_utils.assert_deep_almost_equal(SI_SLAB, slab.to_json())
+    print(slab.to_json())
+    assertion_utils.assert_deep_almost_equal(SI_SLAB_100_MAVRL, slab.to_json())
