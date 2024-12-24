@@ -5,24 +5,26 @@ from .builders import SlabBuilder, SlabSelectorParameters, PymatgenSlabGenerator
 from .configuration import SlabConfiguration
 from .termination import Termination
 
+CACHED_BUILDER = None
+
 
 def get_terminations(
     configuration: SlabConfiguration, build_parameters: Optional[PymatgenSlabGeneratorParameters] = None
 ) -> List[Termination]:
-    if build_parameters:
-        return SlabBuilder(build_parameters=build_parameters).get_terminations(configuration)
-    return SlabBuilder().get_terminations(configuration)
+    global CACHED_BUILDER
+    CACHED_BUILDER = SlabBuilder(build_parameters=build_parameters)
+    return CACHED_BUILDER.get_terminations(configuration)
 
 
 def create_slab(
     configuration: SlabConfiguration,
     termination: Optional[Termination] = None,
     build_parameters: Optional[PymatgenSlabGeneratorParameters] = None,
+    use_cached_builder: bool = True,
 ) -> Material:
-    if build_parameters:
-        builder = SlabBuilder(build_parameters=build_parameters)
-    else:
-        builder = SlabBuilder()
+    builder = (
+        CACHED_BUILDER if use_cached_builder and CACHED_BUILDER else SlabBuilder(build_parameters=build_parameters)
+    )
     termination = termination or builder.get_terminations(configuration)[0]
     return builder.get_material(configuration, selector_parameters=SlabSelectorParameters(termination=termination))
 
