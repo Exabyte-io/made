@@ -19,6 +19,7 @@ class SlabSelectorParameters(BaseModel):
 
 
 class PymatgenSlabGeneratorParameters(BaseModel):
+    # Parameters described in https://github.com/materialsproject/pymatgen/blob/585bb673c4aa222669c4b0d72ffeec3dbf092630/pymatgen/core/surface.py#L1187
     min_vacuum_size: int = 1
     in_unit_planes: bool = True
     reorient_lattice: bool = True
