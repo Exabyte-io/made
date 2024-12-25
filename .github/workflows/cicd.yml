@@ -68,7 +68,6 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 14.x
           - 20.x
 
     steps:
@@ -87,7 +86,7 @@ jobs:
       - name: Run JS validate
         uses: ./actions/js/validate
         with:
-          node-version: '14.x'
+          node-version: '20.x'
           skip-eslint: 'true'
 
       - name: Run JS tests
@@ -117,7 +116,7 @@ jobs:
       - name: Publish JS release
         uses: ./actions/js/publish
         with:
-          node-version: 14.x
+          node-version: 20.x
           npm-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           verify-tests: 'false'
