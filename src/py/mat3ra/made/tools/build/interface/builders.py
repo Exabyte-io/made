@@ -170,8 +170,6 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
             substrate_miller=configuration.substrate_configuration.miller_indices,
             film_miller=configuration.film_configuration.miller_indices,
             zslgen=generator,
-            # We need to preserve symmetric slabs for different terminations at the surface
-            filter_out_sym_slabs=False,
         )
 
         generated_termination_pairs = [
