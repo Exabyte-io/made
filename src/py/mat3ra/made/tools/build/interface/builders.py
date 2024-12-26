@@ -62,8 +62,8 @@ class InterfaceBuilder(BaseBuilder):
 #                           Simple Interface Builder                                   #
 ########################################################################################
 class SimpleInterfaceBuilderParameters(InterfaceBuilderParameters):
-    scale_film: bool = True
-    slab_as_is: bool = False
+    scale_film: bool = True  # Whether to scale the film to match the substrate
+    slab_as_is: bool = False  # Whether to use the substrate as is as a slab instead of creating a slab
 
 
 class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilder):
