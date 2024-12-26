@@ -105,7 +105,9 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
 
     def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         film_slab_ase = self.__preprocess_slab_configuration(
-            configuration.film_configuration, configuration.film_termination
+            configuration.film_configuration,
+            configuration.film_termination,
+            create_slabs=self.build_parameters.create_slabs,
         )
         substrate_slab_ase = self.__preprocess_slab_configuration(
             configuration.substrate_configuration,
