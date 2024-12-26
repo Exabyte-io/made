@@ -63,7 +63,7 @@ class InterfaceBuilder(BaseBuilder):
 ########################################################################################
 class SimpleInterfaceBuilderParameters(InterfaceBuilderParameters):
     scale_film: bool = True  # Whether to scale the film to match the substrate
-    slab_as_is: bool = False  # Whether to use the substrate as is as a slab instead of creating a slab
+    create_slabs: bool = False  # Whether to use the substrate as is as a slab instead of creating a slab
 
 
 class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilder):
@@ -76,9 +76,9 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 
     def __preprocess_slab_configuration(
-        self, configuration: SlabConfiguration, termination: Termination, slab_as_is=False
+        self, configuration: SlabConfiguration, termination: Termination, create_slabs=False
     ) -> ASEAtoms:
-        slab = create_slab(configuration, termination) if not slab_as_is else configuration.bulk
+        slab = create_slab(configuration, termination) if create_slabs else configuration.bulk
         ase_slab = to_ase(slab)
 
         niggli_reduce(ase_slab)
@@ -86,9 +86,9 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
 
     @staticmethod
     def __combine_two_slabs_ase(substrate_slab_ase: ASEAtoms, film_slab_ase: ASEAtoms, distance_z: float) -> ASEAtoms:
-        total_c_length = substrate_slab_ase.cell[2][2] + film_slab_ase.cell[2][2] + distance_z
-        substrate_slab_ase.cell[2][2] = total_c_length
-        film_slab_ase.cell[2][2] = total_c_length
+        total_z_height = substrate_slab_ase.cell[2][2] + film_slab_ase.cell[2][2] + distance_z
+        substrate_slab_ase.cell[2][2] = total_z_height
+        film_slab_ase.cell[2][2] = total_z_height
         max_z_substrate = max(substrate_slab_ase.positions[:, 2])
         min_z_film = min(film_slab_ase.positions[:, 2])
         shift_z = max_z_substrate - min_z_film + distance_z
@@ -110,12 +110,12 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
         substrate_slab_ase = self.__preprocess_slab_configuration(
             configuration.substrate_configuration,
             configuration.substrate_termination,
-            slab_as_is=self.build_parameters.slab_as_is,
+            create_slabs=self.build_parameters.create_slabs,
         )
 
         if self.build_parameters.scale_film:
             temp_cell = [substrate_slab_ase.cell[0], substrate_slab_ase.cell[1], film_slab_ase.cell[2]]
-            # Add z of previous height
+            # We scale the film in XY direction only, and use two scaling steps and a temporary cell
             film_slab_ase.set_cell(temp_cell, scale_atoms=True)
             film_slab_ase.set_cell(substrate_slab_ase.cell, scale_atoms=False)
             film_slab_ase.wrap()
