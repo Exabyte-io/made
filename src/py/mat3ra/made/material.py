@@ -67,7 +67,9 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
 
     @property
     def basis(self) -> Basis:
-        return Basis.from_dict(**self.get_prop("basis"))
+        config = self.get_prop("basis")
+        config["cell"] = config.get("cell", self.lattice.vector_arrays)
+        return Basis.from_dict(**config)
 
     @basis.setter
     def basis(self, basis: Basis) -> None:
