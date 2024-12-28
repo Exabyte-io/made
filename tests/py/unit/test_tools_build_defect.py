@@ -114,9 +114,11 @@ def test_create_adatom_equidistant():
     defect = create_slab_defect(configuration=configuration, builder=EquidistantAdatomSlabDefectBuilder())
 
     assert defect.basis.elements.values[-1] == "Si"
-    # We expect adatom to shift from provided position
+    assert (len(configuration.crystal.basis.coordinates.values) + 1) == len(defect.basis.coordinates.values)
+    defect.to_cartesian()
+    # TODO: resolve the problem with the test in GH pipeline
     assertion_utils.assert_deep_almost_equal(
-        [0.383333334, 0.558333333, 0.872332562], defect.basis.coordinates.values[-1]
+        [6.477224996, 3.739627331, 14.234895469], defect.basis.coordinates.values[-1]
     )
 
 
