@@ -693,7 +693,8 @@ GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
         "build": {
             "configuration": {
                 "type": "PassivationConfiguration",
-                "slab": GRAPHENE_ZIGZAG_NANORIBBON,
+                 # TODO: `basis` retains "cell" leading to a mismatch in the test (as above)
+                "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], GRAPHENE_ZIGZAG_NANORIBBON).pop("cell", None),
                 "passivant": "H",
                 "bond_length": 1.48,
                 "surface": "both",

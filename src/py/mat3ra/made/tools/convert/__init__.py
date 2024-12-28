@@ -85,7 +85,8 @@ def from_pymatgen(structure: Union[PymatgenStructure, PymatgenInterface]) -> Dic
             {"id": i, "value": __round__(list(site.frac_coords))} for i, site in enumerate(structure.sites)
         ],
         "units": "crystal",
-        "cell": __round__(structure.lattice.matrix.tolist()),
+        # `cell` is assigned by the `lattice` object during Material initialization
+        # "cell": __round__(structure.lattice.matrix.tolist()),
         "constraints": [],
     }
 
