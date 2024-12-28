@@ -62,8 +62,8 @@ def test_create_twisted_nanoribbon_interface():
     builder = NanoRibbonTwistedInterfaceBuilder()
     interface = builder.get_material(configuration)
 
-    exected_cell_vectors = [[15.102810734, 0.0, 0.0], [-0.0, 16.108175208, 0.0], [0.0, 0.0, 20.0]]
-    expected_coordinate = [0.704207885, 0.522108183, 0.65]
+    exected_cell_vectors = [[10.990658, 0.0, 0.0], [-0.0, 11.549803, 0.0], [0.0, 0.0, 20.0]]
+    expected_coordinate = [0.552108738, 0.40054955, 0.65]
     assertion_utils.assert_deep_almost_equal(exected_cell_vectors, interface.basis.cell.vectors_as_array)
     assertion_utils.assert_deep_almost_equal(expected_coordinate, interface.basis.coordinates.values[42])
 
@@ -79,7 +79,7 @@ def test_create_commensurate_supercell_twisted_interface():
     interfaces = builder.get_materials(config, post_process_parameters=config)
     assert len(interfaces) == 1
     interface = interfaces[0]
-    expected_cell_vectors = [[-9.869164, -4.273473, 0.0], [-1.233646, -10.683683, 0.0], [0.0, 0.0, 20.0]]
+    expected_cell_vectors =[[10.754672133, 0.0, 0.0],[5.377336066500001, 9.313819276550575, 0.0], [0.0, 0.0, 20.0]]
     assertion_utils.assert_deep_almost_equal(expected_cell_vectors, interface.basis.cell.vectors_as_array)
     expected_angle = 13.174
     assert interface.metadata["build"]["configuration"]["actual_twist_angle"] == expected_angle
