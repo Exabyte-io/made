@@ -102,9 +102,10 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
         self, lattice_vector1: List[float], lattice_vector2: List[float], lattice_vector3: List[float]
     ) -> None:
         lattice = Lattice.from_vectors_array([lattice_vector1, lattice_vector2, lattice_vector3])
+        original_is_in_crystal = self.basis.is_in_crystal_units
         self.to_cartesian()
         self.lattice = lattice
-        if self.basis.is_in_crystal_units:
+        if original_is_in_crystal:
             self.to_crystal()
 
     def add_atom(self, element: str, coordinate: List[float], use_cartesian_coordinates=False) -> None:
