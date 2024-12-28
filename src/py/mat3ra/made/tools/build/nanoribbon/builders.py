@@ -7,7 +7,7 @@ from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell
 
-from ...modify import translate_to_center
+from ...modify import translate_to_center, rotate
 from .configuration import NanoribbonConfiguration
 from .enums import EdgeTypes
 
@@ -134,6 +134,8 @@ class NanoribbonBuilder(BaseBuilder):
 
     def _generate(self, configuration: NanoribbonConfiguration) -> List[_GeneratedItemType]:
         nanoribbon = self.create_nanoribbon(configuration)
+        if configuration.edge_type == EdgeTypes.armchair:
+            nanoribbon = rotate(nanoribbon, [0, 0, 1], 90)
         return [nanoribbon]
 
     def _post_process(
