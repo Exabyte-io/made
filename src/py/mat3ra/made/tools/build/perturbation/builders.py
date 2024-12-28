@@ -74,10 +74,4 @@ class CellMatchingDistancePreservingSlabPerturbationBuilder(DistancePreservingSl
         new_lattice = new_material.lattice.copy()
         new_lattice = new_lattice.from_vectors_array(new_lattice_vectors)
         new_material.lattice = new_lattice
-
-        new_basis = new_material.basis.copy()
-        new_basis.to_cartesian()
-        new_basis.cell = new_basis.cell.from_vectors_array(new_lattice_vectors)
-        new_basis.to_crystal()
-        new_material.basis = new_basis
         return new_material

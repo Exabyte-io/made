@@ -47,8 +47,8 @@ class Basis(RoundNumericValuesMixin, BaseModel):
 
     def clone(self):
         return Basis(
-            elements=self.toJSON()["elements"],
-            coordinates=self.toJSON()["coordinates"],
+            elements=self.elements,
+            coordinates=self.coordinates,
             units=self.units,
             cell=self.cell,
             isEmpty=False,
