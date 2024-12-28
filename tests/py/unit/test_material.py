@@ -21,7 +21,8 @@ def test_material_to_json():
 def test_basis_to_json():
     material = Material.create(Material.default_config)
     basis = material.basis
-    expected_basis_config = {**Material.default_config["basis"],  "labels": []}
+    expected_basis_config = {**Material.default_config["basis"], "labels": []}
     assertion_utils.assert_deep_almost_equal(expected_basis_config, basis.to_json())
+
 
 # TODO: Add test to check if basis.cell is changed when lattice of material is changed, and vice versa
