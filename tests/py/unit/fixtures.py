@@ -57,7 +57,6 @@ INTERFACE_PROPERTIES_JSON = {
     "mean_abs_strain": 0.00105,
 }
 
-
 # Add properties to interface structure
 INTERFACE_STRUCTURE.interface_properties = INTERFACE_PROPERTIES_MOCK
 INTERFACE_NAME = "Cu4(001)-Si8(001), Interface, Strain 0.062pct"
@@ -177,7 +176,6 @@ SI_SLAB_CONFIGURATION: Dict[str, Any] = {
     "make_primitive": True,
 }
 
-
 SI_SLAB_100: Dict[str, Any] = {
     "name": "Si8(001), termination Si_P4/mmm_1, Slab",
     "basis": {
@@ -294,7 +292,6 @@ SI_SLAB_100: Dict[str, Any] = {
     "isUpdated": True,
 }
 
-
 SI_SLAB: Dict[str, Any] = {
     "name": "Si8(001), termination Si_P4/mmm_1, Slab",
     "basis": {
@@ -333,7 +330,6 @@ SI_SLAB: Dict[str, Any] = {
     },
     "isUpdated": True,
 }
-
 
 SI_SLAB_PASSIVATED = {
     "name": "Si8(001), termination Si_P4/mmm_1, Slab H-passivated",
@@ -389,7 +385,6 @@ SI_SLAB_PASSIVATED = {
     "isUpdated": True,
 }
 
-
 SI_SLAB_VACUUM = copy.deepcopy(SI_SLAB)
 SI_SLAB_VACUUM["basis"]["coordinates"] = [
     {"id": 0, "value": [0.583333333, 0.833333333, 0.149981861]},
@@ -398,7 +393,6 @@ SI_SLAB_VACUUM["basis"]["coordinates"] = [
 # SI_SLAB_VACUUM["basis"]["cell"] = [[3.867, 0.0, 0.0], [1.9335, 3.348920236, 0.0], [0.0, 0.0, 13.157392279]]
 SI_SLAB_VACUUM["lattice"]["c"] = 13.157392279
 SI_SLAB_VACUUM["lattice"]["vectors"]["c"] = [0.0, 0.0, 13.157392279]
-
 
 clean_material = Material.create(Material.default_config)
 slab_111_config = SlabConfiguration(
@@ -452,7 +446,7 @@ GRAPHENE = {
     "isNonPeriodic": False,
 }
 
-GRAPHENE_ZIGZAG_NANORIBBON = {
+GRAPHENE_ZIGZAG_NANORIBBON: Dict[str, Any] = {
     "name": "Graphene (Zigzag nanoribbon)",
     "basis": {
         "elements": [
@@ -693,7 +687,7 @@ GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
         "build": {
             "configuration": {
                 "type": "PassivationConfiguration",
-                 # TODO: `basis` retains "cell" leading to a mismatch in the test (as above)
+                # TODO: `basis` retains "cell" leading to a mismatch in the test (as above)
                 "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], GRAPHENE_ZIGZAG_NANORIBBON).pop("cell", None),
                 "passivant": "H",
                 "bond_length": 1.48,
@@ -703,7 +697,6 @@ GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
     },
     "isUpdated": True,
 }
-
 
 GRAPHENE_NICKEL_INTERFACE = {
     "name": "C2(001)-Ni4(111), Interface, Strain 0.105pct",
