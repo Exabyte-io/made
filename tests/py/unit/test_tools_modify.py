@@ -22,7 +22,6 @@ from .fixtures import GRAPHENE_NICKEL_INTERFACE, SI_CONVENTIONAL_CELL, SI_SLAB, 
 
 COMMON_PART = {
     "units": "crystal",
-    # "cell": [[5.468763846, 0.0, 0.0], [-0.0, 5.468763846, 0.0], [0.0, 0.0, 5.468763846]],
     "labels": [],
 }
 
