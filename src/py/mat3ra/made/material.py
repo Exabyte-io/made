@@ -67,7 +67,9 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
 
     @property
     def basis(self) -> Basis:
-        return Basis.from_dict(**self.get_prop("basis"))
+        config = self.get_prop("basis")
+        config["cell"] = config.get("cell", self.lattice.vector_arrays)
+        return Basis.from_dict(**config)
 
     @basis.setter
     def basis(self, basis: Basis) -> None:
@@ -99,15 +101,12 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
     def set_new_lattice_vectors(
         self, lattice_vector1: List[float], lattice_vector2: List[float], lattice_vector3: List[float]
     ) -> None:
-        new_basis = self.basis.copy()
-        new_basis.to_cartesian()
-        new_basis.cell.vector1 = lattice_vector1
-        new_basis.cell.vector2 = lattice_vector2
-        new_basis.cell.vector3 = lattice_vector3
-        new_basis.to_crystal()
-        self.basis = new_basis
         lattice = Lattice.from_vectors_array([lattice_vector1, lattice_vector2, lattice_vector3])
+        original_is_in_crystal = self.basis.is_in_crystal_units
+        self.to_cartesian()
         self.lattice = lattice
+        if original_is_in_crystal:
+            self.to_crystal()
 
     def add_atom(self, element: str, coordinate: List[float], use_cartesian_coordinates=False) -> None:
         new_basis = self.basis.copy()

@@ -7,7 +7,7 @@ from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell
 
-from ...modify import translate_to_center
+from ...modify import translate_to_center, rotate
 from .configuration import NanoribbonConfiguration
 from .enums import EdgeTypes
 
@@ -73,11 +73,11 @@ class NanoribbonBuilder(BaseBuilder):
             nanoribbon_length, nanoribbon_width = nanoribbon_width, nanoribbon_length
             vacuum_width, vacuum_length = vacuum_length, vacuum_width
 
-        length_cartesian = nanoribbon_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
-        width_cartesian = nanoribbon_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
-        height_cartesian = np.dot(np.array(material.basis.cell.vector3), np.array([0, 0, 1]))
-        vacuum_length_cartesian = vacuum_length * np.dot(np.array(material.basis.cell.vector1), np.array([1, 0, 0]))
-        vacuum_width_cartesian = vacuum_width * np.dot(np.array(material.basis.cell.vector2), np.array([0, 1, 0]))
+        length_cartesian = nanoribbon_length * np.dot(np.array(material.lattice.vectors[0]), np.array([1, 0, 0]))
+        width_cartesian = nanoribbon_width * np.dot(np.array(material.lattice.vectors[1]), np.array([0, 1, 0]))
+        height_cartesian = np.dot(np.array(material.lattice.vectors[2]), np.array([0, 0, 1]))
+        vacuum_length_cartesian = vacuum_length * np.dot(np.array(material.lattice.vectors[0]), np.array([1, 0, 0]))
+        vacuum_width_cartesian = vacuum_width * np.dot(np.array(material.lattice.vectors[1]), np.array([0, 1, 0]))
 
         return length_cartesian, width_cartesian, height_cartesian, vacuum_length_cartesian, vacuum_width_cartesian
 
@@ -134,6 +134,8 @@ class NanoribbonBuilder(BaseBuilder):
 
     def _generate(self, configuration: NanoribbonConfiguration) -> List[_GeneratedItemType]:
         nanoribbon = self.create_nanoribbon(configuration)
+        if configuration.edge_type == EdgeTypes.armchair:
+            nanoribbon = rotate(nanoribbon, [0, 0, 1], 90)
         return [nanoribbon]
 
     def _post_process(
