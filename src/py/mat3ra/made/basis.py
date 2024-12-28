@@ -41,7 +41,6 @@ class Basis(RoundNumericValuesMixin, BaseModel):
             "elements": self.elements.to_json(),
             "coordinates": self.coordinates.to_json(skip_rounding=skip_rounding),
             "units": self.units,
-            "cell": self.cell.to_json(skip_rounding=skip_rounding) if self.cell else None,
             "labels": self.labels.to_json(),
         }
         return json.loads(json.dumps(json_value))
