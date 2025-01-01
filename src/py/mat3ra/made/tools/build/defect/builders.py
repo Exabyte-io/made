@@ -6,12 +6,14 @@ from mat3ra.made.material import Material
 
 
 from mat3ra.made.utils import get_center_of_coordinates
+
 from ...third_party import (
     PymatgenStructure,
     PymatgenPeriodicSite,
     PymatgenVacancy,
     PymatgenSubstitution,
     PymatgenInterstitial,
+    PymatgenVoronoiInterstitialGenerator,
 )
 
 from ...modify import (
@@ -31,7 +33,11 @@ from ...analyze.other import (
     get_local_extremum_atom_index,
 )
 from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
-from ...utils import transform_coordinate_to_supercell, coordinate as CoordinateCondition
+from ...utils import (
+    transform_coordinate_to_supercell,
+    coordinate as CoordinateCondition,
+    get_distance_between_coordinates,
+)
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
 from ..supercell import create_supercell
@@ -62,7 +68,7 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuil
 
     _BuildParametersType = PointDefectBuilderParameters
     _DefaultBuildParameters = PointDefectBuilderParameters()
-    _GeneratedItemType: PymatgenStructure = PymatgenStructure
+    _GeneratedItemType: type(PymatgenStructure) = PymatgenStructure  # type: ignore
     _ConfigurationType = PointDefectConfiguration
     _generator: Callable
 
@@ -104,6 +110,43 @@ class SubstitutionPointDefectBuilder(PointDefectBuilder):
 
 class InterstitialPointDefectBuilder(PointDefectBuilder):
     _generator: PymatgenInterstitial = PymatgenInterstitial
+
+
+class VoronoiInterstitialPointDefectBuilderParameters(BaseModel):
+    # According to pymatgen:
+    # https://github.com/materialsproject/pymatgen-analysis-defects/blob/e2cb285de8be07b38912ae1782285ef1f463a9a9/pymatgen/analysis/defects/generators.py#L343
+    clustering_tol: float = 0.5  # Clustering tolerance for merging interstitial sites
+    min_dist: float = 0.9  # Minimum distance between interstitial and nearest atom
+    ltol: float = 0.2  # Tolerance for lattice matching.
+    stol: float = 0.3  # Tolerance for structure matching.
+    angle_tol: float = 5  # Angle tolerance for structure matching.
+
+
+class VoronoiInterstitialPointDefectBuilder(PointDefectBuilder):
+    _BuildParametersType: type(  # type: ignore
+        VoronoiInterstitialPointDefectBuilderParameters
+    ) = VoronoiInterstitialPointDefectBuilderParameters  # type: ignore
+    _DefaultBuildParameters = VoronoiInterstitialPointDefectBuilderParameters()  # type: ignore
+
+    def _generate(
+        self, configuration: BaseBuilder._ConfigurationType
+    ) -> List[type(PointDefectBuilder._GeneratedItemType)]:  # type: ignore
+        pymatgen_structure = to_pymatgen(configuration.crystal)
+        voronoi_gen = PymatgenVoronoiInterstitialGenerator(
+            **self.build_parameters.dict(),
+        )
+        interstitials = list(
+            voronoi_gen.generate(structure=pymatgen_structure, insert_species=[configuration.chemical_element])
+        )
+        approximate_coordinate = configuration.coordinate
+        closest_interstitial = min(
+            interstitials,
+            key=lambda interstitial: get_distance_between_coordinates(
+                interstitial.site.frac_coords, approximate_coordinate
+            ),
+        )
+        pymatgen_structure.append(closest_interstitial.site.species, closest_interstitial.site.frac_coords)
+        return [pymatgen_structure]
 
 
 class SlabDefectBuilderParameters(BaseModel):

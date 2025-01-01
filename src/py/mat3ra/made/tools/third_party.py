@@ -17,6 +17,7 @@ from ase.constraints import FixedPlane as ASEFixedPlane
 from pymatgen.analysis.defects.core import Interstitial as PymatgenInterstitial
 from pymatgen.analysis.defects.core import Substitution as PymatgenSubstitution
 from pymatgen.analysis.defects.core import Vacancy as PymatgenVacancy
+from pymatgen.analysis.defects.generators import VoronoiInterstitialGenerator as PymatgenVoronoiInterstitialGenerator
 from pymatgen.analysis.local_env import VoronoiNN as PymatgenVoronoiNN
 from pymatgen.core import IStructure as PymatgenIStructure
 from pymatgen.core import PeriodicSite as PymatgenPeriodicSite
@@ -50,6 +51,7 @@ __all__ = [
     "PymatgenVacancy",
     "PymatgenSubstitution",
     "PymatgenInterstitial",
+    "PymatgenVoronoiInterstitialGenerator",
     "label_pymatgen_slab_termination",
     "ase_make_supercell",
     "ase_add_vacuum",
