@@ -146,6 +146,7 @@ class VoronoiInterstitialPointDefectBuilder(PointDefectBuilder):
             ),
         )
         pymatgen_structure.append(closest_interstitial.site.species, closest_interstitial.site.frac_coords)
+        pymatgen_structure.remove_oxidation_states()
         return [pymatgen_structure]
 
 
