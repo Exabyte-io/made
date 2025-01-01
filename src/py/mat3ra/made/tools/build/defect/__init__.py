@@ -32,7 +32,7 @@ def create_defect(
     """
     defect_builder_key = configuration.defect_type.lower()
     if configuration.placement_method is not None:
-        defect_builder_key = f"{configuration.defect_type.lower()}:{configuration.placement_method.lower()}"
+        defect_builder_key = f"{defect_builder_key}:{configuration.placement_method.lower()}"
     BuilderClass = DefectBuilderFactory.get_class_by_name(defect_builder_key)
     builder = BuilderClass(builder_parameters)
     return builder.get_material(configuration) if builder else configuration.crystal
