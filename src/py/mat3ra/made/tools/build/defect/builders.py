@@ -128,7 +128,9 @@ class VoronoiInterstitialPointDefectBuilder(PointDefectBuilder):
     ) = VoronoiInterstitialPointDefectBuilderParameters  # type: ignore
     _DefaultBuildParameters = VoronoiInterstitialPointDefectBuilderParameters()  # type: ignore
 
-    def _generate(self, configuration: BaseBuilder._ConfigurationType) -> List[PointDefectBuilder._GeneratedItemType]:
+    def _generate(
+        self, configuration: BaseBuilder._ConfigurationType
+    ) -> List[PointDefectBuilder._GeneratedItemType]:  # type: ignore
         pymatgen_structure = to_pymatgen(configuration.crystal)
         voronoi_gen = PymatgenVoronoiInterstitialGenerator(
             **self.build_parameters.dict(),
