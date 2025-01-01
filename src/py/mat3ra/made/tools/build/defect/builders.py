@@ -113,6 +113,8 @@ class InterstitialPointDefectBuilder(PointDefectBuilder):
 
 
 class VoronoiInterstitialPointDefectBuilderParameters(BaseModel):
+    # According to pymatgen:
+    # https://github.com/materialsproject/pymatgen-analysis-defects/blob/e2cb285de8be07b38912ae1782285ef1f463a9a9/pymatgen/analysis/defects/generators.py#L343
     clustering_tol: float = 0.5  # Clustering tolerance for merging interstitial sites
     min_dist: float = 0.9  # Minimum distance between interstitial and nearest atom
     ltol: float = 0.2  # Tolerance for lattice matching.
