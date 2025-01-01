@@ -26,6 +26,8 @@ class AtomPlacementMethodEnum(str, Enum):
     EQUIDISTANT = "equidistant"
     # Places the atom at the existing or extrapolated crystal site closest to the given coordinate.
     CRYSTAL_SITE = "crystal_site"
+    # Places the atom at Voronoi site closest to the given coordinate.
+    VORONOI_SITE = "voronoi_site"
 
 
 class CoordinatesShapeEnum(str, Enum):
