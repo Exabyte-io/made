@@ -60,6 +60,21 @@ def test_create_interstitial():
     ]
 
 
+def test_create_interstitial_voronoi():
+    configuration = PointDefectConfiguration(
+        crystal=clean_material,
+        defect_type="interstitial",
+        chemical_element="Ge",
+        # Voronoi must resolve to [0.5, 0.5, 0.5] for Si structure
+        coordinate=[0.25, 0.25, 0.5],
+        placement_method="voronoi_site",
+    )
+    defect = create_defect(configuration)
+
+    assert defect.basis.elements.values[-1] == "Ge"
+    assertion_utils.assert_deep_almost_equal([0.5, 0.5, 0.5], defect.basis.coordinates.values[-1])
+
+
 def test_create_defect_from_site_id():
     # Substitution of Ge in place of Si at site_id=1
     defect_configuration = PointDefectConfiguration.from_site_id(
