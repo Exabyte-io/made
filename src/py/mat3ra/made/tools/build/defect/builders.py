@@ -68,7 +68,7 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuil
 
     _BuildParametersType = PointDefectBuilderParameters
     _DefaultBuildParameters = PointDefectBuilderParameters()
-    _GeneratedItemType: PymatgenStructure = PymatgenStructure
+    _GeneratedItemType: type(PymatgenStructure) = PymatgenStructure  # type: ignore
     _ConfigurationType = PointDefectConfiguration
     _generator: Callable
 
