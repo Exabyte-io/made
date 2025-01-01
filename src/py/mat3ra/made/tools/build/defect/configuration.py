@@ -58,6 +58,7 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     coordinate: List[float] = [0, 0, 0]
     chemical_element: Optional[str] = None
     use_cartesian_coordinates: bool = False
+    placement_method: Optional[AtomPlacementMethodEnum] = None
 
     @classmethod
     def from_site_id(
@@ -107,6 +108,8 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
             "defect_type": self.defect_type.name,
             "coordinate": self.coordinate,
             "chemical_element": self.chemical_element,
+            "use_cartesian_coordinates": self.use_cartesian_coordinates,
+            "placement_method": self.placement_method.name if self.placement_method else None,
         }
 
 
