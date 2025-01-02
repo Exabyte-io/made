@@ -16,10 +16,7 @@ from .enums import PointDefectTypeEnum
 from .factories import DefectBuilderFactory
 
 
-def create_defect(
-    configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
-    builder_parameters: Union[PointDefectBuilderParameters, SlabDefectBuilderParameters, None] = None,
-) -> Material:
+def get_material_with_defect(configuration, builder_parameters):
     """
     Return a material with a selected defect added.
 
@@ -36,6 +33,23 @@ def create_defect(
     BuilderClass = DefectBuilderFactory.get_class_by_name(defect_builder_key)
     builder = BuilderClass(builder_parameters)
     return builder.get_material(configuration) if builder else configuration.crystal
+
+
+def create_defect(
+    configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
+    builder_parameters: Union[PointDefectBuilderParameters, SlabDefectBuilderParameters, None] = None,
+) -> Material:
+    """
+    Return a material with a selected defect added.
+
+    Args:
+        configuration: The configuration of the defect to be added.
+        builder_parameters: The parameters to be used by the defect builder.
+
+    Returns:
+        The material with the defect added.
+    """
+    return get_material_with_defect(configuration, builder_parameters)
 
 
 def create_defects(
@@ -57,10 +71,7 @@ def create_defects(
     for configuration in configurations:
         if material_with_defect:
             configuration.crystal = material_with_defect
-
-        BuilderClass = DefectBuilderFactory.get_class_by_name(configuration.defect_type)
-        builder = BuilderClass(builder_parameters)
-        material_with_defect = builder.get_material(configuration) if builder else configuration.crystal
+        material_with_defect = get_material_with_defect(configuration, builder_parameters)
 
     return material_with_defect
 
