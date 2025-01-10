@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntity
@@ -112,3 +112,63 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
         new_basis = self.basis.copy()
         new_basis.add_atom(element, coordinate, use_cartesian_coordinates)
         self.basis = new_basis
+
+
+    @classmethod
+    def create_empty(
+        cls,
+        a: float = 1.0,
+        b: Optional[float] = None,
+        c: Optional[float] = None,
+        alpha: float = 90.0,
+        beta: float = 90.0,
+        gamma: float = 90.0,
+        lattice_type: str = "CUB",
+        name: str = "New Material"
+    ) -> "Material":
+        """
+        Create an empty material with specified lattice parameters.
+
+        Args:
+            a (float): First lattice constant. Defaults to 1.0.
+            b (float, optional): Second lattice constant. Defaults to value of 'a'.
+            c (float, optional): Third lattice constant. Defaults to value of 'a'.
+            alpha (float): First lattice angle in degrees. Defaults to 90.0.
+            beta (float): Second lattice angle in degrees. Defaults to 90.0.
+            gamma (float): Third lattice angle in degrees. Defaults to 90.0.
+            lattice_type (str): Type of lattice. Defaults to "CUB".
+            name (str): Name of the material. Defaults to "New Material".
+
+        Returns:
+            Material: A new empty Material instance with specified lattice
+        """
+        b = b if b is not None else a
+        c = c if c is not None else a
+
+        basis_config = {
+            "elements": [],
+            "coordinates": [],
+            "units": AtomicCoordinateUnits.cartesian,
+        }
+
+        lattice_config = {
+            "type": lattice_type,
+            "a": a,
+            "b": b,
+            "c": c,
+            "alpha": alpha,
+            "beta": beta,
+            "gamma": gamma,
+            "units": {
+                "length": Units.angstrom,
+                "angle": Units.degree,
+            }
+        }
+
+        config = {
+            "name": name,
+            "basis": basis_config,
+            "lattice": lattice_config
+        }
+
+        return cls(config)
