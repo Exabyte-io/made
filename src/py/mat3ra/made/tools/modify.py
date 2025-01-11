@@ -201,7 +201,7 @@ def filter_by_layers(
     if central_atom_id is not None:
         center_coordinate = material.basis.coordinates.get_element_value_by_index(central_atom_id)
     vectors = material.lattice.vectors
-    direction_vector = vectors[2]
+    direction_vector = vectors.c
 
     def condition(coordinate):
         return is_coordinate_within_layer(coordinate, center_coordinate, direction_vector, layer_thickness)
@@ -535,7 +535,7 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
     new_basis.to_cartesian()
     new_lattice = translated_material.lattice
     new_lattice.c = get_atomic_coordinates_extremum(translated_material, use_cartesian_coordinates=True) + fixed_padding
-    new_basis.cell.vector3 = new_lattice.vectors[2]
+    new_basis.cell.vector3 = new_lattice.vectors.c
     new_basis.to_crystal()
     new_material = material.clone()
 
