@@ -9,6 +9,7 @@ from ..third_party import PymatgenStructure
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
 
+
 def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
     """
     Decorator to convert a 2x2 matrix to a 3x3 matrix.

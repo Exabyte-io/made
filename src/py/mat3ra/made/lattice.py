@@ -11,13 +11,15 @@ HASH_TOLERANCE = 3
 DEFAULT_UNITS = {"length": "angstrom", "angle": "degree"}
 DEFAULT_TYPE = "TRI"
 
+
 class LatticeVectors(BaseModel):
     """
     A class to represent the lattice vectors.
     """
-    a: List[float] = [[1.0, 0.0, 0.0]]
-    b: List[float] = [[0.0, 1.0, 0.0]]
-    c: List[float] = [[0.0, 0.0, 1.0]]
+
+    a: List[float] = [1.0, 0.0, 0.0]
+    b: List[float] = [0.0, 1.0, 0.0]
+    c: List[float] = [0.0, 0.0, 1.0]
 
 
 class Lattice(RoundNumericValuesMixin, BaseModel):

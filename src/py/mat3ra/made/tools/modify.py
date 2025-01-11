@@ -1,7 +1,6 @@
 from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
-from fontTools.misc.bezierTools import epsilon
 from mat3ra.made.material import Material
 
 from .analyze.other import (
@@ -58,7 +57,7 @@ def translate_to_z_level(
     if z_level == "top":
         material = translate_by_vector(material, vector=[0, 0, 1 - max_z - tolerance])
     elif z_level == "bottom":
-        material = translate_by_vector(material, vector=[0, 0, - min_z + tolerance])
+        material = translate_by_vector(material, vector=[0, 0, -min_z + tolerance])
     elif z_level == "center":
         material = translate_by_vector(material, vector=[0, 0, (1 - min_z - max_z) / 2])
     return material

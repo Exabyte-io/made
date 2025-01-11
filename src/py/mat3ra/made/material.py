@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntity
@@ -113,7 +113,6 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
         new_basis.add_atom(element, coordinate, use_cartesian_coordinates)
         self.basis = new_basis
 
-
     @classmethod
     def create_empty(
         cls,
@@ -124,7 +123,7 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
         beta: float = 90.0,
         gamma: float = 90.0,
         lattice_type: str = "CUB",
-        name: str = "New Material"
+        name: str = "New Material",
     ) -> "Material":
         """
         Create an empty material with specified lattice parameters.
@@ -162,13 +161,9 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
             "units": {
                 "length": Units.angstrom,
                 "angle": Units.degree,
-            }
+            },
         }
 
-        config = {
-            "name": name,
-            "basis": basis_config,
-            "lattice": lattice_config
-        }
+        config = {"name": name, "basis": basis_config, "lattice": lattice_config}
 
         return cls(config)
