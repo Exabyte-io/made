@@ -27,6 +27,30 @@ def test_basis_to_json():
 
 # TODO: Add test to check if basis.cell is changed when lattice of material is changed, and vice versa
 
+def test_basis_cell_lattice_sync():
+    """Test synchronization between basis.cell and material.lattice"""
+    material = Material.create(Material.default_config)
+
+    # Change lattice vectors
+    new_vectors = [
+        [1.0, 0.0, 0.0],
+        [0.0, 2.0, 0.0],
+        [0.0, 0.0, 3.0]
+    ]
+    material.set_new_lattice_vectors(*new_vectors)
+
+    # Verify basis.cell matches new lattice vectors
+    assertion_utils.assert_deep_almost_equal(
+        new_vectors,
+        material.basis.cell.vectors_as_array
+    )
+
+    assertion_utils.assert_deep_almost_equal(
+        new_vectors,
+        material.lattice.vectors
+    )
+
+
 
 def test_create_empty():
     """Test creating empty materials with different lattice parameters"""
@@ -70,4 +94,5 @@ def test_create_empty():
     assert material.lattice.a == 2.5
     assert material.lattice.b == 2.5
     assert material.lattice.c == 2.5
+
 
