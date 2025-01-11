@@ -158,7 +158,7 @@ def test_remove_vacuum():
     # to compare correctly, we need to translate the expected material to the bottom
     # as it down when setting vacuum to 0
     material = Material(SI_SLAB)
-    material_down = translate_to_z_level(material, z_level="bottom")
+    material_down = translate_to_z_level(material, z_level="bottom", tolerance=0)
 
     assertion_utils.assert_deep_almost_equal(material_down.to_json(), material_with_set_vacuum.to_json())
 
