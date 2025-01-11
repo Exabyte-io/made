@@ -65,7 +65,7 @@ class DistancePreservingSlabPerturbationBuilder(SlabPerturbationBuilder):
 
 class CellMatchingDistancePreservingSlabPerturbationBuilder(DistancePreservingSlabPerturbationBuilder):
     def _transform_lattice_vectors(self, configuration: PerturbationConfiguration) -> List[List[float]]:
-        cell_vectors = configuration.material.lattice.vectors
+        cell_vectors = configuration.material.lattice.vector_arrays
         return [configuration.perturbation_function_holder.transform_coordinates(coord) for coord in cell_vectors]
 
     def create_perturbed_slab(self, configuration: PerturbationConfiguration) -> Material:
