@@ -64,7 +64,7 @@ def test_create_twisted_nanoribbon_interface():
 
     expected_cell_vectors = [[15.102811, 0.0, 0.0], [0.0, 16.108175208, 0.0], [0.0, 0.0, 20.0]]
     expected_coordinate = [0.704207885, 0.522108183, 0.65]
-    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, interface.lattice.vectors)
+    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, interface.lattice.vector_arrays)
     assertion_utils.assert_deep_almost_equal(expected_coordinate, interface.basis.coordinates.values[42])
 
 

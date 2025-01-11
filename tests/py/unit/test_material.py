@@ -45,7 +45,7 @@ def test_basis_cell_lattice_sync():
 
     assertion_utils.assert_deep_almost_equal(
         new_vectors,
-        material.lattice.vectors
+        material.lattice.vector_arrays
     )
 
 
@@ -116,5 +116,21 @@ def test_create_empty():
     assert material.lattice.a == 2.5
     assert material.lattice.b == 2.5
     assert material.lattice.c == 2.5
+
+
+def test_lattice_vectors_access():
+    lattice = Lattice(a=2.0, b=3.0, c=4.0)
+    
+    # Test individual vector access
+    assert isinstance(lattice.vectors.a, list)
+    assert isinstance(lattice.vectors.b, list)
+    assert isinstance(lattice.vectors.c, list)
+    
+    # Test vector arrays access
+    arrays = lattice.vector_arrays
+    assert len(arrays) == 3
+    assert arrays[0] == lattice.vectors.a
+    assert arrays[1] == lattice.vectors.b
+    assert arrays[2] == lattice.vectors.c
 
 
