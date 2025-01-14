@@ -40,7 +40,7 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
 
 
 def translate_to_z_level(
-    material: Material, z_level: Optional[Literal["top", "bottom", "center"]] = "bottom", tolerance: float = 1e-6
+        material: Material, z_level: Optional[Literal["top", "bottom", "center"]] = "bottom", tolerance: float = 1e-6
 ) -> Material:
     """
     Translate atoms to the specified z-level.
@@ -64,9 +64,9 @@ def translate_to_z_level(
 
 
 def translate_by_vector(
-    material: Material,
-    vector: Optional[List[float]] = None,
-    use_cartesian_coordinates: bool = False,
+        material: Material,
+        vector: Optional[List[float]] = None,
+        use_cartesian_coordinates: bool = False,
 ) -> Material:
     """
     Translate atoms by a vector.
@@ -151,10 +151,10 @@ def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> M
 
 
 def filter_by_condition_on_coordinates(
-    material: Material,
-    condition: Callable[[List[float]], bool],
-    use_cartesian_coordinates: bool = False,
-    invert_selection: bool = False,
+        material: Material,
+        condition: Callable[[List[float]], bool],
+        use_cartesian_coordinates: bool = False,
+        invert_selection: bool = False,
 ) -> Material:
     """
     Filter atoms based on a condition on their coordinates.
@@ -180,11 +180,11 @@ def filter_by_condition_on_coordinates(
 
 
 def filter_by_layers(
-    material: Material,
-    center_coordinate: List[float] = [0, 0, 0],
-    central_atom_id: Optional[int] = None,
-    layer_thickness: float = 1.0,
-    invert_selection: bool = False,
+        material: Material,
+        center_coordinate: List[float] = [0, 0, 0],
+        central_atom_id: Optional[int] = None,
+        layer_thickness: float = 1.0,
+        invert_selection: bool = False,
 ) -> Material:
     """
     Filter out atoms within a specified layer thickness of a central atom along c-vector direction.
@@ -237,12 +237,12 @@ def get_default_min_max(material: Material, use_cartesian_coordinates: bool) -> 
 
 
 def filter_by_sphere(
-    material: Material,
-    center_coordinate: List[float] = [0, 0, 0],
-    central_atom_id: Optional[int] = None,
-    radius: float = 1,
-    tolerance: float = 0.0,
-    invert: bool = False,
+        material: Material,
+        center_coordinate: List[float] = [0, 0, 0],
+        central_atom_id: Optional[int] = None,
+        radius: float = 1,
+        tolerance: float = 0.0,
+        invert: bool = False,
 ) -> Material:
     """
     Filter out atoms within a specified radius of a central atom considering periodic boundary conditions.
@@ -267,13 +267,13 @@ def filter_by_sphere(
 
 
 def filter_by_circle_projection(
-    material: Material,
-    x: float = 0.5,
-    y: float = 0.5,
-    r: float = 0.25,
-    tolerance: float = 0.0,
-    use_cartesian_coordinates: bool = False,
-    invert_selection: bool = False,
+        material: Material,
+        x: float = 0.5,
+        y: float = 0.5,
+        r: float = 0.25,
+        tolerance: float = 0.0,
+        use_cartesian_coordinates: bool = False,
+        invert_selection: bool = False,
 ) -> Material:
     """
     Get material with atoms that are within or outside an XY circle projection.
@@ -300,14 +300,14 @@ def filter_by_circle_projection(
 
 
 def filter_by_cylinder(
-    material: Material,
-    center_position: Optional[List[float]] = None,
-    min_z: Optional[float] = None,
-    max_z: Optional[float] = None,
-    radius: float = 0.25,
-    tolerance: float = 0.0,
-    use_cartesian_coordinates: bool = False,
-    invert_selection: bool = False,
+        material: Material,
+        center_position: Optional[List[float]] = None,
+        min_z: Optional[float] = None,
+        max_z: Optional[float] = None,
+        radius: float = 0.25,
+        tolerance: float = 0.0,
+        use_cartesian_coordinates: bool = False,
+        invert_selection: bool = False,
 ) -> Material:
     """
     Get material with atoms that are within or outside a cylinder.
@@ -337,7 +337,8 @@ def filter_by_cylinder(
         )
 
     def condition(coordinate):
-        return is_coordinate_in_cylinder(coordinate, center_position, radius + tolerance, min_z - tolerance, max_z + tolerance)
+        return is_coordinate_in_cylinder(coordinate, center_position, radius + tolerance, min_z - tolerance,
+                                         max_z + tolerance)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
@@ -345,12 +346,12 @@ def filter_by_cylinder(
 
 
 def filter_by_rectangle_projection(
-    material: Material,
-    min_coordinate: List[float] = [0, 0],
-    max_coordinate: List[float] = [1, 1],
-    tolerance: float = 0.0,
-    use_cartesian_coordinates: bool = False,
-    invert_selection: bool = False,
+        material: Material,
+        min_coordinate: List[float] = [0, 0],
+        max_coordinate: List[float] = [1, 1],
+        tolerance: float = 0.0,
+        use_cartesian_coordinates: bool = False,
+        invert_selection: bool = False,
 ) -> Material:
     """
     Get material with atoms that are within or outside an XY rectangle projection.
@@ -380,12 +381,12 @@ def filter_by_rectangle_projection(
 
 
 def filter_by_box(
-    material: Material,
-    min_coordinate: Optional[List[float]] = None,
-    max_coordinate: Optional[List[float]] = None,
-    tolerance: float = 0.0,
-    use_cartesian_coordinates: bool = False,
-    invert_selection: bool = False,
+        material: Material,
+        min_coordinate: Optional[List[float]] = None,
+        max_coordinate: Optional[List[float]] = None,
+        tolerance: float = 0.0,
+        use_cartesian_coordinates: bool = False,
+        invert_selection: bool = False,
 ) -> Material:
     """
     Get material with atoms that are within or outside an XYZ box.
@@ -418,15 +419,15 @@ def filter_by_box(
 
 
 def filter_by_triangle_projection(
-    material: Material,
-    coordinate_1: Optional[List[float]] = None,
-    coordinate_2: Optional[List[float]] = None,
-    coordinate_3: Optional[List[float]] = None,
-    min_z: Optional[float] = None,
-    max_z: Optional[float] = None,
-    tolerance: float = 0.0,
-    use_cartesian_coordinates: bool = False,
-    invert_selection: bool = False,
+        material: Material,
+        coordinate_1: Optional[List[float]] = None,
+        coordinate_2: Optional[List[float]] = None,
+        coordinate_3: Optional[List[float]] = None,
+        min_z: Optional[float] = None,
+        max_z: Optional[float] = None,
+        tolerance: float = 0.0,
+        use_cartesian_coordinates: bool = False,
+        invert_selection: bool = False,
 ) -> Material:
     """
     Get material with atoms that are within or outside a triangular prism.
@@ -451,18 +452,27 @@ def filter_by_triangle_projection(
         coordinate_2 = coordinate_2 if coordinate_2 is not None else [default_min[0], default_max[1]]
         coordinate_3 = coordinate_3 if coordinate_3 is not None else [default_max[0], default_min[1]]
 
-    if min_z is not None:
+    if min_z is None:
+        min_z = get_atomic_coordinates_extremum(
+            material, "min", "z", use_cartesian_coordinates=use_cartesian_coordinates
+        )
+    else:
         min_z -= tolerance
-    if max_z is not None:
+
+    if max_z is None:
+        max_z = get_atomic_coordinates_extremum(
+            material, "max", "z", use_cartesian_coordinates=use_cartesian_coordinates
+        )
+    else:
         max_z += tolerance
 
     def condition(coordinate):
         return is_coordinate_in_triangular_prism(
-            coordinate, 
-            coordinate_1, 
-            coordinate_2, 
-            coordinate_3, 
-            min_z, 
+            coordinate,
+            coordinate_1,
+            coordinate_2,
+            coordinate_3,
+            min_z,
             max_z,
         )
 
@@ -593,10 +603,10 @@ def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True,
 
 
 def interface_displace_part(
-    interface: Material,
-    displacement: List[float],
-    label: InterfacePartsEnum = InterfacePartsEnum.FILM,
-    use_cartesian_coordinates=True,
+        interface: Material,
+        displacement: List[float],
+        label: InterfacePartsEnum = InterfacePartsEnum.FILM,
+        use_cartesian_coordinates=True,
 ) -> Material:
     """
     Displace atoms in an interface along a certain direction.
@@ -629,8 +639,8 @@ def interface_displace_part(
 
 
 def interface_get_part(
-    interface: Material,
-    part: InterfacePartsEnum = InterfacePartsEnum.FILM,
+        interface: Material,
+        part: InterfacePartsEnum = InterfacePartsEnum.FILM,
 ) -> Material:
     if interface.metadata["build"]["configuration"]["type"] != "InterfaceConfiguration":
         raise ValueError("The material is not an interface.")
