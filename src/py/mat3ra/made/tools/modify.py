@@ -241,6 +241,7 @@ def filter_by_sphere(
     center_coordinate: List[float] = [0, 0, 0],
     central_atom_id: Optional[int] = None,
     radius: float = 1,
+    tolerance: float = 0.0,
     invert: bool = False,
 ) -> Material:
     """
@@ -250,6 +251,7 @@ def filter_by_sphere(
         material (Material): The material object to filter.
         central_atom_id (int): Index of the central atom.
         radius (float): Radius of the sphere in angstroms.
+        tolerance (float): The tolerance value to include atoms on the edge of the sphere.
         invert (bool): Whether to invert the selection.
 
     Returns:
@@ -259,7 +261,7 @@ def filter_by_sphere(
         material=material,
         atom_index=central_atom_id,
         coordinate=center_coordinate,
-        radius=radius,
+        radius=radius + tolerance,
     )
     return filter_by_ids(material, ids, invert=invert)
 
@@ -269,6 +271,7 @@ def filter_by_circle_projection(
     x: float = 0.5,
     y: float = 0.5,
     r: float = 0.25,
+    tolerance: float = 0.0,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
@@ -280,6 +283,7 @@ def filter_by_circle_projection(
         x (float): The x-coordinate of the circle center.
         y (float): The y-coordinate of the circle center.
         r (float): The radius of the circle.
+        tolerance (float): The tolerance value to include atoms on the edge of the circle.
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates
         invert_selection (bool): Whether to invert the selection.
 
@@ -288,7 +292,7 @@ def filter_by_circle_projection(
     """
 
     def condition(coordinate):
-        return is_coordinate_in_cylinder(coordinate, [x, y, 0], r, min_z=0, max_z=1)
+        return is_coordinate_in_cylinder(coordinate, [x, y, 0], r + tolerance, min_z=0, max_z=1)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
@@ -301,6 +305,7 @@ def filter_by_cylinder(
     min_z: Optional[float] = None,
     max_z: Optional[float] = None,
     radius: float = 0.25,
+    tolerance: float = 0.0,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
@@ -332,7 +337,7 @@ def filter_by_cylinder(
         )
 
     def condition(coordinate):
-        return is_coordinate_in_cylinder(coordinate, center_position, radius, min_z, max_z)
+        return is_coordinate_in_cylinder(coordinate, center_position, radius + tolerance, min_z - tolerance, max_z + tolerance)
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
@@ -343,6 +348,7 @@ def filter_by_rectangle_projection(
     material: Material,
     min_coordinate: List[float] = [0, 0],
     max_coordinate: List[float] = [1, 1],
+    tolerance: float = 0.0,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
@@ -353,6 +359,7 @@ def filter_by_rectangle_projection(
         material (Material): The material object to filter.
         min_coordinate (List[float]): The minimum coordinate of the rectangle.
         max_coordinate (List[float]): The maximum coordinate of the rectangle.
+        tolerance (float): The tolerance value to include atoms on the edges of the rectangle.
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates
         invert_selection (bool): Whether to invert the selection.
 
@@ -361,8 +368,8 @@ def filter_by_rectangle_projection(
     """
     min_z = get_atomic_coordinates_extremum(material, "min", "z", use_cartesian_coordinates=use_cartesian_coordinates)
     max_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=use_cartesian_coordinates)
-    min_coordinate = min_coordinate[:2] + [min_z]
-    max_coordinate = max_coordinate[:2] + [max_z]
+    min_coordinate = [c - tolerance for c in min_coordinate[:2]] + [min_z]
+    max_coordinate = [c + tolerance for c in max_coordinate[:2]] + [max_z]
 
     def condition(coordinate):
         return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
@@ -376,6 +383,7 @@ def filter_by_box(
     material: Material,
     min_coordinate: Optional[List[float]] = None,
     max_coordinate: Optional[List[float]] = None,
+    tolerance: float = 0.0,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
@@ -386,6 +394,7 @@ def filter_by_box(
         material (Material): The material to filter.
         min_coordinate (List[float], optional): The minimum coordinate of the box. Defaults to material's min.
         max_coordinate (List[float], optional): The maximum coordinate of the box. Defaults to material's max.
+        tolerance (float): The tolerance value to include atoms on the edges of the box.
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
         invert_selection (bool): Whether to invert the selection.
 
@@ -396,6 +405,9 @@ def filter_by_box(
         default_min, default_max = get_default_min_max(material, use_cartesian_coordinates)
         min_coordinate = min_coordinate if min_coordinate is not None else default_min
         max_coordinate = max_coordinate if max_coordinate is not None else default_max
+
+    min_coordinate = [c - tolerance for c in min_coordinate]
+    max_coordinate = [c + tolerance for c in max_coordinate]
 
     def condition(coordinate):
         return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
@@ -412,6 +424,7 @@ def filter_by_triangle_projection(
     coordinate_3: Optional[List[float]] = None,
     min_z: Optional[float] = None,
     max_z: Optional[float] = None,
+    tolerance: float = 0.0,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
 ) -> Material:
@@ -425,6 +438,7 @@ def filter_by_triangle_projection(
         coordinate_3 (List[float], optional): Third vertex of the triangle. Defaults to material's corner.
         min_z (float, optional): Lower z-limit. Defaults to material's min z.
         max_z (float, optional): Upper z-limit. Defaults to material's max z.
+        tolerance (float): The tolerance value to include atoms on the top and bottom faces of the prism.
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates.
         invert_selection (bool): Whether to invert the selection.
 
@@ -437,17 +451,20 @@ def filter_by_triangle_projection(
         coordinate_2 = coordinate_2 if coordinate_2 is not None else [default_min[0], default_max[1]]
         coordinate_3 = coordinate_3 if coordinate_3 is not None else [default_max[0], default_min[1]]
 
-    if min_z is None:
-        min_z = get_atomic_coordinates_extremum(
-            material, "min", "z", use_cartesian_coordinates=use_cartesian_coordinates
-        )
-    if max_z is None:
-        max_z = get_atomic_coordinates_extremum(
-            material, "max", "z", use_cartesian_coordinates=use_cartesian_coordinates
-        )
+    if min_z is not None:
+        min_z -= tolerance
+    if max_z is not None:
+        max_z += tolerance
 
     def condition(coordinate):
-        return is_coordinate_in_triangular_prism(coordinate, coordinate_1, coordinate_2, coordinate_3, min_z, max_z)
+        return is_coordinate_in_triangular_prism(
+            coordinate, 
+            coordinate_1, 
+            coordinate_2, 
+            coordinate_3, 
+            min_z, 
+            max_z,
+        )
 
     return filter_by_condition_on_coordinates(
         material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
