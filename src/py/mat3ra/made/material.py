@@ -141,29 +141,23 @@ class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
         Returns:
             Material: A new empty Material instance with specified lattice
         """
-        b = b if b is not None else a
-        c = c if c is not None else a
-
-        basis_config = {
-            "elements": [],
-            "coordinates": [],
-            "units": AtomicCoordinateUnits.cartesian,
-        }
-
-        lattice_config = {
-            "type": lattice_type,
-            "a": a,
-            "b": b,
-            "c": c,
-            "alpha": alpha,
-            "beta": beta,
-            "gamma": gamma,
-            "units": {
-                "length": Units.angstrom,
-                "angle": Units.degree,
+        empty_config = {
+            **cls.default_config,
+            "name": name,
+            "basis": {
+                "elements": [],
+                "coordinates": [],
+                "units": AtomicCoordinateUnits.cartesian,
+            },
+            "lattice": {
+                "type": lattice_type,
+                "a": a,
+                "b": b if b is not None else a,
+                "c": c if c is not None else a,
+                "alpha": alpha,
+                "beta": beta,
+                "gamma": gamma,
+                "units": cls.default_config["lattice"]["units"],
             },
         }
-
-        config = {"name": name, "basis": basis_config, "lattice": lattice_config}
-
-        return cls(config)
+        return cls.create(empty_config)
