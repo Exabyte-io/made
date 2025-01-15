@@ -38,6 +38,7 @@ def get_unique_coordination_numbers(
     material_with_crystal_sites.analyze()
     return material_with_crystal_sites.get_unique_coordination_numbers(cutoff=cutoff)
 
+
 def get_coordination_numbers_distribution(
     configuration: PassivationConfiguration,
     cutoff: float = 3.0,
