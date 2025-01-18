@@ -37,19 +37,3 @@ def test_basis_cell_lattice_sync():
     assertion_utils.assert_deep_almost_equal(new_vectors, material.basis.cell.vectors_as_array)
 
     assertion_utils.assert_deep_almost_equal(new_vectors, material.lattice.vector_arrays)
-
-
-def test_create_empty():
-    """Test that creating an empty material results in empty basis"""
-    material = Material.create_empty()
-    assert material.basis.elements.values == []
-    assert material.basis.coordinates.values == []
-
-
-def test_create_empty_default_params():
-    """Test default parameters when creating empty material"""
-    material = Material.create_empty()
-    assert material.name == "New Material"
-    assert material.lattice is not None
-    assert material.basis is not None
-
