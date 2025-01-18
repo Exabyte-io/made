@@ -46,4 +46,4 @@ def test_distance_preserved_sine_perturbation():
         [-12.043583, 21.367367, 0.0],
         [0.0, 0.0, 20.0],
     ]
-    assertion_utils.assert_deep_almost_equal(expected_cell, perturbed_slab.lattice.vectors)
+    assertion_utils.assert_deep_almost_equal(expected_cell, perturbed_slab.lattice.vector_arrays)

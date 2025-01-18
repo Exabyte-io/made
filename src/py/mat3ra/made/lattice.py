@@ -12,6 +12,16 @@ DEFAULT_UNITS = {"length": "angstrom", "angle": "degree"}
 DEFAULT_TYPE = "TRI"
 
 
+class LatticeVectors(BaseModel):
+    """
+    A class to represent the lattice vectors.
+    """
+
+    a: List[float] = [1.0, 0.0, 0.0]
+    b: List[float] = [0.0, 1.0, 0.0]
+    c: List[float] = [0.0, 0.0, 1.0]
+
+
 class Lattice(RoundNumericValuesMixin, BaseModel):
     a: float = 1.0
     b: float = a
@@ -23,7 +33,7 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
     type: str = DEFAULT_TYPE
 
     @property
-    def vectors(self) -> List[List[float]]:
+    def vectors(self) -> LatticeVectors:
         a = self.a
         b = self.b
         c = self.c
@@ -44,12 +54,12 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
         cos_gamma_star = math.cos(gamma_star)
         sin_gamma_star = math.sin(gamma_star)
 
-        # Return the lattice matrix using the derived trigonometric values
-        return [
-            [a * sin_beta, 0.0, a * cos_beta],
-            [-b * sin_alpha * cos_gamma_star, b * sin_alpha * sin_gamma_star, b * cos_alpha],
-            [0.0, 0.0, c],
-        ]
+        # Calculate the vectors
+        vector_a = [a * sin_beta, 0.0, a * cos_beta]
+        vector_b = [-b * sin_alpha * cos_gamma_star, b * sin_alpha * sin_gamma_star, b * cos_alpha]
+        vector_c = [0.0, 0.0, c]
+
+        return LatticeVectors(a=vector_a, b=vector_b, c=vector_c)
 
     @classmethod
     def from_vectors_array(
@@ -96,7 +106,9 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
 
     @property
     def vector_arrays(self) -> List[List[float]]:
-        return self.vectors
+        """Returns lattice vectors as a nested array"""
+        v = self.vectors
+        return [v.a, v.b, v.c]
 
     @property
     def cell(self) -> Cell:

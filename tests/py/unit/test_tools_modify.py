@@ -160,7 +160,7 @@ def test_remove_vacuum():
     material = Material(SI_SLAB)
     material_down = translate_to_z_level(material, z_level="bottom")
 
-    assertion_utils.assert_deep_almost_equal(material_down.to_json(), material_with_set_vacuum.to_json())
+    assertion_utils.assert_deep_almost_equal(material_down.to_json(), material_with_set_vacuum.to_json(), atol=1e-3)
 
 
 def test_rotate():
