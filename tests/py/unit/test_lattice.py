@@ -1,5 +1,6 @@
 from mat3ra.made.lattice import Lattice
 
+
 def test_lattice_vectors_access():
     lattice = Lattice(a=2.0, b=3.0, c=4.0)
 
