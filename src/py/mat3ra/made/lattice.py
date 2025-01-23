@@ -13,7 +13,7 @@ DEFAULT_UNITS = {"length": "angstrom", "angle": "degree"}
 DEFAULT_TYPE = "TRI"
 
 
-class LatticeVectors(BaseModel):
+class LatticeVectors(RoundNumericValuesMixin, BaseModel):
     """
     A class to represent the lattice vectors.
     """
@@ -22,11 +22,11 @@ class LatticeVectors(BaseModel):
     b: List[float] = [0.0, 1.0, 0.0]
     c: List[float] = [0.0, 0.0, 1.0]
 
-    def to_json(self) -> Dict[str, List[float]]:
+    def to_json(self, skip_rounding=False) -> Dict[str, List[float]]:
         json_value = {
-            "a": self.a,
-            "b": self.b,
-            "c": self.c,
+            "a": self.round_array_or_number(self.a, skip_rounding) if not skip_rounding else self.a,
+            "b": self.round_array_or_number(self.b, skip_rounding) if not skip_rounding else self.b,
+            "c": self.round_array_or_number(self.c, skip_rounding) if not skip_rounding else self.c,
         }
         return json.loads(json.dumps(json_value))
 
@@ -105,7 +105,7 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
             "gamma": round_func(self.gamma),
             "units": self.units,
             "type": self.type,
-            "vectors": self.vectors.to_json(),
+            "vectors": self.vectors.to_json(skip_rounding),
         }
 
     def clone(self, extra_context: Optional[Dict[str, Any]] = None) -> "Lattice":
