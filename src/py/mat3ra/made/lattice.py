@@ -72,7 +72,7 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
 
     @classmethod
     def from_vectors_array(
-            cls, vectors: List[List[float]], units: Optional[Dict[str, str]] = None, type: Optional[str] = None
+        cls, vectors: List[List[float]], units: Optional[Dict[str, str]] = None, type: Optional[str] = None
     ) -> "Lattice":
         """
         Create a Lattice object from a nested array of vectors.
