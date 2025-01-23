@@ -1,3 +1,4 @@
+import json
 import math
 from typing import Any, Dict, List, Optional
 
@@ -20,6 +21,14 @@ class LatticeVectors(BaseModel):
     a: List[float] = [1.0, 0.0, 0.0]
     b: List[float] = [0.0, 1.0, 0.0]
     c: List[float] = [0.0, 0.0, 1.0]
+
+    def to_json(self) -> Dict[str, List[float]]:
+        json_value = {
+            "a": self.a,
+            "b": self.b,
+            "c": self.c,
+        }
+        return json.loads(json.dumps(json_value))
 
 
 class Lattice(RoundNumericValuesMixin, BaseModel):
@@ -63,7 +72,7 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
 
     @classmethod
     def from_vectors_array(
-        cls, vectors: List[List[float]], units: Optional[Dict[str, str]] = None, type: Optional[str] = None
+            cls, vectors: List[List[float]], units: Optional[Dict[str, str]] = None, type: Optional[str] = None
     ) -> "Lattice":
         """
         Create a Lattice object from a nested array of vectors.
@@ -96,7 +105,7 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
             "gamma": round_func(self.gamma),
             "units": self.units,
             "type": self.type,
-            "vectors": self.vectors,
+            "vectors": self.vectors.to_json(),
         }
 
     def clone(self, extra_context: Optional[Dict[str, Any]] = None) -> "Lattice":
