@@ -1,9 +1,7 @@
-from pydantic import BaseModel
+from mat3ra.made.tools.build.slab.termination import TerminationSchema
 
 
-class Termination(BaseModel):
-    chemical_elements: str
-    space_group_symmetry_label: str
+class Termination(TerminationSchema):
 
     def __str__(self):
         return f"{self.chemical_elements}_{self.space_group_symmetry_label}"
