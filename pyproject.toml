@@ -4,9 +4,9 @@ dynamic = ["version"]
 description = "MAterials DEfinitions and/or MAterials DEsign library."
 readme = "README.md"
 requires-python = ">=3.8"
-license = {file = "LICENSE.md"}
+license = { file = "LICENSE.md" }
 authors = [
-    {name = "Exabyte Inc.", email = "info@mat3ra.com"}
+    { name = "Exabyte Inc.", email = "info@mat3ra.com" }
 ]
 classifiers = [
     "Programming Language :: Python",
@@ -19,7 +19,7 @@ dependencies = [
     # new verison of numpy==2.0.0 is not handled by pymatgen yet
     "numpy<=1.26.4",
     "mat3ra-utils",
-    "mat3ra-esse",
+  "mat3ra-esse @ git+https://github.com/Exabyte-io/esse.git@refs/pull/325/head",
     "mat3ra-code",
 ]
 
