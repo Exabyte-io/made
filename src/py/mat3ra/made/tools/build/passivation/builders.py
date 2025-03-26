@@ -31,7 +31,10 @@ class PassivationBuilder(BaseBuilder):
         return material
 
     def create_passivated_material(self, configuration: BaseBuilder._ConfigurationType) -> Material:
-        material = translate_to_z_level(configuration.slab, "center")
+        material = configuration.slab.clone()
+        material.to_cartesian()
+        material = translate_to_z_level(material, "center")
+        material.to_crystal()
         return material
 
     def _add_passivant_atoms(
