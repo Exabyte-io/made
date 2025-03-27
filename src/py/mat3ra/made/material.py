@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntity
@@ -47,19 +47,16 @@ defaultMaterialConfig = {
     },
 }
 
-MaterialSchemaJSON = Dict[str, Union[MaterialSchema, Any]]
 
-
-class Material(HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
-    jsonSchema: MaterialSchemaJSON
-    default_config = defaultMaterialConfig
+class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
+    default_config: Dict[str, Any] = defaultMaterialConfig
 
     def __init__(self, config: Any) -> None:
         super().__init__(config)
         self.name = super().name or self.formula
 
-    def to_json(self, exclude: List[str] = []) -> MaterialSchemaJSON:
-        return {**super().to_json()}
+    def to_json(self, exclude: List[str] = []) -> MaterialSchema.model_dump_json:
+        return self.model_dump_json()
 
     @property
     def coordinates_array(self) -> List[List[float]]:

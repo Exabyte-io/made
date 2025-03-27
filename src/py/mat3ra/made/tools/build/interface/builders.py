@@ -49,8 +49,8 @@ class InterfaceBuilder(BaseBuilder):
     _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        film_formula = get_chemical_formula(configuration.film_configuration.bulk)
-        substrate_formula = get_chemical_formula(configuration.substrate_configuration.bulk)
+        film_formula = get_chemical_formula(configuration.film_configuration.BulkMaterialMaterial)
+        substrate_formula = get_chemical_formula(configuration.substrate_configuration.BulkMaterial)
         film_miller_indices = "".join([str(i) for i in configuration.film_configuration.miller_indices])
         substrate_miller_indices = "".join([str(i) for i in configuration.substrate_configuration.miller_indices])
         new_name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
@@ -78,7 +78,7 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     def __preprocess_slab_configuration(
         self, configuration: SlabConfiguration, termination: Termination, create_slabs=False
     ) -> ASEAtoms:
-        slab = create_slab(configuration, termination) if create_slabs else configuration.bulk
+        slab = create_slab(configuration, termination) if create_slabs else configuration.BulkMaterial
         ase_slab = to_ase(slab)
 
         niggli_reduce(ase_slab)
@@ -174,9 +174,11 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
     def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
         generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.dict())
         substrate_with_atoms_translated_to_bottom = translate_to_z_level(
-            configuration.substrate_configuration.bulk, "bottom"
+            configuration.substrate_configuration.BulkMaterial, "bottom"
         )
-        film_with_atoms_translated_to_bottom = translate_to_z_level(configuration.film_configuration.bulk, "bottom")
+        film_with_atoms_translated_to_bottom = translate_to_z_level(
+            configuration.film_configuration.BulkMaterial, "bottom"
+        )
         builder = CoherentInterfaceBuilder(
             substrate_structure=to_pymatgen(substrate_with_atoms_translated_to_bottom),
             film_structure=to_pymatgen(film_with_atoms_translated_to_bottom),

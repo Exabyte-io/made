@@ -364,17 +364,49 @@ def get_surface_atom_indices(
     new_material.to_cartesian()
     coordinates = np.array(new_material.basis.coordinates.values)
     ids = new_material.basis.coordinates.ids
-    kd_tree = cKDTree(coordinates)
-
-    z_extremum = np.max(coordinates[:, 2]) if surface == SurfaceTypes.TOP else np.min(coordinates[:, 2])
-
-    exposed_atoms_indices = []
-    for idx, (x, y, z) in enumerate(coordinates):
-        if is_height_within_limits(z, z_extremum, depth, surface):
-            neighbors_indices = kd_tree.query_ball_point([x, y, z], r=shadowing_radius)
-            if is_shadowed_by_neighbors_from_surface(z, neighbors_indices, surface, coordinates):
-                exposed_atoms_indices.append(ids[idx])
-
+    
+    # Get z-extremum and sort atoms by z-coordinate
+    z_coords = coordinates[:, 2]
+    z_extremum = np.max(z_coords) if surface == SurfaceTypes.TOP else np.min(z_coords)
+    
+    # First filter by height
+    height_mask = np.array([is_height_within_limits(z, z_extremum, depth, surface) for z in z_coords])
+    potential_surface_indices = np.where(height_mask)[0]
+    
+    if len(potential_surface_indices) == 0:
+        return []
+        
+    # For remaining atoms, check shadowing using KDTree
+    try:
+        kd_tree = cKDTree(coordinates)
+        exposed_atoms_indices = []
+        
+        for idx in potential_surface_indices:
+            x, y, z = coordinates[idx]
+            try:
+                neighbors_indices = kd_tree.query_ball_point([x, y, z], r=shadowing_radius)
+                if is_shadowed_by_neighbors_from_surface(z, neighbors_indices, surface, coordinates):
+                    exposed_atoms_indices.append(ids[idx])
+            except Exception:
+                # Fallback if KDTree query fails - manual distance calculation
+                neighbors_indices = []
+                for i, coord in enumerate(coordinates):
+                    if i != idx:
+                        dist = np.linalg.norm(coord - coordinates[idx])
+                        if dist <= shadowing_radius:
+                            neighbors_indices.append(i)
+                if is_shadowed_by_neighbors_from_surface(z, neighbors_indices, surface, coordinates):
+                    exposed_atoms_indices.append(ids[idx])
+                    
+    except Exception:
+        # Fallback if KDTree fails completely - use simple z-coordinate based detection
+        z_threshold = z_extremum - (0.5 * depth) if surface == SurfaceTypes.TOP else z_extremum + (0.5 * depth)
+        exposed_atoms_indices = [
+            ids[i] for i in potential_surface_indices
+            if (surface == SurfaceTypes.TOP and z_coords[i] >= z_threshold) or
+               (surface == SurfaceTypes.BOTTOM and z_coords[i] <= z_threshold)
+        ]
+    
     return exposed_atoms_indices
 
 

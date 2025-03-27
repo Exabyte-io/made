@@ -76,8 +76,8 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         return super()._finalize(final_slabs, configuration)
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
-        phase_1_formula = get_chemical_formula(configuration.phase_1_configuration.bulk)
-        phase_2_formula = get_chemical_formula(configuration.phase_2_configuration.bulk)
+        phase_1_formula = get_chemical_formula(configuration.phase_1_configuration.BulkMaterial)
+        phase_2_formula = get_chemical_formula(configuration.phase_2_configuration.BulkMaterial)
         phase_1_miller_indices = "".join([str(i) for i in configuration.phase_1_configuration.miller_indices])
         phase_2_miller_indices = "".join([str(i) for i in configuration.phase_2_configuration.miller_indices])
         new_name = (
