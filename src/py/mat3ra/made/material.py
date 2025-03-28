@@ -1,8 +1,8 @@
-from typing import Any, List, ClassVar, Dict
+from typing import Any, ClassVar, Dict, List
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
-from mat3ra.esse.models.material import MaterialSchema, BasisSchema
+from mat3ra.esse.models.material import BasisSchema, MaterialSchema
 
 from .basis import Basis
 from .lattice import Lattice
@@ -54,7 +54,7 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
 
     def model_post_init(self, __context: Any) -> None:
         if not self.name and self.formula:
-            self.name = self.formula
+            self.name: str = self.formula
 
     @property
     def coordinates_array(self) -> List[List[float]]:
@@ -71,7 +71,7 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         return Lattice(**self.model_dump()["lattice"])
 
     def to_cartesian(self) -> None:
-        new_basis = Basis(**self.basis.model_dump())  # convert from BasisSchema → Basis
+        new_basis: Basis = Basis(**self.basis.model_dump())  # convert from BasisSchema → Basis
         new_basis.to_cartesian()
         self.basis = BasisSchema(**new_basis.model_dump())
 
