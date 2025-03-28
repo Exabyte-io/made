@@ -38,7 +38,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> P
     material_data = material_or_material_data
 
     if isinstance(material_or_material_data, Material):
-        material_data = material_or_material_data.to_json()
+        material_data = material_or_material_data.to_dict()
 
     lattice_params = material_data["lattice"]
     a = lattice_params["a"]

@@ -122,12 +122,12 @@ def get_closest_site_id_from_coordinate_and_element(
     new_material = material.clone()
     if use_cartesian_coordinates:
         new_material.to_cartesian()
-    coordinates = np.array(new_material.basis.coordinates.values)
+    coordinates = np.array(new_material.BasisCls.coordinates.values)
     coordinate = np.array(coordinate)  # type: ignore
     distances = np.linalg.norm(coordinates - coordinate, axis=1)
 
     if chemical_element is not None:
-        elements = np.array(new_material.basis.elements.values)
+        elements = np.array(new_material.BasisCls.elements.values)
         element_indices = np.where(elements == chemical_element)[0]
         distances = distances[element_indices]
         return int(element_indices[np.argmin(distances)])
@@ -263,13 +263,13 @@ def get_atom_indices_with_condition_on_coordinates(
         List[int]: List of indices of atoms whose coordinates satisfy the condition.
     """
     new_material = material.clone()
-    new_basis = new_material.basis
+    new_basis = new_material.BasisCls
     if use_cartesian_coordinates:
         new_basis.to_cartesian()
     else:
         new_basis.to_crystal()
-    new_material.basis = new_basis
-    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
+    new_material.BasisCls = new_basis
+    coordinates = new_material.BasisCls.coordinates.to_array_of_values_with_ids()
 
     selected_indices = []
     for coord in coordinates:
@@ -297,13 +297,13 @@ def get_atomic_coordinates_extremum(
         float: Minimum or maximum of coordinates along the specified axis.
     """
     new_material = material.clone()
-    new_basis = new_material.basis
+    new_basis = new_material.BasisCls
     if use_cartesian_coordinates:
         new_basis.to_cartesian()
     else:
         new_basis.to_crystal()
-    new_material.basis = new_basis
-    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
+    new_material.BasisCls = new_basis
+    coordinates = new_material.BasisCls.coordinates.to_array_of_values_with_ids()
     values = [coord.value[{"x": 0, "y": 1, "z": 2}[axis]] for coord in coordinates]
     return getattr(np, extremum)(values)
 
@@ -362,25 +362,25 @@ def get_surface_atom_indices(
     """
     new_material = material.clone()
     new_material.to_cartesian()
-    coordinates = np.array(new_material.basis.coordinates.values)
-    ids = new_material.basis.coordinates.ids
-    
+    coordinates = np.array(new_material.BasisCls.coordinates.values)
+    ids = new_material.BasisCls.coordinates.ids
+
     # Get z-extremum and sort atoms by z-coordinate
     z_coords = coordinates[:, 2]
     z_extremum = np.max(z_coords) if surface == SurfaceTypes.TOP else np.min(z_coords)
-    
+
     # First filter by height
     height_mask = np.array([is_height_within_limits(z, z_extremum, depth, surface) for z in z_coords])
     potential_surface_indices = np.where(height_mask)[0]
-    
+
     if len(potential_surface_indices) == 0:
         return []
-        
+
     # For remaining atoms, check shadowing using KDTree
     try:
         kd_tree = cKDTree(coordinates)
         exposed_atoms_indices = []
-        
+
         for idx in potential_surface_indices:
             x, y, z = coordinates[idx]
             try:
@@ -397,16 +397,17 @@ def get_surface_atom_indices(
                             neighbors_indices.append(i)
                 if is_shadowed_by_neighbors_from_surface(z, neighbors_indices, surface, coordinates):
                     exposed_atoms_indices.append(ids[idx])
-                    
+
     except Exception:
         # Fallback if KDTree fails completely - use simple z-coordinate based detection
         z_threshold = z_extremum - (0.5 * depth) if surface == SurfaceTypes.TOP else z_extremum + (0.5 * depth)
         exposed_atoms_indices = [
-            ids[i] for i in potential_surface_indices
-            if (surface == SurfaceTypes.TOP and z_coords[i] >= z_threshold) or
-               (surface == SurfaceTypes.BOTTOM and z_coords[i] <= z_threshold)
+            ids[i]
+            for i in potential_surface_indices
+            if (surface == SurfaceTypes.TOP and z_coords[i] >= z_threshold)
+            or (surface == SurfaceTypes.BOTTOM and z_coords[i] <= z_threshold)
         ]
-    
+
     return exposed_atoms_indices
 
 
@@ -435,10 +436,10 @@ def get_local_extremum_atom_index(
     new_material = material.clone()
     new_material.to_cartesian()
     if not use_cartesian_coordinates:
-        coordinate = new_material.basis.cell.convert_point_to_cartesian(coordinate)
+        coordinate = new_material.BasisCls.cell.convert_point_to_cartesian(coordinate)
 
-    coordinates = np.array(new_material.basis.coordinates.values)
-    ids = np.array(new_material.basis.coordinates.ids)
+    coordinates = np.array(new_material.BasisCls.coordinates.values)
+    ids = np.array(new_material.BasisCls.coordinates.ids)
     tree = cKDTree(coordinates[:, :2])
     indices = tree.query_ball_point(coordinate[:2], vicinity)
     z_values = [(id, coord[2]) for id, coord in zip(ids[indices], coordinates[indices])]

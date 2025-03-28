@@ -31,11 +31,11 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
         Material: The filtered material object.
     """
     new_material = material.clone()
-    labels_array = new_material.basis.labels.to_array_of_values_with_ids()
+    labels_array = new_material.BasisCls.labels.to_array_of_values_with_ids()
     filtered_label_ids = [_label.id for _label in labels_array if _label.value == label]
-    new_basis = new_material.basis
+    new_basis = new_material.BasisCls
     new_basis.filter_atoms_by_ids(filtered_label_ids)
-    new_material.basis = new_basis
+    new_material.BasisCls = new_basis
     return new_material
 
 
@@ -142,11 +142,11 @@ def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> M
         Material: The filtered material object.
     """
     new_material = material.clone()
-    new_basis = new_material.basis
+    new_basis = new_material.BasisCls
     if invert is True:
         ids = list(set(new_basis.elements.ids) - set(ids))
     new_basis.filter_atoms_by_ids(ids)
-    new_material.basis = new_basis
+    new_material.BasisCls = new_basis
     return new_material
 
 
@@ -527,7 +527,7 @@ def add_vacuum_sides(material: Material, vacuum: float = 5.0, on_x=False, on_y=F
     min_y = get_atomic_coordinates_extremum(new_material, "min", "y", use_cartesian_coordinates=True)
     max_y = get_atomic_coordinates_extremum(new_material, "max", "y", use_cartesian_coordinates=True)
 
-    new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector = new_material.lattice.vector_arrays
+    new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector = new_material.LatticeCls.vector_arrays
     if on_x:
         new_x_length = max_x - min_x + 2 * vacuum
         new_lattice_a_vector = [new_x_length, 0, 0]
@@ -568,8 +568,8 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
     new_basis.to_crystal()
     new_material = material.clone()
 
-    new_material.basis = new_basis
-    new_material.lattice = new_lattice
+    new_material.BasisCls = new_basis
+    new_material.LatticeCls = new_lattice
 
     if from_top and not from_bottom:
         new_material = translate_to_z_level(new_material, z_level="top")
@@ -624,12 +624,12 @@ def interface_displace_part(
     new_material = interface.clone()
     if use_cartesian_coordinates:
         new_material.to_cartesian()
-    labels_array = new_material.basis.labels.to_array_of_values_with_ids()
+    labels_array = new_material.BasisCls.labels.to_array_of_values_with_ids()
     displaced_label_ids = [_label.id for _label in labels_array if _label.value == int(label)]
 
-    new_coordinates_values = new_material.basis.coordinates.values
+    new_coordinates_values = new_material.BasisCls.coordinates.values
     for atom_id in displaced_label_ids:
-        current_coordinate = new_material.basis.coordinates.get_element_value_by_index(atom_id)
+        current_coordinate = new_material.BasisCls.coordinates.get_element_value_by_index(atom_id)
         new_atom_coordinate = np.array(current_coordinate) + np.array(displacement)
         new_coordinates_values[atom_id] = new_atom_coordinate
 
@@ -646,6 +646,6 @@ def interface_get_part(
     if interface.metadata["build"]["configuration"]["type"] != "InterfaceConfiguration":
         raise ValueError("The material is not an interface.")
     interface_part_material = interface.clone()
-    film_atoms_basis = interface_part_material.basis.filter_atoms_by_labels([int(part)])
-    interface_part_material.basis = film_atoms_basis
+    film_atoms_basis = interface_part_material.BasisCls.filter_atoms_by_labels([int(part)])
+    interface_part_material.BasisCls = film_atoms_basis
     return interface_part_material

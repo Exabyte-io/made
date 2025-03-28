@@ -36,7 +36,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         build_parameters = self.build_parameters or PymatgenSlabGeneratorParameters()
         generator = PymatgenSlabGenerator(
-            initial_structure=to_pymatgen(configuration.BulkMaterial),
+            initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,
             min_slab_size=configuration.thickness,
             min_vacuum_size=build_parameters.min_vacuum_size,
@@ -65,7 +65,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
 
         # Adding total vacuum to be exactly as specified in configuration, including already added vacuum
         added_vacuum = (
-            build_parameters.min_vacuum_size * self.__configuration.BulkMaterial.lattice.c
+            build_parameters.min_vacuum_size * self.__configuration.bulk.lattice.c
             if build_parameters.in_unit_planes
             else build_parameters.min_vacuum_size
         )
@@ -92,7 +92,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         return Termination.from_string(label_pymatgen_slab_termination(slab))
 
     def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
-        formula = get_chemical_formula(configuration.BulkMaterial)
+        formula = get_chemical_formula(configuration.bulk)
         miller_indices = "".join([str(i) for i in configuration.miller_indices])
         termination = material.metadata.get("build").get("termination", "")
         # for example: "Si8(001), termination Si_P4/mmm_1, Slab"

@@ -21,9 +21,9 @@ class BaseNanoparticleConfiguration(BaseConfiguration):
         material = self.material
         conventional_material = ASEBasedNanoparticleConfiguration.convert_to_conventional(material)
         lattice_constants = [
-            conventional_material.lattice.a,
-            conventional_material.lattice.b,
-            conventional_material.lattice.c,
+            conventional_material.LatticeCls.a,
+            conventional_material.LatticeCls.b,
+            conventional_material.LatticeCls.c,
         ]
         # If lattice constants are not equal within a tolerance, raise an error
         if not np.all(np.isclose(lattice_constants, lattice_constants[0], atol=1e-6)):

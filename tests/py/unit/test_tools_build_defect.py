@@ -174,7 +174,7 @@ def test_create_island():
 
     # Only 1 atoms in the island were added for this configuration with 001 slab orientation
     NUMBER_OF_ATOMS_IN_ISLAND = 1
-    assert len(defect.basis.elements.values) == len(SLAB_001.basis.elements.values) + NUMBER_OF_ATOMS_IN_ISLAND
+    assert len(defect.basis.elements.values) == len(SLAB_001.BasisCls.elements.values) + NUMBER_OF_ATOMS_IN_ISLAND
     assert defect.basis.elements.values[-1] == "Si"
 
 

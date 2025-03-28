@@ -1,8 +1,8 @@
-from typing import Any, Dict, List
+from typing import Any, List, ClassVar, Dict
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
-from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntity
-from mat3ra.esse.models.material import MaterialSchema
+from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
+from mat3ra.esse.models.material import MaterialSchema, BasisSchema
 
 from .basis import Basis
 from .lattice import Lattice
@@ -48,52 +48,41 @@ defaultMaterialConfig = {
 }
 
 
-class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemoryEntity):
-    default_config: Dict[str, Any] = defaultMaterialConfig
+class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic):
+    default_config: ClassVar[Dict[str, Any]] = defaultMaterialConfig
 
     def __init__(self, config: Any) -> None:
-        super().__init__(config)
-        self.name = super().name or self.formula
-
-    def to_json(self, exclude: List[str] = []) -> MaterialSchema.model_dump_json:
-        return self.model_dump_json()
+        super().__init__(**(config if isinstance(config, dict) else config.model_dump()))
+        self.name = self.name or self.formula
 
     @property
     def coordinates_array(self) -> List[List[float]]:
-        return self.basis.coordinates.values
+        return self.BasisCls.coordinates.values
 
     @property
-    def basis(self) -> Basis:
-        config = self.get_prop("basis")
-        config["cell"] = config.get("cell", self.lattice.vector_arrays)
+    def BasisCls(self) -> Basis:
+        config = self.model_dump()["basis"]
+        config["cell"] = config.get("cell", self.LatticeCls.vector_arrays)
         return Basis.from_dict(**config)
 
-    @basis.setter
-    def basis(self, basis: Basis) -> None:
-        self.set_prop("basis", basis.to_json())
-
     @property
-    def lattice(self) -> Lattice:
-        return Lattice(**self.get_prop("lattice"))
-
-    @lattice.setter
-    def lattice(self, lattice: Lattice) -> None:
-        self.set_prop("lattice", lattice.to_json())
+    def LatticeCls(self) -> Lattice:
+        return Lattice(**self.model_dump()["lattice"])
 
     def to_cartesian(self) -> None:
-        new_basis = self.basis.copy()
+        new_basis = Basis(**self.basis.model_dump())  # convert from BasisSchema → Basis
         new_basis.to_cartesian()
-        self.basis = new_basis
+        self.basis = BasisSchema(**new_basis.model_dump())
 
     def to_crystal(self) -> None:
-        new_basis = self.basis.copy()
+        new_basis = self.basis.model_copy()
         new_basis.to_crystal()
-        self.basis = new_basis
+        self.basis = BasisSchema(**new_basis.model_dump())
 
     def set_coordinates(self, coordinates: List[List[float]]) -> None:
-        new_basis = self.basis.copy()
+        new_basis = self.basis.model_copy()
         new_basis.coordinates.values = coordinates
-        self.basis = new_basis
+        self.basis = BasisSchema(**self.basis.model_dump())
 
     def set_new_lattice_vectors(
         self, lattice_vector1: List[float], lattice_vector2: List[float], lattice_vector3: List[float]
@@ -101,11 +90,11 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         lattice = Lattice.from_vectors_array([lattice_vector1, lattice_vector2, lattice_vector3])
         original_is_in_crystal = self.basis.is_in_crystal_units
         self.to_cartesian()
-        self.lattice = lattice
+        self.lattice = lattice.to_schema()
         if original_is_in_crystal:
             self.to_crystal()
 
-    def add_atom(self, element: str, coordinate: List[float], use_cartesian_coordinates=False) -> None:
-        new_basis = self.basis.copy()
+    def add_atom(self, element: str, coordinate: List[float], use_cartesian_coordinates: bool = False) -> None:
+        new_basis = self.basis.model_copy()
         new_basis.add_atom(element, coordinate, use_cartesian_coordinates)
-        self.basis = new_basis
+        self.basis = BasisSchema(**new_basis.model_dump())

@@ -28,7 +28,7 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
     def decorator(func):
         @wraps(func)
         def wrapper(material, *args, **kwargs):
-            original_basis_is_in_cartesian = material.basis.is_in_cartesian_units
+            original_basis_is_in_cartesian = material.BasisCls.is_in_cartesian_units
             if original_basis_is_in_cartesian:
                 material.to_crystal()
             augmented_material, last_id = augment_material_with_periodic_images(material, cutoff)
@@ -37,7 +37,7 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
             result = func(augmented_material, *args, **kwargs)
             if original_basis_is_in_cartesian:
                 material.to_cartesian()
-            original_ids = material.basis.coordinates.ids
+            original_ids = material.BasisCls.coordinates.ids
             if isinstance(result, ArrayWithIds):
                 result.filter_by_ids(original_ids)
             if isinstance(result, list):
@@ -70,7 +70,7 @@ def augment_material_with_periodic_images(
     coordinates = np.array(material.basis.coordinates.values)
     elements = np.array(material.basis.elements.values)
     augmented_material = material.clone()
-    new_basis = augmented_material.basis.copy()
+    new_basis = augmented_material.BasisCls.copy()
 
     for axis in range(3):
         for direction in [-1, 1]:
@@ -83,5 +83,5 @@ def augment_material_with_periodic_images(
             for coord, elem in zip(translated_coordinates, filtered_elements):
                 new_basis.add_atom(elem, coord)
 
-    augmented_material.basis = new_basis
+    augmented_material.BasisCls = new_basis
     return augmented_material, last_id

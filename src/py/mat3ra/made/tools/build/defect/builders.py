@@ -73,7 +73,7 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuil
     _generator: Callable
 
     def _get_species(self, configuration: BaseBuilder._ConfigurationType):
-        crystal_elements = configuration.crystal.basis.elements.values
+        crystal_elements = configuration.crystal.BasisCls.elements.values
         placeholder_specie = crystal_elements[0]
         return configuration.chemical_element or placeholder_specie
 
@@ -306,12 +306,12 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         if position_on_surface is None:
             position_on_surface = [0.5, 0.5]
         new_material = material.clone()
-        new_basis = new_material.basis
+        new_basis = new_material.BasisCls
         adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
             material, position_on_surface, distance_z
         )
         new_basis.add_atom(chemical_element, adatom_coordinate)
-        new_material.basis = new_basis
+        new_material.BasisCls = new_basis
         return new_material
 
     def _calculate_coordinate_from_position_and_distance(
@@ -396,7 +396,7 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
 
-        isolated_neighboring_atoms_basis = supercell_material.basis.copy()
+        isolated_neighboring_atoms_basis = supercell_material.BasisCls.copy()
         isolated_neighboring_atoms_basis.coordinates.filter_by_ids(neighboring_atoms_ids_in_supercell)
         equidistant_coordinate_in_supercell = get_center_of_coordinates(
             isolated_neighboring_atoms_basis.coordinates.values

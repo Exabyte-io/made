@@ -49,8 +49,8 @@ class InterfaceBuilder(BaseBuilder):
     _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        film_formula = get_chemical_formula(configuration.film_configuration.BulkMaterialMaterial)
-        substrate_formula = get_chemical_formula(configuration.substrate_configuration.BulkMaterial)
+        film_formula = get_chemical_formula(configuration.film_configuration.bulkMaterial)
+        substrate_formula = get_chemical_formula(configuration.substrate_configuration.bulk)
         film_miller_indices = "".join([str(i) for i in configuration.film_configuration.miller_indices])
         substrate_miller_indices = "".join([str(i) for i in configuration.substrate_configuration.miller_indices])
         new_name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
@@ -78,7 +78,7 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     def __preprocess_slab_configuration(
         self, configuration: SlabConfiguration, termination: Termination, create_slabs=False
     ) -> ASEAtoms:
-        slab = create_slab(configuration, termination) if create_slabs else configuration.BulkMaterial
+        slab = create_slab(configuration, termination) if create_slabs else configuration.bulk
         ase_slab = to_ase(slab)
 
         niggli_reduce(ase_slab)
@@ -174,11 +174,9 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
     def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
         generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.dict())
         substrate_with_atoms_translated_to_bottom = translate_to_z_level(
-            configuration.substrate_configuration.BulkMaterial, "bottom"
+            configuration.substrate_configuration.bulk, "bottom"
         )
-        film_with_atoms_translated_to_bottom = translate_to_z_level(
-            configuration.film_configuration.BulkMaterial, "bottom"
-        )
+        film_with_atoms_translated_to_bottom = translate_to_z_level(configuration.film_configuration.bulk, "bottom")
         builder = CoherentInterfaceBuilder(
             substrate_structure=to_pymatgen(substrate_with_atoms_translated_to_bottom),
             film_structure=to_pymatgen(film_with_atoms_translated_to_bottom),
@@ -316,7 +314,7 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         Returns:
             int: The maximum integer for the transformation matrices.
         """
-        if film.lattice.type == "HEX":
+        if film.LatticeCls.type == "HEX":
             # getting max int of the matrix that has angle closest to target angle
             xy_supercell_matrix_for_closest_angle = min(
                 angle_to_supercell_matrix_values_for_hex, key=lambda x: abs(x["angle"] - target_angle)
