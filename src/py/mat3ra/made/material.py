@@ -48,12 +48,13 @@ defaultMaterialConfig = {
 }
 
 
+# TODO: replace `-Pydantic` with actual class in the next PR
 class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic):
-    default_config: ClassVar[Dict[str, Any]] = defaultMaterialConfig
+    __default_config__: ClassVar[Dict[str, Any]] = defaultMaterialConfig
 
-    def __init__(self, config: Any) -> None:
-        super().__init__(**(config if isinstance(config, dict) else config.model_dump()))
-        self.name = self.name or self.formula
+    def model_post_init(self, __context: Any) -> None:
+        if not self.name and self.formula:
+            self.name = self.formula
 
     @property
     def coordinates_array(self) -> List[List[float]]:
