@@ -322,9 +322,7 @@ class Basis {
         const clsInstance = new Basis(this.toJSON());
         clsInstance.toStandardRepresentation();
         const standardRep = clsInstance.elementsAndCoordinatesAndLabelsArray.map((entry) => {
-            const element = entry[0];
-            const coordinate = entry[1];
-            const atomicLabel = entry[2];
+            const [element, coordinate, atomicLabel] = entry;
             const toleratedCoordinates = coordinate.map((x) => math_1.default.round(x, constants_1.HASH_TOLERANCE));
             return `${element}${atomicLabel} ${toleratedCoordinates.join()}`;
         });
@@ -367,10 +365,8 @@ class Basis {
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
      */
     get atomicPositions() {
-        return this.elementsAndCoordinatesAndLabelsArray.map((entry, idx) => {
-            const element = entry[0];
-            const coordinate = entry[1];
-            const atomicLabel = this.atomicLabelsArray[idx];
+        return this.elementsAndCoordinatesAndLabelsArray.map((entry) => {
+            const [element, coordinate, atomicLabel] = entry;
             return `${element}${atomicLabel} ${coordinate
                 .map((x) => underscore_string_1.default.sprintf("%14.9f", x).trim())
                 .join(" ")}`;
