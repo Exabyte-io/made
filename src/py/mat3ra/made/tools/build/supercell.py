@@ -26,7 +26,7 @@ def create_supercell(
     if scaling_factor is not None:
         supercell_matrix = np.multiply(scaling_factor, np.eye(3)).tolist()
     supercell_atoms = ase_make_supercell(atoms, supercell_matrix)
-    new_material = Material(from_ase(supercell_atoms))
+    new_material = Material(**from_ase(supercell_atoms))
     if material.metadata:
         new_material.metadata = material.metadata
     new_material.name = material.name

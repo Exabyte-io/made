@@ -128,7 +128,7 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
         return [interface_ase_with_vacuum]
 
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
-        return [Material(from_ase(slab)) for slab in items]
+        return [Material(**from_ase(slab)) for slab in items]
 
 
 ########################################################################################
