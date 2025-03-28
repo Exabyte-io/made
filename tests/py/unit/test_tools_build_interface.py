@@ -47,7 +47,7 @@ def test_create_interfaces():
 
 
 def test_create_twisted_nanoribbon_interface():
-    film = Material(GRAPHENE)
+    film = Material(**GRAPHENE)
     configuration = NanoRibbonTwistedInterfaceConfiguration(
         film=film,
         substrate=film,
@@ -69,8 +69,8 @@ def test_create_twisted_nanoribbon_interface():
 
 
 def test_create_commensurate_supercell_twisted_interface():
-    film = Material(GRAPHENE)
-    substrate = Material(GRAPHENE)
+    film = Material(**GRAPHENE)
+    substrate = Material(**GRAPHENE)
     config = TwistedInterfaceConfiguration(film=film, substrate=substrate, twist_angle=13, distance_z=3.0)
     params = CommensurateLatticeTwistedInterfaceBuilderParameters(
         max_repetition_int=5, angle_tolerance=0.5, return_first_match=True

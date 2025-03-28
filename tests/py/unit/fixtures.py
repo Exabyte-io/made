@@ -19,8 +19,8 @@ INTERFACE_ATOMS = substrate + film
 INTERFACE_ATOMS.set_tags([1] * len(substrate) + [2] * len(film))
 
 # Material fixtures
-SUBSTRATE_MATERIAL = Material(from_ase(substrate))
-FILM_MATERIAL = Material(from_ase(film))
+SUBSTRATE_MATERIAL = Material(**from_ase(substrate))
+FILM_MATERIAL = Material(**from_ase(film))
 
 SUBSTRATE_CONFIGURATION = SlabConfiguration(bulk=SUBSTRATE_MATERIAL, thickness=3)
 FILM_CONFIGURATION = SlabConfiguration(bulk=FILM_MATERIAL)
@@ -389,7 +389,7 @@ SI_SLAB_VACUUM["basis"]["coordinates"] = [
 SI_SLAB_VACUUM["lattice"]["c"] = 13.157392279
 SI_SLAB_VACUUM["lattice"]["vectors"]["c"] = [0.0, 0.0, 13.157392279]
 
-clean_material = Material.create(Material.default_config)
+clean_material = Material.create_default()
 slab_111_config = SlabConfiguration(
     bulk=clean_material,
     miller_indices=(1, 1, 1),

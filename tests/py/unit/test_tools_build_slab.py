@@ -9,7 +9,7 @@ from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures import SI_SLAB_100
 
-material = Material.create(Material.default_config)
+material = Material.create_default()
 
 
 def test_build_slab():

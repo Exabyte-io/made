@@ -26,7 +26,7 @@ from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures import SLAB_001, SLAB_111
 
-clean_material = Material.create(Material.default_config)
+clean_material = Material.create_default()
 
 
 def test_create_vacancy():

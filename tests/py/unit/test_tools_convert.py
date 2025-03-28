@@ -26,7 +26,7 @@ direct
 
 
 def test_to_pymatgen():
-    material = Material.create(Material.default_config)
+    material = Material.create_default()
     structure = to_pymatgen(material)
     assert isinstance(structure, Structure)
     assert structure.lattice == Lattice.from_parameters(3.867, 3.867, 3.867, 60, 60, 60)
@@ -44,7 +44,7 @@ def test_from_pymatgen():
 
 
 def test_to_poscar():
-    material = Material.create(Material.default_config)
+    material = Material.create_default()
     poscar = to_poscar(material)
     assert poscar == POSCAR_CONTENT
 
