@@ -1,10 +1,10 @@
 import json
-from pydantic import Field
-from typing import Dict, List, Optional, Union, Any
+from typing import Any, Dict, List, Optional, Union
 
 from mat3ra.code.constants import AtomicCoordinateUnits
 from mat3ra.esse.models.material import BasisSchema
 from mat3ra.utils.mixins import RoundNumericValuesMixin
+from pydantic import Field
 
 from .cell import Cell
 from .utils import ArrayWithIds, get_overlapping_coordinates

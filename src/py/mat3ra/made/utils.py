@@ -1,11 +1,10 @@
 import json
-from typing import Any, Callable, Dict, List, Optional, Union, Tuple, Literal
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.utils.array import convert_to_array_if_not
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import BaseModel, model_serializer
-from pydantic.main import IncEx
 
 
 # TODO: move to a more general location

@@ -3,9 +3,8 @@ import json
 from mat3ra.made.basis import Basis
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.utils import ArrayWithIds
+from mat3ra.utils import assertion as assertion_utils
 
 REFERENCE_OBJECT_1 = {"key1": "value1", "key2": "value2"}
 
@@ -24,7 +23,7 @@ def test_material_to_json():
     material_dict = json.loads(material.to_json())
     material_dict_copy = material_dict.copy()
     for key in material_dict:
-        if not key in Material.__default_config__:
+        if key not in Material.__default_config__:
             material_dict_copy.pop(key)
     actual_data = json.dumps(material_dict_copy)
     expected_data = json.dumps(Material.__default_config__)

@@ -1,9 +1,8 @@
-from typing import Any, ClassVar, Dict, List
+from typing import Any, List
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
-from mat3ra.esse.models.material import BasisSchema, MaterialSchema, LatticeSchema
-from pydantic import BaseModel
+from mat3ra.esse.models.material import MaterialSchema
 
 from .basis import Basis
 from .lattice import Lattice
