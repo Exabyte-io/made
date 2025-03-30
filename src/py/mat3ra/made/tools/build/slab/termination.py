@@ -1,7 +1,10 @@
-from mat3ra.esse.models.reusable.material.slab.termination import TerminationSchema
+from pydantic import BaseModel
 
 
-class Termination(TerminationSchema):
+class Termination(BaseModel):
+    chemical_elements: str
+    space_group_symmetry_label: str
+
     def __str__(self):
         return f"{self.chemical_elements}_{self.space_group_symmetry_label}"
 
