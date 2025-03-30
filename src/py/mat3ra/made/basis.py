@@ -1,21 +1,32 @@
 import json
-from typing import Dict, List, Optional, Union
+from pydantic import Field
+from typing import Dict, List, Optional, Union, Any
 
 from mat3ra.code.constants import AtomicCoordinateUnits
+from mat3ra.esse.models.material import BasisSchema
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import BaseModel
 
 from .cell import Cell
 from .utils import ArrayWithIds, get_overlapping_coordinates
 
 
-class Basis(RoundNumericValuesMixin, BaseModel):
-    elements: ArrayWithIds = ArrayWithIds(values=["Si"])
-    coordinates: ArrayWithIds = ArrayWithIds(values=[0, 0, 0])
-    units: str = AtomicCoordinateUnits.crystal
-    cell: Cell = Cell()
+class Basis(RoundNumericValuesMixin, BasisSchema):
+    elements: ArrayWithIds
+    coordinates: ArrayWithIds
+    cell: Optional[Cell] = Field(Cell(), exclude=True)
     labels: Optional[ArrayWithIds] = ArrayWithIds(values=[])
     constraints: Optional[ArrayWithIds] = ArrayWithIds(values=[])
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        if isinstance(kwargs.get("elements"), list):
+            kwargs["elements"] = ArrayWithIds.from_list_of_dicts(kwargs["elements"])
+        if isinstance(kwargs.get("coordinates"), list):
+            kwargs["coordinates"] = ArrayWithIds.from_list_of_dicts(kwargs["coordinates"])
+        if isinstance(kwargs.get("labels"), list):
+            kwargs["labels"] = ArrayWithIds.from_list_of_dicts(kwargs["labels"])
+        if isinstance(kwargs.get("constraints"), list):
+            kwargs["constraints"] = ArrayWithIds.from_list_of_dicts(kwargs["constraints"])
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def from_dict(
@@ -23,8 +34,8 @@ class Basis(RoundNumericValuesMixin, BaseModel):
         elements: List[Dict],
         coordinates: List[Dict],
         units: str,
+        cell: [List[List[float]]],
         labels: Optional[List[Dict]] = None,
-        cell: Optional[List[List[float]]] = None,
         constraints: Optional[List[Dict]] = None,
     ) -> "Basis":
         return Basis(

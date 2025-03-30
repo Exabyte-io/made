@@ -1,10 +1,11 @@
 import json
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, Tuple, Literal
 
 import numpy as np
 from mat3ra.utils.array import convert_to_array_if_not
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import BaseModel
+from pydantic import BaseModel, model_serializer
+from pydantic.main import IncEx
 
 
 # TODO: move to a more general location
@@ -150,8 +151,8 @@ class ValueWithId(RoundNumericValuesMixin, BaseModel):
 
 
 class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
-    values: List[Any] = []
-    ids: List[int] = []
+    values: List[Any]
+    ids: Optional[List[int]] = None
 
     @classmethod
     def from_values(cls, values: List[Any]) -> "ArrayWithIds":
@@ -162,10 +163,18 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
             raise ValueError("Values must be a list")
 
     @classmethod
-    def from_list_of_dicts(cls, list_of_dicts: List[Dict[str, Any]]) -> "ArrayWithIds":
+    def get_values_and_ids_from_list_of_dicts(cls, list_of_dicts: List[Dict[str, Any]]) -> Tuple[List[Any], List[int]]:
         try:
             values = [item["value"] for item in list_of_dicts]
             ids = [item["id"] for item in list_of_dicts]
+            return values, ids
+        except KeyError:
+            raise ValueError("List of dictionaries must contain 'id' and 'value' keys")
+
+    @classmethod
+    def from_list_of_dicts(cls, list_of_dicts: List[Dict[str, Any]]) -> "ArrayWithIds":
+        try:
+            values, ids = cls.get_values_and_ids_from_list_of_dicts(list_of_dicts)
             return cls(values=values, ids=ids)
         except KeyError:
             raise ValueError("List of dictionaries must contain 'id' and 'value' keys")
@@ -209,6 +218,7 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
         self.values = [self.values[index] for index in keep_indices]
         self.ids = [self.ids[index] for index in keep_indices]
 
+    @model_serializer
     def to_dict(self) -> List[Dict[str, Any]]:
         return [
             item.to_dict() if isinstance(item, ValueWithId) else ValueWithId(id=index, value=item).to_dict()

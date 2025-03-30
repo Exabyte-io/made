@@ -314,7 +314,7 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         Returns:
             int: The maximum integer for the transformation matrices.
         """
-        if film.LatticeCls.type == "HEX":
+        if film.lattice.type == "HEX":
             # getting max int of the matrix that has angle closest to target angle
             xy_supercell_matrix_for_closest_angle = min(
                 angle_to_supercell_matrix_values_for_hex, key=lambda x: abs(x["angle"] - target_angle)

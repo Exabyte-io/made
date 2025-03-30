@@ -32,9 +32,9 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
         Material: The filtered material object.
     """
     new_material = material.clone()
-    labels_array = new_material.BasisCls.labels.to_array_of_values_with_ids()
+    labels_array = new_material.basis_instance.labels.to_array_of_values_with_ids()
     filtered_label_ids = [_label.id for _label in labels_array if _label.value == label]
-    new_basis = new_material.BasisCls
+    new_basis = new_material.basis_instance
     new_basis.filter_atoms_by_ids(filtered_label_ids)
     new_material.basis = BasisSchema(**new_basis.model_dump())
     return new_material
@@ -80,7 +80,7 @@ def translate_by_vector(
         Material: The translated material object.
     """
     if not use_cartesian_coordinates:
-        vector = material.basis.cell.convert_point_to_cartesian(vector)
+        vector = material.basis_instance.cell.convert_point_to_cartesian(vector)
 
     if vector is None:
         vector = [0, 0, 0]
@@ -143,7 +143,7 @@ def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> M
         Material: The filtered material object.
     """
     new_material = material.clone()
-    new_basis = new_material.BasisCls
+    new_basis = new_material.basis_instance
     if invert is True:
         ids = list(set(new_basis.elements.ids) - set(ids))
     new_basis.filter_atoms_by_ids(ids)
@@ -201,7 +201,7 @@ def filter_by_layers(
         Material: The filtered material object.
     """
     if central_atom_id is not None:
-        center_coordinate = material.basis.coordinates.get_element_value_by_index(central_atom_id)
+        center_coordinate = material.basis_instance.coordinates.get_element_value_by_index(central_atom_id)
     vectors = material.lattice.vectors
     direction_vector = vectors.c
 
@@ -528,7 +528,7 @@ def add_vacuum_sides(material: Material, vacuum: float = 5.0, on_x=False, on_y=F
     min_y = get_atomic_coordinates_extremum(new_material, "min", "y", use_cartesian_coordinates=True)
     max_y = get_atomic_coordinates_extremum(new_material, "max", "y", use_cartesian_coordinates=True)
 
-    new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector = new_material.LatticeCls.vector_arrays
+    new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector = new_material.lattice_instance.vector_arrays
     if on_x:
         new_x_length = max_x - min_x + 2 * vacuum
         new_lattice_a_vector = [new_x_length, 0, 0]
@@ -561,7 +561,7 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
         Material: The material object with the vacuum thickness set.
     """
     translated_material = translate_to_z_level(material, z_level="bottom")
-    new_basis = translated_material.basis
+    new_basis = translated_material.basis_instance
     new_basis.to_cartesian()
     new_lattice = translated_material.lattice
     new_lattice.c = get_atomic_coordinates_extremum(translated_material, use_cartesian_coordinates=True) + fixed_padding
@@ -569,8 +569,8 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
     new_basis.to_crystal()
     new_material = material.clone()
 
-    new_material.BasisCls = new_basis
-    new_material.LatticeCls = new_lattice
+    new_material.basis_instance = new_basis
+    new_material.lattice_instance = new_lattice
 
     if from_top and not from_bottom:
         new_material = translate_to_z_level(new_material, z_level="top")
@@ -592,10 +592,10 @@ def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True,
     Returns:
         Atoms: The rotated material.
     """
-    if material.basis.is_in_cartesian_units:
-        crystal_basis = material.basis.copy()
+    if material.basis_instance.is_in_cartesian_units:
+        crystal_basis = material.basis_instance
         crystal_basis.to_crystal()
-        material.basis = crystal_basis
+        material.basis = BasisSchema(**crystal_basis.model_dump())
     atoms = to_ase(material)
     atoms.rotate(v=axis, a=angle, center="COU", rotate_cell=rotate_cell)
     if wrap:
@@ -625,12 +625,12 @@ def interface_displace_part(
     new_material = interface.clone()
     if use_cartesian_coordinates:
         new_material.to_cartesian()
-    labels_array = new_material.BasisCls.labels.to_array_of_values_with_ids()
+    labels_array = new_material.basis_instance.labels.to_array_of_values_with_ids()
     displaced_label_ids = [_label.id for _label in labels_array if _label.value == int(label)]
 
-    new_coordinates_values = new_material.BasisCls.coordinates.values
+    new_coordinates_values = new_material.basis_instance.coordinates.values
     for atom_id in displaced_label_ids:
-        current_coordinate = new_material.BasisCls.coordinates.get_element_value_by_index(atom_id)
+        current_coordinate = new_material.basis_instance.coordinates.get_element_value_by_index(atom_id)
         new_atom_coordinate = np.array(current_coordinate) + np.array(displacement)
         new_coordinates_values[atom_id] = new_atom_coordinate
 
@@ -647,6 +647,6 @@ def interface_get_part(
     if interface.metadata["build"]["configuration"]["type"] != "InterfaceConfiguration":
         raise ValueError("The material is not an interface.")
     interface_part_material = interface.clone()
-    film_atoms_basis = interface_part_material.BasisCls.filter_atoms_by_labels([int(part)])
-    interface_part_material.BasisCls = film_atoms_basis
+    film_atoms_basis = interface_part_material.basis_instance.filter_atoms_by_labels([int(part)])
+    interface_part_material.basis_instance = film_atoms_basis
     return interface_part_material
