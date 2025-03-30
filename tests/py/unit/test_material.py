@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 from mat3ra.made.basis import Basis
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
@@ -31,6 +32,15 @@ def test_create():
 def test_material_to_json():
     material = Material.create_default()
     # Remove all keys that are null in the config
+    assert_two_entities_deep_almost_equal(material, Material.__default_config__)
+
+
+def test_material_to_from_cartesian():
+    material = Material.create_default()
+    material.basis.to_cartesian()
+    assert np.allclose(material.basis.coordinates.values[1], [1.1163, 0.7893, 1.9335], atol=1e-4)
+    material.basis.to_crystal()
+    assert np.allclose(material.basis.coordinates.values[1], [0.25, 0.25, 0.25], atol=1e-4)
     assert_two_entities_deep_almost_equal(material, Material.__default_config__)
 
 

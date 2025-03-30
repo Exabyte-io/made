@@ -19,7 +19,7 @@ def test_calculate_surface_area():
 
 
 def test_radial_distribution_function():
-    material = Material(**GRAPHENE_ZIGZAG_NANORIBBON)
+    material = Material.create(GRAPHENE_ZIGZAG_NANORIBBON)
 
     rdf = RadialDistributionFunction.from_material(material, cutoff=10.0, bin_size=0.1)
 

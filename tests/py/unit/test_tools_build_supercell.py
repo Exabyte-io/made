@@ -12,4 +12,4 @@ def test_create_supercell():
     supercell_matrix = [[2, 0, 0], [0, 2, 0], [0, 0, 1]]
     supercell_material = create_supercell(material, supercell_matrix)
 
-    assertion_utils.assert_deep_almost_equal(supercell_material.to_json(), si_supercell_2x2x1.to_json())
+    assertion_utils.assert_deep_almost_equal(supercell_material.to_dict(), si_supercell_2x2x1.to_json())
