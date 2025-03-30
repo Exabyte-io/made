@@ -1,21 +1,20 @@
-import json
 from typing import Any, Dict, List, Optional, Union
 
 from mat3ra.code.constants import AtomicCoordinateUnits
+from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.material import BasisSchema
-from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import Field
 
 from .cell import Cell
 from .utils import ArrayWithIds, get_overlapping_coordinates
 
 
-class Basis(RoundNumericValuesMixin, BasisSchema):
+class Basis(BasisSchema, InMemoryEntityPydantic):
     elements: ArrayWithIds
     coordinates: ArrayWithIds
-    cell: Optional[Cell] = Field(Cell(), exclude=True)
-    labels: Optional[ArrayWithIds] = ArrayWithIds(values=[])
-    constraints: Optional[ArrayWithIds] = ArrayWithIds(values=[])
+    cell: Cell = Field(Cell(), exclude=True)
+    labels: Optional[ArrayWithIds] = ArrayWithIds.from_values([])
+    constraints: Optional[ArrayWithIds] = ArrayWithIds.from_values([])
 
     def __init__(self, *args: Any, **kwargs: Any):
         if isinstance(kwargs.get("elements"), list):
@@ -34,7 +33,7 @@ class Basis(RoundNumericValuesMixin, BasisSchema):
         elements: List[Dict],
         coordinates: List[Dict],
         units: str,
-        cell: [List[List[float]]],
+        cell: List[List[float]],
         labels: Optional[List[Dict]] = None,
         constraints: Optional[List[Dict]] = None,
     ) -> "Basis":
@@ -47,14 +46,14 @@ class Basis(RoundNumericValuesMixin, BasisSchema):
             constraints=ArrayWithIds.from_list_of_dicts(constraints) if constraints else ArrayWithIds(values=[]),
         )
 
-    def to_json(self, skip_rounding=False):
-        json_value = {
-            "elements": self.elements.to_json(),
-            "coordinates": self.coordinates.to_json(skip_rounding=skip_rounding),
-            "units": self.units,
-            "labels": self.labels.to_json(),
-        }
-        return json.loads(json.dumps(json_value))
+    # def to_json(self, skip_rounding=False):
+    #     json_value = {
+    #         "elements": self.elements.to_json(),
+    #         "coordinates": self.coordinates.to_json(skip_rounding=skip_rounding),
+    #         "units": self.units,
+    #         "labels": self.labels.to_json(),
+    #     }
+    #     return json.loads(json.dumps(json_value))
 
     def clone(self):
         return Basis(

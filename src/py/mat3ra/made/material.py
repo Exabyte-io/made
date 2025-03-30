@@ -81,6 +81,7 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         original_is_in_crystal = self.basis.is_in_crystal_units
         self.to_cartesian()
         self.lattice = Lattice.from_vectors_array([lattice_vector1, lattice_vector2, lattice_vector3])
+        self.basis.cell = self.lattice.cell
         if original_is_in_crystal:
             self.to_crystal()
 

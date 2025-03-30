@@ -151,7 +151,7 @@ class ValueWithId(RoundNumericValuesMixin, BaseModel):
 
 class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
     values: List[Any]
-    ids: Optional[List[int]] = None
+    ids: List[int]
 
     @classmethod
     def from_values(cls, values: List[Any]) -> "ArrayWithIds":
