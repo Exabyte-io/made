@@ -122,12 +122,12 @@ def get_closest_site_id_from_coordinate_and_element(
     new_material = material.clone()
     if use_cartesian_coordinates:
         new_material.to_cartesian()
-    coordinates = np.array(new_material.basis_instance.coordinates.values)
+    coordinates = np.array(new_material.basis.coordinates.values)
     coordinate = np.array(coordinate)  # type: ignore
     distances = np.linalg.norm(coordinates - coordinate, axis=1)
 
     if chemical_element is not None:
-        elements = np.array(new_material.basis_instance.elements.values)
+        elements = np.array(new_material.basis.elements.values)
         element_indices = np.where(elements == chemical_element)[0]
         distances = distances[element_indices]
         return int(element_indices[np.argmin(distances)])
@@ -263,13 +263,13 @@ def get_atom_indices_with_condition_on_coordinates(
         List[int]: List of indices of atoms whose coordinates satisfy the condition.
     """
     new_material = material.clone()
-    new_basis = new_material.basis_instance
+    new_basis = new_material.basis
     if use_cartesian_coordinates:
         new_basis.to_cartesian()
     else:
         new_basis.to_crystal()
-    new_material.basis_instance = new_basis
-    coordinates = new_material.basis_instance.coordinates.to_array_of_values_with_ids()
+    new_material.basis = new_basis
+    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
 
     selected_indices = []
     for coord in coordinates:
@@ -297,13 +297,13 @@ def get_atomic_coordinates_extremum(
         float: Minimum or maximum of coordinates along the specified axis.
     """
     new_material = material.clone()
-    new_basis = new_material.basis_instance
+    new_basis = new_material.basis
     if use_cartesian_coordinates:
         new_basis.to_cartesian()
     else:
         new_basis.to_crystal()
-    new_material.basis_instance = new_basis
-    coordinates = new_material.basis_instance.coordinates.to_array_of_values_with_ids()
+    new_material.basis = new_basis
+    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
     values = [coord.value[{"x": 0, "y": 1, "z": 2}[axis]] for coord in coordinates]
     return getattr(np, extremum)(values)
 
@@ -362,8 +362,8 @@ def get_surface_atom_indices(
     """
     new_material = material.clone()
     new_material.to_cartesian()
-    coordinates = np.array(new_material.basis_instance.coordinates.values)
-    ids = new_material.basis_instance.coordinates.ids
+    coordinates = np.array(new_material.basis.coordinates.values)
+    ids = new_material.basis.coordinates.ids
 
     # Get z-extremum and sort atoms by z-coordinate
     z_coords = coordinates[:, 2]
@@ -436,10 +436,10 @@ def get_local_extremum_atom_index(
     new_material = material.clone()
     new_material.to_cartesian()
     if not use_cartesian_coordinates:
-        coordinate = new_material.basis_instance.cell.convert_point_to_cartesian(coordinate)
+        coordinate = new_material.basis.cell.convert_point_to_cartesian(coordinate)
 
-    coordinates = np.array(new_material.basis_instance.coordinates.values)
-    ids = np.array(new_material.basis_instance.coordinates.ids)
+    coordinates = np.array(new_material.basis.coordinates.values)
+    ids = np.array(new_material.basis.coordinates.ids)
     tree = cKDTree(coordinates[:, :2])
     indices = tree.query_ball_point(coordinate[:2], vicinity)
     z_values = [(id, coord[2]) for id, coord in zip(ids[indices], coordinates[indices])]

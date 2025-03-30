@@ -161,7 +161,7 @@ perturbed_slab = create_perturbation(perturbation_config,
 Finally, one can review the content of the material:
 
 ```python
-print(perturbed_slab.to_json())
+print(perturbed_slab.to_dict())
 ```
 
 

@@ -61,6 +61,7 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
     def model_post_init(self, __context: Any) -> None:
         if not self.name and self.formula:
             self.name: str = self.formula
+        self.basis.cell = self.lattice.cell
 
     @property
     def coordinates_array(self) -> List[List[float]]:

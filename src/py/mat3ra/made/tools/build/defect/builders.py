@@ -306,12 +306,12 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         if position_on_surface is None:
             position_on_surface = [0.5, 0.5]
         new_material = material.clone()
-        new_basis = new_material.basis_instance
+        new_basis = new_material.basis
         adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
             material, position_on_surface, distance_z
         )
         new_basis.add_atom(chemical_element, adatom_coordinate)
-        new_material.basis_instance = new_basis
+        new_material.basis = new_basis
         return new_material
 
     def _calculate_coordinate_from_position_and_distance(

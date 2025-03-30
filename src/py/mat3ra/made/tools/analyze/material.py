@@ -12,7 +12,7 @@ from .utils import decorator_handle_periodic_boundary_conditions
 
 
 class MaterialWithCrystalSites(Material):
-    crystal_sites: CrystalSiteList = CrystalSiteList(values=[])
+    crystal_sites: CrystalSiteList = CrystalSiteList.from_values([])
 
     @classmethod
     def from_material(cls, material: Material):

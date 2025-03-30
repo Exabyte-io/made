@@ -10,7 +10,7 @@ class BaseMaterialAnalyzer:
 
     @property
     def volume(self):
-        return self.material.basis_instance.cell.volume
+        return self.material.basis.cell.volume
 
     @property
     def atomic_density(self):

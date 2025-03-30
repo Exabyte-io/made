@@ -55,7 +55,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> P
     labels_data = basis.get("labels", []) or []
     labels = [label["value"] for label in labels_data]
     # Assuming that the basis units are fractional since it's a crystal basis
-    coords_are_cartesian = "units" in basis and basis["units"].lower() == "angstrom"
+    coords_are_cartesian = "units" in basis and basis["units"] == "angstrom"
 
     if "labels" in inspect.signature(PymatgenStructure.__init__).parameters:
         structure = PymatgenStructure(

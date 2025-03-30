@@ -24,7 +24,7 @@ class Cell(RoundNumericValuesMixin, BaseModel):
             return [self.vector1, self.vector2, self.vector3]
         return self.round_array_or_number([self.vector1, self.vector2, self.vector3])
 
-    def to_json(self, skip_rounding=False):
+    def to_list(self, skip_rounding=False) -> List[List[float]]:
         _ = self.round_array_or_number
         return [
             self.vector1 if skip_rounding else _(self.vector1),
@@ -42,11 +42,13 @@ class Cell(RoundNumericValuesMixin, BaseModel):
 
     def convert_point_to_cartesian(self, point: List[float]) -> List[float]:
         np_vector = np.array(self.vectors_as_array)
-        return np.dot(point, np_vector)
+        result_list = np.dot(point, np_vector).tolist()
+        return self.round_array_or_number(result_list)
 
     def convert_point_to_crystal(self, point: List[float]) -> List[float]:
         np_vector = np.array(self.vectors_as_array)
-        return np.dot(point, np.linalg.inv(np_vector))
+        result_list = np.dot(point, np.linalg.inv(np_vector)).tolist()
+        return self.round_array_or_number(result_list)
 
     def scale_by_matrix(self, matrix: List[List[float]]):
         np_vector = np.array(self.vectors_as_array)
