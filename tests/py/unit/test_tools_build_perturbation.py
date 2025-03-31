@@ -10,7 +10,7 @@ from .fixtures import GRAPHENE
 
 
 def test_sine_perturbation():
-    material = Material(**GRAPHENE)
+    material = Material.create(GRAPHENE)
     slab = create_supercell(material, [[10, 0, 0], [0, 10, 0], [0, 0, 1]])
 
     perturbation_config = PerturbationConfiguration(
@@ -26,7 +26,7 @@ def test_sine_perturbation():
 
 
 def test_distance_preserved_sine_perturbation():
-    material = Material(**GRAPHENE)
+    material = Material.create(GRAPHENE)
     slab = create_supercell(material, [[10, 0, 0], [0, 10, 0], [0, 0, 1]])
 
     perturbation_config = PerturbationConfiguration(

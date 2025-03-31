@@ -93,7 +93,7 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
             type = DEFAULT_TYPE
         return cls(a=float(a), b=float(b), c=float(c), alpha=alpha, beta=beta, gamma=gamma, units=units, type=type)
 
-    def to_json(self, skip_rounding: bool = False) -> Dict[str, Any]:
+    def to_dict(self, skip_rounding: bool = False) -> Dict[str, Any]:
         __round__ = RoundNumericValuesMixin.round_array_or_number
         round_func = __round__ if not skip_rounding else lambda x: x
         return {
@@ -111,7 +111,7 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
     def clone(self, extra_context: Optional[Dict[str, Any]] = None) -> "Lattice":
         if extra_context is None:
             extra_context = {}
-        return Lattice(**{**self.to_json(), **extra_context})
+        return Lattice(**{**self.to_dict(), **extra_context})
 
     @property
     def vector_arrays(self) -> List[List[float]]:

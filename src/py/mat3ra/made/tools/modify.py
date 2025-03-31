@@ -88,7 +88,7 @@ def translate_by_vector(
     atoms = to_ase(material)
     # ASE accepts cartesian coordinates for translation
     atoms.translate(tuple(vector))
-    return Material(**from_ase(atoms))
+    return Material.create(from_ase(atoms))
 
 
 def translate_to_center(material: Material, axes: Optional[List[str]] = None) -> Material:
@@ -127,7 +127,7 @@ def wrap_to_unit_cell(material: Material) -> Material:
     """
     atoms = to_ase(material)
     atoms.wrap()
-    return Material(**from_ase(atoms))
+    return Material.create(from_ase(atoms))
 
 
 def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> Material:
@@ -500,7 +500,7 @@ def add_vacuum(material: Material, vacuum: float = 5.0, on_top=True, to_bottom=F
     new_material_atoms = to_ase(material)
     vacuum_amount = vacuum * 2 if on_top and to_bottom else vacuum
     ase_add_vacuum(new_material_atoms, vacuum_amount)
-    new_material = Material(**from_ase(new_material_atoms))
+    new_material = Material.create(from_ase(new_material_atoms))
     if to_bottom and not on_top:
         new_material = translate_to_z_level(new_material, z_level="top")
     elif on_top and to_bottom:
@@ -601,7 +601,7 @@ def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True,
     if wrap:
         atoms.wrap()
 
-    return Material(**from_ase(atoms))
+    return Material.create(from_ase(atoms))
 
 
 def interface_displace_part(

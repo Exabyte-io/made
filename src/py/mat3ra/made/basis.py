@@ -55,15 +55,16 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     #     }
     #     return json.loads(json.dumps(json_value))
 
-    def clone(self):
-        return Basis(
-            elements=self.elements,
-            coordinates=self.coordinates,
-            units=self.units,
-            cell=self.cell,
-            isEmpty=False,
-            labels=self.labels,
-        )
+    # def clone(self):
+    #     return Basis(
+    #         elements=self.elements,
+    #         coordinates=self.coordinates,
+    #         units=self.units,
+    #         cell=self.cell,
+    #         isEmpty=False,
+    #         labels=self.labels,
+    #         constraints=self.constraints,
+    #     )
 
     @property
     def is_in_crystal_units(self):

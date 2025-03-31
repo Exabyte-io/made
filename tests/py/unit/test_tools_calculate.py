@@ -19,10 +19,10 @@ interface = nickel_slab.copy()
 add_adsorbate(interface, graphene_layer, height=2, position="ontop")
 
 # Material objects setup
-interface_material = Material(**from_ase(interface))
-nickel_slab_material = Material(**from_ase(nickel_slab))
-nickel_bulk_material = Material(**from_ase(bulk("Ni", "fcc", a=3.52)))
-graphene_layer_material = Material(**from_ase(graphene_layer))
+interface_material = Material.create(from_ase(interface))
+nickel_slab_material = Material.create(from_ase(nickel_slab))
+nickel_bulk_material = Material.create(from_ase(bulk("Ni", "fcc", a=3.52)))
+graphene_layer_material = Material.create(from_ase(graphene_layer))
 graphene_bulk_material = graphene_layer
 
 # Calculator setup

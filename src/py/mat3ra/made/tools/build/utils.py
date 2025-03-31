@@ -49,6 +49,7 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
         units=basis1.units,
         cell=basis1.cell,
         labels=ArrayWithIds.from_values(values=merged_labels_values),
+        constraints=basis1.constraints,
     )
     resolved_basis = resolve_close_coordinates_basis(merged_basis, distance_tolerance)
 
@@ -69,7 +70,7 @@ def merge_two_materials(
 
     name = material_name or "Merged Material"
     new_material = Material.create(
-        {"name": name, "lattice": merged_lattice.to_json(), "basis": resolved_basis.to_json()}
+        {"name": name, "lattice": merged_lattice.to_dict(), "basis": resolved_basis.to_dict()}
     )
     new_material.metadata = {**material1.metadata, **material2.metadata}
     return new_material

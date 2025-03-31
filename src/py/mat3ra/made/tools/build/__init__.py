@@ -98,7 +98,7 @@ class BaseBuilder(BaseModel):
     ) -> List[Material]:
         if self._GeneratedItemType == Material:
             return items
-        return [Material(**self._convert_generated_item(item)) for item in items]
+        return [Material.create(self._convert_generated_item(item)) for item in items]
 
     @staticmethod
     def _convert_generated_item(item: _GeneratedItemType):

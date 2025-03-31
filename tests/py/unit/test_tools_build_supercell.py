@@ -4,7 +4,7 @@ from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures import SI_SUPERCELL_2X2X1
 
-si_supercell_2x2x1 = Material(**SI_SUPERCELL_2X2X1)
+si_supercell_2x2x1 = Material.create(SI_SUPERCELL_2X2X1)
 
 
 def test_create_supercell():

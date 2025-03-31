@@ -17,7 +17,7 @@ from .fixtures import GRAPHENE
 
 @pytest.mark.skip(reason="Test is failing on GHA due to slab generation differences between GHA and local")
 def test_slab_grain_boundary_builder():
-    material = Material(**Material.default_config)
+    material = Material.create(Material.default_config)
     phase_1_configuration = SlabConfiguration(
         bulk=material,
         vacuum=0,

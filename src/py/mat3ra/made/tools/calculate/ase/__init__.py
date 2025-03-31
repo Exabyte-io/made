@@ -100,7 +100,7 @@ class FilmSubstrateDistanceASECalculator(ASECalculator):
             for j in range(3):
                 atoms_plus = atoms.copy()
                 atoms_plus.positions[i, j] += dx
-                material_plus = Material(**from_ase(atoms_plus))
+                material_plus = Material.create(from_ase(atoms_plus))
                 energy_plus = self.material_calculator.get_energy(material_plus)
 
                 forces[i, j] = -(energy_plus - energy) / dx
@@ -115,7 +115,7 @@ class FilmSubstrateDistanceASECalculator(ASECalculator):
         constraints = atoms.constraints
 
         super().calculate(atoms, properties, system_changes)
-        material = Material(**from_ase(atoms))
+        material = Material.create(from_ase(atoms))
         energy = self.material_calculator.get_energy(material)
 
         self.results = {"energy": energy}
