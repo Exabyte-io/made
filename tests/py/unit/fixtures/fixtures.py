@@ -10,7 +10,7 @@ from mat3ra.made.tools.convert import from_ase
 from pymatgen.analysis.elasticity.strain import Strain
 from pymatgen.core.interface import Interface
 
-from .utils import atoms_to_interface_structure
+from unit.utils import atoms_to_interface_structure
 
 # ASE Atoms fixtures
 substrate = bulk("Si", cubic=True)
@@ -98,18 +98,9 @@ SI_CONVENTIONAL_CELL: Dict[str, Any] = {
         "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [5.468763846, 0.0, 0.0],
-            "b": [-0.0, 5.468763846, 0.0],
-            "c": [0.0, 0.0, 5.468763846],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
-    "_id": "",
     "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-    "isUpdated": True,
 }
 
 SI_SUPERCELL_2X2X1: Dict[str, Any] = {
@@ -148,18 +139,9 @@ SI_SUPERCELL_2X2X1: Dict[str, Any] = {
         "gamma": 60.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [6.697840473, 0.0, 3.867],
-            "b": [2.232613491, 6.314784557, 3.867],
-            "c": [0.0, 0.0, 3.867],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
-    "_id": "",
     "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-    "isUpdated": True,
 }
 
 SI_SLAB_CONFIGURATION: Dict[str, Any] = {
@@ -210,16 +192,8 @@ SI_SLAB_100: Dict[str, Any] = {
         "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [3.867, 0.0, 0.0],
-            "b": [-0.0, 3.867, 0.0],
-            "c": [0.0, 0.0, 15.937527692],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
-    "_id": "",
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
@@ -262,18 +236,9 @@ SI_SLAB_100: Dict[str, Any] = {
                         "gamma": 90.0,
                         "units": {"length": "angstrom", "angle": "degree"},
                         "type": "TRI",
-                        "vectors": {
-                            "a": [5.468763846, 0.0, 0.0],
-                            "b": [-0.0, 5.468763846, 0.0],
-                            "c": [0.0, 0.0, 5.468763846],
-                            "alat": 1,
-                            "units": "angstrom",
-                        },
                     },
                     "isNonPeriodic": False,
-                    "_id": "",
                     "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-                    "isUpdated": True,
                 },
                 "miller_indices": (0, 0, 1),
                 "thickness": 2,
@@ -285,7 +250,6 @@ SI_SLAB_100: Dict[str, Any] = {
             },
         },
     },
-    "isUpdated": True,
 }
 
 SI_SLAB: Dict[str, Any] = {
@@ -309,21 +273,12 @@ SI_SLAB: Dict[str, Any] = {
         "gamma": 60.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [3.867, 0.0, 0.0],
-            "b": [1.9335, 3.348920236, 0.0],
-            "c": [0.0, 0.0, 8.157392279],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
-    "_id": "",
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {"configuration": SI_SLAB_CONFIGURATION, "termination": "Si_P4/mmm_1"},
     },
-    "isUpdated": True,
 }
 
 SI_SLAB_PASSIVATED = {
@@ -353,16 +308,8 @@ SI_SLAB_PASSIVATED = {
         "gamma": 60.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [3.867, 0.0, 0.0],
-            "b": [1.9335, 3.348920236, 0.0],
-            "c": [0.0, 0.0, 8.157392279],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
-    "_id": "",
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
@@ -377,7 +324,6 @@ SI_SLAB_PASSIVATED = {
             "termination": "Si_P4/mmm_1",
         },
     },
-    "isUpdated": True,
 }
 
 SI_SLAB_VACUUM = copy.deepcopy(SI_SLAB)
@@ -387,7 +333,6 @@ SI_SLAB_VACUUM["basis"]["coordinates"] = [
 ]
 # SI_SLAB_VACUUM["basis"]["cell"] = [[3.867, 0.0, 0.0], [1.9335, 3.348920236, 0.0], [0.0, 0.0, 13.157392279]]
 SI_SLAB_VACUUM["lattice"]["c"] = 13.157392279
-SI_SLAB_VACUUM["lattice"]["vectors"]["c"] = [0.0, 0.0, 13.157392279]
 
 clean_material = Material.create_default()
 slab_111_config = SlabConfiguration(
@@ -429,13 +374,6 @@ GRAPHENE = {
         "gamma": 120,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "HEX",
-        "vectors": {
-            "a": [2.467291, 0, 0],
-            "b": [-1.233645, 2.136737, 0],
-            "c": [0, 0, 20],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
 }
@@ -492,16 +430,8 @@ GRAPHENE_ZIGZAG_NANORIBBON: Dict[str, Any] = {
         "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [9.869164, 0.0, 0.0],
-            "b": [-0.0, 10.683683422, 0.0],
-            "c": [0.0, 0.0, 20.0],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
-    "_id": "",
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
@@ -515,7 +445,6 @@ GRAPHENE_ZIGZAG_NANORIBBON: Dict[str, Any] = {
             }
         },
     },
-    "isUpdated": True,
 }
 
 GRAPHENE_ARMCHAIR_NANORIBBON = {
@@ -570,16 +499,8 @@ GRAPHENE_ARMCHAIR_NANORIBBON = {
         "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [8.546946738, 0.0, 0.0],
-            "b": [-0.0, 12.336455, 0.0],
-            "c": [0.0, 0.0, 20.0],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
-    "_id": "",
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
@@ -593,7 +514,6 @@ GRAPHENE_ARMCHAIR_NANORIBBON = {
             }
         },
     },
-    "isUpdated": True,
 }
 
 GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
@@ -663,16 +583,8 @@ GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
         "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [9.869164, 0.0, 0.0],
-            "b": [-0.0, 10.683683422, 0.0],
-            "c": [0.0, 0.0, 20.0],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
-    "_id": "",
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
@@ -686,7 +598,6 @@ GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
             }
         },
     },
-    "isUpdated": True,
 }
 
 GRAPHENE_NICKEL_INTERFACE = {
@@ -725,16 +636,8 @@ GRAPHENE_NICKEL_INTERFACE = {
         "gamma": 60.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [2.478974, 0.0, 0.0],
-            "b": [1.239487, 2.14685446, 0.0],
-            "c": [0.0, 0.0, 27.048147591],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
     "isNonPeriodic": False,
-    "_id": "",
     "metadata": {
         "interface_properties": {
             "film_sl_vectors": [[2.467291, 0.0, 0.0], [1.2336455, -2.136736685, -0.0]],
@@ -796,18 +699,9 @@ GRAPHENE_NICKEL_INTERFACE = {
                             "gamma": 90.0,
                             "units": {"length": "angstrom", "angle": "degree"},
                             "type": "TRI",
-                            "vectors": {
-                                "a": [3.505798652, 0.0, 0.0],
-                                "b": [-0.0, 3.505798652, 0.0],
-                                "c": [0.0, 0.0, 3.505798652],
-                                "alat": 1,
-                                "units": "angstrom",
-                            },
                         },
                         "isNonPeriodic": False,
-                        "_id": "",
                         "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-                        "isUpdated": True,
                     },
                     "miller_indices": [1, 1, 1],
                     "thickness": 3,
@@ -824,5 +718,4 @@ GRAPHENE_NICKEL_INTERFACE = {
             }
         },
     },
-    "isUpdated": True,
 }
