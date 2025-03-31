@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from mat3ra.code.constants import AtomicCoordinateUnits
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.esse.models.material import BasisSchema
+from mat3ra.esse.models.material import BasisSchema, Units
 from pydantic import Field
 
 from .cell import Cell
@@ -68,11 +68,11 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
 
     @property
     def is_in_crystal_units(self):
-        return self.units == AtomicCoordinateUnits.crystal
+        return self.units == Units.crystal
 
     @property
     def is_in_cartesian_units(self):
-        return self.units == AtomicCoordinateUnits.cartesian
+        return self.units == Units.cartesian
 
     def to_cartesian(self):
         if self.is_in_cartesian_units:
