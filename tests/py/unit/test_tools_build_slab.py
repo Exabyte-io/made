@@ -5,9 +5,8 @@ from mat3ra.made.tools.build.slab import (
     create_slab,
     get_terminations,
 )
-from mat3ra.utils import assertion as assertion_utils
+from unit.fixtures.slab import SI_SLAB_100
 
-from .fixtures import SI_SLAB_100
 from .utils import assert_two_entities_deep_almost_equal
 
 material = Material.create_default()

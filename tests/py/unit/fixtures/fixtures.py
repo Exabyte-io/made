@@ -9,7 +9,6 @@ from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, get_ter
 from mat3ra.made.tools.convert import from_ase
 from pymatgen.analysis.elasticity.strain import Strain
 from pymatgen.core.interface import Interface
-
 from unit.utils import atoms_to_interface_structure
 
 # ASE Atoms fixtures

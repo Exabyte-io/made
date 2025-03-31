@@ -8,8 +8,12 @@ from mat3ra.made.tools.build.passivation.builders import (
 )
 from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
 from mat3ra.utils import assertion as assertion_utils
-
-from .fixtures import GRAPHENE_ZIGZAG_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED, SI_SLAB, SI_SLAB_PASSIVATED
+from unit.fixtures.fixtures import (
+    GRAPHENE_ZIGZAG_NANORIBBON,
+    GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED,
+    SI_SLAB,
+    SI_SLAB_PASSIVATED,
+)
 
 
 def test_passivate_surface():

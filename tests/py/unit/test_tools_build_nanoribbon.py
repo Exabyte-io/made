@@ -2,8 +2,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build.nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from mat3ra.made.tools.build.nanoribbon.enums import EdgeTypes
 from mat3ra.utils import assertion as assertion_utils
-
-from .fixtures import GRAPHENE, GRAPHENE_ARMCHAIR_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON
+from unit.fixtures.fixtures import GRAPHENE, GRAPHENE_ARMCHAIR_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON
 
 
 def test_build_zigzag_nanoribbon():

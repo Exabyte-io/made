@@ -17,8 +17,8 @@ from mat3ra.made.tools.modify import (
     translate_to_z_level,
 )
 from mat3ra.utils import assertion as assertion_utils
-
-from .fixtures import GRAPHENE_NICKEL_INTERFACE, SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
+from unit.fixtures.fixtures import GRAPHENE_NICKEL_INTERFACE, SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
+from unit.utils import assert_two_entities_deep_almost_equal
 
 COMMON_PART = {
     "units": "crystal",
@@ -107,16 +107,16 @@ def test_filter_by_layers():
     material = Material.create(SI_CONVENTIONAL_CELL)
     section = filter_by_layers(material=material, central_atom_id=0, layer_thickness=3.0)
     cavity = filter_by_layers(material=material, central_atom_id=0, layer_thickness=3.0, invert_selection=True)
-    assertion_utils.assert_deep_almost_equal(expected_basis_layers_section, section.basis.to_json())
-    assertion_utils.assert_deep_almost_equal(expected_basis_layers_cavity, cavity.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_basis_layers_section, section.basis.to_dict())
+    assertion_utils.assert_deep_almost_equal(expected_basis_layers_cavity, cavity.basis.to_dict())
 
 
 def test_filter_by_sphere():
     material = Material.create(SI_CONVENTIONAL_CELL)
     cluster = filter_by_sphere(material, center_coordinate=CRYSTAL_CENTER_3D, radius=CRYSTAL_RADIUS)
     cavity = filter_by_sphere(material, center_coordinate=CRYSTAL_CENTER_3D, radius=CRYSTAL_RADIUS, invert=True)
-    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, cluster.basis.to_json())
-    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, cluster.basis.to_dict())
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_dict())
 
 
 def test_filter_by_circle_projection():
@@ -124,15 +124,16 @@ def test_filter_by_circle_projection():
     # Small cylinder in the middle of the cell containing the central atom will be removed -- the same as with sphere
     section = filter_by_circle_projection(material, 0.5, 0.5, CRYSTAL_RADIUS)
     cavity = filter_by_circle_projection(material, 0.5, 0.5, CRYSTAL_RADIUS, invert_selection=True)
-    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, section.basis.to_json())
-    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_json())
+    assert_two_entities_deep_almost_equal(expected_basis_sphere_cluster, section.basis.to_dict())
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, section.basis.to_dict())
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_dict())
 
 
 def test_filter_by_rectangle_projection():
     material = Material.create(SI_CONVENTIONAL_CELL)
     # Default will contain all the atoms
     section = filter_by_rectangle_projection(material)
-    assertion_utils.assert_deep_almost_equal(material.basis.to_json(), section.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(material.basis.to_dict(), section.basis.to_dict())
 
 
 def test_filter_by_triangle_projection():
@@ -140,14 +141,14 @@ def test_filter_by_triangle_projection():
     material = Material.create(SI_CONVENTIONAL_CELL)
     section = filter_by_triangle_projection(material, [0.4, 0.4], [0.4, 0.5], [0.5, 0.5])
     cavity = filter_by_triangle_projection(material, [0.4, 0.4], [0.4, 0.5], [0.5, 0.5], invert_selection=True)
-    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, section.basis.to_json())
-    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_json())
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cluster, section.basis.to_dict())
+    assertion_utils.assert_deep_almost_equal(expected_basis_sphere_cavity, cavity.basis.to_dict())
 
 
 def test_add_vacuum():
     material = Material.create(SI_SLAB)
     material_with_vacuum = add_vacuum(material, 5.0)
-    assertion_utils.assert_deep_almost_equal(SI_SLAB_VACUUM, material_with_vacuum.to_json())
+    assertion_utils.assert_deep_almost_equal(SI_SLAB_VACUUM, material_with_vacuum.to_dict())
 
 
 def test_remove_vacuum():
@@ -160,7 +161,7 @@ def test_remove_vacuum():
     material = Material.create(SI_SLAB)
     material_down = translate_to_z_level(material, z_level="bottom")
 
-    assertion_utils.assert_deep_almost_equal(material_down.to_json(), material_with_set_vacuum.to_json(), atol=1e-3)
+    assertion_utils.assert_deep_almost_equal(material_down.to_dict(), material_with_set_vacuum.to_dict(), atol=1e-3)
 
 
 def test_rotate():
