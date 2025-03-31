@@ -7,18 +7,9 @@ from mat3ra.made.material import Material
 from mat3ra.made.utils import ArrayWithIds
 from mat3ra.utils import assertion as assertion_utils
 
+from unit.utils import assert_two_entities_deep_almost_equal
+
 REFERENCE_OBJECT_1 = {"key1": "value1", "key2": "value2"}
-
-
-def assert_two_entities_deep_almost_equal(entity1, entity2):
-    dict_1 = json.loads(entity1.to_json())
-    dict_1_copy = dict_1.copy()
-    for key in dict_1:
-        if key not in entity2:
-            dict_1_copy.pop(key)
-    actual_data = json.dumps(dict_1_copy)
-    expected_data = json.dumps(entity2)
-    assertion_utils.assert_deep_almost_equal(expected_data, actual_data)
 
 
 def test_create():
