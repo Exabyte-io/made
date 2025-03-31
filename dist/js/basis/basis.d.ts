@@ -211,6 +211,15 @@ export declare class Basis {
     get atomicLabelsArray(): string[];
     get elementsWithLabelsArray(): string[];
     /**
+     * Strips any label associated with atomic symbol
+     * Possible labels:
+     *   (1) Fe1, Fe11
+     *   (2) Fe-a, Fe-b, Fe-1, Fe-1a
+     *   (3) Fe_a, Fe_b, Fe_1, Fe_1a
+     * As of Mar 2025, only single digit numerical labels are allowed
+     */
+    stripLabelToGetElementSymbol: (elementWithLabel: string) => string;
+    /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
      */

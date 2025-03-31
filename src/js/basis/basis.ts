@@ -457,6 +457,29 @@ export class Basis {
     }
 
     /**
+     * Strips any label associated with atomic symbol
+     * Possible labels:
+     *   (1) Fe1, Fe11
+     *   (2) Fe-a, Fe-b, Fe-1, Fe-1a
+     *   (3) Fe_a, Fe_b, Fe_1, Fe_1a
+     * As of Mar 2025, only single digit numerical labels are allowed
+     */
+    stripLabelToGetElementSymbol = (elementWithLabel: string): string => {
+        // Strip anything after `-` or `_`
+        let elementSymbol = elementWithLabel.split(/[- _]/)[0];
+
+        // Exclude digit labels at the end of the symbol if present
+        elementSymbol = elementSymbol.replace(/\d+$/, "");
+
+        // Return symbol in title case
+        elementSymbol =
+            elementSymbol.charAt(0).toUpperCase() + elementSymbol.slice(1).toLowerCase();
+
+        // We can improve by validating element symbol matches one from the periodic table
+        return elementSymbol;
+    };
+
+    /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
      */
