@@ -18,7 +18,6 @@ class Coordinate(RoundedValueWithId):
 
 
 class Coordinates(RoundedArrayWithIds):
-    __ValueWithIdClsReference__ = Coordinate
 
     def get_values_along_axis(
         self,
