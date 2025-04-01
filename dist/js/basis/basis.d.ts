@@ -218,7 +218,7 @@ export declare class Basis {
      *   (3) Fe_a, Fe_b, Fe_1, Fe_1a
      * As of Mar 2025, only single digit numerical labels are allowed
      */
-    stripLabelToGetElementSymbol: (elementWithLabel: string) => string;
+    static stripLabelToGetElementSymbol: (elementWithLabel: string) => string;
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```

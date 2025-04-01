@@ -19,25 +19,6 @@ class Basis {
     constructor({ elements = ["Si"], coordinates = [[0, 0, 0]], units, cell = Basis.defaultCell, // by default, assume a cubic unary cell
     isEmpty = false, // whether to generate an empty Basis
     labels = [], }) {
-        /**
-         * Strips any label associated with atomic symbol
-         * Possible labels:
-         *   (1) Fe1, Fe11
-         *   (2) Fe-a, Fe-b, Fe-1, Fe-1a
-         *   (3) Fe_a, Fe_b, Fe_1, Fe_1a
-         * As of Mar 2025, only single digit numerical labels are allowed
-         */
-        this.stripLabelToGetElementSymbol = (elementWithLabel) => {
-            // Strip anything after `-` or `_`
-            let elementSymbol = elementWithLabel.split(/[- _]/)[0];
-            // Exclude digit labels at the end of the symbol if present
-            elementSymbol = elementSymbol.replace(/\d+$/, "");
-            // Return symbol in title case
-            elementSymbol =
-                elementSymbol.charAt(0).toUpperCase() + elementSymbol.slice(1).toLowerCase();
-            // We can improve by validating element symbol matches one from the periodic table
-            return elementSymbol;
-        };
         const _elements = isEmpty ? [] : elements;
         const _coordinates = isEmpty ? [] : coordinates;
         const _units = units || Basis.unitsOptionsDefaultValue;
@@ -537,3 +518,22 @@ class Basis {
     }
 }
 exports.Basis = Basis;
+/**
+ * Strips any label associated with atomic symbol
+ * Possible labels:
+ *   (1) Fe1, Fe11
+ *   (2) Fe-a, Fe-b, Fe-1, Fe-1a
+ *   (3) Fe_a, Fe_b, Fe_1, Fe_1a
+ * As of Mar 2025, only single digit numerical labels are allowed
+ */
+Basis.stripLabelToGetElementSymbol = (elementWithLabel) => {
+    // Strip anything after `-` or `_`
+    let elementSymbol = elementWithLabel.split(/[- _]/)[0];
+    // Exclude digit labels at the end of the symbol if present
+    elementSymbol = elementSymbol.replace(/\d+$/, "");
+    // Return symbol in title case
+    elementSymbol =
+        elementSymbol.charAt(0).toUpperCase() + elementSymbol.slice(1).toLowerCase();
+    // We can improve by validating element symbol matches one from the periodic table
+    return elementSymbol;
+};

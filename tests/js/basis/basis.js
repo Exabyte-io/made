@@ -220,12 +220,11 @@ describe("Basis", () => {
     });
 
     it("should strip label and return atomic symbol", () => {
-        const basis = new Basis(Na.basis);
-        expect(basis.stripLabelToGetElementSymbol("Fe1")).to.be.equal("Fe");
-        expect(basis.stripLabelToGetElementSymbol("Fe11")).to.be.equal("Fe");
-        expect(basis.stripLabelToGetElementSymbol("fe_a")).to.be.equal("Fe");
-        expect(basis.stripLabelToGetElementSymbol("Fe-a1")).to.be.equal("Fe");
-        expect(basis.stripLabelToGetElementSymbol("FE1")).to.be.equal("Fe");
-        expect(basis.stripLabelToGetElementSymbol("c_a")).to.be.equal("C");
+        expect(Basis.stripLabelToGetElementSymbol("Fe1")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("Fe11")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("fe_a")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("Fe-a1")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("FE1")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("c_a")).to.be.equal("C");
     });
 });

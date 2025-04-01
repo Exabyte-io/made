@@ -464,7 +464,7 @@ export class Basis {
      *   (3) Fe_a, Fe_b, Fe_1, Fe_1a
      * As of Mar 2025, only single digit numerical labels are allowed
      */
-    stripLabelToGetElementSymbol = (elementWithLabel: string): string => {
+    static stripLabelToGetElementSymbol = (elementWithLabel: string): string => {
         // Strip anything after `-` or `_`
         let elementSymbol = elementWithLabel.split(/[- _]/)[0];
 
