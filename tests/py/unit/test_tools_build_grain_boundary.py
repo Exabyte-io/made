@@ -68,7 +68,7 @@ def test_slab_grain_boundary_builder():
 
 def test_create_surface_grain_boundary():
     config = SurfaceGrainBoundaryConfiguration(
-        film=Material(GRAPHENE),
+        film=Material.create(GRAPHENE),
         twist_angle=13.0,
         gap=2.0,
     )

@@ -2,8 +2,8 @@ from functools import wraps
 from typing import TYPE_CHECKING, Union
 
 import numpy as np
+from mat3ra.code.array_with_ids import ArrayWithIds, RoundedArrayWithIds
 from mat3ra.made.material import Material
-from mat3ra.made.utils import ArrayWithIds
 
 if TYPE_CHECKING:
     from .material import MaterialWithCrystalSites
@@ -38,7 +38,7 @@ def decorator_handle_periodic_boundary_conditions(cutoff):
             if original_basis_is_in_cartesian:
                 material.to_cartesian()
             original_ids = material.basis.coordinates.ids
-            if isinstance(result, ArrayWithIds):
+            if isinstance(result, (ArrayWithIds, RoundedArrayWithIds)):
                 result.filter_by_ids(original_ids)
             if isinstance(result, list):
                 if all(isinstance(x, int) for x in result):

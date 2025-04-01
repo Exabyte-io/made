@@ -1,8 +1,8 @@
 import numpy as np
+from mat3ra.code.array_with_ids import RoundedArrayWithIds
 from mat3ra.made.basis import Basis
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.utils import ArrayWithIds
 from mat3ra.utils import assertion as assertion_utils
 from unit.utils import assert_two_entities_deep_almost_equal
 
@@ -12,7 +12,7 @@ REFERENCE_OBJECT_1 = {"key1": "value1", "key2": "value2"}
 def test_create():
     material = Material.create_default()
     assert isinstance(material.basis, Basis)
-    assert isinstance(material.basis.coordinates, ArrayWithIds)
+    assert isinstance(material.basis.coordinates, RoundedArrayWithIds)
     assert isinstance(material.lattice, Lattice)
     assert material.name == Material.__default_config__["name"]
 

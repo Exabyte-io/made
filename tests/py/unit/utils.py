@@ -53,11 +53,13 @@ def show_difference(expected_data, actual_data):
         json.dumps(actual_data, indent=4).splitlines(),
     )
     diff_str = "\n".join(diff)
+    # Filter out the lines that are the same
+    diff_str = "\n".join(line for line in diff_str.splitlines() if not line.startswith("  "))
     if diff_str:
         raise AssertionError(f"Entities differ:\n{diff_str}")
 
 
-def assert_two_entities_deep_almost_equal(entity1, entity2):
+def assert_two_entities_deep_almost_equal(entity1, entity2, rtol=1e-5, atol=1e-9):
     dict_1 = entity1 if isinstance(entity1, dict) else json.loads(entity1.to_json())
     dict_2 = entity2 if isinstance(entity2, dict) else json.loads(entity2.to_json())
 
@@ -72,4 +74,4 @@ def assert_two_entities_deep_almost_equal(entity1, entity2):
     if actual_data != expected_data:
         show_difference(expected_data, actual_data)
 
-    assertion_utils.assert_deep_almost_equal(expected_data, actual_data)
+    assertion_utils.assert_deep_almost_equal(expected_data, actual_data, rtol=rtol, atol=atol)

@@ -136,6 +136,7 @@ class ValueWithId(RoundNumericValuesMixin, BaseModel):
     id: int = 0
     value: Any = None
 
+    @model_serializer
     def to_dict(self, skip_rounding: bool = True) -> Dict[str, Any]:
         rounded_value = self.round_array_or_number(self.value) if not skip_rounding else self.value
         return {"id": self.id, "value": rounded_value}
@@ -219,10 +220,7 @@ class ArrayWithIds(RoundNumericValuesMixin, BaseModel):
 
     @model_serializer
     def to_dict(self) -> List[Dict[str, Any]]:
-        return [
-            item.to_dict() if isinstance(item, ValueWithId) else ValueWithId(id=index, value=item).to_dict()
-            for index, item in enumerate(self.values)
-        ]
+        return [ValueWithId(id=self.ids[index], value=value).to_dict() for index, value in enumerate(self.values)]
 
     def to_json(self, skip_rounding=True) -> str:
         array_with_ids_values = [

@@ -1,8 +1,8 @@
 from typing import List, Optional, Tuple
 
 import numpy as np
+from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.made.material import Material
-from mat3ra.made.utils import ArrayWithIds
 from scipy.spatial._ckdtree import cKDTree
 
 from ..bonds import BondDirections, BondDirectionsTemplatesForElement

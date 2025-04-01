@@ -1,30 +1,35 @@
 from typing import Any, Dict, List, Optional, Union
 
+from mat3ra.code.array_with_ids import ArrayWithIds, RoundedArrayWithIds
 from mat3ra.code.constants import AtomicCoordinateUnits
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.material import BasisSchema, Units
 from pydantic import Field
 
 from .cell import Cell
-from .utils import ArrayWithIds, get_overlapping_coordinates
+from .utils import get_overlapping_coordinates
 
 
 class Basis(BasisSchema, InMemoryEntityPydantic):
     elements: ArrayWithIds
-    coordinates: ArrayWithIds
+    coordinates: RoundedArrayWithIds
     cell: Cell = Field(Cell(), exclude=True)
     labels: Optional[ArrayWithIds] = ArrayWithIds.from_values([])
     constraints: Optional[ArrayWithIds] = ArrayWithIds.from_values([])
 
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __convert_kwargs__(self, **kwargs: Any) -> Dict[str, Any]:
         if isinstance(kwargs.get("elements"), list):
             kwargs["elements"] = ArrayWithIds.from_list_of_dicts(kwargs["elements"])
         if isinstance(kwargs.get("coordinates"), list):
-            kwargs["coordinates"] = ArrayWithIds.from_list_of_dicts(kwargs["coordinates"])
+            kwargs["coordinates"] = RoundedArrayWithIds.from_list_of_dicts(kwargs["coordinates"])
         if isinstance(kwargs.get("labels"), list):
             kwargs["labels"] = ArrayWithIds.from_list_of_dicts(kwargs["labels"])
         if isinstance(kwargs.get("constraints"), list):
             kwargs["constraints"] = ArrayWithIds.from_list_of_dicts(kwargs["constraints"])
+        return kwargs
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        kwargs = self.__convert_kwargs__(**kwargs)
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -39,32 +44,12 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     ) -> "Basis":
         return Basis(
             elements=ArrayWithIds.from_list_of_dicts(elements),
-            coordinates=ArrayWithIds.from_list_of_dicts(coordinates),
+            coordinates=RoundedArrayWithIds.from_list_of_dicts(coordinates),
             units=units,
             cell=Cell.from_vectors_array(cell),
             labels=ArrayWithIds.from_list_of_dicts(labels) if labels else ArrayWithIds(values=[]),
             constraints=ArrayWithIds.from_list_of_dicts(constraints) if constraints else ArrayWithIds(values=[]),
         )
-
-    # def to_json(self, skip_rounding=False):
-    #     json_value = {
-    #         "elements": self.elements.to_json(),
-    #         "coordinates": self.coordinates.to_json(skip_rounding=skip_rounding),
-    #         "units": self.units,
-    #         "labels": self.labels.to_json(),
-    #     }
-    #     return json.loads(json.dumps(json_value))
-
-    # def clone(self):
-    #     return Basis(
-    #         elements=self.elements,
-    #         coordinates=self.coordinates,
-    #         units=self.units,
-    #         cell=self.cell,
-    #         isEmpty=False,
-    #         labels=self.labels,
-    #         constraints=self.constraints,
-    #     )
 
     @property
     def is_in_crystal_units(self):

@@ -28,7 +28,7 @@ class NanoribbonConfiguration(BaseConfiguration):
     @property
     def _json(self):
         return {
-            "material": self.material.to_json(),
+            "material": self.material.to_dict(),
             "width": self.width,
             "length": self.length,
             "vacuum_width": self.vacuum_width,
