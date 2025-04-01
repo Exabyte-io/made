@@ -1,9 +1,9 @@
 from typing import Literal
 
 import numpy as np
-from mat3ra.esse.models.core.abstract.point import PointSchema
 from mat3ra.code.array_with_ids import RoundedArrayWithIds
 from mat3ra.code.value_with_id import RoundedValueWithId
+from mat3ra.esse.models.core.abstract.point import PointSchema
 
 
 class Point(PointSchema):
@@ -18,7 +18,6 @@ class Coordinate(RoundedValueWithId):
 
 
 class Coordinates(RoundedArrayWithIds):
-
     def get_values_along_axis(
         self,
         axis: Literal["x", "y", "z"] = "z",

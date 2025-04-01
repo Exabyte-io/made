@@ -3,17 +3,25 @@ from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.utils import assertion as assertion_utils
+from unit.fixtures.cell import SI_CONVENTIONAL_CELL
 from unit.utils import assert_two_entities_deep_almost_equal
 
-REFERENCE_OBJECT_1 = {"key1": "value1", "key2": "value2"}
 
-
-def test_create():
+def test_create_default():
     material = Material.create_default()
     assert isinstance(material.basis, Basis)
     assert isinstance(material.basis.coordinates, Coordinates)
     assert isinstance(material.lattice, Lattice)
     assert material.name == Material.__default_config__["name"]
+
+
+def test_create():
+    material = Material.create(SI_CONVENTIONAL_CELL)
+    assert isinstance(material.basis, Basis)
+    assert isinstance(material.basis.coordinates, Coordinates)
+    assert isinstance(material.lattice, Lattice)
+
+    assert_two_entities_deep_almost_equal(material, SI_CONVENTIONAL_CELL)
 
 
 def test_material_to_json():
