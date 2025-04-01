@@ -71,7 +71,8 @@ def assert_two_entities_deep_almost_equal(entity1, entity2, rtol=1e-5, atol=1e-9
     actual_data = json.loads(json.dumps(sorted_dict_1))
     expected_data = json.loads(json.dumps(sorted_dict_2))
 
-    # if actual_data != expected_data:
-    #     show_difference(expected_data, actual_data)
-
-    assertion_utils.assert_deep_almost_equal(expected_data, actual_data, rtol=rtol, atol=atol)
+    try:
+        assertion_utils.assert_deep_almost_equal(expected_data, actual_data, rtol=rtol, atol=atol)
+    except AssertionError as e:
+        show_difference(expected_data, actual_data)
+        raise e

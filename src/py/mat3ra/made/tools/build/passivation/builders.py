@@ -218,7 +218,8 @@ class CoordinationBasedPassivationBuilder(PassivationBuilder):
                 normalized_bond = bond_vector_np / np.linalg.norm(bond_vector_np) * configuration.bond_length
                 normalized_bond_crystal = material.basis.cell.convert_point_to_crystal(normalized_bond)
                 passivant_coordinates.append(
-                    material.basis.coordinates.get_element_value_by_index(idx) + normalized_bond_crystal
+                    np.array(material.basis.coordinates.get_element_value_by_index(idx))
+                    + np.array(normalized_bond_crystal)
                 )
 
         return passivant_coordinates

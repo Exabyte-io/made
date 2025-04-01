@@ -3,7 +3,6 @@ from typing import Any, List
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
 from mat3ra.esse.models.material import MaterialSchema
-from pydantic import BaseModel
 
 from .basis import Basis
 from .lattice import Lattice
@@ -49,16 +48,6 @@ defaultMaterialConfig = {
         "type": "FCC",
     },
 }
-
-
-class PartialMaterialSchema(BaseModel):
-    name: MaterialSchema.__annotations__["name"] = getattr(MaterialSchema, "name", None)
-    basis: MaterialSchema.__annotations__["basis"] = getattr(MaterialSchema, "basis", None)
-    lattice: MaterialSchema.__annotations__["lattice"] = getattr(MaterialSchema, "lattice", None)
-    metadata: MaterialSchema.__annotations__["metadata"] = getattr(MaterialSchema, "metadata", None)
-    formula: MaterialSchema.__annotations__["formula"] = getattr(MaterialSchema, "formula", None)
-    isDefault: MaterialSchema.__annotations__["isDefault"] = getattr(MaterialSchema, "isDefault", None)
-    isNonPeriodic: MaterialSchema.__annotations__["isNonPeriodic"] = getattr(MaterialSchema, "isNonPeriodic", None)
 
 
 # TODO: replace `-Pydantic` with actual class in the next PR
