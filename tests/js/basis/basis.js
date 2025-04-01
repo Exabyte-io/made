@@ -241,5 +241,6 @@ describe("Basis", () => {
         expect(getLabel("Fe-a1")).to.be.equal("-a1");
         expect(getLabel("FE1")).to.be.equal("1");
         expect(getLabel("c_a")).to.be.equal("_a");
+        expect(getLabel("Fe_Fe")).to.be.equal("_Fe");
     });
 });
