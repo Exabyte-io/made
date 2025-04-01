@@ -1,18 +1,18 @@
 from typing import Any, Dict, List, Optional, Union
 
-from mat3ra.code.array_with_ids import ArrayWithIds, RoundedArrayWithIds
-from mat3ra.code.constants import AtomicCoordinateUnits
+from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.esse.models.material import BasisSchema, Units
+from mat3ra.esse.models.material import BasisSchema, Units as UnitsEnum
 from pydantic import Field
 
-from .cell import Cell
-from .utils import get_overlapping_coordinates
+from mat3ra.made.basis.coordinates import Coordinates
+from mat3ra.made.cell import Cell
+from mat3ra.made.utils import get_overlapping_coordinates
 
 
 class Basis(BasisSchema, InMemoryEntityPydantic):
     elements: ArrayWithIds
-    coordinates: RoundedArrayWithIds
+    coordinates: Coordinates
     cell: Cell = Field(Cell(), exclude=True)
     labels: Optional[ArrayWithIds] = ArrayWithIds.from_values([])
     constraints: Optional[ArrayWithIds] = ArrayWithIds.from_values([])
@@ -21,7 +21,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         if isinstance(kwargs.get("elements"), list):
             kwargs["elements"] = ArrayWithIds.from_list_of_dicts(kwargs["elements"])
         if isinstance(kwargs.get("coordinates"), list):
-            kwargs["coordinates"] = RoundedArrayWithIds.from_list_of_dicts(kwargs["coordinates"])
+            kwargs["coordinates"] = Coordinates.from_list_of_dicts(kwargs["coordinates"])
         if isinstance(kwargs.get("labels"), list):
             kwargs["labels"] = ArrayWithIds.from_list_of_dicts(kwargs["labels"])
         if isinstance(kwargs.get("constraints"), list):
@@ -44,7 +44,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     ) -> "Basis":
         return Basis(
             elements=ArrayWithIds.from_list_of_dicts(elements),
-            coordinates=RoundedArrayWithIds.from_list_of_dicts(coordinates),
+            coordinates=Coordinates.from_list_of_dicts(coordinates),
             units=units,
             cell=Cell.from_vectors_array(cell),
             labels=ArrayWithIds.from_list_of_dicts(labels) if labels else ArrayWithIds(values=[]),
@@ -53,23 +53,23 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
 
     @property
     def is_in_crystal_units(self):
-        return self.units == Units.crystal
+        return self.units == UnitsEnum.crystal
 
     @property
     def is_in_cartesian_units(self):
-        return self.units == Units.cartesian
+        return self.units == UnitsEnum.cartesian
 
     def to_cartesian(self):
         if self.is_in_cartesian_units:
             return
         self.coordinates.map_array_in_place(self.cell.convert_point_to_cartesian)
-        self.units = AtomicCoordinateUnits.cartesian
+        self.units = UnitsEnum.cartesian
 
     def to_crystal(self):
         if self.is_in_crystal_units:
             return
         self.coordinates.map_array_in_place(self.cell.convert_point_to_crystal)
-        self.units = AtomicCoordinateUnits.crystal
+        self.units = UnitsEnum.crystal
 
     def add_atom(
         self,

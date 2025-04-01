@@ -149,6 +149,7 @@ def get_atom_indices_within_layer_by_atom_index(material: Material, atom_index: 
     Returns:
         List[int]: List of indices of atoms within the specified layer
     """
+    # TODO: use Coordinates class functions
     coordinates = material.basis.coordinates.to_array_of_values_with_ids()
     vectors = material.lattice.vectors
     direction_vector = np.array(vectors[2])
@@ -269,6 +270,7 @@ def get_atom_indices_with_condition_on_coordinates(
     else:
         new_basis.to_crystal()
     new_material.basis = new_basis
+    # TODO: use Coordinates class functions
     coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
 
     selected_indices = []
@@ -297,15 +299,11 @@ def get_atomic_coordinates_extremum(
         float: Minimum or maximum of coordinates along the specified axis.
     """
     new_material = material.clone()
-    new_basis = new_material.basis
     if use_cartesian_coordinates:
-        new_basis.to_cartesian()
+        new_material.to_cartesian()
     else:
-        new_basis.to_crystal()
-    new_material.basis = new_basis
-    coordinates = new_material.basis.coordinates.to_array_of_values_with_ids()
-    values = [coord.value[{"x": 0, "y": 1, "z": 2}[axis]] for coord in coordinates]
-    return getattr(np, extremum)(values)
+        new_material.to_crystal()
+    return new_material.basis.coordinates.get_extremum_value_along_axis(extremum, axis)
 
 
 def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: SurfaceTypes) -> bool:

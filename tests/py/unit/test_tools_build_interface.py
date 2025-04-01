@@ -37,11 +37,10 @@ interface_configuration = InterfaceConfiguration(
 )
 
 zsl_strain_matching_parameters = ZSLStrainMatchingParameters(max_area=MAX_AREA)
-matched_interfaces_builder = ZSLStrainMatchingInterfaceBuilder(
-    build_parameters=ZSLStrainMatchingInterfaceBuilderParameters(
-        strain_matching_parameters=zsl_strain_matching_parameters
-    )
+build_parameters = ZSLStrainMatchingInterfaceBuilderParameters(
+    strain_matching_parameters=zsl_strain_matching_parameters
 )
+matched_interfaces_builder = ZSLStrainMatchingInterfaceBuilder(build_parameters=build_parameters)
 
 
 def test_create_interfaces():
@@ -78,7 +77,7 @@ def test_create_commensurate_supercell_twisted_interface():
     substrate = Material.create(GRAPHENE)
     config = TwistedInterfaceConfiguration(film=film, substrate=substrate, twist_angle=13, distance_z=3.0)
     params = CommensurateLatticeTwistedInterfaceBuilderParameters(
-        max_repetition_int=5, angle_tolerance=0.5, return_first_match=True
+        max_supercell_matrix_int=5, angle_tolerance=0.5, return_first_match=True
     )
     builder = CommensurateLatticeTwistedInterfaceBuilder(build_parameters=params)
     interfaces = builder.get_materials(config, post_process_parameters=config)

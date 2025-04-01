@@ -18,8 +18,9 @@ from mat3ra.made.tools.modify import (
     translate_to_z_level,
 )
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.cell import SI_CONVENTIONAL_CELL_FILTERED
-from unit.fixtures.fixtures import GRAPHENE_NICKEL_INTERFACE, SI_CONVENTIONAL_CELL, SI_SLAB, SI_SLAB_VACUUM
+from unit.fixtures.cell import SI_CONVENTIONAL_CELL, SI_CONVENTIONAL_CELL_FILTERED
+from unit.fixtures.fixtures import GRAPHENE_NICKEL_INTERFACE, SI_SLAB_VACUUM
+from unit.fixtures.slab import SI_SLAB_001
 from unit.utils import assert_two_entities_deep_almost_equal
 
 COMMON_PART = {
@@ -156,7 +157,7 @@ def test_filter_by_triangle_projection():
 
 
 def test_add_vacuum():
-    material = Material.create(SI_SLAB)
+    material = Material.create(SI_SLAB_001)
     material_with_vacuum = add_vacuum(material, 5.0)
     assert_two_entities_deep_almost_equal(material_with_vacuum, SI_SLAB_VACUUM)
 
@@ -165,16 +166,18 @@ def test_remove_vacuum():
     material_with_vacuum = Material.create(SI_SLAB_VACUUM)
     vacuum = 7.368
     material_with_no_vacuum = remove_vacuum(material_with_vacuum, from_top=True, from_bottom=True, fixed_padding=0)
-    material_with_set_vacuum = add_vacuum(material_with_no_vacuum, vacuum)
+    expected_material = add_vacuum(material_with_no_vacuum, vacuum)
     # to compare correctly, we need to translate the expected material to the bottom
     # as it is effectively moved down when vacuum is removed (set to 0), use atol=1e-3 to account for the translation
-    material = Material.create(SI_SLAB)
-    material_translated_down = translate_to_z_level(material, z_level="bottom")
-    assert_two_entities_deep_almost_equal(material_translated_down, material_with_set_vacuum, atol=1e-3)
+    reference_material = Material.create(SI_SLAB_001)
+    reference_material_translated_down = translate_to_z_level(reference_material, z_level="bottom")
+    # compare absolute coordinates
+
+    assert_two_entities_deep_almost_equal(expected_material, reference_material_translated_down, atol=1e-3)
 
 
 def test_rotate():
-    material = Material.create(SI_SLAB)
+    material = Material.create(SI_SLAB_001)
     # Rotation around Z and X axis will be equivalent for the original material for hist basis in terms of coordinates
     rotated_material = rotate(material, [0, 0, 1], 180)
     rotated_material = rotate(rotated_material, [1, 0, 0], 180)

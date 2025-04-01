@@ -7,22 +7,20 @@ from mat3ra.made.tools.build.passivation.builders import (
     SurfacePassivationBuilderParameters,
 )
 from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
-from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.fixtures import (
-    GRAPHENE_ZIGZAG_NANORIBBON,
-    GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED,
-    SI_SLAB,
-    SI_SLAB_PASSIVATED,
-)
+from unit.fixtures.fixtures import GRAPHENE_ZIGZAG_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED, SI_SLAB_PASSIVATED
+from unit.fixtures.slab import SI_SLAB_001
+from unit.utils import assert_two_entities_deep_almost_equal
 
 
 def test_passivate_surface():
-    config = PassivationConfiguration(slab=Material(SI_SLAB), passivant="H", bond_length=1.48, surface="both")
+    config = PassivationConfiguration(
+        slab=Material.create(SI_SLAB_001), passivant="H", bond_length=1.48, surface="both"
+    )
     builder = SurfacePassivationBuilder(
         build_parameters=SurfacePassivationBuilderParameters(shadowing_radius=2.5, depth=2.0)
     )
     passivated_material = builder.get_material(config)
-    assertion_utils.assert_deep_almost_equal(SI_SLAB_PASSIVATED, passivated_material.to_json())
+    assert_two_entities_deep_almost_equal(passivated_material, SI_SLAB_PASSIVATED)
 
 
 def test_get_unique_coordination_numbers():
@@ -40,4 +38,4 @@ def test_passivate_coordination_based():
     )
     builder = CoordinationBasedPassivationBuilder(build_parameters=params)
     passivated_material = builder.get_material(config)
-    assertion_utils.assert_deep_almost_equal(GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED, passivated_material.to_json())
+    assert_two_entities_deep_almost_equal(passivated_material, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED)

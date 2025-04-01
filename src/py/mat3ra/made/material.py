@@ -86,5 +86,8 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         if original_is_in_crystal:
             self.to_crystal()
 
+    def set_lattice(self, lattice: Lattice) -> None:
+        self.set_new_lattice_vectors(*lattice.vector_arrays)
+
     def add_atom(self, element: str, coordinate: List[float], use_cartesian_coordinates: bool = False) -> None:
         self.basis.add_atom(element, coordinate, use_cartesian_coordinates)

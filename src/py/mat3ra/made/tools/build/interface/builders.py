@@ -49,7 +49,7 @@ class InterfaceBuilder(BaseBuilder):
     _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        film_formula = get_chemical_formula(configuration.film_configuration.bulkMaterial)
+        film_formula = get_chemical_formula(configuration.film_configuration.bulk)
         substrate_formula = get_chemical_formula(configuration.substrate_configuration.bulk)
         film_miller_indices = "".join([str(i) for i in configuration.film_configuration.miller_indices])
         substrate_miller_indices = "".join([str(i) for i in configuration.substrate_configuration.miller_indices])

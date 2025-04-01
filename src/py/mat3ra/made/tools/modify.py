@@ -1,9 +1,9 @@
 from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
+from mat3ra.made.basis import Basis
 from mat3ra.made.material import Material
 
-from ..basis import Basis
 from .analyze.other import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
@@ -561,16 +561,17 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
         Material: The material object with the vacuum thickness set.
     """
     translated_material = translate_to_z_level(material, z_level="bottom")
-    new_basis = translated_material.basis
-    new_basis.to_cartesian()
+    translated_material.to_cartesian()
+    max_z_distance = (
+        get_atomic_coordinates_extremum(translated_material, use_cartesian_coordinates=True) + fixed_padding
+    )
     new_lattice = translated_material.lattice
-    new_lattice.c = get_atomic_coordinates_extremum(translated_material, use_cartesian_coordinates=True) + fixed_padding
-    new_basis.cell.vector3 = new_lattice.vectors.c
-    new_basis.to_crystal()
-    new_material = material.clone()
+    new_lattice.c = max_z_distance
+    translated_material.set_lattice(new_lattice)
+    if material.basis.is_in_crystal_units:
+        translated_material.to_crystal()
 
-    new_material.basis = new_basis
-    new_material.lattice = new_lattice
+    new_material = translated_material.clone()
 
     if from_top and not from_bottom:
         new_material = translate_to_z_level(new_material, z_level="top")

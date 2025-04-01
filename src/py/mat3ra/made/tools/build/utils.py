@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.spatial import cKDTree
 from typing import List, Optional
-from mat3ra.made.basis import Basis
+from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
-from mat3ra.code.array_with_ids import ArrayWithIds, RoundedArrayWithIds
+from mat3ra.code.array_with_ids import ArrayWithIds
 
 from .supercell import create_supercell
 from ..modify import filter_by_box, translate_by_vector
@@ -45,7 +45,7 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
 
     merged_basis = Basis(
         elements=ArrayWithIds.from_values(values=merged_elements_values),
-        coordinates=RoundedArrayWithIds.from_values(values=merged_coordinates_values),
+        coordinates=Coordinates.from_values(values=merged_coordinates_values),
         units=basis1.units,
         cell=basis1.cell,
         labels=ArrayWithIds.from_values(values=merged_labels_values),
