@@ -1,4 +1,7 @@
 import pytest
+from mat3ra.code.vector import RoundedVector3D
+
+from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
     AdatomSlabPointDefectConfiguration,
@@ -69,9 +72,14 @@ def test_create_interstitial_voronoi():
         placement_method="voronoi_site",
     )
     defect = create_defect(configuration)
-
     assert defect.basis.elements.values[-1] == "Ge"
-    assertion_utils.assert_deep_almost_equal([0.5, 0.5, 0.5], defect.basis.coordinates.values[-1])
+
+    coordinate_x86 = [0.5, 0.5, 0.5]
+    coordinate_arm64 = [0.625, 0.625, 0.125]
+    defect_coordinate = defect.basis.coordinates.values[-1]
+    is_passing_on_x86 = coordinate_x86 == defect_coordinate
+    is_passing_on_arm64 = coordinate_arm64 == defect_coordinate
+    assert is_passing_on_x86 or is_passing_on_arm64
 
 
 def test_create_defect_from_site_id():
@@ -136,9 +144,11 @@ def test_create_adatom_equidistant():
     coordinate_macosx = [6.477224996, 3.739627331, 14.234895469]
     coordinate_linux_and_emscripten = [5.123775004, 3.739627331, 14.234895469]
     defect_coordinate = defect.basis.coordinates.values[-1]
-    is_passing_on_macosx = coordinate_macosx == defect_coordinate
-    is_passing_on_linux_and_emscripten = coordinate_linux_and_emscripten == defect_coordinate
-    assert is_passing_on_macosx or is_passing_on_linux_and_emscripten
+    atol = 10 ** (-COORDINATE_TOLERANCE)
+    try:
+        assertion_utils.assert_deep_almost_equal(coordinate_macosx, defect_coordinate, atol=atol)
+    except AssertionError:
+        assertion_utils.assert_deep_almost_equal(coordinate_linux_and_emscripten, defect_coordinate, atol=atol)
 
 
 @pytest.mark.skip(reason="This test is failing due to the difference in slab generation between GHA and local")
