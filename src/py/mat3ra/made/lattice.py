@@ -125,16 +125,6 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
     def cell_volume(self) -> float:
         return self.cell.volume
 
-    def update_from_lattice(self, lattice: "Lattice"):
-        self.a = lattice.a
-        self.b = lattice.b
-        self.c = lattice.c
-        self.alpha = lattice.alpha
-        self.beta = lattice.beta
-        self.gamma = lattice.gamma
-        self.units = lattice.units
-        self.type = lattice.type
-
     def get_scaled_by_matrix(self, matrix: List[List[float]]):
         """
         Scale the lattice by a matrix.

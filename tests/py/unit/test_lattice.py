@@ -43,22 +43,6 @@ def test_lattice_vectors_access():
     assertion_utils.assert_deep_almost_equal(lattice.vectors.a.root, [2.0, 0.0, 0.0])
 
 
-def test_lattice_update_from_lattice():
-    lattice = Lattice(a=2.0, b=3.0, c=4.0)
-    new_lattice = Lattice(a=5.0, b=6.0, c=7.0)
-    lattice.update_from_lattice(new_lattice)
-    assert lattice.a == 5.0
-    assert lattice.b == 6.0
-    assert lattice.c == 7.0
-    assert lattice.alpha == new_lattice.alpha
-    assert lattice.beta == new_lattice.beta
-    assert lattice.gamma == new_lattice.gamma
-    assert lattice.units == new_lattice.units
-    assert lattice.type == new_lattice.type
-    assert lattice.vector_arrays == new_lattice.vector_arrays
-    assert lattice.cell_volume == new_lattice.cell_volume
-
-
 def test_lattice_from_vectors():
     lattice = Lattice.from_vectors_array(vectors=[[2.0, 0, 0], [0, 3.0, 0], [0, 0, 4.0]])
     assert lattice.a == 2.0
