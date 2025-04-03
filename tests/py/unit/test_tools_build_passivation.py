@@ -7,9 +7,10 @@ from mat3ra.made.tools.build.passivation.builders import (
     SurfacePassivationBuilderParameters,
 )
 from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
-from unit.fixtures.fixtures import GRAPHENE_ZIGZAG_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED, SI_SLAB_PASSIVATED
-from unit.fixtures.slab import SI_SLAB_001
-from unit.utils import assert_two_entities_deep_almost_equal
+
+from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED
+from .fixtures.slab import SI_SLAB_001, SI_SLAB_PASSIVATED
+from .utils import assert_two_entities_deep_almost_equal
 
 
 def test_passivate_surface():

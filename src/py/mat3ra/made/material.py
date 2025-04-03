@@ -79,11 +79,11 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
     def set_new_lattice_vectors(
         self, lattice_vector1: List[float], lattice_vector2: List[float], lattice_vector3: List[float]
     ) -> None:
-        original_is_in_crystal = self.basis.is_in_crystal_units
+        original_is_in_crystal_units = self.basis.is_in_crystal_units
         self.to_cartesian()
         self.lattice = Lattice.from_vectors_array([lattice_vector1, lattice_vector2, lattice_vector3])
         self.basis.cell = self.lattice.cell
-        if original_is_in_crystal:
+        if original_is_in_crystal_units:
             self.to_crystal()
 
     def set_lattice(self, lattice: Lattice) -> None:

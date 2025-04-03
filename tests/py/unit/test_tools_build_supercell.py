@@ -1,6 +1,6 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.supercell import create_supercell
-from unit.fixtures.fixtures import SI_SUPERCELL_2X2X1
+from unit.fixtures.supercell import SI_SUPERCELL_2X2X1
 
 from .utils import assert_two_entities_deep_almost_equal
 

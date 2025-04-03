@@ -18,10 +18,11 @@ from mat3ra.made.tools.modify import (
     translate_to_z_level,
 )
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.cell import SI_CONVENTIONAL_CELL, SI_CONVENTIONAL_CELL_FILTERED
-from unit.fixtures.fixtures import GRAPHENE_NICKEL_INTERFACE, SI_SLAB_VACUUM
-from unit.fixtures.slab import SI_SLAB_001
-from unit.utils import assert_two_entities_deep_almost_equal
+
+from .fixtures.cell import SI_CONVENTIONAL_CELL, SI_CONVENTIONAL_CELL_FILTERED
+from .fixtures.interface import GRAPHENE_NICKEL_INTERFACE
+from .fixtures.slab import SI_SLAB_001, SI_SLAB_001_WITH_VACUUM
+from .utils import assert_two_entities_deep_almost_equal
 
 COMMON_PART = {
     "units": "crystal",
@@ -159,11 +160,11 @@ def test_filter_by_triangle_projection():
 def test_add_vacuum():
     material = Material.create(SI_SLAB_001)
     material_with_vacuum = add_vacuum(material, 5.0)
-    assert_two_entities_deep_almost_equal(material_with_vacuum, SI_SLAB_VACUUM)
+    assert_two_entities_deep_almost_equal(material_with_vacuum, SI_SLAB_001_WITH_VACUUM)
 
 
 def test_remove_vacuum():
-    material_with_vacuum = Material.create(SI_SLAB_VACUUM)
+    material_with_vacuum = Material.create(SI_SLAB_001_WITH_VACUUM)
     vacuum = 7.368
     material_with_no_vacuum = remove_vacuum(material_with_vacuum, from_top=True, from_bottom=True, fixed_padding=0)
     expected_material = add_vacuum(material_with_no_vacuum, vacuum)

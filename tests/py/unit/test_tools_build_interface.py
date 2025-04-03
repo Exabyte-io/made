@@ -18,11 +18,12 @@ from mat3ra.made.tools.build.interface.builders import (
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.fixtures import (
     FILM_CONFIGURATION,
-    GRAPHENE,
     INTERFACE_NAME,
     INTERFACE_TERMINATION_PAIR,
     SUBSTRATE_CONFIGURATION,
 )
+
+from .fixtures.monolayer import GRAPHENE
 
 MAX_AREA = 100
 # pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2

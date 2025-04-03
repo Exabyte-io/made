@@ -3,15 +3,11 @@ from typing import Literal
 import numpy as np
 from mat3ra.code.array_with_ids import RoundedArrayWithIds
 from mat3ra.code.value_with_id import RoundedValueWithId
-from mat3ra.esse.models.core.abstract.point import PointSchema
-
-
-class Point(PointSchema):
-    pass
+from mat3ra.code.vector import RoundedVector3D as RoundedPoint3D
 
 
 class Coordinate(RoundedValueWithId):
-    value: Point
+    value: RoundedPoint3D
 
     def get_value_along_axis(self, axis: Literal["x", "y", "z"] = "z"):
         return self.value.root[{"x": 0, "y": 1, "z": 2}[axis]]

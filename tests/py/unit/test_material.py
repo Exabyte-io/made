@@ -20,7 +20,6 @@ def test_create():
     assert isinstance(material.basis, Basis)
     assert isinstance(material.basis.coordinates, Coordinates)
     assert isinstance(material.lattice, Lattice)
-
     assert_two_entities_deep_almost_equal(material, SI_CONVENTIONAL_CELL)
 
 
@@ -28,6 +27,12 @@ def test_material_to_json():
     material = Material.create_default()
     # Remove all keys that are null in the config
     assert_two_entities_deep_almost_equal(material, Material.__default_config__)
+
+
+def test_material_clone():
+    material = Material.create_default()
+    clone = material.clone()
+    assert_two_entities_deep_almost_equal(material, clone)
 
 
 def test_material_to_from_cartesian():

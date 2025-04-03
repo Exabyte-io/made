@@ -11,7 +11,8 @@ from mat3ra.made.tools.build.grain_boundary import (
 from mat3ra.made.tools.build.grain_boundary.builders import SlabGrainBoundaryBuilderParameters
 from mat3ra.made.tools.build.slab import SlabConfiguration, get_terminations
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.fixtures import GRAPHENE
+
+from .fixtures.monolayer import GRAPHENE
 
 
 @pytest.mark.skip(reason="Test is failing on GHA due to slab generation differences between GHA and local")

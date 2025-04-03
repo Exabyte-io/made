@@ -14,8 +14,8 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     elements: ArrayWithIds
     coordinates: Coordinates
     cell: Cell = Field(Cell(), exclude=True)
-    labels: Optional[ArrayWithIds] = ArrayWithIds.from_values([])
-    constraints: Optional[ArrayWithIds] = ArrayWithIds.from_values([])
+    labels: ArrayWithIds = Field(ArrayWithIds.from_values([]))
+    constraints: ArrayWithIds = Field(ArrayWithIds.from_values([]))
 
     def __convert_kwargs__(self, **kwargs: Any) -> Dict[str, Any]:
         if isinstance(kwargs.get("elements"), list):
@@ -39,16 +39,16 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         coordinates: List[Dict],
         units: str,
         cell: List[List[float]],
-        labels: Optional[List[Dict]] = None,
-        constraints: Optional[List[Dict]] = None,
+        labels: Optional[List[Dict]] = ArrayWithIds.from_list_of_dicts([]),
+        constraints: Optional[List[Dict]] = ArrayWithIds.from_list_of_dicts([]),
     ) -> "Basis":
         return Basis(
             elements=ArrayWithIds.from_list_of_dicts(elements),
             coordinates=Coordinates.from_list_of_dicts(coordinates),
             units=units,
             cell=Cell.from_vectors_array(cell),
-            labels=ArrayWithIds.from_list_of_dicts(labels) if labels else ArrayWithIds(values=[]),
-            constraints=ArrayWithIds.from_list_of_dicts(constraints) if constraints else ArrayWithIds(values=[]),
+            labels=ArrayWithIds.from_list_of_dicts(labels),
+            constraints=ArrayWithIds.from_list_of_dicts(constraints),
         )
 
     @property
@@ -113,19 +113,15 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     def remove_atom_by_id(self, id: int):
         self.elements.remove_item(id)
         self.coordinates.remove_item(id)
-        if self.labels is not None:
-            self.labels.remove_item(id)
+        self.labels.remove_item(id)
 
-    def filter_atoms_by_ids(self, ids: Union[List[int], int]) -> "Basis":
-        self.elements.filter_by_ids(ids)
-        self.coordinates.filter_by_ids(ids)
-        if self.labels is not None:
-            self.labels.filter_by_ids(ids)
+    def filter_atoms_by_ids(self, ids: Union[List[int], int], invert: bool = False) -> "Basis":
+        self.elements.filter_by_ids(ids, invert)
+        self.coordinates.filter_by_ids(ids, invert)
+        self.labels.filter_by_ids(ids, invert)
         return self
 
     def filter_atoms_by_labels(self, labels: Union[List[str], str]) -> "Basis":
-        if self.labels is None:
-            return self
         self.labels.filter_by_values(labels)
         ids = self.labels.ids
         self.elements.filter_by_ids(ids)
