@@ -2,7 +2,9 @@
 # .venv-3.11.2/lib/python3.11/site-packages/spglib/spglib.py:115
 # tests/py/unit/test_tools_build_defect.py::test_create_island
 # tests/py/unit/test_tools_build_slab.py::test_build_slab
-#   /Users/mat3ra/code/GREEN/stack/lib/made/.venv-3.11.2/lib/python3.11/site-packages/spglib/spglib.py:115: DeprecationWarning: dict interface (SpglibDataset['rotations']) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+#   /Users/mat3ra/code/GREEN/stack/lib/made/.venv-3.11.2/lib/python3.11/site-packages/spglib/spglib.py:115:
+#   DeprecationWarning: dict interface (SpglibDataset['rotations']) is deprecated.
+#   Use attribute interface ({self.__class__.__name__}.{key}) instead
 #     warnings.warn(
 #
 # -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

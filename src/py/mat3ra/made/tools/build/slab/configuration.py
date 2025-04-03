@@ -46,7 +46,7 @@ class SlabConfiguration(BaseConfiguration):
     ):
         if xy_supercell_matrix is None:
             xy_supercell_matrix = np.eye(2).tolist()
-        bulk = bulk or Material.create(Material.default_config)
+        bulk = bulk or Material.create_default()
         __bulk_pymatgen_structure = (
             PymatgenSpacegroupAnalyzer(to_pymatgen(bulk)).get_conventional_standard_structure()
             if use_conventional_cell

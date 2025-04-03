@@ -1,4 +1,3 @@
-import pytest
 from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
@@ -149,7 +148,6 @@ def test_create_adatom_equidistant():
         assertion_utils.assert_deep_almost_equal(coordinate_linux_and_emscripten, defect_coordinate, atol=atol)
 
 
-@pytest.mark.skip(reason="This test is failing due to the difference in slab generation between GHA and local")
 def test_create_crystal_site_adatom():
     # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
@@ -159,11 +157,15 @@ def test_create_crystal_site_adatom():
     defect = create_slab_defect(configuration=configuration, builder=builder)
 
     assert defect.basis.elements.values[-1] == "Si"
-    assertion_utils.assert_deep_almost_equal(
-        # Adjusted expected value to pass tests on GHA due to slab generation differences between GHA and local
-        [0.383333334, 0.558333333, 0.872332562],
-        defect.basis.coordinates.values[-1],
-    )
+
+    coordinates_macosx = [0.458333, 0.458333, 0.628217]
+    coordinates_linux_and_emscripten = [0.383333334, 0.558333333, 0.872332562]
+    defect_coordinate = defect.basis.coordinates.values[-1]
+    atol = 10 ** (-COORDINATE_TOLERANCE)
+    try:
+        assertion_utils.assert_deep_almost_equal(coordinates_macosx, defect_coordinate, atol=atol)
+    except AssertionError:
+        assertion_utils.assert_deep_almost_equal(coordinates_linux_and_emscripten, defect_coordinate, atol=atol)
 
 
 def test_create_island():
