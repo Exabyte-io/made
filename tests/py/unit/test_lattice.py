@@ -1,4 +1,3 @@
-from mat3ra.esse.models.properties_directory.structural.lattice import LatticeSchema
 from mat3ra.made.lattice import Lattice, LatticeVector
 from mat3ra.utils import assertion as assertion_utils
 
