@@ -20,7 +20,7 @@ def calculate_total_energy(atoms: ASEAtoms, calculator: ASECalculator):
     Returns:
         float: The total energy of the atoms.
     """
-    atoms.set_calculator(calculator)
+    atoms.calc = calculator
     return atoms.get_total_energy()
 
 

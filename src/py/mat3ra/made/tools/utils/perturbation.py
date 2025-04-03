@@ -63,7 +63,7 @@ class PerturbationFunctionHolder(FunctionHolder):
         Calculate arc length considering a change along one specific axis.
         """
         a, b = 0, w_prime
-        arc_length = quad(self._integrand, a, b, args=(coordinate, axis))[0]
+        arc_length = quad(self._integrand, a, b, args=(coordinate, axis), limit=1000)[0]
         return arc_length - coordinate[AXIS_TO_INDEX_MAP[axis]]
 
     def transform_coordinates(self, coordinate: List[float]) -> List[float]:

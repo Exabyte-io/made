@@ -133,7 +133,7 @@ class VoronoiInterstitialPointDefectBuilder(PointDefectBuilder):
     ) -> List[type(PointDefectBuilder._GeneratedItemType)]:  # type: ignore
         pymatgen_structure = to_pymatgen(configuration.crystal)
         voronoi_gen = PymatgenVoronoiInterstitialGenerator(
-            **self.build_parameters.dict(),
+            **self.build_parameters.model_dump(),
         )
         interstitials = list(
             voronoi_gen.generate(structure=pymatgen_structure, insert_species=[configuration.chemical_element])
@@ -396,7 +396,7 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
 
-        isolated_neighboring_atoms_basis = supercell_material.basis.copy()
+        isolated_neighboring_atoms_basis = supercell_material.basis.model_copy()
         isolated_neighboring_atoms_basis.coordinates.filter_by_ids(neighboring_atoms_ids_in_supercell)
         equidistant_coordinate_in_supercell = get_center_of_coordinates(
             isolated_neighboring_atoms_basis.coordinates.values

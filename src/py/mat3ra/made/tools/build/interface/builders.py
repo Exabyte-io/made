@@ -172,7 +172,7 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
     _GeneratedItemType: PymatgenInterface = PymatgenInterface  # type: ignore
 
     def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
-        generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.dict())
+        generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.model_dump())
         substrate_with_atoms_translated_to_bottom = translate_to_z_level(
             configuration.substrate_configuration.bulk, "bottom"
         )
