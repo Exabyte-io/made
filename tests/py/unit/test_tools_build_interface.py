@@ -16,7 +16,7 @@ from mat3ra.made.tools.build.interface.builders import (
     TwistedInterfaceConfiguration,
 )
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.fixtures import (
+from unit.fixtures.generated.fixtures import (
     FILM_CONFIGURATION,
     INTERFACE_NAME,
     INTERFACE_TERMINATION_PAIR,

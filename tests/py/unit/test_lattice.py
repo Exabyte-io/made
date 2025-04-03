@@ -1,8 +1,9 @@
+from mat3ra.esse.models.properties_directory.structural.lattice import LatticeSchema
 from mat3ra.made.lattice import Lattice, LatticeVector
 from mat3ra.utils import assertion as assertion_utils
 
-DEFAULT_UNITS = Lattice.__fields__["units"].default_factory()
-DEFAULT_TYPE = Lattice.__fields__["type"].default
+DEFAULT_UNITS = Lattice.__units_default__
+DEFAULT_TYPE = Lattice.__type_default__
 
 
 def test_lattice_creation():
@@ -72,11 +73,11 @@ def test_lattice_from_vectors():
     assert lattice.vector_arrays == [[2.0, 0.0, 0.0], [0.0, 3.0, 0.0], [0.0, 0.0, 4.0]]
 
 
-def test_lattice_scale_by_matrix():
-    lattice = Lattice(a=2.0, b=3.0, c=4.0)
+def test_lattice_get_scaled_by_matrix():
+    original_lattice = Lattice(a=2.0, b=3.0, c=4.0)
     matrix = [[1.5, 0, 0], [0, 1.5, 0], [0, 0, 0.5]]
     expected_vector_values = [[3.0, 0.0, 0.0], [0.0, 4.5, 0.0], [0.0, 0.0, 2.0]]
-    lattice.scale_by_matrix(matrix)
+    lattice = original_lattice.get_scaled_by_matrix(matrix)
     assert lattice.a == 3.0
     assert lattice.b == 4.5
     assert lattice.c == 2.0

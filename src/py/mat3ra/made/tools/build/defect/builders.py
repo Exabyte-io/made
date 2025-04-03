@@ -689,15 +689,8 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         scaling_matrix[0, 0] += delta_a_cart / norm_a
         scaling_matrix[1, 1] += delta_b_cart / norm_b
 
-        cart_basis = material.basis.copy()
-        cart_basis.to_cartesian()
-        cart_basis.cell.scale_by_matrix(scaling_matrix)
-        material.basis = cart_basis
-
-        new_lattice = material.lattice.clone()
-        new_lattice.a = np.linalg.norm(cart_basis.cell.vector1)
-        new_lattice.b = np.linalg.norm(cart_basis.cell.vector2)
-        material.lattice = new_lattice
+        new_lattice = material.lattice.get_scaled_by_matrix(scaling_matrix)
+        material.set_lattice(new_lattice)
         return material
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:

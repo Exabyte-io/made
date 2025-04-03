@@ -6,7 +6,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
 from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Element, Lattice, Structure
-from unit.fixtures.fixtures import INTERFACE_PROPERTIES_JSON, INTERFACE_STRUCTURE
+from unit.fixtures.generated.fixtures import INTERFACE_PROPERTIES_JSON, INTERFACE_STRUCTURE
 
 PYMATGEN_LATTICE = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120, beta=90, gamma=60)
 PYMATGEN_STRUCTURE = Structure(PYMATGEN_LATTICE, ["Si", "Si"], [[0, 0, 0], [0.75, 0.5, 0.75]])

@@ -42,6 +42,8 @@ class LatticeVectors(RoundNumericValuesMixin, LatticeVectorsSchema):
 
 class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydantic):
     __types__ = LatticeTypeEnum
+    __type_default__ = LatticeBravaisSchema.model_fields["type"].default
+    __units_default__ = LatticeBravaisSchema.model_fields["units"].default_factory()
 
     a: float = 1.0
     b: float = a
@@ -49,8 +51,6 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
     alpha: float = 90.0
     beta: float = 90.0
     gamma: float = 90.0
-    units: LatticeUnitsSchema
-    type: LatticeTypeEnum
 
     @property
     def vectors(self) -> LatticeVectors:
@@ -89,8 +89,8 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
     def from_vectors_array(
         cls,
         vectors: List[List[float]],
-        units: Optional[LatticeUnitsSchema] = None,
-        type: Optional[LatticeTypeEnum] = None,
+        units: Optional[LatticeUnitsSchema] = __units_default__,
+        type: Optional[LatticeTypeEnum] = __type_default__,
     ) -> "Lattice":
         a = np.linalg.norm(vectors[0])
         b = np.linalg.norm(vectors[1])
@@ -106,8 +106,8 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
             alpha=alpha,
             beta=beta,
             gamma=gamma,
-            units=units or LatticeBravaisSchema.model_fields["units"].default,
-            type=type or LatticeBravaisSchema.model_fields["type"].default,
+            units=units,
+            type=type,
         )
 
     @property
@@ -135,7 +135,7 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
         self.units = lattice.units
         self.type = lattice.type
 
-    def scale_by_matrix(self, matrix: List[List[float]]):
+    def get_scaled_by_matrix(self, matrix: List[List[float]]):
         """
         Scale the lattice by a matrix.
         Args:
@@ -145,4 +145,4 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
         np_matrix = np.array(matrix)
         scaled_vectors = np.dot(np_matrix, np_vectors).tolist()
         new_lattice = self.from_vectors_array(vectors=scaled_vectors, units=self.units, type=self.type)
-        self.update_from_lattice(new_lattice)
+        return new_lattice

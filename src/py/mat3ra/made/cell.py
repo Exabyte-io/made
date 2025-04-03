@@ -56,7 +56,3 @@ class Cell(RoundNumericValuesMixin, BaseModel):
     def volume(self) -> float:
         volume = np.linalg.det(np.array(self.vectors_as_array))
         return self.round_array_or_number(volume)
-
-    def scale_by_matrix(self, matrix: List[List[float]]):
-        np_vector = np.array(self.vectors_as_array)
-        self.vector1, self.vector2, self.vector3 = np.dot(np.array(matrix), np_vector).tolist()
