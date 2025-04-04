@@ -23,6 +23,19 @@ def test_create():
     assert_two_entities_deep_almost_equal(material, SI_CONVENTIONAL_CELL)
 
 
+def test_create_with_cell_as_list():
+    # The key cell should be ignored and Basis.Cell created from Lattice by Material
+    config = Material.__default_config__.copy()
+    config["basis"]["cell"] = [
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0],
+    ]
+    material = Material.create(config)
+    assert isinstance(material.basis, Basis)
+    assert material.basis.cell.vectors_as_array == material.lattice.cell.vectors_as_array
+
+
 def test_material_to_json():
     material = Material.create_default()
     # Remove all keys that are null in the config
