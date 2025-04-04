@@ -1,12 +1,12 @@
 import numpy as np
 from scipy.spatial import cKDTree
 from typing import List, Optional
-from mat3ra.made.basis import Basis
+from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
+from mat3ra.code.array_with_ids import ArrayWithIds
 
 from .supercell import create_supercell
 from ..modify import filter_by_box, translate_by_vector
-from ...utils import ArrayWithIds
 
 
 def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.1) -> Basis:
@@ -45,10 +45,11 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
 
     merged_basis = Basis(
         elements=ArrayWithIds.from_values(values=merged_elements_values),
-        coordinates=ArrayWithIds.from_values(values=merged_coordinates_values),
+        coordinates=Coordinates.from_values(values=merged_coordinates_values),
         units=basis1.units,
         cell=basis1.cell,
         labels=ArrayWithIds.from_values(values=merged_labels_values),
+        constraints=basis1.constraints,
     )
     resolved_basis = resolve_close_coordinates_basis(merged_basis, distance_tolerance)
 
@@ -69,7 +70,7 @@ def merge_two_materials(
 
     name = material_name or "Merged Material"
     new_material = Material.create(
-        {"name": name, "lattice": merged_lattice.to_json(), "basis": resolved_basis.to_json()}
+        {"name": name, "lattice": merged_lattice.to_dict(), "basis": resolved_basis.to_dict()}
     )
     new_material.metadata = {**material1.metadata, **material2.metadata}
     return new_material

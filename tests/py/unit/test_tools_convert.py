@@ -1,13 +1,12 @@
 import numpy as np
 from ase import Atoms
 from ase.build import bulk
-from mat3ra.made.basis import Basis
+from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
 from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Element, Lattice, Structure
-
-from .fixtures import INTERFACE_PROPERTIES_JSON, INTERFACE_STRUCTURE
+from unit.fixtures.generated.fixtures import INTERFACE_PROPERTIES_JSON, INTERFACE_STRUCTURE
 
 PYMATGEN_LATTICE = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120, beta=90, gamma=60)
 PYMATGEN_STRUCTURE = Structure(PYMATGEN_LATTICE, ["Si", "Si"], [[0, 0, 0], [0.75, 0.5, 0.75]])
@@ -26,7 +25,7 @@ direct
 
 
 def test_to_pymatgen():
-    material = Material.create(Material.default_config)
+    material = Material.create_default()
     structure = to_pymatgen(material)
     assert isinstance(structure, Structure)
     assert structure.lattice == Lattice.from_parameters(3.867, 3.867, 3.867, 60, 60, 60)
@@ -44,7 +43,7 @@ def test_from_pymatgen():
 
 
 def test_to_poscar():
-    material = Material.create(Material.default_config)
+    material = Material.create_default()
     poscar = to_poscar(material)
     assert poscar == POSCAR_CONTENT
 
@@ -56,9 +55,9 @@ def test_from_poscar():
 
 
 def test_to_ase():
-    material = Material.create(Material.default_config)
+    material = Material.create_default()
     labels_array = [{"id": 0, "value": 0}, {"id": 1, "value": 1}]
-    material.basis = Basis.from_dict(**Material.default_config["basis"], labels=labels_array)
+    material.basis.labels = ArrayWithIds.from_list_of_dicts(labels_array)
     ase_atoms = to_ase(material)
     assert isinstance(ase_atoms, Atoms)
     assert np.allclose(

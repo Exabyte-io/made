@@ -16,8 +16,14 @@ from mat3ra.made.tools.build.interface.builders import (
     TwistedInterfaceConfiguration,
 )
 from mat3ra.utils import assertion as assertion_utils
+from unit.fixtures.generated.fixtures import (
+    FILM_CONFIGURATION,
+    INTERFACE_NAME,
+    INTERFACE_TERMINATION_PAIR,
+    SUBSTRATE_CONFIGURATION,
+)
 
-from .fixtures import FILM_CONFIGURATION, GRAPHENE, INTERFACE_NAME, INTERFACE_TERMINATION_PAIR, SUBSTRATE_CONFIGURATION
+from .fixtures.monolayer import GRAPHENE
 
 MAX_AREA = 100
 # pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2
@@ -32,11 +38,10 @@ interface_configuration = InterfaceConfiguration(
 )
 
 zsl_strain_matching_parameters = ZSLStrainMatchingParameters(max_area=MAX_AREA)
-matched_interfaces_builder = ZSLStrainMatchingInterfaceBuilder(
-    build_parameters=ZSLStrainMatchingInterfaceBuilderParameters(
-        strain_matching_parameters=zsl_strain_matching_parameters
-    )
+build_parameters = ZSLStrainMatchingInterfaceBuilderParameters(
+    strain_matching_parameters=zsl_strain_matching_parameters
 )
+matched_interfaces_builder = ZSLStrainMatchingInterfaceBuilder(build_parameters=build_parameters)
 
 
 def test_create_interfaces():
@@ -47,7 +52,7 @@ def test_create_interfaces():
 
 
 def test_create_twisted_nanoribbon_interface():
-    film = Material(GRAPHENE)
+    film = Material.create(GRAPHENE)
     configuration = NanoRibbonTwistedInterfaceConfiguration(
         film=film,
         substrate=film,
@@ -69,11 +74,11 @@ def test_create_twisted_nanoribbon_interface():
 
 
 def test_create_commensurate_supercell_twisted_interface():
-    film = Material(GRAPHENE)
-    substrate = Material(GRAPHENE)
+    film = Material.create(GRAPHENE)
+    substrate = Material.create(GRAPHENE)
     config = TwistedInterfaceConfiguration(film=film, substrate=substrate, twist_angle=13, distance_z=3.0)
     params = CommensurateLatticeTwistedInterfaceBuilderParameters(
-        max_repetition_int=5, angle_tolerance=0.5, return_first_match=True
+        max_supercell_matrix_int=5, angle_tolerance=0.5, return_first_match=True
     )
     builder = CommensurateLatticeTwistedInterfaceBuilder(build_parameters=params)
     interfaces = builder.get_materials(config, post_process_parameters=config)

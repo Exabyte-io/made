@@ -3,8 +3,9 @@ from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
+from unit.fixtures.generated.fixtures import INTERFACE_ATOMS
 
-from .fixtures import GRAPHENE_ZIGZAG_NANORIBBON, INTERFACE_ATOMS
+from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 
 
 def test_calculate_average_interlayer_distance():
@@ -19,7 +20,7 @@ def test_calculate_surface_area():
 
 
 def test_radial_distribution_function():
-    material = Material(GRAPHENE_ZIGZAG_NANORIBBON)
+    material = Material.create(GRAPHENE_ZIGZAG_NANORIBBON)
 
     rdf = RadialDistributionFunction.from_material(material, cutoff=10.0, bin_size=0.1)
 

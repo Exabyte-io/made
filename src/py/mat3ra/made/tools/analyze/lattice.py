@@ -15,11 +15,11 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         """
         Convert a structure to its primitive cell.
         """
-        return Material(from_pymatgen(self.spacegroup_analyzer.get_primitive_standard_structure()))
+        return Material.create(from_pymatgen(self.spacegroup_analyzer.get_primitive_standard_structure()))
 
     @property
     def get_with_conventional_lattice(self: Material) -> Material:
         """
         Convert a structure to its conventional cell.
         """
-        return Material(from_pymatgen(self.spacegroup_analyzer.get_conventional_standard_structure()))
+        return Material.create(from_pymatgen(self.spacegroup_analyzer.get_conventional_standard_structure()))

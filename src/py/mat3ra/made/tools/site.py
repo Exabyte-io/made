@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 import numpy as np
-from mat3ra.made.utils import ArrayWithIds
+from mat3ra.code.array_with_ids import ArrayWithIds
 from pydantic import BaseModel
 
 

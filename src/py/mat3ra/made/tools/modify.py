@@ -33,9 +33,7 @@ def filter_by_label(material: Material, label: Union[int, str]) -> Material:
     new_material = material.clone()
     labels_array = new_material.basis.labels.to_array_of_values_with_ids()
     filtered_label_ids = [_label.id for _label in labels_array if _label.value == label]
-    new_basis = new_material.basis
-    new_basis.filter_atoms_by_ids(filtered_label_ids)
-    new_material.basis = new_basis
+    new_material.basis.filter_atoms_by_ids(filtered_label_ids)
     return new_material
 
 
@@ -87,7 +85,7 @@ def translate_by_vector(
     atoms = to_ase(material)
     # ASE accepts cartesian coordinates for translation
     atoms.translate(tuple(vector))
-    return Material(from_ase(atoms))
+    return Material.create(from_ase(atoms))
 
 
 def translate_to_center(material: Material, axes: Optional[List[str]] = None) -> Material:
@@ -104,12 +102,12 @@ def translate_to_center(material: Material, axes: Optional[List[str]] = None) ->
     new_material.to_crystal()
     if axes is None:
         axes = ["x", "y", "z"]
-    min_x = get_atomic_coordinates_extremum(material, axis="x", extremum="min") if "x" in axes else 0
-    max_x = get_atomic_coordinates_extremum(material, axis="x", extremum="max") if "x" in axes else 1
-    min_y = get_atomic_coordinates_extremum(material, axis="y", extremum="min") if "y" in axes else 0
-    max_y = get_atomic_coordinates_extremum(material, axis="y", extremum="max") if "y" in axes else 1
+    min_x = get_atomic_coordinates_extremum(new_material, axis="x", extremum="min") if "x" in axes else 0
+    max_x = get_atomic_coordinates_extremum(new_material, axis="x", extremum="max") if "x" in axes else 1
+    min_y = get_atomic_coordinates_extremum(new_material, axis="y", extremum="min") if "y" in axes else 0
+    max_y = get_atomic_coordinates_extremum(new_material, axis="y", extremum="max") if "y" in axes else 1
     if "z" in axes:
-        material = translate_to_z_level(material, z_level="center")
+        material = translate_to_z_level(new_material, z_level="center")
 
     material = translate_by_vector(material, vector=[(1 - min_x - max_x) / 2, (1 - min_y - max_y) / 2, 0])
     return material
@@ -126,7 +124,7 @@ def wrap_to_unit_cell(material: Material) -> Material:
     """
     atoms = to_ase(material)
     atoms.wrap()
-    return Material(from_ase(atoms))
+    return Material.create(from_ase(atoms))
 
 
 def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> Material:
@@ -142,11 +140,7 @@ def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> M
         Material: The filtered material object.
     """
     new_material = material.clone()
-    new_basis = new_material.basis
-    if invert is True:
-        ids = list(set(new_basis.elements.ids) - set(ids))
-    new_basis.filter_atoms_by_ids(ids)
-    new_material.basis = new_basis
+    new_material.basis.filter_atoms_by_ids(ids, invert)
     return new_material
 
 
@@ -202,7 +196,7 @@ def filter_by_layers(
     if central_atom_id is not None:
         center_coordinate = material.basis.coordinates.get_element_value_by_index(central_atom_id)
     vectors = material.lattice.vectors
-    direction_vector = vectors.c
+    direction_vector = vectors.c.value
 
     def condition(coordinate):
         return is_coordinate_within_layer(coordinate, center_coordinate, direction_vector, layer_thickness)
@@ -499,7 +493,7 @@ def add_vacuum(material: Material, vacuum: float = 5.0, on_top=True, to_bottom=F
     new_material_atoms = to_ase(material)
     vacuum_amount = vacuum * 2 if on_top and to_bottom else vacuum
     ase_add_vacuum(new_material_atoms, vacuum_amount)
-    new_material = Material(from_ase(new_material_atoms))
+    new_material = Material.create(from_ase(new_material_atoms))
     if to_bottom and not on_top:
         new_material = translate_to_z_level(new_material, z_level="top")
     elif on_top and to_bottom:
@@ -560,16 +554,17 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
         Material: The material object with the vacuum thickness set.
     """
     translated_material = translate_to_z_level(material, z_level="bottom")
-    new_basis = translated_material.basis
-    new_basis.to_cartesian()
+    translated_material.to_cartesian()
+    max_z_distance = (
+        get_atomic_coordinates_extremum(translated_material, use_cartesian_coordinates=True) + fixed_padding
+    )
     new_lattice = translated_material.lattice
-    new_lattice.c = get_atomic_coordinates_extremum(translated_material, use_cartesian_coordinates=True) + fixed_padding
-    new_basis.cell.vector3 = new_lattice.vectors.c
-    new_basis.to_crystal()
-    new_material = material.clone()
+    new_lattice.c = max_z_distance
+    translated_material.set_lattice(new_lattice)
+    if material.basis.is_in_crystal_units:
+        translated_material.to_crystal()
 
-    new_material.basis = new_basis
-    new_material.lattice = new_lattice
+    new_material = translated_material.clone()
 
     if from_top and not from_bottom:
         new_material = translate_to_z_level(new_material, z_level="top")
@@ -591,16 +586,16 @@ def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True,
     Returns:
         Atoms: The rotated material.
     """
-    if material.basis.is_in_cartesian_units:
-        crystal_basis = material.basis.copy()
-        crystal_basis.to_crystal()
-        material.basis = crystal_basis
+    original_is_in_cartesian_units = material.basis.is_in_cartesian_units
+    material.to_crystal()
     atoms = to_ase(material)
     atoms.rotate(v=axis, a=angle, center="COU", rotate_cell=rotate_cell)
     if wrap:
         atoms.wrap()
-
-    return Material(from_ase(atoms))
+    new_material = Material.create(from_ase(atoms))
+    if original_is_in_cartesian_units:
+        new_material.to_cartesian()
+    return new_material
 
 
 def interface_displace_part(

@@ -133,7 +133,7 @@ class VoronoiInterstitialPointDefectBuilder(PointDefectBuilder):
     ) -> List[type(PointDefectBuilder._GeneratedItemType)]:  # type: ignore
         pymatgen_structure = to_pymatgen(configuration.crystal)
         voronoi_gen = PymatgenVoronoiInterstitialGenerator(
-            **self.build_parameters.dict(),
+            **self.build_parameters.model_dump(),
         )
         interstitials = list(
             voronoi_gen.generate(structure=pymatgen_structure, insert_species=[configuration.chemical_element])
@@ -396,7 +396,7 @@ class EquidistantAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found. Try reducing the distance_z.")
 
-        isolated_neighboring_atoms_basis = supercell_material.basis.copy()
+        isolated_neighboring_atoms_basis = supercell_material.basis.model_copy()
         isolated_neighboring_atoms_basis.coordinates.filter_by_ids(neighboring_atoms_ids_in_supercell)
         equidistant_coordinate_in_supercell = get_center_of_coordinates(
             isolated_neighboring_atoms_basis.coordinates.values
@@ -689,15 +689,8 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         scaling_matrix[0, 0] += delta_a_cart / norm_a
         scaling_matrix[1, 1] += delta_b_cart / norm_b
 
-        cart_basis = material.basis.copy()
-        cart_basis.to_cartesian()
-        cart_basis.cell.scale_by_matrix(scaling_matrix)
-        material.basis = cart_basis
-
-        new_lattice = material.lattice.clone()
-        new_lattice.a = np.linalg.norm(cart_basis.cell.vector1)
-        new_lattice.b = np.linalg.norm(cart_basis.cell.vector2)
-        material.lattice = new_lattice
+        new_lattice = material.lattice.get_scaled_by_matrix(scaling_matrix)
+        material.set_lattice(new_lattice)
         return material
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
