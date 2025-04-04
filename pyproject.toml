@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "MAterials DEfinitions and/or MAterials DEsign library."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { file = "LICENSE.md" }
+license = {file = "LICENSE.md"}
 authors = [
     { name = "Exabyte Inc.", email = "info@mat3ra.com" }
 ]
@@ -20,7 +20,7 @@ dependencies = [
     "numpy<=1.26.4",
     "mat3ra-utils",
     "mat3ra-esse",
-    "mat3ra-code @ git+https://github.com/Exabyte-io/code.git@feature/SOF-7570-2",
+    "mat3ra-code",
 ]
 
 [project.optional-dependencies]
