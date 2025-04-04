@@ -1,8 +1,9 @@
 import numpy as np
+from mat3ra.utils import assertion as assertion_utils
+
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.cell import SI_CONVENTIONAL_CELL
 from unit.utils import assert_two_entities_deep_almost_equal
 
@@ -25,12 +26,13 @@ def test_create():
 
 def test_create_with_cell_as_list():
     # The key cell should be ignored and Basis.Cell created from Lattice by Material
-    config = Material.__default_config__.copy()
-    config["basis"]["cell"] = [
+    cell = [
         [1.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],
         [0.0, 0.0, 1.0],
     ]
+    config = {**Material.__default_config__, "basis": {**Material.__default_config__["basis"], "cell": cell}}
+
     material = Material.create(config)
     assert isinstance(material.basis, Basis)
     assert material.basis.cell.vectors_as_array == material.lattice.cell.vectors_as_array
