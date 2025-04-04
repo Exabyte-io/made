@@ -26,6 +26,8 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
             kwargs["labels"] = ArrayWithIds.from_list_of_dicts(kwargs["labels"])
         if isinstance(kwargs.get("constraints"), list):
             kwargs["constraints"] = ArrayWithIds.from_list_of_dicts(kwargs["constraints"])
+        if isinstance(kwargs.get("cell"), list):
+            kwargs["cell"] = Cell.from_vectors_array(kwargs["cell"])
         return kwargs
 
     def __init__(self, *args: Any, **kwargs: Any):
