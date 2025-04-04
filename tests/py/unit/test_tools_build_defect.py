@@ -159,7 +159,7 @@ def test_create_crystal_site_adatom():
     assert defect.basis.elements.values[-1] == "Si"
 
     coordinates_macosx = [0.458333, 0.458333, 0.628217]
-    coordinates_linux_and_emscripten = [0.083333, 0.558333333, 0.872332562]
+    coordinates_linux_and_emscripten = [0.083333, 0.458333, 0.872332562]
     defect_coordinate = defect.basis.coordinates.values[-1]
     atol = 10 ** (-COORDINATE_TOLERANCE)
     try:
