@@ -58,59 +58,6 @@ export declare class Basis {
     static get unitsOptionsConfig(): typeof ATOMIC_COORD_UNITS;
     static get unitsOptionsDefaultValue(): string;
     static get defaultCell(): [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema];
-    /**
-     * Serialize class instance to JSON.
-     * @param skipRounding - Whether to skip rounding the resulting lattice values, defaults to `false`.
-     * @example As below:
-     {
-            "elements" : [
-                {
-                    "id" : 0,
-                    "value" : "Si"
-                },
-                {
-                    "id" : 1,
-                    "value" : "Si"
-                }
-            ],
-            "coordinates" : [
-                {
-                    "id" : 0,
-                    "value" : [
-                        0,
-                        0,
-                        0
-                    ]
-                },
-                {
-                    "id" : 1,
-                    "value" : [
-                        0.25,
-                        0.25,
-                        0.25
-                    ]
-                }
-            ],
-            "units" : "crystal",
-            "cell" : [
-                [
-                    1,
-                    0,
-                    0
-                ],
-                [
-                    0,
-                    1,
-                    0
-                ],
-                [
-                    0,
-                    0,
-                    1
-                ]
-            ]
-        }
-     */
     toJSON(skipRounding?: boolean): BasisSchema;
     /** Return coordinates rounded to default precision */
     get coordinatesRounded(): {
