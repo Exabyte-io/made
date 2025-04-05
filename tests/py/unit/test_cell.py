@@ -1,5 +1,4 @@
 from mat3ra.code.vector import RoundedVector3D
-
 from mat3ra.made.cell import Cell
 
 VECTORS = [

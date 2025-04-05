@@ -2,12 +2,11 @@ from typing import List
 
 import numpy as np
 from mat3ra.code.vector import RoundedVector3D
+from mat3ra.esse.models.properties_directory.structural.lattice.lattice_vectors import LatticeExplicitUnit as CellSchema
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 from pydantic import Field
 
 DEFAULT_CELL = np.eye(3).tolist()
-
-from mat3ra.esse.models.properties_directory.structural.lattice.lattice_vectors import LatticeExplicitUnit as CellSchema
 
 
 class Cell(RoundNumericValuesMixin, CellSchema):
