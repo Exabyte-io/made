@@ -1,9 +1,8 @@
 import numpy as np
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.cell import SI_CONVENTIONAL_CELL
 from unit.utils import assert_two_entities_deep_almost_equal
 
@@ -35,7 +34,7 @@ def test_create_with_cell_as_list():
 
     material = Material.create(config)
     assert isinstance(material.basis, Basis)
-    assert material.basis.cell.vectors_as_array == material.lattice.cell.vectors_as_array
+    assert material.basis.cell.vector_arrays == material.lattice.cell.vector_arrays
 
 
 def test_material_to_json():
@@ -89,6 +88,6 @@ def test_basis_cell_lattice_sync():
     new_lattice = Lattice.from_vectors_array(new_vectors)
     material.set_lattice(new_lattice)
     # Verify basis.cell matches new lattice vectors
-    assertion_utils.assert_deep_almost_equal(new_vectors, material.basis.cell.vectors_as_array)
+    assertion_utils.assert_deep_almost_equal(new_vectors, material.basis.cell.vector_arrays)
     assertion_utils.assert_deep_almost_equal(new_vectors, material.lattice.vector_arrays)
     # Verify basis coordinates are still correct

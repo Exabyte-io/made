@@ -1,4 +1,5 @@
-from mat3ra.made.lattice import Lattice, LatticeVector
+from mat3ra.code.vector import RoundedVector3D
+from mat3ra.made.lattice import Lattice
 from mat3ra.utils import assertion as assertion_utils
 
 DEFAULT_UNITS = Lattice.__units_default__
@@ -27,9 +28,9 @@ def test_lattice_vectors_access():
     lattice = Lattice(a=2.0, b=3.0, c=4.0)
 
     # Test individual vector access
-    assert isinstance(lattice.vectors.a, LatticeVector)
-    assert isinstance(lattice.vectors.b, LatticeVector)
-    assert isinstance(lattice.vectors.c, LatticeVector)
+    assert isinstance(lattice.vectors.a, RoundedVector3D)
+    assert isinstance(lattice.vectors.b, RoundedVector3D)
+    assert isinstance(lattice.vectors.c, RoundedVector3D)
 
     # Test vector arrays access
     arrays = lattice.vector_arrays
