@@ -52,3 +52,6 @@ def test_merge_materials():
     merged_material_reverse = merge_materials([cavity, section])
     assertion_utils.assert_deep_almost_equal(merged_material.basis, expected_merged_material_basis)
     assertion_utils.assert_deep_almost_equal(merged_material_reverse.basis, expected_merged_material_reverse_basis)
+
+
+# def test_resolve_close_coordinates_basis():

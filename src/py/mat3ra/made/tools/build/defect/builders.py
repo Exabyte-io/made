@@ -648,7 +648,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         """
         height_cartesian = self._calculate_height_cartesian(original_material, new_material)
         cut_direction_xy_proj_cart = np.linalg.norm(
-            np.dot(np.array(new_material.basis.cell.vector_arrays), normalized_direction_vector)
+            np.dot(np.array(new_material.lattice.vector_arrays), normalized_direction_vector)
         )
         # Slope of the terrace along the cut direction
         hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])
