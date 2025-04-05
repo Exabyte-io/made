@@ -112,6 +112,18 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.elements.add_item(element)
         self.coordinates.add_item(coordinate)
 
+    def add_atoms_from_another_basis(self, other_basis: "Basis"):
+        """
+        Add atoms from another basis to this basis.
+
+        Args:
+            other_basis (Basis): The other basis to add atoms from.
+        """
+
+        self.elements.add_items(other_basis.elements.values)
+        self.coordinates.add_items(other_basis.coordinates.values)
+        self.labels.add_items(other_basis.labels.values)
+
     def remove_atom_by_id(self, id: int):
         self.elements.remove_item(id)
         self.coordinates.remove_item(id)

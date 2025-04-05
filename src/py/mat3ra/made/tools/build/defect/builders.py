@@ -612,7 +612,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
             The normalized cut direction vector in Cartesian coordinates.
         """
         np_cut_direction = np.array(cut_direction)
-        direction_vector = np.dot(np.array(material.basis.cell.vectors_as_array), np_cut_direction)
+        direction_vector = np.dot(np.array(material.basis.cell.vector_arrays), np_cut_direction)
         normalized_direction_vector = direction_vector / np.linalg.norm(direction_vector)
         return normalized_direction_vector
 
@@ -648,7 +648,7 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         """
         height_cartesian = self._calculate_height_cartesian(original_material, new_material)
         cut_direction_xy_proj_cart = np.linalg.norm(
-            np.dot(np.array(new_material.basis.cell.vectors_as_array), normalized_direction_vector)
+            np.dot(np.array(new_material.basis.cell.vector_arrays), normalized_direction_vector)
         )
         # Slope of the terrace along the cut direction
         hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])
@@ -679,17 +679,17 @@ class TerraceSlabDefectBuilder(SlabDefectBuilder):
         Returns:
             The material with the increased lattice size.
         """
-        vector_a, vector_b = np.array(material.basis.cell.vector1), np.array(material.basis.cell.vector2)
-        norm_a, norm_b = np.linalg.norm(vector_a), np.linalg.norm(vector_b)
+        vector_a, vector_b = material.lattice.vectors.a, material.lattice.vectors.b
+        norm_a, norm_b = vector_a.norm, vector_b.norm
 
-        delta_a_cart = np.dot(vector_a, np.array(direction_of_increase)) * length_increase / norm_a
-        delta_b_cart = np.dot(vector_b, np.array(direction_of_increase)) * length_increase / norm_b
+        delta_a_cart = np.dot(vector_a.value, np.array(direction_of_increase)) * length_increase / norm_a
+        delta_b_cart = np.dot(vector_b.value, np.array(direction_of_increase)) * length_increase / norm_b
 
         scaling_matrix = np.eye(3)
         scaling_matrix[0, 0] += delta_a_cart / norm_a
         scaling_matrix[1, 1] += delta_b_cart / norm_b
 
-        new_lattice = material.lattice.get_scaled_by_matrix(scaling_matrix)
+        new_lattice = material.lattice.get_scaled_by_matrix(scaling_matrix.tolist())
         material.set_lattice(new_lattice)
         return material
 

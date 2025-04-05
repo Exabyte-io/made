@@ -3,7 +3,6 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.code.vector import RoundedVector3D
 from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
     LatticeImplicitSchema as LatticeBravaisSchema,
 )
@@ -11,33 +10,16 @@ from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais 
     LatticeTypeEnum,
     LatticeUnitsSchema,
 )
-from mat3ra.esse.models.properties_directory.structural.lattice.lattice_vectors import (
-    LatticeExplicitUnit as LatticeVectorsSchema,
-)
+
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import Field
 
 from .cell import Cell
 
 COORDINATE_TOLERANCE = 6
 
 
-class LatticeVector(RoundedVector3D):
+class LatticeVectors(Cell):
     pass
-
-
-class LatticeVectors(RoundNumericValuesMixin, LatticeVectorsSchema):
-    """
-    A class to represent the lattice vectors.
-    """
-
-    a: LatticeVector = Field(default_factory=lambda: LatticeVector(root=[1.0, 0.0, 0.0]))
-    b: LatticeVector = Field(default_factory=lambda: LatticeVector(root=[0.0, 1.0, 0.0]))
-    c: LatticeVector = Field(default_factory=lambda: LatticeVector(root=[0.0, 0.0, 1.0]))
-
-    @classmethod
-    def from_vectors_array(cls, vectors: List[List[float]]) -> "LatticeVectors":
-        return cls(a=LatticeVector(root=vectors[0]), b=LatticeVector(root=vectors[1]), c=LatticeVector(root=vectors[2]))
 
 
 class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydantic):

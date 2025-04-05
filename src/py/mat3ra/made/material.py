@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, Dict, List, Type
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic

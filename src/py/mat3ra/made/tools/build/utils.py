@@ -43,6 +43,9 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
     merged_coordinates_values = basis1.coordinates.values + basis2.coordinates.values
     merged_labels_values = basis1.labels.values + basis2.labels.values if basis1.labels and basis2.labels else []
 
+    new_basis = basis1.clone()
+    new_basis.elements = ArrayWithIds.from_values(values=merged_elements_values)
+
     merged_basis = Basis(
         elements=ArrayWithIds.from_values(values=merged_elements_values),
         coordinates=Coordinates.from_values(values=merged_coordinates_values),
