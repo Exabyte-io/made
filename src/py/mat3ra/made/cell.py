@@ -1,16 +1,13 @@
 from typing import List, Optional
 
 import numpy as np
-from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import BaseModel, Field
-
 from mat3ra.code.vector import RoundedVector3D
+from mat3ra.utils.mixins import RoundNumericValuesMixin
+from pydantic import Field
 
 DEFAULT_CELL = np.eye(3).tolist()
 
-from mat3ra.esse.models.properties_directory.structural.lattice.lattice_vectors import (
-    LatticeExplicitUnit as CellSchema,
-)
+from mat3ra.esse.models.properties_directory.structural.lattice.lattice_vectors import LatticeExplicitUnit as CellSchema
 
 
 class Cell(RoundNumericValuesMixin, CellSchema):
@@ -21,7 +18,7 @@ class Cell(RoundNumericValuesMixin, CellSchema):
     __default_vectors__ = DEFAULT_CELL
 
     @classmethod
-    def from_vectors_array(cls, vectors: Optional[List[List[float]]] = None) -> "Cell":
+    def from_vectors_array(cls, vectors: List[List[float]] = DEFAULT_CELL) -> "Cell":
         return cls(
             a=RoundedVector3D(vectors[0]),
             b=RoundedVector3D(vectors[1]),

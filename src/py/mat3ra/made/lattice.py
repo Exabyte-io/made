@@ -10,7 +10,6 @@ from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais 
     LatticeTypeEnum,
     LatticeUnitsSchema,
 )
-
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 
 from .cell import Cell
