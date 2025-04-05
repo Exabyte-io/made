@@ -91,4 +91,4 @@ def test_create_surface_grain_boundary():
     ]
 
     assert len(gb) == 1
-    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, gb[0].basis.cell.vectors_as_array)
+    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, gb[0].basis.cell.vector_arrays)

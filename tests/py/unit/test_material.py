@@ -23,6 +23,20 @@ def test_create():
     assert_two_entities_deep_almost_equal(material, SI_CONVENTIONAL_CELL)
 
 
+def test_create_with_cell_as_list():
+    # The key cell should be ignored and Basis.Cell created from Lattice by Material
+    cell = [
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0],
+    ]
+    config = {**Material.__default_config__, "basis": {**Material.__default_config__["basis"], "cell": cell}}
+
+    material = Material.create(config)
+    assert isinstance(material.basis, Basis)
+    assert material.basis.cell.vector_arrays == material.lattice.vector_arrays
+
+
 def test_material_to_json():
     material = Material.create_default()
     # Remove all keys that are null in the config
@@ -74,6 +88,6 @@ def test_basis_cell_lattice_sync():
     new_lattice = Lattice.from_vectors_array(new_vectors)
     material.set_lattice(new_lattice)
     # Verify basis.cell matches new lattice vectors
-    assertion_utils.assert_deep_almost_equal(new_vectors, material.basis.cell.vectors_as_array)
+    assertion_utils.assert_deep_almost_equal(new_vectors, material.basis.cell.vector_arrays)
     assertion_utils.assert_deep_almost_equal(new_vectors, material.lattice.vector_arrays)
     # Verify basis coordinates are still correct

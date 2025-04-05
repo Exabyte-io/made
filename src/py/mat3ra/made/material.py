@@ -61,7 +61,7 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
     def model_post_init(self, __context: Any) -> None:
         if not self.name and self.formula:
             self.name: str = self.formula
-        self.basis.cell = self.lattice.cell
+        self.basis.cell = self.lattice.vectors
 
     @property
     def coordinates_array(self) -> List[List[float]]:
@@ -82,7 +82,7 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         original_is_in_crystal_units = self.basis.is_in_crystal_units
         self.to_cartesian()
         self.lattice = Lattice.from_vectors_array([lattice_vector1, lattice_vector2, lattice_vector3])
-        self.basis.cell = self.lattice.cell
+        self.basis.cell = self.lattice.vectors
         if original_is_in_crystal_units:
             self.to_crystal()
 
