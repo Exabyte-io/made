@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 import numpy as np
 from mat3ra.code.vector import RoundedVector3D
@@ -11,11 +11,12 @@ from mat3ra.esse.models.properties_directory.structural.lattice.lattice_vectors 
 
 
 class Cell(RoundNumericValuesMixin, CellSchema):
-    a: RoundedVector3D = Field(default_factory=lambda: RoundedVector3D(DEFAULT_CELL[0]))
-    b: RoundedVector3D = Field(default_factory=lambda: RoundedVector3D(DEFAULT_CELL[1]))
-    c: RoundedVector3D = Field(default_factory=lambda: RoundedVector3D(DEFAULT_CELL[2]))
-    __round_precision__ = 6
+    __rounded_vector3d__ = RoundedVector3D
     __default_vectors__ = DEFAULT_CELL
+
+    a: RoundedVector3D = Field(default_factory=lambda: Cell.__rounded_vector3d__(DEFAULT_CELL[0]))
+    b: RoundedVector3D = Field(default_factory=lambda: Cell.__rounded_vector3d__(DEFAULT_CELL[1]))
+    c: RoundedVector3D = Field(default_factory=lambda: Cell.__rounded_vector3d__(DEFAULT_CELL[2]))
 
     @classmethod
     def from_vectors_array(cls, vectors: List[List[float]] = DEFAULT_CELL) -> "Cell":
@@ -25,23 +26,31 @@ class Cell(RoundNumericValuesMixin, CellSchema):
             c=RoundedVector3D(vectors[2]),
         )
 
-    @property
-    def vector_arrays(self, skip_rounding=False) -> List[List[float]]:
+    def get_vector_arrays(self, skip_rounding=False) -> List[List[float]]:
         if skip_rounding:
             return [self.a.value, self.b.value, self.c.value]
         return [self.a.value_rounded, self.b.value_rounded, self.c.value_rounded]
 
+    @property
+    def vector_arrays(self) -> List[List[float]]:
+        return self.get_vector_arrays(skip_rounding=True)
+
+    @property
+    def vector_arrays_rounded(self) -> List[List[float]]:
+        return self.get_vector_arrays(skip_rounding=False)
+
     def convert_point_to_cartesian(self, point: List[float]) -> List[float]:
         np_vector = np.array(self.vector_arrays)
-        result_list = np.dot(point, np_vector).tolist()
-        return self.round_array_or_number(result_list)
+        return np.dot(point, np_vector).tolist()
 
     def convert_point_to_crystal(self, point: List[float]) -> List[float]:
         np_vector = np.array(self.vector_arrays)
-        result_list = np.dot(point, np.linalg.inv(np_vector)).tolist()
-        return self.round_array_or_number(result_list)
+        return np.dot(point, np.linalg.inv(np_vector)).tolist()
 
     @property
     def volume(self) -> float:
-        volume = np.linalg.det(np.array(self.vector_arrays))
-        return self.round_array_or_number(volume)
+        return np.linalg.det(np.array(self.vector_arrays))
+
+    @property
+    def volume_rounded(self) -> float:
+        return self.round_array_or_number(self.volume)

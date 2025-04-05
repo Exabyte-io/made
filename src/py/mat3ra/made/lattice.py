@@ -92,19 +92,20 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
         )
 
     @property
-    def vector_arrays(self, skip_rounding=False) -> List[List[float]]:
-        _ = [self.vectors.a, self.vectors.b, self.vectors.c]
-        if not skip_rounding:
-            return list(map(lambda vector: vector.value_rounded, _))
-        return list(map(lambda vector: vector.root, _))
+    def vector_arrays(self) -> List[List[float]]:
+        return self.vectors.vector_arrays
 
     @property
-    def cell(self) -> Cell:
-        return Cell.from_vectors_array(self.vector_arrays)
+    def vector_arrays_rounded(self) -> List[List[float]]:
+        return self.vectors.vector_arrays_rounded
 
     @property
     def cell_volume(self) -> float:
-        return self.cell.volume
+        return self.vectors.volume
+
+    @property
+    def cell_volume_rounded(self) -> float:
+        return self.vectors.volume_rounded
 
     def get_scaled_by_matrix(self, matrix: List[List[float]]):
         """

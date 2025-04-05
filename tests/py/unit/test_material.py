@@ -34,7 +34,7 @@ def test_create_with_cell_as_list():
 
     material = Material.create(config)
     assert isinstance(material.basis, Basis)
-    assert material.basis.cell.vector_arrays == material.lattice.cell.vector_arrays
+    assert material.basis.cell.vector_arrays == material.lattice.vector_arrays
 
 
 def test_material_to_json():
