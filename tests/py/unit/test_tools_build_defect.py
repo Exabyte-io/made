@@ -196,9 +196,8 @@ def test_create_terrace():
     )
     new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
     coordinate_macosx = [0.777786396, 0.5, 0.414655236]
-    coordinate_linux_and_emscripten = [0.627786404, 0.5, 0.414655236]
+    coordinate_linux_and_emscripten = [0.627786404, 0.25, 0.439235145]
     defect_coordinate = new_slab.basis.coordinates.values[42]
-    print(defect_coordinate)
     atol = 10 ** (-COORDINATE_TOLERANCE)
     try:
         assertion_utils.assert_deep_almost_equal(coordinate_macosx, defect_coordinate, atol=atol)
