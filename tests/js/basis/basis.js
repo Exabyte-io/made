@@ -1,6 +1,7 @@
 import { expect } from "chai";
 
 import { Basis } from "../../../src/js/basis/basis";
+import { Material } from "../../../src/js/material";
 import {
     AsGeBasis,
     C2H4,
@@ -21,8 +22,10 @@ describe("Basis", () => {
     });
 
     it("should return true when basis is compared to its clone", () => {
-        const basis = new Basis(Na4Cl4.basis);
-        expect(basis.isEqualTo(basis.clone())).to.be.equal(true);
+        const basis1 = new Material(Na4Cl4).Basis;
+        const basis2 = basis1.clone();
+        expect(basis1.isEqualTo(basis2)).to.be.equal(true);
+        expect(basis1.hasEquivalentCellTo(basis2)).to.be.equal(true);
     });
 
     it("should return jsonified basis", () => {
@@ -31,8 +34,8 @@ describe("Basis", () => {
     });
 
     it("should return true if cells are equal", () => {
-        const basis1 = new Basis(FeLiSiBasis);
-        const basis2 = new Basis(LiFeSiBasis);
+        const basis1 = new Material(Na4Cl4).Basis;
+        const basis2 = new Material(Na4Cl4Cartesian).Basis;
         expect(basis1.hasEquivalentCellTo(basis2)).to.be.equal(true);
     });
 

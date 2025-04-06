@@ -140,6 +140,7 @@ export class Basis {
     clone(extraContext?: Partial<BasisProps>): Basis {
         return new (this.constructor as typeof Basis)({
             ...this.toJSON(),
+            cell: this.cell,
             ...extraContext,
         });
     }
