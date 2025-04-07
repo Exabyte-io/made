@@ -42,19 +42,15 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
     merged_elements_values = basis1.elements.values + basis2.elements.values
     merged_coordinates_values = basis1.coordinates.values + basis2.coordinates.values
     merged_labels_values = basis1.labels.values + basis2.labels.values if basis1.labels and basis2.labels else []
+    merged_constraints_values = basis1.constraints.values + basis2.constraints.values
 
     new_basis = basis1.clone()
     new_basis.elements = ArrayWithIds.from_values(values=merged_elements_values)
+    new_basis.coordinates = Coordinates.from_values(values=merged_coordinates_values)
+    new_basis.labels = ArrayWithIds.from_values(values=merged_labels_values)
+    new_basis.constraints = ArrayWithIds.from_values(values=merged_constraints_values)
 
-    merged_basis = Basis(
-        elements=ArrayWithIds.from_values(values=merged_elements_values),
-        coordinates=Coordinates.from_values(values=merged_coordinates_values),
-        units=basis1.units,
-        cell=basis1.cell,
-        labels=ArrayWithIds.from_values(values=merged_labels_values),
-        constraints=basis1.constraints,
-    )
-    resolved_basis = resolve_close_coordinates_basis(merged_basis, distance_tolerance)
+    resolved_basis = resolve_close_coordinates_basis(new_basis, distance_tolerance)
 
     return resolved_basis
 
@@ -82,7 +78,7 @@ def merge_two_materials(
 def merge_materials(
     materials: List[Material],
     material_name: Optional[str] = None,
-    distance_tolerance: float = 0.01,
+    distance_tolerance: float = 0.1,
     merge_dangerously=False,
 ) -> Material:
     """
