@@ -77,7 +77,7 @@ SECTION_MATERIAL_BASIS_EXTRA_ATOM = {
         "coordinates": [
             {"id": 0, "value": [0.0, 0.0, 0.0]},
             {"id": 3, "value": [0.5, 0.5, 0.0]},
-            {"id": 4, "value": [0.51, 0.51, 0.0]},  # Extra atom collides with Au
+            {"id": 4, "value": [0.51, 0.51, 0.0]},  # Extra atom collides with Au in cavity material
         ],
         "elements": [{"id": 0, "value": "Ni"}, {"id": 3, "value": "Ni"}, {"id": 4, "value": "O"}],
         "labels": [],
