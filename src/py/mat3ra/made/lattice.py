@@ -3,7 +3,6 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.code.vector import RoundedVector3D
 from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
     LatticeImplicitSchema as LatticeBravaisSchema,
 )
@@ -11,33 +10,15 @@ from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais 
     LatticeTypeEnum,
     LatticeUnitsSchema,
 )
-from mat3ra.esse.models.properties_directory.structural.lattice.lattice_vectors import (
-    LatticeExplicitUnit as LatticeVectorsSchema,
-)
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import Field
 
 from .cell import Cell
 
 COORDINATE_TOLERANCE = 6
 
 
-class LatticeVector(RoundedVector3D):
+class LatticeVectors(Cell):
     pass
-
-
-class LatticeVectors(RoundNumericValuesMixin, LatticeVectorsSchema):
-    """
-    A class to represent the lattice vectors.
-    """
-
-    a: LatticeVector = Field(default_factory=lambda: LatticeVector(root=[1.0, 0.0, 0.0]))
-    b: LatticeVector = Field(default_factory=lambda: LatticeVector(root=[0.0, 1.0, 0.0]))
-    c: LatticeVector = Field(default_factory=lambda: LatticeVector(root=[0.0, 0.0, 1.0]))
-
-    @classmethod
-    def from_vectors_array(cls, vectors: List[List[float]]) -> "LatticeVectors":
-        return cls(a=LatticeVector(root=vectors[0]), b=LatticeVector(root=vectors[1]), c=LatticeVector(root=vectors[2]))
 
 
 class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydantic):
@@ -111,19 +92,20 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
         )
 
     @property
-    def vector_arrays(self, skip_rounding=False) -> List[List[float]]:
-        _ = [self.vectors.a, self.vectors.b, self.vectors.c]
-        if not skip_rounding:
-            return list(map(lambda vector: vector.value_rounded, _))
-        return list(map(lambda vector: vector.root, _))
+    def vector_arrays(self) -> List[List[float]]:
+        return self.vectors.vector_arrays
 
     @property
-    def cell(self) -> Cell:
-        return Cell.from_vectors_array(self.vector_arrays)
+    def vector_arrays_rounded(self) -> List[List[float]]:
+        return self.vectors.vector_arrays_rounded
 
     @property
     def cell_volume(self) -> float:
-        return self.cell.volume
+        return self.vectors.volume
+
+    @property
+    def cell_volume_rounded(self) -> float:
+        return self.vectors.volume_rounded
 
     def get_scaled_by_matrix(self, matrix: List[List[float]]):
         """

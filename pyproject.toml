@@ -20,12 +20,13 @@ dependencies = [
     "numpy<=1.26.4",
     "mat3ra-utils",
     "mat3ra-esse",
-    "mat3ra-code",
+    "mat3ra-code @ git+https://github.com/Exabyte-io/code.git@feature/SOF-7570-fix",
 ]
 
 [project.optional-dependencies]
 # tracking separately the deps required to use the tools module
 tools = [
+    "scipy",
     "pymatgen==2024.4.13",
     "ase",
     "pymatgen-analysis-defects==2024.4.23",

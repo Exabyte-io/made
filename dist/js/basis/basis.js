@@ -43,65 +43,11 @@ class Basis {
     static get defaultCell() {
         return new lattice_1.Lattice().vectorArrays;
     }
-    /**
-     * Serialize class instance to JSON.
-     * @param skipRounding - Whether to skip rounding the resulting lattice values, defaults to `false`.
-     * @example As below:
-     {
-            "elements" : [
-                {
-                    "id" : 0,
-                    "value" : "Si"
-                },
-                {
-                    "id" : 1,
-                    "value" : "Si"
-                }
-            ],
-            "coordinates" : [
-                {
-                    "id" : 0,
-                    "value" : [
-                        0,
-                        0,
-                        0
-                    ]
-                },
-                {
-                    "id" : 1,
-                    "value" : [
-                        0.25,
-                        0.25,
-                        0.25
-                    ]
-                }
-            ],
-            "units" : "crystal",
-            "cell" : [
-                [
-                    1,
-                    0,
-                    0
-                ],
-                [
-                    0,
-                    1,
-                    0
-                ],
-                [
-                    0,
-                    0,
-                    1
-                ]
-            ]
-        }
-     */
     toJSON(skipRounding = false) {
         const json = {
             elements: this.elements,
             coordinates: skipRounding ? this.coordinates : this.coordinatesRounded,
             units: this.units,
-            cell: skipRounding ? this.cell : this.cellRounded,
         };
         if (!underscore_1.default.isEmpty(this.labels)) {
             return JSON.parse(JSON.stringify({
@@ -131,6 +77,7 @@ class Basis {
     clone(extraContext) {
         return new this.constructor({
             ...this.toJSON(),
+            cell: this.cell,
             ...extraContext,
         });
     }

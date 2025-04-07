@@ -99,65 +99,11 @@ export class Basis {
         return new Lattice().vectorArrays;
     }
 
-    /**
-     * Serialize class instance to JSON.
-     * @param skipRounding - Whether to skip rounding the resulting lattice values, defaults to `false`.
-     * @example As below:
-     {
-            "elements" : [
-                {
-                    "id" : 0,
-                    "value" : "Si"
-                },
-                {
-                    "id" : 1,
-                    "value" : "Si"
-                }
-            ],
-            "coordinates" : [
-                {
-                    "id" : 0,
-                    "value" : [
-                        0,
-                        0,
-                        0
-                    ]
-                },
-                {
-                    "id" : 1,
-                    "value" : [
-                        0.25,
-                        0.25,
-                        0.25
-                    ]
-                }
-            ],
-            "units" : "crystal",
-            "cell" : [
-                [
-                    1,
-                    0,
-                    0
-                ],
-                [
-                    0,
-                    1,
-                    0
-                ],
-                [
-                    0,
-                    0,
-                    1
-                ]
-            ]
-        }
-     */
     toJSON(skipRounding = false): BasisSchema {
         const json = {
             elements: this.elements,
             coordinates: skipRounding ? this.coordinates : this.coordinatesRounded,
             units: this.units,
-            cell: skipRounding ? this.cell : this.cellRounded,
         };
 
         if (!_.isEmpty(this.labels)) {
@@ -194,6 +140,7 @@ export class Basis {
     clone(extraContext?: Partial<BasisProps>): Basis {
         return new (this.constructor as typeof Basis)({
             ...this.toJSON(),
+            cell: this.cell,
             ...extraContext,
         });
     }

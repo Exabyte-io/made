@@ -26,6 +26,8 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
             kwargs["labels"] = ArrayWithIds.from_list_of_dicts(kwargs["labels"])
         if isinstance(kwargs.get("constraints"), list):
             kwargs["constraints"] = ArrayWithIds.from_list_of_dicts(kwargs["constraints"])
+        if isinstance(kwargs.get("cell"), list):
+            kwargs["cell"] = Cell.from_vectors_array(kwargs["cell"])
         return kwargs
 
     def __init__(self, *args: Any, **kwargs: Any):
@@ -109,6 +111,18 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
                 return
         self.elements.add_item(element)
         self.coordinates.add_item(coordinate)
+
+    def add_atoms_from_another_basis(self, other_basis: "Basis"):
+        """
+        Add atoms from another basis to this basis.
+
+        Args:
+            other_basis (Basis): The other basis to add atoms from.
+        """
+
+        self.elements.add_items(other_basis.elements.values)
+        self.coordinates.add_items(other_basis.coordinates.values)
+        self.labels.add_items(other_basis.labels.values)
 
     def remove_atom_by_id(self, id: int):
         self.elements.remove_item(id)
