@@ -8,6 +8,7 @@ import { ObjectWithIdAndValue, ValueOrObjectArray } from "../abstract/scalar_wit
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import { Vector } from "../lattice/types";
+import {  ArrayOf3NumberElementsSchema } from "@mat3ra/esse/dist/js/types";
 import math from "../math";
 import { Coordinate } from "./types";
 
@@ -140,7 +141,7 @@ export class Basis {
     clone(extraContext?: Partial<BasisProps>): Basis {
         return new (this.constructor as typeof Basis)({
             ...this.toJSON(),
-            cell: this.cell,
+            cell: this.cellRounded as ArrayOf3NumberElementsSchema[],
             ...extraContext,
         });
     }

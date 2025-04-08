@@ -5,7 +5,7 @@ import { readFile, readJSONFile } from "./utils";
 export const TOLERANCE = 1e-3;
 
 export const FIXTURES_DIR = path.resolve(__dirname, "../fixtures");
-export const Si = readJSONFile(path.join(FIXTURES_DIR, "Si.json"));
+export const Si = readJSONFile(path.join(FIXTURES_DIR, "Si-fake.json"));
 export const FeO = readJSONFile(path.join(FIXTURES_DIR, "FeO.json"));
 export const Na4Cl4 = readJSONFile(path.join(FIXTURES_DIR, "Na4Cl4.json"));
 export const Na4Cl4Cartesian = readJSONFile(path.join(FIXTURES_DIR, "Na4Cl4-cartesian.json"));
