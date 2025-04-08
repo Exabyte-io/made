@@ -1,9 +1,9 @@
+import { ArrayOf3NumberElementsSchema } from "@mat3ra/esse/dist/js/types";
 import _ from "underscore";
 import { ArrayWithIds } from "../abstract/array_with_ids";
 import { ObjectWithIdAndValue, ValueOrObjectArray } from "../abstract/scalar_with_id";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { Vector } from "../lattice/types";
-import { ArrayOf3NumberElementsSchema } from "@mat3ra/esse/dist/js/types";
 import { Coordinate } from "./types";
 export interface BasisProps {
     elements: ValueOrObjectArray<string>;
