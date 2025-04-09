@@ -1,5 +1,6 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
+import { ArrayOf3NumberElementsSchema } from "@mat3ra/esse/dist/js/types";
 import _ from "underscore";
 import s from "underscore.string";
 
@@ -140,7 +141,7 @@ export class Basis {
     clone(extraContext?: Partial<BasisProps>): Basis {
         return new (this.constructor as typeof Basis)({
             ...this.toJSON(),
-            cell: this.cell,
+            cell: this.cellRounded as ArrayOf3NumberElementsSchema[],
             ...extraContext,
         });
     }

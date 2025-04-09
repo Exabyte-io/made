@@ -29,7 +29,7 @@ describe("Basis", () => {
     });
 
     it("should return jsonified basis", () => {
-        const basis = new Basis(Na4Cl4.basis);
+        const basis = new Material(Na4Cl4).Basis;
         expect(basis.toJSON()).to.be.deep.almost.equal(Na4Cl4.basis);
     });
 
@@ -108,7 +108,7 @@ describe("Basis", () => {
     });
 
     it("should convert crystal to cartesian", () => {
-        const basis = new Basis(Na4Cl4.basis);
+        const basis = new Material(Na4Cl4).Basis;
         basis.toCartesian();
         expect(basis.isInCartesianUnits).to.be.equal(true);
         expect(basis.coordinates).to.be.deep.almost.equal(Na4Cl4Cartesian.basis.coordinates);
@@ -172,7 +172,7 @@ describe("Basis", () => {
      */
 
     it("should return standard representation", () => {
-        const basis = new Basis(Na4Cl4Cartesian.basis);
+        const basis = new Material(Na4Cl4Cartesian).Basis;
         expect(basis.standardRepresentation).to.be.deep.almost.equal(Na4Cl4.basis);
     });
 

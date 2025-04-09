@@ -13,6 +13,8 @@ const ADD = math_1.default.add;
 function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix) {
     const oldBasis = basis.clone();
     const newBasis = basis.clone({ isEmpty: true });
+    // oldBasis.cell = cell.vectorsAsArray;
+    // newBasis.cell = supercell.vectorsAsArray;
     oldBasis.toCrystal();
     newBasis.toCrystal();
     oldBasis.elements.forEach((element) => {

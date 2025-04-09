@@ -1,3 +1,4 @@
+import { ArrayOf3NumberElementsSchema } from "@mat3ra/esse/dist/js/types";
 import _ from "underscore";
 import { ArrayWithIds } from "../abstract/array_with_ids";
 import { ObjectWithIdAndValue, ValueOrObjectArray } from "../abstract/scalar_with_id";
@@ -57,7 +58,7 @@ export declare class Basis {
     labels, }: BasisProps);
     static get unitsOptionsConfig(): typeof ATOMIC_COORD_UNITS;
     static get unitsOptionsDefaultValue(): string;
-    static get defaultCell(): [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema];
+    static get defaultCell(): [ArrayOf3NumberElementsSchema, ArrayOf3NumberElementsSchema, ArrayOf3NumberElementsSchema];
     toJSON(skipRounding?: boolean): BasisSchema;
     /** Return coordinates rounded to default precision */
     get coordinatesRounded(): {
