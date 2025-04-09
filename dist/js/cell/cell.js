@@ -29,13 +29,7 @@ class Cell {
      * @example [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
      */
     get vectorsAsArray() {
-        return [
-            this.vector1,
-            this.vector2,
-            this.vector3,
-            // assert that no near-zero artifacts are present (ie. 1.6 x 10^-16) before attempting inversion
-            // @param tolerance {Number} Maximum tolerance to small numbers, used to avoid artifacts on matrix inversion
-        ].map((v) => v.map((c) => (math_1.math.abs(c) < constants_1.default.tolerance.lengthAngstrom ? 0 : c)));
+        return [this.vector1, this.vector2, this.vector3].map((v) => v.map((x) => math_1.math.precise(math_1.math.roundToZero(x))));
     }
     clone() {
         return new this.constructor(this.vectorsAsArray);
