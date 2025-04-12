@@ -14,4 +14,11 @@ describe("Lattice Bravais", () => {
         const lattice = new LatticeBravais(Na4Cl4.lattice);
         expect(lattice.editables).to.be.deep.equal({ a: true });
     });
+
+    it("lattice created from vectors should be equal to the original lattice", () => {
+        const lattice = LatticeBravais.fromVectors(Na4Cl4.lattice.vectors);
+        const originalLattice = new LatticeBravais(Na4Cl4.lattice);
+
+        assertDeepAlmostEqual(lattice.toJSON(), originalLattice.toJSON(), ["type"]);
+    });
 });
