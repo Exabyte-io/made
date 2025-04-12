@@ -14,7 +14,7 @@ const getMatrixInLeftHandedRepresentation = (matrix) => {
 };
 /**
  * Helper function for extended GCD.
- * Inspired by https://gitlab.com/ase/ase/blob/master/ase/build/general_surface.py
+ * Inspired by https://gitlab.com/ase/ase/-/blob/20401e2596821a85f17ced1cb18f32c508e35fb0/ase/build/general_surface.py
  * @param {Number} a
  * @param {Number} b
  * @return {Array}
@@ -77,7 +77,15 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
         const k1 = DOT(ADD(MULT(p, z1), MULT(q, z2)), z3);
         const k2 = DOT(ADD(MULT(l, z1), MULT(-1, k, z2)), z3);
         if (math_1.default.abs(k2) > tol) {
-            const i = -parseInt(math_1.default.round(k1 / k2), 10);
+            // For mathjs version 3.20: round(-0.5) = -0
+            // For mathjs version 5.10: round(-0.5) = -1
+            // Here we explicitly use parseInt to get the same result
+            // For Python 3.11: round(-0.5) = 0
+            const value = k1 / k2;
+            const abs = math_1.default.abs(value);
+            const roundAbs = math_1.default.abs(abs);
+            const parsed = -parseInt(roundAbs, 10);
+            const i = parsed;
             [p, q] = [p + i * l, q - i * k];
         }
         const [a, b] = extGCD(p * k + q * l, h);
@@ -128,7 +136,8 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
     const dimensionsScalingMatrix = getDimensionsScalingMatrix(cell, millerSupercell, outOfPlaneAxisIndex, numberOfLayers, vx, vy);
     const supercellMatrix = MULT(dimensionsScalingMatrix, millerScalingMatrix);
     const supercell = millerSupercell.cloneAndScaleByMatrix(dimensionsScalingMatrix);
-    const newBasis = supercell_1.default.generateNewBasisWithinSupercell(material.Basis, cell, supercell, supercellMatrix);
+    const tempBasis = material.Basis.clone();
+    const newBasis = supercell_1.default.generateNewBasisWithinSupercell(tempBasis, cell, supercell, supercellMatrix);
     const newLattice = lattice_bravais_1.LatticeBravais.fromVectors({
         a: supercell.vector1,
         b: supercell.vector2,

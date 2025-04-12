@@ -41,7 +41,7 @@ class LatticeBravais {
      */
     static fromVectors({ a, b, c, alat = 1, units = "angstrom", type = "TRI", skipRounding = false, }) {
         const roundValue = skipRounding ? (x) => x : this._roundValue;
-        return new this.prototype.constructor({
+        const config = {
             // @ts-ignore
             a: roundValue(math_1.default.vlen(a) * alat),
             // @ts-ignore
@@ -57,7 +57,9 @@ class LatticeBravais {
                 length: units,
                 angle: "degree",
             },
-        });
+        };
+        // @ts-ignore
+        return new this.prototype.constructor(config);
     }
     /**
      * See fromVectors above.

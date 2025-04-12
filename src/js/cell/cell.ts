@@ -38,9 +38,7 @@ export class Cell {
      * @example [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
      */
     get vectorsAsArray(): VectorsAsArray {
-        return [this.vector1, this.vector2, this.vector3].map(
-            (v) => v.map((x) => math.precise(math.roundToZero(x))) as Vector,
-        ) as VectorsAsArray;
+        return [this.vector1, this.vector2, this.vector3] as VectorsAsArray;
     }
 
     clone(): Cell {

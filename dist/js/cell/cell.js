@@ -29,7 +29,7 @@ class Cell {
      * @example [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
      */
     get vectorsAsArray() {
-        return [this.vector1, this.vector2, this.vector3].map((v) => v.map((x) => math_1.math.precise(math_1.math.roundToZero(x))));
+        return [this.vector1, this.vector2, this.vector3];
     }
     clone() {
         return new this.constructor(this.vectorsAsArray);
