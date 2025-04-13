@@ -1,7 +1,7 @@
 import { expect } from "chai";
 
 import { ReciprocalLattice } from "../../../src/js/lattice/reciprocal/lattice_reciprocal";
-import { Na4Cl4, Si, SiSlab } from "../enums";
+import { Na4Cl4, Silicon, SiSlab } from "../enums";
 import { assertDeepAlmostEqual } from "../utils";
 
 describe("Lattice Reciprocal", () => {
@@ -34,12 +34,12 @@ describe("Lattice Reciprocal", () => {
     });
 
     it("should return reciprocal vectors", () => {
-        const lattice = new ReciprocalLattice(Si.lattice);
+        const lattice = new ReciprocalLattice(Silicon.lattice);
         const actualVectors = lattice.reciprocalVectors;
         const expectedVectors = [
-            [1, 0, 0],
-            [0, 1, 0],
-            [0, 0, 1],
+            [1.1547005383792517, -0.40824829046386313, 0],
+            [0, 1.2247448713915892, 0],
+            [-0.5773502691896261, -0.40824829046386313, 1],
         ];
         assertDeepAlmostEqual(actualVectors, expectedVectors);
     });

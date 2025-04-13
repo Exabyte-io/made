@@ -3,11 +3,11 @@ import { expect } from "chai";
 import { Basis } from "../../../src/js/basis/basis";
 import { Made } from "../../../src/js/made";
 import { Material } from "../../../src/js/material";
-import { Si, SiSupercell } from "../enums";
+import { Silicon, SiSupercell } from "../enums";
 
 describe("Tools:Supercell", () => {
     it("should generate supercell", () => {
-        const material = new Material(Si);
+        const material = new Material(Silicon);
         const supercell = Made.tools.supercell.generateConfig(material, [
             [2, 0, 0],
             [0, 2, 0],
