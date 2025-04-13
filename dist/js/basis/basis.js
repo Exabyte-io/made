@@ -77,7 +77,7 @@ class Basis {
     clone(extraContext) {
         return new this.constructor({
             ...this.toJSON(),
-            cell: this.cellRounded,
+            cell: this.cell,
             ...extraContext,
         });
     }
