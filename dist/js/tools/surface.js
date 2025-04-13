@@ -79,13 +79,10 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
         if (math_1.default.abs(k2) > tol) {
             // For mathjs version 3.20: round(-0.5) = -0
             // For mathjs version 5.10: round(-0.5) = -1
-            // Here we explicitly use parseInt to get the same result
+            // Here we specify rounding method to Bankers
             // For Python 3.11: round(-0.5) = 0
             const value = k1 / k2;
-            const abs = math_1.default.abs(value);
-            const roundAbs = math_1.default.abs(abs);
-            const parsed = -parseInt(roundAbs, 10);
-            const i = parsed;
+            const i = math_1.default.roundCustom(value, 0, math_1.default.RoundingMethod.Bankers);
             [p, q] = [p + i * l, q - i * k];
         }
         const [a, b] = extGCD(p * k + q * l, h);

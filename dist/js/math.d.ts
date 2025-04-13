@@ -18,6 +18,8 @@ declare const _default: {
     calculateSegmentsBetweenPoints3D: (point1: (string | number)[], point2: (string | number)[], n: string | number) => number[][];
     roundValueToNDecimals: (value: number, decimals?: number | undefined) => number;
     numberToPrecision: typeof import("@mat3ra/code/dist/js/math").numberToPrecision;
+    roundCustom: (value: number, decimals?: number | undefined, method?: import("@mat3ra/code/dist/js/math").RoundingMethod | undefined) => number;
+    RoundingMethod: typeof import("@mat3ra/code/dist/js/math").RoundingMethod;
     e: number;
     pi: number;
     i: number;
