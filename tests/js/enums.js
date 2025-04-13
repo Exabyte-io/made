@@ -1,6 +1,5 @@
+import fs from "fs";
 import path from "path";
-
-import { readFile } from "./utils";
 
 // TODO: use @mat3ra/standata
 export { default as Silicon } from "../fixtures/si-standata.json";
@@ -34,9 +33,12 @@ export { default as NiHex } from "../fixtures/Ni-hex.json";
 export const FIXTURES_DIR = path.resolve(__dirname, "../fixtures");
 
 // NON-JSON
-export const Na4Cl4Poscar = readFile(path.join(FIXTURES_DIR, "Na4Cl4.poscar"));
-export const SiPWSCFInput = readFile(path.join(FIXTURES_DIR, "Si-pwscf.in"));
-export const Zr1H23Zr1H1Poscar = readFile(path.join(FIXTURES_DIR, "Zr1H23Zr1H1.poscar"));
-export const H2OPoscar = readFile(path.join(FIXTURES_DIR, "H2O.poscar"));
-export const GraphenePoscar = readFile(path.join(FIXTURES_DIR, "Graphene.poscar"));
-export const NiHexPoscar = readFile(path.join(FIXTURES_DIR, "Ni-hex.poscar"));
+export const Na4Cl4Poscar = fs.readFileSync(path.join(FIXTURES_DIR, "Na4Cl4.poscar"), "utf8");
+export const SiPWSCFInput = fs.readFileSync(path.join(FIXTURES_DIR, "Si-pwscf.in"), "utf8");
+export const Zr1H23Zr1H1Poscar = fs.readFileSync(
+    path.join(FIXTURES_DIR, "Zr1H23Zr1H1.poscar"),
+    "utf8",
+);
+export const H2OPoscar = fs.readFileSync(path.join(FIXTURES_DIR, "H2O.poscar"), "utf8");
+export const GraphenePoscar = fs.readFileSync(path.join(FIXTURES_DIR, "Graphene.poscar"), "utf8");
+export const NiHexPoscar = fs.readFileSync(path.join(FIXTURES_DIR, "Ni-hex.poscar"), "utf8");
