@@ -1,6 +1,6 @@
 import chai from "chai";
 import chaiAlmost from "chai-almost";
 
-import { TOLERANCE } from "./enums";
+const TOLERANCE = 1e-3;
 
 chai.use(chaiAlmost(TOLERANCE));

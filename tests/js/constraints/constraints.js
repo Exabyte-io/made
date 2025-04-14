@@ -1,9 +1,11 @@
+import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
 import { AtomicConstraints } from "../../../src/js/constraints/constraints";
 import parsers from "../../../src/js/parsers/parsers";
-import { atomicConstraints } from "../enums";
-import { assertDeepAlmostEqual } from "../utils";
+import { atomicConstraints } from "../fixtures";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("AtomicConstraints", () => {
     it("should return constraints as string", () => {

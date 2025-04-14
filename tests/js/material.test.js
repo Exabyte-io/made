@@ -1,7 +1,7 @@
 import { expect } from "chai";
 
 import { Material } from "../../src/js/material";
-import { Na4Cl4 } from "./enums";
+import { Na4Cl4 } from "./fixtures";
 
 describe("Material", () => {
     it("should return unique elements", () => {

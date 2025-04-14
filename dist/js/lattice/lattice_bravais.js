@@ -41,12 +41,9 @@ class LatticeBravais {
      */
     static fromVectors({ a, b, c, alat = 1, units = "angstrom", type = "TRI", skipRounding = false, }) {
         const roundValue = skipRounding ? (x) => x : this._roundValue;
-        return new this.prototype.constructor({
-            // @ts-ignore
+        const config = {
             a: roundValue(math_1.default.vlen(a) * alat),
-            // @ts-ignore
             b: roundValue(math_1.default.vlen(b) * alat),
-            // @ts-ignore
             c: roundValue(math_1.default.vlen(c) * alat),
             alpha: roundValue(math_1.default.angle(b, c, "deg")),
             beta: roundValue(math_1.default.angle(a, c, "deg")),
@@ -57,7 +54,8 @@ class LatticeBravais {
                 length: units,
                 angle: "degree",
             },
-        });
+        };
+        return new this.prototype.constructor(config);
     }
     /**
      * See fromVectors above.

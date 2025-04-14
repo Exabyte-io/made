@@ -1,7 +1,10 @@
+import { Utils } from "@mat3ra/utils";
+
 import { primitiveCell } from "../../../src/js/cell/primitive_cell";
 import { Lattice } from "../../../src/js/lattice/lattice";
-import { Na4Cl4 } from "../enums";
-import { assertDeepAlmostEqual } from "../utils";
+import { Na4Cl4 } from "../fixtures";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Primitive Cell", () => {
     it("should return primitive lattice", () => {

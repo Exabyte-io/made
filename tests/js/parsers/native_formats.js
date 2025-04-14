@@ -1,8 +1,10 @@
+import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
 import nativeFormatParsers from "../../../src/js/parsers/native_format_parsers";
-import { Graphene, GraphenePoscar, NiHex, NiHexPoscar } from "../enums";
-import { assertDeepAlmostEqual } from "../utils";
+import { Graphene, GraphenePoscar, NiHex, NiHexPoscar } from "../fixtures";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Parsers.NativeFormat", () => {
     it("should return a material config for graphene from a json", () => {
