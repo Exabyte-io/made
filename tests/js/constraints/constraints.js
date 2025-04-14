@@ -3,7 +3,7 @@ import { expect } from "chai";
 
 import { AtomicConstraints } from "../../../src/js/constraints/constraints";
 import parsers from "../../../src/js/parsers/parsers";
-import { atomicConstraints } from "../enums";
+import { atomicConstraints } from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 

@@ -2,7 +2,7 @@ import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
 import { ReciprocalLattice } from "../../../src/js/lattice/reciprocal/lattice_reciprocal";
-import { Na4Cl4, Silicon, SiSlab } from "../enums";
+import { Na4Cl4, Silicon, SiSlab } from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 

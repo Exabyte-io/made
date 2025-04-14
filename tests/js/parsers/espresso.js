@@ -2,7 +2,7 @@ import { expect } from "chai";
 
 import { Material } from "../../../src/js/material";
 import parsers from "../../../src/js/parsers/parsers";
-import { Silicon, SiPWSCFInput } from "../enums";
+import { Silicon, SiPWSCFInput } from "../fixtures";
 
 describe("Parsers:Espresso", () => {
     it("should return textual representation of a material according to QE pw.x input format", () => {

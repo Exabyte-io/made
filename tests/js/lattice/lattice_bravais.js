@@ -2,7 +2,7 @@ import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
 import { LatticeBravais } from "../../../src/js/lattice/lattice_bravais";
-import { Na4Cl4 } from "../enums";
+import { Na4Cl4 } from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 

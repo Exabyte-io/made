@@ -2,7 +2,7 @@ import { expect } from "chai";
 
 import { Material } from "../../../src/js/material";
 import { atomsCount } from "../../../src/js/parsers/poscar";
-import { H2OPoscar, Na4Cl4, Na4Cl4Poscar, Zr1H23Zr1H1, Zr1H23Zr1H1Poscar } from "../enums";
+import { H2OPoscar, Na4Cl4, Na4Cl4Poscar, Zr1H23Zr1H1, Zr1H23Zr1H1Poscar } from "../fixtures";
 
 describe("Parsers.POSCAR", () => {
     it("should return a valid poscar", () => {

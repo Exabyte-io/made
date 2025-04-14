@@ -1,7 +1,7 @@
 import { Utils } from "@mat3ra/utils";
 
 import parsers from "../../../src/js/parsers/parsers";
-import { FeO, Silicon } from "../enums";
+import { FeO, Silicon } from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 

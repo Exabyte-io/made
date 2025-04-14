@@ -26,30 +26,37 @@ import SiSlab from "../fixtures/Si-slab.json";
 import Zr1H23Zr1H1 from "../fixtures/Zr1H23Zr1H1.json";
 import Graphene from "../fixtures/Graphene.json";
 import NiHex from "../fixtures/Ni-hex.json";
+import SiSlab100 from "../fixtures/si-slab-100.json";
+import SiSlab111 from "../fixtures/si-slab-111-0.5-vacuum-ratio.json";
+import SiSlab111NoVacuum from "../fixtures/si-slab-111-0-vacuum.json";
 
-export const TOLERANCE = 1e-3;
 
 export {
+    // Silicon
     Silicon,
+    SiSupercell,
+    SiSlab,
+    SiSlab100,
+    SiSlab111,
+    SiSlab111NoVacuum,
+    Si2Basis,
+    Si2BasisRepeated,
+    // Other
     FeO,
     Na4Cl4,
     Na4Cl4Cartesian,
-    SiSupercell,
     C2H4,
     C2H4Translated,
     Na,
     OSiBasis,
-    Si2Basis,
     Ge2Basis,
     AsGeBasis,
     FeLiSiBasis,
     LiFeSiBasis,
     atomicConstraints,
-    Si2BasisRepeated,
     H2HInitial,
     H2HFinal,
     H2HImage,
-    SiSlab,
     Zr1H23Zr1H1,
     Graphene,
     NiHex,

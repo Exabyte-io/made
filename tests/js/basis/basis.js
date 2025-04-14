@@ -12,7 +12,7 @@ import {
     Na,
     Na4Cl4,
     Na4Cl4Cartesian,
-} from "../enums";
+} from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 
