@@ -1,6 +1,9 @@
+import { Utils } from "@mat3ra/utils";
+
 import { Lattice } from "../../../src/js/lattice/lattice";
 import { Silicon } from "../enums";
-import { assertDeepAlmostEqual } from "../utils";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Cell", () => {
     it("should return scaled cell", () => {

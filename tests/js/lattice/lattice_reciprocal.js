@@ -1,8 +1,10 @@
+import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
 import { ReciprocalLattice } from "../../../src/js/lattice/reciprocal/lattice_reciprocal";
 import { Na4Cl4, Silicon, SiSlab } from "../enums";
-import { assertDeepAlmostEqual } from "../utils";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Lattice Reciprocal", () => {
     it("should extract kpoint path", () => {

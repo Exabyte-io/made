@@ -1,7 +1,10 @@
+import { Utils } from "@mat3ra/utils";
+
 import { Basis } from "../../../src/js/basis/basis";
 import tools from "../../../src/js/tools";
 import { H2HFinal, H2HImage, H2HInitial, Si2Basis, Si2BasisRepeated } from "../enums";
-import { assertDeepAlmostEqual } from "../utils";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Tools:Basis", () => {
     it("should return a repeated basis", () => {

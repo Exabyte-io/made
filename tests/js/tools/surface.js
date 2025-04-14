@@ -1,10 +1,13 @@
+import { Utils } from "@mat3ra/utils";
+
 import { Material } from "../../../src/js/material";
 import tools from "../../../src/js/tools";
 import SiSlab100 from "../../fixtures/si-slab-100.json";
 import SiSlab111 from "../../fixtures/si-slab-111-0.5-vacuum-ratio.json";
 import SiSlab111NoVacuum from "../../fixtures/si-slab-111-0-vacuum.json";
 import Si from "../../fixtures/si-standata.json";
-import { assertDeepAlmostEqual } from "../utils";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Tools:Surface", () => {
     it("should return slab (100)", () => {

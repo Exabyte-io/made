@@ -1,8 +1,10 @@
+import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
 import { LatticeBravais } from "../../../src/js/lattice/lattice_bravais";
 import { Na4Cl4 } from "../enums";
-import { assertDeepAlmostEqual } from "../utils";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Lattice Bravais", () => {
     it("should return lattice bravais from vectors", () => {

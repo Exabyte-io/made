@@ -1,6 +1,9 @@
+import { Utils } from "@mat3ra/utils";
+
 import parsers from "../../../src/js/parsers/parsers";
 import { FeO, Silicon } from "../enums";
-import { assertDeepAlmostEqual } from "../utils";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Parsers:XYZ", () => {
     it("should extract basis from XYZ text", () => {

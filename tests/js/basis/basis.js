@@ -1,3 +1,4 @@
+import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
 import { Basis } from "../../../src/js/basis/basis";
@@ -12,7 +13,8 @@ import {
     Na4Cl4,
     Na4Cl4Cartesian,
 } from "../enums";
-import { assertDeepAlmostEqual } from "../utils";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Basis", () => {
     it("should return true if basises are equal", () => {
