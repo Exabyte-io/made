@@ -4,7 +4,7 @@ import s from "underscore.string";
 
 import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
-import { Constraint } from "../constraints/constraints";
+import { Constraint, ConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
 import { Vector } from "../lattice/types";
 import math from "../math";
@@ -51,7 +51,7 @@ export function validate(xyzTxt: string) {
 export interface ParsedObject {
     element: string;
     coordinates: Vector;
-    constraints: [boolean, boolean, boolean];
+    constraints: ConstraintValue;
     label?: number;
 }
 

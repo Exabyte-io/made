@@ -3,20 +3,20 @@ import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/period
 import _ from "underscore";
 import s from "underscore.string";
 
+import { BasisSchema } from "@mat3ra/esse/dist/js/types";
+
 import { ArrayWithIds } from "../abstract/array_with_ids";
-import { ObjectWithIdAndValue, ValueOrObjectArray } from "../abstract/scalar_with_id";
+import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import { Vector } from "../lattice/types";
 import math from "../math";
 import { Coordinate } from "./types";
 
-export interface BasisProps {
-    elements: ValueOrObjectArray<string>; // chemical elements for atoms in basis.
-    coordinates: ValueOrObjectArray<Coordinate>; // coordinates for the atoms in basis.
+export interface BasisProps extends BasisSchema {
     labels?: { id: number; value: number }[];
-    units: string; // units for the coordinates (eg. angstrom, crystal).
-    cell: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
+    units?: string; // units for the coordinates (eg. angstrom, crystal).
+    cell?: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
     isEmpty?: boolean; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
 }
 
@@ -31,14 +31,6 @@ export interface ElementCount {
     value: string;
 }
 
-export interface BasisSchema {
-    elements: ObjectWithIdAndValue<string>[];
-    labels?: { id: number; value: number }[];
-    coordinates: ObjectWithIdAndValue<Coordinate>[];
-    units: string;
-    cell: Vector[];
-}
-
 interface Overlap {
     id1: number;
     id2: number;
@@ -49,7 +41,7 @@ interface Overlap {
 /**
  * A class representing a crystal basis.
  */
-export class Basis {
+export class Basis implements BasisSchema {
     _elements: ArrayWithIds<string>;
 
     _coordinates: ArrayWithIds<Coordinate>;
@@ -61,9 +53,9 @@ export class Basis {
     cell: Vector[];
 
     constructor({
-        elements = ["Si"],
-        coordinates = [[0, 0, 0]],
-        units,
+        elements,
+        coordinates,
+        units = ATOMIC_COORD_UNITS.crystal,
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
         labels = [],

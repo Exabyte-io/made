@@ -1,6 +1,6 @@
 import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { ConstrainedBasis } from "../basis/constrained_basis";
-import { Constraint } from "../constraints/constraints";
+import { Constraint, ConstraintValue } from "../constraints/constraints";
 import { Vector } from "../lattice/types";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 /**
@@ -10,7 +10,7 @@ export declare function validate(xyzTxt: string): void;
 export interface ParsedObject {
     element: string;
     coordinates: Vector;
-    constraints: [boolean, boolean, boolean];
+    constraints: ConstraintValue;
     label?: number;
 }
 export interface BasisConfig {

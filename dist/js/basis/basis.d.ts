@@ -1,18 +1,17 @@
 import _ from "underscore";
+import { BasisSchema } from "@mat3ra/esse/dist/js/types";
 import { ArrayWithIds } from "../abstract/array_with_ids";
-import { ObjectWithIdAndValue, ValueOrObjectArray } from "../abstract/scalar_with_id";
+import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { Vector } from "../lattice/types";
 import { Coordinate } from "./types";
-export interface BasisProps {
-    elements: ValueOrObjectArray<string>;
-    coordinates: ValueOrObjectArray<Coordinate>;
+export interface BasisProps extends BasisSchema {
     labels?: {
         id: number;
         value: number;
     }[];
-    units: string;
-    cell: Vector[];
+    units?: string;
+    cell?: Vector[];
     isEmpty?: boolean;
 }
 export interface Atom {
@@ -24,16 +23,6 @@ export interface ElementCount {
     count: number;
     value: string;
 }
-export interface BasisSchema {
-    elements: ObjectWithIdAndValue<string>[];
-    labels?: {
-        id: number;
-        value: number;
-    }[];
-    coordinates: ObjectWithIdAndValue<Coordinate>[];
-    units: string;
-    cell: Vector[];
-}
 interface Overlap {
     id1: number;
     id2: number;
@@ -43,7 +32,7 @@ interface Overlap {
 /**
  * A class representing a crystal basis.
  */
-export declare class Basis {
+export declare class Basis implements BasisSchema {
     _elements: ArrayWithIds<string>;
     _coordinates: ArrayWithIds<Coordinate>;
     labels?: {

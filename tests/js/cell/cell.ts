@@ -2,12 +2,13 @@ import { Utils } from "@mat3ra/utils";
 
 import { Lattice } from "../../../src/js/lattice/lattice";
 import { Silicon } from "../fixtures";
+import { LatticeSchema } from "@mat3ra/esse/dist/js/types";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Cell", () => {
     it("should return scaled cell", () => {
-        const lattice = new Lattice(Silicon.lattice);
+        const lattice = new Lattice(Silicon.lattice as LatticeSchema);
         const expectedCell = {
             tolerance: 1,
             vector1: [6.697840472868848, 0, 3.867],

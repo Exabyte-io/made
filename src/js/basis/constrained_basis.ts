@@ -1,9 +1,10 @@
 import s from "underscore.string";
 
+import { BasisSchema } from "@mat3ra/esse/dist/js/types";
 import { ArrayWithIds } from "../abstract/array_with_ids";
 import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 import { AtomicConstraints, Constraint, ConstraintValue } from "../constraints/constraints";
-import { Basis, BasisProps, BasisSchema } from "./basis";
+import { Basis, BasisProps } from "./basis";
 import { Coordinate } from "./types";
 
 export interface ConstrainedBasisProps extends BasisProps {
