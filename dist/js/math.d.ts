@@ -1,11 +1,11 @@
 declare const _default: {
     PI: number;
     trunc: (x: number) => number;
-    product: (v1: number[], v2: number[]) => import("mathjs").Matrix;
-    vlen: (v: number[]) => import("mathjs").Matrix;
+    product: (v1: number[], v2: number[]) => number;
+    vlen: (v: number[]) => number;
     angle: (a: number[], b: number[], unit: string) => number;
     angleUpTo90: (a: number[], b: number[], unit: string) => number;
-    vDist: (v1: number[], v2: number[]) => import("mathjs").Matrix | undefined;
+    vDist: (v1: number[], v2: number[]) => number | undefined;
     vEqualWithTolerance: (vec1: number[], vec2: number[], tolerance?: number | undefined) => boolean;
     roundToZero: (n: number) => number;
     precise: (x: number, n?: number | undefined) => number;
@@ -18,8 +18,8 @@ declare const _default: {
     calculateSegmentsBetweenPoints3D: (point1: (string | number)[], point2: (string | number)[], n: string | number) => number[][];
     roundValueToNDecimals: (value: number, decimals?: number | undefined) => number;
     numberToPrecision: typeof import("@mat3ra/code/dist/js/math").numberToPrecision;
-    roundCustom: (value: number, decimals?: number | undefined, method?: import("@mat3ra/code/dist/js/math").RoundingMethod | undefined) => number;
-    RoundingMethod: typeof import("@mat3ra/code/dist/js/math").RoundingMethod;
+    roundCustom: (value: number, decimals?: number | undefined, method?: import("@mat3ra/code/dist/js/math").RoundingMethodEnum | undefined) => number;
+    RoundingMethod: typeof import("@mat3ra/code/dist/js/math").RoundingMethodEnum;
     e: number;
     pi: number;
     i: number;

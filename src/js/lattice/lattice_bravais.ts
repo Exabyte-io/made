@@ -87,11 +87,8 @@ export class LatticeBravais implements LatticeImplicitSchema {
     }: FromVectorsProps) {
         const roundValue = skipRounding ? (x: number) => x : this._roundValue;
         const config = {
-            // @ts-ignore
             a: roundValue(math.vlen(a) * alat),
-            // @ts-ignore
             b: roundValue(math.vlen(b) * alat),
-            // @ts-ignore
             c: roundValue(math.vlen(c) * alat),
             alpha: roundValue(math.angle(b, c, "deg")),
             beta: roundValue(math.angle(a, c, "deg")),
@@ -100,10 +97,10 @@ export class LatticeBravais implements LatticeImplicitSchema {
             type,
             units: {
                 length: units,
-                angle: "degree",
+                // Will be substituted by the actual value in the constructor
+                // angle: "degree",
             },
         };
-        // @ts-ignore
         return new (this.prototype.constructor as typeof LatticeBravais)(config);
     }
 
