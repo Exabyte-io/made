@@ -52,8 +52,7 @@ class LatticeBravais {
             type,
             units: {
                 length: units,
-                // Will be substituted by the actual value in the constructor
-                // angle: "degree",
+                angle: "degree",
             },
         };
         return new this.prototype.constructor(config);

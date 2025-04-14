@@ -14,7 +14,7 @@ describe("Lattice", () => {
 
     it("should return lattice from vectors", () => {
         const lattice = Lattice.fromVectors(Na4Cl4.lattice.vectors);
-        assertDeepAlmostEqual(lattice.toJSON(), Na4Cl4.lattice, ["type"]);
+        assertDeepAlmostEqual(Na4Cl4.lattice, lattice.toJSON(), ["type"]);
     });
 
     it("should return lattice type", () => {

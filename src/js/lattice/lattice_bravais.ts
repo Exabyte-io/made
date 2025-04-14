@@ -97,8 +97,7 @@ export class LatticeBravais implements LatticeImplicitSchema {
             type,
             units: {
                 length: units,
-                // Will be substituted by the actual value in the constructor
-                // angle: "degree",
+                angle: "degree" as Units["angle"],
             },
         };
         return new (this.prototype.constructor as typeof LatticeBravais)(config);
