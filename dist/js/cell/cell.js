@@ -21,15 +21,16 @@ class Cell {
      * @param nestedArray {Number[][]} is an array of cell vectors in cartesian Angstrom units.
      */
     constructor(nestedArray) {
-        this.tolerance = 1;
-        [this.vector1, this.vector2, this.vector3] = nestedArray;
+        this.alat = 1;
+        this.units = "angstrom";
+        [this.a, this.b, this.c] = nestedArray;
     }
     /**
      * Get cell vectors as (a nested) array.
      * @example [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
      */
     get vectorsAsArray() {
-        return [this.vector1, this.vector2, this.vector3];
+        return [this.a, this.b, this.c];
     }
     clone() {
         return new this.constructor(this.vectorsAsArray);
@@ -76,7 +77,7 @@ class Cell {
      */
     scaleByMatrix(matrix) {
         // @ts-ignore
-        [this.vector1, this.vector2, this.vector3] = MATRIX_MULT(matrix, this.vectorsAsArray);
+        [this.a, this.b, this.c] = MATRIX_MULT(matrix, this.vectorsAsArray);
     }
 }
 exports.Cell = Cell;

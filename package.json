@@ -33,7 +33,7 @@
         "@babel/register": "^7.22.15",
         "@babel/runtime-corejs3": "^7.16.8",
         "@exabyte-io/eslint-config": "^2023.8.29-1",
-        "@mat3ra/code": "2025.4.14-2",
+        "@mat3ra/code": "git+https://git@github.com/Exabyte-io/code.git#82e5099433bcf8965dbadad4b93249f6dc9d26bb",
         "@mat3ra/esse": "2024.6.4-1",
         "@mat3ra/tsconfig": "2024.6.3-0",
         "@mat3ra/utils": "2025.4.14-0",

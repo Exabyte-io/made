@@ -1,12 +1,14 @@
 import CodeMath from "@mat3ra/code/dist/js/math";
+import { LatticeExplicitUnit as CellSchema } from "@mat3ra/esse/dist/js/types";
 import { Coordinate } from "../basis/types";
 import { Vector, VectorsAsArray } from "../lattice/types";
 type Point = Coordinate | CodeMath.Matrix | CodeMath.MathType;
-export declare class Cell {
-    tolerance: number;
-    vector1: Vector;
-    vector2: Vector;
-    vector3: Vector;
+export declare class Cell implements CellSchema {
+    a: CellSchema["a"];
+    b: CellSchema["b"];
+    c: CellSchema["c"];
+    alat: number;
+    units: CellSchema["units"];
     /**
      * Create a cell.
      * @param nestedArray {Number[][]} is an array of cell vectors in cartesian Angstrom units.

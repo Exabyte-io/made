@@ -136,9 +136,9 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
     const tempBasis = material.Basis.clone();
     const newBasis = supercell_1.default.generateNewBasisWithinSupercell(tempBasis, cell, supercell, supercellMatrix);
     const newLattice = lattice_bravais_1.LatticeBravais.fromVectors({
-        a: supercell.vector1,
-        b: supercell.vector2,
-        c: supercell.vector3,
+        a: supercell.a,
+        b: supercell.b,
+        c: supercell.c,
     });
     return {
         name: `${material.name} - slab ${JSON.stringify(millerIndices)}`,
