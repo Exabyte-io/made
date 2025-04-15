@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 
+// TODO: use @mat3ra/standata
 import AsGeBasis from "../fixtures/AsGe-basis.json";
 import atomicConstraints from "../fixtures/atomic-constraints.json";
 import C2H4 from "../fixtures/C2H4.json";
@@ -23,7 +24,6 @@ import SiSlab100 from "../fixtures/si-slab-100.json";
 import SiSlab111Gamma120 from "../fixtures/si-slab-111-0.5-vacuum-gamma-120.json";
 import SiSlab111 from "../fixtures/si-slab-111-0.5-vacuum-ratio.json";
 import SiSlab111NoVacuum from "../fixtures/si-slab-111-0-vacuum.json";
-// TODO: use @mat3ra/standata
 import Silicon from "../fixtures/si-standata.json";
 import SiSupercell from "../fixtures/Si-supercell.json";
 import Si2Basis from "../fixtures/Si2-basis.json";
