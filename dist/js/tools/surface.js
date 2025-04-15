@@ -84,8 +84,6 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
             const value = k1 / k2;
             const roundedValue = math_1.default.roundCustom(value, 0, math_1.default.RoundingMethod.Bankers);
             const i = -roundedValue;
-            const i_prev = -parseInt(math_1.default.round(k1 / k2), 10);
-            console.log(`i: ${i}, i_prev: ${i_prev}`);
             [p, q] = [p + i * l, q - i * k];
         }
         const [a, b] = extGCD(p * k + q * l, h);
