@@ -1,35 +1,34 @@
 import fs from "fs";
 import path from "path";
 
-// TODO: use @mat3ra/standata
-
-import Silicon from "../fixtures/si-standata.json";
-import FeO from "../fixtures/FeO.json";
-import Na4Cl4 from "../fixtures/Na4Cl4.json";
-import Na4Cl4Cartesian from "../fixtures/Na4Cl4-cartesian.json";
-import SiSupercell from "../fixtures/Si-supercell.json";
+import AsGeBasis from "../fixtures/AsGe-basis.json";
+import atomicConstraints from "../fixtures/atomic-constraints.json";
 import C2H4 from "../fixtures/C2H4.json";
 import C2H4Translated from "../fixtures/C2H4-translated.json";
-import Na from "../fixtures/Na.json";
-import OSiBasis from "../fixtures/OSi-basis.json";
-import Si2Basis from "../fixtures/Si2-basis.json";
-import Ge2Basis from "../fixtures/Ge2-basis.json";
-import AsGeBasis from "../fixtures/AsGe-basis.json";
 import FeLiSiBasis from "../fixtures/FeLiSi-basis.json";
-import LiFeSiBasis from "../fixtures/LiFeSi-basis.json";
-import atomicConstraints from "../fixtures/atomic-constraints.json";
-import Si2BasisRepeated from "../fixtures/Si2-basis-repeated.json";
-import H2HInitial from "../fixtures/H2+H-initial.json";
+import FeO from "../fixtures/FeO.json";
+import Ge2Basis from "../fixtures/Ge2-basis.json";
+import Graphene from "../fixtures/Graphene.json";
 import H2HFinal from "../fixtures/H2+H-final.json";
 import H2HImage from "../fixtures/H2+H-image.json";
-import SiSlab from "../fixtures/Si-slab.json";
-import Zr1H23Zr1H1 from "../fixtures/Zr1H23Zr1H1.json";
-import Graphene from "../fixtures/Graphene.json";
+import H2HInitial from "../fixtures/H2+H-initial.json";
+import LiFeSiBasis from "../fixtures/LiFeSi-basis.json";
+import Na from "../fixtures/Na.json";
+import Na4Cl4 from "../fixtures/Na4Cl4.json";
+import Na4Cl4Cartesian from "../fixtures/Na4Cl4-cartesian.json";
 import NiHex from "../fixtures/Ni-hex.json";
+import OSiBasis from "../fixtures/OSi-basis.json";
+import SiSlab from "../fixtures/Si-slab.json";
 import SiSlab100 from "../fixtures/si-slab-100.json";
+import SiSlab111Gamma120 from "../fixtures/si-slab-111-0.5-vacuum-gamma-120.json";
 import SiSlab111 from "../fixtures/si-slab-111-0.5-vacuum-ratio.json";
 import SiSlab111NoVacuum from "../fixtures/si-slab-111-0-vacuum.json";
-
+// TODO: use @mat3ra/standata
+import Silicon from "../fixtures/si-standata.json";
+import SiSupercell from "../fixtures/Si-supercell.json";
+import Si2Basis from "../fixtures/Si2-basis.json";
+import Si2BasisRepeated from "../fixtures/Si2-basis-repeated.json";
+import Zr1H23Zr1H1 from "../fixtures/Zr1H23Zr1H1.json";
 
 export {
     // Silicon
@@ -38,6 +37,7 @@ export {
     SiSlab,
     SiSlab100,
     SiSlab111,
+    SiSlab111Gamma120,
     SiSlab111NoVacuum,
     Si2Basis,
     Si2BasisRepeated,

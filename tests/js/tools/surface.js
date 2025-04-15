@@ -2,7 +2,7 @@ import { Utils } from "@mat3ra/utils";
 
 import { Material } from "../../../src/js/material";
 import tools from "../../../src/js/tools";
-import { Silicon, SiSlab100, SiSlab111, SiSlab111NoVacuum } from "../fixtures";
+import { Silicon, SiSlab100, SiSlab111, SiSlab111Gamma120, SiSlab111NoVacuum } from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 
@@ -32,6 +32,59 @@ describe("Tools:Surface", () => {
             1 / (1 - vacuumRatio),
         );
         const expectedSlabMaterial = new Material(SiSlab111);
-        assertDeepAlmostEqual(expectedSlabMaterial.toJSON(), slabMaterial.toJSON());
+        const expectedMaterialJSON = expectedSlabMaterial.toJSON();
+        const slabMaterialJSON = slabMaterial.toJSON();
+        assertDeepAlmostEqual(expectedMaterialJSON, slabMaterialJSON);
+    });
+
+    it("should return slab (111) with vacuum (gamma~=120) for gamma = 59.999", () => {
+        const adjustedSilicon = {
+            ...Silicon,
+            lattice: {
+                ...Silicon.lattice,
+                gamma: 59.999,
+            },
+        };
+        const material = new Material(adjustedSilicon);
+        const slabConfig = tools.surface.generateConfig(material, [1, 1, 1], 3, 1, 1);
+        const vacuumRatio = 0.5;
+        const slabMaterial = new Material(slabConfig);
+        const { outOfPlaneAxisIndex } = slabConfig;
+        // Add 0.5 vacuum ratio, which is used in MD
+        tools.material.scaleOneLatticeVector(
+            slabMaterial,
+            ["a", "b", "c"][outOfPlaneAxisIndex],
+            1 / (1 - vacuumRatio),
+        );
+        // With original gamma being below 60, the surface generated differently, with a different gamma
+        const expectedSlabMaterial = new Material(SiSlab111Gamma120);
+        const expectedMaterialJSON = expectedSlabMaterial.toJSON();
+        const slabMaterialJSON = slabMaterial.toJSON();
+        assertDeepAlmostEqual(expectedMaterialJSON, slabMaterialJSON);
+    });
+
+    it("should return slab (111) with vacuum for gamma = 60.001", () => {
+        const adjustedSilicon = {
+            ...Silicon,
+            lattice: {
+                ...Silicon.lattice,
+                gamma: 60.001,
+            },
+        };
+        const material = new Material(adjustedSilicon);
+        const slabConfig = tools.surface.generateConfig(material, [1, 1, 1], 3, 1, 1);
+        const vacuumRatio = 0.5;
+        const slabMaterial = new Material(slabConfig);
+        const { outOfPlaneAxisIndex } = slabConfig;
+        // Add 0.5 vacuum ratio, which is used in MD
+        tools.material.scaleOneLatticeVector(
+            slabMaterial,
+            ["a", "b", "c"][outOfPlaneAxisIndex],
+            1 / (1 - vacuumRatio),
+        );
+        const expectedSlabMaterial = new Material(SiSlab111);
+        const expectedMaterialJSON = expectedSlabMaterial.toJSON();
+        const slabMaterialJSON = slabMaterial.toJSON();
+        assertDeepAlmostEqual(expectedMaterialJSON, slabMaterialJSON);
     });
 });
