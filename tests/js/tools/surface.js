@@ -6,6 +6,19 @@ import { Silicon, SiSlab100, SiSlab111, SiSlab111Gamma120, SiSlab111NoVacuum } f
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 
+const generateSlabWithVacuum = (slabConfig, vacuumRatio) => {
+    const slabMaterial = new Material(slabConfig);
+    const { outOfPlaneAxisIndex } = slabConfig;
+
+    tools.material.scaleOneLatticeVector(
+        slabMaterial,
+        ["a", "b", "c"][outOfPlaneAxisIndex],
+        1 / (1 - vacuumRatio),
+    );
+
+    return slabMaterial;
+};
+
 describe("Tools:Surface", () => {
     it("should return slab (100)", () => {
         const material = new Material(Silicon);
@@ -23,14 +36,7 @@ describe("Tools:Surface", () => {
         const material = new Material(Silicon);
         const slabConfig = tools.surface.generateConfig(material, [1, 1, 1], 3, 1, 1);
         const vacuumRatio = 0.5;
-        const slabMaterial = new Material(slabConfig);
-        const { outOfPlaneAxisIndex } = slabConfig;
-        // Add 0.5 vacuum ratio, which is used in MD
-        tools.material.scaleOneLatticeVector(
-            slabMaterial,
-            ["a", "b", "c"][outOfPlaneAxisIndex],
-            1 / (1 - vacuumRatio),
-        );
+        const slabMaterial = generateSlabWithVacuum(slabConfig, vacuumRatio);
         const expectedSlabMaterial = new Material(SiSlab111);
         const expectedMaterialJSON = expectedSlabMaterial.toJSON();
         const slabMaterialJSON = slabMaterial.toJSON();
@@ -48,14 +54,7 @@ describe("Tools:Surface", () => {
         const material = new Material(adjustedSilicon);
         const slabConfig = tools.surface.generateConfig(material, [1, 1, 1], 3, 1, 1);
         const vacuumRatio = 0.5;
-        const slabMaterial = new Material(slabConfig);
-        const { outOfPlaneAxisIndex } = slabConfig;
-        // Add 0.5 vacuum ratio, which is used in MD
-        tools.material.scaleOneLatticeVector(
-            slabMaterial,
-            ["a", "b", "c"][outOfPlaneAxisIndex],
-            1 / (1 - vacuumRatio),
-        );
+        const slabMaterial = generateSlabWithVacuum(slabConfig, vacuumRatio);
         // With original gamma being below 60, the surface generated differently, with a different gamma
         const expectedSlabMaterial = new Material(SiSlab111Gamma120);
         const expectedMaterialJSON = expectedSlabMaterial.toJSON();
@@ -74,14 +73,7 @@ describe("Tools:Surface", () => {
         const material = new Material(adjustedSilicon);
         const slabConfig = tools.surface.generateConfig(material, [1, 1, 1], 3, 1, 1);
         const vacuumRatio = 0.5;
-        const slabMaterial = new Material(slabConfig);
-        const { outOfPlaneAxisIndex } = slabConfig;
-        // Add 0.5 vacuum ratio, which is used in MD
-        tools.material.scaleOneLatticeVector(
-            slabMaterial,
-            ["a", "b", "c"][outOfPlaneAxisIndex],
-            1 / (1 - vacuumRatio),
-        );
+        const slabMaterial = generateSlabWithVacuum(slabConfig, vacuumRatio);
         const expectedSlabMaterial = new Material(SiSlab111);
         const expectedMaterialJSON = expectedSlabMaterial.toJSON();
         const slabMaterialJSON = slabMaterial.toJSON();
