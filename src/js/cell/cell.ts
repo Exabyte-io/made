@@ -1,4 +1,5 @@
 import CodeMath, { math } from "@mat3ra/code/dist/js/math";
+import { LatticeExplicitUnit as CellSchema } from "@mat3ra/esse/dist/js/types";
 
 import { Coordinate } from "../basis/types";
 import constants from "../constants";
@@ -16,21 +17,23 @@ type Point = Coordinate | CodeMath.Matrix | CodeMath.MathType;
  * Cell represents a unit cell in geometrical form: 3x3 matrix where rows are cell vectors.
  * Example: [[1, 0, 0], [0, 1, 0], [0, 0, 1]].
  */
-export class Cell {
-    tolerance = 1;
+export class Cell implements CellSchema {
+    a: CellSchema["a"];
 
-    vector1: Vector;
+    b: CellSchema["b"];
 
-    vector2: Vector;
+    c: CellSchema["c"];
 
-    vector3: Vector;
+    alat = 1;
+
+    units: CellSchema["units"] = "angstrom";
 
     /**
      * Create a cell.
      * @param nestedArray {Number[][]} is an array of cell vectors in cartesian Angstrom units.
      */
     constructor(nestedArray: VectorsAsArray) {
-        [this.vector1, this.vector2, this.vector3] = nestedArray;
+        [this.a, this.b, this.c] = nestedArray;
     }
 
     /**
@@ -38,7 +41,7 @@ export class Cell {
      * @example [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
      */
     get vectorsAsArray(): VectorsAsArray {
-        return [this.vector1, this.vector2, this.vector3] as VectorsAsArray;
+        return [this.a, this.b, this.c] as VectorsAsArray;
     }
 
     clone(): Cell {
@@ -94,6 +97,6 @@ export class Cell {
      */
     scaleByMatrix(matrix: number[][]) {
         // @ts-ignore
-        [this.vector1, this.vector2, this.vector3] = MATRIX_MULT(matrix, this.vectorsAsArray);
+        [this.a, this.b, this.c] = MATRIX_MULT(matrix, this.vectorsAsArray);
     }
 }

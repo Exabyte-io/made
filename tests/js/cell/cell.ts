@@ -10,10 +10,9 @@ describe("Cell", () => {
     it("should return scaled cell", () => {
         const lattice = new Lattice(Silicon.lattice as LatticeSchema);
         const expectedCell = {
-            tolerance: 1,
-            vector1: [6.697840472868848, 0, 3.867],
-            vector2: [2.232613490956283, 6.314784556895033, 3.867],
-            vector3: [0, 0, 7.734],
+            a: [6.697840472868848, 0, 3.867],
+            b: [2.232613490956283, 6.314784556895033, 3.867],
+            c: [0, 0, 7.734],
         };
         const actualCell = lattice.Cell.cloneAndScaleByMatrix([
             [2, 0, 0],

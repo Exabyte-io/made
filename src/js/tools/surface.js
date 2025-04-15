@@ -163,9 +163,9 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
         supercellMatrix,
     );
     const newLattice = LatticeBravais.fromVectors({
-        a: supercell.vector1,
-        b: supercell.vector2,
-        c: supercell.vector3,
+        a: supercell.a,
+        b: supercell.b,
+        c: supercell.c,
     });
 
     return {
