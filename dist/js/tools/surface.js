@@ -1,7 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __importDefault =
+    (this && this.__importDefault) ||
+    function (mod) {
+        return mod && mod.__esModule ? mod : { default: mod };
+    };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lattice_bravais_1 = require("../lattice/lattice_bravais");
 const math_1 = __importDefault(require("../math"));
@@ -20,10 +22,8 @@ const getMatrixInLeftHandedRepresentation = (matrix) => {
  * @return {Array}
  */
 function extGCD(a, b) {
-    if (b === 0)
-        return [1, 0];
-    if (math_1.default.mod(a, b) === 0)
-        return [0, 1];
+    if (b === 0) return [1, 0];
+    if (math_1.default.mod(a, b) === 0) return [0, 1];
     const [x, y] = extGCD(b, math_1.default.mod(a, b));
     return [y, x - y * math_1.default.floor(a, b)];
 }
@@ -64,8 +64,7 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
                 [0, 0, 1],
             ];
         }
-    }
-    else {
+    } else {
         const [a1, a2, a3] = cell.vectorsAsArray;
         // z1 = (k * a1 - h * a2)
         // z2 = (l * a1 - h * a3)
@@ -82,7 +81,12 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
             // Here we specify rounding method to Bankers
             // For Python 3.11: round(-0.5) = 0
             const value = k1 / k2;
-            const i = math_1.default.roundCustom(value, 0, math_1.default.RoundingMethod.Bankers);
+            const roundedValue = math_1.default.roundCustom(
+                value,
+                0,
+                math_1.default.RoundingMethod.Bankers,
+            );
+            const i = -roundedValue;
             [p, q] = [p + i * l, q - i * k];
         }
         const [a, b] = extGCD(p * k + q * l, h);
@@ -108,7 +112,10 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
     const transformationMatrix = math_1.default.identity(3).toArray();
     const vxIndex = outOfPlaneAxisIndex === 2 ? 0 : outOfPlaneAxisIndex + 1;
     const vyIndex = vxIndex === 2 ? 0 : vxIndex + 1;
-    transformationMatrix[outOfPlaneAxisIndex] = MULT(thickness, transformationMatrix[outOfPlaneAxisIndex]);
+    transformationMatrix[outOfPlaneAxisIndex] = MULT(
+        thickness,
+        transformationMatrix[outOfPlaneAxisIndex],
+    );
     transformationMatrix[vxIndex] = MULT(vx, transformationMatrix[vxIndex]);
     transformationMatrix[vyIndex] = MULT(vy, transformationMatrix[vyIndex]);
     return transformationMatrix;
@@ -129,12 +136,25 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
-    const outOfPlaneAxisIndex = millerSupercell.getMostCollinearVectorIndex(millerPlanePseudoNormal);
-    const dimensionsScalingMatrix = getDimensionsScalingMatrix(cell, millerSupercell, outOfPlaneAxisIndex, numberOfLayers, vx, vy);
+    const outOfPlaneAxisIndex =
+        millerSupercell.getMostCollinearVectorIndex(millerPlanePseudoNormal);
+    const dimensionsScalingMatrix = getDimensionsScalingMatrix(
+        cell,
+        millerSupercell,
+        outOfPlaneAxisIndex,
+        numberOfLayers,
+        vx,
+        vy,
+    );
     const supercellMatrix = MULT(dimensionsScalingMatrix, millerScalingMatrix);
     const supercell = millerSupercell.cloneAndScaleByMatrix(dimensionsScalingMatrix);
     const tempBasis = material.Basis.clone();
-    const newBasis = supercell_1.default.generateNewBasisWithinSupercell(tempBasis, cell, supercell, supercellMatrix);
+    const newBasis = supercell_1.default.generateNewBasisWithinSupercell(
+        tempBasis,
+        cell,
+        supercell,
+        supercellMatrix,
+    );
     const newLattice = lattice_bravais_1.LatticeBravais.fromVectors({
         a: supercell.a,
         b: supercell.b,

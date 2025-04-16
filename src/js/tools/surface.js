@@ -85,7 +85,8 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
             // Here we specify rounding method to Bankers
             // For Python 3.11: round(-0.5) = 0
             const value = k1 / k2;
-            const i = math.roundCustom(value, 0, math.RoundingMethod.Bankers);
+            const roundedValue = math.roundCustom(value, 0, math.RoundingMethod.Bankers);
+            const i = -roundedValue;
             [p, q] = [p + i * l, q - i * k];
         }
 
