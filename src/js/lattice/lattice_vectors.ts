@@ -17,21 +17,19 @@ export interface BravaisConfigProps extends Partial<LatticeImplicitSchema> {
     isConventional?: boolean;
 }
 
-export interface LatticeVectorsConfig {
-    a: Vector;
-    b: Vector;
-    c: Vector;
-    alat?: number;
-    units?: "angstrom" | "bohr";
+export type LatticeVectorsConfig = LatticeExplicitUnit & {
     type?: LatticeTypeEnum;
-}
-
+};
 
 export class LatticeVectors implements Required<LatticeExplicitUnit> {
     a: Vector;
+
     b: Vector;
+
     c: Vector;
+
     alat: number;
+
     units: Units;
 
     constructor(config: LatticeExplicitUnit) {
@@ -58,8 +56,8 @@ export class LatticeVectors implements Required<LatticeExplicitUnit> {
         b = a,
         c = a,
         alpha = 90,
-        beta = 90,
-        gamma = 90,
+        beta = alpha,
+        gamma = alpha,
         units = {
             length: "angstrom",
             angle: "degree",

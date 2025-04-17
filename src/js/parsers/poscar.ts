@@ -5,7 +5,7 @@ import { Coordinate } from "../basis/types";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { Constraint, ConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
-import { Vector } from "../lattice/types";
+import { Vector } from "../lattice/lattice_vectors";
 import math from "../math";
 import { MaterialJSON } from "../types";
 

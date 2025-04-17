@@ -6,7 +6,7 @@ import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Constraint, ConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
-import { Vector } from "../lattice/types";
+import { Vector } from "../lattice/lattice_vectors";
 import math from "../math";
 import { InvalidLineError } from "./errors";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";

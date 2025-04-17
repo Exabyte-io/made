@@ -5,11 +5,11 @@ import * as s from "underscore.string";
 
 import { BasisSchema } from "@mat3ra/esse/dist/js/types";
 
-import { ArrayWithIds } from "../abstract/array_with_ids";
+import { ArrayWithIds } from "@mat3ra/code/dist/js/ArrayWithIds";
 import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
-import { Vector } from "../lattice/types";
+import { Vector } from "../lattice/lattice_vectors";
 import math from "../math";
 import { Coordinate } from "./types";
 
