@@ -1,5 +1,5 @@
-import { ArrayWithIds } from "../abstract/array_with_ids";
-import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
+import { ArrayWithIds } from "@mat3ra/code/dist/js/ArrayWithIds";
+import { ValueWithId } from "@mat3ra/code/dist/js/ValueWithId";
 
 export interface ConstraintValue extends Array<boolean> {
     0: boolean;
@@ -7,7 +7,7 @@ export interface ConstraintValue extends Array<boolean> {
     2: boolean;
 }
 
-export type Constraint = ObjectWithIdAndValue<ConstraintValue>;
+export type Constraint = ValueWithId<ConstraintValue>;
 
 export class AtomicConstraints {
     name: string;
