@@ -9,7 +9,7 @@ import constants from "../constants";
 import math from "../math";
 import { latticeVectorUnits, Vector, VectorsAsArray } from "../types";
 
-export interface BravaisConfigProps extends Partial<LatticeImplicitSchema> {
+export interface LatticeBravaisConfig extends Required<LatticeImplicitSchema> {
     isConventional?: boolean;
 }
 
@@ -60,7 +60,7 @@ export class LatticeVectors implements Required<LatticeExplicitUnit> {
         },
         type = "TRI",
         isConventional = false,
-    }: BravaisConfigProps): LatticeVectors {
+    }: LatticeBravaisConfig): LatticeVectors {
         // fall back to primitive if conventional not explicitly requested
         if (!isConventional) type = "TRI";
 

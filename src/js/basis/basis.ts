@@ -1,19 +1,18 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
+import { ArrayWithIds } from "@mat3ra/code/dist/js/ArrayWithIds";
+import { ValueWithId } from "@mat3ra/code/dist/js/ValueWithId";
+import { BasisSchema } from "@mat3ra/esse/dist/js/types";
 import * as _ from "underscore";
 import * as s from "underscore.string";
 
-import { BasisSchema } from "@mat3ra/esse/dist/js/types";
-
-import { ArrayWithIds } from "@mat3ra/code/dist/js/ArrayWithIds";
-import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
-import { Vector } from "../lattice/lattice_vectors";
 import math from "../math";
+import { Vector } from "../types";
 import { Coordinate } from "./types";
 
-export interface BasisProps extends Omit<BasisSchema, 'units'> {
+export interface BasisProps extends Omit<BasisSchema, "units"> {
     labels?: { id: number; value: number }[];
     units?: "crystal" | "cartesian"; // units for the coordinates (eg. angstrom, crystal).
     cell?: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
@@ -98,8 +97,8 @@ export class Basis implements BasisSchema {
             gamma: 90,
             units: {
                 length: "angstrom",
-                angle: "degree"
-            }
+                angle: "degree",
+            },
         }).vectorArrays;
     }
 
@@ -161,7 +160,7 @@ export class Basis implements BasisSchema {
         return this._elements.array;
     }
 
-    get elements(): ObjectWithIdAndValue<string>[] {
+    get elements(): ValueWithId<string>[] {
         return this._elements.toJSON();
     }
 
@@ -169,15 +168,15 @@ export class Basis implements BasisSchema {
      * Set basis elements to passed array.
      * @param elementsArray - New elements array.
      */
-    set elements(elementsArray: string[] | ObjectWithIdAndValue<string>[]) {
+    set elements(elementsArray: string[] | ValueWithId<string>[]) {
         this._elements = new ArrayWithIds<string>(elementsArray);
     }
 
-    getElementsAsObject(): ObjectWithIdAndValue<string>[] {
+    getElementsAsObject(): ValueWithId<string>[] {
         return this._elements.toJSON();
     }
 
-    get coordinates(): ObjectWithIdAndValue<Coordinate>[] {
+    get coordinates(): ValueWithId<Coordinate>[] {
         return this._coordinates.toJSON();
     }
 
@@ -185,7 +184,7 @@ export class Basis implements BasisSchema {
      * Set basis elements to passed array.
      * @param {Array|ArrayWithIds} coordinatesNestedArray - New coordinates array.
      */
-    set coordinates(coordinatesNestedArray: Coordinate[] | ObjectWithIdAndValue<Coordinate>[]) {
+    set coordinates(coordinatesNestedArray: Coordinate[] | ValueWithId<Coordinate>[]) {
         this._coordinates = new ArrayWithIds<Coordinate>(coordinatesNestedArray);
     }
 

@@ -1,19 +1,17 @@
+import { HASH_TOLERANCE } from "@mat3ra/code/dist/js/constants";
 import {
     LatticeImplicitSchema,
     LatticeSchema,
     LatticeTypeExtendedEnum,
 } from "@mat3ra/esse/dist/js/types";
 import * as lodash from "lodash";
-import * as _ from "underscore";
 
 import { Cell } from "../cell/cell";
 import { primitiveCell } from "../cell/primitive_cell";
-import { HASH_TOLERANCE } from "../constants";
 import math from "../math";
 import { LatticeBravais } from "./lattice_bravais";
 import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
-import { BravaisConfigProps, LatticeVectors, LatticeVectorsConfig } from "./lattice_vectors";
-import { UnitCell, UnitCellProps } from "./unit_cell";
+import { LatticeBravaisConfig, LatticeVectors, LatticeVectorsConfig } from "./lattice_vectors";
 
 /**
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
@@ -33,13 +31,14 @@ export class Lattice extends LatticeBravais implements LatticeSchema {
      * Create a Lattice class from a config object.
      * @param {Object} config - Config object. See LatticeVectors.fromBravais.
      */
-    constructor(config: LatticeImplicitSchema) {
+    constructor(config: LatticeSchema) {
         super(config);
-        this.vectors = LatticeVectors.fromBravais(config);
+        this.vectors = LatticeVectors.fromBravais(config as LatticeBravaisConfig);
     }
 
     static fromVectors(config: LatticeVectorsConfig): Lattice {
-        return new Lattice(LatticeBravais.fromVectors(config).toJSON());
+        const latticeBravaisConfig = LatticeBravais.fromVectors(config).toJSON();
+        return new Lattice(latticeBravaisConfig as LatticeBravaisConfig);
     }
 
     /**
@@ -97,8 +96,8 @@ export class Lattice extends LatticeBravais implements LatticeSchema {
         };
     }
 
-    clone(extraContext: BravaisConfigProps) {
-        return new (this.constructor as typeof Lattice)({ ...this.toJSON(), ...extraContext });
+    clone(extraContext: LatticeBravaisConfig) {
+        return new Lattice({ ...this.toJSON(), ...extraContext });
     }
 
     /**
@@ -189,12 +188,6 @@ export class Lattice extends LatticeBravais implements LatticeSchema {
             beta: f_(newLattice.beta),
             gamma: f_(newLattice.gamma),
         });
-    }
-
-    // TODO: remove
-    get unitCell() {
-        const vectors = [..._.flatten(this.vectorArrays), this.units.length] as UnitCellProps;
-        return new UnitCell(vectors);
     }
 
     /**

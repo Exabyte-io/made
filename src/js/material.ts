@@ -18,7 +18,7 @@ import {
 import { ATOMIC_COORD_UNITS, units } from "./constants";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-import { BravaisConfigProps } from "./lattice/lattice_vectors";
+import { LatticeBravaisConfig } from "./lattice/lattice_vectors";
 import parsers from "./parsers/parsers";
 import { BasisConfig } from "./parsers/xyz";
 // TODO: fix dependency cycle below
@@ -210,11 +210,11 @@ export function MaterialMixin<
             return this.Basis.uniqueElements;
         }
 
-        get lattice(): BravaisConfigProps | undefined {
-            return this.prop("lattice", undefined);
+        get lattice(): LatticeBravaisConfig {
+            return this.prop("lattice") as LatticeBravaisConfig;
         }
 
-        set lattice(config: BravaisConfigProps | undefined) {
+        set lattice(config: LatticeBravaisConfig) {
             this.setProp("lattice", config);
             this.unsetFileProps();
         }

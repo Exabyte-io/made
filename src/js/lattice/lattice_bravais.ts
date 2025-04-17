@@ -5,8 +5,9 @@ import {
 
 import constants from "../constants";
 import math from "../math";
-import { LatticeVectorsConfig, VectorsAsArray } from "./lattice_vectors";
+import { VectorsAsArray } from "../types";
 import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
+import { LatticeVectorsConfig } from "./lattice_vectors";
 
 export type Units = Required<LatticeBravaisSchema>["units"];
 

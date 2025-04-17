@@ -3,7 +3,7 @@ import { LatticeExplicitUnit as CellSchema } from "@mat3ra/esse/dist/js/types";
 
 import { Coordinate } from "../basis/types";
 import constants from "../constants";
-import { Vector, VectorsAsArray } from "../lattice/types";
+import { Vector, VectorsAsArray } from "../types";
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;
@@ -87,9 +87,8 @@ export class Cell implements CellSchema {
      * @param testVector
      */
     getMostCollinearVectorIndex(testVector: Vector): number {
-        // @ts-ignore
-        const angles = this.vectorsAsArray.map((v) => math.angleUpTo90(v, testVector));
-        return angles.findIndex((el) => el === math.min(angles));
+        const angles = this.vectorsAsArray.map((v) => math.angleUpTo90(v, testVector, "deg"));
+        return angles.findIndex((el: number) => el === math.min(angles));
     }
 
     /**
