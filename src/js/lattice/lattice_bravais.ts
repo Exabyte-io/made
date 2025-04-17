@@ -1,26 +1,23 @@
-import { LatticeImplicitSchema, LatticeTypeSchema } from "@mat3ra/esse/dist/js/types";
+import {
+    LatticeImplicitSchema as LatticeBravaisSchema,
+    LatticeSchema,
+    LatticeTypeEnum,
+} from "@mat3ra/esse/dist/js/types";
 
 import constants from "../constants";
 import math from "../math";
-import { LATTICE_TYPE_CONFIGS, Vector, VectorsAsArray } from "./types";
+import { LATTICE_TYPE_CONFIGS, VectorsAsArray } from "./types";
 
-export type Units = Required<LatticeImplicitSchema>["units"];
+export type Units = Required<LatticeBravaisSchema>["units"];
 
-export interface FromVectorsProps {
-    a: Vector; // vector of the lattice.
-    b: Vector; // vector of the lattice.
-    c: Vector; // vector of the lattice.
-    alat?: number; // scaling factor for the vector coordinates, defaults to 1.
-    units?: Units["length"]; // units for the coordinates (eg. angstrom, crystal).
-    type?: LatticeTypeSchema; // type of the lattice to be created, defaults to TRI when not provided.
-    skipRounding?: boolean; // whether to skip rounding the resulting lattice values, defaults to `false`.
-}
+export type LatticeVectors = Required<LatticeSchema>["vectors"];
+export type LatticeType = Required<LatticeSchema>["type"];
 
 /*
  * @summary: class that holds parameters of a Bravais Lattice: a, b, c, alpha, beta, gamma + corresponding units.
  * When stored as class variables units for lengths are always "angstrom"s, angle - "degree"s
  */
-export class LatticeBravais implements LatticeImplicitSchema {
+export class LatticeBravais implements LatticeBravaisSchema {
     a: number;
 
     b: number;
@@ -35,12 +32,12 @@ export class LatticeBravais implements LatticeImplicitSchema {
 
     units: Units;
 
-    type: LatticeImplicitSchema["type"];
+    type: LatticeBravaisSchema["type"];
 
     /**
      * Create a Bravais lattice.
      */
-    constructor(config: Partial<LatticeImplicitSchema>) {
+    constructor(config: LatticeBravaisSchema) {
         const {
             a = 1, // default lattice is cubic with unity in edge sizes
             b = a,
@@ -83,36 +80,35 @@ export class LatticeBravais implements LatticeImplicitSchema {
         alat = 1,
         units = "angstrom",
         type = "TRI",
-        skipRounding = false,
-    }: FromVectorsProps) {
-        const roundValue = skipRounding ? (x: number) => x : this._roundValue;
-        const config = {
-            a: roundValue(math.vlen(a) * alat),
-            b: roundValue(math.vlen(b) * alat),
-            c: roundValue(math.vlen(c) * alat),
-            alpha: roundValue(math.angle(b, c, "deg")),
-            beta: roundValue(math.angle(a, c, "deg")),
-            gamma: roundValue(math.angle(a, b, "deg")),
-            // initially we do not know what lattice type this is => set to TRI
-            type,
+    }: LatticeVectors & {type: LatticeType}) {
+        const round = this._roundValue;
+
+        const config: LatticeBravaisSchema = {
+            a: round(math.vlen(a) * alat),
+            b: round(math.vlen(b) * alat),
+            c: round(math.vlen(c) * alat),
+            alpha: round(math.angle(b, c, "deg")),
+            beta: round(math.angle(a, c, "deg")),
+            gamma: round(math.angle(a, b, "deg")),
+            type: type ?? "TRI",
             units: {
                 length: units,
-                angle: "degree" as Units["angle"],
+                angle: "degree",
             },
         };
-        return new (this.prototype.constructor as typeof LatticeBravais)(config);
+
+        return new LatticeBravais(config);
     }
 
     /**
      * See fromVectors above.
      */
-    static fromVectorArrays(array: VectorsAsArray, type: LatticeTypeSchema, skipRounding = true) {
+    static fromVectorArrays(array: VectorsAsArray, type: LatticeTypeEnum) {
         return this.fromVectors({
             a: array[0],
             b: array[1],
             c: array[2],
             type,
-            skipRounding, // do not round the values to avoid loosing precision by default
         });
     }
 
@@ -155,7 +151,7 @@ export class LatticeBravais implements LatticeImplicitSchema {
             "type" : "FCC"
          }
      */
-    toJSON(): LatticeImplicitSchema {
+    toJSON(): LatticeBravaisSchema {
         return {
             ...this,
             units: {

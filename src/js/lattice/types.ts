@@ -1,4 +1,4 @@
-import { ArrayOf3NumberElementsSchema, LatticeTypeSchema } from "@mat3ra/esse/dist/js/types";
+import { ArrayOf3NumberElementsSchema, LatticeTypeEnum } from "@mat3ra/esse/dist/js/types";
 
 export const DEFAULT_LATTICE_UNITS = {
     // by default lattice vectors shall be measured in angstrom, angles - in degrees
@@ -47,7 +47,7 @@ export interface VectorsAsArray extends Array<Vector> {
 
 interface LatticeTypeConfig {
     label: string;
-    code: LatticeTypeSchema;
+    code: LatticeTypeEnum;
     editables: string[];
     editablesConventional: string[];
 }
