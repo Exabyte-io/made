@@ -1,5 +1,4 @@
 import {
-    ArrayOf3NumberElementsSchema,
     LatticeExplicitUnit,
     LatticeImplicitSchema,
     LatticeTypeEnum,
@@ -8,10 +7,7 @@ import {
 import { primitiveCell } from "../cell/primitive_cell";
 import constants from "../constants";
 import math from "../math";
-
-export type Vector = ArrayOf3NumberElementsSchema;
-export type VectorsAsArray = [Vector, Vector, Vector];
-export type Units = Required<LatticeExplicitUnit>["units"];
+import { latticeVectorUnits, Vector, VectorsAsArray } from "../types";
 
 export interface BravaisConfigProps extends Partial<LatticeImplicitSchema> {
     isConventional?: boolean;
@@ -30,7 +26,7 @@ export class LatticeVectors implements Required<LatticeExplicitUnit> {
 
     alat: number;
 
-    units: Units;
+    units: latticeVectorUnits;
 
     constructor(config: LatticeExplicitUnit) {
         const { a, b, c, alat = 1, units = "angstrom" } = config;

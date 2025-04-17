@@ -1,8 +1,7 @@
-/* eslint no-unused-vars: 0 */
 import { LatticeImplicitSchema } from "@mat3ra/esse/dist/js/types";
 
-import { VectorsAsArray } from "../lattice/types";
 import math from "../math";
+import { VectorsAsArray } from "../types";
 
 /**
  * Routines for calculating primitive cell vectors from conventional cell Bravais parameters.
@@ -147,29 +146,6 @@ const PRIMITIVE_CELLS = {
             [a * sinBeta, 0.0, a * cosBeta],
             [-b * sinAlpha * cosGammaStar, b * sinAlpha * sinGammaStar, b * cosAlpha],
             [0.0, 0.0, c],
-        ];
-    },
-
-    // alternative implementation
-    TRIalt: ({ a, b, c, alpha, beta, gamma }: LatticeImplicitSchema): VectorsAsArray => {
-        const cosAlpha = math.cos((alpha / 180) * math.PI);
-        const cosBeta = math.cos((beta / 180) * math.PI);
-        const cosGamma = math.cos((gamma / 180) * math.PI);
-        const sinGamma = math.sqrt(1 - cosGamma * cosGamma);
-        return [
-            [a, 0.0, 0.0],
-            [b * cosGamma, b * sinGamma, 0.0],
-            [
-                c * cosBeta,
-                (c / sinGamma) * (cosAlpha - cosBeta * cosGamma),
-                (c / sinGamma) *
-                    math.sqrt(
-                        sinGamma * sinGamma -
-                            cosAlpha * cosAlpha -
-                            cosBeta * cosBeta +
-                            2 * cosAlpha * cosBeta * cosGamma,
-                    ),
-            ],
         ];
     },
 };

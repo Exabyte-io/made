@@ -56,11 +56,10 @@ export const PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS = {
         [0, 0, 1],
     ],
     TRI: unitMatrix,
-    TRIalt: unitMatrix,
 };
 
 export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES: {
-    [key in LatticeSchema["type"] | "TRIalt"]: LatticeSchema["type"];
+    [key in LatticeSchema["type"]]: LatticeSchema["type"];
 } = {
     // PRIMITIVE    =>  CONVENTIONAL
     CUB: "CUB",
@@ -77,8 +76,6 @@ export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES: {
     MCL: "MCL",
     MCLC: "MCL",
     TRI: "TRI",
-    // TODO: Legacy `TRI_alt` type, assert not used and remove
-    TRIalt: "TRI",
 };
 
 export function isConventionalCellSameAsPrimitiveForLatticeType(

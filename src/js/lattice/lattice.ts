@@ -1,4 +1,8 @@
-import { LatticeImplicitSchema, LatticeSchema, LatticeTypeExtendedEnum } from "@mat3ra/esse/dist/js/types";
+import {
+    LatticeImplicitSchema,
+    LatticeSchema,
+    LatticeTypeExtendedEnum,
+} from "@mat3ra/esse/dist/js/types";
 import * as lodash from "lodash";
 import * as _ from "underscore";
 
@@ -7,8 +11,8 @@ import { primitiveCell } from "../cell/primitive_cell";
 import { HASH_TOLERANCE } from "../constants";
 import math from "../math";
 import { LatticeBravais } from "./lattice_bravais";
-import { BravaisConfigProps, LatticeVectors, LatticeVectorsConfig } from "./lattice_vectors";
 import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
+import { BravaisConfigProps, LatticeVectors, LatticeVectorsConfig } from "./lattice_vectors";
 import { UnitCell, UnitCellProps } from "./unit_cell";
 
 /**

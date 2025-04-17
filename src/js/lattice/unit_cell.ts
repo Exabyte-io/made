@@ -1,4 +1,4 @@
-import { Vector } from "./types";
+import { Vector } from "./lattice_vectors";
 
 export type UnitCellProps = [
     number,

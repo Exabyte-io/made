@@ -6,8 +6,8 @@ import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Constraint, ConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
-import { Vector } from "../lattice/lattice_vectors";
 import math from "../math";
+import { Vector } from "../types";
 import { InvalidLineError } from "./errors";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 
@@ -172,7 +172,7 @@ function fromBasis(
     skipRounding = false,
 ) {
     const XYZArray: string[] = [];
-    basisClsInstance._elements.array.forEach((item, idx) => {
+    basisClsInstance._elements.array.forEach((item: any, idx: number) => {
         // assume that _elements and _coordinates are indexed equivalently
         const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
         const elementWithLabel = item + atomicLabel;
