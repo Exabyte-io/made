@@ -1,6 +1,3 @@
-import _ from "underscore";
-import { LatticeTypeEnum, LatticeTypeExtendedEnum } from "@mat3ra/esse/dist/js/types";
-
 interface KPointStep {
     point: string;
     steps: number;
@@ -133,15 +130,18 @@ export const paths: PathsType = (() => {
 
     Object.entries(points).forEach(([key, pathSegments]) => {
         // Flatten arrays of path segments into a single array
-        const flattenedPath: string[] = pathSegments.reduce((acc, segment) => [...acc, ...segment], []);
-        
+        const flattenedPath: string[] = pathSegments.reduce(
+            (acc, segment) => [...acc, ...segment],
+            [],
+        );
+
         // Convert to KPointStep array
+        // TODO: calculate number of steps based on distance in k-space
         result[key] = flattenedPath.map((point) => ({
             point,
-            // TODO: calculate number of steps based on distance in k-space
             steps: 10,
         }));
     });
 
     return result;
-})(); 
+})();
