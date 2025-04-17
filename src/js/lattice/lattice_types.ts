@@ -1,14 +1,4 @@
-import { ArrayOf3NumberElementsSchema, LatticeTypeEnum } from "@mat3ra/esse/dist/js/types";
-
-export const DEFAULT_LATTICE_UNITS = {
-    // by default lattice vectors shall be measured in angstrom, angles - in degrees
-    length: {
-        angstrom: "angstrom",
-    },
-    angle: {
-        degree: "degree",
-    },
-};
+import { LatticeTypeEnum } from "@mat3ra/esse/dist/js/types";
 
 export enum LatticeTypeExtended {
     BCC = "BCC",
@@ -35,14 +25,6 @@ export enum LatticeTypeExtended {
     TRI_1a = "TRI_1a",
     TRI_2a = "TRI_2a",
     TRI_1b = "TRI_1b",
-}
-
-export type Vector = ArrayOf3NumberElementsSchema;
-
-export interface VectorsAsArray extends Array<Vector> {
-    0: Vector;
-    1: Vector;
-    2: Vector;
 }
 
 interface LatticeTypeConfig {

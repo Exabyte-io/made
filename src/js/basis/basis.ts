@@ -1,7 +1,7 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
-import _ from "underscore";
-import s from "underscore.string";
+import * as _ from "underscore";
+import * as s from "underscore.string";
 
 import { BasisSchema } from "@mat3ra/esse/dist/js/types";
 
@@ -13,9 +13,9 @@ import { Vector } from "../lattice/types";
 import math from "../math";
 import { Coordinate } from "./types";
 
-export interface BasisProps extends BasisSchema {
+export interface BasisProps extends Omit<BasisSchema, 'units'> {
     labels?: { id: number; value: number }[];
-    units?: string; // units for the coordinates (eg. angstrom, crystal).
+    units?: "crystal" | "cartesian"; // units for the coordinates (eg. angstrom, crystal).
     cell?: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
     isEmpty?: boolean; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
 }
@@ -48,14 +48,14 @@ export class Basis implements BasisSchema {
 
     labels?: { id: number; value: number }[];
 
-    units: string;
+    units: "crystal" | "cartesian";
 
     cell: Vector[];
 
     constructor({
         elements,
         coordinates,
-        units = ATOMIC_COORD_UNITS.crystal,
+        units = ATOMIC_COORD_UNITS.crystal as "crystal" | "cartesian",
         cell = Basis.defaultCell, // by default, assume a cubic unary cell
         isEmpty = false, // whether to generate an empty Basis
         labels = [],
@@ -88,7 +88,19 @@ export class Basis implements BasisSchema {
     }
 
     static get defaultCell() {
-        return new Lattice().vectorArrays;
+        return new Lattice({
+            type: "CUB",
+            a: 1,
+            b: 1,
+            c: 1,
+            alpha: 90,
+            beta: 90,
+            gamma: 90,
+            units: {
+                length: "angstrom",
+                angle: "degree"
+            }
+        }).vectorArrays;
     }
 
     toJSON(skipRounding = false): BasisSchema {

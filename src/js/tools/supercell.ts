@@ -65,6 +65,7 @@ function generateConfig(material: Material, supercellMatrix: number[][]) {
         a: supercell.a,
         b: supercell.b,
         c: supercell.c,
+        type: "TRI",
     });
 
     return {

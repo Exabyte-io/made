@@ -1,18 +1,14 @@
-import {
-    LatticeImplicitSchema,
-    LatticeSchema,
-    LatticeTypeExtendedEnum,
-} from "@mat3ra/esse/dist/js/types";
-import lodash from "lodash";
-import _ from "underscore";
+import { LatticeImplicitSchema, LatticeSchema, LatticeTypeExtendedEnum } from "@mat3ra/esse/dist/js/types";
+import * as lodash from "lodash";
+import * as _ from "underscore";
 
 import { Cell } from "../cell/cell";
 import { primitiveCell } from "../cell/primitive_cell";
 import { HASH_TOLERANCE } from "../constants";
 import math from "../math";
-import { LatticeBravais, LatticeType } from "./lattice_bravais";
-import { BravaisConfigProps, LatticeVectors } from "./lattice_vectors";
-import { LATTICE_TYPE_CONFIGS } from "./types";
+import { LatticeBravais } from "./lattice_bravais";
+import { BravaisConfigProps, LatticeVectors, LatticeVectorsConfig } from "./lattice_vectors";
+import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
 import { UnitCell, UnitCellProps } from "./unit_cell";
 
 /**
@@ -38,11 +34,7 @@ export class Lattice extends LatticeBravais implements LatticeSchema {
         this.vectors = LatticeVectors.fromBravais(config);
     }
 
-    /**
-     * Create a Lattice class from a list of vectors.
-     * @param {Object} config - Config object. See LatticeBravais.fromVectors.
-     */
-    static fromVectors(config: LatticeVectors & {type: LatticeType}): Lattice {
+    static fromVectors(config: LatticeVectorsConfig): Lattice {
         return new Lattice(LatticeBravais.fromVectors(config).toJSON());
     }
 

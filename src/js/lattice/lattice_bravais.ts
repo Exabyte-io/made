@@ -1,17 +1,14 @@
 import {
     LatticeImplicitSchema as LatticeBravaisSchema,
-    LatticeSchema,
     LatticeTypeEnum,
 } from "@mat3ra/esse/dist/js/types";
 
 import constants from "../constants";
 import math from "../math";
-import { LATTICE_TYPE_CONFIGS, VectorsAsArray } from "./types";
+import { LatticeVectorsConfig, VectorsAsArray } from "./lattice_vectors";
+import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
 
 export type Units = Required<LatticeBravaisSchema>["units"];
-
-export type LatticeVectors = Required<LatticeSchema>["vectors"];
-export type LatticeType = Required<LatticeSchema>["type"];
 
 /*
  * @summary: class that holds parameters of a Bravais Lattice: a, b, c, alpha, beta, gamma + corresponding units.
@@ -80,7 +77,7 @@ export class LatticeBravais implements LatticeBravaisSchema {
         alat = 1,
         units = "angstrom",
         type = "TRI",
-    }: LatticeVectors & {type: LatticeType}) {
+    }: LatticeVectorsConfig): LatticeBravais {
         const round = this._roundValue;
 
         const config: LatticeBravaisSchema = {
@@ -120,11 +117,11 @@ export class LatticeBravais implements LatticeBravaisSchema {
     get editables() {
         const object = {};
         const editablesList = LATTICE_TYPE_CONFIGS.find(
-            (entry) => entry.code === this.type,
+            (entry: any) => entry.code === this.type,
         )?.editables;
         // ["a", "gamma"] => {a: true, gamma: true}
         if (editablesList) {
-            editablesList.forEach((element) => {
+            editablesList.forEach((element: any) => {
                 Object.assign(object, {
                     [element]: true,
                 });
@@ -137,19 +134,19 @@ export class LatticeBravais implements LatticeBravaisSchema {
     /**
      * Serialize class instance to JSON.
      * @example As below:
-         {
-            "a" : 3.867,
-            "b" : 3.867,
-            "c" : 3.867,
-            "alpha" : 60,
-            "beta" : 60,
-            "gamma" : 60,
-            "units" : {
-                "length" : "angstrom",
-                "angle" : "degree"
-            },
-            "type" : "FCC"
-         }
+     {
+     "a" : 3.867,
+     "b" : 3.867,
+     "c" : 3.867,
+     "alpha" : 60,
+     "beta" : 60,
+     "gamma" : 60,
+     "units" : {
+     "length" : "angstrom",
+     "angle" : "degree"
+     },
+     "type" : "FCC"
+     }
      */
     toJSON(): LatticeBravaisSchema {
         return {
