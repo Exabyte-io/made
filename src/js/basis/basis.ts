@@ -1,28 +1,26 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
-import { ArrayWithIds } from "@mat3ra/code/dist/js/ArrayWithIds";
-import { ValueWithId } from "@mat3ra/code/dist/js/ValueWithId";
-import { BasisSchema } from "@mat3ra/esse/dist/js/types";
+import {
+    ArrayWithIds,
+    RoundedArrayWithIds,
+    RoundedValueWithId,
+    RoundedVector3D,
+    ValueWithId,
+} from "@mat3ra/code";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { BasisSchema, ElementSchema, PointSchema } from "@mat3ra/esse/dist/js/types";
 import * as _ from "underscore";
 import * as s from "underscore.string";
 
+import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
-import { Lattice, nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
+import { nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import math from "../math";
-import { Vector } from "../types";
-import { Coordinate } from "./types";
-
-export interface BasisProps extends Omit<BasisSchema, "units"> {
-    labels?: { id: number; value: number }[];
-    units?: "crystal" | "cartesian"; // units for the coordinates (eg. angstrom, crystal).
-    cell?: Vector[]; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
-    isEmpty?: boolean; // crystal cell corresponding to the basis (eg. to convert to crystal coordinates).
-}
 
 export interface Atom {
     id?: number; // numeric id of the element (optional).
     element: string; // Chemical element
-    coordinate: Coordinate; // 3-dimensional coordinate
+    coordinate: Coordinate; // Coordinates of the element
 }
 
 export interface ElementCount {
@@ -37,45 +35,83 @@ interface Overlap {
     element2: string;
 }
 
-/**
- * A class representing a crystal basis.
- */
-export class Basis implements BasisSchema {
-    _elements: ArrayWithIds<string>;
+export interface BasisProps extends BasisSchema {
+    cell?: Cell;
+    isEmpty?: boolean;
+}
 
-    _coordinates: ArrayWithIds<Coordinate>;
+export class Coordinate extends RoundedValueWithId<RoundedVector3D> {
+    value: RoundedVector3D;
 
-    labels?: { id: number; value: number }[];
+    constructor(id: number, value: RoundedVector3D) {
+        super(id, value);
+        this.value = value;
+    }
+
+    static fromArray(value: number[], id = 0): Coordinate {
+        return new Coordinate(id, new RoundedVector3D(value));
+    }
+
+    getValueAlongAxis(axis: "x" | "y" | "z" = "z"): number {
+        const index = { x: 0, y: 1, z: 2 }[axis];
+        return this.value[index] as number;
+    }
+}
+
+export class Coordinates extends RoundedArrayWithIds<PointSchema> {
+    getValuesAlongAxis(axis: "x" | "y" | "z" = "z"): number[] {
+        return this.values.map((coord) => Coordinate.fromArray(coord).getValueAlongAxis(axis));
+    }
+
+    getMaxValueAlongAxis(axis: "x" | "y" | "z" = "z"): number {
+        return Math.max(...this.getValuesAlongAxis(axis));
+    }
+
+    getMinValueAlongAxis(axis: "x" | "y" | "z" = "z"): number {
+        return Math.min(...this.getValuesAlongAxis(axis));
+    }
+
+    getExtremumValueAlongAxis(
+        extremum: "max" | "min" = "max",
+        axis: "x" | "y" | "z" = "z",
+    ): number {
+        return extremum === "max"
+            ? this.getMaxValueAlongAxis(axis)
+            : this.getMinValueAlongAxis(axis);
+    }
+}
+
+export class Elements extends ArrayWithIds<ElementSchema> {}
+
+export class Basis extends InMemoryEntity implements BasisSchema {
+    _elements: Elements;
+
+    _coordinates: Coordinates;
+
+    _labels: ArrayWithIds<string>;
 
     units: "crystal" | "cartesian";
 
-    cell: Vector[];
+    cell: Cell;
 
     constructor({
-        elements,
-        coordinates,
-        units = ATOMIC_COORD_UNITS.crystal as "crystal" | "cartesian",
-        cell = Basis.defaultCell, // by default, assume a cubic unary cell
-        isEmpty = false, // whether to generate an empty Basis
+        elements = [],
+        coordinates = [],
+        units = ATOMIC_COORD_UNITS.crystal as BasisSchema["units"],
+        cell = new Cell(),
         labels = [],
+        isEmpty = false,
     }: BasisProps) {
-        const _elements = isEmpty ? [] : elements;
-        const _coordinates = isEmpty ? [] : coordinates;
-        const _units = units || Basis.unitsOptionsDefaultValue;
-
-        if (!units) {
-            console.warn("Basis.constructor: units are not provided => set to crystal");
-        }
-
-        // assert that elements and coordinates have ids if not already passed in config + store Array helper classes
-        this._elements = new ArrayWithIds<string>(_elements);
-        this._coordinates = new ArrayWithIds<Coordinate>(_coordinates);
-        this.units = _units;
+        super();
+        this._elements = new Elements(isEmpty ? [] : elements);
+        this._coordinates = new Coordinates(isEmpty ? [] : coordinates);
+        this._labels = new ArrayWithIds<string>(labels);
+        this.units = units || (ATOMIC_COORD_UNITS.crystal as BasisSchema["units"]);
         this.cell = cell;
+    }
 
-        if (!_.isEmpty(labels)) {
-            this.labels = labels;
-        }
+    static fromDict(props: BasisProps): Basis {
+        return new Basis(props);
     }
 
     static get unitsOptionsConfig() {
@@ -86,81 +122,12 @@ export class Basis implements BasisSchema {
         return ATOMIC_COORD_UNITS.crystal;
     }
 
-    static get defaultCell() {
-        return new Lattice({
-            type: "CUB",
-            a: 1,
-            b: 1,
-            c: 1,
-            alpha: 90,
-            beta: 90,
-            gamma: 90,
-            units: {
-                length: "angstrom",
-                angle: "degree",
-            },
-        }).vectorArrays;
-    }
-
-    toJSON(skipRounding = false): BasisSchema {
-        const json = {
-            elements: this.elements,
-            coordinates: skipRounding ? this.coordinates : this.coordinatesRounded,
-            units: this.units,
-        };
-
-        if (!_.isEmpty(this.labels)) {
-            return JSON.parse(
-                JSON.stringify({
-                    ...json,
-                    labels: this.labels,
-                }),
-            );
-        }
-
-        return JSON.parse(JSON.stringify(json));
-    }
-
-    /** Return coordinates rounded to default precision */
-    get coordinatesRounded() {
-        return this.coordinates.map((coordinate) => {
-            return {
-                id: coordinate.id,
-                value: coordinate.value.map((x) => math.precise(math.roundToZero(x))),
-            };
-        });
-    }
-
     /** Return cell with vectors values rounded to default precision */
     get cellRounded() {
-        return this.cell.map((vector) => vector.map((x) => math.precise(math.roundToZero(x))));
-    }
-
-    /**
-     * Create an identical copy of the class instance.
-     * @param extraContext - Extra context to be passed to the new class instance on creation.
-     */
-    clone(extraContext?: Partial<BasisProps>): Basis {
-        return new (this.constructor as typeof Basis)({
-            ...this.toJSON(),
-            cell: this.cell,
-            ...extraContext,
-        });
-    }
-
-    getElementByIndex(idx: number): string {
-        return this._elements.getArrayElementByIndex(idx);
-    }
-
-    getCoordinateByIndex(idx: number): Coordinate {
-        return this._coordinates.getArrayElementByIndex(idx);
+        return this.cell.vectorArraysRounded;
     }
 
     get elementsArray(): string[] {
-        return this._elements.array;
-    }
-
-    get elements(): ValueWithId<string>[] {
         return this._elements.toJSON();
     }
 
@@ -168,16 +135,12 @@ export class Basis implements BasisSchema {
      * Set basis elements to passed array.
      * @param elementsArray - New elements array.
      */
-    set elements(elementsArray: string[] | ValueWithId<string>[]) {
-        this._elements = new ArrayWithIds<string>(elementsArray);
+    set elements(elementsArray: string[] | Element[]) {
+        this._elements = Elements.fromValues(elementsArray);
     }
 
     getElementsAsObject(): ValueWithId<string>[] {
         return this._elements.toJSON();
-    }
-
-    get coordinates(): ValueWithId<Coordinate>[] {
-        return this._coordinates.toJSON();
     }
 
     /**
@@ -189,33 +152,56 @@ export class Basis implements BasisSchema {
     }
 
     get coordinatesAsArray() {
-        return this._coordinates.array;
+        return this._coordinates.values;
     }
 
-    get isInCrystalUnits() {
-        return this.units === ATOMIC_COORD_UNITS.crystal;
+    get coordinates(): PointSchema[] {
+        return this._coordinates.values as unknown as Coordinate[];
     }
 
-    get isInCartesianUnits() {
+    get elements(): ElementSchema[] {
+        return this._elements.toValueWithIdArray() as unknown as ElementSchema[];
+    }
+
+    /** Return coordinates rounded to default precision */
+    get coordinatesRounded() {
+        return this.coordinates.map((coordinate) => {
+            return {
+                id: coordinate.id,
+                value: coordinate.value.toJSON().map((x) => math.precise(math.roundToZero(x))),
+            };
+        });
+    }
+
+    get isInCartesianUnits(): boolean {
         return this.units === ATOMIC_COORD_UNITS.cartesian;
     }
 
-    toCartesian() {
-        const unitCell = this.cell;
-        if (this.units === ATOMIC_COORD_UNITS.cartesian) return;
+    get isInCrystalUnits(): boolean {
+        return this.units === ATOMIC_COORD_UNITS.crystal;
+    }
+
+    toCartesian(): void {
+        if (this.isInCartesianUnits) return;
         this._coordinates.mapArrayInPlace(
-            (point) => math.multiply(point, unitCell) as unknown as Coordinate,
+            (point) => math.multiply(point, this.cell.vectorArrays) as Coordinate,
         );
         this.units = ATOMIC_COORD_UNITS.cartesian;
     }
 
-    toCrystal() {
-        const unitCell = this.cell;
-        if (this.units === ATOMIC_COORD_UNITS.crystal) return;
-        this._coordinates.mapArrayInPlace(
-            (point) => math.multiply(point, math.inv(unitCell)) as unknown as Coordinate,
-        );
+    toCrystal(): void {
+        if (this.isInCrystalUnits) return;
+        const invCell = math.inv(this.cell.vectorArrays);
+        this._coordinates.mapArrayInPlace((point) => math.multiply(point, invCell) as Coordinate);
         this.units = ATOMIC_COORD_UNITS.crystal;
+    }
+
+    getElementByIndex(idx: number): string {
+        return this._elements.getArrayElementByIndex(idx);
+    }
+
+    getCoordinateByIndex(idx: number): Coordinate {
+        return this._coordinates.getArrayElementByIndex(idx);
     }
 
     /**
@@ -243,17 +229,17 @@ export class Basis implements BasisSchema {
      * Add atom with a chemical element at coordinate.
      */
     addAtom({ element = "Si", coordinate = [0.5, 0.5, 0.5] }: Atom) {
-        this._elements.addElement(element);
-        this._coordinates.addElement(coordinate);
+        this._elements.addItem(element);
+        this._coordinates.addItem(coordinate);
     }
 
     /**
      * Remove atom with a chemical element at coordinate either by passing the (element AND coordinate) OR id.
      */
     removeAtom({ element, coordinate, id }: Atom) {
-        if (element && coordinate.length > 0) {
-            this._elements.removeElement(element, id);
-            this._coordinates.removeElement(coordinate, id);
+        if (element && coordinate) {
+            this._elements.removeItem(element, id);
+            this._coordinates.removeItem(coordinate, id);
         }
     }
 
@@ -261,7 +247,7 @@ export class Basis implements BasisSchema {
      * Unique names (symbols) of the chemical elements basis. E.g. `['Si', 'Li']`
      */
     get uniqueElements(): string[] {
-        return _.unique(this._elements.array);
+        return _.unique(this._elements.values);
     }
 
     /**

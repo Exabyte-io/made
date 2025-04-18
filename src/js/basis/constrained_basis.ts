@@ -1,5 +1,4 @@
-import { ArrayWithIds } from "@mat3ra/code/dist/js/ArrayWithIds";
-import { ValueWithId } from "@mat3ra/code/dist/js/ValueWithId";
+import { ArrayWithIds, ValueWithId } from "@mat3ra/code";
 import { BasisSchema } from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
@@ -73,14 +72,14 @@ export class ConstrainedBasis extends Basis {
     }
 
     getConstraintByIndex(idx: number): ConstraintValue {
-        return this._constraints.getArrayElementByIndex(idx) || [];
+        return this._constraints.getElementValueByIndex(idx) || [false, false, false];
     }
 
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
     get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue, string][] {
-        return this._elements.array.map((element: any, idx: number) => {
+        return this._elements.values.map((element: any, idx: number) => {
             const coordinates = this.getCoordinateByIndex(idx);
             const constraints = this.getConstraintByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
