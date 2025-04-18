@@ -20,11 +20,11 @@ const DEFAULT_CELL: [PointSchema, PointSchema, PointSchema] = [
 export class Cell implements CellSchema {
     alat = 1;
 
-    private _a: RoundedVector3D;
+    protected _a: RoundedVector3D;
 
-    private _b: RoundedVector3D;
+    protected _b: RoundedVector3D;
 
-    private _c: RoundedVector3D;
+    protected _c: RoundedVector3D;
 
     constructor(
         a: PointSchema = DEFAULT_CELL[0],

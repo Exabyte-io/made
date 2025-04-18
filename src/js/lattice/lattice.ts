@@ -1,17 +1,19 @@
 import { HASH_TOLERANCE } from "@mat3ra/code/dist/js/constants";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import {
     LatticeImplicitSchema,
     LatticeSchema,
+    LatticeTypeEnum,
     LatticeTypeExtendedEnum,
+    PointSchema,
 } from "@mat3ra/esse/dist/js/types";
 import * as lodash from "lodash";
 
 import { Cell } from "../cell/cell";
 import { primitiveCell } from "../cell/primitive_cell";
 import math from "../math";
-import { LatticeBravais } from "./lattice_bravais";
+import { Units } from "./lattice_bravais";
 import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
-import { LatticeBravaisConfig, LatticeVectors, LatticeVectorsConfig } from "./lattice_vectors";
 
 /**
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
@@ -19,96 +21,108 @@ import { LatticeBravaisConfig, LatticeVectors, LatticeVectorsConfig } from "./la
  */
 export const nonPeriodicLatticeScalingFactor = 2.0;
 
-/*
- * Container class for crystal lattice and associated methods.
- * Follows Bravais convention for lattice types and contains lattice vectors within.
- * Units for lattice vector coordinates are "angstroms", and "degrees" for the corresponding angles.
- */
-export class Lattice extends LatticeBravais implements LatticeSchema {
-    vectors: LatticeVectors;
+export class Lattice extends InMemoryEntity implements LatticeSchema {
+    a: number;
 
-    /**
-     * Create a Lattice class from a config object.
-     * @param {Object} config - Config object. See LatticeVectors.fromBravais.
-     */
-    constructor(config: LatticeSchema) {
-        super(config);
-        this.vectors = LatticeVectors.fromBravais(config as LatticeBravaisConfig);
+    b: number;
+
+    c: number;
+
+    alpha: number;
+
+    beta: number;
+
+    gamma: number;
+
+    type: LatticeTypeEnum;
+
+    units: Units;
+
+    constructor(
+        a = 1,
+        b = 1,
+        c = 1,
+        alpha = 90,
+        beta = 90,
+        gamma = 90,
+        units: Units = { length: "angstrom", angle: "degree" },
+        type: LatticeTypeEnum = "CUB",
+    ) {
+        super();
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.alpha = alpha;
+        this.beta = beta;
+        this.gamma = gamma;
+        this.units = units;
+        this.type = type;
     }
 
-    static fromVectors(config: LatticeVectorsConfig): Lattice {
-        const latticeBravaisConfig = LatticeBravais.fromVectors(config).toJSON();
-        return new Lattice(latticeBravaisConfig as LatticeBravaisConfig);
+    get vectors(): Cell {
+        return Cell.fromVectorsArray(this.calculateVectors());
     }
 
-    /**
-     * Serialize class instance to JSON.
-     * @example As below:
-         {
-            "a" : 3.867,
-            "b" : 3.867,
-            "c" : 3.867,
-            "alpha" : 60,
-            "beta" : 60,
-            "gamma" : 60,
-            "units" : {
-                "length" : "angstrom",
-                "angle" : "degree"
-            },
-            "type" : "FCC",
-            "vectors" : {
-                "a" : [
-                    3.34892,
-                    0,
-                    1.9335
-                ],
-                "b" : [
-                    1.116307,
-                    3.157392,
-                    1.9335
-                ],
-                "c" : [
-                    0,
-                    0,
-                    3.867
-                ],
-                "alat" : 1,
-                "units" : "angstrom"
-            }
-        }
-     */
-    toJSON(skipRounding = false): LatticeSchema {
-        const round = skipRounding ? (x: number) => x : Lattice._roundValue; // round values by default
+    calculateVectors(): PointSchema[] {
+        const { a } = this;
+        const { b } = this;
+        const { c } = this;
 
-        return {
-            a: round(this.a),
-            b: round(this.b),
-            c: round(this.c),
-            alpha: round(this.alpha),
-            beta: round(this.beta),
-            gamma: round(this.gamma),
-            units: {
-                length: this.units.length,
-                angle: this.units.angle,
-            },
-            type: this.type,
-            vectors: this.vectors.toJSON(),
-        };
+        const alphaRad = math.unit(this.alpha, "deg").toNumber("rad");
+        const betaRad = math.unit(this.beta, "deg").toNumber("rad");
+        const gammaRad = math.unit(this.gamma, "deg").toNumber("rad");
+
+        const cosAlpha = math.cos(alphaRad);
+        const cosBeta = math.cos(betaRad);
+        const cosGamma = math.cos(gammaRad);
+        const sinAlpha = math.sin(alphaRad);
+        const sinBeta = math.sin(betaRad);
+
+        const gammaStar = math.acos((cosAlpha * cosBeta - cosGamma) / (sinAlpha * sinBeta));
+        const cosGammaStar = math.cos(gammaStar);
+        const sinGammaStar = math.sin(gammaStar);
+
+        const vectorA: PointSchema = [a * sinBeta, 0.0, a * cosBeta];
+        const vectorB: PointSchema = [
+            -b * sinAlpha * cosGammaStar,
+            b * sinAlpha * sinGammaStar,
+            b * cosAlpha,
+        ];
+        const vectorC: PointSchema = [0.0, 0.0, c];
+
+        return [vectorA, vectorB, vectorC];
     }
 
-    clone(extraContext: LatticeBravaisConfig) {
-        return new Lattice({ ...this.toJSON(), ...extraContext });
+    static fromVectorsArray(
+        vectors: PointSchema[],
+        units: Units = { length: "angstrom", angle: "degree" },
+        type: LatticeTypeEnum = "CUB",
+    ): Lattice {
+        const [aVec, bVec, cVec] = vectors;
+        const a = math.vlen(aVec);
+        const b = math.vlen(bVec);
+        const c = math.vlen(cVec);
+        const alpha = math.angle(bVec, cVec, "deg");
+        const beta = math.angle(aVec, cVec, "deg");
+        const gamma = math.angle(aVec, bVec, "deg");
+
+        return new Lattice(a, b, c, alpha, beta, gamma, units, type);
     }
 
-    /**
-     * Get lattice vectors as a nested array
-     */
-    get vectorArrays() {
-        return this.vectors.vectorArrays;
+    get vectorArrays(): PointSchema[] {
+        return this.Cell.vectorArrays;
+    }
+
+    get vectorArraysRounded(): PointSchema[] {
+        return this.Cell.vectorArraysRounded;
+    }
+
+    get cellVolumeRounded(): number {
+        return this.Cell.volumeRounded;
     }
 
     get Cell() {
-        return new Cell(this.vectorArrays);
+        return Cell.fromVectorsArray(this.vectorArrays);
     }
 
     /**
@@ -172,11 +186,11 @@ export class Lattice extends LatticeBravais implements LatticeSchema {
      * @param latticeConfig {Object} LatticeBravais config (see constructor)
      */
     static getDefaultPrimitiveLatticeConfigByType(latticeConfig: LatticeImplicitSchema) {
-        const f_ = Lattice._roundValue;
+        const f_ = math.roundArrayOrNumber;
         // construct new primitive cell using lattice parameters and skip rounding the vectors
         const pCell = primitiveCell(latticeConfig, true);
         // create new lattice from primitive cell
-        const newLattice = { ...Lattice.fromVectorArrays(pCell, latticeConfig.type) };
+        const newLattice = { ...Lattice.fromVectorsArray(pCell, undefined, latticeConfig.type) };
         // preserve the new type and scale back the lattice parameters
         const k = latticeConfig.a / newLattice.a;
 

@@ -1,13 +1,15 @@
+import { RoundedVector3D } from "@mat3ra/code";
 import {
     LatticeExplicitUnit,
     LatticeImplicitSchema,
     LatticeTypeEnum,
 } from "@mat3ra/esse/dist/js/types";
 
+import { Cell } from "../cell/cell";
 import { primitiveCell } from "../cell/primitive_cell";
 import constants from "../constants";
 import math from "../math";
-import { latticeVectorUnits, Vector, VectorsAsArray } from "../types";
+import { LatticeVectorUnits, Vector, VectorsAsArray } from "../types";
 
 export interface LatticeBravaisConfig extends Required<LatticeImplicitSchema> {
     isConventional?: boolean;
@@ -17,24 +19,17 @@ export type LatticeVectorsConfig = LatticeExplicitUnit & {
     type?: LatticeTypeEnum;
 };
 
-export class LatticeVectors implements Required<LatticeExplicitUnit> {
-    a: Vector;
-
-    b: Vector;
-
-    c: Vector;
-
-    alat: number;
-
-    units: latticeVectorUnits;
+export class LatticeVectors extends Cell {
+    units: LatticeVectorUnits;
 
     constructor(config: LatticeExplicitUnit) {
+        super(config.a, config.b, config.c);
         const { a, b, c, alat = 1, units = "angstrom" } = config;
         const k = constants.units.bohr === units ? constants.coefficients.BOHR_TO_ANGSTROM : 1;
 
-        this.a = a.map((x) => x * k) as Vector;
-        this.b = b.map((x) => x * k) as Vector;
-        this.c = c.map((x) => x * k) as Vector;
+        this._a = new RoundedVector3D(a.map((x) => x * k));
+        this._b = new RoundedVector3D(b.map((x) => x * k));
+        this._c = new RoundedVector3D(c.map((x) => x * k));
         this.alat = alat;
         this.units = "angstrom"; // always store as angstrom internally
     }
