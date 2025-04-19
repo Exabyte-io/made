@@ -1,12 +1,13 @@
+// @ts-nocheck
 import { ArrayWithIds, ValueWithId } from "@mat3ra/code";
-import { BasisSchema } from "@mat3ra/esse/dist/js/types";
+import { AtomicConstraints as ConstraintsSchema, BasisSchema } from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
 import { AtomicConstraints, Constraint, ConstraintValue } from "../constraints/constraints";
-import { Basis, BasisProps } from "./basis";
+import { Basis, BasisConfig } from "./basis";
 import { Coordinate } from "./types";
 
-export interface ConstrainedBasisProps extends BasisProps {
+export interface ConstrainedBasisProps extends BasisConfig {
     constraints: Constraint[];
 }
 
@@ -21,6 +22,8 @@ export interface ConstrainedBasisJSON extends BasisSchema {
 export class ConstrainedBasis extends Basis {
     _constraints: ArrayWithIds<ConstraintValue>;
 
+    constraints: Constraint[];
+
     /**
      * Create a an array with ids.
      * @param {Object} config
@@ -28,15 +31,8 @@ export class ConstrainedBasis extends Basis {
      */
     constructor(config: ConstrainedBasisProps) {
         super(config);
+        this.constraints = config.constraints;
         this._constraints = new ArrayWithIds<ConstraintValue>(config.constraints); // `constraints` is an Array with ids
-    }
-
-    get constraints() {
-        return this._constraints.array;
-    }
-
-    set constraints(newConstraints: ConstraintValue[]) {
-        this._constraints = new ArrayWithIds(newConstraints);
     }
 
     getConstraintAsArray() {

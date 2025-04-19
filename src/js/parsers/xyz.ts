@@ -1,10 +1,10 @@
-import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
+import { BasisSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import _ from "underscore";
 import s from "underscore.string";
 
-import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
-import { Constraint, ConstraintValue } from "../constraints/constraints";
+import { Cell } from "../cell/cell";
+import { ConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
 import { Vector } from "../types";
@@ -82,24 +82,7 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
     return basisLineConfig;
 }
 
-// TODO: reuse Basis Definition(s) from ESSE/Code.js instead
-export interface BasisConfig {
-    elements: {
-        id: number;
-        value: string;
-    }[];
-    labels?: {
-        id: number;
-        value: number;
-    }[];
-    coordinates: {
-        id: number;
-        value: Vector;
-    }[];
-    units: string;
-    cell: Vector[];
-    constraints: Constraint[];
-}
+export type BasisConfig = BasisSchema;
 
 /**
  * Parse XYZ text for basis.
@@ -107,7 +90,7 @@ export interface BasisConfig {
  * @param units Coordinate units
  * @param cell Basis Cell
  */
-function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell): BasisConfig {
+function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): BasisConfig {
     // @ts-ignore
     const lines: string[] = s(txt).trim().lines();
     const listOfObjects = _.map(lines, _parseXYZLineAsWords);
@@ -153,10 +136,10 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
         return {
             ...basisConfig,
             labels,
-        };
+        } as BasisConfig;
     }
 
-    return basisConfig;
+    return basisConfig as BasisConfig;
 }
 
 /**
@@ -172,12 +155,12 @@ function fromBasis(
     skipRounding = false,
 ) {
     const XYZArray: string[] = [];
-    basisClsInstance._elements.array.forEach((item: any, idx: number) => {
+    basisClsInstance._elements.values.forEach((item: any, idx: number) => {
         // assume that _elements and _coordinates are indexed equivalently
         const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
         const elementWithLabel = item + atomicLabel;
         const element = s.sprintf("%-3s", elementWithLabel);
-        const coordinates = basisClsInstance.getCoordinateByIndex(idx).map((x) => {
+        const coordinates = basisClsInstance.getCoordinateByIndex(idx).value.value.map((x) => {
             return s.sprintf(printFormat, skipRounding ? x : math.precise(math.roundToZero(x)));
         });
         const constraints = basisClsInstance.constraints
@@ -199,7 +182,7 @@ function fromMaterial(materialOrConfig: MaterialSchema, fractional = false): str
     // @ts-ignore
     const basis = new ConstrainedBasis({
         ...materialOrConfig.basis,
-        cell: lattice.vectorArrays,
+        cell: Cell.fromVectorsArray(lattice.vectorArrays),
     });
     if (fractional) {
         basis.toCrystal();

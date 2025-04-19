@@ -1,7 +1,8 @@
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
-import { Coordinate } from "../basis/types";
+import { Coordinate } from "../basis/coordinates";
+import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { Constraint, ConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
@@ -24,12 +25,12 @@ function toPoscar(materialOrConfig: MaterialJSON, omitConstraints = false): stri
     // @ts-ignore
     const basis = new ConstrainedBasis({
         ...materialOrConfig.basis,
-        cell: lattice.vectorArrays,
+        cell: Cell.fromVectorsArray(lattice.vectorArrays),
     });
     const BasisLines: string[] = [];
     let addSelectiveDynamics = false;
-    basis._elements.array.forEach((item, idx) => {
-        const coord = basis.getCoordinateByIndex(idx).map((x) => _print(x));
+    basis._elements.values.forEach((item, idx) => {
+        const coord = basis.getCoordinateByIndex(idx).value.value.map((x) => _print(x));
         const constraintsAsString = omitConstraints
             ? ""
             : basis.AtomicConstraints.getAsStringByIndex(idx, atomicConstraintsCharFromBool);
@@ -103,12 +104,12 @@ function fromPoscar(fileContent: string): object {
     for (let i = 0; i < atomSymbols.length; i++) {
         for (let j = 0; j < atomCounts[i]; j++) {
             const lineComponents = lines[startLine + atomIndex].trim().split(/\s+/);
-            const coordinate: Coordinate = [
+            const coordinate: number[] = [
                 parseFloat(lineComponents[0]),
                 parseFloat(lineComponents[1]),
                 parseFloat(lineComponents[2]),
             ];
-            coordinates.push(coordinate);
+            coordinates.push(Coordinate.fromArray(coordinate));
 
             // Add constraints if selective dynamics is used
             if (selectiveDynamics) {
@@ -117,13 +118,14 @@ function fromPoscar(fileContent: string): object {
                     lineComponents[4] === "T",
                     lineComponents[5] === "T",
                 ];
+                // @ts-ignore
                 constraints.push({ id: j, value: constraint });
             }
             atomIndex += 1;
         }
     }
 
-    const lattice = Lattice.fromVectors({
+    const lattice = Lattice.fromVectorsArray({
         a: lines[2].trim().split(/\s+/).map(Number) as Vector,
         b: lines[3].trim().split(/\s+/).map(Number) as Vector,
         c: lines[4].trim().split(/\s+/).map(Number) as Vector,
@@ -131,7 +133,7 @@ function fromPoscar(fileContent: string): object {
         units: "angstrom",
     });
 
-    const basis = new ConstrainedBasis({
+    const basis = new ConstrainedBasis.fromElementsAndCoordinates({
         elements,
         coordinates,
         units: coordinateType === "c" ? ATOMIC_COORD_UNITS.cartesian : ATOMIC_COORD_UNITS.crystal,

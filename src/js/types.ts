@@ -9,4 +9,4 @@ export type MaterialJSON = MaterialSchema & AnyObject;
 
 export type Vector = ArrayOf3NumberElementsSchema;
 export type VectorsAsArray = [Vector, Vector, Vector];
-export type latticeVectorUnits = Required<LatticeExplicitUnit>["units"];
+export type LatticeVectorUnits = Required<LatticeExplicitUnit>["units"];

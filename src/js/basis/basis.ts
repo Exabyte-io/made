@@ -1,14 +1,9 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
-import {
-    ArrayWithIds,
-    RoundedArrayWithIds,
-    RoundedValueWithId,
-    RoundedVector3D,
-    ValueWithId,
-} from "@mat3ra/code";
+import { ArrayWithIds } from "@mat3ra/code";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { BasisSchema, ElementSchema, PointSchema } from "@mat3ra/esse/dist/js/types";
+import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
+import { BasisSchema, PointSchema } from "@mat3ra/esse/dist/js/types";
 import * as _ from "underscore";
 import * as s from "underscore.string";
 
@@ -16,6 +11,8 @@ import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import math from "../math";
+import { Coordinate, Coordinates } from "./coordinates";
+import { Elements } from "./elements";
 
 export interface Atom {
     id?: number; // numeric id of the element (optional).
@@ -35,142 +32,109 @@ interface Overlap {
     element2: string;
 }
 
-export interface BasisProps extends BasisSchema {
+export interface BasisConfig extends BasisSchema {
     cell?: Cell;
     isEmpty?: boolean;
 }
 
-export class Coordinate extends RoundedValueWithId<RoundedVector3D> {
-    value: RoundedVector3D;
-
-    constructor(id: number, value: RoundedVector3D) {
-        super(id, value);
-        this.value = value;
-    }
-
-    static fromArray(value: number[], id = 0): Coordinate {
-        return new Coordinate(id, new RoundedVector3D(value));
-    }
-
-    getValueAlongAxis(axis: "x" | "y" | "z" = "z"): number {
-        const index = { x: 0, y: 1, z: 2 }[axis];
-        return this.value[index] as number;
-    }
-}
-
-export class Coordinates extends RoundedArrayWithIds<PointSchema> {
-    getValuesAlongAxis(axis: "x" | "y" | "z" = "z"): number[] {
-        return this.values.map((coord) => Coordinate.fromArray(coord).getValueAlongAxis(axis));
-    }
-
-    getMaxValueAlongAxis(axis: "x" | "y" | "z" = "z"): number {
-        return Math.max(...this.getValuesAlongAxis(axis));
-    }
-
-    getMinValueAlongAxis(axis: "x" | "y" | "z" = "z"): number {
-        return Math.min(...this.getValuesAlongAxis(axis));
-    }
-
-    getExtremumValueAlongAxis(
-        extremum: "max" | "min" = "max",
-        axis: "x" | "y" | "z" = "z",
-    ): number {
-        return extremum === "max"
-            ? this.getMaxValueAlongAxis(axis)
-            : this.getMinValueAlongAxis(axis);
-    }
-}
-
-export class Elements extends ArrayWithIds<ElementSchema> {}
+const DEFAULT_BASIS_CONFIG = {
+    elements: [
+        {
+            id: 0,
+            value: "Si",
+        },
+        {
+            id: 1,
+            value: "Si",
+        },
+    ],
+    coordinates: [
+        {
+            id: 0,
+            value: [0, 0, 0],
+        },
+        {
+            id: 1,
+            value: [0.25, 0.25, 0.25],
+        },
+    ],
+    units: "crystal",
+};
 
 export class Basis extends InMemoryEntity implements BasisSchema {
+    static defaultConfig: BasisSchema = DEFAULT_BASIS_CONFIG as BasisSchema;
+
+    units: BasisSchema["units"];
+
+    cell: Cell;
+
+    elements: BasisSchema["elements"];
+
+    coordinates: BasisSchema["coordinates"];
+
+    labels: BasisSchema["labels"];
+
     _elements: Elements;
 
     _coordinates: Coordinates;
 
     _labels: ArrayWithIds<string>;
 
-    units: "crystal" | "cartesian";
-
-    cell: Cell;
-
-    constructor({
+    static fromElementsAndCoordinates({
         elements = [],
         coordinates = [],
         units = ATOMIC_COORD_UNITS.crystal as BasisSchema["units"],
         cell = new Cell(),
         labels = [],
-        isEmpty = false,
-    }: BasisProps) {
-        super();
-        this._elements = new Elements(isEmpty ? [] : elements);
-        this._coordinates = new Coordinates(isEmpty ? [] : coordinates);
-        this._labels = new ArrayWithIds<string>(labels);
+    }): Basis {
+        const elementsArrayWithIdsJSON = Elements.fromValues(elements).toJSON();
+        const coordinatesArrayWithIdsJSON = Coordinates.fromValues(coordinates).toJSON();
+        const labelsArrayWithIdsJSON = ArrayWithIds.fromValues(labels).toJSON();
+        return new Basis({
+            elements: elementsArrayWithIdsJSON as BasisSchema["elements"],
+            coordinates: coordinatesArrayWithIdsJSON,
+            units,
+            cell,
+            labels: labelsArrayWithIdsJSON,
+        });
+    }
+
+    constructor(config: BasisConfig = Basis.defaultConfig) {
+        super(config);
+        const { elements, coordinates, units, labels } = config;
+        this.elements = elements;
+        this.labels = labels;
+        this.coordinates = coordinates;
+        this.units = units;
+        this.cell = new Cell(config.cell);
         this.units = units || (ATOMIC_COORD_UNITS.crystal as BasisSchema["units"]);
-        this.cell = cell;
+        this._elements = Elements.fromObjects(elements);
+        // @ts-ignore
+        this._coordinates = Coordinates.fromObjects(coordinates);
+        // @ts-ignore
+        this._labels = ArrayWithIds.fromObjects(labels);
     }
 
-    static fromDict(props: BasisProps): Basis {
-        return new Basis(props);
+    toJSON(exclude?: string[]): AnyObject {
+        return {
+            ...super.toJSON(exclude),
+        };
     }
 
-    static get unitsOptionsConfig() {
-        return ATOMIC_COORD_UNITS;
-    }
-
-    static get unitsOptionsDefaultValue() {
-        return ATOMIC_COORD_UNITS.crystal;
-    }
-
-    /** Return cell with vectors values rounded to default precision */
     get cellRounded() {
         return this.cell.vectorArraysRounded;
     }
 
-    get elementsArray(): string[] {
+    get elementsArray(): object[] {
         return this._elements.toJSON();
     }
 
-    /**
-     * Set basis elements to passed array.
-     * @param elementsArray - New elements array.
-     */
-    set elements(elementsArray: string[] | Element[]) {
-        this._elements = Elements.fromValues(elementsArray);
-    }
-
-    getElementsAsObject(): ValueWithId<string>[] {
-        return this._elements.toJSON();
-    }
-
-    /**
-     * Set basis elements to passed array.
-     * @param {Array|ArrayWithIds} coordinatesNestedArray - New coordinates array.
-     */
-    set coordinates(coordinatesNestedArray: Coordinate[] | ValueWithId<Coordinate>[]) {
-        this._coordinates = new ArrayWithIds<Coordinate>(coordinatesNestedArray);
+    getElementsAsObject(): BasisSchema["elements"] {
+        return this.elements;
     }
 
     get coordinatesAsArray() {
         return this._coordinates.values;
-    }
-
-    get coordinates(): PointSchema[] {
-        return this._coordinates.values as unknown as Coordinate[];
-    }
-
-    get elements(): ElementSchema[] {
-        return this._elements.toValueWithIdArray() as unknown as ElementSchema[];
-    }
-
-    /** Return coordinates rounded to default precision */
-    get coordinatesRounded() {
-        return this.coordinates.map((coordinate) => {
-            return {
-                id: coordinate.id,
-                value: coordinate.value.toJSON().map((x) => math.precise(math.roundToZero(x))),
-            };
-        });
     }
 
     get isInCartesianUnits(): boolean {
@@ -183,33 +147,27 @@ export class Basis extends InMemoryEntity implements BasisSchema {
 
     toCartesian(): void {
         if (this.isInCartesianUnits) return;
-        this._coordinates.mapArrayInPlace(
-            (point) => math.multiply(point, this.cell.vectorArrays) as Coordinate,
-        );
-        this.units = ATOMIC_COORD_UNITS.cartesian;
+        this._coordinates.mapArrayInPlace((point) => this.cell.convertPointToCartesian(point));
+        this.units = ATOMIC_COORD_UNITS.cartesian as BasisSchema["units"];
     }
 
     toCrystal(): void {
         if (this.isInCrystalUnits) return;
-        const invCell = math.inv(this.cell.vectorArrays);
-        this._coordinates.mapArrayInPlace((point) => math.multiply(point, invCell) as Coordinate);
-        this.units = ATOMIC_COORD_UNITS.crystal;
+        this._coordinates.mapArrayInPlace((point) => this.cell.convertPointToCrystal(point));
+        this.units = ATOMIC_COORD_UNITS.crystal as BasisSchema["units"];
     }
 
     getElementByIndex(idx: number): string {
-        return this._elements.getArrayElementByIndex(idx);
+        return this._elements.getElementValueByIndex(idx) as string;
     }
 
     getCoordinateByIndex(idx: number): Coordinate {
-        return this._coordinates.getArrayElementByIndex(idx);
+        return Coordinate.fromArray(this._coordinates.getElementValueByIndex(idx) as PointSchema);
     }
 
-    /**
-     * Asserts that all coordinates are in standardRepresentation (as explained below).
-     */
     toStandardRepresentation() {
         this.toCrystal();
-        this._coordinates.mapArrayInPlace((point) => point.map((x) => math.mod(x)) as Coordinate);
+        this._coordinates.mapArrayInPlace((point) => point.map((x) => math.mod(x)) as PointSchema);
     }
 
     /** A representation where all coordinates are within 0 and 1 in crystal units */
@@ -222,14 +180,16 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         // preserve the original state
         if (originalUnits !== ATOMIC_COORD_UNITS.crystal) this.toCartesian();
 
-        return result;
+        return result as unknown as BasisSchema;
     }
 
     /**
      * Add atom with a chemical element at coordinate.
      */
+    // @ts-ignore
     addAtom({ element = "Si", coordinate = [0.5, 0.5, 0.5] }: Atom) {
         this._elements.addItem(element);
+        // @ts-ignore
         this._coordinates.addItem(coordinate);
     }
 
@@ -238,7 +198,9 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     removeAtom({ element, coordinate, id }: Atom) {
         if (element && coordinate) {
+            // @ts-ignore
             this._elements.removeItem(element, id);
+            // @ts-ignore
             this._coordinates.removeItem(coordinate, id);
         }
     }
@@ -269,8 +231,8 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     get elementCounts(): ElementCount[] {
         const elementCounts: ElementCount[] = [];
-        this.getElementsAsObject().forEach((element, index) => {
-            const previousElement = this.getElementsAsObject()[index - 1];
+        this.elements.forEach((element, index) => {
+            const previousElement = this.elements[index - 1];
             if (previousElement && previousElement.value === element.value) {
                 const previousElementCount = elementCounts[elementCounts.length - 1];
                 previousElementCount.count += 1;
@@ -315,7 +277,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
      */
     get elementsAndCoordinatesArray(): [string, Coordinate][] {
-        return this._elements.array.map((element, idx) => {
+        return this._elements.values.map((element, idx) => {
             const coordinates = this.getCoordinateByIndex(idx);
             return [element, coordinates];
         });
@@ -326,7 +288,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * @example Output: [ ["Si", [0,0,0], ['1']], ["Si", [0.5,0.5,0.5]] , ['2']]
      */
     get elementsAndCoordinatesAndLabelsArray(): [string, Coordinate, string][] {
-        return this._elements.array.map((element, idx) => {
+        return this._elements.values.map((element, idx) => {
             const coordinates = this.getCoordinateByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
             return [element, coordinates, atomicLabel];
@@ -346,13 +308,15 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     getAsSortedString(): string {
         // make a copy to prevent modifying class values
-        const clsInstance = new Basis(this.toJSON());
+        const clsInstance = this.clone();
         clsInstance.toStandardRepresentation();
         const standardRep = clsInstance.elementsAndCoordinatesAndLabelsArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
-            const toleratedCoordinates = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
+            const toleratedCoordinates = coordinate.value.value.map((x) =>
+                math.round(x, HASH_TOLERANCE),
+            );
             return `${element}${atomicLabel} ${toleratedCoordinates.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
@@ -379,6 +343,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         // https://dev.to/maafaishal/benchmarking-for-while-forof-and-arrayforeach-using-performancenow-1jjg
         if (this.labels?.length) {
             for (let i = 0; i < this.labels.length; i++) {
+                // @ts-ignore
                 labelsArray[this.labels[i].id] = this.labels[i].value.toString();
             }
         }
@@ -403,7 +368,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = this.atomicLabelsArray[idx];
-            return `${element}${atomicLabel} ${coordinate
+            return `${element}${atomicLabel} ${coordinate.value.value
                 .map((x) => s.sprintf("%14.9f", x).trim())
                 .join(" ")}`;
         });
@@ -413,7 +378,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * @summary Returns number of atoms in material
      */
     get nAtoms(): number {
-        return this._elements.array.length;
+        return this._elements.values.length;
     }
 
     // helpers
@@ -433,9 +398,9 @@ export class Basis extends InMemoryEntity implements BasisSchema {
     hasEquivalentCellTo(anotherBasisClsInstance: Basis): boolean {
         // this.cell {Array} - Cell Vectors 1, eg. [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         // prettier-ignore
-        return !this.cell
+        return !this.cell.vectorArrays
             .map((vector, idx) => {
-                return math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell[idx]);
+                return math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell.vectorArrays[idx]);
             })
             .some((x) => !x);
     }
@@ -447,8 +412,8 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     getMinimumLatticeSize(latticeScalingFactor = nonPeriodicLatticeScalingFactor): number {
         let latticeSizeAdditiveContribution = 0;
-        if (this._elements.array.length === 1) {
-            const elementSymbol = this._elements.getArrayElementByIndex(0);
+        if (this._elements.values.length === 1) {
+            const elementSymbol = this._elements.getElementValueByIndex(0);
             latticeSizeAdditiveContribution = getElementAtomicRadius(elementSymbol);
         }
         const moleculeLatticeSize = this.maxPairwiseDistance * latticeScalingFactor;
@@ -513,12 +478,12 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         const originalUnits = this.units;
         this.toCartesian();
         let maxDistance = 0;
-        if (this._elements.array.length >= 2) {
-            for (let i = 0; i < this._elements.array.length; i++) {
-                for (let j = i + 1; j < this._elements.array.length; j++) {
+        if (this._elements.values.length >= 2) {
+            for (let i = 0; i < this._elements.values.length; i++) {
+                for (let j = i + 1; j < this._elements.values.length; j++) {
                     const distance = math.vDist(
-                        this._coordinates.getArrayElementByIndex(i),
-                        this._coordinates.getArrayElementByIndex(j),
+                        this._coordinates.getElementValueByIndex(i) as PointSchema,
+                        this._coordinates.getElementValueByIndex(j) as PointSchema,
                     );
                     // @ts-ignore
                     if (distance > maxDistance) {
@@ -551,11 +516,12 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * Returns an array = [xCenter, yCenter, zCenter]
      */
     get centerOfCoordinatesPoint(): number[] {
-        const transposedBasisCoordinates = math.transpose(this._coordinates.array);
+        const transposedBasisCoordinates = math.transpose(this._coordinates.values);
         const centerOfCoordinatesVectors = [];
         for (let i = 0; i < 3; i++) {
             const center = // @ts-ignore
-                transposedBasisCoordinates[i].reduce((a, b) => a + b) / this._elements.array.length;
+                transposedBasisCoordinates[i].reduce((a, b) => a + b) /
+                this._elements.values.length;
             centerOfCoordinatesVectors.push(math.precise(center, 4));
         }
         return centerOfCoordinatesVectors;

@@ -1,5 +1,5 @@
 import { RoundedVector3D } from "@mat3ra/code";
-import CodeMath, { math } from "@mat3ra/code/dist/js/math";
+import { math } from "@mat3ra/code/dist/js/math";
 import { LatticeExplicitUnit as CellSchema, PointSchema } from "@mat3ra/esse/dist/js/types";
 
 import constants from "../constants";
@@ -87,8 +87,8 @@ export class Cell implements CellSchema {
         return newCell;
     }
 
-    convertPointToCartesian(point: PointSchema): CodeMath.MathType {
-        return MULT(point, this.vectorArrays);
+    convertPointToCartesian(point: PointSchema): PointSchema {
+        return MULT(point, this.vectorArrays) as unknown as PointSchema;
     }
 
     convertPointToCrystal(point: PointSchema): PointSchema {

@@ -22,9 +22,10 @@ export class AtomicConstraints {
      * @param {Object} config
      * @param {ArrayWithIds|Array} config.values
      */
-    constructor({ values }: { values?: ConstraintValue[] }) {
+    constructor(config: { values?: ArrayWithIds<ConstraintValue> | ConstraintValue[] }) {
         this.name = "atomic_constraints";
-        this.values = new ArrayWithIds(values || []);
+        // @ts-ignore
+        this.values = new ArrayWithIds(config.values || []);
     }
 
     /**

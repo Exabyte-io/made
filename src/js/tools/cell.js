@@ -24,7 +24,7 @@ function latticePointsInSupercell(supercellMatrix) {
     for (let i = mins[0]; i <= maxes[0]; i++) {
         for (let j = mins[1]; j <= maxes[1]; j++) {
             for (let k = mins[2]; k <= maxes[2]; k++) {
-                points.push(supercell.convertPointToFractional([i, j, k]));
+                points.push(supercell.convertPointToCrystal([i, j, k]));
             }
         }
     }

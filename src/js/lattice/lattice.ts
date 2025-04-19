@@ -68,7 +68,12 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         this.type = type;
     }
 
-    static fromConfig(config: LatticeBravaisSchema): Lattice {
+    static fromConfig(config: object): Lattice {
+        const latticeConfig = config as LatticeBravaisSchema;
+        return new Lattice(latticeConfig);
+    }
+
+    static fromConfigPartial(config: LatticeBravaisSchema): Lattice {
         const primitiveLatticeConfig = Lattice.getDefaultPrimitiveLatticeConfigByType(config);
         return new Lattice(primitiveLatticeConfig);
     }

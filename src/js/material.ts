@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import {
@@ -5,6 +6,7 @@ import {
     DerivedPropertiesSchema,
     FileSourceSchema,
     InChIRepresentationSchema,
+    LatticeSchema,
     MaterialSchema,
 } from "@mat3ra/esse/dist/js/types";
 import CryptoJS from "crypto-js";
@@ -18,7 +20,6 @@ import {
 import { ATOMIC_COORD_UNITS, units } from "./constants";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-import { LatticeBravaisConfig } from "./lattice/lattice_vectors";
 import parsers from "./parsers/parsers";
 import { BasisConfig } from "./parsers/xyz";
 // TODO: fix dependency cycle below
@@ -199,7 +200,7 @@ export function MaterialMixin<
         get Basis() {
             return new ConstrainedBasis({
                 ...this.basis,
-                cell: this.Lattice.vectorArrays,
+                cell: this.Lattice.vectors,
             });
         }
 
@@ -210,11 +211,11 @@ export function MaterialMixin<
             return this.Basis.uniqueElements;
         }
 
-        get lattice(): LatticeBravaisConfig {
-            return this.prop("lattice") as LatticeBravaisConfig;
+        get lattice(): LatticeSchema {
+            return this.prop("lattice") as LatticeSchema;
         }
 
-        set lattice(config: LatticeBravaisConfig) {
+        set lattice(config: LatticeSchema) {
             this.setProp("lattice", config);
             this.unsetFileProps();
         }
