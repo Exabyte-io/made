@@ -1,4 +1,4 @@
-import { Vector } from "./types";
+import { Vector } from "../types";
 
 export type UnitCellProps = [
     number,

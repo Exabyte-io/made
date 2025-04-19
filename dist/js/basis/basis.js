@@ -16,7 +16,7 @@ const math_1 = __importDefault(require("../math"));
  * A class representing a crystal basis.
  */
 class Basis {
-    constructor({ elements = ["Si"], coordinates = [[0, 0, 0]], units, cell = Basis.defaultCell, // by default, assume a cubic unary cell
+    constructor({ elements, coordinates, units = constants_1.ATOMIC_COORD_UNITS.crystal, cell = Basis.defaultCell, // by default, assume a cubic unary cell
     isEmpty = false, // whether to generate an empty Basis
     labels = [], }) {
         const _elements = isEmpty ? [] : elements;

@@ -1,5 +1,4 @@
-import { ArrayWithIds } from "../abstract/array_with_ids";
-import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
+import { ArrayWithIds, ValueWithId } from "@mat3ra/code";
 
 export interface ConstraintValue extends Array<boolean> {
     0: boolean;
@@ -7,7 +6,7 @@ export interface ConstraintValue extends Array<boolean> {
     2: boolean;
 }
 
-export type Constraint = ObjectWithIdAndValue<ConstraintValue>;
+export type Constraint = typeof ValueWithId<ConstraintValue>;
 
 export class AtomicConstraints {
     name: string;
@@ -23,9 +22,10 @@ export class AtomicConstraints {
      * @param {Object} config
      * @param {ArrayWithIds|Array} config.values
      */
-    constructor({ values }: { values?: ConstraintValue[] }) {
+    constructor(config: { values?: ArrayWithIds<ConstraintValue> | ConstraintValue[] }) {
         this.name = "atomic_constraints";
-        this.values = new ArrayWithIds(values || []);
+        // @ts-ignore
+        this.values = new ArrayWithIds(config.values || []);
     }
 
     /**
@@ -48,8 +48,8 @@ export class AtomicConstraints {
         };
     }
 
-    getByIndex(idx: number): ConstraintValue {
-        return this.values.getArrayElementByIndex(idx) || [];
+    getByIndex(idx: number): ConstraintValue | undefined {
+        return this.values.getElementValueByIndex(idx);
     }
 
     /**
@@ -58,6 +58,7 @@ export class AtomicConstraints {
      * @param mapFn (OPTIONAL) - a function to be applied to each constraint. By default 0 or 1 is returned.
      */
     getAsStringByIndex(idx: number, mapFn = (val: boolean): string => (val ? "1" : "0")): string {
-        return this.getByIndex(idx).map(mapFn).join(" ");
+        const constraints = this.getByIndex(idx);
+        return constraints ? constraints.map(mapFn).join(" ") : "";
     }
 }

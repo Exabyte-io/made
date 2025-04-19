@@ -59,12 +59,12 @@ def test_vector_arrays_including_rounded():
     class_reference.__rounded_vector3d__ = RoundedVector3D
 
     class_reference.__rounded_vector3d__.__round_precision__ = 4
-    cell = Cell.from_vectors_array(vectors=VECTORS_EQUAL_UP_TO_PRECISION_4)
+    cell = class_reference.from_vectors_array(vectors=VECTORS_EQUAL_UP_TO_PRECISION_4)
     assert cell.vector_arrays == VECTORS_EQUAL_UP_TO_PRECISION_4
     assert cell.vector_arrays_rounded == VECTORS
 
     class_reference.__rounded_vector3d__.__round_precision__ = 5
-    cell = Cell.from_vectors_array(vectors=VECTORS_EQUAL_UP_TO_PRECISION_4)
+    cell = class_reference.from_vectors_array(vectors=VECTORS_EQUAL_UP_TO_PRECISION_4)
     assert cell.vector_arrays == VECTORS_EQUAL_UP_TO_PRECISION_4
     assert cell.vector_arrays_rounded != VECTORS
 

@@ -140,7 +140,7 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
     if (numberOfLayers < 1)
         throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
 
-    const cell = material.Lattice.Cell;
+    const { cell } = material.Lattice;
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
@@ -164,9 +164,9 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
         supercellMatrix,
     );
     const newLattice = LatticeBravais.fromVectors({
-        a: supercell.vector1,
-        b: supercell.vector2,
-        c: supercell.vector3,
+        a: supercell.a,
+        b: supercell.b,
+        c: supercell.c,
     });
 
     return {

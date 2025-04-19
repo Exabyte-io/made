@@ -1,8 +1,7 @@
-/* eslint no-unused-vars: 0 */
 import { LatticeImplicitSchema } from "@mat3ra/esse/dist/js/types";
 
-import { VectorsAsArray } from "../lattice/types";
 import math from "../math";
+import { VectorsAsArray } from "../types";
 
 /**
  * Routines for calculating primitive cell vectors from conventional cell Bravais parameters.
@@ -149,47 +148,17 @@ const PRIMITIVE_CELLS = {
             [0.0, 0.0, c],
         ];
     },
-
-    // alternative implementation
-    TRIalt: ({ a, b, c, alpha, beta, gamma }: LatticeImplicitSchema): VectorsAsArray => {
-        const cosAlpha = math.cos((alpha / 180) * math.PI);
-        const cosBeta = math.cos((beta / 180) * math.PI);
-        const cosGamma = math.cos((gamma / 180) * math.PI);
-        const sinGamma = math.sqrt(1 - cosGamma * cosGamma);
-        return [
-            [a, 0.0, 0.0],
-            [b * cosGamma, b * sinGamma, 0.0],
-            [
-                c * cosBeta,
-                (c / sinGamma) * (cosAlpha - cosBeta * cosGamma),
-                (c / sinGamma) *
-                    math.sqrt(
-                        sinGamma * sinGamma -
-                            cosAlpha * cosAlpha -
-                            cosBeta * cosBeta +
-                            2 * cosAlpha * cosBeta * cosGamma,
-                    ),
-            ],
-        ];
-    },
 };
 
 /**
  * Returns lattice vectors for a primitive cell for a lattice.
- * @param lattice - Lattice instance.
- * @param  skipRounding - whether to skip rounding the lattice vectors.
+ * @param latticeConfig - Lattice config.
  * @return Cell.vectorsAsArray
  */
-export function primitiveCell(
-    lattice: LatticeImplicitSchema,
-    skipRounding = false,
+export function getPrimitiveLatticeVectorsFromConfig(
+    latticeConfig: LatticeImplicitSchema,
 ): VectorsAsArray {
-    const [vectorA, vectorB, vectorC] = PRIMITIVE_CELLS[lattice.type || "TRI"](lattice);
-    // set precision and remove JS floating point artifacts
-    if (!skipRounding) {
-        [vectorA, vectorB, vectorC].map((vec) =>
-            vec.map((c) => math.precise(c)).map(math.roundToZero),
-        );
-    }
+    const primitiveCellGenerator = PRIMITIVE_CELLS[latticeConfig.type || "TRI"];
+    const [vectorA, vectorB, vectorC] = primitiveCellGenerator(latticeConfig);
     return [vectorA, vectorB, vectorC];
 }

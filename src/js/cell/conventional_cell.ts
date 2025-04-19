@@ -1,4 +1,4 @@
-import { LatticeTypeSchema } from "@mat3ra/esse/dist/js/types";
+import { LatticeSchema } from "@mat3ra/esse/dist/js/types";
 
 /**
  * Routines for calculating conventional cell vectors from primitive cell Bravais parameters.
@@ -56,11 +56,10 @@ export const PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS = {
         [0, 0, 1],
     ],
     TRI: unitMatrix,
-    TRIalt: unitMatrix,
 };
 
 export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES: {
-    [key in LatticeTypeSchema | "TRIalt"]: LatticeTypeSchema;
+    [key in LatticeSchema["type"]]: LatticeSchema["type"];
 } = {
     // PRIMITIVE    =>  CONVENTIONAL
     CUB: "CUB",
@@ -77,12 +76,10 @@ export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES: {
     MCL: "MCL",
     MCLC: "MCL",
     TRI: "TRI",
-    // TODO: Legacy `TRI_alt` type, assert not used and remove
-    TRIalt: "TRI",
 };
 
 export function isConventionalCellSameAsPrimitiveForLatticeType(
-    latticeType: LatticeTypeSchema,
+    latticeType: LatticeSchema["type"],
 ): boolean {
     const multiplier = PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[latticeType || "TRI"];
     return multiplier === unitMatrix;

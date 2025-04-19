@@ -1,4 +1,3 @@
-import { ArrayWithIds } from "./abstract/array_with_ids";
 import { Basis } from "./basis/basis";
 import { ATOMIC_COORD_UNITS, coefficients, tolerance, units } from "./constants";
 import { AtomicConstraints } from "./constraints/constraints";
@@ -30,7 +29,4 @@ export const Made = {
     tools,
     LATTICE_TYPE_CONFIGS,
     DEFAULT_LATTICE_UNITS,
-    primitive: {
-        ArrayWithIds,
-    },
 };

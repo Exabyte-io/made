@@ -46,9 +46,9 @@ function generateConfig(material, supercellMatrix) {
     const supercell = cell.cloneAndScaleByMatrix(supercellMatrix);
     const newBasis = generateNewBasisWithinSupercell(material.Basis, cell, supercell, supercellMatrix);
     const newLattice = lattice_bravais_1.LatticeBravais.fromVectors({
-        a: supercell.vector1,
-        b: supercell.vector2,
-        c: supercell.vector3,
+        a: supercell.a,
+        b: supercell.b,
+        c: supercell.c,
     });
     return {
         name: `${material.name} - supercell ${JSON.stringify(supercellMatrix)}`,

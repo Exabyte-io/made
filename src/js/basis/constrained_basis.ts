@@ -1,17 +1,18 @@
+// @ts-nocheck
+import { ArrayWithIds, ValueWithId } from "@mat3ra/code";
+import { AtomicConstraints as ConstraintsSchema, BasisSchema } from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
-import { ArrayWithIds } from "../abstract/array_with_ids";
-import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
 import { AtomicConstraints, Constraint, ConstraintValue } from "../constraints/constraints";
-import { Basis, BasisProps, BasisSchema } from "./basis";
+import { Basis, BasisConfig } from "./basis";
 import { Coordinate } from "./types";
 
-export interface ConstrainedBasisProps extends BasisProps {
+export interface ConstrainedBasisProps extends BasisConfig {
     constraints: Constraint[];
 }
 
 export interface ConstrainedBasisJSON extends BasisSchema {
-    constraints: ObjectWithIdAndValue<ConstraintValue>[];
+    constraints: ValueWithId<ConstraintValue>[];
 }
 
 /**
@@ -21,6 +22,8 @@ export interface ConstrainedBasisJSON extends BasisSchema {
 export class ConstrainedBasis extends Basis {
     _constraints: ArrayWithIds<ConstraintValue>;
 
+    constraints: Constraint[];
+
     /**
      * Create a an array with ids.
      * @param {Object} config
@@ -28,15 +31,8 @@ export class ConstrainedBasis extends Basis {
      */
     constructor(config: ConstrainedBasisProps) {
         super(config);
+        this.constraints = config.constraints;
         this._constraints = new ArrayWithIds<ConstraintValue>(config.constraints); // `constraints` is an Array with ids
-    }
-
-    get constraints() {
-        return this._constraints.array;
-    }
-
-    set constraints(newConstraints: ConstraintValue[]) {
-        this._constraints = new ArrayWithIds(newConstraints);
     }
 
     getConstraintAsArray() {
@@ -72,14 +68,14 @@ export class ConstrainedBasis extends Basis {
     }
 
     getConstraintByIndex(idx: number): ConstraintValue {
-        return this._constraints.getArrayElementByIndex(idx) || [];
+        return this._constraints.getElementValueByIndex(idx) || [false, false, false];
     }
 
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
     get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue, string][] {
-        return this._elements.array.map((element, idx) => {
+        return this._elements.values.map((element: any, idx: number) => {
             const coordinates = this.getCoordinateByIndex(idx);
             const constraints = this.getConstraintByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];

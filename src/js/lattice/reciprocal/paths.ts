@@ -1,11 +1,18 @@
-import _ from "underscore";
+interface KPointStep {
+    point: string;
+    steps: number;
+}
+
+interface PathsType {
+    [key: string]: KPointStep[];
+}
 
 /**
  * Default kpoing paths according to:
  *  [AFLOW](https://arxiv.org/abs/1004.2974) methodology.
  *  Paths are split in parts for clarity.
  */
-const points = {
+const points: Record<string, string[][]> = {
     CUB: [
         ["Г", "X", "M", "Г", "R", "X"],
         ["M", "R"],
@@ -117,18 +124,24 @@ const points = {
     ],
 };
 
-export const paths = _.each(points, (val, key, obj) => {
-    // merge sub-arrays
-    // eslint-disable-next-line no-param-reassign
-    val = val.reduce((a, b) => a.concat(b));
+// Export a processed version of the paths
+export const paths: PathsType = (() => {
+    const result: PathsType = {};
 
-    _.each(val, (el, idx, list) => {
-        list[idx] = {
-            point: el,
-            // TODO: calculate number of steps based on distance in k-space
+    Object.entries(points).forEach(([key, pathSegments]) => {
+        // Flatten arrays of path segments into a single array
+        const flattenedPath: string[] = pathSegments.reduce(
+            (acc, segment) => [...acc, ...segment],
+            [],
+        );
+
+        // Convert to KPointStep array
+        // TODO: calculate number of steps based on distance in k-space
+        result[key] = flattenedPath.map((point) => ({
+            point,
             steps: 10,
-        };
+        }));
     });
 
-    obj[key] = val;
-});
+    return result;
+})();

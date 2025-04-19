@@ -30,8 +30,8 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
     b: float = a
     c: float = a
     alpha: float = 90.0
-    beta: float = 90.0
-    gamma: float = 90.0
+    beta: float = alpha
+    gamma: float = alpha
 
     @property
     def vectors(self) -> LatticeVectors:
