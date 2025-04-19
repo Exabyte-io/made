@@ -32,6 +32,8 @@ export class Cell implements CellSchema {
 
     alat = 1;
 
+    units: CellSchema["units"] = "angstrom";
+
     constructor(config = Cell.defaultConfig) {
         const { a, b, c } = config;
         this.a = a;
@@ -128,5 +130,15 @@ export class Cell implements CellSchema {
 
     scaleByMatrix(matrix: number[][]) {
         [this.a, this.b, this.c] = MATRIX_MULT(matrix, this.vectorArrays);
+    }
+
+    toJSON(): CellSchema {
+        return {
+            a: this._a.toJSON(),
+            b: this._b.toJSON(),
+            c: this._c.toJSON(),
+            alat: this.alat,
+            units: this.units,
+        };
     }
 }

@@ -152,20 +152,13 @@ const PRIMITIVE_CELLS = {
 
 /**
  * Returns lattice vectors for a primitive cell for a lattice.
- * @param lattice - Lattice instance.
- * @param  skipRounding - whether to skip rounding the lattice vectors.
+ * @param latticeConfig - Lattice config.
  * @return Cell.vectorsAsArray
  */
-export function primitiveCell(
-    lattice: LatticeImplicitSchema,
-    skipRounding = false,
+export function getPrimitiveLatticeVectorsFromConfig(
+    latticeConfig: LatticeImplicitSchema,
 ): VectorsAsArray {
-    const [vectorA, vectorB, vectorC] = PRIMITIVE_CELLS[lattice.type || "TRI"](lattice);
-    // set precision and remove JS floating point artifacts
-    if (!skipRounding) {
-        [vectorA, vectorB, vectorC].map((vec) =>
-            vec.map((c) => math.precise(c)).map(math.roundToZero),
-        );
-    }
+    const primitiveCellGenerator = PRIMITIVE_CELLS[latticeConfig.type || "TRI"];
+    const [vectorA, vectorB, vectorC] = primitiveCellGenerator(latticeConfig);
     return [vectorA, vectorB, vectorC];
 }

@@ -12,6 +12,14 @@ const VECTORS: PointSchema[] = [
     [0.0, 0.0, 3.0],
 ];
 
+const CELL_JSON = {
+    a: VECTORS[0],
+    b: VECTORS[1],
+    c: VECTORS[2],
+    alat: 1,
+    units: "angstrom",
+};
+
 const POINT_IN_CELL_CRYSTAL: PointSchema = [0.5, 0.5, 0.5];
 const POINT_OUTSIDE_CELL_CRYSTAL: PointSchema = [1.1, 1.1, 1.1];
 const POINT_IN_CELL_CARTESIAN: PointSchema = [0.5, 1.0, 1.5];
@@ -165,5 +173,10 @@ describe("Cell", () => {
         const pointInCellCrystal = cell.convertPointToCrystal(POINT_IN_CELL_CARTESIAN);
         expect(cell.isPointInsideCellCrystal(pointInCellCrystal)).to.equal(true);
         expect(cell.isPointInsideCellCrystal(POINT_OUTSIDE_CELL_CRYSTAL)).to.equal(false);
+    });
+    it("toJSON", () => {
+        const cell = Cell.fromVectorsArray(VECTORS);
+        const json = cell.toJSON();
+        expect(json).to.deep.equal(CELL_JSON);
     });
 });
