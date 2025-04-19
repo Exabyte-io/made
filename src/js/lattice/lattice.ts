@@ -1,7 +1,9 @@
 import { HASH_TOLERANCE } from "@mat3ra/code/dist/js/constants";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import {
-    LatticeImplicitSchema,
+    LatticeExplicitUnit as LatticeVectorsSchema,
+    LatticeImplicitSchema as LatticeBravaisSchema,
     LatticeSchema,
     LatticeTypeEnum,
     LatticeTypeExtendedEnum,
@@ -10,9 +12,8 @@ import {
 import * as lodash from "lodash";
 
 import { Cell } from "../cell/cell";
-import { primitiveCell } from "../cell/primitive_cell";
+import { getPrimitiveLatticeVectorsFromConfig } from "../cell/primitive_cell";
 import math from "../math";
-import { Units } from "./lattice_bravais";
 import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
 
 /**
@@ -21,34 +22,41 @@ import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
  */
 export const nonPeriodicLatticeScalingFactor = 2.0;
 
+export class LatticeVectors extends Cell implements LatticeVectorsSchema {}
+
+export type { LatticeVectorsSchema };
+
 export class Lattice extends InMemoryEntity implements LatticeSchema {
-    a: number;
+    static defaultConfig: LatticeSchema = {
+        a: 1,
+        b: 1,
+        c: 1,
+        alpha: 90,
+        beta: 90,
+        gamma: 90,
+        units: { length: "angstrom", angle: "degree" },
+        type: "CUB",
+    };
 
-    b: number;
+    a: LatticeSchema["a"];
 
-    c: number;
+    b: LatticeSchema["b"];
 
-    alpha: number;
+    c: LatticeSchema["c"];
 
-    beta: number;
+    alpha: LatticeSchema["alpha"];
 
-    gamma: number;
+    beta: LatticeSchema["beta"];
+
+    gamma: LatticeSchema["gamma"];
 
     type: LatticeTypeEnum;
 
-    units: Units;
+    units: LatticeSchema["units"];
 
-    constructor(
-        a = 1,
-        b = 1,
-        c = 1,
-        alpha = 90,
-        beta = 90,
-        gamma = 90,
-        units: Units = { length: "angstrom", angle: "degree" },
-        type: LatticeTypeEnum = "CUB",
-    ) {
-        super();
+    constructor(config: LatticeBravaisSchema = Lattice.defaultConfig) {
+        super(config);
+        const { a, b, c, alpha, beta, gamma, units, type } = config;
         this.a = a;
         this.b = b;
         this.c = c;
@@ -59,8 +67,9 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         this.type = type;
     }
 
-    get vectors(): Cell {
-        return Cell.fromVectorsArray(this.calculateVectors());
+    static fromConfig(config: LatticeBravaisSchema): Lattice {
+        const primitiveLatticeConfig = Lattice.getDefaultPrimitiveLatticeConfigByType(config);
+        return new Lattice(primitiveLatticeConfig);
     }
 
     calculateVectors(): PointSchema[] {
@@ -93,10 +102,14 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         return [vectorA, vectorB, vectorC];
     }
 
+    static fromVectors(config: LatticeVectorsSchema): Lattice {
+        return this.fromVectorsArray([config.a, config.b, config.c]);
+    }
+
     static fromVectorsArray(
         vectors: PointSchema[],
-        units: Units = { length: "angstrom", angle: "degree" },
-        type: LatticeTypeEnum = "CUB",
+        units: LatticeSchema["units"] = Lattice.defaultConfig.units,
+        type: LatticeTypeEnum = "TRI",
     ): Lattice {
         const [aVec, bVec, cVec] = vectors;
         const a = math.vlen(aVec);
@@ -106,23 +119,36 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         const beta = math.angle(aVec, cVec, "deg");
         const gamma = math.angle(aVec, bVec, "deg");
 
-        return new Lattice(a, b, c, alpha, beta, gamma, units, type);
+        return new Lattice({
+            a,
+            b,
+            c,
+            alpha,
+            beta,
+            gamma,
+            units,
+            type,
+        });
+    }
+
+    get vectors(): LatticeVectors {
+        return LatticeVectors.fromVectorsArray(this.calculateVectors());
     }
 
     get vectorArrays(): PointSchema[] {
-        return this.Cell.vectorArrays;
+        return this.vectors.vectorArrays;
     }
 
     get vectorArraysRounded(): PointSchema[] {
-        return this.Cell.vectorArraysRounded;
+        return this.vectors.vectorArraysRounded;
+    }
+
+    get cellVolume(): number {
+        return this.vectors.volume;
     }
 
     get cellVolumeRounded(): number {
-        return this.Cell.volumeRounded;
-    }
-
-    get Cell() {
-        return Cell.fromVectorsArray(this.vectorArrays);
+        return this.vectors.volumeRounded;
     }
 
     /**
@@ -185,12 +211,12 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
      * Returns a "default" primitive lattice by type, with lattice parameters scaled by the length of "a",
      * @param latticeConfig {Object} LatticeBravais config (see constructor)
      */
-    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: LatticeImplicitSchema) {
+    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: LatticeBravaisSchema) {
         const f_ = math.roundArrayOrNumber;
         // construct new primitive cell using lattice parameters and skip rounding the vectors
-        const pCell = primitiveCell(latticeConfig, true);
+        const vectors = getPrimitiveLatticeVectorsFromConfig(latticeConfig);
         // create new lattice from primitive cell
-        const newLattice = { ...Lattice.fromVectorsArray(pCell, undefined, latticeConfig.type) };
+        const newLattice = Lattice.fromVectorsArray(vectors, undefined, latticeConfig.type);
         // preserve the new type and scale back the lattice parameters
         const k = latticeConfig.a / newLattice.a;
 
@@ -228,5 +254,34 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         ]
             .map((x) => math.round(x, HASH_TOLERANCE))
             .join(";")};`;
+    }
+
+    /**
+     * Get the list of editable keys (eg. 'a', 'alpha') for the current lattice.
+     * @return {Object}
+     * @example {a: true, b: false, c: false, alpha: true, beta: false, gamma: false}
+     */
+    get editables() {
+        const object = {};
+        const editablesList = LATTICE_TYPE_CONFIGS.find(
+            (entry: any) => entry.code === this.type,
+        )?.editables;
+        // ["a", "gamma"] => {a: true, gamma: true}
+        if (editablesList) {
+            editablesList.forEach((element: any) => {
+                Object.assign(object, {
+                    [element]: true,
+                });
+            });
+        }
+
+        return object;
+    }
+
+    toJSON(exclude?: string[]): AnyObject {
+        return {
+            ...super.toJSON(exclude),
+            vectors: this.vectors.toJSON(),
+        };
     }
 }

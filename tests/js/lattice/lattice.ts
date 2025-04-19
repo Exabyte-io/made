@@ -1,21 +1,30 @@
+import "../setup";
+
+import {
+    LatticeExplicitUnit as LatticeVectorsSchema,
+    LatticeSchema,
+} from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
-import { LatticeSchema } from "@mat3ra/esse/dist/js/types";
 import { Lattice } from "../../../src/js/lattice/lattice";
 import { Na4Cl4, Silicon } from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Lattice", () => {
+    it("should create a lattice", () => {
+        const lattice = new Lattice(Silicon.lattice as LatticeSchema);
+        expect(lattice).to.be.instanceOf(Lattice);
+        expect(lattice.a).to.be.equal(Silicon.lattice.a);
+    });
     it("should return lattice cell volume", () => {
         const lattice = new Lattice(Silicon.lattice as LatticeSchema);
         expect(lattice.volume).to.be.almost.equal(40.889096881496656);
     });
 
     it("should return lattice from vectors", () => {
-        // @ts-ignore
-        const lattice = Lattice.fromVectors(Na4Cl4.lattice.vectors);
+        const lattice = Lattice.fromVectors(Na4Cl4.lattice.vectors as LatticeVectorsSchema);
         assertDeepAlmostEqual(Na4Cl4.lattice, lattice.toJSON(), ["type"]);
     });
 
