@@ -14,10 +14,15 @@ const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Lattice", () => {
     it("should create a lattice", () => {
-        const lattice = new Lattice(Silicon.lattice as LatticeSchema);
+        const lattice = Lattice.fromConfig(Silicon.lattice);
         expect(lattice).to.be.instanceOf(Lattice);
         expect(lattice.a).to.be.equal(Silicon.lattice.a);
     });
+    it("should return lattice type", () => {
+        const lattice = new Lattice(Silicon.lattice as LatticeSchema);
+        expect(lattice.type).to.be.equal("FCC");
+    });
+
     it("should return lattice cell volume", () => {
         const lattice = new Lattice(Silicon.lattice as LatticeSchema);
         expect(lattice.volume).to.be.almost.equal(40.889096881496656);
@@ -37,4 +42,5 @@ describe("Lattice", () => {
         const lattice = new Lattice(Na4Cl4.lattice as LatticeSchema);
         expect(lattice.getHashString()).to.be.equal("5.692;5.692;5.692;90;90;90;");
     });
+    // TODO: add more tests
 });
