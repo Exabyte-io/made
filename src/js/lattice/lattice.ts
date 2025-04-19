@@ -15,6 +15,7 @@ import { Cell } from "../cell/cell";
 import { getPrimitiveLatticeVectorsFromConfig } from "../cell/primitive_cell";
 import math from "../math";
 import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
+import { UnitCell, UnitCellProps } from "./unit_cell";
 
 /**
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
@@ -129,6 +130,13 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
             units,
             type,
         });
+    }
+
+    // TODO: remove
+    get unitCell() {
+        const units = this.units?.length || "angstrom";
+        const vectors = [...lodash.flatten(this.vectorArrays), units] as UnitCellProps;
+        return new UnitCell(vectors);
     }
 
     get vectors(): LatticeVectors {
