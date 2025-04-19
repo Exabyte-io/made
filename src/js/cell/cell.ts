@@ -11,45 +11,52 @@ const INV = math.inv;
 // @ts-ignore
 const MATRIX_MULT = (...args) => MULT(...args.map((x) => MATRIX(x))).toArray();
 
-const DEFAULT_CELL: [PointSchema, PointSchema, PointSchema] = [
-    [1, 0, 0],
-    [0, 1, 0],
-    [0, 0, 1],
-];
-
 export class Cell implements CellSchema {
+    static RoundedVector3DClassReference = RoundedVector3D;
+
+    static roundPrecision = 9;
+
+    static tolerance = constants.tolerance.length; // in crystal coordinates
+
+    static defaultConfig: CellSchema = {
+        a: [1.0, 0, 0],
+        b: [0, 1.0, 0],
+        c: [0, 0, 1.0],
+    };
+
+    a: CellSchema["a"];
+
+    b: CellSchema["b"];
+
+    c: CellSchema["c"];
+
     alat = 1;
 
-    protected _a: RoundedVector3D;
-
-    protected _b: RoundedVector3D;
-
-    protected _c: RoundedVector3D;
-
-    constructor(
-        a: PointSchema = DEFAULT_CELL[0],
-        b: PointSchema = DEFAULT_CELL[1],
-        c: PointSchema = DEFAULT_CELL[2],
-    ) {
-        this._a = new RoundedVector3D(a);
-        this._b = new RoundedVector3D(b);
-        this._c = new RoundedVector3D(c);
+    constructor(config = Cell.defaultConfig) {
+        const { a, b, c } = config;
+        this.a = a;
+        this.b = b;
+        this.c = c;
     }
 
     static fromVectorsArray(vectors: PointSchema[]): Cell {
-        return new Cell(vectors[0], vectors[1], vectors[2]);
+        return new Cell({
+            a: vectors[0],
+            b: vectors[1],
+            c: vectors[2],
+        });
     }
 
-    get a(): PointSchema {
-        return this._a.value_rounded;
+    get _a() {
+        return new Cell.RoundedVector3DClassReference(this.a);
     }
 
-    get b(): PointSchema {
-        return this._b.value_rounded;
+    get _b() {
+        return new Cell.RoundedVector3DClassReference(this.b);
     }
 
-    get c(): PointSchema {
-        return this._c.value_rounded;
+    get _c() {
+        return new Cell.RoundedVector3DClassReference(this.c);
     }
 
     get vectorArrays(): PointSchema[] {
@@ -65,11 +72,11 @@ export class Cell implements CellSchema {
     }
 
     get volumeRounded(): number {
-        return math.roundArrayOrNumber(this.volume, 9) as number;
+        return math.roundArrayOrNumber(this.volume, Cell.roundPrecision) as number;
     }
 
     clone(): Cell {
-        return Cell.fromVectorsArray(this.vectorArrays);
+        return new Cell({ a: this.a, b: this.b, c: this.c });
     }
 
     cloneAndScaleByMatrix(matrix: number[][]) {
@@ -78,48 +85,48 @@ export class Cell implements CellSchema {
         return newCell;
     }
 
-    /**
-     * Convert a point (in crystal coordinates) to cartesian.
-     */
     convertPointToCartesian(point: PointSchema): CodeMath.MathType {
         return MULT(point, this.vectorArrays);
     }
 
-    /**
-     * Convert a point (in cartesian coordinates) to crystal (fractional).
-     */
-    convertPointToFractional(point: PointSchema): PointSchema {
+    convertPointToCrystal(point: PointSchema): PointSchema {
         return MULT(point, INV(this.vectorArrays)) as unknown as PointSchema;
     }
 
-    /**
-     * Check whether a point is inside the cell.
-     * @param point - the point to conduct the check for.
-     * @param tolerance - numerical tolerance.
-     */
-    isPointInsideCell(point: PointSchema, tolerance = constants.tolerance.length): boolean {
+    isPointInsideCellCartesian(point: PointSchema): boolean {
+        const { tolerance } = this.constructor as typeof Cell;
         return (
-            this.convertPointToFractional(point)
+            this.convertPointToCrystal(point)
                 .map((c: number) => math.isBetweenZeroInclusiveAndOne(c, tolerance))
                 // @ts-ignore
                 .reduce((a: boolean, b: boolean): boolean => a && b)
         );
     }
 
-    /**
-     * Returns the index of the cell vector, most collinear with the testVector.
-     * @param testVector
-     */
+    // eslint-disable-next-line class-methods-use-this
+    isPointInsideCellCrystal(point: PointSchema): boolean {
+        const { tolerance } = this.constructor as typeof Cell;
+        return (
+            point
+                .map((c: number) => math.isBetweenZeroInclusiveAndOne(c, tolerance))
+                // @ts-ignore
+                .reduce((a: boolean, b: boolean): boolean => a && b)
+        );
+    }
+
+    isPointInsideCell(point: PointSchema, useCrystal = false): boolean {
+        if (useCrystal) {
+            return this.isPointInsideCellCrystal(point);
+        }
+        return this.isPointInsideCellCartesian(point);
+    }
+
     getMostCollinearVectorIndex(testVector: Vector): number {
         const angles = this.vectorArrays.map((v) => math.angleUpTo90(v, testVector, "deg"));
         return angles.findIndex((el: number) => el === math.min(angles));
     }
 
-    /**
-     * Scale this cell by right-multiplying it to a matrix (nested array)
-     */
     scaleByMatrix(matrix: number[][]) {
-        // @ts-ignore
         [this.a, this.b, this.c] = MATRIX_MULT(matrix, this.vectorArrays);
     }
 }
