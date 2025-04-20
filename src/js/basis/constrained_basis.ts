@@ -1,18 +1,14 @@
-// @ts-nocheck
-import { ArrayWithIds, ValueWithId } from "@mat3ra/code";
-import { AtomicConstraints as ConstraintsSchema, BasisSchema } from "@mat3ra/esse/dist/js/types";
+import { ArrayWithIds } from "@mat3ra/code";
+import { AtomicConstraintsSchema } from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
-import { AtomicConstraints, Constraint, ConstraintValue } from "../constraints/constraints";
+import { AtomicConstraints, AtomicConstraintValue } from "../constraints/constraints";
 import { Basis, BasisConfig } from "./basis";
 import { Coordinate } from "./types";
+import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 
-export interface ConstrainedBasisProps extends BasisConfig {
-    constraints: Constraint[];
-}
-
-export interface ConstrainedBasisJSON extends BasisSchema {
-    constraints: ValueWithId<ConstraintValue>[];
+export interface ConstrainedBasisConfig extends BasisConfig {
+    constraints: AtomicConstraintsSchema;
 }
 
 /**
@@ -20,66 +16,45 @@ export interface ConstrainedBasisJSON extends BasisSchema {
  * @extends Basis
  */
 export class ConstrainedBasis extends Basis {
-    _constraints: ArrayWithIds<ConstraintValue>;
+    _constraints: AtomicConstraints;
 
-    constraints: Constraint[];
+    constraints: AtomicConstraintsSchema;
 
-    /**
-     * Create a an array with ids.
-     * @param {Object} config
-     * @param {ArrayWithIds|Array} config.constraints - atomic constraints.
-     */
-    constructor(config: ConstrainedBasisProps) {
+    constructor(config: ConstrainedBasisConfig) {
         super(config);
         this.constraints = config.constraints;
-        this._constraints = new ArrayWithIds<ConstraintValue>(config.constraints); // `constraints` is an Array with ids
-    }
-
-    getConstraintAsArray() {
-        return this._constraints;
+        this._constraints = AtomicConstraints.fromObjects(config.constraints); // `constraints` is an Array with ids
     }
 
     get AtomicConstraints() {
-        return AtomicConstraints.fromArray(this.constraints);
+        return AtomicConstraints.fromObjects(this.constraints);
     }
 
-    /**
-     * Serialize class instance to JSON.
-     * @example As below:
-         {
-            ...Basis.toJSON(),
-            "constraints": [
-                {
-                    "id" : 0,
-                    "value" : [
-                        1,
-                        1,
-                        1
-                    ]
-                },
-            ]
-         }
-     */
-    toJSON(): ConstrainedBasisJSON {
+    override toJSON(): AnyObject {
         return {
             ...super.toJSON(),
             constraints: this._constraints.toJSON(),
         };
     }
 
-    getConstraintByIndex(idx: number): ConstraintValue {
+    getConstraintByIndex(idx: number): AtomicConstraintValue {
         return this._constraints.getElementValueByIndex(idx) || [false, false, false];
     }
 
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
-    get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue, string][] {
+    get elementsCoordinatesConstraintsArray(): [
+        string,
+        Coordinate,
+        AtomicConstraintValue,
+        string,
+    ][] {
         return this._elements.values.map((element: any, idx: number) => {
-            const coordinates = this.getCoordinateByIndex(idx);
-            const constraints = this.getConstraintByIndex(idx);
+            const coordinate = this.getCoordinateByIndex(idx);
+            const constraint = this.getConstraintByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
-            return [element, coordinates, constraints, atomicLabel];
+            return [element, coordinate, constraint, atomicLabel];
         });
     }
 
@@ -94,7 +69,7 @@ export class ConstrainedBasis extends Basis {
             const constraint = entry[2];
             return (
                 s.sprintf("%-4s", element) +
-                coordinate.map((x) => s.sprintf("%14.9f", x).trim()).join(" ") +
+                coordinate.prettyPrint() +
                 " " +
                 constraint.map((x) => (x ? 1 : 0)).join(" ")
             );

@@ -8,5 +8,3 @@ import {
 export type MaterialJSON = MaterialSchema & AnyObject;
 
 export type Vector = ArrayOf3NumberElementsSchema;
-export type VectorsAsArray = [Vector, Vector, Vector];
-export type LatticeVectorUnits = Required<LatticeExplicitUnit>["units"];

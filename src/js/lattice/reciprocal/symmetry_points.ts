@@ -4,7 +4,7 @@
  * This file contains information about the Brillouin zone symmetry points by lattice type.
  * [AFLOW](https://arxiv.org/abs/1004.2974) methodology is used for implementation.
  */
-import { LatticeImplicitSchema } from "@mat3ra/esse/dist/js/types";
+import { LatticeSchema } from "@mat3ra/esse/dist/js/types";
 
 import { Lattice } from "../lattice";
 
@@ -93,7 +93,7 @@ const POINTS = {
         ];
     },
 
-    BCT: ({ a, c }: LatticeImplicitSchema) => {
+    BCT: ({ a, c }: LatticeSchema) => {
         let n;
         if (c < a) {
             // BCT-1
@@ -197,7 +197,7 @@ const POINTS = {
         ];
     },
 
-    ORCF: ({ a, b, c }: LatticeImplicitSchema) => {
+    ORCF: ({ a, b, c }: LatticeSchema) => {
         let n;
         if (1 / (a * a) >= 1 / (b * b) + 1 / (c * c)) {
             // ORCF-1,3
@@ -286,7 +286,7 @@ const POINTS = {
         ];
     },
 
-    ORCI: ({ a, b, c }: LatticeImplicitSchema) => {
+    ORCI: ({ a, b, c }: LatticeSchema) => {
         const n = (1 + (a * a) / (c * c)) / 4;
         const e = (1 + (b * b) / (c * c)) / 4;
         const d = (b * b - a * a) / (4 * c * c);
@@ -343,7 +343,7 @@ const POINTS = {
         ];
     },
 
-    ORCC: ({ a, b }: LatticeImplicitSchema) => {
+    ORCC: ({ a, b }: LatticeSchema) => {
         const e = (1 + (a * a) / (b * b)) / 4;
         return [
             {
@@ -410,7 +410,7 @@ const POINTS = {
         ];
     },
 
-    RHL: ({ alpha }: LatticeImplicitSchema) => {
+    RHL: ({ alpha }: LatticeSchema) => {
         let n, v;
         const cosAlpha = Math.cos((alpha / 180) * Math.PI);
         if (cosAlpha > 0) {
@@ -499,7 +499,7 @@ const POINTS = {
         ];
     },
 
-    MCL: ({ b, c, alpha }: LatticeImplicitSchema) => {
+    MCL: ({ b, c, alpha }: LatticeSchema) => {
         const cosAlpha = Math.cos((alpha / 180) * Math.PI);
         const n = ((1 / 2) * (1 - (b * cosAlpha) / c)) / (1 - cosAlpha * cosAlpha);
         const v = 1 / 2 - (n * c * cosAlpha) / b;
@@ -567,7 +567,7 @@ const POINTS = {
         ];
     },
 
-    MCLC: ({ a, b, c, alpha, gamma }: LatticeImplicitSchema) => {
+    MCLC: ({ a, b, c, alpha, gamma }: LatticeSchema) => {
         const cosAlpha = Math.cos((alpha / 180) * Math.PI);
         let e, n, p, f, m, d, v;
         if (gamma >= 90) {
@@ -805,7 +805,7 @@ const POINTS = {
         ];
     },
 
-    TRI: ({ alpha, beta, gamma }: LatticeImplicitSchema) => {
+    TRI: ({ alpha, beta, gamma }: LatticeSchema) => {
         if (alpha > 90 && beta > 90 && gamma >= 90) {
             // TRI-1a,2a
             return [

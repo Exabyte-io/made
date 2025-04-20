@@ -31,7 +31,7 @@ describe("Basis", () => {
     });
 
     it("should return jsonified basis", () => {
-        const basis = new Material(Na4aaCl4).Basis;
+        const basis = new Material(Na4Cl4).Basis;
         expect(basis.toJSON()).to.be.deep.almost.equal(Na4Cl4.basis);
     });
 

@@ -1,40 +1,46 @@
-import { RoundedArrayWithIds, RoundedValueWithId, RoundedVector3D } from "@mat3ra/code";
-import { PointSchema } from "@mat3ra/esse/dist/js/types";
+import { RoundedArrayWithIds, RoundedValueWithId } from "@mat3ra/code";
+import { AtomicCoordinateSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
+import s from "underscore.string";
 
-export class Coordinate extends RoundedValueWithId<RoundedVector3D> {
-    value: RoundedVector3D;
+export type AtomicCoordinateValue = AtomicCoordinateSchema["value"];
 
-    constructor(id: number, value: RoundedVector3D) {
+type AxisType = "x" | "y" | "z";
+
+export class Coordinate extends RoundedValueWithId<AtomicCoordinateValue> {
+    value: AtomicCoordinateValue;
+
+    constructor({ value, id }: AtomicCoordinateSchema) {
         super(id, value);
         this.value = value;
     }
 
-    static fromArray(value: number[], id = 0): Coordinate {
-        return new Coordinate(id, new RoundedVector3D(value));
+    getValueAlongAxis(axis: AxisType = "z"): number {
+        const index = { x: 0, y: 1, z: 2 }[axis];
+        return this.value[index] as number;
     }
 
-    getValueAlongAxis(axis: "x" | "y" | "z" = "z"): number {
-        return this.value[axis];
+    prettyPrint(format = "%14.9f"): string {
+        return this.value.map((x) => s.sprintf(format, x).trim()).join(" ");
     }
 }
 
-export class Coordinates extends RoundedArrayWithIds<PointSchema> {
-    getValuesAlongAxis(axis: "x" | "y" | "z" = "z"): number[] {
-        return this.values.map((coord) => Coordinate.fromArray(coord).getValueAlongAxis(axis));
+export class Coordinates extends RoundedArrayWithIds<Coordinate3DSchema> {
+    getValuesAlongAxis(axis: AxisType = "z"): number[] {
+        return this.values.map((coord) => {
+            const coordinate = Coordinate.fromValueAndId(coord);
+            return coordinate.getValueAlongAxis(axis);
+        });
     }
 
-    getMaxValueAlongAxis(axis: "x" | "y" | "z" = "z"): number {
+    getMaxValueAlongAxis(axis: AxisType = "z"): number {
         return Math.max(...this.getValuesAlongAxis(axis));
     }
 
-    getMinValueAlongAxis(axis: "x" | "y" | "z" = "z"): number {
+    getMinValueAlongAxis(axis: AxisType = "z"): number {
         return Math.min(...this.getValuesAlongAxis(axis));
     }
 
-    getExtremumValueAlongAxis(
-        extremum: "max" | "min" = "max",
-        axis: "x" | "y" | "z" = "z",
-    ): number {
+    getExtremumValueAlongAxis(extremum: "max" | "min" = "max", axis: AxisType = "z"): number {
         return extremum === "max"
             ? this.getMaxValueAlongAxis(axis)
             : this.getMinValueAlongAxis(axis);

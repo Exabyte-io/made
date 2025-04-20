@@ -1,4 +1,4 @@
-import { PointSchema } from "@mat3ra/esse/dist/js/types";
+import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 
 import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
@@ -34,11 +34,11 @@ function generateNewBasisWithinSupercell(
         shifts.forEach((comb) => {
             // "combination" is effectively a point in fractional coordinates here, hence the below
             const newPoint = ADD(cartesianCoordinate, supercell.convertPointToCartesian(comb));
-            if (supercell.isPointInsideCell(newPoint as PointSchema)) {
+            if (supercell.isPointInsideCell(newPoint as Coordinate3DSchema)) {
                 newBasis.addAtom({
                     element: element.value,
                     coordinate: supercell.convertPointToCrystal(
-                        newPoint as PointSchema,
+                        newPoint as Coordinate3DSchema,
                     ) as unknown as Coordinate,
                 });
             }

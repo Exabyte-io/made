@@ -2,12 +2,12 @@ import { HASH_TOLERANCE } from "@mat3ra/code/dist/js/constants";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import {
-    LatticeExplicitUnit as LatticeVectorsSchema,
-    LatticeImplicitSchema as LatticeBravaisSchema,
+    Coordinate3DSchema,
     LatticeSchema,
     LatticeTypeEnum,
     LatticeTypeExtendedEnum,
-    PointSchema,
+    LatticeVectorsSchema,
+    Matrix3X3Schema,
 } from "@mat3ra/esse/dist/js/types";
 import * as lodash from "lodash";
 
@@ -51,11 +51,11 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
 
     gamma: LatticeSchema["gamma"];
 
-    type: LatticeTypeEnum;
+    type: LatticeTypeEnum = "TRI";
 
     units: LatticeSchema["units"];
 
-    constructor(config: LatticeBravaisSchema = Lattice.defaultConfig) {
+    constructor(config: LatticeSchema = Lattice.defaultConfig) {
         super(config);
         const { a, b, c, alpha, beta, gamma, units, type } = config;
         this.a = a;
@@ -65,20 +65,20 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         this.beta = beta;
         this.gamma = gamma;
         this.units = units;
-        this.type = type;
+        this.type = type || "TRI";
     }
 
     static fromConfig(config: object): Lattice {
-        const latticeConfig = config as LatticeBravaisSchema;
+        const latticeConfig = config as LatticeSchema;
         return new Lattice(latticeConfig);
     }
 
-    static fromConfigPartial(config: LatticeBravaisSchema): Lattice {
+    static fromConfigPartial(config: LatticeSchema): Lattice {
         const primitiveLatticeConfig = Lattice.getDefaultPrimitiveLatticeConfigByType(config);
         return new Lattice(primitiveLatticeConfig);
     }
 
-    calculateVectors(): PointSchema[] {
+    calculateVectors(): Matrix3X3Schema {
         const { a } = this;
         const { b } = this;
         const { c } = this;
@@ -97,13 +97,13 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         const cosGammaStar = math.cos(gammaStar);
         const sinGammaStar = math.sin(gammaStar);
 
-        const vectorA: PointSchema = [a * sinBeta, 0.0, a * cosBeta];
-        const vectorB: PointSchema = [
+        const vectorA: Coordinate3DSchema = [a * sinBeta, 0.0, a * cosBeta];
+        const vectorB: Coordinate3DSchema = [
             -b * sinAlpha * cosGammaStar,
             b * sinAlpha * sinGammaStar,
             b * cosAlpha,
         ];
-        const vectorC: PointSchema = [0.0, 0.0, c];
+        const vectorC: Coordinate3DSchema = [0.0, 0.0, c];
 
         return [vectorA, vectorB, vectorC];
     }
@@ -113,7 +113,7 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
     }
 
     static fromVectorsArray(
-        vectors: PointSchema[],
+        vectors: Matrix3X3Schema,
         units: LatticeSchema["units"] = Lattice.defaultConfig.units,
         type: LatticeTypeEnum = "TRI",
     ): Lattice {
@@ -148,11 +148,11 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         return LatticeVectors.fromVectorsArray(this.calculateVectors());
     }
 
-    get vectorArrays(): PointSchema[] {
+    get vectorArrays(): Matrix3X3Schema {
         return this.vectors.vectorArrays;
     }
 
-    get vectorArraysRounded(): PointSchema[] {
+    get vectorArraysRounded(): Matrix3X3Schema {
         return this.vectors.vectorArraysRounded;
     }
 
@@ -224,7 +224,7 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
      * Returns a "default" primitive lattice by type, with lattice parameters scaled by the length of "a",
      * @param latticeConfig {Object} LatticeBravais config (see constructor)
      */
-    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: LatticeBravaisSchema) {
+    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: LatticeSchema) {
         const f_ = math.roundArrayOrNumber;
         // construct new primitive cell using lattice parameters and skip rounding the vectors
         const vectors = getPrimitiveLatticeVectorsFromConfig(latticeConfig);

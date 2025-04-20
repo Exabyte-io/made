@@ -1,3 +1,4 @@
+import { BasisSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
@@ -74,7 +75,8 @@ function fromPoscar(fileContent: string): object {
     const lines = fileContent.split("\n");
 
     const comment = lines[0];
-    const latticeConstant = parseFloat(lines[1].trim());
+    // TODO: alat should be handled
+    // const latticeConstant = parseFloat(lines[1].trim());
 
     // Atom symbols and counts
     const atomSymbols = lines[5].trim().split(/\s+/);
@@ -98,7 +100,7 @@ function fromPoscar(fileContent: string): object {
         .reduce((a, b) => a.concat(b), []);
 
     // Atom coordinates and constraints
-    const coordinates: Coordinate[] = [];
+    const coordinates: Coordinate3DSchema[] = [];
     const constraints: Constraint[] = [];
     let atomIndex = 0;
     for (let i = 0; i < atomSymbols.length; i++) {
@@ -109,7 +111,7 @@ function fromPoscar(fileContent: string): object {
                 parseFloat(lineComponents[1]),
                 parseFloat(lineComponents[2]),
             ];
-            coordinates.push(Coordinate.fromArray(coordinate));
+            coordinates.push(coordinate as Coordinate3DSchema);
 
             // Add constraints if selective dynamics is used
             if (selectiveDynamics) {
@@ -125,19 +127,20 @@ function fromPoscar(fileContent: string): object {
         }
     }
 
-    const lattice = Lattice.fromVectorsArray({
-        a: lines[2].trim().split(/\s+/).map(Number) as Vector,
-        b: lines[3].trim().split(/\s+/).map(Number) as Vector,
-        c: lines[4].trim().split(/\s+/).map(Number) as Vector,
-        alat: latticeConstant,
-        units: "angstrom",
-    });
+    const lattice = Lattice.fromVectorsArray([
+        lines[2].trim().split(/\s+/).map(Number) as Vector,
+        lines[3].trim().split(/\s+/).map(Number) as Vector,
+        lines[4].trim().split(/\s+/).map(Number) as Vector,
+    ]);
 
-    const basis = new ConstrainedBasis.fromElementsAndCoordinates({
+    const basis = ConstrainedBasis.fromElementsAndCoordinates({
         elements,
         coordinates,
-        units: coordinateType === "c" ? ATOMIC_COORD_UNITS.cartesian : ATOMIC_COORD_UNITS.crystal,
-        cell: lattice.vectorArrays,
+        units:
+            coordinateType === "c"
+                ? (ATOMIC_COORD_UNITS.cartesian as BasisSchema["units"])
+                : (ATOMIC_COORD_UNITS.crystal as BasisSchema["units"]),
+        cell: new Cell(lattice.vectorArrays),
         constraints,
     });
 

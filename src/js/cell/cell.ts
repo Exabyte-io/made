@@ -1,9 +1,13 @@
 import { RoundedVector3D } from "@mat3ra/code";
 import { math } from "@mat3ra/code/dist/js/math";
-import { LatticeExplicitUnit as CellSchema, PointSchema } from "@mat3ra/esse/dist/js/types";
+import {
+    Coordinate3DSchema,
+    LatticeVectorsSchema as CellSchema,
+    Matrix3X3Schema,
+    Vector3DSchema,
+} from "@mat3ra/esse/dist/js/types";
 
 import constants from "../constants";
-import { Vector } from "../types";
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;
@@ -41,7 +45,7 @@ export class Cell implements CellSchema {
         this.c = c;
     }
 
-    static fromVectorsArray(vectors: PointSchema[]): Cell {
+    static fromVectorsArray(vectors: Matrix3X3Schema): Cell {
         return new Cell({
             a: vectors[0],
             b: vectors[1],
@@ -61,11 +65,11 @@ export class Cell implements CellSchema {
         return new Cell.RoundedVector3DClassReference(this.c);
     }
 
-    get vectorArrays(): PointSchema[] {
+    get vectorArrays(): Matrix3X3Schema {
         return [this._a.value, this._b.value, this._c.value];
     }
 
-    get vectorArraysRounded(): PointSchema[] {
+    get vectorArraysRounded(): Matrix3X3Schema {
         return [this._a.value_rounded, this._b.value_rounded, this._c.value_rounded];
     }
 
@@ -87,15 +91,15 @@ export class Cell implements CellSchema {
         return newCell;
     }
 
-    convertPointToCartesian(point: PointSchema): PointSchema {
-        return MULT(point, this.vectorArrays) as unknown as PointSchema;
+    convertPointToCartesian(point: Coordinate3DSchema): Coordinate3DSchema {
+        return MULT(point, this.vectorArrays) as unknown as Coordinate3DSchema;
     }
 
-    convertPointToCrystal(point: PointSchema): PointSchema {
-        return MULT(point, INV(this.vectorArrays)) as unknown as PointSchema;
+    convertPointToCrystal(point: Coordinate3DSchema): Coordinate3DSchema {
+        return MULT(point, INV(this.vectorArrays)) as unknown as Coordinate3DSchema;
     }
 
-    isPointInsideCellCartesian(point: PointSchema): boolean {
+    isPointInsideCellCartesian(point: Coordinate3DSchema): boolean {
         const { tolerance } = this.constructor as typeof Cell;
         return (
             this.convertPointToCrystal(point)
@@ -106,7 +110,7 @@ export class Cell implements CellSchema {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    isPointInsideCellCrystal(point: PointSchema): boolean {
+    isPointInsideCellCrystal(point: Coordinate3DSchema): boolean {
         const { tolerance } = this.constructor as typeof Cell;
         return (
             point
@@ -116,14 +120,14 @@ export class Cell implements CellSchema {
         );
     }
 
-    isPointInsideCell(point: PointSchema, useCrystal = false): boolean {
+    isPointInsideCell(point: Coordinate3DSchema, useCrystal = false): boolean {
         if (useCrystal) {
             return this.isPointInsideCellCrystal(point);
         }
         return this.isPointInsideCellCartesian(point);
     }
 
-    getMostCollinearVectorIndex(testVector: Vector): number {
+    getMostCollinearVectorIndex(testVector: Vector3DSchema): number {
         const angles = this.vectorArrays.map((v) => math.angleUpTo90(v, testVector, "deg"));
         return angles.findIndex((el: number) => el === math.min(angles));
     }

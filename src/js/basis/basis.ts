@@ -1,9 +1,8 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
-import { ArrayWithIds } from "@mat3ra/code";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import { BasisSchema, PointSchema } from "@mat3ra/esse/dist/js/types";
+import { BasisSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 import * as _ from "underscore";
 import * as s from "underscore.string";
 
@@ -11,10 +10,11 @@ import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import math from "../math";
-import { Coordinate, Coordinates } from "./coordinates";
-import { Elements } from "./elements";
+import { AtomicCoordinateValue, Coordinate, Coordinates } from "./coordinates";
+import { AtomicElementValue, Elements } from "./elements";
+import { AtomicLabelValue, Labels } from "./labels";
 
-export interface Atom {
+export interface ElementWithCoordinate {
     id?: number; // numeric id of the element (optional).
     element: string; // Chemical element
     coordinate: Coordinate; // Coordinates of the element
@@ -35,6 +35,14 @@ interface Overlap {
 export interface BasisConfig extends BasisSchema {
     cell?: Cell;
     isEmpty?: boolean;
+}
+
+export interface ElementsAndCoordinatesConfig {
+    elements: AtomicElementValue[];
+    coordinates: AtomicCoordinateValue[];
+    labels?: AtomicLabelValue[];
+    units?: BasisSchema["units"];
+    cell?: Cell;
 }
 
 const DEFAULT_BASIS_CONFIG = {
@@ -78,7 +86,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
 
     _coordinates: Coordinates;
 
-    _labels: ArrayWithIds<string>;
+    _labels: Labels;
 
     static fromElementsAndCoordinates({
         elements = [],
@@ -86,16 +94,16 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         units = ATOMIC_COORD_UNITS.crystal as BasisSchema["units"],
         cell = new Cell(),
         labels = [],
-    }): Basis {
+    }: ElementsAndCoordinatesConfig): Basis {
         const elementsArrayWithIdsJSON = Elements.fromValues(elements).toJSON();
         const coordinatesArrayWithIdsJSON = Coordinates.fromValues(coordinates).toJSON();
-        const labelsArrayWithIdsJSON = ArrayWithIds.fromValues(labels).toJSON();
+        const labelsArrayWithIdsJSON = Labels.fromValues(labels).toJSON();
         return new Basis({
             elements: elementsArrayWithIdsJSON as BasisSchema["elements"],
-            coordinates: coordinatesArrayWithIdsJSON,
+            coordinates: coordinatesArrayWithIdsJSON as BasisSchema["coordinates"],
             units,
             cell,
-            labels: labelsArrayWithIdsJSON,
+            labels: labelsArrayWithIdsJSON as BasisSchema["labels"],
         });
     }
 
@@ -109,16 +117,23 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         this.cell = new Cell(config.cell);
         this.units = units || (ATOMIC_COORD_UNITS.crystal as BasisSchema["units"]);
         this._elements = Elements.fromObjects(elements);
-        // @ts-ignore
         this._coordinates = Coordinates.fromObjects(coordinates);
-        // @ts-ignore
-        this._labels = ArrayWithIds.fromObjects(labels);
+        this._labels = Labels.fromObjects(labels || []);
     }
 
     toJSON(exclude?: string[]): AnyObject {
         return {
             ...super.toJSON(exclude),
         };
+    }
+
+    removeAllAtoms() {
+        this.elements = [];
+        this.coordinates = [];
+        this.labels = [];
+        this._elements = Elements.fromValues([]);
+        this._coordinates = Coordinates.fromValues([]);
+        this._labels = Labels.fromValues([]);
     }
 
     get cellRounded() {
@@ -162,12 +177,18 @@ export class Basis extends InMemoryEntity implements BasisSchema {
     }
 
     getCoordinateByIndex(idx: number): Coordinate {
-        return Coordinate.fromArray(this._coordinates.getElementValueByIndex(idx) as PointSchema);
+        const value = this._coordinates.getElementValueByIndex(idx);
+        if (value) {
+            return Coordinate.fromValueAndId(value, idx);
+        }
+        throw new Error(`Coordinate with index ${idx} not found`);
     }
 
     toStandardRepresentation() {
         this.toCrystal();
-        this._coordinates.mapArrayInPlace((point) => point.map((x) => math.mod(x)) as PointSchema);
+        this._coordinates.mapArrayInPlace(
+            (point) => point.map((x) => math.mod(x)) as Coordinate3DSchema,
+        );
     }
 
     /** A representation where all coordinates are within 0 and 1 in crystal units */
@@ -187,7 +208,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * Add atom with a chemical element at coordinate.
      */
     // @ts-ignore
-    addAtom({ element = "Si", coordinate = [0.5, 0.5, 0.5] }: Atom) {
+    addAtom({ element = "Si", coordinate = [0.5, 0.5, 0.5] }: ElementWithCoordinate) {
         this._elements.addItem(element);
         // @ts-ignore
         this._coordinates.addItem(coordinate);
@@ -196,7 +217,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
     /**
      * Remove atom with a chemical element at coordinate either by passing the (element AND coordinate) OR id.
      */
-    removeAtom({ element, coordinate, id }: Atom) {
+    removeAtom({ element, coordinate, id }: ElementWithCoordinate) {
         if (element && coordinate) {
             // @ts-ignore
             this._elements.removeItem(element, id);
@@ -314,9 +335,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
-            const toleratedCoordinates = coordinate.value.value.map((x) =>
-                math.round(x, HASH_TOLERANCE),
-            );
+            const toleratedCoordinates = coordinate.value.map((x) => math.round(x, HASH_TOLERANCE));
             return `${element}${atomicLabel} ${toleratedCoordinates.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
@@ -368,7 +387,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = this.atomicLabelsArray[idx];
-            return `${element}${atomicLabel} ${coordinate.value.value
+            return `${element}${atomicLabel} ${coordinate.value
                 .map((x) => s.sprintf("%14.9f", x).trim())
                 .join(" ")}`;
         });
@@ -482,8 +501,8 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             for (let i = 0; i < this._elements.values.length; i++) {
                 for (let j = i + 1; j < this._elements.values.length; j++) {
                     const distance = math.vDist(
-                        this._coordinates.getElementValueByIndex(i) as PointSchema,
-                        this._coordinates.getElementValueByIndex(j) as PointSchema,
+                        this._coordinates.getElementValueByIndex(i) as Coordinate3DSchema,
+                        this._coordinates.getElementValueByIndex(j) as Coordinate3DSchema,
                     );
                     // @ts-ignore
                     if (distance > maxDistance) {

@@ -1,4 +1,4 @@
-import { PointSchema } from "@mat3ra/esse/dist/js/types";
+import { Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
@@ -6,7 +6,7 @@ import { Cell } from "../../../src/js/cell/cell";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 
-const VECTORS: PointSchema[] = [
+const VECTORS: Matrix3X3Schema = [
     [1.0, 0.0, 0.0],
     [0.0, 2.0, 0.0],
     [0.0, 0.0, 3.0],
@@ -20,22 +20,22 @@ const CELL_JSON = {
     units: "angstrom",
 };
 
-const POINT_IN_CELL_CRYSTAL: PointSchema = [0.5, 0.5, 0.5];
-const POINT_OUTSIDE_CELL_CRYSTAL: PointSchema = [1.1, 1.1, 1.1];
-const POINT_IN_CELL_CARTESIAN: PointSchema = [0.5, 1.0, 1.5];
+const POINT_IN_CELL_CRYSTAL: Coordinate3DSchema = [0.5, 0.5, 0.5];
+const POINT_OUTSIDE_CELL_CRYSTAL: Coordinate3DSchema = [1.1, 1.1, 1.1];
+const POINT_IN_CELL_CARTESIAN: Coordinate3DSchema = [0.5, 1.0, 1.5];
 
-const POINT_IN_CELL: PointSchema = [0.5, 0.5, 0.5];
-const POINT_OUTSIDE_CELL: PointSchema = [1.5, 1.5, 1.5];
+const POINT_IN_CELL: Coordinate3DSchema = [0.5, 0.5, 0.5];
+const POINT_OUTSIDE_CELL: Coordinate3DSchema = [1.5, 1.5, 1.5];
 
 // This is in crystal coordinates, but since VECTORS[0] is [1,0,0], it's the same in cartesian
 const POINT_IN_CELL_TOLERANCE = 0.01;
-const POINT_IN_CELL_WITH_TOLERANCE_0_1: PointSchema = [0.99, 0.5, 0.5];
-const POINT_OUTSIDE_CELL_WITH_TOLERANCE_0_1: PointSchema = [1.01, 0.5, 0.5];
-const POINT_OUTSIDE_CELL_WITH_TOLERANCE_0_1_ALT: PointSchema = [0.999, 0.5, 0.5];
+const POINT_IN_CELL_WITH_TOLERANCE_0_1: Coordinate3DSchema = [0.99, 0.5, 0.5];
+const POINT_OUTSIDE_CELL_WITH_TOLERANCE_0_1: Coordinate3DSchema = [1.01, 0.5, 0.5];
+const POINT_OUTSIDE_CELL_WITH_TOLERANCE_0_1_ALT: Coordinate3DSchema = [0.999, 0.5, 0.5];
 
 const VECTORS_VOLUME = 6.0;
 
-const VECTORS_EQUAL_UP_TO_PRECISION_4: PointSchema[] = [
+const VECTORS_EQUAL_UP_TO_PRECISION_4: Matrix3X3Schema = [
     [1.00001, 0.0, 0.0],
     [0.0, 2.00001, 0.0],
     [0.0, 0.0, 3.00001],

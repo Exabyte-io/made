@@ -4,7 +4,7 @@ from typing import List, Optional
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
-    LatticeImplicitSchema as LatticeBravaisSchema,
+    LatticeSchema as LatticeBravaisSchema,
 )
 from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
     LatticeTypeEnum,

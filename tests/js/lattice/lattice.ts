@@ -1,9 +1,6 @@
 import "../setup";
 
-import {
-    LatticeExplicitUnit as LatticeVectorsSchema,
-    LatticeSchema,
-} from "@mat3ra/esse/dist/js/types";
+import { LatticeSchema, LatticeVectorsSchema } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
