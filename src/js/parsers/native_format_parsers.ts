@@ -15,7 +15,7 @@ const NATIVE_FORMAT = {
  * @param {string} text -  input string to detect format
  * @returns {NATIVE_FORMAT} - Format of the input string
  */
-function detectFormat(text) {
+function detectFormat(text: string) {
     const jsonRegex = /^\s*\{/;
     if (jsonRegex.test(text)) return NATIVE_FORMAT.JSON;
     if (Poscar.isPoscar(text)) return NATIVE_FORMAT.POSCAR;
@@ -29,7 +29,7 @@ function detectFormat(text) {
  * @throws {Error} - If the input string is of unknown format
  * @return {Object} - Material config
  */
-function convertFromNativeFormat(text) {
+function convertFromNativeFormat(text: string) {
     const format = detectFormat(text);
 
     switch (format) {

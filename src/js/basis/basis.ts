@@ -16,20 +16,20 @@ import { AtomicLabelValue, Labels } from "./labels";
 
 export interface ElementWithCoordinate {
     id?: number; // numeric id of the element (optional).
-    element: string; // Chemical element
-    coordinate: Coordinate; // Coordinates of the element
+    element: AtomicElementValue; // Chemical element
+    coordinate: AtomicCoordinateValue; // Coordinates of the element
 }
 
 export interface ElementCount {
     count: number;
-    value: string;
+    value: AtomicElementValue;
 }
 
 interface Overlap {
     id1: number;
     id2: number;
-    element1: string;
-    element2: string;
+    element1: AtomicElementValue;
+    element2: AtomicElementValue;
 }
 
 export interface BasisConfig extends BasisSchema {

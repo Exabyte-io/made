@@ -2,7 +2,6 @@ import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 
 import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
-import { Coordinate } from "../basis/coordinates";
 import { Cell } from "../cell/cell";
 import { Lattice } from "../lattice/lattice";
 // eslint-disable-next-line import/no-cycle
@@ -29,7 +28,7 @@ function generateNewBasisWithinSupercell(
 
     oldBasis.elements.forEach((element) => {
         const coordinate = oldBasis.getCoordinateByIndex(element.id);
-        const cartesianCoordinate = cell.convertPointToCartesian(coordinate.value.value);
+        const cartesianCoordinate = cell.convertPointToCartesian(coordinate.value);
         const shifts = cellTools.latticePointsInSupercell(supercellMatrix);
         shifts.forEach((comb) => {
             // "combination" is effectively a point in fractional coordinates here, hence the below
@@ -39,7 +38,7 @@ function generateNewBasisWithinSupercell(
                     element: element.value,
                     coordinate: supercell.convertPointToCrystal(
                         newPoint as Coordinate3DSchema,
-                    ) as unknown as Coordinate,
+                    ) as Coordinate3DSchema,
                 });
             }
         });

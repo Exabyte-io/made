@@ -4,7 +4,7 @@ import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Cell } from "../cell/cell";
-import { ConstraintValue } from "../constraints/constraints";
+import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
 import { Vector } from "../types";
@@ -51,7 +51,7 @@ export function validate(xyzTxt: string) {
 export interface ParsedObject {
     element: string;
     coordinates: Vector;
-    constraints: ConstraintValue;
+    constraints: AtomicConstraintValue;
     label?: number;
 }
 
@@ -160,7 +160,7 @@ function fromBasis(
         const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
         const elementWithLabel = item + atomicLabel;
         const element = s.sprintf("%-3s", elementWithLabel);
-        const coordinates = basisClsInstance.getCoordinateByIndex(idx).value.value.map((x) => {
+        const coordinates = basisClsInstance.getCoordinateByIndex(idx).value.map((x) => {
             return s.sprintf(printFormat, skipRounding ? x : math.precise(math.roundToZero(x)));
         });
         const constraints = basisClsInstance.constraints

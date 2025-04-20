@@ -1,4 +1,4 @@
-import { LatticeSchema } from "@mat3ra/esse/dist/js/types";
+import { LatticeSchema, LatticeTypeEnum } from "@mat3ra/esse/dist/js/types";
 
 /**
  * Routines for calculating conventional cell vectors from primitive cell Bravais parameters.
@@ -59,7 +59,7 @@ export const PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS = {
 };
 
 export const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES: {
-    [key in LatticeSchema["type"]]: LatticeSchema["type"];
+    [key in LatticeTypeEnum]: LatticeTypeEnum;
 } = {
     // PRIMITIVE    =>  CONVENTIONAL
     CUB: "CUB",

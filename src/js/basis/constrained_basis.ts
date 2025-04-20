@@ -1,14 +1,17 @@
-import { ArrayWithIds } from "@mat3ra/code";
+import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import { AtomicConstraintsSchema } from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
 import { AtomicConstraints, AtomicConstraintValue } from "../constraints/constraints";
-import { Basis, BasisConfig } from "./basis";
-import { Coordinate } from "./types";
-import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
+import { Basis, BasisConfig, ElementsAndCoordinatesConfig } from "./basis";
+import { Coordinate } from "./coordinates";
 
 export interface ConstrainedBasisConfig extends BasisConfig {
     constraints: AtomicConstraintsSchema;
+}
+
+export interface ElementsCoordinatesAndConstraintsConfig extends ElementsAndCoordinatesConfig {
+    constraints: AtomicConstraintValue[];
 }
 
 /**
@@ -24,6 +27,24 @@ export class ConstrainedBasis extends Basis {
         super(config);
         this.constraints = config.constraints;
         this._constraints = AtomicConstraints.fromObjects(config.constraints); // `constraints` is an Array with ids
+    }
+
+    static fromElementsCoordinatesAndConstraints(
+        config: ElementsCoordinatesAndConstraintsConfig,
+    ): ConstrainedBasis {
+        const base = super.fromElementsAndCoordinates({
+            elements: config.elements,
+            coordinates: config.coordinates,
+            units: config.units,
+            cell: config.cell,
+            labels: config.labels,
+        }) as ConstrainedBasis;
+
+        base.constraints = AtomicConstraints.fromValues(
+            config.constraints,
+        ).toJSON() as AtomicConstraintsSchema;
+        base._constraints = AtomicConstraints.fromObjects(base.constraints);
+        return base;
     }
 
     get AtomicConstraints() {
