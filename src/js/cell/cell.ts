@@ -85,7 +85,7 @@ export class Cell implements CellSchema {
         return new Cell({ a: this.a, b: this.b, c: this.c });
     }
 
-    cloneAndScaleByMatrix(matrix: number[][]) {
+    cloneAndScaleByMatrix(matrix: Matrix3X3Schema) {
         const newCell = this.clone();
         newCell.scaleByMatrix(matrix);
         return newCell;

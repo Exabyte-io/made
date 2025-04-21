@@ -1,8 +1,10 @@
 /* eslint-disable max-classes-per-file */
+import { BasisSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 import _ from "underscore";
 import * as s from "underscore.string";
 
-import { Basis } from "../basis/basis";
+import { ElementsAndCoordinatesConfig } from "../basis/basis";
+import { Cell } from "../cell/cell";
 import math from "../math";
 
 /**
@@ -48,19 +50,32 @@ const ERROR_CODES = {
     REGEX_NOT_PASSED: 3,
 };
 
+// TODO: rename `coordinates` to `coordinate`
+export type ElementWithCoordinate = {
+    element: string;
+    coordinates: Coordinate3DSchema;
+};
+
 export class WrongBasisFormat extends Error {
-    constructor(xyz, message, type) {
-        super(message, type);
+    xyz: string;
+
+    constructor(xyz: string, message: string, code: number) {
+        super(message);
         this.xyz = xyz;
+        console.log(`Wrong basis format: ${message}, code: ${code}`);
     }
 }
 
 export class CombinatorialBasis {
-    /**
-     * Creates Combinatorial basis
-     * @param eXYZ
-     */
-    constructor(eXYZ) {
+    _xyz: string;
+
+    _lines: any[];
+
+    _hasPermutationLine: boolean;
+
+    _hasCombinationLine: boolean;
+
+    constructor(eXYZ: string) {
         this._xyz = eXYZ;
         this._lines = s
             .lines(eXYZ)
@@ -93,7 +108,7 @@ export class CombinatorialBasis {
      * @return {{displayName: string, isCombination: boolean, isPermutation: boolean, elements: Array, coordinates: *[]}}
      * @private
      */
-    _parseBasisLine(str, index) {
+    _parseBasisLine(str: string, index: number) {
         if (!str.match(LINE_REGEX)) {
             throw new WrongBasisFormat(
                 this._xyz,
@@ -132,6 +147,7 @@ export class CombinatorialBasis {
         const coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
 
         return {
+            // TODO: define as a type
             displayName: `ELEMENT_${index}`,
             isCombination: containsCombination,
             isPermutation: containsPermutation,
@@ -153,7 +169,11 @@ export class CombinatorialBasis {
             .sort();
     }
 
-    static toBasisConfig(array, units = "crystal", cell = Basis.defaultCell) {
+    static toBasisConfigForElementsAndCoordinates(
+        array: ElementWithCoordinate[],
+        units = "crystal" as BasisSchema["units"],
+        cell = new Cell(),
+    ): ElementsAndCoordinatesConfig {
         return {
             elements: _.pluck(array, "element"),
             coordinates: _.pluck(array, "coordinates"),
@@ -167,13 +187,13 @@ export class CombinatorialBasis {
      * @return {Basis[]|Object[]}
      */
     get allBasisConfigs() {
-        let result = [];
+        let result: ElementWithCoordinate[][] = [];
         if (this._hasPermutationLine) {
             result = this._permutation();
         } else if (this._hasCombinationLine) {
             result = this._combination();
         } else {
-            const items = [];
+            const items: ElementWithCoordinate[] = [];
             this._lines.forEach((line) => {
                 items.push({
                     element: line.elements[0],
@@ -182,17 +202,19 @@ export class CombinatorialBasis {
             });
             result = [items];
         }
-        return result.map((x) => CombinatorialBasis.toBasisConfig(x));
+        return result.map((x) => CombinatorialBasis.toBasisConfigForElementsAndCoordinates(x));
     }
 
     /**
      * Returns array of regular bases extracted from current combinatorial basis with combinations.
      * @private
      */
-    _combination() {
-        const dimensions = [];
+    _combination(): ElementWithCoordinate[][] {
+        const dimensions: ElementWithCoordinate[][] = [];
         this._lines.forEach((line) => {
-            const itemsSet = [];
+            const itemsSet: ElementWithCoordinate[] = [];
+            // TODO: add type for element
+            // @ts-ignore
             line.elements.forEach((element) => {
                 // omit vacancy characters
                 itemsSet.push({
@@ -202,8 +224,11 @@ export class CombinatorialBasis {
             });
             dimensions.push(itemsSet);
         });
+        // @ts-ignore
         const basisSet = math.cartesianProduct.apply(null, dimensions);
+        // @ts-ignore
         return basisSet.map((basis) =>
+            // @ts-ignore
             basis.filter((entry) => entry.element !== VACANCY_CHARACTER),
         );
     }
@@ -217,7 +242,7 @@ export class CombinatorialBasis {
         const maxLen = Math.max(...this._lines.map((x) => x.elements.length));
         const bases = [];
         for (let i = 0; i < maxLen; i++) {
-            const items = [];
+            const items: ElementWithCoordinate[] = [];
             this._lines.forEach((line) => {
                 const element =
                     line.elements.length <= i ? _.last(line.elements) : line.elements[i];

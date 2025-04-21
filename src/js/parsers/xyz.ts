@@ -1,8 +1,8 @@
-import { BasisSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
+import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import _ from "underscore";
 import s from "underscore.string";
 
-import { ConstrainedBasis } from "../basis/constrained_basis";
+import { ConstrainedBasis, ConstrainedBasisConfig } from "../basis/constrained_basis";
 import { Cell } from "../cell/cell";
 import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
@@ -82,15 +82,13 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
     return basisLineConfig;
 }
 
-export type BasisConfig = BasisSchema;
-
 /**
  * Parse XYZ text for basis.
  * @param txt Text
  * @param units Coordinate units
  * @param cell Basis Cell
  */
-function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): BasisConfig {
+function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): ConstrainedBasisConfig {
     // @ts-ignore
     const lines: string[] = s(txt).trim().lines();
     const listOfObjects = _.map(lines, _parseXYZLineAsWords);
@@ -136,10 +134,10 @@ function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): Basi
         return {
             ...basisConfig,
             labels,
-        } as BasisConfig;
+        } as ConstrainedBasisConfig;
     }
 
-    return basisConfig as BasisConfig;
+    return basisConfig as ConstrainedBasisConfig;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
+import { Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
 
 import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
@@ -18,10 +18,11 @@ function generateNewBasisWithinSupercell(
     basis: Basis | ConstrainedBasis,
     cell: Cell,
     supercell: Cell,
-    supercellMatrix: number[][],
+    supercellMatrix: Matrix3X3Schema,
 ): Basis {
     const oldBasis = basis.clone();
-    const newBasis = basis.clone({ isEmpty: true });
+    const newBasis = basis.clone();
+    newBasis.removeAllAtoms();
 
     oldBasis.toCrystal();
     newBasis.toCrystal();
@@ -52,7 +53,7 @@ function generateNewBasisWithinSupercell(
  * @param material
  * @param supercellMatrix {Number[][]}
  */
-function generateConfig(material: Material, supercellMatrix: number[][]) {
+function generateConfig(material: Material, supercellMatrix: Matrix3X3Schema) {
     const det = math.det(supercellMatrix);
     if (det === 0) {
         throw new Error("Scaling matrix is degenerate.");

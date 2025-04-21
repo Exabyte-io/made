@@ -1,3 +1,4 @@
+import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 
 import { Material } from "../../../src/js/material";
@@ -6,7 +7,11 @@ import { Silicon, SiSlab100, SiSlab111, SiSlab111Gamma120, SiSlab111NoVacuum } f
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 
-const generateSlabWithVacuum = (slabConfig, vacuumRatio) => {
+export type SlabConfigSchema = MaterialSchema & {
+    outOfPlaneAxisIndex: number;
+};
+
+const generateSlabWithVacuum = (slabConfig: SlabConfigSchema, vacuumRatio: number) => {
     const slabMaterial = new Material(slabConfig);
     const { outOfPlaneAxisIndex } = slabConfig;
 

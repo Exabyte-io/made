@@ -1,7 +1,6 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import { BasisSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 import * as _ from "underscore";
 import * as s from "underscore.string";
@@ -76,17 +75,30 @@ export class Basis extends InMemoryEntity implements BasisSchema {
 
     cell: Cell;
 
-    elements: BasisSchema["elements"];
-
-    coordinates: BasisSchema["coordinates"];
-
-    labels: BasisSchema["labels"];
-
     _elements: Elements;
 
     _coordinates: Coordinates;
 
     _labels: Labels;
+
+    static _convertValuesToConfig({
+        elements = [],
+        coordinates = [],
+        units = ATOMIC_COORD_UNITS.crystal as BasisSchema["units"],
+        cell = new Cell(),
+        labels = [],
+    }: ElementsAndCoordinatesConfig): BasisConfig {
+        const elementsArrayWithIdsJSON = Elements.fromValues(elements).toJSON();
+        const coordinatesArrayWithIdsJSON = Coordinates.fromValues(coordinates).toJSON();
+        const labelsArrayWithIdsJSON = Labels.fromValues(labels).toJSON();
+        return {
+            elements: elementsArrayWithIdsJSON as BasisSchema["elements"],
+            coordinates: coordinatesArrayWithIdsJSON as BasisSchema["coordinates"],
+            units,
+            cell,
+            labels: labelsArrayWithIdsJSON as BasisSchema["labels"],
+        };
+    }
 
     static fromElementsAndCoordinates({
         elements = [],
@@ -95,24 +107,20 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         cell = new Cell(),
         labels = [],
     }: ElementsAndCoordinatesConfig): Basis {
-        const elementsArrayWithIdsJSON = Elements.fromValues(elements).toJSON();
-        const coordinatesArrayWithIdsJSON = Coordinates.fromValues(coordinates).toJSON();
-        const labelsArrayWithIdsJSON = Labels.fromValues(labels).toJSON();
-        return new Basis({
-            elements: elementsArrayWithIdsJSON as BasisSchema["elements"],
-            coordinates: coordinatesArrayWithIdsJSON as BasisSchema["coordinates"],
-            units,
-            cell,
-            labels: labelsArrayWithIdsJSON as BasisSchema["labels"],
-        });
+        return new Basis(
+            Basis._convertValuesToConfig({
+                elements,
+                coordinates,
+                units,
+                cell,
+                labels,
+            }),
+        );
     }
 
     constructor(config: BasisConfig = Basis.defaultConfig) {
         super(config);
         const { elements, coordinates, units, labels } = config;
-        this.elements = elements;
-        this.labels = labels;
-        this.coordinates = coordinates;
         this.units = units;
         this.cell = new Cell(config.cell);
         this.units = units || (ATOMIC_COORD_UNITS.crystal as BasisSchema["units"]);
@@ -121,10 +129,47 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         this._labels = Labels.fromObjects(labels || []);
     }
 
-    toJSON(exclude?: string[]): AnyObject {
+    get elements(): BasisSchema["elements"] {
+        return this._elements.toJSON() as BasisSchema["elements"];
+    }
+
+    set elements(elements: BasisSchema["elements"]) {
+        this._elements = Elements.fromObjects(elements);
+    }
+
+    get coordinates(): BasisSchema["coordinates"] {
+        return this._coordinates.toJSON() as BasisSchema["coordinates"];
+    }
+
+    set coordinates(coordinates: BasisSchema["coordinates"]) {
+        this._coordinates = Coordinates.fromObjects(coordinates);
+    }
+
+    get labels(): BasisSchema["labels"] {
+        return this._labels.toJSON() as BasisSchema["labels"];
+    }
+
+    set labels(labels: BasisSchema["labels"]) {
+        this._labels = Labels.fromObjects(labels || []);
+    }
+
+    // TODO: figure out how to override toJSON in the parent class with generic classes
+    // @ts-ignore
+    toJSON(exclude: string[] = ["cell"]): BasisSchema {
         return {
             ...super.toJSON(exclude),
+            elements: this.elements,
+            coordinates: this.coordinates,
+            units: this.units,
+            ...(this.labels?.length ? { labels: this.labels } : {}),
         };
+    }
+
+    // @ts-ignore
+    override clone(): Basis {
+        const instance = super.clone();
+        instance.cell = this.cell.clone();
+        return instance;
     }
 
     removeAllAtoms() {
@@ -212,6 +257,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         this._elements.addItem(element);
         // @ts-ignore
         this._coordinates.addItem(coordinate);
+        this.coordinates = this._coordinates.toJSON() as BasisSchema["coordinates"];
     }
 
     /**
@@ -415,11 +461,12 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * @param anotherBasisClsInstance {Basis} Another Basis.
      */
     hasEquivalentCellTo(anotherBasisClsInstance: Basis): boolean {
-        // this.cell {Array} - Cell Vectors 1, eg. [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-        // prettier-ignore
         return !this.cell.vectorArrays
             .map((vector, idx) => {
-                return math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell.vectorArrays[idx]);
+                return math.vEqualWithTolerance(
+                    vector,
+                    anotherBasisClsInstance.cell.vectorArrays[idx],
+                );
             })
             .some((x) => !x);
     }

@@ -1,11 +1,17 @@
-import { LatticeBravais } from "../lattice/lattice_bravais";
+import { MathType } from "@mat3ra/code/dist/js/math";
+import { Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
+
+import { SlabConfigSchema } from "../../../tests/js/tools/surface";
+import { Cell } from "../cell/cell";
+import { Lattice } from "../lattice/lattice";
+import { Material } from "../material";
 import math from "../math";
 import SupercellTools from "./supercell";
 
 const MULT = math.multiply;
 const ADD = math.add;
 const DOT = math.product;
-const getMatrixInLeftHandedRepresentation = (matrix) => {
+const getMatrixInLeftHandedRepresentation = (matrix: Matrix3X3Schema) => {
     return math.det(matrix) < 0 ? MULT(matrix, -1) : matrix;
 };
 
@@ -16,12 +22,12 @@ const getMatrixInLeftHandedRepresentation = (matrix) => {
  * @param {Number} b
  * @return {Array}
  */
-function extGCD(a, b) {
+function extGCD(a: number, b: number): [number, number] {
     if (b === 0) return [1, 0];
     if (math.mod(a, b) === 0) return [0, 1];
 
     const [x, y] = extGCD(b, math.mod(a, b));
-    return [y, x - y * math.floor(a, b)];
+    return [y, x - y * math.floor(a / b)];
 }
 
 /**
@@ -32,7 +38,11 @@ function extGCD(a, b) {
  * @param tol {Number} Zero-value tolerance
  * @return {Number[][]}
  */
-function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
+function getMillerScalingMatrix(
+    cell: Cell,
+    millerIndices: Coordinate3DSchema,
+    tol = 1e-8,
+): Matrix3X3Schema {
     if (!millerIndices.reduce((a, b) => math.abs(a) + math.abs(b)))
         throw new Error("Miller indices are zeros.");
 
@@ -66,18 +76,20 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
             ];
         }
     } else {
-        const [a1, a2, a3] = cell.vectorsAsArray;
+        const [a1, a2, a3] = cell.vectorArrays;
         // z1 = (k * a1 - h * a2)
         // z2 = (l * a1 - h * a3)
         // z3 = l * a2 - k * a3)
-        const z1 = ADD(MULT(k, a1), MULT(-1, h, a2));
-        const z2 = ADD(MULT(l, a1), MULT(-1, h, a3));
-        const z3 = ADD(MULT(l, a2), MULT(-1, k, a3));
+        const z1 = ADD(MULT(k, a1), -MULT(h, a2));
+        const z2 = ADD(MULT(l, a1), -MULT(h, a3));
+        const z3 = ADD(MULT(l, a2), -MULT(k, a3));
 
         let [p, q] = extGCD(k, l);
 
+        // @ts-ignore
         const k1 = DOT(ADD(MULT(p, z1), MULT(q, z2)), z3);
-        const k2 = DOT(ADD(MULT(l, z1), MULT(-1, k, z2)), z3);
+        // @ts-ignore
+        const k2 = DOT(ADD(MULT(l, z1), -MULT(k, z2)), z3);
 
         if (math.abs(k2) > tol) {
             // For mathjs version 3.20: round(-0.5) = -0
@@ -98,6 +110,7 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
         scalingMatrix = [c1, c2, c3];
     }
 
+    // @ts-ignore
     return getMatrixInLeftHandedRepresentation(scalingMatrix);
 }
 
@@ -112,8 +125,13 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
  * @param vy {Number} Size of lateral supercell along the direction of the second (y) cell vector (Positive Integer).
  * @return {Number[][]}
  */
-function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, thickness, vx, vy) {
-    const transformationMatrix = math.identity(3).toArray();
+function getDimensionsScalingMatrix(
+    outOfPlaneAxisIndex: number,
+    thickness: number,
+    vx: number,
+    vy: number,
+): Matrix3X3Schema {
+    const transformationMatrix = Array(math.eye(3) as MathType);
     const vxIndex = outOfPlaneAxisIndex === 2 ? 0 : outOfPlaneAxisIndex + 1;
     const vyIndex = vxIndex === 2 ? 0 : vxIndex + 1;
 
@@ -124,7 +142,7 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
     transformationMatrix[vxIndex] = MULT(vx, transformationMatrix[vxIndex]);
     transformationMatrix[vyIndex] = MULT(vy, transformationMatrix[vyIndex]);
 
-    return transformationMatrix;
+    return transformationMatrix as Matrix3X3Schema;
 }
 
 /*
@@ -136,19 +154,23 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
  * @param vy {Number} Size of lateral supercell along the direction of the second (y) cell vector (Positive Integer).
  * @return {Object}
  */
-function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy = 1) {
+function generateConfig(
+    material: Material,
+    millerIndices: Coordinate3DSchema,
+    numberOfLayers = 1,
+    vx = 1,
+    vy = 1,
+): SlabConfigSchema {
     if (numberOfLayers < 1)
         throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
 
-    const { cell } = material.Lattice;
+    const cell = material.Lattice.vectors;
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
     const outOfPlaneAxisIndex =
         millerSupercell.getMostCollinearVectorIndex(millerPlanePseudoNormal);
     const dimensionsScalingMatrix = getDimensionsScalingMatrix(
-        cell,
-        millerSupercell,
         outOfPlaneAxisIndex,
         numberOfLayers,
         vx,
@@ -161,9 +183,10 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
         tempBasis,
         cell,
         supercell,
+        // @ts-ignore
         supercellMatrix,
     );
-    const newLattice = LatticeBravais.fromVectors({
+    const newLattice = Lattice.fromVectors({
         a: supercell.a,
         b: supercell.b,
         c: supercell.c,

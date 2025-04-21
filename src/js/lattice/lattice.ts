@@ -1,6 +1,5 @@
 import { HASH_TOLERANCE } from "@mat3ra/code/dist/js/constants";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import {
     Coordinate3DSchema,
     LatticeSchema,
@@ -291,10 +290,11 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         return object;
     }
 
-    toJSON(exclude?: string[]): AnyObject {
+    // @ts-ignore
+    toJSON(exclude?: string[]): LatticeSchema {
         return {
             ...super.toJSON(exclude),
             vectors: this.vectors.toJSON(),
-        };
+        } as LatticeSchema;
     }
 }

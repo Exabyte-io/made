@@ -27,12 +27,22 @@ export enum LatticeTypeExtended {
     TRI_1b = "TRI_1b",
 }
 
-interface LatticeTypeConfig {
+export interface LatticeTypeConfig {
     label: string;
     code: LatticeTypeEnum;
     editables: string[];
     editablesConventional: string[];
 }
+
+export const DEFAULT_LATTICE_UNITS = {
+    // by default lattice vectors shall be measured in angstrom, angles - in degrees
+    length: {
+        angstrom: "angstrom",
+    },
+    angle: {
+        degree: "degree",
+    },
+};
 
 export const LATTICE_TYPE_CONFIGS: LatticeTypeConfig[] = [
     {

@@ -1,4 +1,3 @@
-import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import { AtomicConstraintsSchema } from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
@@ -21,40 +20,40 @@ export interface ElementsCoordinatesAndConstraintsConfig extends ElementsAndCoor
 export class ConstrainedBasis extends Basis {
     _constraints: AtomicConstraints;
 
-    constraints: AtomicConstraintsSchema;
-
     constructor(config: ConstrainedBasisConfig) {
         super(config);
-        this.constraints = config.constraints;
-        this._constraints = AtomicConstraints.fromObjects(config.constraints); // `constraints` is an Array with ids
+        const { constraints } = config;
+        this.constraints = constraints || [];
+        this._constraints = AtomicConstraints.fromObjects(this.constraints); // `constraints` is an Array with ids
     }
 
     static fromElementsCoordinatesAndConstraints(
         config: ElementsCoordinatesAndConstraintsConfig,
     ): ConstrainedBasis {
-        const base = super.fromElementsAndCoordinates({
-            elements: config.elements,
-            coordinates: config.coordinates,
-            units: config.units,
-            cell: config.cell,
-            labels: config.labels,
-        }) as ConstrainedBasis;
+        const basisConfig = this._convertValuesToConfig(config);
+        const constraints = AtomicConstraints.fromValues(config.constraints);
+        return new this({
+            ...basisConfig,
+            constraints: constraints.toJSON() as AtomicConstraintsSchema,
+        });
+    }
 
-        base.constraints = AtomicConstraints.fromValues(
-            config.constraints,
-        ).toJSON() as AtomicConstraintsSchema;
-        base._constraints = AtomicConstraints.fromObjects(base.constraints);
-        return base;
+    get constraints() {
+        return this._constraints.toJSON() as AtomicConstraintsSchema;
+    }
+
+    set constraints(constraints: AtomicConstraintsSchema) {
+        this._constraints = AtomicConstraints.fromObjects(constraints);
     }
 
     get AtomicConstraints() {
         return AtomicConstraints.fromObjects(this.constraints);
     }
 
-    override toJSON(): AnyObject {
+    override toJSON(): ConstrainedBasisConfig {
         return {
             ...super.toJSON(),
-            constraints: this._constraints.toJSON(),
+            constraints: this.constraints,
         };
     }
 

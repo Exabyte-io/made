@@ -7,7 +7,7 @@ import { AsGeBasis, FeLiSiBasis, Ge2Basis, OSiBasis, Si2Basis } from "../fixture
 describe("Parsers:CombinatorialBasis", () => {
     it("toBasisConfig", () => {
         // eslint-disable-next-line new-cap
-        const basisConfig2 = CombinatorialBasis.toBasisConfig([
+        const basisConfig2 = CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
             {
                 element: "Si",
                 coordinates: [0, 0, 0],
@@ -21,7 +21,10 @@ describe("Parsers:CombinatorialBasis", () => {
                 coordinates: [0.5, 0.5, 0.5],
             },
         ]);
-        const [basis1, basis2] = [new Basis(FeLiSiBasis), new Basis(basisConfig2)];
+        const [basis1, basis2] = [
+            new Basis(FeLiSiBasis),
+            Basis.fromElementsAndCoordinates(basisConfig2),
+        ];
 
         expect(basis1.isEqualTo(basis2)).to.equal(true);
     });
@@ -33,7 +36,7 @@ describe("Parsers:CombinatorialBasis", () => {
         `;
         const basis = new CombinatorialBasis(xyz);
         expect(basis.uniqueElements).deep.equal(["O", "Si"]);
-        const basis1 = new Basis(basis.allBasisConfigs[0]);
+        const basis1 = Basis.fromElementsAndCoordinates(basis.allBasisConfigs[0]);
         const basis2 = new Basis(OSiBasis);
         expect(basis1.isEqualTo(basis2)).to.equal(true);
     });
@@ -45,7 +48,7 @@ describe("Parsers:CombinatorialBasis", () => {
         `;
         const basis = new CombinatorialBasis(permutation);
         expect(basis.uniqueElements).deep.equal(["As", "Ge", "Si"]);
-        const basisList1 = basis.allBasisConfigs.map((c) => new Basis(c));
+        const basisList1 = basis.allBasisConfigs.map((c) => Basis.fromElementsAndCoordinates(c));
         const basisList2 = [Si2Basis, Ge2Basis, AsGeBasis].map((c) => new Basis(c));
 
         basisList1.forEach((basis1) => {
@@ -64,11 +67,11 @@ describe("Parsers:CombinatorialBasis", () => {
         const basis = new CombinatorialBasis(combination);
         expect(basis.uniqueElements).deep.equal(["As", "Ge", "Si"]);
 
-        const basisList1 = basis.allBasisConfigs.map((c) => new Basis(c));
+        const basisList1 = basis.allBasisConfigs.map((c) => Basis.fromElementsAndCoordinates(c));
         expect(basisList1.length).to.equal(6);
 
         const basisList2 = [
-            CombinatorialBasis.toBasisConfig([
+            CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "Si",
                     coordinates: [0, 0, 0],
@@ -78,7 +81,7 @@ describe("Parsers:CombinatorialBasis", () => {
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
-            CombinatorialBasis.toBasisConfig([
+            CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "Si",
                     coordinates: [0, 0, 0],
@@ -88,7 +91,7 @@ describe("Parsers:CombinatorialBasis", () => {
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
-            CombinatorialBasis.toBasisConfig([
+            CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "Ge",
                     coordinates: [0, 0, 0],
@@ -98,7 +101,7 @@ describe("Parsers:CombinatorialBasis", () => {
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
-            CombinatorialBasis.toBasisConfig([
+            CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "Ge",
                     coordinates: [0, 0, 0],
@@ -108,7 +111,7 @@ describe("Parsers:CombinatorialBasis", () => {
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
-            CombinatorialBasis.toBasisConfig([
+            CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "As",
                     coordinates: [0, 0, 0],
@@ -118,7 +121,7 @@ describe("Parsers:CombinatorialBasis", () => {
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
-            CombinatorialBasis.toBasisConfig([
+            CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "As",
                     coordinates: [0, 0, 0],
@@ -128,7 +131,7 @@ describe("Parsers:CombinatorialBasis", () => {
                     coordinates: [0.5, 0.5, 0.5],
                 },
             ]),
-        ].map((c) => new Basis(c));
+        ].map((c) => Basis.fromElementsAndCoordinates(c));
 
         basisList1.forEach((basis1) => {
             const condition = basisList2
