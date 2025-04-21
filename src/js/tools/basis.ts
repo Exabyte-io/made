@@ -1,6 +1,6 @@
+import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 import _ from "underscore";
 
-// eslint-disable-next-line no-unused-vars
 import { Basis } from "../basis/basis";
 import math from "../math";
 
@@ -13,7 +13,7 @@ const MULT = math.multiply;
  * @param repetitions{Number[]} Repetition vector `[x, y, z]`, in each spatial dimension.
  * @return {Basis} New Basis.
  */
-function repeat(basis, repetitions) {
+function repeat(basis: Basis, repetitions: number[]): Basis {
     let i, j, k;
     let shiftI = 0;
     let shiftJ = 0;
@@ -32,11 +32,11 @@ function repeat(basis, repetitions) {
                 // for each atom in original basis add one with a repetition
                 // eslint-disable-next-line no-loop-func
                 basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
-                    const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index);
+                    const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
                     // only add atoms if shifts are non-zero
                     if (shiftI || shiftJ || shiftK) {
                         newBasis.addAtom({
-                            element,
+                            element: element.value,
                             coordinate: [coord[0] + shiftI, coord[1] + shiftJ, coord[2] + shiftK],
                         });
                     }
@@ -62,7 +62,11 @@ function repeat(basis, repetitions) {
  * @param normalizedStepIndex {Number} - k.
  * @return {Basis[]} List of all bases.
  */
-function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
+function _linearInterpolation(
+    initialCoordinates: Coordinate3DSchema,
+    delta: Coordinate3DSchema,
+    normalizedStepIndex: number,
+) {
     return ADD(initialCoordinates, MULT(delta, normalizedStepIndex));
 }
 
@@ -74,7 +78,7 @@ function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
  * @param numberOfSteps{Number} Number of intermediate steps.
  * @return {Basis[]} List of all bases.
  */
-function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
+function interpolate(initialBasis: Basis, finalBasis: Basis, numberOfSteps = 1) {
     // check that initial and final basis have the same cell
     if (!initialBasis.hasEquivalentCellTo(finalBasis))
         throw new Error("basis.interpolate: Basis cells are not equal");
@@ -94,8 +98,8 @@ function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
     for (let i = 1; i <= numberOfSteps; i++) {
         const normalizedStepIndex = i / (numberOfSteps + 1);
         const intermediateCoordinates = _linearInterpolation(
-            initialCoordinates,
-            delta,
+            initialCoordinates as Coordinate3DSchema,
+            delta as Coordinate3DSchema,
             normalizedStepIndex,
         );
         const vectorSize = 3;

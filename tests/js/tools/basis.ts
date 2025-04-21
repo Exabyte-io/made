@@ -8,8 +8,9 @@ const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Tools:Basis", () => {
     it("should return a repeated basis", () => {
-        const b = new Basis(Si2Basis);
-        assertDeepAlmostEqual(Si2BasisRepeated, tools.basis.repeat(b, [2, 1, 1]).toJSON());
+        const basis = new Basis(Si2Basis);
+        const repeatedBasis = tools.basis.repeat(basis, [2, 1, 1]);
+        assertDeepAlmostEqual(Si2BasisRepeated, repeatedBasis.toJSON());
     });
 
     it("should return interpolated basises", () => {
