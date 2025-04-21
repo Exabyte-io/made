@@ -121,7 +121,6 @@ export class Basis extends InMemoryEntity implements BasisSchema {
     constructor(config: BasisConfig = Basis.defaultConfig) {
         super(config);
         const { elements, coordinates, units, labels } = config;
-        this.units = units;
         this.cell = new Cell(config.cell);
         this.units = units || (ATOMIC_COORD_UNITS.crystal as BasisSchema["units"]);
         this._elements = Elements.fromObjects(elements);

@@ -121,7 +121,7 @@ function fromPoscar(fileContent: string): object {
                     lineComponents[5] === "T",
                 ];
                 // @ts-ignore
-                constraints.push({ id: j, value: constraint });
+                constraints.push(constraint);
             }
             atomIndex += 1;
         }

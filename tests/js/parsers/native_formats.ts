@@ -1,3 +1,5 @@
+import "../setup";
+
 import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 

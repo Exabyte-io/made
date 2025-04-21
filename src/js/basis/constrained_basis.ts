@@ -23,8 +23,7 @@ export class ConstrainedBasis extends Basis {
     constructor(config: ConstrainedBasisConfig) {
         super(config);
         const { constraints } = config;
-        this.constraints = constraints || [];
-        this._constraints = AtomicConstraints.fromObjects(this.constraints); // `constraints` is an Array with ids
+        this._constraints = AtomicConstraints.fromObjects(constraints || []); // `constraints` is an Array with ids
     }
 
     static fromElementsCoordinatesAndConstraints(
