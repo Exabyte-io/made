@@ -120,7 +120,6 @@ function fromPoscar(fileContent: string): object {
                     lineComponents[4] === "T",
                     lineComponents[5] === "T",
                 ];
-                // @ts-ignore
                 constraints.push(constraint);
             }
             atomIndex += 1;
