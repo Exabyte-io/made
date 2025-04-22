@@ -1,4 +1,4 @@
-import { BasisSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
+import { BasisSchema, Coordinate3DSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
@@ -8,10 +8,10 @@ import { ATOMIC_COORD_UNITS } from "../constants";
 import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
-import { MaterialJSON, Vector } from "../types";
+import { MaterialJSON } from "../types";
 
 const _print = (x: number, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
-const _latticeVectorsToString = (vectors: Vector[]) =>
+const _latticeVectorsToString = (vectors: Vector3DSchema[]) =>
     vectors.map((v) => v.map((c) => _print(c)).join("\t")).join("\n");
 const atomicConstraintsCharFromBool = (bool: boolean): string => (bool ? "T" : "F");
 
@@ -127,9 +127,9 @@ function fromPoscar(fileContent: string): object {
     }
 
     const lattice = Lattice.fromVectorsArray([
-        lines[2].trim().split(/\s+/).map(Number) as Vector,
-        lines[3].trim().split(/\s+/).map(Number) as Vector,
-        lines[4].trim().split(/\s+/).map(Number) as Vector,
+        lines[2].trim().split(/\s+/).map(Number) as Vector3DSchema,
+        lines[3].trim().split(/\s+/).map(Number) as Vector3DSchema,
+        lines[4].trim().split(/\s+/).map(Number) as Vector3DSchema,
     ]);
 
     const basis = ConstrainedBasis.fromElementsCoordinatesAndConstraints({

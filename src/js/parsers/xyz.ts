@@ -1,4 +1,4 @@
-import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
+import { MaterialSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import _ from "underscore";
 import s from "underscore.string";
 
@@ -7,7 +7,6 @@ import { Cell } from "../cell/cell";
 import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
 import math from "../math";
-import { Vector } from "../types";
 import { InvalidLineError } from "./errors";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 
@@ -50,7 +49,7 @@ export function validate(xyzTxt: string) {
 
 export interface ParsedObject {
     element: string;
-    coordinates: Vector;
+    coordinates: Vector3DSchema;
     constraints: AtomicConstraintValue;
     label?: number;
 }
