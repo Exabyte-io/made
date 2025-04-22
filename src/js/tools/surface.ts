@@ -1,6 +1,7 @@
 import { MathType } from "@mat3ra/code/dist/js/math";
 import { Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
 
+// eslint-disable-next-line import/no-cycle
 import { SlabConfigSchema } from "../../../tests/js/tools/surface";
 import { Cell } from "../cell/cell";
 import { Lattice } from "../lattice/lattice";

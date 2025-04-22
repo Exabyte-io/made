@@ -66,8 +66,8 @@ function _linearInterpolation(
     initialCoordinates: Coordinate3DSchema,
     delta: Coordinate3DSchema,
     normalizedStepIndex: number,
-) {
-    return ADD(initialCoordinates, MULT(delta, normalizedStepIndex));
+): number[] {
+    return ADD(initialCoordinates, MULT(delta, normalizedStepIndex)) as number[];
 }
 
 /**
@@ -97,17 +97,23 @@ function interpolate(initialBasis: Basis, finalBasis: Basis, numberOfSteps = 1) 
 
     for (let i = 1; i <= numberOfSteps; i++) {
         const normalizedStepIndex = i / (numberOfSteps + 1);
-        const intermediateCoordinates = _linearInterpolation(
+        const intermediateCoordinates: number[] = _linearInterpolation(
             initialCoordinates as Coordinate3DSchema,
             delta as Coordinate3DSchema,
             normalizedStepIndex,
         );
         const vectorSize = 3;
         const intermediateCoordinatesAsNestedArray = _.toArray(
-            _.groupBy(intermediateCoordinates, (a, b) => Math.floor(b / vectorSize)),
+            _.groupBy(intermediateCoordinates, (_, b) => Math.floor(b / vectorSize)),
         );
         const intermediateBasis = initialBasis.clone();
-        intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray;
+        intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray.map(
+            (coordinate, index) => ({
+                id: index,
+                value: coordinate as Coordinate3DSchema,
+            }),
+        );
+
         resultingListOfBases.push(intermediateBasis);
     }
 

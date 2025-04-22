@@ -31,9 +31,12 @@ function generateNewBasisWithinSupercell(
         const coordinate = oldBasis.getCoordinateByIndex(element.id);
         const cartesianCoordinate = cell.convertPointToCartesian(coordinate.value);
         const shifts = cellTools.latticePointsInSupercell(supercellMatrix);
-        shifts.forEach((comb) => {
+        shifts.forEach((combination) => {
             // "combination" is effectively a point in fractional coordinates here, hence the below
-            const newPoint = ADD(cartesianCoordinate, supercell.convertPointToCartesian(comb));
+            const newPoint = ADD(
+                cartesianCoordinate,
+                supercell.convertPointToCartesian(combination),
+            );
             if (supercell.isPointInsideCell(newPoint as Coordinate3DSchema)) {
                 newBasis.addAtom({
                     element: element.value,

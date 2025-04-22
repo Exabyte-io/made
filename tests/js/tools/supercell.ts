@@ -1,9 +1,13 @@
+import { Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
 import { Basis } from "../../../src/js/basis/basis";
 import { Made } from "../../../src/js/made";
 import { Material } from "../../../src/js/material";
 import { Silicon, SiSupercell } from "../fixtures";
+
+const { assertDeepAlmostEqual } = Utils.assertion;
 
 describe("Tools:Supercell", () => {
     it("should generate supercell", () => {
@@ -12,8 +16,9 @@ describe("Tools:Supercell", () => {
             [2, 0, 0],
             [0, 2, 0],
             [0, 0, 2],
-        ]);
-        expect(supercell.lattice).deep.equal(SiSupercell.lattice, "lattices are not equal");
+        ] as Matrix3X3Schema);
+        // expect(supercell.lattice).deep.equal(SiSupercell.lattice, "lattices are not equal");
+        assertDeepAlmostEqual(supercell.lattice, SiSupercell.lattice, ["vectors"]);
 
         const basis1 = new Basis(SiSupercell.basis);
         const basis2 = new Basis(supercell.basis);

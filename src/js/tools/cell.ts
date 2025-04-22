@@ -1,3 +1,5 @@
+import { Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
+
 import { Cell } from "../cell/cell";
 import math from "../math";
 
@@ -5,8 +7,8 @@ import math from "../math";
  * Returns the list of points on the original lattice contained in the supercell in fractional coordinates.
  * Source: https://pymatgen.org/_modules/pymatgen/util/coord.html
  */
-function latticePointsInSupercell(supercellMatrix) {
-    const supercell = new Cell(supercellMatrix);
+function latticePointsInSupercell(supercellMatrix: Matrix3X3Schema) {
+    const supercell = Cell.fromVectorsArray(supercellMatrix);
     const diagonals = [
         [0, 0, 0],
         [0, 0, 1],
@@ -17,7 +19,9 @@ function latticePointsInSupercell(supercellMatrix) {
         [1, 1, 0],
         [1, 1, 1],
     ];
-    const d_points = diagonals.map((p) => supercell.convertPointToCartesian(p));
+    const d_points = diagonals.map((point) =>
+        supercell.convertPointToCartesian(point as Coordinate3DSchema),
+    );
     const mins = [0, 1, 2].map((i) => math.min(...d_points.map((p) => p[i])));
     const maxes = [0, 1, 2].map((i) => math.max(...d_points.map((p) => p[i])) + 1);
     const points = [];

@@ -2,6 +2,7 @@ import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 
 import { Material } from "../../../src/js/material";
+// eslint-disable-next-line import/no-cycle
 import tools from "../../../src/js/tools";
 import { Silicon, SiSlab100, SiSlab111, SiSlab111Gamma120, SiSlab111NoVacuum } from "../fixtures";
 
@@ -14,10 +15,11 @@ export type SlabConfigSchema = MaterialSchema & {
 const generateSlabWithVacuum = (slabConfig: SlabConfigSchema, vacuumRatio: number) => {
     const slabMaterial = new Material(slabConfig);
     const { outOfPlaneAxisIndex } = slabConfig;
+    const AXES = ["a", "b", "c"] as const;
 
     tools.material.scaleOneLatticeVector(
         slabMaterial,
-        ["a", "b", "c"][outOfPlaneAxisIndex],
+        AXES[outOfPlaneAxisIndex],
         1 / (1 - vacuumRatio),
     );
 
