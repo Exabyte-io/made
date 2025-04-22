@@ -1,7 +1,7 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { BasisSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
+import { BasisSchema, Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
 import * as _ from "underscore";
 import * as s from "underscore.string";
 
@@ -574,9 +574,11 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         const transposedBasisCoordinates = math.transpose(this._coordinates.values);
         const centerOfCoordinatesVectors = [];
         for (let i = 0; i < 3; i++) {
-            const center = // @ts-ignore
-                transposedBasisCoordinates[i].reduce((a, b) => a + b) /
-                this._elements.values.length;
+            const coordArray = (transposedBasisCoordinates as Matrix3X3Schema)[
+                i
+            ] as Coordinate3DSchema;
+            const center =
+                coordArray.reduce((a: number, b: number) => a + b, 0) / this.coordinates.length;
             centerOfCoordinatesVectors.push(math.precise(center, 4));
         }
         return centerOfCoordinatesVectors;

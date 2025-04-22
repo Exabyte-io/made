@@ -1,5 +1,5 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { BasisSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
+import { BasisSchema, Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
 import * as _ from "underscore";
 import { Cell } from "../cell/cell";
 import { AtomicCoordinateValue, Coordinate, Coordinates } from "./coordinates";
@@ -50,7 +50,7 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
     toJSON(exclude?: string[]): BasisSchema;
     clone(): Basis;
     removeAllAtoms(): void;
-    get cellRounded(): import("@mat3ra/esse/dist/js/types").Matrix3X3Schema;
+    get cellRounded(): Matrix3X3Schema;
     get elementsArray(): object[];
     getElementsAsObject(): BasisSchema["elements"];
     get coordinatesAsArray(): Coordinate3DSchema[];

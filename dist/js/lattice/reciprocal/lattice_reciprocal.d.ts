@@ -1,5 +1,5 @@
+import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import { Lattice } from "../lattice";
-type Vector3 = [number, number, number];
 type KPointCoordinates = number[];
 type KPointPath = Array<{
     point: string;
@@ -18,9 +18,9 @@ interface ConversionTable {
 export declare class ReciprocalLattice extends Lattice {
     /**
      * Get reciprocal vectors for the current Lattice in cartesian (2pi / a) units
-     * @return {Vector3[]}
+     * @return {Vector3DSchema[]}
      */
-    get reciprocalVectors(): Vector3[];
+    get reciprocalVectors(): Vector3DSchema[];
     /**
      * Norms of reciprocal vectors.
      * @return {number[]}

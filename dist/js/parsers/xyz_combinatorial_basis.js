@@ -155,7 +155,7 @@ class CombinatorialBasis {
     static toBasisConfigForElementsAndCoordinates(array, units = "crystal", cell = new cell_1.Cell()) {
         return {
             elements: underscore_1.default.pluck(array, "element"),
-            coordinates: underscore_1.default.pluck(array, "coordinates"),
+            coordinates: underscore_1.default.pluck(array, "coordinate"),
             units,
             cell,
         };
@@ -177,7 +177,7 @@ class CombinatorialBasis {
             this._lines.forEach((line) => {
                 items.push({
                     element: line.elements[0],
-                    coordinates: line.coordinates,
+                    coordinate: line.coordinate,
                 });
             });
             result = [items];
@@ -198,7 +198,7 @@ class CombinatorialBasis {
                 // omit vacancy characters
                 itemsSet.push({
                     element,
-                    coordinates: line.coordinates,
+                    coordinate: line.coordinate,
                 });
             });
             dimensions.push(itemsSet);
@@ -225,7 +225,7 @@ class CombinatorialBasis {
                 if (element !== VACANCY_CHARACTER) {
                     items.push({
                         element,
-                        coordinates: line.coordinates,
+                        coordinate: line.coordinate,
                     });
                 }
             });

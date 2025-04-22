@@ -486,9 +486,8 @@ class Basis extends entity_1.InMemoryEntity {
         const transposedBasisCoordinates = math_1.default.transpose(this._coordinates.values);
         const centerOfCoordinatesVectors = [];
         for (let i = 0; i < 3; i++) {
-            const center = // @ts-ignore
-             transposedBasisCoordinates[i].reduce((a, b) => a + b) /
-                this._elements.values.length;
+            const coordArray = transposedBasisCoordinates[i];
+            const center = coordArray.reduce((a, b) => a + b, 0) / this.coordinates.length;
             centerOfCoordinatesVectors.push(math_1.default.precise(center, 4));
         }
         return centerOfCoordinatesVectors;

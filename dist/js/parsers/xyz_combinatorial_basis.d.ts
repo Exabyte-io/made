@@ -3,7 +3,7 @@ import { ElementsAndCoordinatesConfig } from "../basis/basis";
 import { Cell } from "../cell/cell";
 export type ElementWithCoordinate = {
     element: string;
-    coordinates: Coordinate3DSchema;
+    coordinate: Coordinate3DSchema;
 };
 export declare class WrongBasisFormat extends Error {
     xyz: string;

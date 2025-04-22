@@ -15,7 +15,7 @@ const symmetry_points_1 = require("./symmetry_points");
 class ReciprocalLattice extends lattice_1.Lattice {
     /**
      * Get reciprocal vectors for the current Lattice in cartesian (2pi / a) units
-     * @return {Vector3[]}
+     * @return {Vector3DSchema[]}
      */
     get reciprocalVectors() {
         const vectors_ = this.vectors.vectorArrays;

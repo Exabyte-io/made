@@ -1,4 +1,5 @@
 import { ATOMIC_COORD_UNITS, units as UNITS } from "@mat3ra/code/dist/js/constants";
+import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 // @ts-ignore
 import almostEqual from "array-almost-equal";
 import lodash from "lodash";
@@ -8,7 +9,6 @@ import { Lattice } from "../lattice";
 import { paths } from "./paths";
 import { symmetryPoints } from "./symmetry_points";
 
-type Vector3 = [number, number, number];
 type KPointCoordinates = number[];
 type KPointPath = Array<{
     point: string;
@@ -37,10 +37,10 @@ interface PathsType {
 export class ReciprocalLattice extends Lattice {
     /**
      * Get reciprocal vectors for the current Lattice in cartesian (2pi / a) units
-     * @return {Vector3[]}
+     * @return {Vector3DSchema[]}
      */
-    get reciprocalVectors(): Vector3[] {
-        const vectors_: Vector3[] = this.vectors.vectorArrays as unknown as Vector3[];
+    get reciprocalVectors(): Vector3DSchema[] {
+        const vectors_: Vector3DSchema[] = this.vectors.vectorArrays as Vector3DSchema[];
         const a: number = math.vlen(vectors_[0]);
         const divider: number =
             (math.multiply(
@@ -48,9 +48,9 @@ export class ReciprocalLattice extends Lattice {
                 math.cross(vectors_[1], vectors_[2]),
             ) as unknown as number) / a;
         return [
-            math.multiply(math.cross(vectors_[1], vectors_[2]), 1 / divider) as unknown as Vector3,
-            math.multiply(math.cross(vectors_[2], vectors_[0]), 1 / divider) as unknown as Vector3,
-            math.multiply(math.cross(vectors_[0], vectors_[1]), 1 / divider) as unknown as Vector3,
+            math.multiply(math.cross(vectors_[1], vectors_[2]), 1 / divider) as Vector3DSchema,
+            math.multiply(math.cross(vectors_[2], vectors_[0]), 1 / divider) as Vector3DSchema,
+            math.multiply(math.cross(vectors_[0], vectors_[1]), 1 / divider) as Vector3DSchema,
         ];
     }
 
@@ -59,7 +59,7 @@ export class ReciprocalLattice extends Lattice {
      * @return {number[]}
      */
     get reciprocalVectorNorms(): number[] {
-        return this.reciprocalVectors.map((vec) => math.norm(vec) as unknown as number);
+        return this.reciprocalVectors.map((vec) => math.norm(vec) as number);
     }
 
     /**
@@ -68,7 +68,7 @@ export class ReciprocalLattice extends Lattice {
      */
     get reciprocalVectorRatios(): number[] {
         const norms: number[] = this.reciprocalVectorNorms;
-        const maxNorm: number = math.max(...norms) as unknown as number;
+        const maxNorm: number = math.max(...norms) as number;
         return norms.map((n: number) => n / maxNorm);
     }
 
@@ -78,7 +78,7 @@ export class ReciprocalLattice extends Lattice {
      * @return {KPointCoordinates}
      */
     getCartesianCoordinates(point: KPointCoordinates): KPointCoordinates {
-        return math.multiply(point, this.reciprocalVectors) as unknown as KPointCoordinates;
+        return math.multiply(point, this.reciprocalVectors) as KPointCoordinates;
     }
 
     /**
@@ -134,8 +134,8 @@ export class ReciprocalLattice extends Lattice {
         const [j, k] = [0, 1, 2].filter((i) => i !== index); // get indices of other two dimensions
         const N: number = math.cbrt(
             (nPoints * norms[index] ** 2) / (norms[j] * norms[k]),
-        ) as unknown as number;
-        return math.max(1, math.ceil(N)) as unknown as number;
+        ) as number;
+        return math.max(1, math.ceil(N)) as number;
     }
 
     /**
@@ -174,10 +174,7 @@ export class ReciprocalLattice extends Lattice {
     ): number[] {
         const factor: number = this.conversionTable[units][ATOMIC_COORD_UNITS.cartesian] || 1;
         return this.reciprocalVectorNorms.map((norm: number) => {
-            return math.max(
-                1,
-                math.ceil(lodash.round(norm / (spacing * factor), 4)),
-            ) as unknown as number;
+            return math.max(1, math.ceil(lodash.round(norm / (spacing * factor), 4))) as number;
         });
     }
 
@@ -197,7 +194,7 @@ export class ReciprocalLattice extends Lattice {
             factor *
             (math.mean(
                 dimensions.map((dim: number, i: number) => norms[i] / math.max(1, dim)),
-            ) as unknown as number)
+            ) as number)
         );
     }
 }
