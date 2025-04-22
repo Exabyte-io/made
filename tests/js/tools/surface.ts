@@ -4,13 +4,10 @@ import { Utils } from "@mat3ra/utils";
 import { Material } from "../../../src/js/material";
 // eslint-disable-next-line import/no-cycle
 import tools from "../../../src/js/tools";
+import { SlabConfigSchema } from "../../../src/js/tools/surface";
 import { Silicon, SiSlab100, SiSlab111, SiSlab111Gamma120, SiSlab111NoVacuum } from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
-
-export type SlabConfigSchema = MaterialSchema & {
-    outOfPlaneAxisIndex: number;
-};
 
 const generateSlabWithVacuum = (slabConfig: SlabConfigSchema, vacuumRatio: number) => {
     const slabMaterial = new Material(slabConfig);
