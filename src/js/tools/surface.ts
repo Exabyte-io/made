@@ -1,5 +1,4 @@
-import { MathType } from "@mat3ra/code/dist/js/math";
-import { Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
+import { Coordinate3DSchema, Matrix3X3Schema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 
 // eslint-disable-next-line import/no-cycle
 import { SlabConfigSchema } from "../../../tests/js/tools/surface";
@@ -132,16 +131,20 @@ function getDimensionsScalingMatrix(
     vx: number,
     vy: number,
 ): Matrix3X3Schema {
-    const transformationMatrix = Array(math.eye(3) as MathType);
+    const transformationMatrix = [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+    ] as Matrix3X3Schema;
     const vxIndex = outOfPlaneAxisIndex === 2 ? 0 : outOfPlaneAxisIndex + 1;
     const vyIndex = vxIndex === 2 ? 0 : vxIndex + 1;
 
     transformationMatrix[outOfPlaneAxisIndex] = MULT(
         thickness,
         transformationMatrix[outOfPlaneAxisIndex],
-    );
-    transformationMatrix[vxIndex] = MULT(vx, transformationMatrix[vxIndex]);
-    transformationMatrix[vyIndex] = MULT(vy, transformationMatrix[vyIndex]);
+    ) as Vector3DSchema;
+    transformationMatrix[vxIndex] = MULT(vx, transformationMatrix[vxIndex]) as Vector3DSchema;
+    transformationMatrix[vyIndex] = MULT(vy, transformationMatrix[vyIndex]) as Vector3DSchema;
 
     return transformationMatrix as Matrix3X3Schema;
 }
