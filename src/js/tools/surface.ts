@@ -194,13 +194,12 @@ function generateConfig(
         tempBasis,
         cell,
         supercell,
-        // @ts-ignore
-        supercellMatrix,
+        supercellMatrix as Matrix3X3Schema,
     );
     const newLattice = Lattice.fromVectors({
-        a: supercell.vectorArraysRounded[0],
-        b: supercell.vectorArraysRounded[1],
-        c: supercell.vectorArraysRounded[2],
+        a: supercell.vectorArrays[0],
+        b: supercell.vectorArrays[1],
+        c: supercell.vectorArrays[2],
     });
 
     return {

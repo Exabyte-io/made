@@ -142,13 +142,11 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
     const supercellMatrix = MULT(dimensionsScalingMatrix, millerScalingMatrix);
     const supercell = millerSupercell.cloneAndScaleByMatrix(dimensionsScalingMatrix);
     const tempBasis = material.Basis.clone();
-    const newBasis = supercell_1.default.generateNewBasisWithinSupercell(tempBasis, cell, supercell, 
-    // @ts-ignore
-    supercellMatrix);
+    const newBasis = supercell_1.default.generateNewBasisWithinSupercell(tempBasis, cell, supercell, supercellMatrix);
     const newLattice = lattice_1.Lattice.fromVectors({
-        a: supercell.vectorArraysRounded[0],
-        b: supercell.vectorArraysRounded[1],
-        c: supercell.vectorArraysRounded[2],
+        a: supercell.vectorArrays[0],
+        b: supercell.vectorArrays[1],
+        c: supercell.vectorArrays[2],
     });
     return {
         name: `${material.name} - slab ${JSON.stringify(millerIndices)}`,

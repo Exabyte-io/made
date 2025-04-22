@@ -133,9 +133,6 @@ class Basis extends entity_1.InMemoryEntity {
         this.elements = [];
         this.coordinates = [];
         this.labels = [];
-        this._elements = elements_1.Elements.fromValues([]);
-        this._coordinates = coordinates_1.Coordinates.fromValues([]);
-        this._labels = labels_1.Labels.fromValues([]);
     }
     get cellRounded() {
         return this.cell.vectorArraysRounded;
@@ -183,21 +180,18 @@ class Basis extends entity_1.InMemoryEntity {
     }
     /** A representation where all coordinates are within 0 and 1 in crystal units */
     get standardRepresentation() {
-        const originalUnits = this.units;
+        const originalIsInCartesianUnits = this.isInCartesianUnits;
         this.toStandardRepresentation();
         const result = this.toJSON();
-        // preserve the original state
-        if (originalUnits !== constants_1.ATOMIC_COORD_UNITS.crystal)
+        if (originalIsInCartesianUnits)
             this.toCartesian();
         return result;
     }
     /**
      * Add atom with a chemical element at coordinate.
      */
-    // @ts-ignore
     addAtom({ element = "Si", coordinate = [0.5, 0.5, 0.5] }) {
         this._elements.addItem(element);
-        // @ts-ignore
         this._coordinates.addItem(coordinate);
         this.coordinates = this._coordinates.toJSON();
     }
@@ -206,10 +200,9 @@ class Basis extends entity_1.InMemoryEntity {
      */
     removeAtom({ element, coordinate, id }) {
         if (element && coordinate) {
-            // @ts-ignore
-            this._elements.removeItem(element, id);
-            // @ts-ignore
-            this._coordinates.removeItem(coordinate, id);
+            const coordinateId = this._coordinates.getElementIdByValue(coordinate) || -1;
+            this._elements.removeItem(coordinateId, id);
+            this._coordinates.removeItem(coordinateId, id);
         }
     }
     /**
@@ -291,9 +284,9 @@ class Basis extends entity_1.InMemoryEntity {
      */
     get elementsAndCoordinatesAndLabelsArray() {
         return this._elements.values.map((element, idx) => {
-            const coordinates = this.getCoordinateByIndex(idx);
+            const coordinate = this.getCoordinateByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
-            return [element, coordinates, atomicLabel];
+            return [element, coordinate, atomicLabel];
         });
     }
     /**
@@ -308,15 +301,14 @@ class Basis extends entity_1.InMemoryEntity {
      * This guarantees the independence from the order in the elements array.
      */
     getAsSortedString() {
-        // make a copy to prevent modifying class values
         const clsInstance = this.clone();
         clsInstance.toStandardRepresentation();
         const standardRep = clsInstance.elementsAndCoordinatesAndLabelsArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
-            const toleratedCoordinates = coordinate.value.map((x) => math_1.default.round(x, constants_1.HASH_TOLERANCE));
-            return `${element}${atomicLabel} ${toleratedCoordinates.join()}`;
+            const toleratedCoordinate = coordinate.value.map((x) => math_1.default.round(x, constants_1.HASH_TOLERANCE));
+            return `${element}${atomicLabel} ${toleratedCoordinate.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
     }
@@ -462,9 +454,7 @@ class Basis extends entity_1.InMemoryEntity {
             for (let i = 0; i < this._elements.values.length; i++) {
                 for (let j = i + 1; j < this._elements.values.length; j++) {
                     const distance = math_1.default.vDist(this._coordinates.getElementValueByIndex(i), this._coordinates.getElementValueByIndex(j));
-                    // @ts-ignore
-                    if (distance > maxDistance) {
-                        // @ts-ignore
+                    if (distance && distance > maxDistance) {
                         maxDistance = distance;
                     }
                 }
@@ -507,7 +497,6 @@ class Basis extends entity_1.InMemoryEntity {
      * @summary Function translates coordinates by the vector passed as an argument.
      */
     translateByVector(translationVector) {
-        // @ts-ignore
         this._coordinates.mapArrayInPlace((x) => math_1.default.add(x, translationVector));
     }
 }

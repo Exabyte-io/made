@@ -175,9 +175,6 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         this.elements = [];
         this.coordinates = [];
         this.labels = [];
-        this._elements = Elements.fromValues([]);
-        this._coordinates = Coordinates.fromValues([]);
-        this._labels = Labels.fromValues([]);
     }
 
     get cellRounded() {
@@ -237,24 +234,21 @@ export class Basis extends InMemoryEntity implements BasisSchema {
 
     /** A representation where all coordinates are within 0 and 1 in crystal units */
     get standardRepresentation(): BasisSchema {
-        const originalUnits = this.units;
+        const originalIsInCartesianUnits = this.isInCartesianUnits;
 
         this.toStandardRepresentation();
         const result = this.toJSON();
 
-        // preserve the original state
-        if (originalUnits !== ATOMIC_COORD_UNITS.crystal) this.toCartesian();
+        if (originalIsInCartesianUnits) this.toCartesian();
 
-        return result as unknown as BasisSchema;
+        return result as BasisSchema;
     }
 
     /**
      * Add atom with a chemical element at coordinate.
      */
-    // @ts-ignore
     addAtom({ element = "Si", coordinate = [0.5, 0.5, 0.5] }: ElementWithCoordinate) {
         this._elements.addItem(element);
-        // @ts-ignore
         this._coordinates.addItem(coordinate);
         this.coordinates = this._coordinates.toJSON() as BasisSchema["coordinates"];
     }
@@ -264,10 +258,9 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     removeAtom({ element, coordinate, id }: ElementWithCoordinate) {
         if (element && coordinate) {
-            // @ts-ignore
-            this._elements.removeItem(element, id);
-            // @ts-ignore
-            this._coordinates.removeItem(coordinate, id);
+            const coordinateId = this._coordinates.getElementIdByValue(coordinate) || -1;
+            this._elements.removeItem(coordinateId, id);
+            this._coordinates.removeItem(coordinateId, id);
         }
     }
 
@@ -355,9 +348,9 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     get elementsAndCoordinatesAndLabelsArray(): [string, Coordinate, string][] {
         return this._elements.values.map((element, idx) => {
-            const coordinates = this.getCoordinateByIndex(idx);
+            const coordinate = this.getCoordinateByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
-            return [element, coordinates, atomicLabel];
+            return [element, coordinate, atomicLabel];
         });
     }
 
@@ -373,15 +366,14 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * This guarantees the independence from the order in the elements array.
      */
     getAsSortedString(): string {
-        // make a copy to prevent modifying class values
         const clsInstance = this.clone();
         clsInstance.toStandardRepresentation();
         const standardRep = clsInstance.elementsAndCoordinatesAndLabelsArray.map((entry) => {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
-            const toleratedCoordinates = coordinate.value.map((x) => math.round(x, HASH_TOLERANCE));
-            return `${element}${atomicLabel} ${toleratedCoordinates.join()}`;
+            const toleratedCoordinate = coordinate.value.map((x) => math.round(x, HASH_TOLERANCE));
+            return `${element}${atomicLabel} ${toleratedCoordinate.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
     }
@@ -550,9 +542,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
                         this._coordinates.getElementValueByIndex(i) as Coordinate3DSchema,
                         this._coordinates.getElementValueByIndex(j) as Coordinate3DSchema,
                     );
-                    // @ts-ignore
-                    if (distance > maxDistance) {
-                        // @ts-ignore
+                    if (distance && distance > maxDistance) {
                         maxDistance = distance;
                     }
                 }
@@ -596,7 +586,8 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * @summary Function translates coordinates by the vector passed as an argument.
      */
     translateByVector(translationVector: number[]) {
-        // @ts-ignore
-        this._coordinates.mapArrayInPlace((x) => math.add(x, translationVector));
+        this._coordinates.mapArrayInPlace(
+            (x) => math.add(x, translationVector) as Coordinate3DSchema,
+        );
     }
 }
