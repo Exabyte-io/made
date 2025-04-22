@@ -49,7 +49,7 @@ export function validate(xyzTxt: string) {
 
 export interface ParsedObject {
     element: string;
-    coordinates: Vector3DSchema;
+    coordinate: Vector3DSchema;
     constraints: AtomicConstraintValue;
     label?: number;
 }
@@ -66,7 +66,7 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
 
     const basisLineConfig: ParsedObject = {
         element,
-        coordinates: [+words[1], +words[2], +words[3]],
+        coordinate: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
         constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
     };
@@ -102,7 +102,7 @@ function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): Cons
         coordinates: listOfObjects.map((elm, idx) => {
             return {
                 id: idx,
-                value: elm.coordinates,
+                value: elm.coordinate,
             };
         }),
         units,

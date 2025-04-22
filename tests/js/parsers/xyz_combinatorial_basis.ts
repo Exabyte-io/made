@@ -10,15 +10,15 @@ describe("Parsers:CombinatorialBasis", () => {
         const basisConfig2 = CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
             {
                 element: "Si",
-                coordinates: [0, 0, 0],
+                coordinate: [0, 0, 0],
             },
             {
                 element: "Li",
-                coordinates: [0.3, 0.3, 0.3],
+                coordinate: [0.3, 0.3, 0.3],
             },
             {
                 element: "Fe",
-                coordinates: [0.5, 0.5, 0.5],
+                coordinate: [0.5, 0.5, 0.5],
             },
         ]);
         const [basis1, basis2] = [
@@ -74,61 +74,61 @@ describe("Parsers:CombinatorialBasis", () => {
             CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "Si",
-                    coordinates: [0, 0, 0],
+                    coordinate: [0, 0, 0],
                 },
                 {
                     element: "Si",
-                    coordinates: [0.5, 0.5, 0.5],
+                    coordinate: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "Si",
-                    coordinates: [0, 0, 0],
+                    coordinate: [0, 0, 0],
                 },
                 {
                     element: "Ge",
-                    coordinates: [0.5, 0.5, 0.5],
+                    coordinate: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "Ge",
-                    coordinates: [0, 0, 0],
+                    coordinate: [0, 0, 0],
                 },
                 {
                     element: "Si",
-                    coordinates: [0.5, 0.5, 0.5],
+                    coordinate: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "Ge",
-                    coordinates: [0, 0, 0],
+                    coordinate: [0, 0, 0],
                 },
                 {
                     element: "Ge",
-                    coordinates: [0.5, 0.5, 0.5],
+                    coordinate: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "As",
-                    coordinates: [0, 0, 0],
+                    coordinate: [0, 0, 0],
                 },
                 {
                     element: "Si",
-                    coordinates: [0.5, 0.5, 0.5],
+                    coordinate: [0.5, 0.5, 0.5],
                 },
             ]),
             CombinatorialBasis.toBasisConfigForElementsAndCoordinates([
                 {
                     element: "As",
-                    coordinates: [0, 0, 0],
+                    coordinate: [0, 0, 0],
                 },
                 {
                     element: "Ge",
-                    coordinates: [0.5, 0.5, 0.5],
+                    coordinate: [0.5, 0.5, 0.5],
                 },
             ]),
         ].map((c) => Basis.fromElementsAndCoordinates(c));

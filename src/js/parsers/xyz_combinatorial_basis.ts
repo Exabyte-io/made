@@ -53,7 +53,7 @@ const ERROR_CODES = {
 // TODO: rename `coordinates` to `coordinate`
 export type ElementWithCoordinate = {
     element: string;
-    coordinates: Coordinate3DSchema;
+    coordinate: Coordinate3DSchema;
 };
 
 export class WrongBasisFormat extends Error {
@@ -144,7 +144,7 @@ export class CombinatorialBasis {
             elements = [words[0]];
         }
 
-        const coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
+        const coordinate = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
 
         return {
             // TODO: define as a type
@@ -152,7 +152,7 @@ export class CombinatorialBasis {
             isCombination: containsCombination,
             isPermutation: containsPermutation,
             elements,
-            coordinates,
+            coordinate,
         };
     }
 
@@ -176,7 +176,7 @@ export class CombinatorialBasis {
     ): ElementsAndCoordinatesConfig {
         return {
             elements: _.pluck(array, "element"),
-            coordinates: _.pluck(array, "coordinates"),
+            coordinates: _.pluck(array, "coordinate"),
             units,
             cell,
         };
@@ -197,7 +197,7 @@ export class CombinatorialBasis {
             this._lines.forEach((line) => {
                 items.push({
                     element: line.elements[0],
-                    coordinates: line.coordinates,
+                    coordinate: line.coordinate,
                 });
             });
             result = [items];
@@ -213,22 +213,18 @@ export class CombinatorialBasis {
         const dimensions: ElementWithCoordinate[][] = [];
         this._lines.forEach((line) => {
             const itemsSet: ElementWithCoordinate[] = [];
-            // TODO: add type for element
-            // @ts-ignore
-            line.elements.forEach((element) => {
+            line.elements.forEach((element: string) => {
                 // omit vacancy characters
                 itemsSet.push({
                     element,
-                    coordinates: line.coordinates,
+                    coordinate: line.coordinate,
                 });
             });
             dimensions.push(itemsSet);
         });
-        // @ts-ignore
-        const basisSet = math.cartesianProduct.apply(null, dimensions);
-        // @ts-ignore
-        return basisSet.map((basis) =>
-            // @ts-ignore
+        // @ts-ignore // We're multiplying objects with math, not numbers. No type casting will help.
+        const basisSet = math.cartesianProduct.apply(null, dimensions) as ElementWithCoordinate[][];
+        return basisSet.map((basis: ElementWithCoordinate[]) =>
             basis.filter((entry) => entry.element !== VACANCY_CHARACTER),
         );
     }
@@ -249,7 +245,7 @@ export class CombinatorialBasis {
                 if (element !== VACANCY_CHARACTER) {
                     items.push({
                         element,
-                        coordinates: line.coordinates,
+                        coordinate: line.coordinate,
                     });
                 }
             });
