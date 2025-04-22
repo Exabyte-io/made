@@ -1,4 +1,3 @@
-import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 
 import { Material } from "../../../src/js/material";

@@ -198,9 +198,9 @@ function generateConfig(
         supercellMatrix,
     );
     const newLattice = Lattice.fromVectors({
-        a: supercell.a,
-        b: supercell.b,
-        c: supercell.c,
+        a: supercell.vectorArraysRounded[0],
+        b: supercell.vectorArraysRounded[1],
+        c: supercell.vectorArraysRounded[2],
     });
 
     return {

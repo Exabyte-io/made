@@ -13,15 +13,13 @@ import { Material } from "../material";
  */
 
 function scaleOneLatticeVector(material: Material, key: "a" | "b" | "c" = "a", factor = 1.0) {
-    material.toCartesian();
+    const lattice = { ...material.lattice };
+    if (lattice.vectors === undefined) {
+        throw new Error("Lattice vectors are undefined");
+    }
+    lattice.vectors[key] = lattice.vectors![key].map((v) => v * factor) as Vector3DSchema;
 
-    const { lattice } = material;
-    // @ts-ignore
-    lattice.vectors?.[key] = lattice.vectors![key].map((v) => v * factor) as Vector3DSchema;
-
-    material.lattice = lattice;
-
-    material.toCrystal();
+    material.lattice = Lattice.fromVectors(lattice.vectors);
 }
 
 /**

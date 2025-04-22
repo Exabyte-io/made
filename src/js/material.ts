@@ -216,7 +216,18 @@ export function MaterialMixin<
         }
 
         set lattice(config: LatticeSchema) {
+            const originalIsInCrystalUnits = this.Basis.isInCrystalUnits;
+            const basis = this.Basis;
+            basis.toCartesian();
+
+            const newLattice = new Lattice(config);
+            basis.cell = newLattice.vectors;
+            if (originalIsInCrystalUnits) basis.toCrystal();
+
+            const newBasisConfig = { ...basis.toJSON(), cell: newLattice.vectors };
+            this.setProp("basis", newBasisConfig);
             this.setProp("lattice", config);
+
             this.unsetFileProps();
         }
 

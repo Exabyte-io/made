@@ -168,6 +168,15 @@ function MaterialMixin(superclass) {
             return this.prop("lattice");
         }
         set lattice(config) {
+            const originalIsInCrystalUnits = this.Basis.isInCrystalUnits;
+            const basis = this.Basis;
+            basis.toCartesian();
+            const newLattice = new lattice_1.Lattice(config);
+            basis.cell = newLattice.vectors;
+            if (originalIsInCrystalUnits)
+                basis.toCrystal();
+            const newBasisConfig = { ...basis.toJSON(), cell: newLattice.vectors };
+            this.setProp("basis", newBasisConfig);
             this.setProp("lattice", config);
             this.unsetFileProps();
         }

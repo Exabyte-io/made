@@ -146,9 +146,9 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
     // @ts-ignore
     supercellMatrix);
     const newLattice = lattice_1.Lattice.fromVectors({
-        a: supercell.a,
-        b: supercell.b,
-        c: supercell.c,
+        a: supercell.vectorArraysRounded[0],
+        b: supercell.vectorArraysRounded[1],
+        c: supercell.vectorArraysRounded[2],
     });
     return {
         name: `${material.name} - slab ${JSON.stringify(millerIndices)}`,
