@@ -55,7 +55,7 @@ function _parseXYZLineAsWords(line) {
     const constraint = (n) => parseInt(`${n}`, 10) !== 0;
     const basisLineConfig = {
         element,
-        coordinates: [+words[1], +words[2], +words[3]],
+        coordinate: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
         constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
     };
@@ -87,7 +87,7 @@ function toBasisConfig(txt, units = "angstrom", cell = new cell_1.Cell()) {
         coordinates: listOfObjects.map((elm, idx) => {
             return {
                 id: idx,
-                value: elm.coordinates,
+                value: elm.coordinate,
             };
         }),
         units,

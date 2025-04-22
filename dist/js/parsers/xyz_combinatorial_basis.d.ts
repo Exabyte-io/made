@@ -29,7 +29,7 @@ export declare class CombinatorialBasis {
         isCombination: boolean;
         isPermutation: boolean;
         elements: string[];
-        coordinates: number[];
+        coordinate: number[];
     };
     /**
      * Returns array of ALL unique elements used in basis.

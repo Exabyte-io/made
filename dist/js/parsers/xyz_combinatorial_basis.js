@@ -130,14 +130,14 @@ class CombinatorialBasis {
         else {
             elements = [words[0]];
         }
-        const coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
+        const coordinate = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
         return {
             // TODO: define as a type
             displayName: `ELEMENT_${index}`,
             isCombination: containsCombination,
             isPermutation: containsPermutation,
             elements,
-            coordinates,
+            coordinate,
         };
     }
     /**
@@ -192,8 +192,6 @@ class CombinatorialBasis {
         const dimensions = [];
         this._lines.forEach((line) => {
             const itemsSet = [];
-            // TODO: add type for element
-            // @ts-ignore
             line.elements.forEach((element) => {
                 // omit vacancy characters
                 itemsSet.push({
@@ -203,12 +201,9 @@ class CombinatorialBasis {
             });
             dimensions.push(itemsSet);
         });
-        // @ts-ignore
+        // @ts-ignore // We're multiplying objects with math, not numbers. No type casting will help.
         const basisSet = math_1.default.cartesianProduct.apply(null, dimensions);
-        // @ts-ignore
-        return basisSet.map((basis) => 
-        // @ts-ignore
-        basis.filter((entry) => entry.element !== VACANCY_CHARACTER));
+        return basisSet.map((basis) => basis.filter((entry) => entry.element !== VACANCY_CHARACTER));
     }
     /**
      * Returns array of regular bases extracted from current combinatorial basis with permutations.

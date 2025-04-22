@@ -9,7 +9,7 @@ import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 export declare function validate(xyzTxt: string): void;
 export interface ParsedObject {
     element: string;
-    coordinates: Vector3DSchema;
+    coordinate: Vector3DSchema;
     constraints: AtomicConstraintValue;
     label?: number;
 }
