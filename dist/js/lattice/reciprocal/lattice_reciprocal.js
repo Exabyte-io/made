@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReciprocalLattice = void 0;
 const constants_1 = require("@mat3ra/code/dist/js/constants");
+// @ts-ignore
 const array_almost_equal_1 = __importDefault(require("array-almost-equal"));
 const lodash_1 = __importDefault(require("lodash"));
 const math_1 = __importDefault(require("../../math"));
@@ -14,7 +15,7 @@ const symmetry_points_1 = require("./symmetry_points");
 class ReciprocalLattice extends lattice_1.Lattice {
     /**
      * Get reciprocal vectors for the current Lattice in cartesian (2pi / a) units
-     * @return {Array[]}
+     * @return {Vector3[]}
      */
     get reciprocalVectors() {
         const vectors_ = this.vectors.vectorArrays;
@@ -44,30 +45,31 @@ class ReciprocalLattice extends lattice_1.Lattice {
     }
     /**
      * Get point (in crystal coordinates) in cartesian coordinates.
-     * @param {Array} point - point in 3D space
-     * @return {Array}
+     * @param {KPointCoordinates} point - point in 3D space
+     * @return {KPointCoordinates}
      */
     getCartesianCoordinates(point) {
         return math_1.default.multiply(point, this.reciprocalVectors);
     }
     /**
      * Get the list of high-symmetry points for the current lattice.
-     * @return {Object[]}
+     * @return {SymmetryPoint[]}
      */
     get symmetryPoints() {
         return (0, symmetry_points_1.symmetryPoints)(this);
     }
     /**
      * Get the default path in reciprocal space for the current lattice.
-     * @return {Array[]}
+     * @return {Array<{point: string; steps: number}>}
      */
     get defaultKpointPath() {
-        return paths_1.paths[this.typeExtended] || paths_1.paths[this.type];
+        const pathsObj = paths_1.paths;
+        return pathsObj[this.typeExtended] || pathsObj[this.type] || [];
     }
     /**
      * Find/mark the high symmetry points on a list with raw data and return the edited list.
-     * @param {Array} dataPoints - list of point coordinates
-     * @return {Object[]}
+     * @param {KPointCoordinates[]} dataPoints - list of point coordinates
+     * @return {KPointPath}
      */
     extractKpointPath(dataPoints = []) {
         const kpointPath = [];
@@ -142,7 +144,8 @@ class ReciprocalLattice extends lattice_1.Lattice {
     getSpacingFromDimensions(dimensions, units = constants_1.ATOMIC_COORD_UNITS.cartesian) {
         const factor = this.conversionTable[constants_1.ATOMIC_COORD_UNITS.cartesian][units] || 1;
         const norms = this.reciprocalVectorNorms;
-        return factor * math_1.default.mean(dimensions.map((dim, i) => norms[i] / math_1.default.max(1, dim)));
+        return (factor *
+            math_1.default.mean(dimensions.map((dim, i) => norms[i] / math_1.default.max(1, dim))));
     }
 }
 exports.ReciprocalLattice = ReciprocalLattice;

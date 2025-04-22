@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Material = exports.MaterialMixin = exports.defaultMaterialConfig = void 0;
+// @ts-nocheck
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const constrained_basis_1 = require("./basis/constrained_basis");
@@ -154,7 +155,7 @@ function MaterialMixin(superclass) {
         get Basis() {
             return new constrained_basis_1.ConstrainedBasis({
                 ...this.basis,
-                cell: this.Lattice.vectorArrays,
+                cell: this.Lattice.vectors,
             });
         }
         /**
@@ -164,7 +165,7 @@ function MaterialMixin(superclass) {
             return this.Basis.uniqueElements;
         }
         get lattice() {
-            return this.prop("lattice", undefined);
+            return this.prop("lattice");
         }
         set lattice(config) {
             this.setProp("lattice", config);

@@ -1,7 +1,10 @@
-import { Coordinate3DSchema, Matrix3X3Schema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import {
+    Coordinate3DSchema,
+    MaterialSchema,
+    Matrix3X3Schema,
+    Vector3DSchema,
+} from "@mat3ra/esse/dist/js/types";
 
-// eslint-disable-next-line import/no-cycle
-import { SlabConfigSchema } from "../../../tests/js/tools/surface";
 import { Cell } from "../cell/cell";
 import { Lattice } from "../lattice/lattice";
 import { Material } from "../material";
@@ -148,6 +151,10 @@ function getDimensionsScalingMatrix(
 
     return transformationMatrix as Matrix3X3Schema;
 }
+
+export type SlabConfigSchema = MaterialSchema & {
+    outOfPlaneAxisIndex: number;
+};
 
 /*
  * Generate a config object for a surface based on a set of parameters.

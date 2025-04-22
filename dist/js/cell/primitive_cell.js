@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.primitiveCell = void 0;
+exports.getPrimitiveLatticeVectorsFromConfig = void 0;
 const math_1 = __importDefault(require("../math"));
 /**
  * Routines for calculating primitive cell vectors from conventional cell Bravais parameters.
@@ -135,39 +135,15 @@ const PRIMITIVE_CELLS = {
             [0.0, 0.0, c],
         ];
     },
-    // alternative implementation
-    TRIalt: ({ a, b, c, alpha, beta, gamma }) => {
-        const cosAlpha = math_1.default.cos((alpha / 180) * math_1.default.PI);
-        const cosBeta = math_1.default.cos((beta / 180) * math_1.default.PI);
-        const cosGamma = math_1.default.cos((gamma / 180) * math_1.default.PI);
-        const sinGamma = math_1.default.sqrt(1 - cosGamma * cosGamma);
-        return [
-            [a, 0.0, 0.0],
-            [b * cosGamma, b * sinGamma, 0.0],
-            [
-                c * cosBeta,
-                (c / sinGamma) * (cosAlpha - cosBeta * cosGamma),
-                (c / sinGamma) *
-                    math_1.default.sqrt(sinGamma * sinGamma -
-                        cosAlpha * cosAlpha -
-                        cosBeta * cosBeta +
-                        2 * cosAlpha * cosBeta * cosGamma),
-            ],
-        ];
-    },
 };
 /**
  * Returns lattice vectors for a primitive cell for a lattice.
- * @param lattice - Lattice instance.
- * @param  skipRounding - whether to skip rounding the lattice vectors.
+ * @param latticeConfig - Lattice config.
  * @return Cell.vectorsAsArray
  */
-function primitiveCell(lattice, skipRounding = false) {
-    const [vectorA, vectorB, vectorC] = PRIMITIVE_CELLS[lattice.type || "TRI"](lattice);
-    // set precision and remove JS floating point artifacts
-    if (!skipRounding) {
-        [vectorA, vectorB, vectorC].map((vec) => vec.map((c) => math_1.default.precise(c)).map(math_1.default.roundToZero));
-    }
+function getPrimitiveLatticeVectorsFromConfig(latticeConfig) {
+    const primitiveCellGenerator = PRIMITIVE_CELLS[latticeConfig.type || "TRI"];
+    const [vectorA, vectorB, vectorC] = primitiveCellGenerator(latticeConfig);
     return [vectorA, vectorB, vectorC];
 }
-exports.primitiveCell = primitiveCell;
+exports.getPrimitiveLatticeVectorsFromConfig = getPrimitiveLatticeVectorsFromConfig;

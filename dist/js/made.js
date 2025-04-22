@@ -4,13 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Made = void 0;
-const array_with_ids_1 = require("./abstract/array_with_ids");
 const basis_1 = require("./basis/basis");
 const constants_1 = require("./constants");
 const constraints_1 = require("./constraints/constraints");
 const lattice_1 = require("./lattice/lattice");
+const lattice_types_1 = require("./lattice/lattice_types");
 const lattice_reciprocal_1 = require("./lattice/reciprocal/lattice_reciprocal");
-const types_1 = require("./lattice/types");
 const material_1 = require("./material");
 const math_1 = __importDefault(require("./math"));
 const parsers_1 = __importDefault(require("./parsers/parsers"));
@@ -31,9 +30,6 @@ exports.Made = {
     AtomicConstraints: constraints_1.AtomicConstraints,
     parsers: parsers_1.default,
     tools: index_1.default,
-    LATTICE_TYPE_CONFIGS: types_1.LATTICE_TYPE_CONFIGS,
-    DEFAULT_LATTICE_UNITS: types_1.DEFAULT_LATTICE_UNITS,
-    primitive: {
-        ArrayWithIds: array_with_ids_1.ArrayWithIds,
-    },
+    LATTICE_TYPE_CONFIGS: lattice_types_1.LATTICE_TYPE_CONFIGS,
+    DEFAULT_LATTICE_UNITS: lattice_types_1.DEFAULT_LATTICE_UNITS,
 };

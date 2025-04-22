@@ -1,7 +1,7 @@
-import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
-import { ConstrainedBasis } from "../basis/constrained_basis";
-import { Constraint, ConstraintValue } from "../constraints/constraints";
-import { Vector } from "../lattice/types";
+import { MaterialSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import { ConstrainedBasis, ConstrainedBasisConfig } from "../basis/constrained_basis";
+import { Cell } from "../cell/cell";
+import { AtomicConstraintValue } from "../constraints/constraints";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 /**
  * Validates that passed string is well-formed XYZ file.
@@ -9,26 +9,9 @@ import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 export declare function validate(xyzTxt: string): void;
 export interface ParsedObject {
     element: string;
-    coordinates: Vector;
-    constraints: ConstraintValue;
+    coordinates: Vector3DSchema;
+    constraints: AtomicConstraintValue;
     label?: number;
-}
-export interface BasisConfig {
-    elements: {
-        id: number;
-        value: string;
-    }[];
-    labels?: {
-        id: number;
-        value: number;
-    }[];
-    coordinates: {
-        id: number;
-        value: Vector;
-    }[];
-    units: string;
-    cell: Vector[];
-    constraints: Constraint[];
 }
 /**
  * Parse XYZ text for basis.
@@ -36,7 +19,7 @@ export interface BasisConfig {
  * @param units Coordinate units
  * @param cell Basis Cell
  */
-declare function toBasisConfig(txt: string, units?: string, cell?: [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema]): BasisConfig;
+declare function toBasisConfig(txt: string, units?: string, cell?: Cell): ConstrainedBasisConfig;
 /**
  * Create XYZ from Basis class instance.
  * @param basisClsInstance Basis class instance.

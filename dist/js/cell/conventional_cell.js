@@ -55,7 +55,6 @@ exports.PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS = {
         [0, 0, 1],
     ],
     TRI: unitMatrix,
-    TRIalt: unitMatrix,
 };
 exports.PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES = {
     // PRIMITIVE    =>  CONVENTIONAL
@@ -73,8 +72,6 @@ exports.PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES = {
     MCL: "MCL",
     MCLC: "MCL",
     TRI: "TRI",
-    // TODO: Legacy `TRI_alt` type, assert not used and remove
-    TRIalt: "TRI",
 };
 function isConventionalCellSameAsPrimitiveForLatticeType(latticeType) {
     const multiplier = exports.PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[latticeType || "TRI"];

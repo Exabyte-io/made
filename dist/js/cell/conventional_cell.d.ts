@@ -1,4 +1,4 @@
-import { LatticeTypeSchema } from "@mat3ra/esse/dist/js/types";
+import { LatticeSchema, LatticeTypeEnum } from "@mat3ra/esse/dist/js/types";
 export declare const PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS: {
     CUB: number[][];
     FCC: number[][];
@@ -14,9 +14,8 @@ export declare const PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS: {
     MCL: number[][];
     MCLC: number[][];
     TRI: number[][];
-    TRIalt: number[][];
 };
 export declare const PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES: {
-    [key in LatticeTypeSchema | "TRIalt"]: LatticeTypeSchema;
+    [key in LatticeTypeEnum]: LatticeTypeEnum;
 };
-export declare function isConventionalCellSameAsPrimitiveForLatticeType(latticeType: LatticeTypeSchema): boolean;
+export declare function isConventionalCellSameAsPrimitiveForLatticeType(latticeType: LatticeSchema["type"]): boolean;

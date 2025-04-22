@@ -1,9 +1,26 @@
-export class ReciprocalLattice extends Lattice {
+import { Lattice } from "../lattice";
+type Vector3 = [number, number, number];
+type KPointCoordinates = number[];
+type KPointPath = Array<{
+    point: string;
+    steps: number;
+    coordinates: KPointCoordinates;
+}>;
+interface SymmetryPoint {
+    point: string;
+    coordinates: KPointCoordinates;
+}
+interface ConversionTable {
+    [key: string]: {
+        [key: string]: number;
+    };
+}
+export declare class ReciprocalLattice extends Lattice {
     /**
      * Get reciprocal vectors for the current Lattice in cartesian (2pi / a) units
-     * @return {Array[]}
+     * @return {Vector3[]}
      */
-    get reciprocalVectors(): any[][];
+    get reciprocalVectors(): Vector3[];
     /**
      * Norms of reciprocal vectors.
      * @return {number[]}
@@ -16,26 +33,29 @@ export class ReciprocalLattice extends Lattice {
     get reciprocalVectorRatios(): number[];
     /**
      * Get point (in crystal coordinates) in cartesian coordinates.
-     * @param {Array} point - point in 3D space
-     * @return {Array}
+     * @param {KPointCoordinates} point - point in 3D space
+     * @return {KPointCoordinates}
      */
-    getCartesianCoordinates(point: any[]): any[];
+    getCartesianCoordinates(point: KPointCoordinates): KPointCoordinates;
     /**
      * Get the list of high-symmetry points for the current lattice.
-     * @return {Object[]}
+     * @return {SymmetryPoint[]}
      */
-    get symmetryPoints(): Object[];
+    get symmetryPoints(): SymmetryPoint[];
     /**
      * Get the default path in reciprocal space for the current lattice.
-     * @return {Array[]}
+     * @return {Array<{point: string; steps: number}>}
      */
-    get defaultKpointPath(): any[][];
+    get defaultKpointPath(): Array<{
+        point: string;
+        steps: number;
+    }>;
     /**
      * Find/mark the high symmetry points on a list with raw data and return the edited list.
-     * @param {Array} dataPoints - list of point coordinates
-     * @return {Object[]}
+     * @param {KPointCoordinates[]} dataPoints - list of point coordinates
+     * @return {KPointPath}
      */
-    extractKpointPath(dataPoints?: any[]): Object[];
+    extractKpointPath(dataPoints?: KPointCoordinates[]): KPointPath;
     /**
      * Calculate grid dimension based on reciprocal lattice vectors.
      * @param {number} nPoints - Total number of points
@@ -50,11 +70,7 @@ export class ReciprocalLattice extends Lattice {
      * @return {number[]} - Grid dimensions
      */
     getDimensionsFromPointsCount(nKpoints: number): number[];
-    get conversionTable(): {
-        [x: string]: {
-            [x: string]: number;
-        };
-    };
+    get conversionTable(): ConversionTable;
     /**
      * Calculate grid dimensions from k-point spacing, i.e.
      * the maximum distance between adjacent points along a reciprocal axis.
@@ -72,4 +88,4 @@ export class ReciprocalLattice extends Lattice {
      */
     getSpacingFromDimensions(dimensions: number[], units?: string): number;
 }
-import { Lattice } from "../lattice";
+export {};

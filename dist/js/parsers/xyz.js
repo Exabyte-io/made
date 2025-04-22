@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.validate = void 0;
 const underscore_1 = __importDefault(require("underscore"));
 const underscore_string_1 = __importDefault(require("underscore.string"));
-const basis_1 = require("../basis/basis");
 const constrained_basis_1 = require("../basis/constrained_basis");
+const cell_1 = require("../cell/cell");
 const lattice_1 = require("../lattice/lattice");
 const math_1 = __importDefault(require("../math"));
 const errors_1 = require("./errors");
@@ -73,7 +73,7 @@ function _parseXYZLineAsWords(line) {
  * @param units Coordinate units
  * @param cell Basis Cell
  */
-function toBasisConfig(txt, units = "angstrom", cell = basis_1.Basis.defaultCell) {
+function toBasisConfig(txt, units = "angstrom", cell = new cell_1.Cell()) {
     // @ts-ignore
     const lines = (0, underscore_string_1.default)(txt).trim().lines();
     const listOfObjects = underscore_1.default.map(lines, _parseXYZLineAsWords);
@@ -125,12 +125,12 @@ function toBasisConfig(txt, units = "angstrom", cell = basis_1.Basis.defaultCell
  */
 function fromBasis(basisClsInstance, printFormat = "%9.5f", skipRounding = false) {
     const XYZArray = [];
-    basisClsInstance._elements.array.forEach((item, idx) => {
+    basisClsInstance._elements.values.forEach((item, idx) => {
         // assume that _elements and _coordinates are indexed equivalently
         const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
         const elementWithLabel = item + atomicLabel;
         const element = underscore_string_1.default.sprintf("%-3s", elementWithLabel);
-        const coordinates = basisClsInstance.getCoordinateByIndex(idx).map((x) => {
+        const coordinates = basisClsInstance.getCoordinateByIndex(idx).value.map((x) => {
             return underscore_string_1.default.sprintf(printFormat, skipRounding ? x : math_1.default.precise(math_1.default.roundToZero(x)));
         });
         const constraints = basisClsInstance.constraints
@@ -151,7 +151,7 @@ function fromMaterial(materialOrConfig, fractional = false) {
     // @ts-ignore
     const basis = new constrained_basis_1.ConstrainedBasis({
         ...materialOrConfig.basis,
-        cell: lattice.vectorArrays,
+        cell: cell_1.Cell.fromVectorsArray(lattice.vectorArrays),
     });
     if (fractional) {
         basis.toCrystal();

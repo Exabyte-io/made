@@ -1,10 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.paths = void 0;
-const underscore_1 = __importDefault(require("underscore"));
 /**
  * Default kpoing paths according to:
  *  [AFLOW](https://arxiv.org/abs/1004.2974) methodology.
@@ -121,16 +117,18 @@ const points = {
         ["R", "Г"],
     ],
 };
-exports.paths = underscore_1.default.each(points, (val, key, obj) => {
-    // merge sub-arrays
-    // eslint-disable-next-line no-param-reassign
-    val = val.reduce((a, b) => a.concat(b));
-    underscore_1.default.each(val, (el, idx, list) => {
-        list[idx] = {
-            point: el,
-            // TODO: calculate number of steps based on distance in k-space
+// Export a processed version of the paths
+exports.paths = (() => {
+    const result = {};
+    Object.entries(points).forEach(([key, pathSegments]) => {
+        // Flatten arrays of path segments into a single array
+        const flattenedPath = pathSegments.reduce((acc, segment) => [...acc, ...segment], []);
+        // Convert to KPointStep array
+        // TODO: calculate number of steps based on distance in k-space
+        result[key] = flattenedPath.map((point) => ({
+            point,
             steps: 10,
-        };
+        }));
     });
-    obj[key] = val;
-});
+    return result;
+})();

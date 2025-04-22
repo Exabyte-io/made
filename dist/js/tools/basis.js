@@ -4,8 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const underscore_1 = __importDefault(require("underscore"));
-// eslint-disable-next-line no-unused-vars
-const basis_1 = require("../basis/basis");
 const math_1 = __importDefault(require("../math"));
 const ADD = math_1.default.add;
 const MULT = math_1.default.multiply;
@@ -31,11 +29,11 @@ function repeat(basis, repetitions) {
                 // for each atom in original basis add one with a repetition
                 // eslint-disable-next-line no-loop-func
                 basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
-                    const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index);
+                    const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
                     // only add atoms if shifts are non-zero
                     if (shiftI || shiftJ || shiftK) {
                         newBasis.addAtom({
-                            element,
+                            element: element.value,
                             coordinate: [coord[0] + shiftI, coord[1] + shiftJ, coord[2] + shiftK],
                         });
                     }
@@ -87,9 +85,12 @@ function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
         const normalizedStepIndex = i / (numberOfSteps + 1);
         const intermediateCoordinates = _linearInterpolation(initialCoordinates, delta, normalizedStepIndex);
         const vectorSize = 3;
-        const intermediateCoordinatesAsNestedArray = underscore_1.default.toArray(underscore_1.default.groupBy(intermediateCoordinates, (a, b) => Math.floor(b / vectorSize)));
+        const intermediateCoordinatesAsNestedArray = underscore_1.default.toArray(underscore_1.default.groupBy(intermediateCoordinates, (_, b) => Math.floor(b / vectorSize)));
         const intermediateBasis = initialBasis.clone();
-        intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray;
+        intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray.map((coordinate, index) => ({
+            id: index,
+            value: coordinate,
+        }));
         resultingListOfBases.push(intermediateBasis);
     }
     return resultingListOfBases;

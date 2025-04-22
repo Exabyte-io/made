@@ -1,54 +1,35 @@
-import { BasisSchema } from "@mat3ra/esse/dist/js/types";
-import { ArrayWithIds } from "../abstract/array_with_ids";
-import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
-import { AtomicConstraints, Constraint, ConstraintValue } from "../constraints/constraints";
-import { Basis, BasisProps } from "./basis";
-import { Coordinate } from "./types";
-export interface ConstrainedBasisProps extends BasisProps {
-    constraints: Constraint[];
+import { AtomicConstraintsSchema } from "@mat3ra/esse/dist/js/types";
+import { AtomicConstraints, AtomicConstraintValue } from "../constraints/constraints";
+import { Basis, BasisConfig, ElementsAndCoordinatesConfig } from "./basis";
+import { Coordinate } from "./coordinates";
+export interface ConstrainedBasisConfig extends BasisConfig {
+    constraints: AtomicConstraintsSchema;
 }
-export interface ConstrainedBasisJSON extends BasisSchema {
-    constraints: ObjectWithIdAndValue<ConstraintValue>[];
+export interface ElementsCoordinatesAndConstraintsConfig extends ElementsAndCoordinatesConfig {
+    constraints: AtomicConstraintValue[];
 }
 /**
  * @summary Extension of the Basis class able to deal with atomic constraints.
  * @extends Basis
  */
 export declare class ConstrainedBasis extends Basis {
-    _constraints: ArrayWithIds<ConstraintValue>;
-    /**
-     * Create a an array with ids.
-     * @param {Object} config
-     * @param {ArrayWithIds|Array} config.constraints - atomic constraints.
-     */
-    constructor(config: ConstrainedBasisProps);
-    get constraints(): ConstraintValue[];
-    set constraints(newConstraints: ConstraintValue[]);
-    getConstraintAsArray(): ArrayWithIds<ConstraintValue>;
+    _constraints: AtomicConstraints;
+    constructor(config: ConstrainedBasisConfig);
+    static fromElementsCoordinatesAndConstraints(config: ElementsCoordinatesAndConstraintsConfig): ConstrainedBasis;
+    get constraints(): AtomicConstraintsSchema;
+    set constraints(constraints: AtomicConstraintsSchema);
     get AtomicConstraints(): AtomicConstraints;
-    /**
-     * Serialize class instance to JSON.
-     * @example As below:
-         {
-            ...Basis.toJSON(),
-            "constraints": [
-                {
-                    "id" : 0,
-                    "value" : [
-                        1,
-                        1,
-                        1
-                    ]
-                },
-            ]
-         }
-     */
-    toJSON(): ConstrainedBasisJSON;
-    getConstraintByIndex(idx: number): ConstraintValue;
+    toJSON(): ConstrainedBasisConfig;
+    getConstraintByIndex(idx: number): AtomicConstraintValue;
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
-    get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue, string][];
+    get elementsCoordinatesConstraintsArray(): [
+        string,
+        Coordinate,
+        AtomicConstraintValue,
+        string
+    ][];
     /**
      * Returns an array with atomic positions (with constraints) per atom stored as strings.
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
