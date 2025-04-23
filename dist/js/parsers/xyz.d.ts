@@ -1,5 +1,6 @@
-import { MaterialSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { ConstrainedBasis, ConstrainedBasisConfig } from "../basis/constrained_basis";
+import { AtomicCoordinateValue } from "../basis/coordinates";
 import { AtomicElementValue } from "../basis/elements";
 import { Cell } from "../cell/cell";
 import { AtomicConstraintValue } from "../constraints/constraints";
@@ -10,7 +11,7 @@ import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 export declare function validate(xyzTxt: string): void;
 export interface ParsedObject {
     element: AtomicElementValue;
-    coordinate: Vector3DSchema;
+    coordinate: AtomicCoordinateValue;
     constraints: AtomicConstraintValue;
     label?: number;
 }

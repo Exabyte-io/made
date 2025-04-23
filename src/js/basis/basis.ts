@@ -564,7 +564,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      *
      * Returns an array = [xCenter, yCenter, zCenter]
      */
-    get centerOfCoordinatesPoint(): Vector3DSchema {
+    get centerOfCoordinatesPoint(): AtomicCoordinateValue {
         return this._coordinates.getCenterPoint();
     }
 

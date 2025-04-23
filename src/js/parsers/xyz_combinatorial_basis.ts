@@ -1,9 +1,9 @@
-/* eslint-disable max-classes-per-file */
-import { BasisSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
+import { BasisSchema } from "@mat3ra/esse/dist/js/types";
 import { chain, last, map } from "lodash";
 import * as s from "underscore.string";
 
 import { ElementsAndCoordinatesConfig } from "../basis/basis";
+import { AtomicCoordinateValue } from "../basis/coordinates";
 import { AtomicElementValue } from "../basis/elements";
 import { Cell } from "../cell/cell";
 import math from "../math";
@@ -54,7 +54,7 @@ const ERROR_CODES = {
 // TODO: rename `coordinates` to `coordinate`
 export type ElementWithCoordinate = {
     element: AtomicElementValue;
-    coordinate: Coordinate3DSchema;
+    coordinate: AtomicCoordinateValue;
 };
 
 export class WrongBasisFormat extends Error {

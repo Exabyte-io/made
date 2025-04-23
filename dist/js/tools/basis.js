@@ -52,13 +52,13 @@ function repeat(basis, repetitions) {
 }
 /**
  * Calculates linear function `y = kx + b` for vectors. Isolated for modularity.
- * @param initialCoordinates {Array} - b.
+ * @param initialCoordinate {Array} - b.
  * @param delta {Array} - x.
  * @param normalizedStepIndex {Number} - k.
  * @return {Basis[]} List of all bases.
  */
-function _linearInterpolation(initialCoordinates, delta, normalizedStepIndex) {
-    return ADD(initialCoordinates, MULT(delta, normalizedStepIndex));
+function _linearInterpolation(initialCoordinate, delta, normalizedStepIndex) {
+    return ADD(initialCoordinate, MULT(delta, normalizedStepIndex));
 }
 /**
  * Returns a set of Bases for a crystal interpolated from initial to final crystal.

@@ -1,10 +1,10 @@
-import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 import { ElementsAndCoordinatesConfig } from "../basis/basis";
+import { AtomicCoordinateValue } from "../basis/coordinates";
 import { AtomicElementValue } from "../basis/elements";
 import { Cell } from "../cell/cell";
 export type ElementWithCoordinate = {
     element: AtomicElementValue;
-    coordinate: Coordinate3DSchema;
+    coordinate: AtomicCoordinateValue;
 };
 export declare class WrongBasisFormat extends Error {
     xyz: string;

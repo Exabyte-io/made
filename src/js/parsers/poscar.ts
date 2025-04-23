@@ -107,7 +107,7 @@ function fromPoscar(fileContent: string): object {
     for (let i = 0; i < atomSymbols.length; i++) {
         for (let j = 0; j < atomCounts[i]; j++) {
             const lineComponents = lines[startLine + atomIndex].trim().split(/\s+/);
-            const coordinate: number[] = [
+            const coordinate: AtomicCoordinateValue = [
                 parseFloat(lineComponents[0]),
                 parseFloat(lineComponents[1]),
                 parseFloat(lineComponents[2]),

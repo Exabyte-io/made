@@ -2,6 +2,7 @@ import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 import { chunk, flatten } from "lodash";
 
 import { Basis } from "../basis/basis";
+import { AtomicCoordinateValue } from "../basis/coordinates";
 import math from "../math";
 
 const ADD = math.add;
@@ -57,17 +58,17 @@ function repeat(basis: Basis, repetitions: number[]): Basis {
 
 /**
  * Calculates linear function `y = kx + b` for vectors. Isolated for modularity.
- * @param initialCoordinates {Array} - b.
+ * @param initialCoordinate {Array} - b.
  * @param delta {Array} - x.
  * @param normalizedStepIndex {Number} - k.
  * @return {Basis[]} List of all bases.
  */
 function _linearInterpolation(
-    initialCoordinates: Coordinate3DSchema,
+    initialCoordinate: AtomicCoordinateValue,
     delta: Coordinate3DSchema,
     normalizedStepIndex: number,
 ): number[] {
-    return ADD(initialCoordinates, MULT(delta, normalizedStepIndex)) as number[];
+    return ADD(initialCoordinate, MULT(delta, normalizedStepIndex)) as number[];
 }
 
 /**
@@ -98,8 +99,8 @@ function interpolate(initialBasis: Basis, finalBasis: Basis, numberOfSteps = 1) 
     for (let i = 1; i <= numberOfSteps; i++) {
         const normalizedStepIndex = i / (numberOfSteps + 1);
         const intermediateCoordinates: number[] = _linearInterpolation(
-            initialCoordinates as Coordinate3DSchema,
-            delta as Coordinate3DSchema,
+            initialCoordinates as AtomicCoordinateValue,
+            delta as AtomicCoordinateValue,
             normalizedStepIndex,
         );
         const vectorSize = 3;
@@ -108,7 +109,7 @@ function interpolate(initialBasis: Basis, finalBasis: Basis, numberOfSteps = 1) 
         intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray.map(
             (coordinate, index) => ({
                 id: index,
-                value: coordinate as Coordinate3DSchema,
+                value: coordinate as AtomicCoordinateValue,
             }),
         );
 
