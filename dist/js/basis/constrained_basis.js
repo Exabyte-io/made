@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConstrainedBasis = void 0;
-const lodash_1 = require("lodash");
 const constraints_1 = require("../constraints/constraints");
 const basis_1 = require("./basis");
 /**
@@ -56,14 +55,9 @@ class ConstrainedBasis extends basis_1.Basis {
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
      */
     get atomicPositionsWithConstraints() {
-        return this.elementsCoordinatesConstraintsArray.map((entry) => {
-            const element = entry[0] + entry[3]; // element with label, Fe1
-            const coordinate = entry[1];
-            const constraint = entry[2];
-            return ((0, lodash_1.padEnd)(element, 4) +
-                coordinate.prettyPrint() +
-                " " +
-                constraint.map((x) => (x ? 1 : 0)).join(" "));
+        return this.elementsCoordinatesConstraintsArray.map(([element, coordinate, constraint, label]) => {
+            const fullElement = element + label; // e.g., Fe1
+            return new constraints_1.Constraint({ id: 0, value: constraint }).prettyPrint(fullElement, coordinate, constraint);
         });
     }
 }

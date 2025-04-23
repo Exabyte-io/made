@@ -1,7 +1,6 @@
 import { AtomicConstraintsSchema } from "@mat3ra/esse/dist/js/types";
-import { padEnd } from "lodash";
 
-import { AtomicConstraints, AtomicConstraintValue } from "../constraints/constraints";
+import { AtomicConstraints, AtomicConstraintValue, Constraint } from "../constraints/constraints";
 import { Basis, BasisConfig, ElementsAndCoordinatesConfig } from "./basis";
 import { Coordinate } from "./coordinates";
 
@@ -82,16 +81,15 @@ export class ConstrainedBasis extends Basis {
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
      */
     get atomicPositionsWithConstraints(): string[] {
-        return this.elementsCoordinatesConstraintsArray.map((entry) => {
-            const element = entry[0] + entry[3]; // element with label, Fe1
-            const coordinate = entry[1];
-            const constraint = entry[2];
-            return (
-                padEnd(element, 4) +
-                coordinate.prettyPrint() +
-                " " +
-                constraint.map((x) => (x ? 1 : 0)).join(" ")
-            );
-        });
+        return this.elementsCoordinatesConstraintsArray.map(
+            ([element, coordinate, constraint, label]) => {
+                const fullElement = element + label; // e.g., Fe1
+                return new Constraint({ id: 0, value: constraint }).prettyPrint(
+                    fullElement,
+                    coordinate,
+                    constraint,
+                );
+            },
+        );
     }
 }

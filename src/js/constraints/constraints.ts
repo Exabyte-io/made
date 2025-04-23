@@ -1,7 +1,34 @@
-import { ArrayWithIds } from "@mat3ra/code";
+import { ArrayWithIds, ValueWithId } from "@mat3ra/code";
 import { AtomicConstraintSchema } from "@mat3ra/esse/dist/js/types";
+import { padEnd } from "lodash";
 
 export type AtomicConstraintValue = AtomicConstraintSchema["value"];
+
+export class Constraint extends ValueWithId<AtomicConstraintValue> {
+    value: AtomicConstraintValue;
+
+    constructor({ value, id }: AtomicConstraintSchema) {
+        super({ id, value });
+        this.value = value;
+    }
+
+    getValueAsString(): string {
+        return this.value.map((x) => (x ? 1 : 0)).join(" ");
+    }
+
+    prettyPrint(
+        element: string,
+        coordinate: { prettyPrint: () => string },
+        constraint: boolean[],
+    ): string {
+        return (
+            padEnd(element, 4) +
+            coordinate.prettyPrint() +
+            " " +
+            constraint.map((x) => (x ? 1 : 0)).join(" ")
+        );
+    }
+}
 
 export class AtomicConstraints extends ArrayWithIds<AtomicConstraintValue> {
     /**

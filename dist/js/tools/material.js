@@ -23,7 +23,6 @@ function scaleOneLatticeVector(material, key = "a", factor = 1.0) {
  * @param material {Material}
  */
 function scaleLatticeToMakeNonPeriodic(material) {
-    // @ts-ignore
     material.lattice = lattice_1.Lattice.fromConfigPartial({
         a: material.Basis.getMinimumLatticeSize(),
         type: "CUB",

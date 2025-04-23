@@ -1,5 +1,5 @@
 import { math } from "@mat3ra/code/dist/js/math";
-import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import { LatticeSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { Lattice } from "../lattice/lattice";
@@ -28,11 +28,10 @@ function scaleOneLatticeVector(material: Material, key: "a" | "b" | "c" = "a", f
  * @param material {Material}
  */
 function scaleLatticeToMakeNonPeriodic(material: Material) {
-    // @ts-ignore
     material.lattice = Lattice.fromConfigPartial({
         a: material.Basis.getMinimumLatticeSize(),
         type: "CUB",
-    });
+    } as LatticeSchema);
 }
 
 /**

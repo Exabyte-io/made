@@ -42,7 +42,7 @@ declare const _default: {
             readonly unitCellFormula: string;
             unsetFileProps(): void;
             setBasis(textOrObject: any, format?: string | undefined, unitz?: string | undefined): void;
-            setBasisConstraints(constraints: Constraint[]): void;
+            setBasisConstraints(constraints: import("../constraints/constraints").Constraint[]): void;
             readonly basis: BasisConfig;
             readonly Basis: import("../basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
@@ -287,7 +287,7 @@ declare const _default: {
             readonly unitCellFormula: string;
             unsetFileProps(): void;
             setBasis(textOrObject: any, format?: string | undefined, unitz?: string | undefined): void;
-            setBasisConstraints(constraints: Constraint[]): void;
+            setBasisConstraints(constraints: import("../constraints/constraints").Constraint[]): void;
             readonly basis: BasisConfig;
             readonly Basis: import("../basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
@@ -537,7 +537,7 @@ declare const _default: {
             readonly unitCellFormula: string;
             unsetFileProps(): void;
             setBasis(textOrObject: any, format?: string | undefined, unitz?: string | undefined): void;
-            setBasisConstraints(constraints: Constraint[]): void;
+            setBasisConstraints(constraints: import("../constraints/constraints").Constraint[]): void;
             readonly basis: BasisConfig;
             readonly Basis: import("../basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
@@ -780,7 +780,7 @@ declare const _default: {
             readonly unitCellFormula: string;
             unsetFileProps(): void;
             setBasis(textOrObject: any, format?: string | undefined, unitz?: string | undefined): void;
-            setBasisConstraints(constraints: Constraint[]): void;
+            setBasisConstraints(constraints: import("../constraints/constraints").Constraint[]): void;
             readonly basis: BasisConfig;
             readonly Basis: import("../basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
@@ -1023,7 +1023,7 @@ declare const _default: {
             readonly unitCellFormula: string;
             unsetFileProps(): void;
             setBasis(textOrObject: any, format?: string | undefined, unitz?: string | undefined): void;
-            setBasisConstraints(constraints: Constraint[]): void;
+            setBasisConstraints(constraints: import("../constraints/constraints").Constraint[]): void;
             readonly basis: BasisConfig;
             readonly Basis: import("../basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
