@@ -4,7 +4,7 @@ import { Material } from "../../../src/js/material";
 // eslint-disable-next-line import/no-cycle
 import tools from "../../../src/js/tools";
 import { SlabConfigSchema } from "../../../src/js/tools/surface";
-import { Silicon, SiSlab100, SiSlab111, SiSlab111Gamma120, SiSlab111NoVacuum } from "../fixtures";
+import { Silicon, SiSlab100, SiSlab111, SiSlab111NoVacuum } from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
 
@@ -46,7 +46,7 @@ describe("Tools:Surface", () => {
         assertDeepAlmostEqual(expectedMaterialJSON, slabMaterialJSON);
     });
 
-    it("should return slab (111) with vacuum (gamma~=120) for gamma = 59.999", () => {
+    it("should return slab (111) with vacuum for gamma = 59.999", () => {
         const adjustedSilicon = {
             ...Silicon,
             lattice: {
@@ -58,8 +58,7 @@ describe("Tools:Surface", () => {
         const slabConfig = tools.surface.generateConfig(material, [1, 1, 1], 3, 1, 1);
         const vacuumRatio = 0.5;
         const slabMaterial = generateSlabWithVacuum(slabConfig, vacuumRatio);
-        // With original gamma being below 60, the surface generated differently, with a different gamma
-        const expectedSlabMaterial = new Material(SiSlab111Gamma120);
+        const expectedSlabMaterial = new Material(SiSlab111);
         const expectedMaterialJSON = expectedSlabMaterial.toJSON();
         const slabMaterialJSON = slabMaterial.toJSON();
         assertDeepAlmostEqual(expectedMaterialJSON, slabMaterialJSON);
