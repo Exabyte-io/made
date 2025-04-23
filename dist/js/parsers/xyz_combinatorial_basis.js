@@ -27,7 +27,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CombinatorialBasis = exports.WrongBasisFormat = void 0;
-const underscore_1 = __importDefault(require("underscore"));
+const lodash_1 = require("lodash");
 const s = __importStar(require("underscore.string"));
 const cell_1 = require("../cell/cell");
 const math_1 = __importDefault(require("../math"));
@@ -145,17 +145,17 @@ class CombinatorialBasis {
      * @return {String[]}
      */
     get uniqueElements() {
-        return underscore_1.default.chain(this._lines)
+        return (0, lodash_1.chain)(this._lines)
             .map((line) => line.elements)
             .flatten()
-            .unique()
+            .uniq()
             .value()
             .sort();
     }
     static toBasisConfigForElementsAndCoordinates(array, units = "crystal", cell = new cell_1.Cell()) {
         return {
-            elements: underscore_1.default.pluck(array, "element"),
-            coordinates: underscore_1.default.pluck(array, "coordinate"),
+            elements: (0, lodash_1.map)(array, "element"),
+            coordinates: (0, lodash_1.map)(array, "coordinate"),
             units,
             cell,
         };
@@ -216,7 +216,7 @@ class CombinatorialBasis {
         for (let i = 0; i < maxLen; i++) {
             const items = [];
             this._lines.forEach((line) => {
-                const element = line.elements.length <= i ? underscore_1.default.last(line.elements) : line.elements[i];
+                const element = line.elements.length <= i ? (0, lodash_1.last)(line.elements) : line.elements[i];
                 if (element !== VACANCY_CHARACTER) {
                     items.push({
                         element,

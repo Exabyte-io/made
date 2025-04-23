@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { BasisSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
-import _ from "underscore";
+import { chain, last, map } from "lodash";
 import * as s from "underscore.string";
 
 import { ElementsAndCoordinatesConfig } from "../basis/basis";
@@ -161,10 +161,10 @@ export class CombinatorialBasis {
      * @return {String[]}
      */
     get uniqueElements() {
-        return _.chain(this._lines)
+        return chain(this._lines)
             .map((line) => line.elements)
             .flatten()
-            .unique()
+            .uniq()
             .value()
             .sort();
     }
@@ -175,8 +175,8 @@ export class CombinatorialBasis {
         cell = new Cell(),
     ): ElementsAndCoordinatesConfig {
         return {
-            elements: _.pluck(array, "element"),
-            coordinates: _.pluck(array, "coordinate"),
+            elements: map(array, "element"),
+            coordinates: map(array, "coordinate"),
             units,
             cell,
         };
@@ -240,8 +240,7 @@ export class CombinatorialBasis {
         for (let i = 0; i < maxLen; i++) {
             const items: ElementWithCoordinate[] = [];
             this._lines.forEach((line) => {
-                const element =
-                    line.elements.length <= i ? _.last(line.elements) : line.elements[i];
+                const element = line.elements.length <= i ? last(line.elements) : line.elements[i];
                 if (element !== VACANCY_CHARACTER) {
                     items.push({
                         element,

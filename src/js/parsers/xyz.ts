@@ -1,5 +1,5 @@
 import { MaterialSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
-import _ from "underscore";
+import { isEmpty, isNaN, map } from "lodash";
 import s from "underscore.string";
 
 import { ConstrainedBasis, ConstrainedBasisConfig } from "../basis/constrained_basis";
@@ -28,7 +28,7 @@ function validateLine(xyzLine: string, index: number) {
 
     const coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
     coordinates.forEach((num, i) => {
-        if (_.isNaN(num)) {
+        if (isNaN(num)) {
             throw new Error(`Coordinates should be a number. Possible error in ${i} coordinate`);
         }
     });
@@ -90,7 +90,7 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
 function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): ConstrainedBasisConfig {
     // @ts-ignore
     const lines: string[] = s(txt).trim().lines();
-    const listOfObjects = _.map(lines, _parseXYZLineAsWords);
+    const listOfObjects = map(lines, _parseXYZLineAsWords);
 
     const basisConfig = {
         elements: listOfObjects.map((elm, idx) => {
@@ -129,7 +129,7 @@ function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): Cons
         }
     });
 
-    if (!_.isEmpty(labels)) {
+    if (!isEmpty(labels)) {
         return {
             ...basisConfig,
             labels,

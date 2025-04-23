@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validate = void 0;
-const underscore_1 = __importDefault(require("underscore"));
+const lodash_1 = require("lodash");
 const underscore_string_1 = __importDefault(require("underscore.string"));
 const constrained_basis_1 = require("../basis/constrained_basis");
 const cell_1 = require("../cell/cell");
@@ -26,7 +26,7 @@ function validateLine(xyzLine, index) {
     }
     const coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
     coordinates.forEach((num, i) => {
-        if (underscore_1.default.isNaN(num)) {
+        if ((0, lodash_1.isNaN)(num)) {
             throw new Error(`Coordinates should be a number. Possible error in ${i} coordinate`);
         }
     });
@@ -76,7 +76,7 @@ function _parseXYZLineAsWords(line) {
 function toBasisConfig(txt, units = "angstrom", cell = new cell_1.Cell()) {
     // @ts-ignore
     const lines = (0, underscore_string_1.default)(txt).trim().lines();
-    const listOfObjects = underscore_1.default.map(lines, _parseXYZLineAsWords);
+    const listOfObjects = (0, lodash_1.map)(lines, _parseXYZLineAsWords);
     const basisConfig = {
         elements: listOfObjects.map((elm, idx) => {
             return {
@@ -108,7 +108,7 @@ function toBasisConfig(txt, units = "angstrom", cell = new cell_1.Cell()) {
             });
         }
     });
-    if (!underscore_1.default.isEmpty(labels)) {
+    if (!(0, lodash_1.isEmpty)(labels)) {
         return {
             ...basisConfig,
             labels,
