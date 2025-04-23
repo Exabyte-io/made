@@ -1,5 +1,6 @@
 import "../setup";
 
+import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 import { expect } from "chai";
 
@@ -221,7 +222,7 @@ describe("Basis", () => {
     //* * Translation by Vector */
     it("should return the updated basis coordinates", () => {
         const basis = new Basis(C2H4.basis);
-        const translationVector = [1.6917, 1.9667, 2];
+        const translationVector = [1.6917, 1.9667, 2] as Vector3DSchema;
         basis.translateByVector(translationVector);
         assertDeepAlmostEqual(basis.coordinates, C2H4Translated.basis.coordinates);
     });

@@ -1,5 +1,5 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { BasisSchema, Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
+import { BasisSchema, Coordinate3DSchema, Matrix3X3Schema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import { Cell } from "../cell/cell";
 import { AtomicCoordinateValue, Coordinate, Coordinates } from "./coordinates";
 import { AtomicElementValue, Elements } from "./elements";
@@ -184,10 +184,10 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
      *
      * Returns an array = [xCenter, yCenter, zCenter]
      */
-    get centerOfCoordinatesPoint(): number[];
+    get centerOfCoordinatesPoint(): Vector3DSchema;
     /**
      * @summary Function translates coordinates by the vector passed as an argument.
      */
-    translateByVector(translationVector: number[]): void;
+    translateByVector(translationVector: Vector3DSchema): void;
 }
 export {};

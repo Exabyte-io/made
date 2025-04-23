@@ -326,9 +326,7 @@ class Basis extends entity_1.InMemoryEntity {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = this.atomicLabelsArray[idx];
-            return `${element}${atomicLabel} ${coordinate.value
-                .map((x) => (0, lodash_1.padStart)(x.toFixed(9), 14).trim())
-                .join(" ")}`;
+            return `${element}${atomicLabel} ${coordinate.prettyPrint()}`;
         });
     }
     /**
@@ -468,7 +466,7 @@ class Basis extends entity_1.InMemoryEntity {
      * @summary Function translates coordinates by the vector passed as an argument.
      */
     translateByVector(translationVector) {
-        this._coordinates.mapArrayInPlace((x) => math_1.default.add(x, translationVector));
+        this._coordinates.translateByVector(translationVector);
     }
 }
 exports.Basis = Basis;

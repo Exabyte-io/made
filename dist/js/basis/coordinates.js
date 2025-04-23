@@ -12,6 +12,10 @@ class Coordinate extends code_1.RoundedValueWithId {
         const index = { x: 0, y: 1, z: 2 }[axis];
         return this.value[index];
     }
+    translateByVector(vector) {
+        this.value = this.value.map((v, i) => v + vector[i]);
+        return this;
+    }
     prettyPrint(decimalPlaces = 9, padding = 14) {
         return this.value.map((x) => (0, lodash_1.padStart)(x.toFixed(decimalPlaces), padding)).join(" ");
     }
@@ -34,6 +38,9 @@ class Coordinates extends code_1.RoundedArrayWithIds {
         return extremum === "max"
             ? this.getMaxValueAlongAxis(axis)
             : this.getMinValueAlongAxis(axis);
+    }
+    translateByVector(vector) {
+        this.mapArrayInPlace((x) => x.map((v, i) => v + vector[i]));
     }
 }
 exports.Coordinates = Coordinates;

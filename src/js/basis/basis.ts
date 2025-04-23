@@ -1,8 +1,13 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { BasisSchema, Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
-import { chain, padStart, toPairs, uniq, values } from "lodash";
+import {
+    BasisSchema,
+    Coordinate3DSchema,
+    Matrix3X3Schema,
+    Vector3DSchema,
+} from "@mat3ra/esse/dist/js/types";
+import { chain, toPairs, uniq, values } from "lodash";
 
 import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
@@ -420,9 +425,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = this.atomicLabelsArray[idx];
-            return `${element}${atomicLabel} ${coordinate.value
-                .map((x) => padStart(x.toFixed(9), 14).trim())
-                .join(" ")}`;
+            return `${element}${atomicLabel} ${coordinate.prettyPrint()}`;
         });
     }
 
@@ -566,7 +569,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      *
      * Returns an array = [xCenter, yCenter, zCenter]
      */
-    get centerOfCoordinatesPoint(): number[] {
+    get centerOfCoordinatesPoint(): Vector3DSchema {
         const transposedBasisCoordinates = math.transpose(this._coordinates.values);
         const centerOfCoordinatesVectors = [];
         for (let i = 0; i < 3; i++) {
@@ -577,15 +580,13 @@ export class Basis extends InMemoryEntity implements BasisSchema {
                 coordArray.reduce((a: number, b: number) => a + b, 0) / this.coordinates.length;
             centerOfCoordinatesVectors.push(math.precise(center, 4));
         }
-        return centerOfCoordinatesVectors;
+        return centerOfCoordinatesVectors as Vector3DSchema;
     }
 
     /**
      * @summary Function translates coordinates by the vector passed as an argument.
      */
-    translateByVector(translationVector: number[]) {
-        this._coordinates.mapArrayInPlace(
-            (x) => math.add(x, translationVector) as Coordinate3DSchema,
-        );
+    translateByVector(translationVector: Vector3DSchema) {
+        this._coordinates.translateByVector(translationVector);
     }
 }
