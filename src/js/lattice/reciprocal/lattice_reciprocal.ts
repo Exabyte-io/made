@@ -1,6 +1,5 @@
 import { ATOMIC_COORD_UNITS, units as UNITS } from "@mat3ra/code/dist/js/constants";
 import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
-// @ts-ignore
 import almostEqual from "array-almost-equal";
 import lodash from "lodash";
 

@@ -5,7 +5,7 @@ import { BasisConfig } from "./basis/basis";
 import { ConstrainedBasis, ConstrainedBasisConfig } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-import { MaterialJSON } from "./types";
+import { MaterialJSON } from "./types/material";
 export declare const defaultMaterialConfig: {
     name: string;
     basis: {

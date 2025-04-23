@@ -1,7 +1,6 @@
 import { Utils } from "@mat3ra/utils";
 
 import { Material } from "../../../src/js/material";
-// eslint-disable-next-line import/no-cycle
 import tools from "../../../src/js/tools";
 import { SlabConfigSchema } from "../../../src/js/tools/surface";
 import { Silicon, SiSlab100, SiSlab111, SiSlab111NoVacuum } from "../fixtures";

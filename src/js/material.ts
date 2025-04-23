@@ -22,7 +22,7 @@ import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
-import { MaterialJSON } from "./types";
+import { MaterialJSON } from "./types/material";
 
 export const defaultMaterialConfig = {
     name: "Silicon FCC",

@@ -9,3 +9,7 @@ export interface MaterialInterface {
     Basis: Basis | ConstrainedBasis;
     Lattice: Lattice;
 }
+/**
+ * @deprecated Import from './types' directory instead
+ */
+export * from './types/material';

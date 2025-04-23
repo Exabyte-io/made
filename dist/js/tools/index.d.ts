@@ -2,7 +2,7 @@ declare const _default: {
     surface: {
         generateConfig: (material: {
             _json: import("../material").MaterialSchemaJSON;
-            toJSON(): import("../types").MaterialJSON;
+            toJSON(): import("../types/material").MaterialJSON;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
             updateFormula(): void;
             isNonPeriodic: boolean;
@@ -255,7 +255,7 @@ declare const _default: {
     material: {
         scaleOneLatticeVector: (material: {
             _json: import("../material").MaterialSchemaJSON;
-            toJSON(): import("../types").MaterialJSON;
+            toJSON(): import("../types/material").MaterialJSON;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
             updateFormula(): void;
             isNonPeriodic: boolean;
@@ -498,7 +498,7 @@ declare const _default: {
         } & import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity, key?: "a" | "b" | "c", factor?: number) => void;
         scaleLatticeToMakeNonPeriodic: (material: {
             _json: import("../material").MaterialSchemaJSON;
-            toJSON(): import("../types").MaterialJSON;
+            toJSON(): import("../types/material").MaterialJSON;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
             updateFormula(): void;
             isNonPeriodic: boolean;
@@ -741,7 +741,7 @@ declare const _default: {
         } & import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) => void;
         getBasisConfigTranslatedToCenter: (material: {
             _json: import("../material").MaterialSchemaJSON;
-            toJSON(): import("../types").MaterialJSON;
+            toJSON(): import("../types/material").MaterialJSON;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
             updateFormula(): void;
             isNonPeriodic: boolean;
