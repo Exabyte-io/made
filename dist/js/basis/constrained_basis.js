@@ -1,10 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConstrainedBasis = void 0;
-const underscore_string_1 = __importDefault(require("underscore.string"));
+const lodash_1 = require("lodash");
 const constraints_1 = require("../constraints/constraints");
 const basis_1 = require("./basis");
 /**
@@ -63,7 +60,7 @@ class ConstrainedBasis extends basis_1.Basis {
             const element = entry[0] + entry[3]; // element with label, Fe1
             const coordinate = entry[1];
             const constraint = entry[2];
-            return (underscore_string_1.default.sprintf("%-4s", element) +
+            return ((0, lodash_1.padEnd)(element, 4) +
                 coordinate.prettyPrint() +
                 " " +
                 constraint.map((x) => (x ? 1 : 0)).join(" "));

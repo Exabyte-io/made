@@ -1,11 +1,8 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Coordinates = exports.Coordinate = void 0;
 const code_1 = require("@mat3ra/code");
-const underscore_string_1 = __importDefault(require("underscore.string"));
+const lodash_1 = require("lodash");
 class Coordinate extends code_1.RoundedValueWithId {
     constructor({ value, id }) {
         super(id, value);
@@ -15,8 +12,8 @@ class Coordinate extends code_1.RoundedValueWithId {
         const index = { x: 0, y: 1, z: 2 }[axis];
         return this.value[index];
     }
-    prettyPrint(format = "%14.9f") {
-        return this.value.map((x) => underscore_string_1.default.sprintf(format, x).trim()).join(" ");
+    prettyPrint(decimalPlaces = 9, padding = 14) {
+        return this.value.map((x) => (0, lodash_1.padStart)(x.toFixed(decimalPlaces), padding)).join(" ");
     }
 }
 exports.Coordinate = Coordinate;

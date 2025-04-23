@@ -2,7 +2,7 @@
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { BasisSchema, Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
-import * as _ from "underscore";
+import { chain, toPairs, uniq, values } from "lodash";
 import * as s from "underscore.string";
 
 import { Cell } from "../cell/cell";
@@ -268,7 +268,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * Unique names (symbols) of the chemical elements basis. E.g. `['Si', 'Li']`
      */
     get uniqueElements(): string[] {
-        return _.unique(this._elements.values);
+        return uniq(this._elements.values);
     }
 
     /**
@@ -276,7 +276,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
      */
     get uniqueElementCountsSortedByElectronegativity() {
-        return _.chain(this.elements)
+        return chain(this.elements)
             .sortBy("value")
             .sortBy((x) => getElectronegativity(x.value))
             .countBy((element) => element.value)
@@ -310,13 +310,12 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     get formula(): string {
         const counts = this.uniqueElementCountsSortedByElectronegativity;
-        const countsValues = _.values(counts);
+        const countsValues = values(counts);
         const gcd = countsValues.length > 1 ? math.gcd(...countsValues) : countsValues[0];
-        return _.pairs(counts)
-            .map((x) => x[0] + (x[1] / gcd === 1 ? "" : x[1] / gcd))
-            .reduce((mem, item) => {
-                return mem + item;
-            }, "");
+
+        return toPairs(counts)
+            .map(([element, count]) => element + (count / gcd === 1 ? "" : count / gcd))
+            .reduce((acc, part) => acc + part, "");
     }
 
     /**
@@ -324,11 +323,9 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     get unitCellFormula(): string {
         const counts = this.uniqueElementCountsSortedByElectronegativity;
-        return _.pairs(counts)
-            .map((x) => x[0] + (x[1] === 1 ? "" : x[1]))
-            .reduce((mem, item) => {
-                return mem + item;
-            }, "");
+        return toPairs(counts)
+            .map(([element, count]) => element + (count === 1 ? "" : count))
+            .reduce((acc, part) => acc + part, "");
     }
 
     /**

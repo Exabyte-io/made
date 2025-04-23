@@ -1,6 +1,6 @@
 import { RoundedArrayWithIds, RoundedValueWithId } from "@mat3ra/code";
 import { AtomicCoordinateSchema, Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
-import s from "underscore.string";
+import { padStart } from "lodash";
 
 export type AtomicCoordinateValue = AtomicCoordinateSchema["value"];
 
@@ -19,8 +19,8 @@ export class Coordinate extends RoundedValueWithId<AtomicCoordinateValue> {
         return this.value[index] as number;
     }
 
-    prettyPrint(format = "%14.9f"): string {
-        return this.value.map((x) => s.sprintf(format, x).trim()).join(" ");
+    prettyPrint(decimalPlaces = 9, padding = 14): string {
+        return this.value.map((x: number) => padStart(x.toFixed(decimalPlaces), padding)).join(" ");
     }
 }
 

@@ -1,5 +1,5 @@
 import { AtomicConstraintsSchema } from "@mat3ra/esse/dist/js/types";
-import s from "underscore.string";
+import { padEnd } from "lodash";
 
 import { AtomicConstraints, AtomicConstraintValue } from "../constraints/constraints";
 import { Basis, BasisConfig, ElementsAndCoordinatesConfig } from "./basis";
@@ -87,7 +87,7 @@ export class ConstrainedBasis extends Basis {
             const coordinate = entry[1];
             const constraint = entry[2];
             return (
-                s.sprintf("%-4s", element) +
+                padEnd(element, 4) +
                 coordinate.prettyPrint() +
                 " " +
                 constraint.map((x) => (x ? 1 : 0)).join(" ")

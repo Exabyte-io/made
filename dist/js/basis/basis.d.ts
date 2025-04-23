@@ -1,6 +1,5 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { BasisSchema, Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
-import * as _ from "underscore";
 import { Cell } from "../cell/cell";
 import { AtomicCoordinateValue, Coordinate, Coordinates } from "./coordinates";
 import { AtomicElementValue, Elements } from "./elements";
@@ -79,7 +78,7 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
      * Returns unique chemical elements with their count sorted by electronegativity.
      * `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
      */
-    get uniqueElementCountsSortedByElectronegativity(): _.Dictionary<number>;
+    get uniqueElementCountsSortedByElectronegativity(): import("lodash").Dictionary<number>;
     /**
      * Returns chemical elements with their count wrt their original order in the basis.
      * Note: entries for the same element separated by another element are considered separately.

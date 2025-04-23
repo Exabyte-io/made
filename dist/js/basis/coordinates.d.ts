@@ -6,7 +6,7 @@ export declare class Coordinate extends RoundedValueWithId<AtomicCoordinateValue
     value: AtomicCoordinateValue;
     constructor({ value, id }: AtomicCoordinateSchema);
     getValueAlongAxis(axis?: AxisType): number;
-    prettyPrint(format?: string): string;
+    prettyPrint(decimalPlaces?: number, padding?: number): string;
 }
 export declare class Coordinates extends RoundedArrayWithIds<Coordinate3DSchema> {
     getValuesAlongAxis(axis?: AxisType): number[];
