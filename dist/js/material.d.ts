@@ -1,10 +1,10 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
-import { ConstrainedBasis } from "./basis/constrained_basis";
+import { BasisConfig } from "./basis/basis";
+import { ConstrainedBasis, ConstrainedBasisConfig } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-import { BasisConfig } from "./parsers/xyz";
 import { MaterialJSON } from "./types";
 export declare const defaultMaterialConfig: {
     name: string;
@@ -37,6 +37,7 @@ export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
 }
 type MaterialBaseEntity = InstanceType<typeof HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity>;
 export type MaterialBaseEntityConstructor<T extends MaterialBaseEntity = MaterialBaseEntity> = new (...args: any[]) => T;
+export type OptionallyConstrainedBasisConfig = BasisConfig & Partial<Pick<ConstrainedBasisConfig, "constraints">>;
 export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = MaterialBaseEntityConstructor>(superclass: T): {
     new (...config: any[]): {
         _json: MaterialSchemaJSON;
@@ -99,7 +100,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
         setBasisConstraints(constraints: Constraint[]): void;
-        readonly basis: BasisConfig;
+        readonly basis: OptionallyConstrainedBasisConfig;
         readonly Basis: ConstrainedBasis;
         /**
          * High-level access to unique elements from material instead of basis.
@@ -333,7 +334,7 @@ export declare const Material: {
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
         setBasisConstraints(constraints: Constraint[]): void;
-        readonly basis: BasisConfig;
+        readonly basis: OptionallyConstrainedBasisConfig;
         readonly Basis: ConstrainedBasis;
         /**
          * High-level access to unique elements from material instead of basis.

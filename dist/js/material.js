@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Material = exports.MaterialMixin = exports.defaultMaterialConfig = void 0;
-// @ts-nocheck
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const constrained_basis_1 = require("./basis/constrained_basis");
@@ -121,7 +120,6 @@ function MaterialMixin(superclass) {
         get unitCellFormula() {
             return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
         }
-        // should be private, but TS throws error "Property 'unsetFileProps' of exported class expression may not be private or protected"
         unsetFileProps() {
             this.unsetProp("src");
             this.unsetProp("icsdId");
@@ -134,28 +132,33 @@ function MaterialMixin(superclass) {
          */
         setBasis(textOrObject, format, unitz) {
             let basis;
-            switch (format) {
-                case "xyz":
-                    basis = parsers_1.default.xyz.toBasisConfig(textOrObject, unitz);
-                    break;
-                default:
-                    basis = textOrObject;
+            if (typeof textOrObject === "string" && format === "xyz") {
+                basis = parsers_1.default.xyz.toBasisConfig(textOrObject, unitz);
+            }
+            else {
+                basis = textOrObject;
             }
             this.setProp("basis", basis);
             this.unsetFileProps();
             this.updateFormula();
         }
         setBasisConstraints(constraints) {
-            this.setBasis({ ...this.basis, constraints });
+            const basisWithConstraints = {
+                ...this.basis,
+                constraints: constraints.map((c) => c.toJSON()),
+            };
+            this.setBasis(basisWithConstraints);
         }
         get basis() {
             return this.prop("basis");
         }
         // returns the instance of {ConstrainedBasis} class
         get Basis() {
+            const basisData = this.basis;
             return new constrained_basis_1.ConstrainedBasis({
-                ...this.basis,
+                ...basisData,
                 cell: this.Lattice.vectors,
+                constraints: basisData.constraints || [],
             });
         }
         /**
@@ -175,7 +178,8 @@ function MaterialMixin(superclass) {
             basis.cell = newLattice.vectors;
             if (originalIsInCrystalUnits)
                 basis.toCrystal();
-            const newBasisConfig = { ...basis.toJSON(), cell: newLattice.vectors };
+            // Preserve all properties from the original basis to ensure constraints are included
+            const newBasisConfig = basis.toJSON();
             this.setProp("basis", newBasisConfig);
             this.setProp("lattice", config);
             this.unsetFileProps();
@@ -291,7 +295,6 @@ function MaterialMixin(superclass) {
             const config = supercell_1.default.generateConfig(material, conventionalSupercellMatrix);
             config.lattice.type = conventionalLatticeType;
             config.name = `${material.name} - conventional cell`;
-            // @ts-ignore
             return new this.constructor(config);
         }
         /**
