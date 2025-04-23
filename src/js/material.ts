@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import {
@@ -11,6 +10,7 @@ import {
 } from "@mat3ra/esse/dist/js/types";
 import CryptoJS from "crypto-js";
 
+import { BasisConfig } from "./basis/basis";
 import { ConstrainedBasis } from "./basis/constrained_basis";
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
@@ -21,7 +21,6 @@ import { ATOMIC_COORD_UNITS, units } from "./constants";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
-import { BasisConfig } from "./parsers/xyz";
 // TODO: fix dependency cycle below
 // eslint-disable-next-line import/no-cycle
 import supercellTools from "./tools/supercell";
