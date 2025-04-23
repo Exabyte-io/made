@@ -2,8 +2,7 @@
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { BasisSchema, Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
-import { chain, toPairs, uniq, values } from "lodash";
-import * as s from "underscore.string";
+import { chain, padStart, toPairs, uniq, values } from "lodash";
 
 import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
@@ -422,7 +421,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             const coordinate = entry[1];
             const atomicLabel = this.atomicLabelsArray[idx];
             return `${element}${atomicLabel} ${coordinate.value
-                .map((x) => s.sprintf("%14.9f", x).trim())
+                .map((x) => padStart(x.toFixed(9), 14).trim())
                 .join(" ")}`;
         });
     }
