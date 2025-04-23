@@ -3,6 +3,7 @@ import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { AtomicCoordinateValue } from "../basis/coordinates";
+import { AtomicElementValue } from "../basis/elements";
 import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { AtomicConstraintValue } from "../constraints/constraints";
@@ -95,7 +96,7 @@ function fromPoscar(fileContent: string): object {
         startLine = 8;
     }
 
-    const elements: string[] = atomSymbols
+    const elements: AtomicElementValue[] = atomSymbols
         .map((symbol: string, i: number): string[] => Array(atomCounts[i]).fill(symbol))
         .reduce((a, b) => a.concat(b), []);
 

@@ -1,12 +1,7 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import {
-    BasisSchema,
-    Coordinate3DSchema,
-    Matrix3X3Schema,
-    Vector3DSchema,
-} from "@mat3ra/esse/dist/js/types";
+import { BasisSchema, Coordinate3DSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import { chain, toPairs, uniq, values } from "lodash";
 
 import { Cell } from "../cell/cell";
@@ -271,7 +266,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
     /**
      * Unique names (symbols) of the chemical elements basis. E.g. `['Si', 'Li']`
      */
-    get uniqueElements(): string[] {
+    get uniqueElements(): AtomicElementValue[] {
         return uniq(this._elements.values);
     }
 
@@ -408,10 +403,10 @@ export class Basis extends InMemoryEntity implements BasisSchema {
     }
 
     /* Returns array of elements with labels E.g., ["Fe1", "Fe2", "O", "O"] */
-    get elementsWithLabelsArray(): string[] {
+    get elementsWithLabelsArray(): AtomicElementValue[] {
         const elements = this.elementsArray;
         const labels = this.atomicLabelsArray;
-        const elementsWithLabels: string[] = [];
+        const elementsWithLabels: AtomicElementValue[] = [];
         elements.forEach((symbol, idx) => elementsWithLabels.push(symbol + labels[idx]));
         return elementsWithLabels;
     }
@@ -570,17 +565,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * Returns an array = [xCenter, yCenter, zCenter]
      */
     get centerOfCoordinatesPoint(): Vector3DSchema {
-        const transposedBasisCoordinates = math.transpose(this._coordinates.values);
-        const centerOfCoordinatesVectors = [];
-        for (let i = 0; i < 3; i++) {
-            const coordArray = (transposedBasisCoordinates as Matrix3X3Schema)[
-                i
-            ] as Coordinate3DSchema;
-            const center =
-                coordArray.reduce((a: number, b: number) => a + b, 0) / this.coordinates.length;
-            centerOfCoordinatesVectors.push(math.precise(center, 4));
-        }
-        return centerOfCoordinatesVectors as Vector3DSchema;
+        return this._coordinates.getCenterPoint();
     }
 
     /**

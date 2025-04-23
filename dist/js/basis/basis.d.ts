@@ -1,5 +1,5 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { BasisSchema, Coordinate3DSchema, Matrix3X3Schema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import { BasisSchema, Coordinate3DSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import { Cell } from "../cell/cell";
 import { AtomicCoordinateValue, Coordinate, Coordinates } from "./coordinates";
 import { AtomicElementValue, Elements } from "./elements";
@@ -49,7 +49,7 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
     toJSON(exclude?: string[]): BasisSchema;
     clone(): Basis;
     removeAllAtoms(): void;
-    get cellRounded(): Matrix3X3Schema;
+    get cellRounded(): import("@mat3ra/esse/dist/js/types").Matrix3X3Schema;
     get elementsArray(): object[];
     getElementsAsObject(): BasisSchema["elements"];
     get coordinatesAsArray(): Coordinate3DSchema[];
@@ -73,7 +73,7 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
     /**
      * Unique names (symbols) of the chemical elements basis. E.g. `['Si', 'Li']`
      */
-    get uniqueElements(): string[];
+    get uniqueElements(): AtomicElementValue[];
     /**
      * Returns unique chemical elements with their count sorted by electronegativity.
      * `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
@@ -120,7 +120,7 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
      */
     get hashString(): string;
     get atomicLabelsArray(): string[];
-    get elementsWithLabelsArray(): string[];
+    get elementsWithLabelsArray(): AtomicElementValue[];
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```

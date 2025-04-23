@@ -2,9 +2,12 @@ import { RoundedArrayWithIds, RoundedValueWithId } from "@mat3ra/code";
 import {
     AtomicCoordinateSchema,
     Coordinate3DSchema,
+    Matrix3X3Schema,
     Vector3DSchema,
 } from "@mat3ra/esse/dist/js/types";
 import { padStart } from "lodash";
+
+import math from "../math";
 
 export type AtomicCoordinateValue = AtomicCoordinateSchema["value"];
 
@@ -57,5 +60,18 @@ export class Coordinates extends RoundedArrayWithIds<Coordinate3DSchema> {
 
     translateByVector(vector: Vector3DSchema): void {
         this.mapArrayInPlace((x) => x.map((v, i) => v + vector[i]) as Coordinate3DSchema);
+    }
+
+    getCenterPoint(): Vector3DSchema {
+        const transposed = math.transpose(this.values) as Matrix3X3Schema;
+        const center: Vector3DSchema = [0, 0, 0];
+
+        for (let i = 0; i < 3; i++) {
+            const axisCoords = transposed[i] as Coordinate3DSchema;
+            const sum = axisCoords.reduce((a, b) => a + b, 0);
+            center[i] = math.precise(sum / this.values.length, 4);
+        }
+
+        return center;
     }
 }

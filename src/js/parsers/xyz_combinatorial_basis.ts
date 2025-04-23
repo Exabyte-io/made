@@ -4,6 +4,7 @@ import { chain, last, map } from "lodash";
 import * as s from "underscore.string";
 
 import { ElementsAndCoordinatesConfig } from "../basis/basis";
+import { AtomicElementValue } from "../basis/elements";
 import { Cell } from "../cell/cell";
 import math from "../math";
 
@@ -52,7 +53,7 @@ const ERROR_CODES = {
 
 // TODO: rename `coordinates` to `coordinate`
 export type ElementWithCoordinate = {
-    element: string;
+    element: AtomicElementValue;
     coordinate: Coordinate3DSchema;
 };
 
@@ -213,7 +214,7 @@ export class CombinatorialBasis {
         const dimensions: ElementWithCoordinate[][] = [];
         this._lines.forEach((line) => {
             const itemsSet: ElementWithCoordinate[] = [];
-            line.elements.forEach((element: string) => {
+            line.elements.forEach((element: AtomicElementValue) => {
                 // omit vacancy characters
                 itemsSet.push({
                     element,

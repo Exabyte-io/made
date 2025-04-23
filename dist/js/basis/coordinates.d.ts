@@ -15,5 +15,6 @@ export declare class Coordinates extends RoundedArrayWithIds<Coordinate3DSchema>
     getMinValueAlongAxis(axis?: AxisType): number;
     getExtremumValueAlongAxis(extremum?: "max" | "min", axis?: AxisType): number;
     translateByVector(vector: Vector3DSchema): void;
+    getCenterPoint(): Vector3DSchema;
 }
 export {};
