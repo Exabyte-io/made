@@ -21,8 +21,6 @@ import { ATOMIC_COORD_UNITS, units } from "./constants";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
-// TODO: fix dependency cycle below
-// eslint-disable-next-line import/no-cycle
 import supercellTools from "./tools/supercell";
 import { MaterialJSON } from "./types";
 

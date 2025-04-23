@@ -11,8 +11,6 @@ const conventional_cell_1 = require("./cell/conventional_cell");
 const constants_1 = require("./constants");
 const lattice_1 = require("./lattice/lattice");
 const parsers_1 = __importDefault(require("./parsers/parsers"));
-// TODO: fix dependency cycle below
-// eslint-disable-next-line import/no-cycle
 const supercell_1 = __importDefault(require("./tools/supercell"));
 exports.defaultMaterialConfig = {
     name: "Silicon FCC",
