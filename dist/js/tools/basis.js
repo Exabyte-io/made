@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const underscore_1 = __importDefault(require("underscore"));
+const lodash_1 = require("lodash");
 const math_1 = __importDefault(require("../math"));
 const ADD = math_1.default.add;
 const MULT = math_1.default.multiply;
@@ -77,15 +77,15 @@ function interpolate(initialBasis, finalBasis, numberOfSteps = 1) {
     const finalBasisCopy = finalBasis.clone();
     initialBasisCopy.toCrystal();
     finalBasisCopy.toCrystal();
-    const initialCoordinates = underscore_1.default.flatten(initialBasisCopy.coordinatesAsArray);
-    const finalCoordinates = underscore_1.default.flatten(finalBasisCopy.coordinatesAsArray);
+    const initialCoordinates = (0, lodash_1.flatten)(initialBasisCopy.coordinatesAsArray);
+    const finalCoordinates = (0, lodash_1.flatten)(finalBasisCopy.coordinatesAsArray);
     const delta = ADD(finalCoordinates, MULT(initialCoordinates, -1));
     const resultingListOfBases = [];
     for (let i = 1; i <= numberOfSteps; i++) {
         const normalizedStepIndex = i / (numberOfSteps + 1);
         const intermediateCoordinates = _linearInterpolation(initialCoordinates, delta, normalizedStepIndex);
         const vectorSize = 3;
-        const intermediateCoordinatesAsNestedArray = underscore_1.default.toArray(underscore_1.default.groupBy(intermediateCoordinates, (_, b) => Math.floor(b / vectorSize)));
+        const intermediateCoordinatesAsNestedArray = (0, lodash_1.chunk)(intermediateCoordinates, vectorSize);
         const intermediateBasis = initialBasis.clone();
         intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray.map((coordinate, index) => ({
             id: index,

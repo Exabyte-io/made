@@ -1,5 +1,5 @@
 import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
-import _ from "underscore";
+import { chunk, flatten } from "lodash";
 
 import { Basis } from "../basis/basis";
 import math from "../math";
@@ -90,8 +90,8 @@ function interpolate(initialBasis: Basis, finalBasis: Basis, numberOfSteps = 1) 
     initialBasisCopy.toCrystal();
     finalBasisCopy.toCrystal();
 
-    const initialCoordinates = _.flatten(initialBasisCopy.coordinatesAsArray);
-    const finalCoordinates = _.flatten(finalBasisCopy.coordinatesAsArray);
+    const initialCoordinates = flatten(initialBasisCopy.coordinatesAsArray);
+    const finalCoordinates = flatten(finalBasisCopy.coordinatesAsArray);
     const delta = ADD(finalCoordinates, MULT(initialCoordinates, -1));
     const resultingListOfBases = [];
 
@@ -103,9 +103,7 @@ function interpolate(initialBasis: Basis, finalBasis: Basis, numberOfSteps = 1) 
             normalizedStepIndex,
         );
         const vectorSize = 3;
-        const intermediateCoordinatesAsNestedArray = _.toArray(
-            _.groupBy(intermediateCoordinates, (_, b) => Math.floor(b / vectorSize)),
-        );
+        const intermediateCoordinatesAsNestedArray = chunk(intermediateCoordinates, vectorSize);
         const intermediateBasis = initialBasis.clone();
         intermediateBasis.coordinates = intermediateCoordinatesAsNestedArray.map(
             (coordinate, index) => ({
