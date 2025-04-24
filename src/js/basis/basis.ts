@@ -331,10 +331,10 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * Returns a nested array with elements and their corresponding coordinates
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
      */
-    get elementsAndCoordinatesArray(): [string, Coordinate][] {
+    get elementsAndCoordinatesArray(): [AtomicElementValue, AtomicCoordinateValue][] {
         return this._elements.values.map((element, idx) => {
-            const coordinates = this.getCoordinateByIndex(idx);
-            return [element, coordinates];
+            const coordinate = this.getCoordinateByIndex(idx).value;
+            return [element, coordinate];
         });
     }
 
@@ -342,9 +342,13 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      * Returns a nested array with elements and their corresponding coordinates with labels
      * @example Output: [ ["Si", [0,0,0], ['1']], ["Si", [0.5,0.5,0.5]] , ['2']]
      */
-    get elementsAndCoordinatesAndLabelsArray(): [string, Coordinate, string][] {
+    get elementsAndCoordinatesAndLabelsArray(): [
+        AtomicElementValue,
+        AtomicCoordinateValue,
+        AtomicLabelValue,
+    ][] {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx);
+            const coordinate = this.getCoordinateByIndex(idx).value;
             const atomicLabel = this.atomicLabelsArray[idx];
             return [element, coordinate, atomicLabel];
         });
@@ -368,7 +372,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
-            const toleratedCoordinate = coordinate.value.map((x) => math.round(x, HASH_TOLERANCE));
+            const toleratedCoordinate = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
             return `${element}${atomicLabel} ${toleratedCoordinate.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
@@ -419,7 +423,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = this.atomicLabelsArray[idx];
-            return `${element}${atomicLabel} ${coordinate.prettyPrint()}`;
+            return `${element}${atomicLabel} ${coordinate}`;
         });
     }
 

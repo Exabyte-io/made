@@ -97,12 +97,16 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
      * Returns a nested array with elements and their corresponding coordinates
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
      */
-    get elementsAndCoordinatesArray(): [string, Coordinate][];
+    get elementsAndCoordinatesArray(): [AtomicElementValue, AtomicCoordinateValue][];
     /**
      * Returns a nested array with elements and their corresponding coordinates with labels
      * @example Output: [ ["Si", [0,0,0], ['1']], ["Si", [0.5,0.5,0.5]] , ['2']]
      */
-    get elementsAndCoordinatesAndLabelsArray(): [string, Coordinate, string][];
+    get elementsAndCoordinatesAndLabelsArray(): [
+        AtomicElementValue,
+        AtomicCoordinateValue,
+        AtomicLabelValue
+    ][];
     /**
      * @summary Concatenates elements and sorts them in alphanumeric order.
      * E.g.,

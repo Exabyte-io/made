@@ -246,8 +246,8 @@ class Basis extends entity_1.InMemoryEntity {
      */
     get elementsAndCoordinatesArray() {
         return this._elements.values.map((element, idx) => {
-            const coordinates = this.getCoordinateByIndex(idx);
-            return [element, coordinates];
+            const coordinate = this.getCoordinateByIndex(idx).value;
+            return [element, coordinate];
         });
     }
     /**
@@ -256,7 +256,7 @@ class Basis extends entity_1.InMemoryEntity {
      */
     get elementsAndCoordinatesAndLabelsArray() {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx);
+            const coordinate = this.getCoordinateByIndex(idx).value;
             const atomicLabel = this.atomicLabelsArray[idx];
             return [element, coordinate, atomicLabel];
         });
@@ -279,7 +279,7 @@ class Basis extends entity_1.InMemoryEntity {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
-            const toleratedCoordinate = coordinate.value.map((x) => math_1.default.round(x, constants_1.HASH_TOLERANCE));
+            const toleratedCoordinate = coordinate.map((x) => math_1.default.round(x, constants_1.HASH_TOLERANCE));
             return `${element}${atomicLabel} ${toleratedCoordinate.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
@@ -326,7 +326,7 @@ class Basis extends entity_1.InMemoryEntity {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = this.atomicLabelsArray[idx];
-            return `${element}${atomicLabel} ${coordinate.prettyPrint()}`;
+            return `${element}${atomicLabel} ${coordinate}`;
         });
     }
     /**
