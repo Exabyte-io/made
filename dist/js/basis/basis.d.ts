@@ -120,7 +120,7 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
      */
     get hashString(): string;
     get atomicLabelsArray(): string[];
-    get elementsWithLabelsArray(): AtomicElementValue[];
+    get elementsWithLabelsArray(): string[];
     /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```

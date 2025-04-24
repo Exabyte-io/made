@@ -403,12 +403,11 @@ export class Basis extends InMemoryEntity implements BasisSchema {
     }
 
     /* Returns array of elements with labels E.g., ["Fe1", "Fe2", "O", "O"] */
-    get elementsWithLabelsArray(): AtomicElementValue[] {
-        const elements = this.elementsArray;
-        const labels = this.atomicLabelsArray;
-        const elementsWithLabels: AtomicElementValue[] = [];
-        elements.forEach((symbol, idx) => elementsWithLabels.push(symbol + labels[idx]));
-        return elementsWithLabels;
+    get elementsWithLabelsArray(): string[] {
+        return this.elements.map((element, i) => {
+            const label = this.labels?.[i]?.value || "";
+            return `${element.value}${label}`;
+        });
     }
 
     /**

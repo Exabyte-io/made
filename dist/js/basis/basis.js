@@ -311,11 +311,11 @@ class Basis extends entity_1.InMemoryEntity {
     }
     /* Returns array of elements with labels E.g., ["Fe1", "Fe2", "O", "O"] */
     get elementsWithLabelsArray() {
-        const elements = this.elementsArray;
-        const labels = this.atomicLabelsArray;
-        const elementsWithLabels = [];
-        elements.forEach((symbol, idx) => elementsWithLabels.push(symbol + labels[idx]));
-        return elementsWithLabels;
+        return this.elements.map((element, i) => {
+            var _a, _b;
+            const label = ((_b = (_a = this.labels) === null || _a === void 0 ? void 0 : _a[i]) === null || _b === void 0 ? void 0 : _b.value) || "";
+            return `${element.value}${label}`;
+        });
     }
     /**
      * Returns an array of strings with chemical elements and their atomic positions.

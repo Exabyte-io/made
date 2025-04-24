@@ -12,6 +12,7 @@ import {
     C2H4Translated,
     FeLiSiBasis,
     LiFeSiBasis,
+    LiFeSiBasisLabels,
     Na,
     Na4Cl4,
     Na4Cl4Cartesian,
@@ -117,6 +118,17 @@ describe("Basis", () => {
         basis.toCartesian();
         expect(basis.isInCartesianUnits).to.be.equal(true);
         expect(basis.coordinates).to.be.deep.almost.equal(Na4Cl4Cartesian.basis.coordinates);
+    });
+
+    /**
+     * Labels
+     */
+
+    it("should return elements with labels", () => {
+        const basis = new Basis(LiFeSiBasisLabels);
+        const elementsWithLabels = basis.elementsWithLabelsArray;
+        const expectedElementsWithLabels = ["Li0", "Fe1", "Si2"];
+        expect(elementsWithLabels).to.be.deep.equal(expectedElementsWithLabels);
     });
 
     /**

@@ -15,6 +15,7 @@ import H2HFinal_JSON from "../fixtures/H2+H-final.json";
 import H2HImage_JSON from "../fixtures/H2+H-image.json";
 import H2HInitial_JSON from "../fixtures/H2+H-initial.json";
 import LiFeSiBasis_JSON from "../fixtures/LiFeSi-basis.json";
+import LiFeSiBasisLabels_JSON from "../fixtures/LiFeSi-basis-labels.json";
 import Na_JSON from "../fixtures/Na.json";
 import Na4Cl4_JSON from "../fixtures/Na4Cl4.json";
 import Na4Cl4Cartesian_JSON from "../fixtures/Na4Cl4-cartesian.json";
@@ -60,6 +61,7 @@ const Ge2Basis = Ge2Basis_JSON as BasisSchema;
 const AsGeBasis = AsGeBasis_JSON as BasisSchema;
 const FeLiSiBasis = FeLiSiBasis_JSON as BasisSchema;
 const LiFeSiBasis = LiFeSiBasis_JSON as BasisSchema;
+const LiFeSiBasisLabels = LiFeSiBasisLabels_JSON as BasisSchema;
 
 // Other
 const atomicConstraints = atomicConstraints_JSON as AtomicConstraintsSchema;
@@ -87,6 +89,7 @@ export {
     AsGeBasis,
     FeLiSiBasis,
     LiFeSiBasis,
+    LiFeSiBasisLabels,
     atomicConstraints,
     H2HInitial,
     H2HFinal,
