@@ -159,7 +159,7 @@ function fromBasis(
         const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
         const elementWithLabel = item + atomicLabel;
         const element = s.sprintf("%-3s", elementWithLabel);
-        const coordinates = basisClsInstance.getCoordinateById(idx).value.map((x) => {
+        const coordinates = basisClsInstance.getCoordinateByIndex(idx).value.map((x) => {
             return s.sprintf(printFormat, skipRounding ? x : math.precise(math.roundToZero(x)));
         });
         const constraints = basisClsInstance.constraints
