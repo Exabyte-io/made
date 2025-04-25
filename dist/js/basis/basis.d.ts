@@ -57,8 +57,10 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
     get isInCrystalUnits(): boolean;
     toCartesian(): void;
     toCrystal(): void;
-    getElementByIndex(idx: number): string;
+    getElementByIndex(idx: number): AtomicElementValue;
+    getElementById(id: number): AtomicElementValue;
     getCoordinateByIndex(idx: number): Coordinate;
+    getCoordinateById(id: number): Coordinate;
     toStandardRepresentation(): void;
     /** A representation where all coordinates are within 0 and 1 in crystal units */
     get standardRepresentation(): BasisSchema;

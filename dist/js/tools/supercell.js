@@ -17,7 +17,7 @@ function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix
     oldBasis.toCrystal();
     newBasis.toCrystal();
     oldBasis.elements.forEach((element) => {
-        const coordinate = oldBasis.getCoordinateByIndex(element.id);
+        const coordinate = oldBasis.getCoordinateById(element.id);
         const cartesianCoordinate = cell.convertPointToCartesian(coordinate.value);
         const shifts = cell_1.default.latticePointsInSupercell(supercellMatrix);
         shifts.forEach((combination) => {

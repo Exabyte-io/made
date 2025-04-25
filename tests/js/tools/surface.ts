@@ -34,6 +34,37 @@ describe("Tools:Surface", () => {
         assertDeepAlmostEqual(SiSlab111NoVacuum, slabConfig);
     });
 
+    it("should return slab (111) even if ids shifted", () => {
+        const adjustedSilicon = {
+            ...Silicon,
+            basis: {
+                elements: [
+                    {
+                        id: 10,
+                        value: "Si",
+                    },
+                    {
+                        id: 14,
+                        value: "Si",
+                    },
+                ],
+                coordinates: [
+                    {
+                        id: 10,
+                        value: [0.0, 0.0, 0.0],
+                    },
+                    {
+                        id: 14,
+                        value: [0.25, 0.25, 0.25],
+                    },
+                ],
+            },
+        };
+        const material = new Material(adjustedSilicon);
+        const slabConfig = tools.surface.generateConfig(material, [1, 1, 1], 3, 1, 1);
+        assertDeepAlmostEqual(SiSlab111NoVacuum, slabConfig);
+    });
+
     it("should return slab (111) with vacuum", () => {
         const material = new Material(Silicon);
         const slabConfig = tools.surface.generateConfig(material, [1, 1, 1], 3, 1, 1);

@@ -143,12 +143,30 @@ class Basis extends entity_1.InMemoryEntity {
     getElementByIndex(idx) {
         return this._elements.getElementValueByIndex(idx);
     }
+    // TODO: should use method from ArrayWithIds
+    getElementById(id) {
+        const elements = this._elements.toJSON();
+        const elementObj = elements.find((elm) => elm.id === id);
+        if (elementObj) {
+            return elementObj.value;
+        }
+        throw new Error(`Element with index ${id} not found`);
+    }
     getCoordinateByIndex(idx) {
         const value = this._coordinates.getElementValueByIndex(idx);
         if (value) {
             return coordinates_1.Coordinate.fromValueAndId(value, idx);
         }
         throw new Error(`Coordinate with index ${idx} not found`);
+    }
+    // TODO: should use method from RoundedArrayWithIds
+    getCoordinateById(id) {
+        const coordinates = this._coordinates.toJSON();
+        const coordinateObj = coordinates.find((coord) => coord.id === id);
+        if (coordinateObj) {
+            return coordinates_1.Coordinate.fromValueAndId(coordinateObj.value, coordinateObj.id);
+        }
+        throw new Error(`Coordinate with index ${id} not found`);
     }
     toStandardRepresentation() {
         this.toCrystal();

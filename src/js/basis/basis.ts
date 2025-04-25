@@ -212,8 +212,18 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         this.units = ATOMIC_COORD_UNITS.crystal as BasisSchema["units"];
     }
 
-    getElementByIndex(idx: number): string {
-        return this._elements.getElementValueByIndex(idx) as string;
+    getElementByIndex(idx: number): AtomicElementValue {
+        return this._elements.getElementValueByIndex(idx) as AtomicElementValue;
+    }
+
+    // TODO: should use method from ArrayWithIds
+    getElementById(id: number): AtomicElementValue {
+        const elements = this._elements.toJSON() as BasisSchema["elements"];
+        const elementObj = elements.find((elm) => elm.id === id);
+        if (elementObj) {
+            return elementObj.value;
+        }
+        throw new Error(`Element with index ${id} not found`);
     }
 
     getCoordinateByIndex(idx: number): Coordinate {
@@ -222,6 +232,16 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             return Coordinate.fromValueAndId(value, idx);
         }
         throw new Error(`Coordinate with index ${idx} not found`);
+    }
+
+    // TODO: should use method from RoundedArrayWithIds
+    getCoordinateById(id: number): Coordinate {
+        const coordinates = this._coordinates.toJSON() as BasisSchema["coordinates"];
+        const coordinateObj = coordinates.find((coord) => coord.id === id);
+        if (coordinateObj) {
+            return Coordinate.fromValueAndId(coordinateObj.value, coordinateObj.id);
+        }
+        throw new Error(`Coordinate with index ${id} not found`);
     }
 
     toStandardRepresentation() {

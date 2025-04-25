@@ -130,7 +130,7 @@ function fromBasis(basisClsInstance, printFormat = "%9.5f", skipRounding = false
         const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
         const elementWithLabel = item + atomicLabel;
         const element = underscore_string_1.default.sprintf("%-3s", elementWithLabel);
-        const coordinates = basisClsInstance.getCoordinateByIndex(idx).value.map((x) => {
+        const coordinates = basisClsInstance.getCoordinateById(idx).value.map((x) => {
             return underscore_string_1.default.sprintf(printFormat, skipRounding ? x : math_1.default.precise(math_1.default.roundToZero(x)));
         });
         const constraints = basisClsInstance.constraints
