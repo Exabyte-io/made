@@ -6,6 +6,7 @@ from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
     LatticeImplicitSchema as LatticeBravaisSchema,
 )
+
 from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
     LatticeTypeEnum,
     LatticeUnitsSchema,
@@ -30,8 +31,8 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
     b: float = a
     c: float = a
     alpha: float = 90.0
-    beta: float = 90.0
-    gamma: float = 90.0
+    beta: float = alpha
+    gamma: float = alpha
 
     @property
     def vectors(self) -> LatticeVectors:

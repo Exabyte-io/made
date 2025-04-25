@@ -1,120 +1,84 @@
-import _ from "underscore";
-import { ArrayWithIds } from "../abstract/array_with_ids";
-import { ObjectWithIdAndValue, ValueOrObjectArray } from "../abstract/scalar_with_id";
-import { ATOMIC_COORD_UNITS } from "../constants";
-import { Vector } from "../lattice/types";
-import { Coordinate } from "./types";
-export interface BasisProps {
-    elements: ValueOrObjectArray<string>;
-    coordinates: ValueOrObjectArray<Coordinate>;
-    labels?: {
-        id: number;
-        value: number;
-    }[];
-    units: string;
-    cell: Vector[];
-    isEmpty?: boolean;
-}
-export interface Atom {
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { BasisSchema, Coordinate3DSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import { Cell } from "../cell/cell";
+import { AtomicCoordinateValue, Coordinate, Coordinates } from "./coordinates";
+import { AtomicElementValue, Elements } from "./elements";
+import { AtomicLabelValue, Labels } from "./labels";
+export interface ElementWithCoordinate {
     id?: number;
-    element: string;
-    coordinate: Coordinate;
+    element: AtomicElementValue;
+    coordinate: AtomicCoordinateValue;
 }
 export interface ElementCount {
     count: number;
-    value: string;
-}
-export interface BasisSchema {
-    elements: ObjectWithIdAndValue<string>[];
-    labels?: {
-        id: number;
-        value: number;
-    }[];
-    coordinates: ObjectWithIdAndValue<Coordinate>[];
-    units: string;
-    cell: Vector[];
+    value: AtomicElementValue;
 }
 interface Overlap {
     id1: number;
     id2: number;
-    element1: string;
-    element2: string;
+    element1: AtomicElementValue;
+    element2: AtomicElementValue;
 }
-/**
- * A class representing a crystal basis.
- */
-export declare class Basis {
-    _elements: ArrayWithIds<string>;
-    _coordinates: ArrayWithIds<Coordinate>;
-    labels?: {
-        id: number;
-        value: number;
-    }[];
-    units: string;
-    cell: Vector[];
-    constructor({ elements, coordinates, units, cell, // by default, assume a cubic unary cell
-    isEmpty, // whether to generate an empty Basis
-    labels, }: BasisProps);
-    static get unitsOptionsConfig(): typeof ATOMIC_COORD_UNITS;
-    static get unitsOptionsDefaultValue(): string;
-    static get defaultCell(): [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema];
-    toJSON(skipRounding?: boolean): BasisSchema;
-    /** Return coordinates rounded to default precision */
-    get coordinatesRounded(): {
-        id: number;
-        value: number[];
-    }[];
-    /** Return cell with vectors values rounded to default precision */
-    get cellRounded(): number[][];
-    /**
-     * Create an identical copy of the class instance.
-     * @param extraContext - Extra context to be passed to the new class instance on creation.
-     */
-    clone(extraContext?: Partial<BasisProps>): Basis;
-    getElementByIndex(idx: number): string;
-    getCoordinateByIndex(idx: number): Coordinate;
-    get elementsArray(): string[];
-    get elements(): ObjectWithIdAndValue<string>[];
-    /**
-     * Set basis elements to passed array.
-     * @param elementsArray - New elements array.
-     */
-    set elements(elementsArray: string[] | ObjectWithIdAndValue<string>[]);
-    getElementsAsObject(): ObjectWithIdAndValue<string>[];
-    get coordinates(): ObjectWithIdAndValue<Coordinate>[];
-    /**
-     * Set basis elements to passed array.
-     * @param {Array|ArrayWithIds} coordinatesNestedArray - New coordinates array.
-     */
-    set coordinates(coordinatesNestedArray: Coordinate[] | ObjectWithIdAndValue<Coordinate>[]);
-    get coordinatesAsArray(): Coordinate[];
-    get isInCrystalUnits(): boolean;
+export interface BasisConfig extends BasisSchema {
+    cell?: Cell;
+    isEmpty?: boolean;
+}
+export interface ElementsAndCoordinatesConfig {
+    elements: AtomicElementValue[];
+    coordinates: AtomicCoordinateValue[];
+    labels?: AtomicLabelValue[];
+    units?: BasisSchema["units"];
+    cell?: Cell;
+}
+export declare class Basis extends InMemoryEntity implements BasisSchema {
+    static defaultConfig: BasisSchema;
+    units: BasisSchema["units"];
+    cell: Cell;
+    _elements: Elements;
+    _coordinates: Coordinates;
+    _labels: Labels;
+    static _convertValuesToConfig({ elements, coordinates, units, cell, labels, }: ElementsAndCoordinatesConfig): BasisConfig;
+    static fromElementsAndCoordinates({ elements, coordinates, units, cell, labels, }: ElementsAndCoordinatesConfig): Basis;
+    constructor(config?: BasisConfig);
+    get elements(): BasisSchema["elements"];
+    set elements(elements: BasisSchema["elements"]);
+    get coordinates(): BasisSchema["coordinates"];
+    set coordinates(coordinates: BasisSchema["coordinates"]);
+    get labels(): BasisSchema["labels"];
+    set labels(labels: BasisSchema["labels"]);
+    toJSON(exclude?: string[]): BasisSchema;
+    clone(): Basis;
+    removeAllAtoms(): void;
+    get cellRounded(): import("@mat3ra/esse/dist/js/types").Matrix3X3Schema;
+    get elementsArray(): object[];
+    getElementsAsObject(): BasisSchema["elements"];
+    get coordinatesAsArray(): Coordinate3DSchema[];
     get isInCartesianUnits(): boolean;
+    get isInCrystalUnits(): boolean;
     toCartesian(): void;
     toCrystal(): void;
-    /**
-     * Asserts that all coordinates are in standardRepresentation (as explained below).
-     */
+    getElementByIndex(idx: number): string;
+    getCoordinateByIndex(idx: number): Coordinate;
     toStandardRepresentation(): void;
     /** A representation where all coordinates are within 0 and 1 in crystal units */
     get standardRepresentation(): BasisSchema;
     /**
      * Add atom with a chemical element at coordinate.
      */
-    addAtom({ element, coordinate }: Atom): void;
+    addAtom({ element, coordinate }: ElementWithCoordinate): void;
     /**
      * Remove atom with a chemical element at coordinate either by passing the (element AND coordinate) OR id.
      */
-    removeAtom({ element, coordinate, id }: Atom): void;
+    removeAtom({ element, coordinate, id }: ElementWithCoordinate): void;
     /**
      * Unique names (symbols) of the chemical elements basis. E.g. `['Si', 'Li']`
      */
-    get uniqueElements(): string[];
+    get uniqueElements(): AtomicElementValue[];
     /**
      * Returns unique chemical elements with their count sorted by electronegativity.
      * `{ "Fe": 4.0, "O": 8.0, "Li": 2.0}`.
      */
-    get uniqueElementCountsSortedByElectronegativity(): _.Dictionary<number>;
+    get uniqueElementCountsSortedByElectronegativity(): import("lodash").Dictionary<number>;
     /**
      * Returns chemical elements with their count wrt their original order in the basis.
      * Note: entries for the same element separated by another element are considered separately.
@@ -133,12 +97,16 @@ export declare class Basis {
      * Returns a nested array with elements and their corresponding coordinates
      * @example Output: [ ["Si", [0,0,0]], ["Si", [0.5,0.5,0.5]] ]
      */
-    get elementsAndCoordinatesArray(): [string, Coordinate][];
+    get elementsAndCoordinatesArray(): [AtomicElementValue, AtomicCoordinateValue][];
     /**
      * Returns a nested array with elements and their corresponding coordinates with labels
      * @example Output: [ ["Si", [0,0,0], ['1']], ["Si", [0.5,0.5,0.5]] , ['2']]
      */
-    get elementsAndCoordinatesAndLabelsArray(): [string, Coordinate, string][];
+    get elementsAndCoordinatesAndLabelsArray(): [
+        AtomicElementValue,
+        AtomicCoordinateValue,
+        AtomicLabelValue
+    ][];
     /**
      * @summary Concatenates elements and sorts them in alphanumeric order.
      * E.g.,
@@ -220,10 +188,10 @@ export declare class Basis {
      *
      * Returns an array = [xCenter, yCenter, zCenter]
      */
-    get centerOfCoordinatesPoint(): number[];
+    get centerOfCoordinatesPoint(): AtomicCoordinateValue;
     /**
      * @summary Function translates coordinates by the vector passed as an argument.
      */
-    translateByVector(translationVector: number[]): void;
+    translateByVector(translationVector: Vector3DSchema): void;
 }
 export {};

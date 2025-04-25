@@ -1,5 +1,5 @@
 import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
-import _ from "underscore";
+import { map } from "lodash";
 import s from "underscore.string";
 
 import { Lattice } from "../lattice/lattice";
@@ -12,7 +12,7 @@ import xyz from "./xyz";
 function toEspressoFormat(materialOrConfig: MaterialSchema): string {
     const l = new Lattice(materialOrConfig.lattice);
     const vectors = l.vectorArrays;
-    const vectorsAsString = _.map(vectors, (v) => {
+    const vectorsAsString = map(vectors, (v) => {
         return `${s.sprintf("%14.9f", v[0])}\t${s.sprintf("%14.9f", v[1])}\t${s.sprintf(
             "%14.9f",
             v[2],

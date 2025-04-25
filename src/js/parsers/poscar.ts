@@ -1,16 +1,18 @@
+import { BasisSchema, Coordinate3DSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
-import { Coordinate } from "../basis/types";
+import { AtomicCoordinateValue } from "../basis/coordinates";
+import { AtomicElementValue } from "../basis/elements";
+import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS } from "../constants";
-import { Constraint, ConstraintValue } from "../constraints/constraints";
+import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
-import { Vector } from "../lattice/types";
 import math from "../math";
 import { MaterialJSON } from "../types";
 
 const _print = (x: number, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
-const _latticeVectorsToString = (vectors: Vector[]) =>
+const _latticeVectorsToString = (vectors: Vector3DSchema[]) =>
     vectors.map((v) => v.map((c) => _print(c)).join("\t")).join("\n");
 const atomicConstraintsCharFromBool = (bool: boolean): string => (bool ? "T" : "F");
 
@@ -25,12 +27,12 @@ function toPoscar(materialOrConfig: MaterialJSON, omitConstraints = false): stri
     // @ts-ignore
     const basis = new ConstrainedBasis({
         ...materialOrConfig.basis,
-        cell: lattice.vectorArrays,
+        cell: Cell.fromVectorsArray(lattice.vectorArrays),
     });
     const BasisLines: string[] = [];
     let addSelectiveDynamics = false;
-    basis._elements.array.forEach((item, idx) => {
-        const coord = basis.getCoordinateByIndex(idx).map((x) => _print(x));
+    basis._elements.values.forEach((item, idx) => {
+        const coord = basis.getCoordinateByIndex(idx).value.map((x) => _print(x));
         const constraintsAsString = omitConstraints
             ? ""
             : basis.AtomicConstraints.getAsStringByIndex(idx, atomicConstraintsCharFromBool);
@@ -74,7 +76,8 @@ function fromPoscar(fileContent: string): object {
     const lines = fileContent.split("\n");
 
     const comment = lines[0];
-    const latticeConstant = parseFloat(lines[1].trim());
+    // TODO: alat should be handled!!!!
+    // const latticeConstant = parseFloat(lines[1].trim());
 
     // Atom symbols and counts
     const atomSymbols = lines[5].trim().split(/\s+/);
@@ -93,50 +96,51 @@ function fromPoscar(fileContent: string): object {
         startLine = 8;
     }
 
-    const elements: string[] = atomSymbols
+    const elements: AtomicElementValue[] = atomSymbols
         .map((symbol: string, i: number): string[] => Array(atomCounts[i]).fill(symbol))
         .reduce((a, b) => a.concat(b), []);
 
     // Atom coordinates and constraints
-    const coordinates: Coordinate[] = [];
-    const constraints: Constraint[] = [];
+    const coordinates: AtomicCoordinateValue[] = [];
+    const constraints: AtomicConstraintValue[] = [];
     let atomIndex = 0;
     for (let i = 0; i < atomSymbols.length; i++) {
         for (let j = 0; j < atomCounts[i]; j++) {
             const lineComponents = lines[startLine + atomIndex].trim().split(/\s+/);
-            const coordinate: Coordinate = [
+            const coordinate: AtomicCoordinateValue = [
                 parseFloat(lineComponents[0]),
                 parseFloat(lineComponents[1]),
                 parseFloat(lineComponents[2]),
             ];
-            coordinates.push(coordinate);
+            coordinates.push(coordinate as Coordinate3DSchema);
 
             // Add constraints if selective dynamics is used
             if (selectiveDynamics) {
-                const constraint: ConstraintValue = [
+                const constraint: AtomicConstraintValue = [
                     lineComponents[3] === "T",
                     lineComponents[4] === "T",
                     lineComponents[5] === "T",
                 ];
-                constraints.push({ id: j, value: constraint });
+                constraints.push(constraint);
             }
             atomIndex += 1;
         }
     }
 
-    const lattice = Lattice.fromVectors({
-        a: lines[2].trim().split(/\s+/).map(Number) as Vector,
-        b: lines[3].trim().split(/\s+/).map(Number) as Vector,
-        c: lines[4].trim().split(/\s+/).map(Number) as Vector,
-        alat: latticeConstant,
-        units: "angstrom",
-    });
+    const lattice = Lattice.fromVectorsArray([
+        lines[2].trim().split(/\s+/).map(Number) as Vector3DSchema,
+        lines[3].trim().split(/\s+/).map(Number) as Vector3DSchema,
+        lines[4].trim().split(/\s+/).map(Number) as Vector3DSchema,
+    ]);
 
-    const basis = new ConstrainedBasis({
+    const basis = ConstrainedBasis.fromElementsCoordinatesAndConstraints({
         elements,
         coordinates,
-        units: coordinateType === "c" ? ATOMIC_COORD_UNITS.cartesian : ATOMIC_COORD_UNITS.crystal,
-        cell: lattice.vectorArrays,
+        units:
+            coordinateType === "c"
+                ? (ATOMIC_COORD_UNITS.cartesian as BasisSchema["units"])
+                : (ATOMIC_COORD_UNITS.crystal as BasisSchema["units"]),
+        cell: Cell.fromVectorsArray(lattice.vectorArrays),
         constraints,
     });
 

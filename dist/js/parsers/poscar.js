@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.atomsCount = void 0;
 const underscore_string_1 = __importDefault(require("underscore.string"));
 const constrained_basis_1 = require("../basis/constrained_basis");
+const cell_1 = require("../cell/cell");
 const constants_1 = require("../constants");
 const lattice_1 = require("../lattice/lattice");
 const math_1 = __importDefault(require("../math"));
@@ -23,12 +24,12 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
     // @ts-ignore
     const basis = new constrained_basis_1.ConstrainedBasis({
         ...materialOrConfig.basis,
-        cell: lattice.vectorArrays,
+        cell: cell_1.Cell.fromVectorsArray(lattice.vectorArrays),
     });
     const BasisLines = [];
     let addSelectiveDynamics = false;
-    basis._elements.array.forEach((item, idx) => {
-        const coord = basis.getCoordinateByIndex(idx).map((x) => _print(x));
+    basis._elements.values.forEach((item, idx) => {
+        const coord = basis.getCoordinateByIndex(idx).value.map((x) => _print(x));
         const constraintsAsString = omitConstraints
             ? ""
             : basis.AtomicConstraints.getAsStringByIndex(idx, atomicConstraintsCharFromBool);
@@ -69,7 +70,8 @@ exports.atomsCount = atomsCount;
 function fromPoscar(fileContent) {
     const lines = fileContent.split("\n");
     const comment = lines[0];
-    const latticeConstant = parseFloat(lines[1].trim());
+    // TODO: alat should be handled!!!!
+    // const latticeConstant = parseFloat(lines[1].trim());
     // Atom symbols and counts
     const atomSymbols = lines[5].trim().split(/\s+/);
     const atomCounts = lines[6].trim().split(/\s+/).map(Number);
@@ -109,23 +111,23 @@ function fromPoscar(fileContent) {
                     lineComponents[4] === "T",
                     lineComponents[5] === "T",
                 ];
-                constraints.push({ id: j, value: constraint });
+                constraints.push(constraint);
             }
             atomIndex += 1;
         }
     }
-    const lattice = lattice_1.Lattice.fromVectors({
-        a: lines[2].trim().split(/\s+/).map(Number),
-        b: lines[3].trim().split(/\s+/).map(Number),
-        c: lines[4].trim().split(/\s+/).map(Number),
-        alat: latticeConstant,
-        units: "angstrom",
-    });
-    const basis = new constrained_basis_1.ConstrainedBasis({
+    const lattice = lattice_1.Lattice.fromVectorsArray([
+        lines[2].trim().split(/\s+/).map(Number),
+        lines[3].trim().split(/\s+/).map(Number),
+        lines[4].trim().split(/\s+/).map(Number),
+    ]);
+    const basis = constrained_basis_1.ConstrainedBasis.fromElementsCoordinatesAndConstraints({
         elements,
         coordinates,
-        units: coordinateType === "c" ? constants_1.ATOMIC_COORD_UNITS.cartesian : constants_1.ATOMIC_COORD_UNITS.crystal,
-        cell: lattice.vectorArrays,
+        units: coordinateType === "c"
+            ? constants_1.ATOMIC_COORD_UNITS.cartesian
+            : constants_1.ATOMIC_COORD_UNITS.crystal,
+        cell: cell_1.Cell.fromVectorsArray(lattice.vectorArrays),
         constraints,
     });
     const materialConfig = {

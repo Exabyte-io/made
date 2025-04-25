@@ -1,4 +1,4 @@
-import { Vector } from "./types";
+import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 export type UnitCellProps = [
     number,
     number,
@@ -23,8 +23,8 @@ export declare class UnitCell {
     cz: number;
     units: string;
     constructor([ax, ay, az, bx, by, bz, cx, cy, cz, units]: UnitCellProps);
-    vectorA(): Vector;
-    vectorB(): Vector;
-    vectorC(): Vector;
-    axes(): [Vector, Vector, Vector];
+    vectorA(): Vector3DSchema;
+    vectorB(): Vector3DSchema;
+    vectorC(): Vector3DSchema;
+    axes(): [Vector3DSchema, Vector3DSchema, Vector3DSchema];
 }

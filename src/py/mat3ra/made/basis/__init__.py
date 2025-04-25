@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.material import BasisSchema
-from mat3ra.esse.models.material import Units as UnitsEnum
+from mat3ra.esse.models.material import BasisUnitsEnum
 from mat3ra.made.basis.coordinates import Coordinates
 from mat3ra.made.cell import Cell
 from mat3ra.made.utils import get_overlapping_coordinates
@@ -55,23 +55,23 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
 
     @property
     def is_in_crystal_units(self):
-        return self.units == UnitsEnum.crystal
+        return self.units == BasisUnitsEnum.crystal
 
     @property
     def is_in_cartesian_units(self):
-        return self.units == UnitsEnum.cartesian
+        return self.units == BasisUnitsEnum.cartesian
 
     def to_cartesian(self):
         if self.is_in_cartesian_units:
             return
         self.coordinates.map_array_in_place(self.cell.convert_point_to_cartesian)
-        self.units = UnitsEnum.cartesian
+        self.units = BasisUnitsEnum.cartesian
 
     def to_crystal(self):
         if self.is_in_crystal_units:
             return
         self.coordinates.map_array_in_place(self.cell.convert_point_to_crystal)
-        self.units = UnitsEnum.crystal
+        self.units = BasisUnitsEnum.crystal
 
     def add_atom(
         self,

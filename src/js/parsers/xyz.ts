@@ -1,12 +1,13 @@
 import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
-import _ from "underscore";
+import { isEmpty, isNaN, map } from "lodash";
 import s from "underscore.string";
 
-import { Basis } from "../basis/basis";
-import { ConstrainedBasis } from "../basis/constrained_basis";
-import { Constraint } from "../constraints/constraints";
+import { ConstrainedBasis, ConstrainedBasisConfig } from "../basis/constrained_basis";
+import { AtomicCoordinateValue } from "../basis/coordinates";
+import { AtomicElementValue } from "../basis/elements";
+import { Cell } from "../cell/cell";
+import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
-import { Vector } from "../lattice/types";
 import math from "../math";
 import { InvalidLineError } from "./errors";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
@@ -29,7 +30,7 @@ function validateLine(xyzLine: string, index: number) {
 
     const coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
     coordinates.forEach((num, i) => {
-        if (_.isNaN(num)) {
+        if (isNaN(num)) {
             throw new Error(`Coordinates should be a number. Possible error in ${i} coordinate`);
         }
     });
@@ -49,9 +50,9 @@ export function validate(xyzTxt: string) {
 }
 
 export interface ParsedObject {
-    element: string;
-    coordinates: Vector;
-    constraints: [boolean, boolean, boolean];
+    element: AtomicElementValue;
+    coordinate: AtomicCoordinateValue;
+    constraints: AtomicConstraintValue;
     label?: number;
 }
 
@@ -61,13 +62,13 @@ export interface ParsedObject {
  */
 function _parseXYZLineAsWords(line: string): ParsedObject {
     const words = s.words(line);
-    const elementWithOptionalLabel: string = words[0];
-    const element: string = elementWithOptionalLabel.replace(/\d$/, ""); // Fe1 => Fe
+    const elementWithOptionalLabel: AtomicElementValue = words[0];
+    const element: AtomicElementValue = elementWithOptionalLabel.replace(/\d$/, ""); // Fe1 => Fe
     const constraint = (n: number) => parseInt(`${n}`, 10) !== 0;
 
     const basisLineConfig: ParsedObject = {
         element,
-        coordinates: [+words[1], +words[2], +words[3]],
+        coordinate: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
         constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
     };
@@ -82,35 +83,16 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
     return basisLineConfig;
 }
 
-// TODO: reuse Basis Definition(s) from ESSE/Code.js instead
-export interface BasisConfig {
-    elements: {
-        id: number;
-        value: string;
-    }[];
-    labels?: {
-        id: number;
-        value: number;
-    }[];
-    coordinates: {
-        id: number;
-        value: Vector;
-    }[];
-    units: string;
-    cell: Vector[];
-    constraints: Constraint[];
-}
-
 /**
  * Parse XYZ text for basis.
  * @param txt Text
  * @param units Coordinate units
  * @param cell Basis Cell
  */
-function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell): BasisConfig {
+function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): ConstrainedBasisConfig {
     // @ts-ignore
     const lines: string[] = s(txt).trim().lines();
-    const listOfObjects = _.map(lines, _parseXYZLineAsWords);
+    const listOfObjects = map(lines, _parseXYZLineAsWords);
 
     const basisConfig = {
         elements: listOfObjects.map((elm, idx) => {
@@ -122,7 +104,7 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
         coordinates: listOfObjects.map((elm, idx) => {
             return {
                 id: idx,
-                value: elm.coordinates,
+                value: elm.coordinate,
             };
         }),
         units,
@@ -149,14 +131,14 @@ function toBasisConfig(txt: string, units = "angstrom", cell = Basis.defaultCell
         }
     });
 
-    if (!_.isEmpty(labels)) {
+    if (!isEmpty(labels)) {
         return {
             ...basisConfig,
             labels,
-        };
+        } as ConstrainedBasisConfig;
     }
 
-    return basisConfig;
+    return basisConfig as ConstrainedBasisConfig;
 }
 
 /**
@@ -172,12 +154,12 @@ function fromBasis(
     skipRounding = false,
 ) {
     const XYZArray: string[] = [];
-    basisClsInstance._elements.array.forEach((item, idx) => {
+    basisClsInstance._elements.values.forEach((item: any, idx: number) => {
         // assume that _elements and _coordinates are indexed equivalently
         const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
         const elementWithLabel = item + atomicLabel;
         const element = s.sprintf("%-3s", elementWithLabel);
-        const coordinates = basisClsInstance.getCoordinateByIndex(idx).map((x) => {
+        const coordinates = basisClsInstance.getCoordinateByIndex(idx).value.map((x) => {
             return s.sprintf(printFormat, skipRounding ? x : math.precise(math.roundToZero(x)));
         });
         const constraints = basisClsInstance.constraints
@@ -199,7 +181,7 @@ function fromMaterial(materialOrConfig: MaterialSchema, fractional = false): str
     // @ts-ignore
     const basis = new ConstrainedBasis({
         ...materialOrConfig.basis,
-        cell: lattice.vectorArrays,
+        cell: Cell.fromVectorsArray(lattice.vectorArrays),
     });
     if (fractional) {
         basis.toCrystal();

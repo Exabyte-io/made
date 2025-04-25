@@ -1,17 +1,15 @@
-import s from "underscore.string";
+import { AtomicConstraintsSchema } from "@mat3ra/esse/dist/js/types";
 
-import { ArrayWithIds } from "../abstract/array_with_ids";
-import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
-import { AtomicConstraints, Constraint, ConstraintValue } from "../constraints/constraints";
-import { Basis, BasisProps, BasisSchema } from "./basis";
-import { Coordinate } from "./types";
+import { AtomicConstraints, AtomicConstraintValue, Constraint } from "../constraints/constraints";
+import { Basis, BasisConfig, ElementsAndCoordinatesConfig } from "./basis";
+import { Coordinate } from "./coordinates";
 
-export interface ConstrainedBasisProps extends BasisProps {
-    constraints: Constraint[];
+export interface ConstrainedBasisConfig extends BasisConfig {
+    constraints: AtomicConstraintsSchema;
 }
 
-export interface ConstrainedBasisJSON extends BasisSchema {
-    constraints: ObjectWithIdAndValue<ConstraintValue>[];
+export interface ElementsCoordinatesAndConstraintsConfig extends ElementsAndCoordinatesConfig {
+    constraints: AtomicConstraintValue[];
 }
 
 /**
@@ -19,71 +17,62 @@ export interface ConstrainedBasisJSON extends BasisSchema {
  * @extends Basis
  */
 export class ConstrainedBasis extends Basis {
-    _constraints: ArrayWithIds<ConstraintValue>;
+    _constraints: AtomicConstraints;
 
-    /**
-     * Create a an array with ids.
-     * @param {Object} config
-     * @param {ArrayWithIds|Array} config.constraints - atomic constraints.
-     */
-    constructor(config: ConstrainedBasisProps) {
+    constructor(config: ConstrainedBasisConfig) {
         super(config);
-        this._constraints = new ArrayWithIds<ConstraintValue>(config.constraints); // `constraints` is an Array with ids
+        const { constraints } = config;
+        this._constraints = AtomicConstraints.fromObjects(constraints || []); // `constraints` is an Array with ids
+    }
+
+    static fromElementsCoordinatesAndConstraints(
+        config: ElementsCoordinatesAndConstraintsConfig,
+    ): ConstrainedBasis {
+        const basisConfig = this._convertValuesToConfig(config);
+        const constraints = AtomicConstraints.fromValues(config.constraints);
+        return new this({
+            ...basisConfig,
+            constraints: constraints.toJSON() as AtomicConstraintsSchema,
+        });
     }
 
     get constraints() {
-        return this._constraints.array;
+        return this._constraints.toJSON() as AtomicConstraintsSchema;
     }
 
-    set constraints(newConstraints: ConstraintValue[]) {
-        this._constraints = new ArrayWithIds(newConstraints);
-    }
-
-    getConstraintAsArray() {
-        return this._constraints;
+    set constraints(constraints: AtomicConstraintsSchema) {
+        this._constraints = AtomicConstraints.fromObjects(constraints);
     }
 
     get AtomicConstraints() {
-        return AtomicConstraints.fromArray(this.constraints);
+        return AtomicConstraints.fromObjects(this.constraints);
     }
 
-    /**
-     * Serialize class instance to JSON.
-     * @example As below:
-         {
-            ...Basis.toJSON(),
-            "constraints": [
-                {
-                    "id" : 0,
-                    "value" : [
-                        1,
-                        1,
-                        1
-                    ]
-                },
-            ]
-         }
-     */
-    toJSON(): ConstrainedBasisJSON {
+    override toJSON(): ConstrainedBasisConfig {
         return {
             ...super.toJSON(),
-            constraints: this._constraints.toJSON(),
+            constraints: this.constraints,
         };
     }
 
-    getConstraintByIndex(idx: number): ConstraintValue {
-        return this._constraints.getArrayElementByIndex(idx) || [];
+    getConstraintByIndex(idx: number): AtomicConstraintValue {
+        return this._constraints.getElementValueByIndex(idx) || [false, false, false];
     }
 
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
-    get elementsCoordinatesConstraintsArray(): [string, Coordinate, ConstraintValue, string][] {
-        return this._elements.array.map((element, idx) => {
-            const coordinates = this.getCoordinateByIndex(idx);
-            const constraints = this.getConstraintByIndex(idx);
+    get elementsCoordinatesConstraintsArray(): [
+        string,
+        Coordinate,
+        AtomicConstraintValue,
+        string,
+    ][] {
+        return this._elements.values.map((element: any, idx: number) => {
+            const coordinate = this.getCoordinateByIndex(idx);
+            const constraint = this.getConstraintByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
-            return [element, coordinates, constraints, atomicLabel];
+            return [element, coordinate, constraint, atomicLabel];
         });
     }
 
@@ -92,16 +81,15 @@ export class ConstrainedBasis extends Basis {
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
      */
     get atomicPositionsWithConstraints(): string[] {
-        return this.elementsCoordinatesConstraintsArray.map((entry) => {
-            const element = entry[0] + entry[3]; // element with label, Fe1
-            const coordinate = entry[1];
-            const constraint = entry[2];
-            return (
-                s.sprintf("%-4s", element) +
-                coordinate.map((x) => s.sprintf("%14.9f", x).trim()).join(" ") +
-                " " +
-                constraint.map((x) => (x ? 1 : 0)).join(" ")
-            );
-        });
+        return this.elementsCoordinatesConstraintsArray.map(
+            ([element, coordinate, constraint, label]) => {
+                const fullElement = element + label; // e.g., Fe1
+                return new Constraint({ id: 0, value: constraint }).prettyPrint(
+                    fullElement,
+                    coordinate,
+                    constraint,
+                );
+            },
+        );
     }
 }

@@ -1,12 +1,11 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
-import { ConstrainedBasis } from "./basis/constrained_basis";
+import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
+import { BasisConfig } from "./basis/basis";
+import { ConstrainedBasis, ConstrainedBasisConfig } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-import { BravaisConfigProps } from "./lattice/lattice_vectors";
-import { BasisConfig } from "./parsers/xyz";
-import { MaterialJSON } from "./types";
+import { MaterialJSON } from "./types/material";
 export declare const defaultMaterialConfig: {
     name: string;
     basis: {
@@ -38,6 +37,7 @@ export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
 }
 type MaterialBaseEntity = InstanceType<typeof HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity>;
 export type MaterialBaseEntityConstructor<T extends MaterialBaseEntity = MaterialBaseEntity> = new (...args: any[]) => T;
+export type OptionallyConstrainedBasisConfig = BasisConfig & Partial<Pick<ConstrainedBasisConfig, "constraints">>;
 export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = MaterialBaseEntityConstructor>(superclass: T): {
     new (...config: any[]): {
         _json: MaterialSchemaJSON;
@@ -100,13 +100,13 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
         setBasisConstraints(constraints: Constraint[]): void;
-        readonly basis: BasisConfig;
+        readonly basis: OptionallyConstrainedBasisConfig;
         readonly Basis: ConstrainedBasis;
         /**
          * High-level access to unique elements from material instead of basis.
          */
         readonly uniqueElements: string[];
-        lattice: BravaisConfigProps | undefined;
+        lattice: LatticeSchema;
         readonly Lattice: Lattice;
         /**
          * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
@@ -334,13 +334,13 @@ export declare const Material: {
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
         setBasisConstraints(constraints: Constraint[]): void;
-        readonly basis: BasisConfig;
+        readonly basis: OptionallyConstrainedBasisConfig;
         readonly Basis: ConstrainedBasis;
         /**
          * High-level access to unique elements from material instead of basis.
          */
         readonly uniqueElements: string[];
-        lattice: BravaisConfigProps | undefined;
+        lattice: LatticeSchema;
         readonly Lattice: Lattice;
         /**
          * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
@@ -518,10 +518,7 @@ export declare const Material: {
     toJSONSafe(exclude?: string[] | undefined): AnyObject;
     toJSONQuick(exclude?: string[] | undefined): AnyObject;
     clone(extraContext?: object | undefined): any;
-    validate(): void; /**
-     * @summary a series of checks for the material's basis and returns an array of results in ConsistencyChecks format.
-     * @returns Array of checks results
-     */
+    validate(): void;
     clean(config: AnyObject): AnyObject;
     isValid(): boolean;
     readonly cls: string;
