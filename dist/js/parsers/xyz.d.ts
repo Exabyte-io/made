@@ -25,11 +25,10 @@ declare function toBasisConfig(txt: string, units?: string, cell?: Cell): Constr
 /**
  * Create XYZ from Basis class instance.
  * @param basisClsInstance Basis class instance.
- * @param printFormat Output format for coordinates.
- * @param skipRounding Whether to round the numbers (ie. to avoid negative zeros).
+ * @param coordinatePrintFormat Output format for coordinates.
  * @return Basis string in XYZ format
  */
-declare function fromBasis(basisClsInstance: ConstrainedBasis, printFormat?: string, skipRounding?: boolean): string;
+declare function fromBasis(basisClsInstance: ConstrainedBasis, coordinatePrintFormat: string): string;
 /**
  * Create XYZ from Material class instance (or its JSON config).
  * @param materialOrConfig Material.

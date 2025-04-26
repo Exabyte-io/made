@@ -5,9 +5,8 @@ export declare class Constraint extends ValueWithId<AtomicConstraintValue> {
     value: AtomicConstraintValue;
     constructor({ value, id }: AtomicConstraintSchema);
     getValueAsString(): string;
-    prettyPrint(element: string, coordinate: {
-        prettyPrint: () => string;
-    }, constraint: boolean[]): string;
+    prettyPrint(): string;
+    isUnconstrained(): boolean;
 }
 export declare class AtomicConstraints extends ArrayWithIds<AtomicConstraintValue> {
     /**
@@ -16,4 +15,5 @@ export declare class AtomicConstraints extends ArrayWithIds<AtomicConstraintValu
      * @param mapFn (OPTIONAL) - a function to be applied to each constraint. By default 0 or 1 is returned.
      */
     getAsStringByIndex(idx: number, mapFn?: (val: boolean) => string): string;
+    get areUnconstrained(): boolean;
 }

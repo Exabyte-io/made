@@ -41,7 +41,7 @@ class Cell {
         return [this._a.value, this._b.value, this._c.value];
     }
     get vectorArraysRounded() {
-        return [this._a.value_rounded, this._b.value_rounded, this._c.value_rounded];
+        return [this._a.valueRounded, this._b.valueRounded, this._c.valueRounded];
     }
     get volume() {
         return math_1.math.det(this.vectorArrays);

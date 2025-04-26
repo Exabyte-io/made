@@ -1,6 +1,5 @@
 import { ArrayWithIds, ValueWithId } from "@mat3ra/code";
 import { AtomicConstraintSchema } from "@mat3ra/esse/dist/js/types";
-import { padEnd } from "lodash";
 
 export type AtomicConstraintValue = AtomicConstraintSchema["value"];
 
@@ -16,17 +15,13 @@ export class Constraint extends ValueWithId<AtomicConstraintValue> {
         return this.value.map((x) => (x ? 1 : 0)).join(" ");
     }
 
-    prettyPrint(
-        element: string,
-        coordinate: { prettyPrint: () => string },
-        constraint: boolean[],
-    ): string {
-        return (
-            padEnd(element, 4) +
-            coordinate.prettyPrint() +
-            " " +
-            constraint.map((x) => (x ? 1 : 0)).join(" ")
-        );
+    prettyPrint(): string {
+        return this.value.map((x) => (x ? 1 : 0)).join(" ");
+    }
+
+    // By default, the constraint is unconstrained if all values are 1/true.
+    isUnconstrained(): boolean {
+        return this.value.every((val) => val);
     }
 }
 
@@ -39,5 +34,12 @@ export class AtomicConstraints extends ArrayWithIds<AtomicConstraintValue> {
     getAsStringByIndex(idx: number, mapFn = (val: boolean): string => (val ? "1" : "0")): string {
         const constraints = this.getElementValueByIndex(idx);
         return constraints ? constraints.map(mapFn).join(" ") : "";
+    }
+
+    get areUnconstrained(): boolean {
+        return this.values.every((constraint) => {
+            const _constraint = Constraint.fromValueAndId(constraint);
+            return _constraint.isUnconstrained();
+        });
     }
 }

@@ -104,6 +104,11 @@ describe("Basis", () => {
         expect(basis.coordinates).to.be.deep.almost.equal(AsGeBasis.coordinates);
     });
 
+    it("should return coordinate by id", () => {
+        const basis = new Basis(Na4Cl4.basis);
+        expect(basis.getCoordinateValueById(3)).to.be.deep.equal([0.5, 0.5, 0]);
+    });
+
     /**
      * Units
      */

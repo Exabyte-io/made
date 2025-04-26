@@ -28,7 +28,7 @@ class Cell(RoundNumericValuesMixin, CellSchema):
     def get_vector_arrays(self, skip_rounding=False) -> List[List[float]]:
         if skip_rounding:
             return [self.a.value, self.b.value, self.c.value]
-        return [self.a.value_rounded, self.b.value_rounded, self.c.value_rounded]
+        return [self.a.valueRounded, self.b.valueRounded, self.c.valueRounded]
 
     @property
     def vector_arrays(self) -> List[List[float]]:

@@ -8,7 +8,7 @@ import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import math from "../math";
-import { AtomicCoordinateValue, Coordinate, Coordinates } from "./coordinates";
+import { AtomicCoordinateValue, Coordinates } from "./coordinates";
 import { AtomicElementValue, Elements } from "./elements";
 import { AtomicLabelValue, Labels } from "./labels";
 
@@ -216,30 +216,26 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         return this._elements.getElementValueByIndex(idx) as AtomicElementValue;
     }
 
-    // TODO: should use method from ArrayWithIds
     getElementById(id: number): AtomicElementValue {
-        const elements = this._elements.toJSON() as BasisSchema["elements"];
-        const elementObj = elements.find((elm) => elm.id === id);
-        if (elementObj) {
-            return elementObj.value;
+        const result = this._elements.getElementValueById(id) as AtomicElementValue;
+        if (result) {
+            return result;
         }
         throw new Error(`Element with index ${id} not found`);
     }
 
-    getCoordinateByIndex(idx: number): Coordinate {
+    getCoordinateValueByIndex(idx: number): AtomicCoordinateValue {
         const value = this._coordinates.getElementValueByIndex(idx);
         if (value) {
-            return Coordinate.fromValueAndId(value, idx);
+            return value as AtomicCoordinateValue;
         }
         throw new Error(`Coordinate with index ${idx} not found`);
     }
 
-    // TODO: should use method from RoundedArrayWithIds
-    getCoordinateById(id: number): Coordinate {
-        const coordinates = this._coordinates.toJSON() as BasisSchema["coordinates"];
-        const coordinateObj = coordinates.find((coord) => coord.id === id);
-        if (coordinateObj) {
-            return Coordinate.fromValueAndId(coordinateObj.value, coordinateObj.id);
+    getCoordinateValueById(id: number): AtomicCoordinateValue {
+        const coordinate = this._coordinates.getElementValueById(id);
+        if (coordinate) {
+            return coordinate as AtomicCoordinateValue;
         }
         throw new Error(`Coordinate with index ${id} not found`);
     }
@@ -353,7 +349,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     get elementsAndCoordinatesArray(): [AtomicElementValue, AtomicCoordinateValue][] {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx).value;
+            const coordinate = this.getCoordinateValueByIndex(idx);
             return [element, coordinate];
         });
     }
@@ -368,7 +364,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         AtomicLabelValue,
     ][] {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx).value;
+            const coordinate = this.getCoordinateValueByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
             return [element, coordinate, atomicLabel];
         });

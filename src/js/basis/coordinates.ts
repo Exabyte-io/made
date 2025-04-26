@@ -1,11 +1,11 @@
-import { RoundedArrayWithIds, RoundedValueWithId } from "@mat3ra/code";
+import { RoundedArrayWithIds, RoundedValueWithId, RoundedVector3D, Vector3D } from "@mat3ra/code";
 import {
     AtomicCoordinateSchema,
     Coordinate3DSchema,
     Matrix3X3Schema,
     Vector3DSchema,
 } from "@mat3ra/esse/dist/js/types";
-import { padStart } from "lodash";
+import { sprintf } from "underscore.string";
 
 import math from "../math";
 
@@ -26,13 +26,18 @@ export class Coordinate extends RoundedValueWithId<AtomicCoordinateValue> {
         return this.value[index] as number;
     }
 
-    translateByVector(vector: Vector3DSchema): Coordinate {
-        this.value = this.value.map((v, i) => v + vector[i]) as AtomicCoordinateValue;
+    translateByVector(vectorAsArray: Vector3DSchema): Coordinate {
+        const vector3D = new Vector3D(this.value);
+        this.value = vector3D.translateByVector(vectorAsArray).value;
         return this;
     }
 
-    prettyPrint(decimalPlaces = 9, padding = 14): string {
-        return this.value.map((x: number) => padStart(x.toFixed(decimalPlaces), padding)).join(" ");
+    get valueRounded(): number[] {
+        return new RoundedVector3D(this.value).valueRounded;
+    }
+
+    prettyPrint(format = "%14.9f"): string {
+        return this.valueRounded.map((v) => sprintf(format, v)).join(" ");
     }
 }
 
@@ -59,7 +64,10 @@ export class Coordinates extends RoundedArrayWithIds<Coordinate3DSchema> {
     }
 
     translateByVector(vector: Vector3DSchema): void {
-        this.mapArrayInPlace((x) => x.map((v, i) => v + vector[i]) as Coordinate3DSchema);
+        this.mapArrayInPlace((x) => {
+            const coordinate = Coordinate.fromValueAndId(x);
+            return coordinate.translateByVector(vector).value;
+        });
     }
 
     getCenterPoint(): Vector3DSchema {

@@ -1,7 +1,7 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { BasisSchema, Coordinate3DSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import { Cell } from "../cell/cell";
-import { AtomicCoordinateValue, Coordinate, Coordinates } from "./coordinates";
+import { AtomicCoordinateValue, Coordinates } from "./coordinates";
 import { AtomicElementValue, Elements } from "./elements";
 import { AtomicLabelValue, Labels } from "./labels";
 export interface ElementWithCoordinate {
@@ -59,8 +59,8 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
     toCrystal(): void;
     getElementByIndex(idx: number): AtomicElementValue;
     getElementById(id: number): AtomicElementValue;
-    getCoordinateByIndex(idx: number): Coordinate;
-    getCoordinateById(id: number): Coordinate;
+    getCoordinateValueByIndex(idx: number): AtomicCoordinateValue;
+    getCoordinateValueById(id: number): AtomicCoordinateValue;
     toStandardRepresentation(): void;
     /** A representation where all coordinates are within 0 and 1 in crystal units */
     get standardRepresentation(): BasisSchema;

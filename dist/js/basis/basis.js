@@ -143,28 +143,24 @@ class Basis extends entity_1.InMemoryEntity {
     getElementByIndex(idx) {
         return this._elements.getElementValueByIndex(idx);
     }
-    // TODO: should use method from ArrayWithIds
     getElementById(id) {
-        const elements = this._elements.toJSON();
-        const elementObj = elements.find((elm) => elm.id === id);
-        if (elementObj) {
-            return elementObj.value;
+        const result = this._elements.getElementValueById(id);
+        if (result) {
+            return result;
         }
         throw new Error(`Element with index ${id} not found`);
     }
-    getCoordinateByIndex(idx) {
+    getCoordinateValueByIndex(idx) {
         const value = this._coordinates.getElementValueByIndex(idx);
         if (value) {
-            return coordinates_1.Coordinate.fromValueAndId(value, idx);
+            return value;
         }
         throw new Error(`Coordinate with index ${idx} not found`);
     }
-    // TODO: should use method from RoundedArrayWithIds
-    getCoordinateById(id) {
-        const coordinates = this._coordinates.toJSON();
-        const coordinateObj = coordinates.find((coord) => coord.id === id);
-        if (coordinateObj) {
-            return coordinates_1.Coordinate.fromValueAndId(coordinateObj.value, coordinateObj.id);
+    getCoordinateValueById(id) {
+        const coordinate = this._coordinates.getElementValueById(id);
+        if (coordinate) {
+            return coordinate;
         }
         throw new Error(`Coordinate with index ${id} not found`);
     }
@@ -264,7 +260,7 @@ class Basis extends entity_1.InMemoryEntity {
      */
     get elementsAndCoordinatesArray() {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx).value;
+            const coordinate = this.getCoordinateValueByIndex(idx);
             return [element, coordinate];
         });
     }
@@ -274,7 +270,7 @@ class Basis extends entity_1.InMemoryEntity {
      */
     get elementsAndCoordinatesAndLabelsArray() {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx).value;
+            const coordinate = this.getCoordinateValueByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
             return [element, coordinate, atomicLabel];
         });

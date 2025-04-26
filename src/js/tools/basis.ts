@@ -2,7 +2,7 @@ import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 import { chunk, flatten } from "lodash";
 
 import { Basis } from "../basis/basis";
-import { AtomicCoordinateValue } from "../basis/coordinates";
+import { AtomicCoordinateValue, Coordinate } from "../basis/coordinates";
 import math from "../math";
 
 const ADD = math.add;
@@ -33,12 +33,18 @@ function repeat(basis: Basis, repetitions: number[]): Basis {
                 // for each atom in original basis add one with a repetition
                 // eslint-disable-next-line no-loop-func
                 basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
-                    const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
+                    const coord = basisCloneInCrystalCoordinates.getCoordinateValueByIndex(index);
                     // only add atoms if shifts are non-zero
                     if (shiftI || shiftJ || shiftK) {
+                        const coordinateInstance = Coordinate.fromValueAndId(coord);
+                        const translatedCoordinateInstance = coordinateInstance.translateByVector([
+                            shiftI,
+                            shiftJ,
+                            shiftK,
+                        ]);
                         newBasis.addAtom({
                             element: element.value,
-                            coordinate: [coord[0] + shiftI, coord[1] + shiftJ, coord[2] + shiftK],
+                            coordinate: translatedCoordinateInstance.value,
                         });
                     }
                 });
