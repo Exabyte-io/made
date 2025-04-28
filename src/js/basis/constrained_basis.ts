@@ -87,7 +87,7 @@ export class ConstrainedBasis extends Basis {
      * Returns an array with atomic positions (with constraints) per atom stored as strings.
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
      */
-    getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat: string): string[] {
+    getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat = ""): string[] {
         const omitConstraints = this._constraints.areUnconstrained;
         return this.elementsCoordinatesConstraintsArray.map(
             ([element, label, coordinate, constraint]) => {
