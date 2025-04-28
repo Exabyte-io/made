@@ -17,8 +17,8 @@ function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix
     oldBasis.toCrystal();
     newBasis.toCrystal();
     oldBasis.elements.forEach((element) => {
-        const coordinate = oldBasis.getCoordinateByIndex(element.id);
-        const cartesianCoordinate = cell.convertPointToCartesian(coordinate.value);
+        const coordinate = oldBasis.getCoordinateValueById(element.id);
+        const cartesianCoordinate = cell.convertPointToCartesian(coordinate);
         const shifts = cell_1.default.latticePointsInSupercell(supercellMatrix);
         shifts.forEach((combination) => {
             // "combination" is effectively a point in fractional coordinates here, hence the below

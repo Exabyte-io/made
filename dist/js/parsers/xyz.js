@@ -9,7 +9,6 @@ const underscore_string_1 = __importDefault(require("underscore.string"));
 const constrained_basis_1 = require("../basis/constrained_basis");
 const cell_1 = require("../cell/cell");
 const lattice_1 = require("../lattice/lattice");
-const math_1 = __importDefault(require("../math"));
 const errors_1 = require("./errors");
 const xyz_combinatorial_basis_1 = require("./xyz_combinatorial_basis");
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
@@ -119,25 +118,11 @@ function toBasisConfig(txt, units = "angstrom", cell = new cell_1.Cell()) {
 /**
  * Create XYZ from Basis class instance.
  * @param basisClsInstance Basis class instance.
- * @param printFormat Output format for coordinates.
- * @param skipRounding Whether to round the numbers (ie. to avoid negative zeros).
+ * @param coordinatePrintFormat Output format for coordinates.
  * @return Basis string in XYZ format
  */
-function fromBasis(basisClsInstance, printFormat = "%9.5f", skipRounding = false) {
-    const XYZArray = [];
-    basisClsInstance._elements.values.forEach((item, idx) => {
-        // assume that _elements and _coordinates are indexed equivalently
-        const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
-        const elementWithLabel = item + atomicLabel;
-        const element = underscore_string_1.default.sprintf("%-3s", elementWithLabel);
-        const coordinates = basisClsInstance.getCoordinateByIndex(idx).value.map((x) => {
-            return underscore_string_1.default.sprintf(printFormat, skipRounding ? x : math_1.default.precise(math_1.default.roundToZero(x)));
-        });
-        const constraints = basisClsInstance.constraints
-            ? basisClsInstance.AtomicConstraints.getAsStringByIndex(idx)
-            : "";
-        XYZArray.push([element, coordinates.join(" "), constraints].join(" "));
-    });
+function fromBasis(basisClsInstance, coordinatePrintFormat) {
+    const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat);
     return `${XYZArray.join("\n")}\n`;
 }
 /**

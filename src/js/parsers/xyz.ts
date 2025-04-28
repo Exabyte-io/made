@@ -8,7 +8,6 @@ import { AtomicElementValue } from "../basis/elements";
 import { Cell } from "../cell/cell";
 import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
-import math from "../math";
 import { InvalidLineError } from "./errors";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 
@@ -144,29 +143,12 @@ function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): Cons
 /**
  * Create XYZ from Basis class instance.
  * @param basisClsInstance Basis class instance.
- * @param printFormat Output format for coordinates.
- * @param skipRounding Whether to round the numbers (ie. to avoid negative zeros).
+ * @param coordinatePrintFormat Output format for coordinates.
  * @return Basis string in XYZ format
  */
-function fromBasis(
-    basisClsInstance: ConstrainedBasis,
-    printFormat = "%9.5f",
-    skipRounding = false,
-) {
-    const XYZArray: string[] = [];
-    basisClsInstance._elements.values.forEach((item: any, idx: number) => {
-        // assume that _elements and _coordinates are indexed equivalently
-        const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
-        const elementWithLabel = item + atomicLabel;
-        const element = s.sprintf("%-3s", elementWithLabel);
-        const coordinates = basisClsInstance.getCoordinateByIndex(idx).value.map((x) => {
-            return s.sprintf(printFormat, skipRounding ? x : math.precise(math.roundToZero(x)));
-        });
-        const constraints = basisClsInstance.constraints
-            ? basisClsInstance.AtomicConstraints.getAsStringByIndex(idx)
-            : "";
-        XYZArray.push([element, coordinates.join(" "), constraints].join(" "));
-    });
+function fromBasis(basisClsInstance: ConstrainedBasis, coordinatePrintFormat: string): string {
+    const XYZArray =
+        basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat);
     return `${XYZArray.join("\n")}\n`;
 }
 

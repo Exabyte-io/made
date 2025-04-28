@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Coordinates = exports.Coordinate = void 0;
 const code_1 = require("@mat3ra/code");
-const lodash_1 = require("lodash");
+const underscore_string_1 = require("underscore.string");
 const math_1 = __importDefault(require("../math"));
 class Coordinate extends code_1.RoundedValueWithId {
     constructor({ value, id }) {
@@ -16,12 +16,16 @@ class Coordinate extends code_1.RoundedValueWithId {
         const index = { x: 0, y: 1, z: 2 }[axis];
         return this.value[index];
     }
-    translateByVector(vector) {
-        this.value = this.value.map((v, i) => v + vector[i]);
+    translateByVector(vectorAsArray) {
+        const vector3D = new code_1.Vector3D(this.value);
+        this.value = vector3D.translateByVector(vectorAsArray).value;
         return this;
     }
-    prettyPrint(decimalPlaces = 9, padding = 14) {
-        return this.value.map((x) => (0, lodash_1.padStart)(x.toFixed(decimalPlaces), padding)).join(" ");
+    get valueRounded() {
+        return new code_1.RoundedVector3D(this.value).valueRounded;
+    }
+    prettyPrint(format = "%14.9f") {
+        return this.valueRounded.map((v) => (0, underscore_string_1.sprintf)(format, v)).join(" ");
     }
 }
 exports.Coordinate = Coordinate;
@@ -44,7 +48,10 @@ class Coordinates extends code_1.RoundedArrayWithIds {
             : this.getMinValueAlongAxis(axis);
     }
     translateByVector(vector) {
-        this.mapArrayInPlace((x) => x.map((v, i) => v + vector[i]));
+        this.mapArrayInPlace((x) => {
+            const coordinate = Coordinate.fromValueAndId(x);
+            return coordinate.translateByVector(vector).value;
+        });
     }
     getCenterPoint() {
         const transposed = math_1.default.transpose(this.values);

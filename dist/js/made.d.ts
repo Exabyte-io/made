@@ -487,7 +487,7 @@ export declare const Made: {
     Material: {
         new (...config: any[]): {
             _json: import("./material").MaterialSchemaJSON;
-            toJSON(): import("./types/material").MaterialJSON;
+            toJSON(): import("./types").MaterialJSON;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
             updateFormula(): void;
             isNonPeriodic: boolean;
@@ -799,7 +799,7 @@ export declare const Made: {
             validate: typeof import("./parsers/xyz").validate;
             fromMaterial: (materialOrConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema, fractional?: boolean) => string;
             toBasisConfig: (txt: string, units?: string, cell?: import("./cell/cell").Cell) => import("./basis/constrained_basis").ConstrainedBasisConfig;
-            fromBasis: (basisClsInstance: import("./basis/constrained_basis").ConstrainedBasis, printFormat?: string, skipRounding?: boolean) => string;
+            fromBasis: (basisClsInstance: import("./basis/constrained_basis").ConstrainedBasis, coordinatePrintFormat: string) => string;
             CombinatorialBasis: typeof import("./parsers/xyz_combinatorial_basis").CombinatorialBasis;
         };
         poscar: {
@@ -824,7 +824,7 @@ export declare const Made: {
         surface: {
             generateConfig: (material: {
                 _json: import("./material").MaterialSchemaJSON;
-                toJSON(): import("./types/material").MaterialJSON;
+                toJSON(): import("./types").MaterialJSON;
                 src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
                 updateFormula(): void;
                 isNonPeriodic: boolean;
@@ -1077,7 +1077,7 @@ export declare const Made: {
         material: {
             scaleOneLatticeVector: (material: {
                 _json: import("./material").MaterialSchemaJSON;
-                toJSON(): import("./types/material").MaterialJSON;
+                toJSON(): import("./types").MaterialJSON;
                 src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
                 updateFormula(): void;
                 isNonPeriodic: boolean;
@@ -1320,7 +1320,7 @@ export declare const Made: {
             } & import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity, key?: "a" | "b" | "c", factor?: number) => void;
             scaleLatticeToMakeNonPeriodic: (material: {
                 _json: import("./material").MaterialSchemaJSON;
-                toJSON(): import("./types/material").MaterialJSON;
+                toJSON(): import("./types").MaterialJSON;
                 src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
                 updateFormula(): void;
                 isNonPeriodic: boolean;
@@ -1563,7 +1563,7 @@ export declare const Made: {
             } & import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) => void;
             getBasisConfigTranslatedToCenter: (material: {
                 _json: import("./material").MaterialSchemaJSON;
-                toJSON(): import("./types/material").MaterialJSON;
+                toJSON(): import("./types").MaterialJSON;
                 src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
                 updateFormula(): void;
                 isNonPeriodic: boolean;

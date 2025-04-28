@@ -2,7 +2,10 @@ import { AtomicConstraintsSchema } from "@mat3ra/esse/dist/js/types";
 
 import { AtomicConstraints, AtomicConstraintValue, Constraint } from "../constraints/constraints";
 import { Basis, BasisConfig, ElementsAndCoordinatesConfig } from "./basis";
-import { Coordinate } from "./coordinates";
+import { AtomicCoordinateValue, Coordinate } from "./coordinates";
+import { AtomicElementValue } from "./elements";
+import { ElementWithLabel } from "./helpers";
+import { AtomicLabelValue } from "./labels";
 
 export interface ConstrainedBasisConfig extends BasisConfig {
     constraints: AtomicConstraintsSchema;
@@ -56,23 +59,27 @@ export class ConstrainedBasis extends Basis {
     }
 
     getConstraintByIndex(idx: number): AtomicConstraintValue {
-        return this._constraints.getElementValueByIndex(idx) || [false, false, false];
+        return this._constraints.getElementValueByIndex(idx) || [true, true, true];
+    }
+
+    getConstraintById(id: number): AtomicConstraintValue {
+        return this._constraints.getElementValueById(id) || [true, true, true];
     }
 
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
     get elementsCoordinatesConstraintsArray(): [
-        string,
-        Coordinate,
+        AtomicElementValue,
+        AtomicLabelValue,
+        AtomicCoordinateValue,
         AtomicConstraintValue,
-        string,
     ][] {
         return this._elements.values.map((element: any, idx: number) => {
-            const coordinate = this.getCoordinateByIndex(idx);
+            const coordinate = this.getCoordinateValueByIndex(idx);
             const constraint = this.getConstraintByIndex(idx);
-            const atomicLabel = this.atomicLabelsArray[idx];
-            return [element, coordinate, constraint, atomicLabel];
+            const label = this.atomicLabelsArray[idx];
+            return [element, label, coordinate, constraint];
         });
     }
 
@@ -80,15 +87,19 @@ export class ConstrainedBasis extends Basis {
      * Returns an array with atomic positions (with constraints) per atom stored as strings.
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
      */
-    get atomicPositionsWithConstraints(): string[] {
+    getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat: string): string[] {
+        const omitConstraints = this._constraints.areUnconstrained;
         return this.elementsCoordinatesConstraintsArray.map(
-            ([element, coordinate, constraint, label]) => {
-                const fullElement = element + label; // e.g., Fe1
-                return new Constraint({ id: 0, value: constraint }).prettyPrint(
-                    fullElement,
-                    coordinate,
-                    constraint,
-                );
+            ([element, label, coordinate, constraint]) => {
+                const _elementWithLabel = new ElementWithLabel({ element, label });
+                const _coordinate = Coordinate.fromValueAndId(coordinate);
+                const _constraint = Constraint.fromValueAndId(constraint);
+
+                return [
+                    _elementWithLabel.prettyPrint(),
+                    _coordinate.prettyPrint(coordinatePrintFormat),
+                    omitConstraints ? "" : _constraint.prettyPrint(),
+                ].join(" ");
             },
         );
     }

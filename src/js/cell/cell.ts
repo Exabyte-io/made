@@ -70,7 +70,7 @@ export class Cell implements CellSchema {
     }
 
     get vectorArraysRounded(): Matrix3X3Schema {
-        return [this._a.value_rounded, this._b.value_rounded, this._c.value_rounded];
+        return [this._a.valueRounded, this._b.valueRounded, this._c.valueRounded];
     }
 
     get volume(): number {

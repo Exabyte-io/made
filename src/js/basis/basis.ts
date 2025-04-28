@@ -8,7 +8,7 @@ import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
 import math from "../math";
-import { AtomicCoordinateValue, Coordinate, Coordinates } from "./coordinates";
+import { AtomicCoordinateValue, Coordinates } from "./coordinates";
 import { AtomicElementValue, Elements } from "./elements";
 import { AtomicLabelValue, Labels } from "./labels";
 
@@ -212,16 +212,32 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         this.units = ATOMIC_COORD_UNITS.crystal as BasisSchema["units"];
     }
 
-    getElementByIndex(idx: number): string {
-        return this._elements.getElementValueByIndex(idx) as string;
+    getElementByIndex(idx: number): AtomicElementValue {
+        return this._elements.getElementValueByIndex(idx) as AtomicElementValue;
     }
 
-    getCoordinateByIndex(idx: number): Coordinate {
+    getElementById(id: number): AtomicElementValue {
+        const result = this._elements.getElementValueById(id) as AtomicElementValue;
+        if (result) {
+            return result;
+        }
+        throw new Error(`Element with index ${id} not found`);
+    }
+
+    getCoordinateValueByIndex(idx: number): AtomicCoordinateValue {
         const value = this._coordinates.getElementValueByIndex(idx);
         if (value) {
-            return Coordinate.fromValueAndId(value, idx);
+            return value as AtomicCoordinateValue;
         }
         throw new Error(`Coordinate with index ${idx} not found`);
+    }
+
+    getCoordinateValueById(id: number): AtomicCoordinateValue {
+        const coordinate = this._coordinates.getElementValueById(id);
+        if (coordinate) {
+            return coordinate as AtomicCoordinateValue;
+        }
+        throw new Error(`Coordinate with index ${id} not found`);
     }
 
     toStandardRepresentation() {
@@ -333,7 +349,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      */
     get elementsAndCoordinatesArray(): [AtomicElementValue, AtomicCoordinateValue][] {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx).value;
+            const coordinate = this.getCoordinateValueByIndex(idx);
             return [element, coordinate];
         });
     }
@@ -348,7 +364,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         AtomicLabelValue,
     ][] {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx).value;
+            const coordinate = this.getCoordinateValueByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
             return [element, coordinate, atomicLabel];
         });

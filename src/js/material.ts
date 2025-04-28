@@ -22,28 +22,28 @@ import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
-import { MaterialJSON } from "./types/material";
+import { MaterialJSON } from "./types";
 
 export const defaultMaterialConfig = {
     name: "Silicon FCC",
     basis: {
         elements: [
             {
-                id: 1,
+                id: 0,
                 value: "Si",
             },
             {
-                id: 2,
+                id: 1,
                 value: "Si",
             },
         ],
         coordinates: [
             {
-                id: 1,
+                id: 0,
                 value: [0.0, 0.0, 0.0],
             },
             {
-                id: 2,
+                id: 1,
                 value: [0.25, 0.25, 0.25],
             },
         ],

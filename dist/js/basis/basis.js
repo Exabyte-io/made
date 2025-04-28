@@ -143,12 +143,26 @@ class Basis extends entity_1.InMemoryEntity {
     getElementByIndex(idx) {
         return this._elements.getElementValueByIndex(idx);
     }
-    getCoordinateByIndex(idx) {
+    getElementById(id) {
+        const result = this._elements.getElementValueById(id);
+        if (result) {
+            return result;
+        }
+        throw new Error(`Element with index ${id} not found`);
+    }
+    getCoordinateValueByIndex(idx) {
         const value = this._coordinates.getElementValueByIndex(idx);
         if (value) {
-            return coordinates_1.Coordinate.fromValueAndId(value, idx);
+            return value;
         }
         throw new Error(`Coordinate with index ${idx} not found`);
+    }
+    getCoordinateValueById(id) {
+        const coordinate = this._coordinates.getElementValueById(id);
+        if (coordinate) {
+            return coordinate;
+        }
+        throw new Error(`Coordinate with index ${id} not found`);
     }
     toStandardRepresentation() {
         this.toCrystal();
@@ -246,7 +260,7 @@ class Basis extends entity_1.InMemoryEntity {
      */
     get elementsAndCoordinatesArray() {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx).value;
+            const coordinate = this.getCoordinateValueByIndex(idx);
             return [element, coordinate];
         });
     }
@@ -256,7 +270,7 @@ class Basis extends entity_1.InMemoryEntity {
      */
     get elementsAndCoordinatesAndLabelsArray() {
         return this._elements.values.map((element, idx) => {
-            const coordinate = this.getCoordinateByIndex(idx).value;
+            const coordinate = this.getCoordinateValueByIndex(idx);
             const atomicLabel = this.atomicLabelsArray[idx];
             return [element, coordinate, atomicLabel];
         });

@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_1 = require("lodash");
+const coordinates_1 = require("../basis/coordinates");
 const math_1 = __importDefault(require("../math"));
 const ADD = math_1.default.add;
 const MULT = math_1.default.multiply;
@@ -29,12 +30,18 @@ function repeat(basis, repetitions) {
                 // for each atom in original basis add one with a repetition
                 // eslint-disable-next-line no-loop-func
                 basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
-                    const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
+                    const coord = basisCloneInCrystalCoordinates.getCoordinateValueByIndex(index);
                     // only add atoms if shifts are non-zero
                     if (shiftI || shiftJ || shiftK) {
+                        const coordinateInstance = coordinates_1.Coordinate.fromValueAndId(coord);
+                        const translatedCoordinateInstance = coordinateInstance.translateByVector([
+                            shiftI,
+                            shiftJ,
+                            shiftK,
+                        ]);
                         newBasis.addAtom({
                             element: element.value,
-                            coordinate: [coord[0] + shiftI, coord[1] + shiftJ, coord[2] + shiftK],
+                            coordinate: translatedCoordinateInstance.value,
                         });
                     }
                 });

@@ -29,7 +29,7 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
     const BasisLines = [];
     let addSelectiveDynamics = false;
     basis._elements.values.forEach((item, idx) => {
-        const coord = basis.getCoordinateByIndex(idx).value.map((x) => _print(x));
+        const coord = basis.getCoordinateValueByIndex(idx).map((x) => _print(x));
         const constraintsAsString = omitConstraints
             ? ""
             : basis.AtomicConstraints.getAsStringByIndex(idx, atomicConstraintsCharFromBool);

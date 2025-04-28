@@ -1,7 +1,9 @@
 import { AtomicConstraintsSchema } from "@mat3ra/esse/dist/js/types";
 import { AtomicConstraints, AtomicConstraintValue } from "../constraints/constraints";
 import { Basis, BasisConfig, ElementsAndCoordinatesConfig } from "./basis";
-import { Coordinate } from "./coordinates";
+import { AtomicCoordinateValue } from "./coordinates";
+import { AtomicElementValue } from "./elements";
+import { AtomicLabelValue } from "./labels";
 export interface ConstrainedBasisConfig extends BasisConfig {
     constraints: AtomicConstraintsSchema;
 }
@@ -21,18 +23,19 @@ export declare class ConstrainedBasis extends Basis {
     get AtomicConstraints(): AtomicConstraints;
     toJSON(): ConstrainedBasisConfig;
     getConstraintByIndex(idx: number): AtomicConstraintValue;
+    getConstraintById(id: number): AtomicConstraintValue;
     /**
      * Helper function returning a nested array with [element, coordinates, constraints] as elements
      */
     get elementsCoordinatesConstraintsArray(): [
-        string,
-        Coordinate,
-        AtomicConstraintValue,
-        string
+        AtomicElementValue,
+        AtomicLabelValue,
+        AtomicCoordinateValue,
+        AtomicConstraintValue
     ][];
     /**
      * Returns an array with atomic positions (with constraints) per atom stored as strings.
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
      */
-    get atomicPositionsWithConstraints(): string[];
+    getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat: string): string[];
 }
