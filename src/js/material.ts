@@ -5,6 +5,7 @@ import {
     type MaterialMixinConstructor,
     defaultMaterialConfig,
     materialMixin,
+    materialMixinStaticProps,
 } from "./materialMixin";
 
 export { defaultMaterialConfig };
@@ -26,6 +27,8 @@ export function MaterialMixin<T extends MaterialBaseEntity = MaterialBaseEntity>
             this.name = this.name || this.formula;
         }
     }
+
+    materialMixinStaticProps(MadeMaterial);
 
     return MadeMaterial;
 }

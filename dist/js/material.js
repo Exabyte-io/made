@@ -17,6 +17,7 @@ function MaterialMixin(superclass) {
             this.name = this.name || this.formula;
         }
     }
+    (0, materialMixin_1.materialMixinStaticProps)(MadeMaterial);
     return MadeMaterial;
 }
 exports.MaterialMixin = MaterialMixin;
