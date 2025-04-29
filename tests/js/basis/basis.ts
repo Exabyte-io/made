@@ -254,7 +254,7 @@ describe("Basis", () => {
     });
 
     it("should determine the labels from stripLabelToGetElementSymbol", () => {
-        const getLabel = (elementWithLabel) => {
+        const getLabel = (elementWithLabel: string) => {
             const symbol = Basis.stripLabelToGetElementSymbol(elementWithLabel);
             const re = new RegExp(`^${symbol}`, "i");
             return elementWithLabel.replace(re, "");
