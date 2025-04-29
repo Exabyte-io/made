@@ -527,7 +527,7 @@ export declare const Made: {
             readonly unitCellFormula: string;
             unsetFileProps(): void;
             setBasis(textOrObject: string | import("./basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
-            setBasisConstraints(constraints: import("./constraints/constraints").Constraint[]): void;
+            setBasisConstraints(constraints: import("./constraints/constraints").Constraint | import("./constraints/constraints").Constraint[]): void;
             readonly basis: import("./material").OptionallyConstrainedBasisConfig;
             readonly Basis: import("./basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
@@ -864,7 +864,7 @@ export declare const Made: {
                 readonly unitCellFormula: string;
                 unsetFileProps(): void;
                 setBasis(textOrObject: string | import("./basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
-                setBasisConstraints(constraints: import("./constraints/constraints").Constraint[]): void;
+                setBasisConstraints(constraints: import("./constraints/constraints").Constraint | import("./constraints/constraints").Constraint[]): void;
                 readonly basis: import("./material").OptionallyConstrainedBasisConfig;
                 readonly Basis: import("./basis/constrained_basis").ConstrainedBasis;
                 readonly uniqueElements: string[];
@@ -1117,7 +1117,7 @@ export declare const Made: {
                 readonly unitCellFormula: string;
                 unsetFileProps(): void;
                 setBasis(textOrObject: string | import("./basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
-                setBasisConstraints(constraints: import("./constraints/constraints").Constraint[]): void;
+                setBasisConstraints(constraints: import("./constraints/constraints").Constraint | import("./constraints/constraints").Constraint[]): void;
                 readonly basis: import("./material").OptionallyConstrainedBasisConfig;
                 readonly Basis: import("./basis/constrained_basis").ConstrainedBasis;
                 readonly uniqueElements: string[];
@@ -1360,7 +1360,7 @@ export declare const Made: {
                 readonly unitCellFormula: string;
                 unsetFileProps(): void;
                 setBasis(textOrObject: string | import("./basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
-                setBasisConstraints(constraints: import("./constraints/constraints").Constraint[]): void;
+                setBasisConstraints(constraints: import("./constraints/constraints").Constraint | import("./constraints/constraints").Constraint[]): void;
                 readonly basis: import("./material").OptionallyConstrainedBasisConfig;
                 readonly Basis: import("./basis/constrained_basis").ConstrainedBasis;
                 readonly uniqueElements: string[];
@@ -1603,7 +1603,7 @@ export declare const Made: {
                 readonly unitCellFormula: string;
                 unsetFileProps(): void;
                 setBasis(textOrObject: string | import("./basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
-                setBasisConstraints(constraints: import("./constraints/constraints").Constraint[]): void;
+                setBasisConstraints(constraints: import("./constraints/constraints").Constraint | import("./constraints/constraints").Constraint[]): void;
                 readonly basis: import("./material").OptionallyConstrainedBasisConfig;
                 readonly Basis: import("./basis/constrained_basis").ConstrainedBasis;
                 readonly uniqueElements: string[];
