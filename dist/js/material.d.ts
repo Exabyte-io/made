@@ -1,6 +1,6 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
+import { AtomicConstraintsSchema, ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { BasisConfig } from "./basis/basis";
 import { ConstrainedBasis, ConstrainedBasisConfig } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
@@ -100,6 +100,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
         setBasisConstraints(constraints: Constraint[]): void;
+        setBasisConstraintsFromArrayOfObjects(constraints: AtomicConstraintsSchema): void;
         readonly basis: OptionallyConstrainedBasisConfig;
         readonly Basis: ConstrainedBasis;
         /**
@@ -334,6 +335,7 @@ export declare const Material: {
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
         setBasisConstraints(constraints: Constraint[]): void;
+        setBasisConstraintsFromArrayOfObjects(constraints: AtomicConstraintsSchema): void;
         readonly basis: OptionallyConstrainedBasisConfig;
         readonly Basis: ConstrainedBasis;
         /**
@@ -530,7 +532,10 @@ export declare const Material: {
     getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
     id: string;
     _id: string;
-    schemaVersion: string;
+    schemaVersion: string; /**
+     * @summary a series of checks for the material and returns an array of results in ConsistencyChecks format.
+     * @returns Array of checks results
+     */
     systemName: string;
     readonly slug: string;
     readonly isSystemEntity: boolean;

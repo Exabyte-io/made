@@ -43,6 +43,7 @@ declare const _default: {
             unsetFileProps(): void;
             setBasis(textOrObject: string | import("../basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
             setBasisConstraints(constraints: import("../constraints/constraints").Constraint[]): void;
+            setBasisConstraintsFromArrayOfObjects(constraints: import("@mat3ra/esse/dist/js/types").AtomicConstraintsSchema): void;
             readonly basis: import("../material").OptionallyConstrainedBasisConfig;
             readonly Basis: import("../basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
@@ -296,6 +297,7 @@ declare const _default: {
             unsetFileProps(): void;
             setBasis(textOrObject: string | import("../basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
             setBasisConstraints(constraints: import("../constraints/constraints").Constraint[]): void;
+            setBasisConstraintsFromArrayOfObjects(constraints: import("@mat3ra/esse/dist/js/types").AtomicConstraintsSchema): void;
             readonly basis: import("../material").OptionallyConstrainedBasisConfig;
             readonly Basis: import("../basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
@@ -539,6 +541,7 @@ declare const _default: {
             unsetFileProps(): void;
             setBasis(textOrObject: string | import("../basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
             setBasisConstraints(constraints: import("../constraints/constraints").Constraint[]): void;
+            setBasisConstraintsFromArrayOfObjects(constraints: import("@mat3ra/esse/dist/js/types").AtomicConstraintsSchema): void;
             readonly basis: import("../material").OptionallyConstrainedBasisConfig;
             readonly Basis: import("../basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
@@ -782,6 +785,7 @@ declare const _default: {
             unsetFileProps(): void;
             setBasis(textOrObject: string | import("../basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
             setBasisConstraints(constraints: import("../constraints/constraints").Constraint[]): void;
+            setBasisConstraintsFromArrayOfObjects(constraints: import("@mat3ra/esse/dist/js/types").AtomicConstraintsSchema): void;
             readonly basis: import("../material").OptionallyConstrainedBasisConfig;
             readonly Basis: import("../basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
