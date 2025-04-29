@@ -72,5 +72,9 @@ class ConstrainedBasis extends basis_1.Basis {
             ].join(" ");
         });
     }
+    removeAllAtoms() {
+        super.removeAllAtoms();
+        this.constraints = [];
+    }
 }
 exports.ConstrainedBasis = ConstrainedBasis;

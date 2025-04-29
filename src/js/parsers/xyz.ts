@@ -64,13 +64,17 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
     const words = s.words(line);
     const elementWithOptionalLabel: AtomicElementValue = words[0];
     const element: AtomicElementValue = elementWithOptionalLabel.replace(/\d$/, ""); // Fe1 => Fe
-    const constraint = (n: number) => parseInt(`${n}`, 10) !== 0;
+    const generateConstraintValue = (n: number) => parseInt(`${n}`, 10) !== 0;
 
     const basisLineConfig: ParsedObject = {
         element,
         coordinate: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
-        constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
+        constraints: [
+            generateConstraintValue(+words[4]),
+            generateConstraintValue(+words[5]),
+            generateConstraintValue(+words[6]),
+        ],
     };
 
     if (elementWithOptionalLabel !== element) {

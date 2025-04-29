@@ -106,4 +106,9 @@ export class ConstrainedBasis extends Basis {
             },
         );
     }
+
+    removeAllAtoms() {
+        super.removeAllAtoms();
+        this.constraints = [];
+    }
 }

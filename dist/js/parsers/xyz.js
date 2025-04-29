@@ -52,12 +52,16 @@ function _parseXYZLineAsWords(line) {
     const words = underscore_string_1.default.words(line);
     const elementWithOptionalLabel = words[0];
     const element = elementWithOptionalLabel.replace(/\d$/, ""); // Fe1 => Fe
-    const constraint = (n) => parseInt(`${n}`, 10) !== 0;
+    const generateConstraintValue = (n) => parseInt(`${n}`, 10) !== 0;
     const basisLineConfig = {
         element,
         coordinate: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
-        constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
+        constraints: [
+            generateConstraintValue(+words[4]),
+            generateConstraintValue(+words[5]),
+            generateConstraintValue(+words[6]),
+        ],
     };
     if (elementWithOptionalLabel !== element) {
         return {
