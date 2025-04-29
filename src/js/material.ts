@@ -185,21 +185,16 @@ export function MaterialMixin<
             this.updateFormula();
         }
 
-        setBasisConstraints(constraints: Constraint | Constraint[]) {
-            let constraintData: object[] = [];
-            if (Array.isArray(constraints)) {
-                constraintData = constraints.map((c) => (c instanceof Constraint ? c.toJSON() : c));
-            } else if (constraints) {
-                constraintData.push(
-                    constraints instanceof Constraint ? constraints.toJSON() : constraints,
-                );
+        setBasisConstraints(constraints: Constraint[]) {
+            const constraintData = constraints.map((c) =>
+                c instanceof Constraint ? c.toJSON() : c,
+            );
 
-                const basisWithConstraints = {
-                    ...this.basis,
-                    constraints: constraintData,
-                };
-                this.setBasis(basisWithConstraints);
-            }
+            const basisWithConstraints = {
+                ...this.basis,
+                constraints: constraintData,
+            };
+            this.setBasis(basisWithConstraints);
         }
 
         get basis(): OptionallyConstrainedBasisConfig {

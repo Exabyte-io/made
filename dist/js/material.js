@@ -142,18 +142,12 @@ function MaterialMixin(superclass) {
             this.updateFormula();
         }
         setBasisConstraints(constraints) {
-            let constraintData = [];
-            if (Array.isArray(constraints)) {
-                constraintData = constraints.map((c) => (c instanceof constraints_1.Constraint ? c.toJSON() : c));
-            }
-            else if (constraints) {
-                constraintData.push(constraints instanceof constraints_1.Constraint ? constraints.toJSON() : constraints);
-                const basisWithConstraints = {
-                    ...this.basis,
-                    constraints: constraintData,
-                };
-                this.setBasis(basisWithConstraints);
-            }
+            const constraintData = constraints.map((c) => c instanceof constraints_1.Constraint ? c.toJSON() : c);
+            const basisWithConstraints = {
+                ...this.basis,
+                constraints: constraintData,
+            };
+            this.setBasis(basisWithConstraints);
         }
         get basis() {
             return this.prop("basis");

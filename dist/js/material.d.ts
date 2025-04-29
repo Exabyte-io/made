@@ -99,7 +99,7 @@ export declare function MaterialMixin<T extends MaterialBaseEntityConstructor = 
          * @param unitz crystal/cartesian
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
-        setBasisConstraints(constraints: Constraint | Constraint[]): void;
+        setBasisConstraints(constraints: Constraint[]): void;
         readonly basis: OptionallyConstrainedBasisConfig;
         readonly Basis: ConstrainedBasis;
         /**
@@ -333,7 +333,7 @@ export declare const Material: {
          * @param unitz crystal/cartesian
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
-        setBasisConstraints(constraints: Constraint | Constraint[]): void;
+        setBasisConstraints(constraints: Constraint[]): void;
         readonly basis: OptionallyConstrainedBasisConfig;
         readonly Basis: ConstrainedBasis;
         /**
