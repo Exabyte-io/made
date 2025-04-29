@@ -36,14 +36,14 @@ export class Coordinate extends RoundedValueWithId<AtomicCoordinateValue> {
         return new RoundedVector3D(this.value).valueRounded;
     }
 
-    getValueRounded(precision: number): number[] {
+    getValueRoundedWithPrecision(precision: number): number[] {
         const RoundedInstance = RoundedVector3D;
         RoundedInstance.roundPrecision = precision;
         return new RoundedInstance(this.value).valueRounded;
     }
 
     prettyPrint(format = "%14.9f", precision: number = this.precision): string {
-        return this.getValueRounded(precision)
+        return this.getValueRoundedWithPrecision(precision)
             .map((x) => sprintf(format, x))
             .join(" ");
     }

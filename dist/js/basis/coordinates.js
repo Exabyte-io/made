@@ -24,13 +24,13 @@ class Coordinate extends code_1.RoundedValueWithId {
     get valueRounded() {
         return new code_1.RoundedVector3D(this.value).valueRounded;
     }
-    getValueRounded(precision) {
+    getValueRoundedWithPrecision(precision) {
         const RoundedInstance = code_1.RoundedVector3D;
         RoundedInstance.roundPrecision = precision;
         return new RoundedInstance(this.value).valueRounded;
     }
     prettyPrint(format = "%14.9f", precision = this.precision) {
-        return this.getValueRounded(precision)
+        return this.getValueRoundedWithPrecision(precision)
             .map((x) => (0, underscore_string_1.sprintf)(format, x))
             .join(" ");
     }

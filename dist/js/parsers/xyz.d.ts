@@ -5,6 +5,7 @@ import { AtomicElementValue } from "../basis/elements";
 import { Cell } from "../cell/cell";
 import { AtomicConstraintValue } from "../constraints/constraints";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
+export declare const XYZ_COORDINATE_PRECISION = 4;
 /**
  * Validates that passed string is well-formed XYZ file.
  */

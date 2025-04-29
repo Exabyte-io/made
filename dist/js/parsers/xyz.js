@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validate = void 0;
+exports.validate = exports.XYZ_COORDINATE_PRECISION = void 0;
 const lodash_1 = require("lodash");
 const underscore_string_1 = __importDefault(require("underscore.string"));
 const constrained_basis_1 = require("../basis/constrained_basis");
@@ -14,6 +14,7 @@ const xyz_combinatorial_basis_1 = require("./xyz_combinatorial_basis");
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
 // eslint-disable-next-line max-len
 const XYZ_LINE_REGEX = /[A-Z][a-z]?(\d)?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
+exports.XYZ_COORDINATE_PRECISION = 4;
 /**
  * Validates XYZ file's line. Line should be in following format "Si 0.5 0.5 0.5".
  * Raises an error if line is in wrong format.
@@ -122,7 +123,7 @@ function toBasisConfig(txt, units = "angstrom", cell = new cell_1.Cell()) {
  * @return Basis string in XYZ format
  */
 function fromBasis(basisClsInstance, coordinatePrintFormat) {
-    const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat, 4);
+    const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat, exports.XYZ_COORDINATE_PRECISION);
     return `${XYZArray.join("\n")}\n`;
 }
 /**

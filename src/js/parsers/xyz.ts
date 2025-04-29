@@ -16,6 +16,7 @@ import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 const XYZ_LINE_REGEX =
     /[A-Z][a-z]?(\d)?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
 
+export const XYZ_COORDINATE_PRECISION = 4;
 /**
  * Validates XYZ file's line. Line should be in following format "Si 0.5 0.5 0.5".
  * Raises an error if line is in wrong format.
@@ -149,7 +150,7 @@ function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): Cons
 function fromBasis(basisClsInstance: ConstrainedBasis, coordinatePrintFormat: string): string {
     const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(
         coordinatePrintFormat,
-        4,
+        XYZ_COORDINATE_PRECISION,
     );
     return `${XYZArray.join("\n")}\n`;
 }
