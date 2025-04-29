@@ -27,10 +27,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CombinatorialBasis = exports.WrongBasisFormat = void 0;
-/* eslint-disable max-classes-per-file */
-const underscore_1 = __importDefault(require("underscore"));
+const lodash_1 = require("lodash");
 const s = __importStar(require("underscore.string"));
-const basis_1 = require("../basis/basis");
+const cell_1 = require("../cell/cell");
 const math_1 = __importDefault(require("../math"));
 /**
  * @summary Combinatorial XYZ basis class and related. Create and get all information about basis and elements in it.
@@ -73,17 +72,14 @@ const ERROR_CODES = {
     REGEX_NOT_PASSED: 3,
 };
 class WrongBasisFormat extends Error {
-    constructor(xyz, message, type) {
-        super(message, type);
+    constructor(xyz, message, code) {
+        super(message);
         this.xyz = xyz;
+        console.log(`Wrong basis format: ${message}, code: ${code}`);
     }
 }
 exports.WrongBasisFormat = WrongBasisFormat;
 class CombinatorialBasis {
-    /**
-     * Creates Combinatorial basis
-     * @param eXYZ
-     */
     constructor(eXYZ) {
         this._xyz = eXYZ;
         this._lines = s
@@ -134,13 +130,14 @@ class CombinatorialBasis {
         else {
             elements = [words[0]];
         }
-        const coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
+        const coordinate = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
         return {
+            // TODO: define as a type
             displayName: `ELEMENT_${index}`,
             isCombination: containsCombination,
             isPermutation: containsPermutation,
             elements,
-            coordinates,
+            coordinate,
         };
     }
     /**
@@ -148,17 +145,17 @@ class CombinatorialBasis {
      * @return {String[]}
      */
     get uniqueElements() {
-        return underscore_1.default.chain(this._lines)
+        return (0, lodash_1.chain)(this._lines)
             .map((line) => line.elements)
             .flatten()
-            .unique()
+            .uniq()
             .value()
             .sort();
     }
-    static toBasisConfig(array, units = "crystal", cell = basis_1.Basis.defaultCell) {
+    static toBasisConfigForElementsAndCoordinates(array, units = "crystal", cell = new cell_1.Cell()) {
         return {
-            elements: underscore_1.default.pluck(array, "element"),
-            coordinates: underscore_1.default.pluck(array, "coordinates"),
+            elements: (0, lodash_1.map)(array, "element"),
+            coordinates: (0, lodash_1.map)(array, "coordinate"),
             units,
             cell,
         };
@@ -180,12 +177,12 @@ class CombinatorialBasis {
             this._lines.forEach((line) => {
                 items.push({
                     element: line.elements[0],
-                    coordinates: line.coordinates,
+                    coordinate: line.coordinate,
                 });
             });
             result = [items];
         }
-        return result.map((x) => CombinatorialBasis.toBasisConfig(x));
+        return result.map((x) => CombinatorialBasis.toBasisConfigForElementsAndCoordinates(x));
     }
     /**
      * Returns array of regular bases extracted from current combinatorial basis with combinations.
@@ -199,11 +196,12 @@ class CombinatorialBasis {
                 // omit vacancy characters
                 itemsSet.push({
                     element,
-                    coordinates: line.coordinates,
+                    coordinate: line.coordinate,
                 });
             });
             dimensions.push(itemsSet);
         });
+        // @ts-ignore // We're multiplying objects with math, not numbers. No type casting will help.
         const basisSet = math_1.default.cartesianProduct.apply(null, dimensions);
         return basisSet.map((basis) => basis.filter((entry) => entry.element !== VACANCY_CHARACTER));
     }
@@ -218,11 +216,11 @@ class CombinatorialBasis {
         for (let i = 0; i < maxLen; i++) {
             const items = [];
             this._lines.forEach((line) => {
-                const element = line.elements.length <= i ? underscore_1.default.last(line.elements) : line.elements[i];
+                const element = line.elements.length <= i ? (0, lodash_1.last)(line.elements) : line.elements[i];
                 if (element !== VACANCY_CHARACTER) {
                     items.push({
                         element,
-                        coordinates: line.coordinates,
+                        coordinate: line.coordinate,
                     });
                 }
             });

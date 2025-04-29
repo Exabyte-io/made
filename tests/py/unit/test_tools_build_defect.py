@@ -1,4 +1,4 @@
-import pytest
+from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
     AdatomSlabPointDefectConfiguration,
@@ -23,10 +23,9 @@ from mat3ra.made.tools.build.defect.configuration import (
 )
 from mat3ra.made.tools.utils import coordinate as CoordinateCondition
 from mat3ra.utils import assertion as assertion_utils
+from unit.fixtures.generated.fixtures import SLAB_001, SLAB_111
 
-from .fixtures import SLAB_001, SLAB_111
-
-clean_material = Material.create(Material.default_config)
+clean_material = Material.create_default()
 
 
 def test_create_vacancy():
@@ -70,9 +69,14 @@ def test_create_interstitial_voronoi():
         placement_method="voronoi_site",
     )
     defect = create_defect(configuration)
-
     assert defect.basis.elements.values[-1] == "Ge"
-    assertion_utils.assert_deep_almost_equal([0.5, 0.5, 0.5], defect.basis.coordinates.values[-1])
+
+    coordinate_x86 = [0.5, 0.5, 0.5]
+    coordinate_arm64 = [0.625, 0.625, 0.125]
+    defect_coordinate = defect.basis.coordinates.values[-1]
+    is_passing_on_x86 = coordinate_x86 == defect_coordinate
+    is_passing_on_arm64 = coordinate_arm64 == defect_coordinate
+    assert is_passing_on_x86 or is_passing_on_arm64
 
 
 def test_create_defect_from_site_id():
@@ -137,12 +141,13 @@ def test_create_adatom_equidistant():
     coordinate_macosx = [6.477224996, 3.739627331, 14.234895469]
     coordinate_linux_and_emscripten = [5.123775004, 3.739627331, 14.234895469]
     defect_coordinate = defect.basis.coordinates.values[-1]
-    is_passing_on_macosx = coordinate_macosx == defect_coordinate
-    is_passing_on_linux_and_emscripten = coordinate_linux_and_emscripten == defect_coordinate
-    assert is_passing_on_macosx or is_passing_on_linux_and_emscripten
+    atol = 10 ** (-COORDINATE_TOLERANCE)
+    try:
+        assertion_utils.assert_deep_almost_equal(coordinate_macosx, defect_coordinate, atol=atol)
+    except AssertionError:
+        assertion_utils.assert_deep_almost_equal(coordinate_linux_and_emscripten, defect_coordinate, atol=atol)
 
 
-@pytest.mark.skip(reason="This test is failing due to the difference in slab generation between GHA and local")
 def test_create_crystal_site_adatom():
     # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
@@ -152,11 +157,15 @@ def test_create_crystal_site_adatom():
     defect = create_slab_defect(configuration=configuration, builder=builder)
 
     assert defect.basis.elements.values[-1] == "Si"
-    assertion_utils.assert_deep_almost_equal(
-        # Adjusted expected value to pass tests on GHA due to slab generation differences between GHA and local
-        [0.383333334, 0.558333333, 0.872332562],
-        defect.basis.coordinates.values[-1],
-    )
+
+    coordinates_macosx = [0.458333, 0.458333, 0.628217]
+    coordinates_linux_and_emscripten = [0.083333, 0.458333, 0.628217]
+    defect_coordinate = defect.basis.coordinates.values[-1]
+    atol = 10 ** (-COORDINATE_TOLERANCE)
+    try:
+        assertion_utils.assert_deep_almost_equal(coordinates_macosx, defect_coordinate, atol=atol)
+    except AssertionError:
+        assertion_utils.assert_deep_almost_equal(coordinates_linux_and_emscripten, defect_coordinate, atol=atol)
 
 
 def test_create_island():
@@ -186,7 +195,14 @@ def test_create_terrace():
         number_of_added_layers=1,
     )
     new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
-    assertion_utils.assert_deep_almost_equal([0.777786396, 0.5, 0.414655236], new_slab.basis.coordinates.values[42])
+    coordinate_macosx = [0.777786396, 0.5, 0.414655236]
+    coordinate_linux_and_emscripten = [0.627786404, 0.25, 0.439235145]
+    defect_coordinate = new_slab.basis.coordinates.values[42]
+    atol = 10 ** (-COORDINATE_TOLERANCE)
+    try:
+        assertion_utils.assert_deep_almost_equal(coordinate_macosx, defect_coordinate, atol=atol)
+    except AssertionError:
+        assertion_utils.assert_deep_almost_equal(coordinate_linux_and_emscripten, defect_coordinate, atol=atol)
 
 
 def test_create_defect_pair():

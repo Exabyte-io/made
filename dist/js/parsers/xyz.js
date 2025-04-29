@@ -4,12 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validate = void 0;
-const underscore_1 = __importDefault(require("underscore"));
+const lodash_1 = require("lodash");
 const underscore_string_1 = __importDefault(require("underscore.string"));
-const basis_1 = require("../basis/basis");
 const constrained_basis_1 = require("../basis/constrained_basis");
+const cell_1 = require("../cell/cell");
 const lattice_1 = require("../lattice/lattice");
-const math_1 = __importDefault(require("../math"));
 const errors_1 = require("./errors");
 const xyz_combinatorial_basis_1 = require("./xyz_combinatorial_basis");
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
@@ -26,7 +25,7 @@ function validateLine(xyzLine, index) {
     }
     const coordinates = [parseFloat(words[1]), parseFloat(words[2]), parseFloat(words[3])];
     coordinates.forEach((num, i) => {
-        if (underscore_1.default.isNaN(num)) {
+        if ((0, lodash_1.isNaN)(num)) {
             throw new Error(`Coordinates should be a number. Possible error in ${i} coordinate`);
         }
     });
@@ -55,7 +54,7 @@ function _parseXYZLineAsWords(line) {
     const constraint = (n) => parseInt(`${n}`, 10) !== 0;
     const basisLineConfig = {
         element,
-        coordinates: [+words[1], +words[2], +words[3]],
+        coordinate: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
         constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
     };
@@ -73,10 +72,10 @@ function _parseXYZLineAsWords(line) {
  * @param units Coordinate units
  * @param cell Basis Cell
  */
-function toBasisConfig(txt, units = "angstrom", cell = basis_1.Basis.defaultCell) {
+function toBasisConfig(txt, units = "angstrom", cell = new cell_1.Cell()) {
     // @ts-ignore
     const lines = (0, underscore_string_1.default)(txt).trim().lines();
-    const listOfObjects = underscore_1.default.map(lines, _parseXYZLineAsWords);
+    const listOfObjects = (0, lodash_1.map)(lines, _parseXYZLineAsWords);
     const basisConfig = {
         elements: listOfObjects.map((elm, idx) => {
             return {
@@ -87,7 +86,7 @@ function toBasisConfig(txt, units = "angstrom", cell = basis_1.Basis.defaultCell
         coordinates: listOfObjects.map((elm, idx) => {
             return {
                 id: idx,
-                value: elm.coordinates,
+                value: elm.coordinate,
             };
         }),
         units,
@@ -108,7 +107,7 @@ function toBasisConfig(txt, units = "angstrom", cell = basis_1.Basis.defaultCell
             });
         }
     });
-    if (!underscore_1.default.isEmpty(labels)) {
+    if (!(0, lodash_1.isEmpty)(labels)) {
         return {
             ...basisConfig,
             labels,
@@ -119,25 +118,11 @@ function toBasisConfig(txt, units = "angstrom", cell = basis_1.Basis.defaultCell
 /**
  * Create XYZ from Basis class instance.
  * @param basisClsInstance Basis class instance.
- * @param printFormat Output format for coordinates.
- * @param skipRounding Whether to round the numbers (ie. to avoid negative zeros).
+ * @param coordinatePrintFormat Output format for coordinates.
  * @return Basis string in XYZ format
  */
-function fromBasis(basisClsInstance, printFormat = "%9.5f", skipRounding = false) {
-    const XYZArray = [];
-    basisClsInstance._elements.array.forEach((item, idx) => {
-        // assume that _elements and _coordinates are indexed equivalently
-        const atomicLabel = basisClsInstance.atomicLabelsArray[idx];
-        const elementWithLabel = item + atomicLabel;
-        const element = underscore_string_1.default.sprintf("%-3s", elementWithLabel);
-        const coordinates = basisClsInstance.getCoordinateByIndex(idx).map((x) => {
-            return underscore_string_1.default.sprintf(printFormat, skipRounding ? x : math_1.default.precise(math_1.default.roundToZero(x)));
-        });
-        const constraints = basisClsInstance.constraints
-            ? basisClsInstance.AtomicConstraints.getAsStringByIndex(idx)
-            : "";
-        XYZArray.push([element, coordinates.join(" "), constraints].join(" "));
-    });
+function fromBasis(basisClsInstance, coordinatePrintFormat) {
+    const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat);
     return `${XYZArray.join("\n")}\n`;
 }
 /**
@@ -151,7 +136,7 @@ function fromMaterial(materialOrConfig, fractional = false) {
     // @ts-ignore
     const basis = new constrained_basis_1.ConstrainedBasis({
         ...materialOrConfig.basis,
-        cell: lattice.vectorArrays,
+        cell: cell_1.Cell.fromVectorsArray(lattice.vectorArrays),
     });
     if (fractional) {
         basis.toCrystal();

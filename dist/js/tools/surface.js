@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const lattice_bravais_1 = require("../lattice/lattice_bravais");
+const lattice_1 = require("../lattice/lattice");
 const math_1 = __importDefault(require("../math"));
 const supercell_1 = __importDefault(require("./supercell"));
 const MULT = math_1.default.multiply;
@@ -14,7 +14,7 @@ const getMatrixInLeftHandedRepresentation = (matrix) => {
 };
 /**
  * Helper function for extended GCD.
- * Inspired by https://gitlab.com/ase/ase/blob/master/ase/build/general_surface.py
+ * Inspired by https://gitlab.com/ase/ase/-/blob/20401e2596821a85f17ced1cb18f32c508e35fb0/ase/build/general_surface.py
  * @param {Number} a
  * @param {Number} b
  * @return {Array}
@@ -25,7 +25,7 @@ function extGCD(a, b) {
     if (math_1.default.mod(a, b) === 0)
         return [0, 1];
     const [x, y] = extGCD(b, math_1.default.mod(a, b));
-    return [y, x - y * math_1.default.floor(a, b)];
+    return [y, x - y * math_1.default.floor(a / b)];
 }
 /**
  * Generates a slab scaling matrix for the specified cell based on miller indices.
@@ -66,18 +66,26 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
         }
     }
     else {
-        const [a1, a2, a3] = cell.vectorsAsArray;
+        const [a1, a2, a3] = cell.vectorArrays;
         // z1 = (k * a1 - h * a2)
         // z2 = (l * a1 - h * a3)
         // z3 = l * a2 - k * a3)
-        const z1 = ADD(MULT(k, a1), MULT(-1, h, a2));
-        const z2 = ADD(MULT(l, a1), MULT(-1, h, a3));
-        const z3 = ADD(MULT(l, a2), MULT(-1, k, a3));
+        const z1 = ADD(MULT(k, a1), -MULT(h, a2));
+        const z2 = ADD(MULT(l, a1), -MULT(h, a3));
+        const z3 = ADD(MULT(l, a2), -MULT(k, a3));
         let [p, q] = extGCD(k, l);
+        // @ts-ignore
         const k1 = DOT(ADD(MULT(p, z1), MULT(q, z2)), z3);
-        const k2 = DOT(ADD(MULT(l, z1), MULT(-1, k, z2)), z3);
+        // @ts-ignore
+        const k2 = DOT(ADD(MULT(l, z1), -MULT(k, z2)), z3);
         if (math_1.default.abs(k2) > tol) {
-            const i = -parseInt(math_1.default.round(k1 / k2), 10);
+            // For mathjs version 3.20: round(-0.5) = -0
+            // For mathjs version 5.10: round(-0.5) = -1
+            // Here we specify rounding method to Bankers
+            // For Python 3.11: round(-0.5) = 0
+            const value = k1 / k2;
+            const roundedValue = math_1.default.roundCustom(value, 0, math_1.default.RoundingMethod.Bankers);
+            const i = -roundedValue;
             [p, q] = [p + i * l, q - i * k];
         }
         const [a, b] = extGCD(p * k + q * l, h);
@@ -86,6 +94,7 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
         const c3 = [b, a * p, a * q];
         scalingMatrix = [c1, c2, c3];
     }
+    // @ts-ignore
     return getMatrixInLeftHandedRepresentation(scalingMatrix);
 }
 /**
@@ -99,8 +108,12 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
  * @param vy {Number} Size of lateral supercell along the direction of the second (y) cell vector (Positive Integer).
  * @return {Number[][]}
  */
-function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, thickness, vx, vy) {
-    const transformationMatrix = math_1.default.identity(3).toArray();
+function getDimensionsScalingMatrix(outOfPlaneAxisIndex, thickness, vx, vy) {
+    const transformationMatrix = [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+    ];
     const vxIndex = outOfPlaneAxisIndex === 2 ? 0 : outOfPlaneAxisIndex + 1;
     const vyIndex = vxIndex === 2 ? 0 : vxIndex + 1;
     transformationMatrix[outOfPlaneAxisIndex] = MULT(thickness, transformationMatrix[outOfPlaneAxisIndex]);
@@ -120,19 +133,20 @@ function getDimensionsScalingMatrix(bulkCell, surfaceCell, outOfPlaneAxisIndex, 
 function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy = 1) {
     if (numberOfLayers < 1)
         throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
-    const cell = material.Lattice.Cell;
+    const cell = material.Lattice.vectors;
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
     const outOfPlaneAxisIndex = millerSupercell.getMostCollinearVectorIndex(millerPlanePseudoNormal);
-    const dimensionsScalingMatrix = getDimensionsScalingMatrix(cell, millerSupercell, outOfPlaneAxisIndex, numberOfLayers, vx, vy);
+    const dimensionsScalingMatrix = getDimensionsScalingMatrix(outOfPlaneAxisIndex, numberOfLayers, vx, vy);
     const supercellMatrix = MULT(dimensionsScalingMatrix, millerScalingMatrix);
     const supercell = millerSupercell.cloneAndScaleByMatrix(dimensionsScalingMatrix);
-    const newBasis = supercell_1.default.generateNewBasisWithinSupercell(material.Basis, cell, supercell, supercellMatrix);
-    const newLattice = lattice_bravais_1.LatticeBravais.fromVectors({
-        a: supercell.vector1,
-        b: supercell.vector2,
-        c: supercell.vector3,
+    const tempBasis = material.Basis.clone();
+    const newBasis = supercell_1.default.generateNewBasisWithinSupercell(tempBasis, cell, supercell, supercellMatrix);
+    const newLattice = lattice_1.Lattice.fromVectors({
+        a: supercell.vectorArrays[0],
+        b: supercell.vectorArrays[1],
+        c: supercell.vectorArrays[2],
     });
     return {
         name: `${material.name} - slab ${JSON.stringify(millerIndices)}`,

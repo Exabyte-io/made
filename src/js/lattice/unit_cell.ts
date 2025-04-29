@@ -1,4 +1,4 @@
-import { Vector } from "./types";
+import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 
 export type UnitCellProps = [
     number,
@@ -48,19 +48,19 @@ export class UnitCell {
         this.units = units;
     }
 
-    vectorA(): Vector {
+    vectorA(): Vector3DSchema {
         return [this.ax, this.ay, this.az];
     }
 
-    vectorB(): Vector {
+    vectorB(): Vector3DSchema {
         return [this.bx, this.by, this.bz];
     }
 
-    vectorC(): Vector {
+    vectorC(): Vector3DSchema {
         return [this.cx, this.cy, this.cz];
     }
 
-    axes(): [Vector, Vector, Vector] {
+    axes(): [Vector3DSchema, Vector3DSchema, Vector3DSchema] {
         return [this.vectorA(), this.vectorB(), this.vectorC()];
     }
 }

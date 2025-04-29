@@ -1,48 +1,45 @@
-import json
 import math
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import numpy as np
+from mat3ra.code.entity import InMemoryEntityPydantic
+from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
+    LatticeImplicitSchema as LatticeBravaisSchema,
+)
+
+from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
+    LatticeTypeEnum,
+    LatticeUnitsSchema,
+)
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import BaseModel
 
 from .cell import Cell
 
-HASH_TOLERANCE = 3
-DEFAULT_UNITS = {"length": "angstrom", "angle": "degree"}
-DEFAULT_TYPE = "TRI"
+COORDINATE_TOLERANCE = 6
 
 
-class LatticeVectors(RoundNumericValuesMixin, BaseModel):
-    """
-    A class to represent the lattice vectors.
-    """
-
-    a: List[float] = [1.0, 0.0, 0.0]
-    b: List[float] = [0.0, 1.0, 0.0]
-    c: List[float] = [0.0, 0.0, 1.0]
-
-    def to_json(self, skip_rounding=False) -> Dict[str, List[float]]:
-        json_value = {
-            "a": self.round_array_or_number(self.a, skip_rounding) if not skip_rounding else self.a,
-            "b": self.round_array_or_number(self.b, skip_rounding) if not skip_rounding else self.b,
-            "c": self.round_array_or_number(self.c, skip_rounding) if not skip_rounding else self.c,
-        }
-        return json.loads(json.dumps(json_value))
+class LatticeVectors(Cell):
+    pass
 
 
-class Lattice(RoundNumericValuesMixin, BaseModel):
+class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydantic):
+    __types__ = LatticeTypeEnum
+    __type_default__ = LatticeBravaisSchema.model_fields["type"].default
+    __units_default__ = LatticeBravaisSchema.model_fields["units"].default_factory()
+
     a: float = 1.0
     b: float = a
     c: float = a
     alpha: float = 90.0
-    beta: float = 90.0
-    gamma: float = 90.0
-    units: Dict[str, str] = DEFAULT_UNITS
-    type: str = DEFAULT_TYPE
+    beta: float = alpha
+    gamma: float = alpha
 
     @property
     def vectors(self) -> LatticeVectors:
+        vectors = self.calculate_vectors()
+        return LatticeVectors.from_vectors_array(vectors)
+
+    def calculate_vectors(self):
         a = self.a
         b = self.b
         c = self.c
@@ -68,61 +65,57 @@ class Lattice(RoundNumericValuesMixin, BaseModel):
         vector_b = [-b * sin_alpha * cos_gamma_star, b * sin_alpha * sin_gamma_star, b * cos_alpha]
         vector_c = [0.0, 0.0, c]
 
-        return LatticeVectors(a=vector_a, b=vector_b, c=vector_c)
+        return [vector_a, vector_b, vector_c]
 
     @classmethod
     def from_vectors_array(
-        cls, vectors: List[List[float]], units: Optional[Dict[str, str]] = None, type: Optional[str] = None
+        cls,
+        vectors: List[List[float]],
+        units: Optional[LatticeUnitsSchema] = __units_default__,
+        type: Optional[LatticeTypeEnum] = __type_default__,
     ) -> "Lattice":
-        """
-        Create a Lattice object from a nested array of vectors.
-        Args:
-            vectors (List[List[float]]): A nested array of vectors.
-        Returns:
-            Lattice: A Lattice object.
-        """
         a = np.linalg.norm(vectors[0])
         b = np.linalg.norm(vectors[1])
         c = np.linalg.norm(vectors[2])
         alpha = np.degrees(np.arccos(np.dot(vectors[1], vectors[2]) / (b * c)))
         beta = np.degrees(np.arccos(np.dot(vectors[0], vectors[2]) / (a * c)))
         gamma = np.degrees(np.arccos(np.dot(vectors[0], vectors[1]) / (a * b)))
-        if units is None:
-            units = DEFAULT_UNITS
-        if type is None:
-            type = DEFAULT_TYPE
-        return cls(a=float(a), b=float(b), c=float(c), alpha=alpha, beta=beta, gamma=gamma, units=units, type=type)
 
-    def to_json(self, skip_rounding: bool = False) -> Dict[str, Any]:
-        __round__ = RoundNumericValuesMixin.round_array_or_number
-        round_func = __round__ if not skip_rounding else lambda x: x
-        return {
-            "a": round_func(self.a),
-            "b": round_func(self.b),
-            "c": round_func(self.c),
-            "alpha": round_func(self.alpha),
-            "beta": round_func(self.beta),
-            "gamma": round_func(self.gamma),
-            "units": self.units,
-            "type": self.type,
-            "vectors": self.vectors.to_json(skip_rounding),
-        }
-
-    def clone(self, extra_context: Optional[Dict[str, Any]] = None) -> "Lattice":
-        if extra_context is None:
-            extra_context = {}
-        return Lattice(**{**self.to_json(), **extra_context})
+        return cls(
+            a=float(a),
+            b=float(b),
+            c=float(c),
+            alpha=alpha,
+            beta=beta,
+            gamma=gamma,
+            units=units,
+            type=type,
+        )
 
     @property
     def vector_arrays(self) -> List[List[float]]:
-        """Returns lattice vectors as a nested array"""
-        v = self.vectors
-        return [v.a, v.b, v.c]
+        return self.vectors.vector_arrays
 
     @property
-    def cell(self) -> Cell:
-        return Cell.from_vectors_array(self.vector_arrays)
+    def vector_arrays_rounded(self) -> List[List[float]]:
+        return self.vectors.vector_arrays_rounded
 
-    def volume(self) -> float:
-        np_vector = np.array(self.vector_arrays)
-        return abs(np.linalg.det(np_vector))
+    @property
+    def cell_volume(self) -> float:
+        return self.vectors.volume
+
+    @property
+    def cell_volume_rounded(self) -> float:
+        return self.vectors.volume_rounded
+
+    def get_scaled_by_matrix(self, matrix: List[List[float]]):
+        """
+        Scale the lattice by a matrix.
+        Args:
+            matrix (List[List[float]]): A 3x3 matrix.
+        """
+        np_vectors = np.array(self.vector_arrays)
+        np_matrix = np.array(matrix)
+        scaled_vectors = np.dot(np_matrix, np_vectors).tolist()
+        new_lattice = self.from_vectors_array(vectors=scaled_vectors, units=self.units, type=self.type)
+        return new_lattice

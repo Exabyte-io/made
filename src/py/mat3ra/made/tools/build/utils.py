@@ -1,12 +1,12 @@
 import numpy as np
 from scipy.spatial import cKDTree
 from typing import List, Optional
-from mat3ra.made.basis import Basis
+from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
+from mat3ra.code.array_with_ids import ArrayWithIds
 
 from .supercell import create_supercell
 from ..modify import filter_by_box, translate_by_vector
-from ...utils import ArrayWithIds
 
 
 def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.1) -> Basis:
@@ -42,15 +42,15 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
     merged_elements_values = basis1.elements.values + basis2.elements.values
     merged_coordinates_values = basis1.coordinates.values + basis2.coordinates.values
     merged_labels_values = basis1.labels.values + basis2.labels.values if basis1.labels and basis2.labels else []
+    merged_constraints_values = basis1.constraints.values + basis2.constraints.values
 
-    merged_basis = Basis(
-        elements=ArrayWithIds.from_values(values=merged_elements_values),
-        coordinates=ArrayWithIds.from_values(values=merged_coordinates_values),
-        units=basis1.units,
-        cell=basis1.cell,
-        labels=ArrayWithIds.from_values(values=merged_labels_values),
-    )
-    resolved_basis = resolve_close_coordinates_basis(merged_basis, distance_tolerance)
+    new_basis = basis1.clone()
+    new_basis.elements = ArrayWithIds.from_values(values=merged_elements_values)
+    new_basis.coordinates = Coordinates.from_values(values=merged_coordinates_values)
+    new_basis.labels = ArrayWithIds.from_values(values=merged_labels_values)
+    new_basis.constraints = ArrayWithIds.from_values(values=merged_constraints_values)
+
+    resolved_basis = resolve_close_coordinates_basis(new_basis, distance_tolerance)
 
     return resolved_basis
 
@@ -69,7 +69,7 @@ def merge_two_materials(
 
     name = material_name or "Merged Material"
     new_material = Material.create(
-        {"name": name, "lattice": merged_lattice.to_json(), "basis": resolved_basis.to_json()}
+        {"name": name, "lattice": merged_lattice.to_dict(), "basis": resolved_basis.to_dict()}
     )
     new_material.metadata = {**material1.metadata, **material2.metadata}
     return new_material
@@ -78,7 +78,7 @@ def merge_two_materials(
 def merge_materials(
     materials: List[Material],
     material_name: Optional[str] = None,
-    distance_tolerance: float = 0.01,
+    distance_tolerance: float = 0.1,
     merge_dangerously=False,
 ) -> Material:
     """

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const lattice_bravais_1 = require("../lattice/lattice_bravais");
+const lattice_1 = require("../lattice/lattice");
 const math_1 = __importDefault(require("../math"));
 const cell_1 = __importDefault(require("./cell"));
 const ADD = math_1.default.add;
@@ -12,20 +12,21 @@ const ADD = math_1.default.add;
  */
 function generateNewBasisWithinSupercell(basis, cell, supercell, supercellMatrix) {
     const oldBasis = basis.clone();
-    const newBasis = basis.clone({ isEmpty: true });
+    const newBasis = basis.clone();
+    newBasis.removeAllAtoms();
     oldBasis.toCrystal();
     newBasis.toCrystal();
     oldBasis.elements.forEach((element) => {
-        const coordinate = oldBasis.getCoordinateByIndex(element.id);
+        const coordinate = oldBasis.getCoordinateValueById(element.id);
         const cartesianCoordinate = cell.convertPointToCartesian(coordinate);
         const shifts = cell_1.default.latticePointsInSupercell(supercellMatrix);
-        shifts.forEach((comb) => {
+        shifts.forEach((combination) => {
             // "combination" is effectively a point in fractional coordinates here, hence the below
-            const newPoint = ADD(cartesianCoordinate, supercell.convertPointToCartesian(comb));
+            const newPoint = ADD(cartesianCoordinate, supercell.convertPointToCartesian(combination));
             if (supercell.isPointInsideCell(newPoint)) {
                 newBasis.addAtom({
                     element: element.value,
-                    coordinate: supercell.convertPointToFractional(newPoint),
+                    coordinate: supercell.convertPointToCrystal(newPoint),
                 });
             }
         });
@@ -42,13 +43,13 @@ function generateConfig(material, supercellMatrix) {
     if (det === 0) {
         throw new Error("Scaling matrix is degenerate.");
     }
-    const cell = material.Lattice.Cell;
+    const cell = material.Lattice.vectors;
     const supercell = cell.cloneAndScaleByMatrix(supercellMatrix);
     const newBasis = generateNewBasisWithinSupercell(material.Basis, cell, supercell, supercellMatrix);
-    const newLattice = lattice_bravais_1.LatticeBravais.fromVectors({
-        a: supercell.vector1,
-        b: supercell.vector2,
-        c: supercell.vector3,
+    const newLattice = lattice_1.Lattice.fromVectors({
+        a: supercell.a,
+        b: supercell.b,
+        c: supercell.c,
     });
     return {
         name: `${material.name} - supercell ${JSON.stringify(supercellMatrix)}`,

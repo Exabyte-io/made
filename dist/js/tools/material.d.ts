@@ -1,16 +1,11 @@
-declare namespace _default {
-    export { scaleOneLatticeVector };
-    export { scaleLatticeToMakeNonPeriodic };
-    export { getBasisConfigTranslatedToCenter };
-}
-export default _default;
+import { Material } from "../material";
 /**
  * Scales one lattice vector for the given material
  * @param material {Material} The material acted upon.
  * @param key {String} Lattice vector key.
  * @param factor {Number} Float scaling factor.
  */
-declare function scaleOneLatticeVector(material: Material, key?: string, factor?: number): void;
+declare function scaleOneLatticeVector(material: Material, key?: "a" | "b" | "c", factor?: number): void;
 /**
  * Updates the size of a materials lattice using the minimumLatticeSize function.
  * The new size of the material is calculated based on the materials basis.
@@ -23,3 +18,9 @@ declare function scaleLatticeToMakeNonPeriodic(material: Material): void;
  * @param material {Material}
  * */
 declare function getBasisConfigTranslatedToCenter(material: Material): void;
+declare const _default: {
+    scaleOneLatticeVector: typeof scaleOneLatticeVector;
+    scaleLatticeToMakeNonPeriodic: typeof scaleLatticeToMakeNonPeriodic;
+    getBasisConfigTranslatedToCenter: typeof getBasisConfigTranslatedToCenter;
+};
+export default _default;

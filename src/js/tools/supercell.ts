@@ -1,10 +1,11 @@
+import { Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
+
 import { Basis } from "../basis/basis";
-import { Coordinate } from "../basis/types";
+import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Cell } from "../cell/cell";
-import { LatticeBravais } from "../lattice/lattice_bravais";
-// eslint-disable-next-line import/no-cycle
-import { Material } from "../material";
+import { Lattice } from "../lattice/lattice";
 import math from "../math";
+import { MaterialInterface } from "../types";
 import cellTools from "./cell";
 
 const ADD = math.add;
@@ -13,34 +14,40 @@ const ADD = math.add;
  * @summary Generates new basis for a supercell. For each site from basis generates shifts that are within supercell.
  */
 function generateNewBasisWithinSupercell(
-    basis: Basis,
+    basis: Basis | ConstrainedBasis,
     cell: Cell,
     supercell: Cell,
-    supercellMatrix: number[][],
+    supercellMatrix: Matrix3X3Schema,
 ): Basis {
     const oldBasis = basis.clone();
-    const newBasis = basis.clone({ isEmpty: true });
+    const newBasis = basis.clone();
+    newBasis.removeAllAtoms();
 
     oldBasis.toCrystal();
     newBasis.toCrystal();
 
     oldBasis.elements.forEach((element) => {
-        const coordinate = oldBasis.getCoordinateByIndex(element.id);
+        const coordinate = oldBasis.getCoordinateValueById(element.id);
         const cartesianCoordinate = cell.convertPointToCartesian(coordinate);
         const shifts = cellTools.latticePointsInSupercell(supercellMatrix);
-        shifts.forEach((comb) => {
+        shifts.forEach((combination) => {
             // "combination" is effectively a point in fractional coordinates here, hence the below
-            const newPoint = ADD(cartesianCoordinate, supercell.convertPointToCartesian(comb));
-            if (supercell.isPointInsideCell(newPoint)) {
+            const newPoint = ADD(
+                cartesianCoordinate,
+                supercell.convertPointToCartesian(combination),
+            );
+            if (supercell.isPointInsideCell(newPoint as Coordinate3DSchema)) {
                 newBasis.addAtom({
                     element: element.value,
-                    coordinate: supercell.convertPointToFractional(newPoint) as Coordinate,
+                    coordinate: supercell.convertPointToCrystal(
+                        newPoint as Coordinate3DSchema,
+                    ) as Coordinate3DSchema,
                 });
             }
         });
     });
 
-    return newBasis;
+    return newBasis as Basis;
 }
 
 /**
@@ -48,12 +55,12 @@ function generateNewBasisWithinSupercell(
  * @param material
  * @param supercellMatrix {Number[][]}
  */
-function generateConfig(material: Material, supercellMatrix: number[][]) {
+function generateConfig(material: MaterialInterface, supercellMatrix: Matrix3X3Schema) {
     const det = math.det(supercellMatrix);
     if (det === 0) {
         throw new Error("Scaling matrix is degenerate.");
     }
-    const cell = material.Lattice.Cell;
+    const cell = material.Lattice.vectors;
     const supercell = cell.cloneAndScaleByMatrix(supercellMatrix);
     const newBasis = generateNewBasisWithinSupercell(
         material.Basis,
@@ -61,10 +68,10 @@ function generateConfig(material: Material, supercellMatrix: number[][]) {
         supercell,
         supercellMatrix,
     );
-    const newLattice = LatticeBravais.fromVectors({
-        a: supercell.vector1,
-        b: supercell.vector2,
-        c: supercell.vector3,
+    const newLattice = Lattice.fromVectors({
+        a: supercell.a,
+        b: supercell.b,
+        c: supercell.c,
     });
 
     return {

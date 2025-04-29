@@ -5,11 +5,13 @@ import {
     DerivedPropertiesSchema,
     FileSourceSchema,
     InChIRepresentationSchema,
+    LatticeSchema,
     MaterialSchema,
 } from "@mat3ra/esse/dist/js/types";
 import CryptoJS from "crypto-js";
 
-import { ConstrainedBasis } from "./basis/constrained_basis";
+import { BasisConfig } from "./basis/basis";
+import { ConstrainedBasis, ConstrainedBasisConfig } from "./basis/constrained_basis";
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
@@ -18,11 +20,7 @@ import {
 import { ATOMIC_COORD_UNITS, units } from "./constants";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-import { BravaisConfigProps } from "./lattice/lattice_vectors";
 import parsers from "./parsers/parsers";
-import { BasisConfig } from "./parsers/xyz";
-// TODO: fix dependency cycle below
-// eslint-disable-next-line import/no-cycle
 import supercellTools from "./tools/supercell";
 import { MaterialJSON } from "./types";
 
@@ -31,21 +29,21 @@ export const defaultMaterialConfig = {
     basis: {
         elements: [
             {
-                id: 1,
+                id: 0,
                 value: "Si",
             },
             {
-                id: 2,
+                id: 1,
                 value: "Si",
             },
         ],
         coordinates: [
             {
-                id: 1,
+                id: 0,
                 value: [0.0, 0.0, 0.0],
             },
             {
-                id: 2,
+                id: 1,
                 value: [0.25, 0.25, 0.25],
             },
         ],
@@ -77,6 +75,9 @@ export type MaterialBaseEntityConstructor<T extends MaterialBaseEntity = Materia
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any[]
 ) => T;
+
+export type OptionallyConstrainedBasisConfig = BasisConfig &
+    Partial<Pick<ConstrainedBasisConfig, "constraints">>;
 
 export function MaterialMixin<
     T extends MaterialBaseEntityConstructor = MaterialBaseEntityConstructor,
@@ -161,7 +162,6 @@ export function MaterialMixin<
             return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
         }
 
-        // should be private, but TS throws error "Property 'unsetFileProps' of exported class expression may not be private or protected"
         unsetFileProps() {
             this.unsetProp("src");
             this.unsetProp("icsdId");
@@ -175,12 +175,10 @@ export function MaterialMixin<
          */
         setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string) {
             let basis: BasisConfig | undefined;
-            switch (format) {
-                case "xyz":
-                    basis = parsers.xyz.toBasisConfig(textOrObject as string, unitz);
-                    break;
-                default:
-                    basis = textOrObject as BasisConfig;
+            if (typeof textOrObject === "string" && format === "xyz") {
+                basis = parsers.xyz.toBasisConfig(textOrObject, unitz);
+            } else {
+                basis = textOrObject as BasisConfig;
             }
             this.setProp("basis", basis);
             this.unsetFileProps();
@@ -188,18 +186,26 @@ export function MaterialMixin<
         }
 
         setBasisConstraints(constraints: Constraint[]) {
-            this.setBasis({ ...this.basis, constraints });
+            const basisWithConstraints = {
+                ...this.basis,
+                constraints: constraints.map((c) => c.toJSON()),
+            };
+            this.setBasis(basisWithConstraints);
         }
 
-        get basis(): BasisConfig {
-            return this.prop<BasisConfig>("basis") as BasisConfig;
+        get basis(): OptionallyConstrainedBasisConfig {
+            return this.prop<BasisConfig>("basis") as BasisConfig &
+                Partial<Pick<ConstrainedBasisConfig, "constraints">>;
         }
 
         // returns the instance of {ConstrainedBasis} class
         get Basis() {
+            const basisData = this.basis;
+
             return new ConstrainedBasis({
-                ...this.basis,
-                cell: this.Lattice.vectorArrays,
+                ...basisData,
+                cell: this.Lattice.vectors,
+                constraints: (basisData as ConstrainedBasisConfig).constraints || [],
             });
         }
 
@@ -210,12 +216,24 @@ export function MaterialMixin<
             return this.Basis.uniqueElements;
         }
 
-        get lattice(): BravaisConfigProps | undefined {
-            return this.prop("lattice", undefined);
+        get lattice(): LatticeSchema {
+            return this.prop("lattice") as LatticeSchema;
         }
 
-        set lattice(config: BravaisConfigProps | undefined) {
+        set lattice(config: LatticeSchema) {
+            const originalIsInCrystalUnits = this.Basis.isInCrystalUnits;
+            const basis = this.Basis;
+            basis.toCartesian();
+
+            const newLattice = new Lattice(config);
+            basis.cell = newLattice.vectors;
+            if (originalIsInCrystalUnits) basis.toCrystal();
+
+            // Preserve all properties from the original basis to ensure constraints are included
+            const newBasisConfig = basis.toJSON();
+            this.setProp("basis", newBasisConfig);
             this.setProp("lattice", config);
+
             this.unsetFileProps();
         }
 
@@ -344,8 +362,7 @@ export function MaterialMixin<
             config.lattice.type = conventionalLatticeType;
             config.name = `${material.name} - conventional cell`;
 
-            // @ts-ignore
-            return new this.constructor(config);
+            return new (this.constructor as any)(config);
         }
 
         /**

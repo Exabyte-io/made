@@ -1,5 +1,3 @@
-export class InvalidLineError extends Error {
-    constructor(num: any, content: any);
-    lineNumber: any;
-    content: any;
+export declare class InvalidLineError extends Error {
+    constructor(num: number, content: string);
 }

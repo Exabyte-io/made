@@ -2,6 +2,7 @@ from typing import List, Optional, Any, Tuple
 
 import numpy as np
 
+from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.supercell import create_supercell
@@ -27,7 +28,7 @@ class NanoribbonBuilder(BaseBuilder):
     _PostProcessParametersType: Any = None
 
     def create_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
-        material = config.material
+        material = config.material.clone()
         (
             length_cartesian,
             width_cartesian,
@@ -35,7 +36,7 @@ class NanoribbonBuilder(BaseBuilder):
             vacuum_length_cartesian,
             vacuum_width_cartesian,
         ) = self._calculate_cartesian_dimensions(config, material)
-        length_lattice_vector, width_lattice_vector, height_lattice_vector = self._get_new_lattice_vectors(
+        new_lattice = self._get_new_lattice(
             length_cartesian,
             width_cartesian,
             height_cartesian,
@@ -43,8 +44,8 @@ class NanoribbonBuilder(BaseBuilder):
             vacuum_width_cartesian,
             config.edge_type,
         )
-        n = max(config.length, config.width)
-        large_supercell_to_cut = create_supercell(material, np.diag([2 * n, 2 * n, 1]))
+        n_repetitions = max(config.length, config.width)
+        large_supercell_to_cut = create_supercell(material, np.diag([2 * n_repetitions, 2 * n_repetitions, 1]))
 
         min_coordinate, max_coordinate = self._calculate_coordinates_of_cut(
             length_cartesian, width_cartesian, height_cartesian, config.edge_type
@@ -55,7 +56,7 @@ class NanoribbonBuilder(BaseBuilder):
             max_coordinate=max_coordinate,
             use_cartesian_coordinates=True,
         )
-        nanoribbon.set_new_lattice_vectors(length_lattice_vector, width_lattice_vector, height_lattice_vector)
+        nanoribbon.set_lattice(new_lattice)
         return translate_to_center(nanoribbon)
 
     @staticmethod
@@ -73,18 +74,20 @@ class NanoribbonBuilder(BaseBuilder):
             nanoribbon_length, nanoribbon_width = nanoribbon_width, nanoribbon_length
             vacuum_width, vacuum_length = vacuum_length, vacuum_width
 
-        length_cartesian = nanoribbon_length * np.dot(np.array(material.lattice.vectors.a), np.array([1, 0, 0]))
-        width_cartesian = nanoribbon_width * np.dot(np.array(material.lattice.vectors.b), np.array([0, 1, 0]))
-        height_cartesian = np.dot(np.array(material.lattice.vectors.c), np.array([0, 0, 1]))
-        vacuum_length_cartesian = vacuum_length * np.dot(np.array(material.lattice.vectors.a), np.array([1, 0, 0]))
-        vacuum_width_cartesian = vacuum_width * np.dot(np.array(material.lattice.vectors.b), np.array([0, 1, 0]))
+        lattice = material.lattice
+
+        length_cartesian = nanoribbon_length * lattice.vectors.a.x
+        width_cartesian = nanoribbon_width * lattice.vectors.b.y
+        height_cartesian = lattice.vectors.c.z
+        vacuum_length_cartesian = vacuum_length * lattice.vectors.a.x
+        vacuum_width_cartesian = vacuum_width * lattice.vectors.b.y
 
         return length_cartesian, width_cartesian, height_cartesian, vacuum_length_cartesian, vacuum_width_cartesian
 
     @staticmethod
-    def _get_new_lattice_vectors(
+    def _get_new_lattice(
         length: float, width: float, height: float, vacuum_length: float, vacuum_width: float, edge_type: EdgeTypes
-    ) -> Tuple[List[float], List[float], List[float]]:
+    ) -> Lattice:
         """
         Calculate the new lattice vectors for the nanoribbon.
 
@@ -99,14 +102,14 @@ class NanoribbonBuilder(BaseBuilder):
         Returns:
             Tuple of the new lattice vectors.
         """
-        length_lattice_vector = [length + vacuum_length, 0, 0]
-        width_lattice_vector = [0, width + vacuum_width, 0]
-        height_lattice_vector = [0, 0, height]
+        length_lattice_vector = [length + vacuum_length, 0.0, 0.0]
+        width_lattice_vector = [0.0, width + vacuum_width, 0.0]
+        height_lattice_vector = [0.0, 0.0, height]
 
         if edge_type == EdgeTypes.armchair:
             length_lattice_vector, width_lattice_vector = width_lattice_vector, length_lattice_vector
 
-        return length_lattice_vector, width_lattice_vector, height_lattice_vector
+        return Lattice.from_vectors_array(vectors=[length_lattice_vector, width_lattice_vector, height_lattice_vector])
 
     @staticmethod
     def _calculate_coordinates_of_cut(

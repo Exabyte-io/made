@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {file = "LICENSE.md"}
 authors = [
-    {name = "Exabyte Inc.", email = "info@mat3ra.com"}
+    { name = "Exabyte Inc.", email = "info@mat3ra.com" }
 ]
 classifiers = [
     "Programming Language :: Python",
@@ -26,6 +26,7 @@ dependencies = [
 [project.optional-dependencies]
 # tracking separately the deps required to use the tools module
 tools = [
+    "scipy",
     "pymatgen==2024.4.13",
     "ase",
     "pymatgen-analysis-defects==2024.4.23",
@@ -99,3 +100,11 @@ target-version = "py38"
 profile = "black"
 multi_line_output = 3
 include_trailing_comma = true
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src/py",
+]
+testpaths = [
+    "tests/py"
+]

@@ -1,34 +1,19 @@
 import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
-import { ConstrainedBasis } from "../basis/constrained_basis";
-import { Constraint } from "../constraints/constraints";
-import { Vector } from "../lattice/types";
+import { ConstrainedBasis, ConstrainedBasisConfig } from "../basis/constrained_basis";
+import { AtomicCoordinateValue } from "../basis/coordinates";
+import { AtomicElementValue } from "../basis/elements";
+import { Cell } from "../cell/cell";
+import { AtomicConstraintValue } from "../constraints/constraints";
 import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 /**
  * Validates that passed string is well-formed XYZ file.
  */
 export declare function validate(xyzTxt: string): void;
 export interface ParsedObject {
-    element: string;
-    coordinates: Vector;
-    constraints: [boolean, boolean, boolean];
+    element: AtomicElementValue;
+    coordinate: AtomicCoordinateValue;
+    constraints: AtomicConstraintValue;
     label?: number;
-}
-export interface BasisConfig {
-    elements: {
-        id: number;
-        value: string;
-    }[];
-    labels?: {
-        id: number;
-        value: number;
-    }[];
-    coordinates: {
-        id: number;
-        value: Vector;
-    }[];
-    units: string;
-    cell: Vector[];
-    constraints: Constraint[];
 }
 /**
  * Parse XYZ text for basis.
@@ -36,15 +21,14 @@ export interface BasisConfig {
  * @param units Coordinate units
  * @param cell Basis Cell
  */
-declare function toBasisConfig(txt: string, units?: string, cell?: [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema]): BasisConfig;
+declare function toBasisConfig(txt: string, units?: string, cell?: Cell): ConstrainedBasisConfig;
 /**
  * Create XYZ from Basis class instance.
  * @param basisClsInstance Basis class instance.
- * @param printFormat Output format for coordinates.
- * @param skipRounding Whether to round the numbers (ie. to avoid negative zeros).
+ * @param coordinatePrintFormat Output format for coordinates.
  * @return Basis string in XYZ format
  */
-declare function fromBasis(basisClsInstance: ConstrainedBasis, printFormat?: string, skipRounding?: boolean): string;
+declare function fromBasis(basisClsInstance: ConstrainedBasis, coordinatePrintFormat: string): string;
 /**
  * Create XYZ from Material class instance (or its JSON config).
  * @param materialOrConfig Material.

@@ -1,15 +1,36 @@
 from typing import Any, List, Optional
 
 import numpy as np
-from pydantic import BaseModel
 from ase.build.tools import niggli_reduce
+from mat3ra.made.lattice import Lattice
+from mat3ra.made.material import Material
+from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
+from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
 )
 
-from mat3ra.made.material import Material
-from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
+from .commensurate_lattice_pair import CommensurateLatticePair
+from .configuration import (
+    InterfaceConfiguration,
+    NanoRibbonTwistedInterfaceConfiguration,
+    TwistedInterfaceConfiguration,
+)
+from .enums import StrainModes, angle_to_supercell_matrix_values_for_hex
+from .termination_pair import TerminationPair, safely_select_termination_pair
+from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
+from ..mixins import (
+    ConvertGeneratedItemsASEAtomsMixin,
+    ConvertGeneratedItemsPymatgenStructureMixin,
+)
+from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
+from ..slab import create_slab, Termination, SlabConfiguration
+from ..supercell import create_supercell
+from ..utils import merge_materials
+from ...analyze.other import get_chemical_formula
+from ...build import BaseBuilder, BaseBuilderParameters
+from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
 from ...modify import (
     translate_to_z_level,
     rotate,
@@ -17,27 +38,6 @@ from ...modify import (
     add_vacuum_sides,
     add_vacuum,
 )
-from ...analyze.other import get_chemical_formula
-from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
-from ...build import BaseBuilder, BaseBuilderParameters
-from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from ..supercell import create_supercell
-from ..slab import create_slab, Termination, SlabConfiguration
-from ..utils import merge_materials
-from ..mixins import (
-    ConvertGeneratedItemsASEAtomsMixin,
-    ConvertGeneratedItemsPymatgenStructureMixin,
-)
-
-from .enums import StrainModes, angle_to_supercell_matrix_values_for_hex
-from .configuration import (
-    InterfaceConfiguration,
-    NanoRibbonTwistedInterfaceConfiguration,
-    TwistedInterfaceConfiguration,
-)
-from .commensurate_lattice_pair import CommensurateLatticePair
-from .termination_pair import TerminationPair, safely_select_termination_pair
-from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
 
 
 class InterfaceBuilderParameters(BaseModel):
@@ -128,7 +128,7 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
         return [interface_ase_with_vacuum]
 
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
-        return [Material(from_ase(slab)) for slab in items]
+        return [Material.create(from_ase(slab)) for slab in items]
 
 
 ########################################################################################
@@ -172,7 +172,7 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
     _GeneratedItemType: PymatgenInterface = PymatgenInterface  # type: ignore
 
     def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
-        generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.dict())
+        generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.model_dump())
         substrate_with_atoms_translated_to_bottom = translate_to_z_level(
             configuration.substrate_configuration.bulk, "bottom"
         )
@@ -314,7 +314,7 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
         Returns:
             int: The maximum integer for the transformation matrices.
         """
-        if film.lattice.type == "HEX":
+        if film.lattice.type == Lattice.__types__.HEX:
             # getting max int of the matrix that has angle closest to target angle
             xy_supercell_matrix_for_closest_angle = min(
                 angle_to_supercell_matrix_values_for_hex, key=lambda x: abs(x["angle"] - target_angle)

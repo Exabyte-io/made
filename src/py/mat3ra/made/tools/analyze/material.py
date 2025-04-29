@@ -1,8 +1,8 @@
 from typing import List, Optional, Tuple
 
 import numpy as np
+from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.made.material import Material
-from mat3ra.made.utils import ArrayWithIds
 from scipy.spatial._ckdtree import cKDTree
 
 from ..bonds import BondDirections, BondDirectionsTemplatesForElement
@@ -12,14 +12,14 @@ from .utils import decorator_handle_periodic_boundary_conditions
 
 
 class MaterialWithCrystalSites(Material):
-    crystal_sites: CrystalSiteList = CrystalSiteList(values=[])
+    crystal_sites: CrystalSiteList = CrystalSiteList.from_values([])
+    nearest_neighbor_vectors: ArrayWithIds = ArrayWithIds.from_values([])
 
     @classmethod
     def from_material(cls, material: Material):
         new_material = material.clone()
         new_material.to_cartesian()
-        config = new_material.to_json()
-        return cls(config)
+        return cls(name=material.name, basis=new_material.basis, lattice=new_material.lattice)
 
     def analyze(self):
         """
@@ -71,7 +71,7 @@ class MaterialWithCrystalSites(Material):
         Returns:
             ArrayWithIds: Array with the nearest neighbor vectors for all sites.
         """
-        nearest_neighbors = ArrayWithIds()
+        nearest_neighbors = ArrayWithIds(values=[], ids=[])
         for site_index in range(len(self.basis.coordinates.values)):
             vectors = self.get_neighbors_vectors_for_site(site_index, cutoff, max_number_of_neighbors)
             nearest_neighbors.add_item(vectors, site_index)
@@ -128,7 +128,7 @@ class MaterialWithCrystalSites(Material):
         Returns:
             ArrayWithIds: Array with the nearest neighbors for all sites.
         """
-        nearest_neighbors = ArrayWithIds()
+        nearest_neighbors = ArrayWithIds(values=[], ids=[])
         for site_index in self.basis.coordinates.ids:
             neighbors, distances = self.get_neighbors_for_site(site_index, cutoff, max_number_of_neighbors)
             nearest_neighbors.add_item(neighbors, site_index)

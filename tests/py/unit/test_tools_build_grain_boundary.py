@@ -12,12 +12,12 @@ from mat3ra.made.tools.build.grain_boundary.builders import SlabGrainBoundaryBui
 from mat3ra.made.tools.build.slab import SlabConfiguration, get_terminations
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import GRAPHENE
+from .fixtures.monolayer import GRAPHENE
 
 
 @pytest.mark.skip(reason="Test is failing on GHA due to slab generation differences between GHA and local")
 def test_slab_grain_boundary_builder():
-    material = Material(Material.default_config)
+    material = Material.create_default()
     phase_1_configuration = SlabConfiguration(
         bulk=material,
         vacuum=0,
@@ -69,7 +69,7 @@ def test_slab_grain_boundary_builder():
 
 def test_create_surface_grain_boundary():
     config = SurfaceGrainBoundaryConfiguration(
-        film=Material(GRAPHENE),
+        film=Material.create(GRAPHENE),
         twist_angle=13.0,
         gap=2.0,
     )
@@ -91,4 +91,4 @@ def test_create_surface_grain_boundary():
     ]
 
     assert len(gb) == 1
-    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, gb[0].basis.cell.vectors_as_array)
+    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, gb[0].basis.cell.vector_arrays)

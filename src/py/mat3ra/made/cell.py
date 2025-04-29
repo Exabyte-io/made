@@ -1,57 +1,55 @@
-from typing import List, Optional
+from typing import List
 
 import numpy as np
+from mat3ra.code.vector import RoundedVector3D
+from mat3ra.esse.models.properties_directory.structural.lattice import LatticeVectorsSchema as CellSchema
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+DEFAULT_CELL = np.eye(3).tolist()
 
 
-class Cell(RoundNumericValuesMixin, BaseModel):
-    # TODO: figure out how to use ArrayOf3NumberElementsSchema
-    vector1: List[float] = Field(default_factory=lambda: [1, 0, 0])
-    vector2: List[float] = Field(default_factory=lambda: [0, 1, 0])
-    vector3: List[float] = Field(default_factory=lambda: [0, 0, 1])
-    __round_precision__ = 6
+class Cell(RoundNumericValuesMixin, CellSchema):
+    __rounded_vector3d__ = RoundedVector3D
+    __default_vectors__ = DEFAULT_CELL
+
+    a: RoundedVector3D = Field(default_factory=lambda: Cell.__rounded_vector3d__(DEFAULT_CELL[0]))
+    b: RoundedVector3D = Field(default_factory=lambda: Cell.__rounded_vector3d__(DEFAULT_CELL[1]))
+    c: RoundedVector3D = Field(default_factory=lambda: Cell.__rounded_vector3d__(DEFAULT_CELL[2]))
 
     @classmethod
-    def from_vectors_array(cls, vectors_array: Optional[List[List[float]]] = None) -> "Cell":
-        if vectors_array is None:
-            vectors_array = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-        return cls(vector1=vectors_array[0], vector2=vectors_array[1], vector3=vectors_array[2])
+    def from_vectors_array(cls, vectors: List[List[float]] = DEFAULT_CELL) -> "Cell":
+        return cls(
+            a=RoundedVector3D(vectors[0]),
+            b=RoundedVector3D(vectors[1]),
+            c=RoundedVector3D(vectors[2]),
+        )
+
+    def get_vector_arrays(self, skip_rounding=False) -> List[List[float]]:
+        if skip_rounding:
+            return [self.a.value, self.b.value, self.c.value]
+        return [self.a.value_rounded, self.b.value_rounded, self.c.value_rounded]
 
     @property
-    def vectors_as_array(self, skip_rounding=False) -> List[List[float]]:
-        if skip_rounding:
-            return [self.vector1, self.vector2, self.vector3]
-        return self.round_array_or_number([self.vector1, self.vector2, self.vector3])
+    def vector_arrays(self) -> List[List[float]]:
+        return self.get_vector_arrays(skip_rounding=True)
 
-    def to_json(self, skip_rounding=False):
-        _ = self.round_array_or_number
-        return [
-            self.vector1 if skip_rounding else _(self.vector1),
-            self.vector2 if skip_rounding else _(self.vector2),
-            self.vector3 if skip_rounding else _(self.vector3),
-        ]
-
-    def clone(self) -> "Cell":
-        return self.from_vectors_array(self.vectors_as_array)
-
-    def clone_and_scale_by_matrix(self, matrix: List[List[float]]) -> "Cell":
-        new_cell = self.clone()
-        new_cell.scale_by_matrix(matrix)
-        return new_cell
+    @property
+    def vector_arrays_rounded(self) -> List[List[float]]:
+        return self.get_vector_arrays(skip_rounding=False)
 
     def convert_point_to_cartesian(self, point: List[float]) -> List[float]:
-        np_vector = np.array(self.vectors_as_array)
-        return np.dot(point, np_vector)
+        np_vector = np.array(self.vector_arrays)
+        return np.dot(point, np_vector).tolist()
 
     def convert_point_to_crystal(self, point: List[float]) -> List[float]:
-        np_vector = np.array(self.vectors_as_array)
-        return np.dot(point, np.linalg.inv(np_vector))
-
-    def scale_by_matrix(self, matrix: List[List[float]]):
-        np_vector = np.array(self.vectors_as_array)
-        self.vector1, self.vector2, self.vector3 = np.dot(np.array(matrix), np_vector).tolist()
+        np_vector = np.array(self.vector_arrays)
+        return np.dot(point, np.linalg.inv(np_vector)).tolist()
 
     @property
     def volume(self) -> float:
-        return np.linalg.det(np.array(self.vectors_as_array))
+        return np.linalg.det(np.array(self.vector_arrays))
+
+    @property
+    def volume_rounded(self) -> float:
+        return self.round_array_or_number(self.volume)

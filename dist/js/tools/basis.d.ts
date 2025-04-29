@@ -1,8 +1,4 @@
-declare namespace _default {
-    export { repeat };
-    export { interpolate };
-}
-export default _default;
+import { Basis } from "../basis/basis";
 /**
  * Returns a repeated basis of a crystal.
  * @param basis {Basis} Original basis.
@@ -19,4 +15,8 @@ declare function repeat(basis: Basis, repetitions: number[]): Basis;
  * @return {Basis[]} List of all bases.
  */
 declare function interpolate(initialBasis: Basis, finalBasis: Basis, numberOfSteps?: number): Basis[];
-import { Basis } from "../basis/basis";
+declare const _default: {
+    repeat: typeof repeat;
+    interpolate: typeof interpolate;
+};
+export default _default;

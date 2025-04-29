@@ -38,7 +38,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> P
     material_data = material_or_material_data
 
     if isinstance(material_or_material_data, Material):
-        material_data = material_or_material_data.to_json()
+        material_data = material_or_material_data.to_dict()
 
     lattice_params = material_data["lattice"]
     a = lattice_params["a"]
@@ -52,9 +52,10 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> P
     basis = material_data["basis"]
     elements = [element["value"] for element in basis["elements"]]
     coordinates = [coord["value"] for coord in basis["coordinates"]]
-    labels = [label["value"] for label in basis.get("labels", [])]
+    labels_data = basis.get("labels", []) or []
+    labels = [label["value"] for label in labels_data]
     # Assuming that the basis units are fractional since it's a crystal basis
-    coords_are_cartesian = "units" in basis and basis["units"].lower() == "angstrom"
+    coords_are_cartesian = "units" in basis and basis["units"] == "angstrom"
 
     if "labels" in inspect.signature(PymatgenStructure.__init__).parameters:
         structure = PymatgenStructure(
@@ -174,7 +175,7 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAto
         Any: An ASE Atoms object.
     """
     if isinstance(material_or_material_data, Material):
-        material_config = material_or_material_data.to_json()
+        material_config = material_or_material_data.to_dict()
     else:
         material_config = material_or_material_data
     structure = to_pymatgen(material_config)

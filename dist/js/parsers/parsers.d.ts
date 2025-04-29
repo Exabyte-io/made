@@ -2,8 +2,8 @@ declare const _default: {
     xyz: {
         validate: typeof import("./xyz").validate;
         fromMaterial: (materialOrConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema, fractional?: boolean) => string;
-        toBasisConfig: (txt: string, units?: string, cell?: [import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema, import("@mat3ra/esse/dist/js/types").ArrayOf3NumberElementsSchema]) => import("./xyz").BasisConfig;
-        fromBasis: (basisClsInstance: import("../basis/constrained_basis").ConstrainedBasis, printFormat?: string, skipRounding?: boolean) => string;
+        toBasisConfig: (txt: string, units?: string, cell?: import("../cell/cell").Cell) => import("../basis/constrained_basis").ConstrainedBasisConfig;
+        fromBasis: (basisClsInstance: import("../basis/constrained_basis").ConstrainedBasis, coordinatePrintFormat: string) => string;
         CombinatorialBasis: typeof import("./xyz_combinatorial_basis").CombinatorialBasis;
     };
     poscar: {
@@ -20,15 +20,8 @@ declare const _default: {
         toEspressoFormat: (materialOrConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema) => string;
     };
     nativeFormatParsers: {
-        detectFormat: (text: string) => {
-            JSON: string;
-            POSCAR: string;
-            CIF: string;
-            PWX: string;
-            XYZ: string;
-            UNKNOWN: string;
-        };
-        convertFromNativeFormat: (text: string) => Object;
+        detectFormat: (text: string) => string;
+        convertFromNativeFormat: (text: string) => any;
     };
 };
 export default _default;

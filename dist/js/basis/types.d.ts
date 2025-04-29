@@ -1,1 +1,1 @@
-export type Coordinate = [number, number, number];
+export type Coordinate = number[];

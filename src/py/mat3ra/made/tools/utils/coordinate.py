@@ -168,7 +168,7 @@ class CoordinateCondition(BaseModel):
 
     def get_json(self) -> Dict:
         json = {"type": self.__class__.__name__}
-        json.update(self.dict())
+        json.update(self.model_dump())
         return json
 
 

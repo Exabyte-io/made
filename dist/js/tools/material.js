@@ -10,11 +10,12 @@ const lattice_1 = require("../lattice/lattice");
  * @param factor {Number} Float scaling factor.
  */
 function scaleOneLatticeVector(material, key = "a", factor = 1.0) {
-    material.toCartesian();
-    const { lattice } = material;
-    lattice[key] *= factor;
-    material.lattice = lattice;
-    material.toCrystal();
+    const lattice = { ...material.lattice };
+    if (lattice.vectors === undefined) {
+        throw new Error("Lattice vectors are undefined");
+    }
+    lattice.vectors[key] = lattice.vectors[key].map((v) => v * factor);
+    material.lattice = lattice_1.Lattice.fromVectors(lattice.vectors);
 }
 /**
  * Updates the size of a materials lattice using the minimumLatticeSize function.
@@ -22,7 +23,7 @@ function scaleOneLatticeVector(material, key = "a", factor = 1.0) {
  * @param material {Material}
  */
 function scaleLatticeToMakeNonPeriodic(material) {
-    material.lattice = new lattice_1.Lattice({
+    material.lattice = lattice_1.Lattice.fromConfigPartial({
         a: material.Basis.getMinimumLatticeSize(),
         type: "CUB",
     });

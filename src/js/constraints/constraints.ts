@@ -1,63 +1,45 @@
-import { ArrayWithIds } from "../abstract/array_with_ids";
-import { ObjectWithIdAndValue } from "../abstract/scalar_with_id";
+import { ArrayWithIds, ValueWithId } from "@mat3ra/code";
+import { AtomicConstraintSchema } from "@mat3ra/esse/dist/js/types";
 
-export interface ConstraintValue extends Array<boolean> {
-    0: boolean;
-    1: boolean;
-    2: boolean;
+export type AtomicConstraintValue = AtomicConstraintSchema["value"];
+
+export class Constraint extends ValueWithId<AtomicConstraintValue> {
+    value: AtomicConstraintValue;
+
+    constructor({ value, id }: AtomicConstraintSchema) {
+        super({ id, value });
+        this.value = value;
+    }
+
+    getValueAsString(): string {
+        return this.value.map((x) => (x ? 1 : 0)).join(" ");
+    }
+
+    prettyPrint(): string {
+        return this.value.map((x) => (x ? 1 : 0)).join(" ");
+    }
+
+    // By default, the constraint is unconstrained if all values are 1/true.
+    isUnconstrained(): boolean {
+        return this.value.every((val) => val);
+    }
 }
 
-export type Constraint = ObjectWithIdAndValue<ConstraintValue>;
-
-export class AtomicConstraints {
-    name: string;
-
-    values: ArrayWithIds<ConstraintValue>;
-
-    static fromArray(array: ConstraintValue[]) {
-        return new AtomicConstraints({ values: array });
-    }
-
-    /**
-     * Create atomic constraints.
-     * @param {Object} config
-     * @param {ArrayWithIds|Array} config.values
-     */
-    constructor({ values }: { values?: ConstraintValue[] }) {
-        this.name = "atomic_constraints";
-        this.values = new ArrayWithIds(values || []);
-    }
-
-    /**
-     * @example As below:
-        [
-            {
-                "id" : 0,
-                "value" : [
-                    1,
-                    1,
-                    1
-                ]
-            }
-        ]
-     */
-    toJSON() {
-        return {
-            name: this.name,
-            values: this.values.toJSON(),
-        };
-    }
-
-    getByIndex(idx: number): ConstraintValue {
-        return this.values.getArrayElementByIndex(idx) || [];
-    }
-
+export class AtomicConstraints extends ArrayWithIds<AtomicConstraintValue> {
     /**
      * Get constraints for an atom with index as string.
      * @param idx - atom index.
      * @param mapFn (OPTIONAL) - a function to be applied to each constraint. By default 0 or 1 is returned.
      */
     getAsStringByIndex(idx: number, mapFn = (val: boolean): string => (val ? "1" : "0")): string {
-        return this.getByIndex(idx).map(mapFn).join(" ");
+        const constraints = this.getElementValueByIndex(idx);
+        return constraints ? constraints.map(mapFn).join(" ") : "";
+    }
+
+    get areUnconstrained(): boolean {
+        return this.values.every((constraint) => {
+            const _constraint = Constraint.fromValueAndId(constraint);
+            return _constraint.isUnconstrained();
+        });
     }
 }

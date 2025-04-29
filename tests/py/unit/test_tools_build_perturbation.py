@@ -6,11 +6,11 @@ from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.utils.perturbation import SineWavePerturbationFunctionHolder
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures import GRAPHENE
+from .fixtures.monolayer import GRAPHENE
 
 
 def test_sine_perturbation():
-    material = Material(GRAPHENE)
+    material = Material.create(GRAPHENE)
     slab = create_supercell(material, [[10, 0, 0], [0, 10, 0], [0, 0, 1]])
 
     perturbation_config = PerturbationConfiguration(
@@ -26,7 +26,7 @@ def test_sine_perturbation():
 
 
 def test_distance_preserved_sine_perturbation():
-    material = Material(GRAPHENE)
+    material = Material.create(GRAPHENE)
     slab = create_supercell(material, [[10, 0, 0], [0, 10, 0], [0, 0, 1]])
 
     perturbation_config = PerturbationConfiguration(

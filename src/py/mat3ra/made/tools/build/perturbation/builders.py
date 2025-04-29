@@ -71,7 +71,7 @@ class CellMatchingDistancePreservingSlabPerturbationBuilder(DistancePreservingSl
     def create_perturbed_slab(self, configuration: PerturbationConfiguration) -> Material:
         new_material = super().create_perturbed_slab(configuration)
         new_lattice_vectors = self._transform_lattice_vectors(configuration)
-        new_lattice = new_material.lattice.copy()
+        new_lattice = new_material.lattice.model_copy()
         new_lattice = new_lattice.from_vectors_array(new_lattice_vectors)
         new_material.lattice = new_lattice
         return new_material
