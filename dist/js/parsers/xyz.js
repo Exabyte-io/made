@@ -122,7 +122,7 @@ function toBasisConfig(txt, units = "angstrom", cell = new cell_1.Cell()) {
  * @return Basis string in XYZ format
  */
 function fromBasis(basisClsInstance, coordinatePrintFormat) {
-    const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat);
+    const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat, 4);
     return `${XYZArray.join("\n")}\n`;
 }
 /**

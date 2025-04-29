@@ -59,7 +59,7 @@ class ConstrainedBasis extends basis_1.Basis {
      * Returns an array with atomic positions (with constraints) per atom stored as strings.
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
      */
-    getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat) {
+    getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat, precision) {
         const omitConstraints = this._constraints.areUnconstrained;
         return this.elementsCoordinatesConstraintsArray.map(([element, label, coordinate, constraint]) => {
             const _elementWithLabel = new helpers_1.ElementWithLabel({ element, label });
@@ -67,7 +67,7 @@ class ConstrainedBasis extends basis_1.Basis {
             const _constraint = constraints_1.Constraint.fromValueAndId(constraint);
             return [
                 _elementWithLabel.prettyPrint(),
-                _coordinate.prettyPrint(coordinatePrintFormat),
+                _coordinate.prettyPrint(coordinatePrintFormat, precision),
                 omitConstraints ? "" : _constraint.prettyPrint(),
             ].join(" ");
         });
