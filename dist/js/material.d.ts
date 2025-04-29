@@ -62,9 +62,9 @@ declare const BaseEntity: (new (...args: any[]) => {
 }) & typeof import("@mat3ra/code/dist/js/entity").InMemoryEntity & Constructor<{
     isDefault: boolean;
 }> & {
-    createDefault(): Constructor<import("@mat3ra/code/dist/js/entity").InMemoryEntity> & {
+    createDefault(this: Constructor<import("@mat3ra/code/dist/js/entity").InMemoryEntity> & {
         defaultConfig?: object | null | undefined;
-    };
+    }): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 } & import("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin").NamedEntityConstructor;
 type MaterialBaseEntity = Constructor<InstanceType<typeof BaseEntity>>;
 export declare function MaterialMixin<T extends MaterialBaseEntity = MaterialBaseEntity>(superclass: T): {
@@ -419,8 +419,8 @@ export declare const Material: {
 }) & typeof import("@mat3ra/code/dist/js/entity").InMemoryEntity & Constructor<{
     isDefault: boolean;
 }> & {
-    createDefault(): Constructor<import("@mat3ra/code/dist/js/entity").InMemoryEntity> & {
+    createDefault(this: Constructor<import("@mat3ra/code/dist/js/entity").InMemoryEntity> & {
         defaultConfig?: object | null | undefined;
-    };
+    }): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
 } & import("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin").NamedEntityConstructor;
 export type Material = InstanceType<typeof Material>;

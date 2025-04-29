@@ -690,9 +690,9 @@ export declare const Made: {
     }) & typeof import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity & import("@mat3ra/code/dist/js/utils/types").Constructor<{
         isDefault: boolean;
     }> & {
-        createDefault(): import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
+        createDefault(this: import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
             defaultConfig?: object | null | undefined;
-        };
+        }): import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity;
     } & import("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin").NamedEntityConstructor;
     MaterialMixin: typeof MaterialMixin;
     defaultMaterialConfig: {
