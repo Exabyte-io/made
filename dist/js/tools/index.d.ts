@@ -30,17 +30,17 @@ declare const _default: {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             } & {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             } & {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             };
             getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity);
             id: string;
@@ -52,9 +52,6 @@ declare const _default: {
             metadata: object;
             updateMetadata(object: object): void;
             isDefault: boolean;
-            createDefault(): import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
-                defaultConfig?: object | null | undefined;
-            };
             name: string;
             setName(name: string): void;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
@@ -167,7 +164,7 @@ declare const _default: {
             getAsEntityReference(byIdOnly: true): {
                 _id: string;
             };
-            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity;
             id: string;
             _id: string;
@@ -196,7 +193,7 @@ declare const _default: {
             getAsEntityReference(byIdOnly: true): {
                 _id: string;
             };
-            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity;
             id: string;
             _id: string;
@@ -206,10 +203,6 @@ declare const _default: {
             readonly isSystemEntity: boolean;
         } & import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity & {
             isDefault: boolean;
-        } & {
-            createDefault(): import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
-                defaultConfig?: object | null | undefined;
-            };
         } & {
             name: string;
         } & {
@@ -255,17 +248,17 @@ declare const _default: {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             } & {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             } & {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             };
             getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity);
             id: string;
@@ -277,9 +270,6 @@ declare const _default: {
             metadata: object;
             updateMetadata(object: object): void;
             isDefault: boolean;
-            createDefault(): import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
-                defaultConfig?: object | null | undefined;
-            };
             name: string;
             setName(name: string): void;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
@@ -392,7 +382,7 @@ declare const _default: {
             getAsEntityReference(byIdOnly: true): {
                 _id: string;
             };
-            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity;
             id: string;
             _id: string;
@@ -421,7 +411,7 @@ declare const _default: {
             getAsEntityReference(byIdOnly: true): {
                 _id: string;
             };
-            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity;
             id: string;
             _id: string;
@@ -431,10 +421,6 @@ declare const _default: {
             readonly isSystemEntity: boolean;
         } & import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity & {
             isDefault: boolean;
-        } & {
-            createDefault(): import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
-                defaultConfig?: object | null | undefined;
-            };
         } & {
             name: string;
         } & {
@@ -470,17 +456,17 @@ declare const _default: {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             } & {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             } & {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             };
             getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity);
             id: string;
@@ -492,9 +478,6 @@ declare const _default: {
             metadata: object;
             updateMetadata(object: object): void;
             isDefault: boolean;
-            createDefault(): import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
-                defaultConfig?: object | null | undefined;
-            };
             name: string;
             setName(name: string): void;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
@@ -607,7 +590,7 @@ declare const _default: {
             getAsEntityReference(byIdOnly: true): {
                 _id: string;
             };
-            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity;
             id: string;
             _id: string;
@@ -636,7 +619,7 @@ declare const _default: {
             getAsEntityReference(byIdOnly: true): {
                 _id: string;
             };
-            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity;
             id: string;
             _id: string;
@@ -646,10 +629,6 @@ declare const _default: {
             readonly isSystemEntity: boolean;
         } & import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity & {
             isDefault: boolean;
-        } & {
-            createDefault(): import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
-                defaultConfig?: object | null | undefined;
-            };
         } & {
             name: string;
         } & {
@@ -685,17 +664,17 @@ declare const _default: {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             } & {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             } & {
                 (byIdOnly: true): {
                     _id: string;
                 };
-                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+                (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             };
             getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity);
             id: string;
@@ -707,9 +686,6 @@ declare const _default: {
             metadata: object;
             updateMetadata(object: object): void;
             isDefault: boolean;
-            createDefault(): import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
-                defaultConfig?: object | null | undefined;
-            };
             name: string;
             setName(name: string): void;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
@@ -822,7 +798,7 @@ declare const _default: {
             getAsEntityReference(byIdOnly: true): {
                 _id: string;
             };
-            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity;
             id: string;
             _id: string;
@@ -851,7 +827,7 @@ declare const _default: {
             getAsEntityReference(byIdOnly: true): {
                 _id: string;
             };
-            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity;
             id: string;
             _id: string;
@@ -861,10 +837,6 @@ declare const _default: {
             readonly isSystemEntity: boolean;
         } & import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity & {
             isDefault: boolean;
-        } & {
-            createDefault(): import("@mat3ra/code/dist/js/utils/types").Constructor<import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity> & {
-                defaultConfig?: object | null | undefined;
-            };
         } & {
             name: string;
         } & {

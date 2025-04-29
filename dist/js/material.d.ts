@@ -22,7 +22,7 @@ declare const BaseEntity: (new (...args: any[]) => {
     getAsEntityReference(byIdOnly: true): {
         _id: string;
     };
-    getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+    getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
     getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
     id: string;
     _id: string;
@@ -51,7 +51,7 @@ declare const BaseEntity: (new (...args: any[]) => {
     getAsEntityReference(byIdOnly: true): {
         _id: string;
     };
-    getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+    getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
     getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
     id: string;
     _id: string;
@@ -61,11 +61,11 @@ declare const BaseEntity: (new (...args: any[]) => {
     readonly isSystemEntity: boolean;
 }) & typeof import("@mat3ra/code/dist/js/entity").InMemoryEntity & Constructor<{
     isDefault: boolean;
-}> & Constructor<{
+}> & {
     createDefault(): Constructor<import("@mat3ra/code/dist/js/entity").InMemoryEntity> & {
         defaultConfig?: object | null | undefined;
     };
-}> & import("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin").NamedEntityConstructor;
+} & import("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin").NamedEntityConstructor;
 type MaterialBaseEntity = Constructor<InstanceType<typeof BaseEntity>>;
 export declare function MaterialMixin<T extends MaterialBaseEntity = MaterialBaseEntity>(superclass: T): {
     new (...config: any[]): {
@@ -98,17 +98,17 @@ export declare function MaterialMixin<T extends MaterialBaseEntity = MaterialBas
             (byIdOnly: true): {
                 _id: string;
             };
-            (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
         } & {
             (byIdOnly: true): {
                 _id: string;
             };
-            (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
         } & {
             (byIdOnly: true): {
                 _id: string;
             };
-            (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
         };
         getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity);
         id: string;
@@ -120,9 +120,6 @@ export declare function MaterialMixin<T extends MaterialBaseEntity = MaterialBas
         metadata: object;
         updateMetadata(object: object): void;
         isDefault: boolean;
-        createDefault(): Constructor<import("@mat3ra/code/dist/js/entity").InMemoryEntity> & {
-            defaultConfig?: object | null | undefined;
-        };
         name: string;
         setName(name: string): void;
         src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
@@ -247,17 +244,17 @@ export declare const Material: {
             (byIdOnly: true): {
                 _id: string;
             };
-            (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
         } & {
             (byIdOnly: true): {
                 _id: string;
             };
-            (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
         } & {
             (byIdOnly: true): {
                 _id: string;
             };
-            (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            (byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
         };
         getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity);
         id: string;
@@ -269,9 +266,6 @@ export declare const Material: {
         metadata: object;
         updateMetadata(object: object): void;
         isDefault: boolean;
-        createDefault(): Constructor<import("@mat3ra/code/dist/js/entity").InMemoryEntity> & {
-            defaultConfig?: object | null | undefined;
-        };
         name: string;
         setName(name: string): void;
         src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
@@ -385,7 +379,7 @@ export declare const Material: {
     getAsEntityReference(byIdOnly: true): {
         _id: string;
     };
-    getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+    getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
     getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
     id: string;
     _id: string;
@@ -414,7 +408,7 @@ export declare const Material: {
     getAsEntityReference(byIdOnly: true): {
         _id: string;
     };
-    getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+    getAsEntityReference(byIdOnly?: false | undefined): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
     getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
     id: string;
     _id: string;
@@ -424,9 +418,9 @@ export declare const Material: {
     readonly isSystemEntity: boolean;
 }) & typeof import("@mat3ra/code/dist/js/entity").InMemoryEntity & Constructor<{
     isDefault: boolean;
-}> & Constructor<{
+}> & {
     createDefault(): Constructor<import("@mat3ra/code/dist/js/entity").InMemoryEntity> & {
         defaultConfig?: object | null | undefined;
     };
-}> & import("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin").NamedEntityConstructor;
+} & import("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin").NamedEntityConstructor;
 export type Material = InstanceType<typeof Material>;
