@@ -1565,7 +1565,7 @@ export declare const Made: {
                 readonly slug: string;
                 readonly isSystemEntity: boolean;
             } & import("@mat3ra/code/dist/js/entity/in_memory").InMemoryEntity) => void;
-            getBasisConfigTranslatedToCenter: (material: {
+            translateAtomsToCenter: (material: {
                 _json: import("./material").MaterialSchemaJSON;
                 toJSON(): import("./types").MaterialJSON;
                 src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;

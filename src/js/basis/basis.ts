@@ -488,7 +488,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         }
         const moleculeLatticeSize = this.maxPairwiseDistance * latticeScalingFactor;
         const latticeSize = latticeSizeAdditiveContribution + moleculeLatticeSize;
-        return math.precise(latticeSize, 4);
+        return latticeSize;
     }
 
     /**

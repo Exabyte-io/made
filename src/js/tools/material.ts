@@ -39,7 +39,7 @@ function scaleLatticeToMakeNonPeriodic(material: Material) {
  * so that the center of the material and lattice are aligned.
  * @param material {Material}
  * */
-function getBasisConfigTranslatedToCenter(material: Material) {
+function translateAtomsToCenter(material: Material) {
     const originalUnits = material.Basis.units;
     material.toCartesian();
     const updatedBasis = material.Basis;
@@ -57,5 +57,5 @@ function getBasisConfigTranslatedToCenter(material: Material) {
 export default {
     scaleOneLatticeVector,
     scaleLatticeToMakeNonPeriodic,
-    getBasisConfigTranslatedToCenter,
+    translateAtomsToCenter,
 };

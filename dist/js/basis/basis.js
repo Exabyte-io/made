@@ -381,7 +381,7 @@ class Basis extends entity_1.InMemoryEntity {
         }
         const moleculeLatticeSize = this.maxPairwiseDistance * latticeScalingFactor;
         const latticeSize = latticeSizeAdditiveContribution + moleculeLatticeSize;
-        return math_1.default.precise(latticeSize, 4);
+        return latticeSize;
     }
     /**
      * @summary function returns an array of overlapping atoms within specified tolerance.
