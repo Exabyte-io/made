@@ -66,7 +66,7 @@ class Coordinates extends code_1.RoundedArrayWithIds {
         for (let i = 0; i < 3; i++) {
             const axisCoords = transposed[i];
             const sum = axisCoords.reduce((a, b) => a + b, 0);
-            center[i] = math_1.default.precise(sum / this.values.length, 4);
+            center[i] = sum / this.values.length;
         }
         return center;
     }

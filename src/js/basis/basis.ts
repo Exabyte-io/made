@@ -562,7 +562,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             }
         }
         if (originalUnits !== ATOMIC_COORD_UNITS.cartesian) this.toCrystal();
-        return math.precise(maxDistance, 4);
+        return maxDistance;
     }
 
     /**

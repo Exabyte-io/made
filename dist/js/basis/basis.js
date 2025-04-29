@@ -446,7 +446,7 @@ class Basis extends entity_1.InMemoryEntity {
         }
         if (originalUnits !== constants_1.ATOMIC_COORD_UNITS.cartesian)
             this.toCrystal();
-        return math_1.default.precise(maxDistance, 4);
+        return maxDistance;
     }
     /**
      * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the

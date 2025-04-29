@@ -85,7 +85,7 @@ export class Coordinates extends RoundedArrayWithIds<Coordinate3DSchema> {
         for (let i = 0; i < 3; i++) {
             const axisCoords = transposed[i] as Coordinate3DSchema;
             const sum = axisCoords.reduce((a, b) => a + b, 0);
-            center[i] = math.precise(sum / this.values.length, 4);
+            center[i] = sum / this.values.length;
         }
 
         return center;
