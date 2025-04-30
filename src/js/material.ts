@@ -1,6 +1,7 @@
 import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import {
+    AtomicConstraintsSchema,
     ConsistencyCheck,
     DerivedPropertiesSchema,
     FileSourceSchema,
@@ -191,6 +192,13 @@ export function MaterialMixin<
                 constraints: constraints.map((c) => c.toJSON()),
             };
             this.setBasis(basisWithConstraints);
+        }
+
+        setBasisConstraintsFromArrayOfObjects(constraints: AtomicConstraintsSchema) {
+            const constraintsInstances = constraints.map((c) => {
+                return Constraint.fromValueAndId(c.value, c.id);
+            });
+            this.setBasisConstraints(constraintsInstances);
         }
 
         get basis(): OptionallyConstrainedBasisConfig {

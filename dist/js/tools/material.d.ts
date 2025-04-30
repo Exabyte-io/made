@@ -17,10 +17,10 @@ declare function scaleLatticeToMakeNonPeriodic(material: Material): void;
  * so that the center of the material and lattice are aligned.
  * @param material {Material}
  * */
-declare function getBasisConfigTranslatedToCenter(material: Material): void;
+declare function translateAtomsToCenter(material: Material): void;
 declare const _default: {
     scaleOneLatticeVector: typeof scaleOneLatticeVector;
     scaleLatticeToMakeNonPeriodic: typeof scaleLatticeToMakeNonPeriodic;
-    getBasisConfigTranslatedToCenter: typeof getBasisConfigTranslatedToCenter;
+    translateAtomsToCenter: typeof translateAtomsToCenter;
 };
 export default _default;

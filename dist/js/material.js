@@ -9,6 +9,7 @@ const crypto_js_1 = __importDefault(require("crypto-js"));
 const constrained_basis_1 = require("./basis/constrained_basis");
 const conventional_cell_1 = require("./cell/conventional_cell");
 const constants_1 = require("./constants");
+const constraints_1 = require("./constraints/constraints");
 const lattice_1 = require("./lattice/lattice");
 const parsers_1 = __importDefault(require("./parsers/parsers"));
 const supercell_1 = __importDefault(require("./tools/supercell"));
@@ -146,6 +147,12 @@ function MaterialMixin(superclass) {
                 constraints: constraints.map((c) => c.toJSON()),
             };
             this.setBasis(basisWithConstraints);
+        }
+        setBasisConstraintsFromArrayOfObjects(constraints) {
+            const constraintsInstances = constraints.map((c) => {
+                return constraints_1.Constraint.fromValueAndId(c.value, c.id);
+            });
+            this.setBasisConstraints(constraintsInstances);
         }
         get basis() {
             return this.prop("basis");
