@@ -385,11 +385,9 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         const clsInstance = this.clone();
         clsInstance.toStandardRepresentation();
         const standardRep = clsInstance.elementsAndCoordinatesAndLabelsArray.map((entry) => {
-            const element = entry[0];
-            const coordinate = entry[1];
-            const atomicLabel = entry[2];
-            const toleratedCoordinate = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
-            return `${element}${atomicLabel} ${toleratedCoordinate.join()}`;
+            const [element, coordinate, atomicLabel] = entry;
+            const toleratedCoordinates = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
+            return `${element}${atomicLabel} ${toleratedCoordinates.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
     }
@@ -431,14 +429,35 @@ export class Basis extends InMemoryEntity implements BasisSchema {
     }
 
     /**
+     * Strips any label associated with atomic symbol
+     * Possible labels:
+     *   (1) Fe1, Fe11
+     *   (2) Fe-a, Fe-b, Fe-1, Fe-1a
+     *   (3) Fe_a, Fe_b, Fe_1, Fe_1a
+     * As of Mar 2025, only single digit numerical labels are allowed
+     */
+    static stripLabelToGetElementSymbol = (elementWithLabel: string): string => {
+        // Strip anything after `-` or `_`
+        let elementSymbol = elementWithLabel.split(/[- _]/)[0];
+
+        // Exclude digit labels at the end of the symbol if present
+        elementSymbol = elementSymbol.replace(/\d+$/, "");
+
+        // Return symbol in title case
+        elementSymbol =
+            elementSymbol.charAt(0).toUpperCase() + elementSymbol.slice(1).toLowerCase();
+
+        // We can improve by validating element symbol matches one from the periodic table
+        return elementSymbol;
+    };
+
+    /**
      * Returns an array of strings with chemical elements and their atomic positions.
      * E.g., ``` ['Si 0 0 0', 'Li 0.5 0.5 0.5']```
      */
     get atomicPositions(): string[] {
-        return this.elementsAndCoordinatesAndLabelsArray.map((entry, idx) => {
-            const element = entry[0];
-            const coordinate = entry[1];
-            const atomicLabel = this.atomicLabelsArray[idx];
+        return this.elementsAndCoordinatesAndLabelsArray.map((entry) => {
+            const [element, coordinate, atomicLabel] = entry;
             return `${element}${atomicLabel} ${coordinate}`;
         });
     }
