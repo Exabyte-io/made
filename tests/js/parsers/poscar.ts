@@ -1,3 +1,5 @@
+import "../setup";
+
 import { expect } from "chai";
 
 import { AtomicConstraints } from "../../../src/js/constraints/constraints";
@@ -58,5 +60,12 @@ direct
 
         const poscar = clonedMaterial.getAsPOSCAR(true);
         expect(poscar).to.be.equal(poscarConstraints);
+    });
+
+    it("should parse POSCAR file and return Material", () => {
+        const material = parsers.poscar.fromPoscar(Na4Cl4Poscar);
+        const parsedMaterial = new Material(material);
+        expect(parsedMaterial.Basis.elements).to.be.deep.equal(Na4Cl4.basis.elements);
+        expect(parsedMaterial.Basis.coordinates).to.be.deep.almost(Na4Cl4.basis.coordinates);
     });
 });
