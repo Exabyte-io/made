@@ -1,5 +1,5 @@
 import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import type { NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
+import type { NamedInMemoryEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
@@ -43,7 +43,7 @@ type MaterialMixinStaticProps = ReturnType<typeof materialMixinStaticProps>;
 export type MaterialMixin = MaterialMixinProps;
 export type MaterialMixinConstructor = Constructor<MaterialMixinProps> & MaterialMixinStaticProps;
 export type OptionallyConstrainedBasisConfig = BasisConfig & Partial<Pick<ConstrainedBasisConfig, "constraints">>;
-type Base = InMemoryEntity & NamedEntity;
+type Base = InMemoryEntity & NamedInMemoryEntity;
 export declare function materialMixin<T extends Base = Base>(item: T): {
     toJSON(): MaterialJSON;
     src: FileSourceSchema | undefined;
