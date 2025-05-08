@@ -59,7 +59,7 @@ function materialMixin(item) {
                 ...originalToJSON(),
                 lattice: this.Lattice.toJSON(),
                 basis: this.Basis.toJSON(),
-                name: item.name,
+                name: item.name || this.formula,
                 isNonPeriodic: this.isNonPeriodic,
             };
         },

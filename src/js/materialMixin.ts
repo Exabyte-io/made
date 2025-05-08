@@ -90,7 +90,7 @@ export function materialMixin<T extends Base = Base>(item: T) {
                 ...originalToJSON(),
                 lattice: this.Lattice.toJSON(),
                 basis: this.Basis.toJSON(),
-                name: item.name,
+                name: item.name || this.formula,
                 isNonPeriodic: this.isNonPeriodic,
             };
         },
