@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 import numpy as np
 from mat3ra.esse.models.materials_category.single_material.two_dimensional.slab.configuration import (
     SlabConfigurationSchema,

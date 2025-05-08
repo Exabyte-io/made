@@ -1,3 +1,5 @@
+from functools import wraps
+from typing import Callable, List
 from typing import Optional
 
 import numpy as np
@@ -8,10 +10,6 @@ from mat3ra.utils.matrix import convert_2x2_to_3x3 as convert_2x2_to_3x3_orig
 
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
-
-
-from functools import wraps
-from typing import Callable, List
 
 
 def convert_2x2_to_3x3(matrix):
