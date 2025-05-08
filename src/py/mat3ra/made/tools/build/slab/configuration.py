@@ -5,12 +5,10 @@ from mat3ra.esse.models.materials_category.single_material.two_dimensional.slab.
     SlabConfigurationSchema,
 )
 
-
 from mat3ra.made.material import Material
-
 from .. import BaseConfiguration
-from ...third_party import PymatgenSpacegroupAnalyzer
 from ...convert import to_pymatgen, from_pymatgen
+from ...third_party import PymatgenSpacegroupAnalyzer
 
 
 class SlabConfiguration(SlabConfigurationSchema, BaseConfiguration):
