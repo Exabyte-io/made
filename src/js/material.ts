@@ -11,7 +11,7 @@ import {
 export { defaultMaterialConfig };
 
 const BaseInMemoryEntity = HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity;
-type BaseMaterial = typeof BaseInMemoryEntity & MaterialMixinConstructor;
+type BaseMaterial = MaterialMixinConstructor & typeof BaseInMemoryEntity;
 
 export class Material extends (BaseInMemoryEntity as BaseMaterial) {
     constructor(config: MaterialSchema) {

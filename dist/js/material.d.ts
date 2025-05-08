@@ -8,7 +8,7 @@ declare const BaseInMemoryEntity: typeof import("@mat3ra/code/dist/js/entity").I
         isDefault: boolean;
     };
 } & import("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin").NamedInMemoryEntityConstructor & import("@mat3ra/code/dist/js/entity/mixins/HasMetadataMixin").HasMetadataInMemoryEntityConstructor & import("@mat3ra/code/dist/js/entity/mixins/HasConsistencyChecksMixin").HasConsistencyChecksInMemoryEntityConstructor;
-type BaseMaterial = typeof BaseInMemoryEntity & MaterialMixinConstructor;
+type BaseMaterial = MaterialMixinConstructor & typeof BaseInMemoryEntity;
 declare const Material_base: BaseMaterial;
 export declare class Material extends Material_base {
     constructor(config: MaterialSchema);
