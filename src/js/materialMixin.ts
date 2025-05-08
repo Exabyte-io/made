@@ -20,14 +20,13 @@ import {
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
     PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS,
 } from "./cell/conventional_cell";
-import { ATOMIC_COORD_UNITS, units } from "./constants";
 import type { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 import type { MaterialJSON } from "./types";
 
-export const defaultMaterialConfig = {
+export const defaultMaterialConfig: MaterialSchema = {
     name: "Silicon FCC",
     basis: {
         elements: [
@@ -50,7 +49,7 @@ export const defaultMaterialConfig = {
                 value: [0.25, 0.25, 0.25],
             },
         ],
-        units: ATOMIC_COORD_UNITS.crystal,
+        units: "crystal",
     },
     lattice: {
         // Primitive cell for Diamond FCC Silicon at ambient conditions
@@ -62,8 +61,8 @@ export const defaultMaterialConfig = {
         beta: 60,
         gamma: 60,
         units: {
-            length: units.angstrom,
-            angle: units.degree,
+            length: "angstrom",
+            angle: "degree",
         },
     },
 };

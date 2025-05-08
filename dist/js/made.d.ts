@@ -485,33 +485,7 @@ export declare const Made: {
         import(object: import("mathjs").ImportObject | import("mathjs").ImportObject[], options: import("mathjs").ImportOptions): void;
     };
     Material: typeof Material;
-    defaultMaterialConfig: {
-        name: string;
-        basis: {
-            elements: {
-                id: number;
-                value: string;
-            }[];
-            coordinates: {
-                id: number;
-                value: number[];
-            }[];
-            units: string;
-        };
-        lattice: {
-            type: string;
-            a: number;
-            b: number;
-            c: number;
-            alpha: number;
-            beta: number;
-            gamma: number;
-            units: {
-                length: string;
-                angle: string;
-            };
-        };
-    };
+    defaultMaterialConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema;
     Lattice: typeof Lattice;
     nonPeriodicLatticeScalingFactor: number;
     ReciprocalLattice: typeof ReciprocalLattice;

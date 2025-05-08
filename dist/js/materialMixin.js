@@ -7,7 +7,6 @@ exports.materialMixinStaticProps = exports.materialMixin = exports.defaultMateri
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const constrained_basis_1 = require("./basis/constrained_basis");
 const conventional_cell_1 = require("./cell/conventional_cell");
-const constants_1 = require("./constants");
 const lattice_1 = require("./lattice/lattice");
 const parsers_1 = __importDefault(require("./parsers/parsers"));
 const supercell_1 = __importDefault(require("./tools/supercell"));
@@ -34,7 +33,7 @@ exports.defaultMaterialConfig = {
                 value: [0.25, 0.25, 0.25],
             },
         ],
-        units: constants_1.ATOMIC_COORD_UNITS.crystal,
+        units: "crystal",
     },
     lattice: {
         // Primitive cell for Diamond FCC Silicon at ambient conditions
@@ -46,8 +45,8 @@ exports.defaultMaterialConfig = {
         beta: 60,
         gamma: 60,
         units: {
-            length: constants_1.units.angstrom,
-            angle: constants_1.units.degree,
+            length: "angstrom",
+            angle: "degree",
         },
     },
 };

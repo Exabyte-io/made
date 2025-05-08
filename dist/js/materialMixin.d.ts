@@ -9,33 +9,7 @@ import { ConstrainedBasis } from "./basis/constrained_basis";
 import type { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import type { MaterialJSON } from "./types";
-export declare const defaultMaterialConfig: {
-    name: string;
-    basis: {
-        elements: {
-            id: number;
-            value: string;
-        }[];
-        coordinates: {
-            id: number;
-            value: number[];
-        }[];
-        units: string;
-    };
-    lattice: {
-        type: string;
-        a: number;
-        b: number;
-        c: number;
-        alpha: number;
-        beta: number;
-        gamma: number;
-        units: {
-            length: string;
-            angle: string;
-        };
-    };
-};
+export declare const defaultMaterialConfig: MaterialSchema;
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
 }
 type MaterialMixinProps = ReturnType<typeof materialMixin>;
@@ -183,33 +157,7 @@ export declare function materialMixin<T extends Base = Base>(item: T): {
     _json: MaterialSchemaJSON;
 };
 export declare function materialMixinStaticProps<T extends Constructor<Base>>(item: T): {
-    readonly defaultConfig: {
-        name: string;
-        basis: {
-            elements: {
-                id: number;
-                value: string;
-            }[];
-            coordinates: {
-                id: number;
-                value: number[];
-            }[];
-            units: string;
-        };
-        lattice: {
-            type: string;
-            a: number;
-            b: number;
-            c: number;
-            alpha: number;
-            beta: number;
-            gamma: number;
-            units: {
-                length: string;
-                angle: string;
-            };
-        };
-    };
+    readonly defaultConfig: MaterialSchema;
     constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): FileSourceSchema;
 };
 export {};
