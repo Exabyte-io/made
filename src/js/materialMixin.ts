@@ -70,11 +70,11 @@ export const defaultMaterialConfig = {
 
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
 
-export type MaterialMixinProps = ReturnType<typeof materialMixin>;
-export type MaterialMixinStaticProps = ReturnType<typeof materialMixinStaticProps>;
+type MaterialMixinProps = ReturnType<typeof materialMixin>;
+type MaterialMixinStaticProps = ReturnType<typeof materialMixinStaticProps>;
 
-export type MaterialMixin = MaterialMixinProps & MaterialMixinStaticProps;
-export type MaterialMixinConstructor = Constructor<MaterialMixin>;
+export type MaterialMixin = MaterialMixinProps;
+export type MaterialMixinConstructor = Constructor<MaterialMixinProps> & MaterialMixinStaticProps;
 
 export type OptionallyConstrainedBasisConfig = BasisConfig &
     Partial<Pick<ConstrainedBasisConfig, "constraints">>;
