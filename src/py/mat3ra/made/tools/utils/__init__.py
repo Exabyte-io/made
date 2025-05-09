@@ -1,62 +1,72 @@
 from functools import wraps
-from typing import Callable, List
+from typing import Callable, List, Union, cast, Any
 from typing import Optional
 
 import numpy as np
 from mat3ra.esse.models.materials_category.single_material.two_dimensional.slab.configuration import (
     SupercellMatrix2DSchemaItem,
 )
-from mat3ra.utils.matrix import convert_2x2_to_3x3 as convert_2x2_to_3x3_orig
+from mat3ra.utils.matrix import convert_2x2_to_3x3
+
+from mat3ra.esse.models.material.reusable.supercell_matrix_2d import SupercellMatrix2DSchema
 
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
 
 
-def convert_2x2_to_3x3(matrix):
+def is_plain_2x2_matrix(matrix: Any) -> bool:
+    return (
+        isinstance(matrix, list) and len(matrix) == 2 and all(isinstance(row, list) and len(row) == 2 for row in matrix)
+    )
+
+
+def normalize_2x2_matrix(
+    matrix: Union[
+        List[List[float]],
+        SupercellMatrix2DSchema,
+    ]
+) -> Optional[List[List[float]]]:
     """
-    Convert a 2x2 matrix (as list of lists, list of SupercellMatrix2DSchemaItem, or SupercellMatrix2DSchemaItem)
-    to a 3x3 matrix by adding a third unitary orthogonal basis vector.
+    Normalize any matrix-like structure to a plain 2x2 list of floats.
+    Returns None if normalization is not possible.
     """
-    # If it's a list of SupercellMatrix2DSchemaItem, extract .root from each
+    if isinstance(matrix, SupercellMatrix2DSchema) and matrix.root:
+        matrix = matrix.root
+
+    if isinstance(matrix, SupercellMatrix2DSchemaItem):
+        return [matrix.root]
+
     if (
         isinstance(matrix, list)
         and len(matrix) == 2
         and all(isinstance(row, SupercellMatrix2DSchemaItem) for row in matrix)
     ):
-        matrix = [row.root for row in matrix]
-    elif isinstance(matrix, SupercellMatrix2DSchemaItem):
-        matrix = matrix.root
-    return convert_2x2_to_3x3_orig(matrix)
+        return [cast(SupercellMatrix2DSchemaItem, row).root for row in matrix]
+
+    if is_plain_2x2_matrix(matrix):
+        return matrix  # already normalized
+
+    return None  # unrecognized format
 
 
 def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
     """
     Decorator that converts a 2x2 matrix input to a 3x3 matrix.
-    Supports:
-    - SupercellMatrix2DSchema
-    - List[List[float]] with 2x2 shape
+    Supports schema-based formats and raw nested lists.
     """
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        def needs_conversion(arg):
-            # list of SupercellMatrix2DSchemaItem
-            if (
-                isinstance(arg, list)
-                and len(arg) == 2
-                and all(isinstance(row, SupercellMatrix2DSchemaItem) for row in arg)
-            ):
-                return True
-            # single SupercellMatrix2DSchemaItem
-            if isinstance(arg, SupercellMatrix2DSchemaItem):
-                return True
-            # plain 2x2 list
-            if isinstance(arg, list) and len(arg) == 2 and all(isinstance(row, list) and len(row) == 2 for row in arg):
-                return True
-            return False
+        def convert_if_matrix(arg):
+            matrix = normalize_2x2_matrix(arg)
+            return convert_2x2_to_3x3(matrix) if matrix else arg
 
-        new_args = [convert_2x2_to_3x3(arg) if needs_conversion(arg) else arg for arg in args]
-        return func(*new_args, **kwargs)
+        args = tuple(convert_if_matrix(arg) for arg in args)
+
+        if "supercell_matrix" in kwargs:
+            kwargs["supercell_matrix"] = convert_if_matrix(kwargs["supercell_matrix"])
+
+        return func(*args, **kwargs)
 
     return wrapper
 
