@@ -79,6 +79,12 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
 
         return materials_with_vacuum
 
+    def _update_material_metadata(self, material, configuration) -> Material:
+        if "build" not in material.metadata:
+            material.metadata["build"] = {}
+        material.metadata["build"]["configuration"] = configuration.to_dict()
+        return material
+
     def get_terminations(self, configuration: _ConfigurationType) -> List[Termination]:
         return [
             self.__create_termination_from_slab_pymatgen(slab)

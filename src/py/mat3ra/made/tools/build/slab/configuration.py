@@ -1,15 +1,16 @@
 import numpy as np
+from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.materials_category.single_material.two_dimensional.slab.configuration import (
     SlabConfigurationSchema,
 )
 
 from mat3ra.made.material import Material
-from .. import BaseConfiguration
+from .. import BaseConfiguration, BaseConfigurationPydantic
 from ...convert import to_pymatgen, from_pymatgen
 from ...third_party import PymatgenSpacegroupAnalyzer
 
 
-class SlabConfiguration(SlabConfigurationSchema, BaseConfiguration):
+class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
     """
     Configuration for building a slab.
 
@@ -24,6 +25,7 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfiguration):
         make_primitive (bool): Whether to try to find primitive cell for the created slab.
     """
 
+    type: str = "SlabConfiguration"
     bulk: Material
 
     def __init__(
@@ -56,17 +58,3 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfiguration):
             use_orthogonal_z=use_orthogonal_z,
             make_primitive=make_primitive,
         )
-
-    @property
-    def _json(self):
-        return {
-            "type": "SlabConfiguration",
-            "bulk": self.bulk.to_dict(),
-            "miller_indices": self.miller_indices,
-            "thickness": self.thickness,
-            "vacuum": self.vacuum,
-            "xy_supercell_matrix": self.xy_supercell_matrix,
-            "use_conventional_cell": self.use_conventional_cell,
-            "use_orthogonal_z": self.use_orthogonal_z,
-            "make_primitive": self.make_primitive,
-        }
