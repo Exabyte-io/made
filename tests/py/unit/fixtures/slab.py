@@ -196,3 +196,61 @@ SI_SLAB_001_WITH_VACUUM["basis"]["coordinates"] = [
     {"id": 0, "value": [0.583333333, 0.833333333, 0.149981861]},
     {"id": 1, "value": [0.25, 0.5, 0.089989116]},
 ]
+
+SI_SLAB_DEFAULT_PARAMETERS = {
+    "basis": {
+        "constraints": [],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.0, 0.457090105]},
+            {"id": 1, "value": [0.25, 0.25, 0.326492932]},
+            {"id": 2, "value": [0.5, 0.5, 0.195895759]},
+            {"id": 3, "value": [0.25, 0.75, 0.065298586]},
+            {"id": 4, "value": [0.0, 0.0, 0.195895759]},
+            {"id": 5, "value": [0.75, 0.25, 0.065298586]},
+            {"id": 6, "value": [0.0, 0.5, 0.457090105]},
+            {"id": 7, "value": [0.75, 0.75, 0.326492932]},
+        ],
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+            {"id": 4, "value": "Si"},
+            {"id": 5, "value": "Si"},
+            {"id": 6, "value": "Si"},
+            {"id": 7, "value": "Si"},
+        ],
+        "labels": [],
+        "units": "crystal",
+    },
+    "isDefault": False,
+    "isNonPeriodic": False,
+    "lattice": {
+        "a": 5.468763846,
+        "alpha": 90.0,
+        "b": 5.468763846,
+        "beta": 90.0,
+        "c": 10.468763846,
+        "gamma": 90.0,
+        "type": "TRI",
+        "units": {"angle": "degree", "length": "angstrom"},
+    },
+    "metadata": {
+        "boundaryConditions": {"offset": 0, "type": "pbc"},
+        "build": {
+            "configuration": {
+                "bulk": SI_CONVENTIONAL_CELL,
+                "make_primitive": False,
+                "miller_indices": [0, 0, 1],
+                "thickness": 1,
+                "type": "SlabConfiguration",
+                "use_conventional_cell": True,
+                "use_orthogonal_z": False,
+                "vacuum": 5.0,
+                "xy_supercell_matrix": [[1, 0], [0, 1]],
+            },
+            "termination": "Si_P4/mmm_2",
+        },
+    },
+    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
+}
