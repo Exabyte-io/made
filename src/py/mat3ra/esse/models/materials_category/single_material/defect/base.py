@@ -1,6 +1,5 @@
-from pydantic import BaseModel
-
 from mat3ra.esse.models.materials_category.single_material.material import MaterialSchema
+from pydantic import BaseModel
 
 
 class BaseDefectConfigurationSchema(BaseModel):
@@ -10,4 +9,5 @@ class BaseDefectConfigurationSchema(BaseModel):
     Args:
         crystal (MaterialSchema): The material object.
     """
-    crystal: MaterialSchema 
+
+    crystal: MaterialSchema

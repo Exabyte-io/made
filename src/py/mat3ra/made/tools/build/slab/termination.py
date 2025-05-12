@@ -2,7 +2,6 @@ from mat3ra.esse.models.material.reusable.slab.termination import TerminationSch
 
 
 class Termination(TerminationSchema):
-
     def __str__(self):
         return f"{self.chemical_elements}_{self.space_group_symmetry_label}"
 

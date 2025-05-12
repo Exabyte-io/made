@@ -1,6 +1,5 @@
 from functools import wraps
-from typing import Callable, List, Union, cast, Any
-from typing import Optional
+from typing import Any, Callable, List, Optional, Union, cast
 
 import numpy as np
 from mat3ra.esse.models.material.reusable.supercell_matrix_2d import SupercellMatrix2DSchema
