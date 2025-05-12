@@ -13,7 +13,7 @@ import type {
 import CryptoJS from "crypto-js";
 
 import type { BasisConfig } from "./basis/basis";
-import { ConstrainedBasis, type ConstrainedBasisConfig } from "./basis/constrained_basis";
+import { type ConstrainedBasisConfig, ConstrainedBasis } from "./basis/constrained_basis";
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
@@ -88,9 +88,12 @@ export function materialMixin<T extends Base = Base>(item: T) {
                 ...originalToJSON(),
                 lattice: this.Lattice.toJSON(),
                 basis: this.Basis.toJSON(),
-                name: item.name || this.formula,
                 isNonPeriodic: this.isNonPeriodic,
             };
+        },
+
+        get name() {
+            return item.prop("name", "") || this.formula;
         },
 
         get src() {

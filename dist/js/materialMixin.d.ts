@@ -4,7 +4,7 @@ import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import type { BasisConfig } from "./basis/basis";
-import { ConstrainedBasis, type ConstrainedBasisConfig } from "./basis/constrained_basis";
+import { type ConstrainedBasisConfig, ConstrainedBasis } from "./basis/constrained_basis";
 import type { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import { MaterialJSON } from "./types";
@@ -19,6 +19,7 @@ export type OptionallyConstrainedBasisConfig = BasisConfig & Partial<Pick<Constr
 type Base = InMemoryEntity & NamedInMemoryEntity;
 export declare function materialMixin<T extends Base = Base>(item: T): {
     toJSON(): MaterialJSON;
+    readonly name: string;
     src: FileSourceSchema | undefined;
     /**
      * Gets Bolean value for whether or not a material is non-periodic vs periodic.

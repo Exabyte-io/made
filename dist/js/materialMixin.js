@@ -58,9 +58,11 @@ function materialMixin(item) {
                 ...originalToJSON(),
                 lattice: this.Lattice.toJSON(),
                 basis: this.Basis.toJSON(),
-                name: item.name || this.formula,
                 isNonPeriodic: this.isNonPeriodic,
             };
+        },
+        get name() {
+            return item.prop("name", "") || this.formula;
         },
         get src() {
             return item.prop("src");
