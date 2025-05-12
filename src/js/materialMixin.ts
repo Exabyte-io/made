@@ -96,6 +96,10 @@ export function materialMixin<T extends Base = Base>(item: T) {
             return item.prop("name", "") || this.formula;
         },
 
+        set name(name: string) {
+            item.setProp("name", name);
+        },
+
         get src() {
             return item.prop("src");
         },

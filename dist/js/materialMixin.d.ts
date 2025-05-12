@@ -19,7 +19,7 @@ export type OptionallyConstrainedBasisConfig = BasisConfig & Partial<Pick<Constr
 type Base = InMemoryEntity & NamedInMemoryEntity;
 export declare function materialMixin<T extends Base = Base>(item: T): {
     toJSON(): MaterialJSON;
-    readonly name: string;
+    name: string;
     src: FileSourceSchema | undefined;
     /**
      * Gets Bolean value for whether or not a material is non-periodic vs periodic.

@@ -64,6 +64,9 @@ function materialMixin(item) {
         get name() {
             return item.prop("name", "") || this.formula;
         },
+        set name(name) {
+            item.setProp("name", name);
+        },
         get src() {
             return item.prop("src");
         },
