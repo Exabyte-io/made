@@ -24,8 +24,15 @@ class Coordinate extends code_1.RoundedValueWithId {
     get valueRounded() {
         return new code_1.RoundedVector3D(this.value).valueRounded;
     }
-    prettyPrint(format = "%14.9f") {
-        return this.valueRounded.map((v) => (0, underscore_string_1.sprintf)(format, v)).join(" ");
+    getValueRoundedWithPrecision(precision) {
+        const RoundedInstance = code_1.RoundedVector3D;
+        RoundedInstance.roundPrecision = precision;
+        return new RoundedInstance(this.value).valueRounded;
+    }
+    prettyPrint(format = "%14.9f", precision = this.precision) {
+        return this.getValueRoundedWithPrecision(precision)
+            .map((x) => (0, underscore_string_1.sprintf)(format, x))
+            .join(" ");
     }
 }
 exports.Coordinate = Coordinate;
@@ -59,7 +66,7 @@ class Coordinates extends code_1.RoundedArrayWithIds {
         for (let i = 0; i < 3; i++) {
             const axisCoords = transposed[i];
             const sum = axisCoords.reduce((a, b) => a + b, 0);
-            center[i] = math_1.default.precise(sum / this.values.length, 4);
+            center[i] = sum / this.values.length;
         }
         return center;
     }

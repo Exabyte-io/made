@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validate = void 0;
+exports.validate = exports.XYZ_COORDINATE_PRECISION = void 0;
 const lodash_1 = require("lodash");
 const underscore_string_1 = __importDefault(require("underscore.string"));
 const constrained_basis_1 = require("../basis/constrained_basis");
@@ -14,6 +14,7 @@ const xyz_combinatorial_basis_1 = require("./xyz_combinatorial_basis");
 // Regular expression for an XYZ line with atomic constraints, eg. Si    0.000000    0.500000    0.446678 1 1 1`
 // eslint-disable-next-line max-len
 const XYZ_LINE_REGEX = /[A-Z][a-z]?(\d)?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
+exports.XYZ_COORDINATE_PRECISION = 4;
 /**
  * Validates XYZ file's line. Line should be in following format "Si 0.5 0.5 0.5".
  * Raises an error if line is in wrong format.
@@ -51,12 +52,16 @@ function _parseXYZLineAsWords(line) {
     const words = underscore_string_1.default.words(line);
     const elementWithOptionalLabel = words[0];
     const element = elementWithOptionalLabel.replace(/\d$/, ""); // Fe1 => Fe
-    const constraint = (n) => parseInt(`${n}`, 10) !== 0;
+    const generateConstraintValue = (n) => parseInt(`${n}`, 10) !== 0;
     const basisLineConfig = {
         element,
         coordinate: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
-        constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
+        constraints: [
+            generateConstraintValue(+words[4]),
+            generateConstraintValue(+words[5]),
+            generateConstraintValue(+words[6]),
+        ],
     };
     if (elementWithOptionalLabel !== element) {
         return {
@@ -122,7 +127,7 @@ function toBasisConfig(txt, units = "angstrom", cell = new cell_1.Cell()) {
  * @return Basis string in XYZ format
  */
 function fromBasis(basisClsInstance, coordinatePrintFormat) {
-    const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat);
+    const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat, exports.XYZ_COORDINATE_PRECISION);
     return `${XYZArray.join("\n")}\n`;
 }
 /**

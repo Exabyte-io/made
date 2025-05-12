@@ -16,6 +16,7 @@ import { CombinatorialBasis } from "./xyz_combinatorial_basis";
 const XYZ_LINE_REGEX =
     /[A-Z][a-z]?(\d)?\s+((-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)(\s+)?(\s+[0-1]\s+[0-1]\s+[0-1](\s+)?)?)$/;
 
+export const XYZ_COORDINATE_PRECISION = 4;
 /**
  * Validates XYZ file's line. Line should be in following format "Si 0.5 0.5 0.5".
  * Raises an error if line is in wrong format.
@@ -63,13 +64,17 @@ function _parseXYZLineAsWords(line: string): ParsedObject {
     const words = s.words(line);
     const elementWithOptionalLabel: AtomicElementValue = words[0];
     const element: AtomicElementValue = elementWithOptionalLabel.replace(/\d$/, ""); // Fe1 => Fe
-    const constraint = (n: number) => parseInt(`${n}`, 10) !== 0;
+    const generateConstraintValue = (n: number) => parseInt(`${n}`, 10) !== 0;
 
     const basisLineConfig: ParsedObject = {
         element,
         coordinate: [+words[1], +words[2], +words[3]],
         // Below maps zero values to false (atom is fixed) and non-zero values to true (atom is moving)
-        constraints: [constraint(+words[4]), constraint(+words[5]), constraint(+words[6])],
+        constraints: [
+            generateConstraintValue(+words[4]),
+            generateConstraintValue(+words[5]),
+            generateConstraintValue(+words[6]),
+        ],
     };
 
     if (elementWithOptionalLabel !== element) {
@@ -147,8 +152,10 @@ function toBasisConfig(txt: string, units = "angstrom", cell = new Cell()): Cons
  * @return Basis string in XYZ format
  */
 function fromBasis(basisClsInstance: ConstrainedBasis, coordinatePrintFormat: string): string {
-    const XYZArray =
-        basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(coordinatePrintFormat);
+    const XYZArray = basisClsInstance.getAtomicPositionsWithConstraintsAsStrings(
+        coordinatePrintFormat,
+        XYZ_COORDINATE_PRECISION,
+    );
     return `${XYZArray.join("\n")}\n`;
 }
 

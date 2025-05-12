@@ -36,8 +36,16 @@ export class Coordinate extends RoundedValueWithId<AtomicCoordinateValue> {
         return new RoundedVector3D(this.value).valueRounded;
     }
 
-    prettyPrint(format = "%14.9f"): string {
-        return this.valueRounded.map((v) => sprintf(format, v)).join(" ");
+    getValueRoundedWithPrecision(precision: number): number[] {
+        const RoundedInstance = RoundedVector3D;
+        RoundedInstance.roundPrecision = precision;
+        return new RoundedInstance(this.value).valueRounded;
+    }
+
+    prettyPrint(format = "%14.9f", precision: number = this.precision): string {
+        return this.getValueRoundedWithPrecision(precision)
+            .map((x) => sprintf(format, x))
+            .join(" ");
     }
 }
 
@@ -77,7 +85,7 @@ export class Coordinates extends RoundedArrayWithIds<Coordinate3DSchema> {
         for (let i = 0; i < 3; i++) {
             const axisCoords = transposed[i] as Coordinate3DSchema;
             const sum = axisCoords.reduce((a, b) => a + b, 0);
-            center[i] = math.precise(sum / this.values.length, 4);
+            center[i] = sum / this.values.length;
         }
 
         return center;

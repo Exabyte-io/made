@@ -532,7 +532,7 @@ export declare const Made: {
         material: {
             scaleOneLatticeVector: (material: Material, key?: "a" | "b" | "c", factor?: number) => void;
             scaleLatticeToMakeNonPeriodic: (material: Material) => void;
-            getBasisConfigTranslatedToCenter: (material: Material) => void;
+            translateAtomsToCenter: (material: Material) => void;
         };
         basis: {
             repeat: (basis: Basis, repetitions: number[]) => Basis;

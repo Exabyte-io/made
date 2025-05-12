@@ -13,7 +13,7 @@ declare const _default: {
     material: {
         scaleOneLatticeVector: (material: import("../material").Material, key?: "a" | "b" | "c", factor?: number) => void;
         scaleLatticeToMakeNonPeriodic: (material: import("../material").Material) => void;
-        getBasisConfigTranslatedToCenter: (material: import("../material").Material) => void;
+        translateAtomsToCenter: (material: import("../material").Material) => void;
     };
     basis: {
         repeat: (basis: import("../basis/basis").Basis, repetitions: number[]) => import("../basis/basis").Basis;

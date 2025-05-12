@@ -4,11 +4,10 @@ import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import type { BasisConfig } from "./basis/basis";
-import type { ConstrainedBasisConfig } from "./basis/constrained_basis";
-import { ConstrainedBasis } from "./basis/constrained_basis";
+import { ConstrainedBasis, type ConstrainedBasisConfig } from "./basis/constrained_basis";
 import type { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-import type { MaterialJSON } from "./types";
+import { MaterialJSON } from "./types";
 export declare const defaultMaterialConfig: MaterialSchema;
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
 }

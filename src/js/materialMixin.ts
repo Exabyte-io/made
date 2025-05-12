@@ -13,8 +13,7 @@ import type {
 import CryptoJS from "crypto-js";
 
 import type { BasisConfig } from "./basis/basis";
-import type { ConstrainedBasisConfig } from "./basis/constrained_basis";
-import { ConstrainedBasis } from "./basis/constrained_basis";
+import { ConstrainedBasis, type ConstrainedBasisConfig } from "./basis/constrained_basis";
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
@@ -24,7 +23,7 @@ import type { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
-import type { MaterialJSON } from "./types";
+import { MaterialJSON } from "./types";
 
 export const defaultMaterialConfig: MaterialSchema = {
     name: "Silicon FCC",
