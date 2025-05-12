@@ -38,7 +38,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,
-            min_slab_size=configuration.thickness,
+            min_slab_size=configuration.number_of_layers,
             min_vacuum_size=build_parameters.min_vacuum_size,
             in_unit_planes=build_parameters.in_unit_planes,
             reorient_lattice=build_parameters.reorient_lattice,

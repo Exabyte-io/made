@@ -198,7 +198,7 @@ class SlabDefectBuilder(DefectBuilder):
         if build_config["type"] != "SlabConfiguration":
             raise ValueError("Material is not a slab.")
         build_config.pop("type")
-        build_config["thickness"] = build_config["thickness"] + added_thickness
+        build_config["number_of_layers"] = build_config["number_of_layers"] + added_thickness
 
         new_slab_config = SlabConfiguration(**build_config)
         material_with_additional_layers = create_slab(new_slab_config, termination)

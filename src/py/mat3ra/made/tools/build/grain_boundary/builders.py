@@ -65,7 +65,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
                 bulk=interface,
                 vacuum=configuration.slab_configuration.vacuum,
                 miller_indices=configuration.slab_configuration.miller_indices,
-                thickness=configuration.slab_configuration.thickness,
+                number_of_layers=configuration.slab_configuration.number_of_layers,
                 use_conventional_cell=False,  # Keep false to prevent Pymatgen from simplifying the interface
                 use_orthogonal_z=True,
             )

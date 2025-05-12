@@ -37,7 +37,7 @@ class SlabBasedNanoparticleBuilder(BaseBuilder):
         slab_config = SlabConfiguration(
             bulk=config.material,
             miller_indices=config.orientation_z,
-            thickness=config.supercell_size,
+            number_of_layers=config.supercell_size,
             use_conventional_cell=True,
             use_orthogonal_z=True,
             make_primitive=False,
