@@ -1,6 +1,6 @@
 from typing import List, Optional, Any
 
-from mat3ra.code.entity import InMemoryEntity
+from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
 from pydantic import BaseModel
 
 from ...material import Material
@@ -21,6 +21,19 @@ class BaseConfiguration(BaseModel, InMemoryEntity):
     @property
     def _json(self):
         raise NotImplementedError
+
+
+class BaseConfigurationPydantic(InMemoryEntityPydantic):
+    """
+    Base class for material build configurations.
+    This class provides an interface for defining the configuration parameters.
+    """
+
+    type: str = "BaseConfiguration"
+
+    # TODO: remove this in the next PR
+    def to_json(self):  # typing: ignore
+        return self.to_dict()
 
 
 class BaseSelectorParameters(BaseModel):

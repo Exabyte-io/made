@@ -6,7 +6,6 @@ from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
     LatticeImplicitSchema as LatticeBravaisSchema,
 )
-
 from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
     LatticeTypeEnum,
     LatticeUnitsSchema,

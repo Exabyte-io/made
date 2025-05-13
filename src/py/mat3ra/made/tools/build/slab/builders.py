@@ -1,17 +1,17 @@
 from typing import List, Optional
+
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material
-
-from ...modify import add_vacuum
-from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
-from ...analyze.other import get_chemical_formula
-from ...convert import to_pymatgen
-from ...build import BaseBuilder
-from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from ..supercell import create_supercell
 from .configuration import SlabConfiguration
 from .termination import Termination
+from ..supercell import create_supercell
+from ...analyze.other import get_chemical_formula
+from ...build import BaseBuilder
+from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
+from ...convert import to_pymatgen
+from ...modify import add_vacuum
+from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 
 
 class SlabSelectorParameters(BaseModel):
@@ -26,19 +26,23 @@ class PymatgenSlabGeneratorParameters(BaseModel):
     symmetrize: bool = True
 
 
+class SlabBuilderParameters(PymatgenSlabGeneratorParameters):
+    pass
+
+
 class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
-    build_parameters: Optional[PymatgenSlabGeneratorParameters] = None
+    build_parameters: Optional[SlabBuilderParameters] = None
     _ConfigurationType: type(SlabConfiguration) = SlabConfiguration  # type: ignore
     _GeneratedItemType: PymatgenSlab = PymatgenSlab  # type: ignore
     _SelectorParametersType: type(SlabSelectorParameters) = SlabSelectorParameters  # type: ignore
     __configuration: SlabConfiguration
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
-        build_parameters = self.build_parameters or PymatgenSlabGeneratorParameters()
+        build_parameters = self.build_parameters or SlabBuilderParameters()
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,
-            min_slab_size=configuration.thickness,
+            min_slab_size=configuration.number_of_layers,
             min_vacuum_size=build_parameters.min_vacuum_size,
             in_unit_planes=build_parameters.in_unit_planes,
             reorient_lattice=build_parameters.reorient_lattice,
@@ -61,7 +65,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = super()._post_process(items, post_process_parameters)
         materials = [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
-        build_parameters = self.build_parameters or PymatgenSlabGeneratorParameters()
+        build_parameters = self.build_parameters or SlabBuilderParameters()
 
         # Adding total vacuum to be exactly as specified in configuration, including already added vacuum
         added_vacuum = (
