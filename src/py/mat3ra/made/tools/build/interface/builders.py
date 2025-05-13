@@ -193,8 +193,8 @@ class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMi
             termination=termination_pair.to_pymatgen(),
             gap=configuration.distance_z,
             vacuum_over_film=configuration.vacuum,
-            film_thickness=configuration.film_configuration.thickness,
-            substrate_thickness=configuration.substrate_configuration.thickness,
+            film_thickness=configuration.film_configuration.number_of_layers,
+            substrate_thickness=configuration.substrate_configuration.number_of_layers,
             in_layers=True,
         )
 

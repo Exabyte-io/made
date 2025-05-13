@@ -5,7 +5,7 @@ from mat3ra.made.tools.build.slab import (
     create_slab,
     get_terminations,
 )
-from unit.fixtures.slab import SI_SLAB_100
+from unit.fixtures.slab import SI_SLAB_100, SI_SLAB_DEFAULT_PARAMETERS
 
 from .utils import assert_two_entities_deep_almost_equal
 
@@ -16,7 +16,7 @@ def test_build_slab():
     slab_config = SlabConfiguration(
         bulk=material,
         miller_indices=(0, 0, 1),
-        thickness=2,
+        number_of_layers=2,
         vacuum=5.0,
         xy_supercell_matrix=[[1, 0], [0, 1]],
         use_orthogonal_z=True,
@@ -30,3 +30,11 @@ def test_build_slab():
     termination = terminations[0]
     slab = create_slab(slab_config, termination, params)
     assert_two_entities_deep_almost_equal(slab, SI_SLAB_100)
+
+
+def test_build_slab_with_default_parameters():
+    slab_config = SlabConfiguration(
+        bulk=material,
+    )
+    slab = create_slab(slab_config)
+    assert_two_entities_deep_almost_equal(slab, SI_SLAB_DEFAULT_PARAMETERS)

@@ -1,17 +1,17 @@
 from typing import List, Optional
+
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material
-
-from ...modify import add_vacuum
-from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
-from ...analyze.other import get_chemical_formula
-from ...convert import to_pymatgen
-from ...build import BaseBuilder
-from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from ..supercell import create_supercell
 from .configuration import SlabConfiguration
 from .termination import Termination
+from ..supercell import create_supercell
+from ...analyze.other import get_chemical_formula
+from ...build import BaseBuilder
+from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
+from ...convert import to_pymatgen
+from ...modify import add_vacuum
+from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 
 
 class SlabSelectorParameters(BaseModel):
@@ -38,7 +38,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,
-            min_slab_size=configuration.thickness,
+            min_slab_size=configuration.number_of_layers,
             min_vacuum_size=build_parameters.min_vacuum_size,
             in_unit_planes=build_parameters.in_unit_planes,
             reorient_lattice=build_parameters.reorient_lattice,
@@ -79,6 +79,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
 
         return materials_with_vacuum
 
+    # TODO: remove when all configurations are migrated to new configurations approach
     def _update_material_metadata(self, material, configuration) -> Material:
         if "build" not in material.metadata:
             material.metadata["build"] = {}

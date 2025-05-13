@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Material } from "../../src/js/material";
 import { Na4Cl4, Silicon } from "./fixtures";
 
-const newBasisXYZ = `Si     0.000000    0.000000    0.000000 
+const newBasisXYZ = `Si     0.000000    0.000000    0.000000
 Ge     0.250000    0.250000    0.250000
 `;
 

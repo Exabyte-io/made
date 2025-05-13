@@ -1,11 +1,9 @@
-import numpy as np
-from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.materials_category.single_material.two_dimensional.slab.configuration import (
     SlabConfigurationSchema,
 )
 
 from mat3ra.made.material import Material
-from .. import BaseConfiguration, BaseConfigurationPydantic
+from .. import BaseConfigurationPydantic
 from ...convert import to_pymatgen, from_pymatgen
 from ...third_party import PymatgenSpacegroupAnalyzer
 
@@ -28,33 +26,17 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
     type: str = "SlabConfiguration"
     bulk: Material
 
-    def __init__(
-        self,
-        bulk=None,
-        miller_indices=SlabConfigurationSchema.model_fields["miller_indices"].default,
-        thickness=SlabConfigurationSchema.model_fields["thickness"].default,
-        vacuum=SlabConfigurationSchema.model_fields["vacuum"].default,
-        xy_supercell_matrix=None,
-        use_conventional_cell=SlabConfigurationSchema.model_fields["use_conventional_cell"].default,
-        use_orthogonal_z=SlabConfigurationSchema.model_fields["use_orthogonal_z"].default,
-        make_primitive=SlabConfigurationSchema.model_fields["make_primitive"].default,
-    ):
-        if xy_supercell_matrix is None:
-            xy_supercell_matrix = np.eye(2).tolist()
-        bulk = bulk or Material.create_default()
-        __bulk_pymatgen_structure = (
-            PymatgenSpacegroupAnalyzer(to_pymatgen(bulk)).get_conventional_standard_structure()
-            if use_conventional_cell
-            else to_pymatgen(bulk)
+    def __init__(self, **kwargs):
+        bulk = kwargs.pop("bulk", None) or Material.create_default()
+        use_conventional = kwargs.get(
+            "use_conventional_cell", SlabConfigurationSchema.model_fields["use_conventional_cell"].default
         )
-        __bulk_config = from_pymatgen(__bulk_pymatgen_structure)
-        super().__init__(
-            bulk=Material.create(__bulk_config),
-            miller_indices=miller_indices,
-            thickness=thickness,
-            vacuum=vacuum,
-            xy_supercell_matrix=xy_supercell_matrix,
-            use_conventional_cell=use_conventional_cell,
-            use_orthogonal_z=use_orthogonal_z,
-            make_primitive=make_primitive,
-        )
+
+        bulk_pmg = to_pymatgen(bulk)
+        if use_conventional:
+            bulk_pmg = PymatgenSpacegroupAnalyzer(bulk_pmg).get_conventional_standard_structure()
+
+        bulk_config = from_pymatgen(bulk_pmg)
+        kwargs["bulk"] = Material.create(bulk_config)
+
+        super().__init__(**kwargs)

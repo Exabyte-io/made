@@ -27,9 +27,6 @@ class BaseConfigurationPydantic(InMemoryEntityPydantic):
     """
     Base class for material build configurations.
     This class provides an interface for defining the configuration parameters.
-
-    The class is designed to be subclassed and the subclass should define the following attributes:
-    - `_json`: The JSON representation of the configuration.
     """
 
     type: str = "BaseConfiguration"
