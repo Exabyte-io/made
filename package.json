@@ -32,7 +32,7 @@
         "@babel/preset-react": "^7.16.7",
         "@babel/register": "^7.22.15",
         "@babel/runtime-corejs3": "^7.16.8",
-        "@exabyte-io/eslint-config": "^2023.8.29-1",
+        "@exabyte-io/eslint-config": "git+https://github.com/Exabyte-io/eslint-config.git#b7cd982fff133541dec43bc4c0b240c829ab29c9",
         "@mat3ra/code": "2025.4.27-0",
         "@mat3ra/esse": "2025.4.22-0",
         "@mat3ra/tsconfig": "2024.6.3-0",
