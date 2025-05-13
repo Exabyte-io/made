@@ -1,6 +1,6 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab import (
-    PymatgenSlabGeneratorParameters,
+    SlabBuilderParameters,
     SlabConfiguration,
     create_slab,
     get_terminations,
@@ -23,9 +23,7 @@ def test_build_slab():
         use_conventional_cell=True,
         make_primitive=True,
     )
-    params = PymatgenSlabGeneratorParameters(
-        min_vacuum_size=1, in_unit_planes=True, reorient_lattice=True, symmetrize=True
-    )
+    params = SlabBuilderParameters(min_vacuum_size=1, in_unit_planes=True, reorient_lattice=True, symmetrize=True)
     terminations = get_terminations(slab_config, build_parameters=params)
     termination = terminations[0]
     slab = create_slab(slab_config, termination, params)
