@@ -31,6 +31,10 @@ class BaseConfigurationPydantic(InMemoryEntityPydantic):
 
     type: str = "BaseConfiguration"
 
+    # TODO: remove this in the next PR
+    def to_json(self):  # typing: ignore
+        return self.to_dict()
+
 
 class BaseSelectorParameters(BaseModel):
     default_index: int = 0

@@ -26,15 +26,19 @@ class PymatgenSlabGeneratorParameters(BaseModel):
     symmetrize: bool = True
 
 
+class SlabBuilderParameters(PymatgenSlabGeneratorParameters):
+    pass
+
+
 class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
-    build_parameters: Optional[PymatgenSlabGeneratorParameters] = None
+    build_parameters: Optional[SlabBuilderParameters] = None
     _ConfigurationType: type(SlabConfiguration) = SlabConfiguration  # type: ignore
     _GeneratedItemType: PymatgenSlab = PymatgenSlab  # type: ignore
     _SelectorParametersType: type(SlabSelectorParameters) = SlabSelectorParameters  # type: ignore
     __configuration: SlabConfiguration
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
-        build_parameters = self.build_parameters or PymatgenSlabGeneratorParameters()
+        build_parameters = self.build_parameters or SlabBuilderParameters()
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(configuration.bulk),
             miller_index=configuration.miller_indices,
@@ -61,7 +65,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = super()._post_process(items, post_process_parameters)
         materials = [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
-        build_parameters = self.build_parameters or PymatgenSlabGeneratorParameters()
+        build_parameters = self.build_parameters or SlabBuilderParameters()
 
         # Adding total vacuum to be exactly as specified in configuration, including already added vacuum
         added_vacuum = (
@@ -78,13 +82,6 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             material.metadata["build"]["termination"] = label_pymatgen_slab_termination(items[idx])
 
         return materials_with_vacuum
-
-    # TODO: remove when all configurations are migrated to new configurations approach
-    def _update_material_metadata(self, material, configuration) -> Material:
-        if "build" not in material.metadata:
-            material.metadata["build"] = {}
-        material.metadata["build"]["configuration"] = configuration.to_dict()
-        return material
 
     def get_terminations(self, configuration: _ConfigurationType) -> List[Termination]:
         return [

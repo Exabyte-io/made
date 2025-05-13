@@ -12,7 +12,7 @@ DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
 
 
-def is_plain_2x2_matrix(matrix: Any) -> bool:
+def is_primitive_2x2_matrix(matrix: Any) -> bool:
     return (
         isinstance(matrix, list) and len(matrix) == 2 and all(isinstance(row, list) and len(row) == 2 for row in matrix)
     )
@@ -41,7 +41,7 @@ def normalize_2x2_matrix(
     ):
         return [cast(SupercellMatrix2DSchemaItem, row).root for row in matrix]
 
-    if is_plain_2x2_matrix(matrix):
+    if is_primitive_2x2_matrix(matrix):
         return matrix  # already normalized
 
     return None  # unrecognized format
