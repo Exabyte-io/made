@@ -1,9 +1,27 @@
 from typing import Optional, List, Union, Generic, TypeVar
-from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
-from mat3ra.made.material import Material
+from mat3ra.esse.models.materials_category.defects.slab.configuration import SlabDefectConfigurationSchema
+from mat3ra.esse.models.materials_category.defects.zero_dimensional.adatom.configuration import (
+    AdatomConfigurationSchema,
+)
+from mat3ra.esse.models.materials_category.defects.zero_dimensional.defect_pair.configuration import (
+    PointDefectPairConfigurationSchema,
+)
+from mat3ra.esse.models.materials_category.defects.zero_dimensional.slab.configuration import (
+    SlabPointDefectConfigurationSchema,
+)
+from mat3ra.esse.models.materials_category.single_material.defect.point_defect.configuration import (
+    PointDefectConfigurationSchema,
+)
 
+from mat3ra.made.material import Material
+from .enums import (
+    PointDefectTypeEnum,
+    SlabDefectTypeEnum,
+    CoordinatesShapeEnum,
+)
+from .. import BaseConfigurationPydantic
 from ...analyze.other import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from ...utils.coordinate import (
     CylinderCoordinateCondition,
@@ -13,30 +31,14 @@ from ...utils.coordinate import (
     PlaneCoordinateCondition,
     CoordinateCondition,
 )
-from .enums import (
-    PointDefectTypeEnum,
-    SlabDefectTypeEnum,
-    AtomPlacementMethodEnum,
-    ComplexDefectTypeEnum,
-    CoordinatesShapeEnum,
-)
 
 
-class BaseDefectConfiguration(BaseModel):
+class BaseDefectConfiguration(BaseConfigurationPydantic):
+    type: str = "BaseDefectConfiguration"
     crystal: Material = None
 
-    class Config:
-        arbitrary_types_allowed = True
 
-    @property
-    def _json(self):
-        return {
-            "type": "BaseDefectConfiguration",
-            "crystal": self.crystal.to_json(),
-        }
-
-
-class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
+class PointDefectConfiguration(PointDefectConfigurationSchema, BaseDefectConfiguration):
     """
     Configuration for a point defect.
 
@@ -54,11 +56,8 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates for coordinates.
     """
 
-    defect_type: PointDefectTypeEnum
-    coordinate: List[float] = [0, 0, 0]
-    chemical_element: Optional[str] = None
-    use_cartesian_coordinates: bool = False
-    placement_method: Optional[AtomPlacementMethodEnum] = None
+    type: str = "PointDefectConfiguration"
+    crystal: Material = None
 
     @classmethod
     def from_site_id(
@@ -100,18 +99,6 @@ class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         else:
             raise ValueError(f"Invalid defect configuration: {data}")
 
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": "PointDefectConfiguration",
-            "defect_type": self.defect_type.name,
-            "coordinate": self.coordinate,
-            "chemical_element": self.chemical_element,
-            "use_cartesian_coordinates": self.use_cartesian_coordinates,
-            "placement_method": self.placement_method.name if self.placement_method else None,
-        }
-
 
 class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
     """
@@ -124,16 +111,23 @@ class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
 
     number_of_added_layers: Union[int, float] = 1
 
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "number_of_added_layers": self.number_of_added_layers,
-        }
+
+class SlabDefectConfigurationPydantic(SlabDefectConfigurationSchema, BaseDefectConfiguration):
+    """
+    Configuration for a slab defect.
+
+    Args:
+        crystal (Material): The Material object.
+        number_of_added_layers (Union[int, float]): The number of added layers to the slab.
+    """
+
+    type: str = "SlabDefectConfiguration"
+    crystal: Material = None
 
 
-class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfiguration):
+class SlabPointDefectConfiguration(
+    SlabPointDefectConfigurationSchema, SlabDefectConfigurationPydantic, PointDefectConfiguration
+):
     """
     Configuration for a slab point defect.
 
@@ -146,8 +140,7 @@ class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfigura
         distance_z (float): The distance in z direction in angstroms.
     """
 
-    position_on_surface: List[float]
-    distance_z: float  # in angstroms
+    type: str = "SlabPointDefectConfiguration"
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -162,17 +155,8 @@ class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfigura
                 ]
             )[2]
 
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "position_on_surface": self.position_on_surface,
-            "distance_z": self.distance_z,
-        }
 
-
-class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
+class AdatomSlabPointDefectConfiguration(AdatomConfigurationSchema, SlabPointDefectConfiguration):
     """
     Configuration for an adatom slab point defect.
 
@@ -185,23 +169,13 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
         distance_z (float): The distance in z direction in angstroms.
     """
 
-    defect_type: PointDefectTypeEnum = PointDefectTypeEnum.ADATOM
-    placement_method: AtomPlacementMethodEnum = AtomPlacementMethodEnum.COORDINATE
-
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "defect_type": self.defect_type.name,
-            "placement_method": self.placement_method.name,
-        }
+    type: str = "AdatomSlabPointDefectConfiguration"
 
 
 CoordinateConditionType = TypeVar("CoordinateConditionType", bound=CoordinateCondition)
 
 
-class IslandSlabDefectConfiguration(SlabDefectConfiguration, Generic[CoordinateConditionType]):
+class IslandSlabDefectConfiguration(SlabDefectConfigurationPydantic, Generic[CoordinateConditionType]):
     """
     Configuration for an island slab defect.
 
@@ -284,7 +258,7 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration, Generic[CoordinateC
         }
 
 
-class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
+class TerraceSlabDefectConfiguration(SlabDefectConfigurationPydantic):
     """
     Configuration for a terrace slab defect.
 
@@ -319,7 +293,7 @@ class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
         }
 
 
-class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
+class PointDefectPairConfiguration(PointDefectPairConfigurationSchema, BaseDefectConfiguration):
     """
     Configuration for a pair of point defects.
 
@@ -328,15 +302,4 @@ class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
         secondary_defect_configuration: The second defect configuration. Material is used from the primary defect.
     """
 
-    defect_type: ComplexDefectTypeEnum = ComplexDefectTypeEnum.PAIR
-    primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
-    secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
-
-    @property
-    def _json(self):
-        return {
-            "type": self.get_cls_name(),
-            "defect_type": self.defect_type.name,
-            "primary_defect_configuration": self.primary_defect_configuration.to_json(),
-            "secondary_defect_configuration": self.secondary_defect_configuration.to_json(),
-        }
+    type: str = "PointDefectPairConfiguration"
