@@ -1,6 +1,9 @@
 from typing import Optional, List, Union, Generic, TypeVar
 
 from mat3ra.code.entity import InMemoryEntity
+from mat3ra.esse.models.materials_category.defects.one_dimensional.terrace.configuration import (
+    TerraceConfigurationSchema,
+)
 from mat3ra.esse.models.materials_category.defects.slab.configuration import SlabDefectConfigurationSchema
 from mat3ra.esse.models.materials_category.defects.zero_dimensional.adatom.configuration import (
     AdatomConfigurationSchema,
@@ -258,7 +261,7 @@ class IslandSlabDefectConfiguration(SlabDefectConfigurationPydantic, Generic[Coo
         }
 
 
-class TerraceSlabDefectConfiguration(SlabDefectConfigurationPydantic):
+class TerraceSlabDefectConfiguration(TerraceConfigurationSchema, SlabDefectConfigurationPydantic):
     """
     Configuration for a terrace slab defect.
 
@@ -277,8 +280,6 @@ class TerraceSlabDefectConfiguration(SlabDefectConfigurationPydantic):
     defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
     cut_direction: List[int] = [1, 0, 0]
     pivot_coordinate: List[float] = [0.5, 0.5, 0.5]
-    use_cartesian_coordinates: bool = False
-    rotate_to_match_pbc: bool = True
 
     @property
     def _json(self):
