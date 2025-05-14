@@ -1,8 +1,13 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from mat3ra.esse.models.material.builders.single_material.two_dimensional.slab.selector_parameters import (
+    SlabSelectorParametersSchema,
+)
 
 from mat3ra.made.material import Material
+from mat3ra.esse.models.apse.materials.builders.slab.pymatgen.parameters import (
+    PymatgenSlabGeneratorParametersSchema,
+)
 from .configuration import SlabConfiguration
 from .termination import Termination
 from ..supercell import create_supercell
@@ -14,16 +19,13 @@ from ...modify import add_vacuum
 from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 
 
-class SlabSelectorParameters(BaseModel):
+class SlabSelectorParameters(SlabSelectorParametersSchema):
     termination: Termination
 
 
-class PymatgenSlabGeneratorParameters(BaseModel):
+class PymatgenSlabGeneratorParameters(PymatgenSlabGeneratorParametersSchema):
     # Parameters described in https://github.com/materialsproject/pymatgen/blob/585bb673c4aa222669c4b0d72ffeec3dbf092630/pymatgen/core/surface.py#L1187
-    min_vacuum_size: int = 1
-    in_unit_planes: bool = True
-    reorient_lattice: bool = True
-    symmetrize: bool = True
+    pass
 
 
 class SlabBuilderParameters(PymatgenSlabGeneratorParameters):
