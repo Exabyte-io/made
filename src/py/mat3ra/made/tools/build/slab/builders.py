@@ -1,13 +1,11 @@
 from typing import List, Optional
 
-from mat3ra.esse.models.material.builders.single_material.two_dimensional.slab.selector_parameters import (
-    SlabSelectorParametersSchema,
-)
-
 from mat3ra.made.material import Material
 from mat3ra.esse.models.apse.materials.builders.slab.pymatgen.parameters import (
     PymatgenSlabGeneratorParametersSchema,
 )
+from pydantic import BaseModel
+
 from .configuration import SlabConfiguration
 from .termination import Termination
 from ..supercell import create_supercell
@@ -19,7 +17,7 @@ from ...modify import add_vacuum
 from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 
 
-class SlabSelectorParameters(SlabSelectorParametersSchema):
+class SlabSelectorParameters(BaseModel):
     termination: Termination
 
 
@@ -48,7 +46,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             min_vacuum_size=build_parameters.min_vacuum_size,
             in_unit_planes=build_parameters.in_unit_planes,
             reorient_lattice=build_parameters.reorient_lattice,
-            primitive=configuration.make_primitive,
+            primitive=False,
         )
         raw_slabs = generator.get_slabs(
             # We need to preserve symmetric slabs for different terminations at the surface
