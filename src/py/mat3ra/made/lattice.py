@@ -3,10 +3,8 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
-    LatticeImplicitSchema as LatticeBravaisSchema,
-)
-from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
+from mat3ra.esse.models.properties_directory.structural.lattice import LatticeSchema
+from mat3ra.esse.models.properties_directory.structural.lattice import (
     LatticeTypeEnum,
     LatticeUnitsSchema,
 )
@@ -21,10 +19,10 @@ class LatticeVectors(Cell):
     pass
 
 
-class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydantic):
+class Lattice(RoundNumericValuesMixin, LatticeSchema, InMemoryEntityPydantic):
     __types__ = LatticeTypeEnum
-    __type_default__ = LatticeBravaisSchema.model_fields["type"].default
-    __units_default__ = LatticeBravaisSchema.model_fields["units"].default_factory()
+    __type_default__ = LatticeSchema.model_fields["type"].default
+    __units_default__ = LatticeSchema.model_fields["units"].default_factory()
 
     a: float = 1.0
     b: float = a

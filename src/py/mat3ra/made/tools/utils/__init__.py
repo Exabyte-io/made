@@ -2,8 +2,8 @@ from functools import wraps
 from typing import Any, Callable, List, Optional, Union, cast
 
 import numpy as np
-from mat3ra.esse.models.material.reusable.supercell_matrix_2d import SupercellMatrix2DSchema
-from mat3ra.esse.models.materials_category.single_material.two_dimensional.slab.configuration import (
+from mat3ra.esse.models.material.reusable.supercell.supercell_matrix_2d import (
+    SupercellMatrix2DSchema,
     SupercellMatrix2DSchemaItem,
 )
 from mat3ra.utils.matrix import convert_2x2_to_3x3

@@ -1,7 +1,6 @@
 from typing import List, Optional, Any
 
 from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
-from mat3ra.esse.models.material.builders.base.selector_parameters import BaseSelectorParametersSchema
 from pydantic import BaseModel
 
 from ...material import Material
@@ -37,8 +36,8 @@ class BaseConfigurationPydantic(InMemoryEntityPydantic):
         return self.to_dict()
 
 
-class BaseSelectorParameters(BaseSelectorParametersSchema):
-    pass
+class BaseSelectorParameters(BaseModel):
+    default_index: int = 0
 
 
 class BaseBuilderParameters(BaseModel):

@@ -1,14 +1,10 @@
-from mat3ra.esse.models.materials_category.single_material.two_dimensional.slab.configuration import (
-    SlabConfigurationSchema,
-)
-
 from mat3ra.made.material import Material
 from .. import BaseConfigurationPydantic
 from ...convert import to_pymatgen, from_pymatgen
 from ...third_party import PymatgenSpacegroupAnalyzer
 
 
-class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
+class SlabConfiguration(BaseConfigurationPydantic):
     """
     Configuration for building a slab.
 
@@ -25,12 +21,17 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
 
     type: str = "SlabConfiguration"
     bulk: Material
+    miller_indices: tuple[int, int, int] = (0, 0, 1)
+    number_of_layers: int = 1
+    vacuum: float = 5.0
+    xy_supercell_matrix: list[list[int]] = [[1, 0], [0, 1]]
+    use_conventional_cell: bool = True
+    use_orthogonal_z: bool = True
+    make_primitive: bool = True
 
     def __init__(self, **kwargs):
         bulk = kwargs.pop("bulk", None) or Material.create_default()
-        use_conventional = kwargs.get(
-            "use_conventional_cell", SlabConfigurationSchema.model_fields["use_conventional_cell"].default
-        )
+        use_conventional = kwargs.get("use_conventional_cell", True)
 
         bulk_pmg = to_pymatgen(bulk)
         if use_conventional:
