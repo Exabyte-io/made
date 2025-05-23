@@ -18,7 +18,6 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
 )
 from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from .termination import Termination
 from .. import BaseConfigurationPydantic
 from ...convert import to_pymatgen, from_pymatgen
@@ -34,6 +33,7 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
         crystal = kwargs.pop("crystal", None) or Material.create_default()
         use_conventional = kwargs.get("use_conventional_cell", False)
         if use_conventional:
+            # TODO: use from LatticeAnalyzer
             crystal = Material.create(
                 from_pymatgen(PymatgenSpacegroupAnalyzer(to_pymatgen(crystal)).get_conventional_standard_structure())
             )
@@ -58,9 +58,6 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
         return raw_slabs
 
     def get_terminations(self):
-        """
-        Get the terminations for the slab.
-        """
         return [Termination.from_string(label_pymatgen_slab_termination(slab)) for slab in self._pymatgen_slabs]
 
 
