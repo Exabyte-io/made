@@ -1,4 +1,5 @@
 import numpy as np
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from scipy.spatial import cKDTree
 from typing import List, Optional
 from mat3ra.made.basis import Basis, Coordinates
@@ -7,6 +8,9 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 
 from .supercell import create_supercell
 from ..modify import filter_by_box, translate_by_vector
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import AxisEnum
+from mat3ra.made.tools.build.slab.configuration import VacuumConfiguration
+from mat3ra.made.tools.modify import add_vacuum, get_atomic_coordinates_extremum
 
 
 def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.1) -> Basis:
@@ -135,6 +139,38 @@ def expand_lattice_vectors(material: Material, gap: float, direction: int = 0) -
         lattice_vector3=new_lattice_vectors[2],
     )
     return material
+
+
+def get_material(obj):
+    return getattr(obj, "crystal", obj)
+
+
+def stack_two_components(component1, component2, direction: AxisEnum = AxisEnum.z):
+    """
+    Stack two components: either two materials, or a material and a vacuum configuration.
+    If stacking with a vacuum configuration, just increase the lattice vector in the stacking direction.
+    If stacking two materials, stack them bottom at z=0, no overlap.
+    """
+    from mat3ra.made.tools.modify import get_atomic_coordinates_extremum, translate_by_vector, add_vacuum
+    from .slab.configuration import VacuumConfiguration
+
+    mat1 = get_material(component1)
+    mat2 = get_material(component2)
+
+    if isinstance(component2, VacuumConfiguration):
+        return add_vacuum(mat1, component2.size)
+    elif isinstance(component1, VacuumConfiguration):
+        return add_vacuum(mat2, component1.size)
+    else:
+        min1 = get_atomic_coordinates_extremum(mat1, "min", axis="z", use_cartesian_coordinates=True)
+        min2 = get_atomic_coordinates_extremum(mat2, "min", axis="z", use_cartesian_coordinates=True)
+        mat1_shifted = translate_by_vector(mat1, [0, 0, -min1], use_cartesian_coordinates=True)
+        mat2_shifted = translate_by_vector(mat2, [0, 0, -min2], use_cartesian_coordinates=True)
+        max1 = get_atomic_coordinates_extremum(mat1_shifted, "max", axis="z", use_cartesian_coordinates=True)
+        mat2_shifted = translate_by_vector(mat2_shifted, [0, 0, max1], use_cartesian_coordinates=True)
+
+        stacked_material = merge_materials([mat1_shifted, mat2_shifted], merge_dangerously=True)
+        return stacked_material
 
 
 def stack_two_materials_xy(
