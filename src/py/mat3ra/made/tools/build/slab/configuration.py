@@ -1,4 +1,5 @@
-from typing import List, Union
+from typing import List, Union, Optional
+from pydantic import BaseModel, confloat, Field
 
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.atomic_layers import AtomicLayersSchema
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.atomic_layers_unique import (
@@ -17,6 +18,7 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
 )
 from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from .termination import Termination
 from .. import BaseConfigurationPydantic
 from ...convert import to_pymatgen, from_pymatgen
@@ -30,28 +32,22 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
 
     def __init__(self, **kwargs):
         crystal = kwargs.pop("crystal", None) or Material.create_default()
-        use_conventional = kwargs.get(
-            "use_conventional_cell", CrystalLatticePlanesSchema.model_fields["use_conventional_cell"].default
-        )
-
-        # TODO: use LatticeAnalyzer to get the conventional cell
-        pymatgen_structure = to_pymatgen(crystal)
+        use_conventional = kwargs.get("use_conventional_cell", False)
         if use_conventional:
-            pymatgen_structure = PymatgenSpacegroupAnalyzer(pymatgen_structure).get_conventional_standard_structure()
-
-        crystal_config = from_pymatgen(pymatgen_structure)
-        kwargs["crystal"] = Material.create(crystal_config)
+            crystal = Material.create(
+                from_pymatgen(PymatgenSpacegroupAnalyzer(to_pymatgen(crystal)).get_conventional_standard_structure())
+            )
+        kwargs["crystal"] = crystal
         super().__init__(**kwargs)
-        self._pymatgen_slabs = self._get_pymatgen_slabs(crystal)
+        self._pymatgen_slabs = self._generate_pymatgen_slabs(self.crystal)
 
-    # TODO: add specific parameters
     def _generate_pymatgen_slabs(self, symmetrize) -> List[PymatgenSlab]:  # type: ignore
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(self.crystal),
             miller_index=self.miller_indices,
-            min_slab_size=1,  # TODO: change
-            min_vacuum_size=1,  # TODO: change
-            in_unit_planes=True,
+            min_slab_size=self.number_of_repetitions if hasattr(self, "number_of_repetitions") else 1,
+            min_vacuum_size=self.size if hasattr(self, "size") else 1,
+            in_unit_planes=False,  # Using angstroms
             primitive=False,
         )
         raw_slabs = generator.get_slabs(
@@ -82,15 +78,28 @@ class AtomicLayersUnique(AtomicLayersUniqueSchema, CrystalLatticePlanes):
 
 
 class AtomicLayersUniqueRepeated(AtomicLayersUniqueRepeatedSchema, CrystalLatticePlanes):
+    crystal: Material
     termination_top: Termination
 
 
-class VacuumConfiguration(VacuumSchema):
-    pass
+# TODO: fix pydantic generation in ESSE and use
+class VacuumConfiguration(BaseModel):
+    """
+    Configuration for adding vacuum to a material.
+
+    Args:
+        direction (AxisEnum): The direction to add vacuum along (x, y, or z).
+        size (float): Size of the vacuum gap in angstroms. Defaults to 10.0.
+        is_orthogonal (bool): Whether the vacuum slab is orthogonal to the specified direction. Defaults to True.
+    """
+
+    direction: AxisEnum
+    size: float = 10.0
+    is_orthogonal: bool = True
 
 
 class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
     type: str = "SlabConfiguration"
     stack_components: List[Union[AtomicLayersUniqueRepeated, VacuumConfiguration]]
-    supercell_matrix: List[List[int]]
+    supercell_xy: List[List[int]]
     direction: AxisEnum = AxisEnum.z

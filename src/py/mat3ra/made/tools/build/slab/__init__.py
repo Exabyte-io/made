@@ -18,15 +18,13 @@ def get_terminations(
 
 def create_slab(
     configuration: SlabConfiguration,
-    termination: Optional[Termination] = None,
     build_parameters: Optional[SlabBuilderParameters] = None,
     use_cached_builder: bool = True,
 ) -> Material:
     builder = (
         CACHED_BUILDER if use_cached_builder and CACHED_BUILDER else SlabBuilder(build_parameters=build_parameters)
     )
-    termination = termination or builder.get_terminations(configuration)[0]
-    return builder.get_material(configuration, selector_parameters=SlabSelectorParameters(termination=termination))
+    return builder.get_material(configuration)
 
 
 def create_slab_if_not(material: Material, default_slab_configuration: SlabConfiguration) -> Material:
