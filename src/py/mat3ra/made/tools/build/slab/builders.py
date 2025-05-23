@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from .configuration import SlabConfiguration, AtomicLayersUniqueRepeated, VacuumConfiguration
 from .termination import Termination
 from ..supercell import create_supercell
-from ..utils import stack_two_components
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
@@ -41,16 +40,24 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         return super().get_material(configuration)
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
+        from ..utils import stack_two_materials
+        
         atomic_layers = configuration.stack_components[0]  # First component is always AtomicLayersUniqueRepeated
         vacuum = configuration.stack_components[1]  # Second component is always VacuumConfiguration
 
         build_parameters = self.build_parameters or SlabBuilderParameters()
         pymatgen_slabs = atomic_layers._generate_pymatgen_slabs(symmetrize=build_parameters.symmetrize)
-
+        vacuum_material = Material.create(
+            {
+                "name": "Vacuum",
+                "lattice": {"a": [1, 0, 0], "b": [0, 1, 0], "c": [0, 0, vacuum.size]},
+                "basis": {"elements": [], "coordinates": []},
+            }
+        )
         # Stack with vacuum
         for i, slab in enumerate(pymatgen_slabs):
-            material = from_pymatgen(slab)
-            stacked = stack_two_components(material, vacuum, direction=configuration.direction)
+            material = Material.create(from_pymatgen(slab))
+            stacked = stack_two_materials(material, vacuum_material, direction=configuration.direction)
             pymatgen_slabs[i] = stacked
 
         return pymatgen_slabs
@@ -64,7 +71,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             if "build" not in material.metadata:
                 material.metadata["build"] = {}
             material.metadata["build"]["termination"] = label_pymatgen_slab_termination(items[idx])
-            material.metadata["build"]["configuration"] = self._configuration.dict()
+            material.metadata["build"]["configuration"] = self._configuration.to_dict()
 
         return materials
 

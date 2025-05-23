@@ -47,7 +47,7 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> P
         c=lattice_params["c"],
         alpha=lattice_params["alpha"],
         beta=lattice_params["beta"],
-        gamma=lattice_params["gamma"]
+        gamma=lattice_params["gamma"],
     )
 
     basis = material_data["basis"]

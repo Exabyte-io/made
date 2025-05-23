@@ -8,6 +8,8 @@ from mat3ra.esse.models.material.reusable.supercell.supercell_matrix_2d import (
 )
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 
+AXIS_TO_INDEX_MAP = {"x": 0, "y": 1, "z": 2}
+
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
 

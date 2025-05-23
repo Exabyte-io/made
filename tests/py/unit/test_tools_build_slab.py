@@ -16,7 +16,37 @@ from unit.fixtures.slab import SI_SLAB_100, SI_SLAB_DEFAULT_PARAMETERS
 
 from .utils import assert_two_entities_deep_almost_equal
 
-material = Material.create_default()
+# Create a default material with correct configuration
+material_config = {
+    'name': 'Silicon FCC',
+    'lattice': {
+        'a': 3.867,
+        'b': 3.867,
+        'c': 3.867,
+        'alpha': 60.0,
+        'beta': 60.0,
+        'gamma': 60.0,
+        'units': {
+            'length': 'angstrom',
+            'angle': 'degree'
+        },
+        'type': 'FCC'
+    },
+    'basis': {
+        'elements': [
+            {'id': 0, 'value': 'Si'},
+            {'id': 1, 'value': 'Si'}
+        ],
+        'coordinates': [
+            {'id': 0, 'value': [0.0, 0.0, 0.0]},
+            {'id': 1, 'value': [0.25, 0.25, 0.25]}
+        ],
+        'units': 'crystal',
+        'constraints': []
+    }
+}
+
+material = Material.create(material_config)
 
 
 def test_get_terminations():
