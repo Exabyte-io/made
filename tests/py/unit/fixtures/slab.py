@@ -82,6 +82,13 @@ SI_SLAB_100: Dict[str, Any] = {
         "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
+        "vectors": {
+            "a": [3.867, 0.0, 0.0],
+            "b": [0.0, 3.867, 0.0],
+            "c": [0.0, 0.0, 15.937527692],
+            "alat": 1,
+            "units": "angstrom"
+        }
     },
     "isNonPeriodic": False,
     "metadata": {

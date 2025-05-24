@@ -41,13 +41,14 @@ def to_pymatgen(material_or_material_data: Union[Material, Dict[str, Any]]) -> P
         material_data = material_or_material_data.to_dict()
 
     lattice_params = material_data["lattice"]
-    a = lattice_params["a"]
-    b = lattice_params["b"]
-    c = lattice_params["c"]
-    alpha = lattice_params["alpha"]
-    beta = lattice_params["beta"]
-    gamma = lattice_params["gamma"]
-    lattice = PymatgenLattice.from_parameters(a, b, c, alpha, beta, gamma)
+    lattice = PymatgenLattice.from_parameters(
+        a=lattice_params["a"],
+        b=lattice_params["b"],
+        c=lattice_params["c"],
+        alpha=lattice_params["alpha"],
+        beta=lattice_params["beta"],
+        gamma=lattice_params["gamma"],
+    )
 
     basis = material_data["basis"]
     elements = [element["value"] for element in basis["elements"]]
