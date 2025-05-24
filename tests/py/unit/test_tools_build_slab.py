@@ -18,32 +18,23 @@ from .utils import assert_two_entities_deep_almost_equal
 
 # Create a default material with correct configuration
 material_config = {
-    'name': 'Silicon FCC',
-    'lattice': {
-        'a': 3.867,
-        'b': 3.867,
-        'c': 3.867,
-        'alpha': 60.0,
-        'beta': 60.0,
-        'gamma': 60.0,
-        'units': {
-            'length': 'angstrom',
-            'angle': 'degree'
-        },
-        'type': 'FCC'
+    "name": "Silicon FCC",
+    "lattice": {
+        "a": 3.867,
+        "b": 3.867,
+        "c": 3.867,
+        "alpha": 60.0,
+        "beta": 60.0,
+        "gamma": 60.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "FCC",
     },
-    'basis': {
-        'elements': [
-            {'id': 0, 'value': 'Si'},
-            {'id': 1, 'value': 'Si'}
-        ],
-        'coordinates': [
-            {'id': 0, 'value': [0.0, 0.0, 0.0]},
-            {'id': 1, 'value': [0.25, 0.25, 0.25]}
-        ],
-        'units': 'crystal',
-        'constraints': []
-    }
+    "basis": {
+        "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
+        "coordinates": [{"id": 0, "value": [0.0, 0.0, 0.0]}, {"id": 1, "value": [0.25, 0.25, 0.25]}],
+        "units": "crystal",
+        "constraints": [],
+    },
 }
 
 material = Material.create(material_config)
@@ -70,12 +61,21 @@ def test_build_slab():
         termination_top=terminations[0],
         use_conventional_cell=True,
     )
+    # atomic_layers = AtomicLayersUniqueRepeated.from_parameters(
+    #     crystal_lattice_planes=crystal_lattice_planes
+    #     number_of_repetitions=2,
+    #     termination_top=terminations[0],
+    #     use_conventional_cell=True,
+    # )
 
     vacuum = VacuumConfiguration(direction=AxisEnum.z, size=5.0, is_orthogonal=True)
+
     slab_config = SlabConfiguration(
         supercell_xy=[[1, 0], [0, 1]], stack_components=[atomic_layers, vacuum], direction=AxisEnum.z
     )
+
     params = SlabBuilderParameters(min_vacuum_size=5.0, reorient_lattice=True, symmetrize=True)
+
     slab = create_slab(slab_config, build_parameters=params)
 
     # Use SI_SLAB_100 as reference, but update if needed to match the new termination
