@@ -36,7 +36,7 @@ class BaseConfigurationPydantic(InMemoryEntityPydantic):
         return self.to_dict()
 
 
-class BaseSelectorParameters:
+class BaseSelectorParameters(BaseModel):
     default_index: int = 0
 
 

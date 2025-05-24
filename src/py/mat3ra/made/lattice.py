@@ -9,6 +9,7 @@ from mat3ra.esse.models.properties_directory.structural.lattice import (
     LatticeUnitsSchema,
 )
 from mat3ra.utils.mixins import RoundNumericValuesMixin
+from pydantic import BaseModel
 
 from .cell import Cell
 
@@ -19,7 +20,19 @@ class LatticeVectors(Cell):
     pass
 
 
-class Lattice(RoundNumericValuesMixin, LatticeSchema, InMemoryEntityPydantic):
+class LatticeSchemaVectorless(BaseModel):
+    """LatticeSchema without the vectors field to avoid conflicts."""
+    a: float
+    b: float  
+    c: float
+    alpha: float
+    beta: float
+    gamma: float
+    units: LatticeUnitsSchema = LatticeSchema.model_fields["units"].default_factory()
+    type: LatticeTypeEnum = LatticeSchema.model_fields["type"].default
+
+
+class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPydantic):
     __types__ = LatticeTypeEnum
     __type_default__ = LatticeSchema.model_fields["type"].default
     __units_default__ = LatticeSchema.model_fields["units"].default_factory()
