@@ -41,24 +41,34 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
 
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         from ..utils import stack_two_materials
-        
+
         atomic_layers = configuration.stack_components[0]  # First component is always AtomicLayersUniqueRepeated
         vacuum = configuration.stack_components[1]  # Second component is always VacuumConfiguration
 
         build_parameters = self.build_parameters or SlabBuilderParameters()
         pymatgen_slabs = atomic_layers._generate_pymatgen_slabs(symmetrize=build_parameters.symmetrize)
-        vacuum_material = Material.create(
-            {
-                "name": "Vacuum",
-                "lattice": {"a": [1, 0, 0], "b": [0, 1, 0], "c": [0, 0, vacuum.size]},
-                "basis": {"elements": [], "coordinates": []},
-            }
-        )
-        # Stack with vacuum
+
+        # TODO: move to a stacker. Just pass vacuum config
         for i, slab in enumerate(pymatgen_slabs):
             material = Material.create(from_pymatgen(slab))
+
+            # Create vacuum material with slab's in-plane lattice vectors
+            slab_vectors = material.lattice.vector_arrays
+            vacuum_vectors = [slab_vectors[0], slab_vectors[1], [0, 0, vacuum.size]]
+            vacuum_lattice = material.lattice.from_vectors_array(
+                vacuum_vectors, material.lattice.units, material.lattice.type
+            )
+            vacuum_material = Material.create(
+                {
+                    "name": "Vacuum",
+                    "lattice": vacuum_lattice.to_dict(),
+                    "basis": {"elements": [], "coordinates": []},
+                    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+                }
+            )
+
             stacked = stack_two_materials(material, vacuum_material, direction=configuration.direction)
-            pymatgen_slabs[i] = stacked
+            pymatgen_slabs[i] = to_pymatgen(stacked)
 
         return pymatgen_slabs
 

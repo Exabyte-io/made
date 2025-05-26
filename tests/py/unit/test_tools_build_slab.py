@@ -49,7 +49,9 @@ def test_get_terminations():
 
 
 def test_build_slab():
-    crystal_lattice_planes = CrystalLatticePlanes(crystal=material, miller_indices=[0, 0, 1])
+    crystal_lattice_planes = CrystalLatticePlanes(
+        crystal=material, miller_indices=[0, 0, 1], use_conventional_cell=True
+    )
     terminations = crystal_lattice_planes.get_terminations()
     print("Available terminations:", [str(t) for t in terminations])
 
@@ -57,15 +59,14 @@ def test_build_slab():
     atomic_layers = AtomicLayersUniqueRepeated(
         crystal=material,
         miller_indices=[0, 0, 1],
+        use_conventional_cell=True,
         number_of_repetitions=2,
         termination_top=terminations[0],
-        use_conventional_cell=True,
     )
     # atomic_layers = AtomicLayersUniqueRepeated.from_parameters(
     #     crystal_lattice_planes=crystal_lattice_planes
     #     number_of_repetitions=2,
     #     termination_top=terminations[0],
-    #     use_conventional_cell=True,
     # )
 
     vacuum = VacuumConfiguration(direction=AxisEnum.z, size=5.0, is_orthogonal=True)

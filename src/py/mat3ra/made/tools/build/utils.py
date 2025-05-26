@@ -165,8 +165,8 @@ def stack_two_materials(
 
     stacked_lattice_vectors_values = [vec.copy() for vec in material_1_lattice_vectors]
     stacked_lattice_vectors_values[lattice_vector_index] = (
-        material_1_lattice_vectors[lattice_vector_index] + material_2_lattice_vectors[lattice_vector_index]
-    )
+        np.array(material_1_lattice_vectors[lattice_vector_index]) + np.array(material_2_lattice_vectors[lattice_vector_index])
+    ).tolist()
 
     material_1_final_lattice_config = material_1.clone()
     material_1_final_lattice_config.set_new_lattice_vectors(
