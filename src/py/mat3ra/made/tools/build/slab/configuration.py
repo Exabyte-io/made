@@ -39,16 +39,23 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
             )
         kwargs["crystal"] = crystal
         super().__init__(**kwargs)
-        self._pymatgen_slabs = self._generate_pymatgen_slabs(self.crystal)
+        self._pymatgen_slabs = self._generate_pymatgen_slabs()
 
-    def _generate_pymatgen_slabs(self, symmetrize) -> List[PymatgenSlab]:  # type: ignore
+    def _generate_pymatgen_slabs(
+        self,
+        min_slab_size=1,
+        min_vacuum_size=1,
+        in_unit_planes: bool = True,
+        make_primitive: bool = False,
+        symmetrize: bool = False,
+    ) -> List[PymatgenSlab]:  # type: ignore
         generator = PymatgenSlabGenerator(
             initial_structure=to_pymatgen(self.crystal),
             miller_index=self.miller_indices,
-            min_slab_size=self.number_of_repetitions if hasattr(self, "number_of_repetitions") else 1,
-            min_vacuum_size=self.size if hasattr(self, "size") else 1,
-            in_unit_planes=False,  # Using angstroms
-            primitive=False,
+            min_slab_size=min_slab_size,
+            min_vacuum_size=min_vacuum_size,
+            in_unit_planes=in_unit_planes,
+            primitive=make_primitive,
         )
         raw_slabs = generator.get_slabs(
             # We need to preserve symmetric slabs for different terminations at the surface
@@ -77,6 +84,15 @@ class AtomicLayersUnique(AtomicLayersUniqueSchema, CrystalLatticePlanes):
 class AtomicLayersUniqueRepeated(AtomicLayersUniqueRepeatedSchema, CrystalLatticePlanes):
     crystal: Material
     termination_top: Termination
+
+    def _generate_pymatgen_slabs(self, **kwargs) -> List[PymatgenSlab]:
+        return super()._generate_pymatgen_slabs(
+            min_slab_size=self.number_of_repetitions,
+            min_vacuum_size=kwargs.get("min_vacuum_size", 1),
+            in_unit_planes=kwargs.get("in_unit_planes", True),
+            make_primitive=kwargs.get("make_primitive", False),
+            symmetrize=kwargs.get("symmetrize", False),
+        )
 
 
 # TODO: fix pydantic generation in ESSE and use

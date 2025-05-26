@@ -49,8 +49,10 @@ def test_get_terminations():
 
 
 def test_build_slab():
+    MILLER_INDICES = [0, 0, 1]
+    USE_CONVENTIONAL_CELL = True
     crystal_lattice_planes = CrystalLatticePlanes(
-        crystal=material, miller_indices=[0, 0, 1], use_conventional_cell=True
+        crystal=material, miller_indices=MILLER_INDICES, use_conventional_cell=USE_CONVENTIONAL_CELL
     )
     terminations = crystal_lattice_planes.get_terminations()
     print("Available terminations:", [str(t) for t in terminations])
@@ -58,8 +60,8 @@ def test_build_slab():
     # Use the available termination for both the atomic layers and the reference
     atomic_layers = AtomicLayersUniqueRepeated(
         crystal=material,
-        miller_indices=[0, 0, 1],
-        use_conventional_cell=True,
+        miller_indices=MILLER_INDICES,
+        use_conventional_cell=USE_CONVENTIONAL_CELL,
         number_of_repetitions=2,
         termination_top=terminations[0],
     )
