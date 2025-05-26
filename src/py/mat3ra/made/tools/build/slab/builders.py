@@ -48,6 +48,9 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         build_parameters = self.build_parameters or SlabBuilderParameters()
         pymatgen_slabs = atomic_layers._generate_pymatgen_slabs(symmetrize=build_parameters.symmetrize)
 
+        if vacuum.is_orthogonal:
+            pymatgen_slabs = [pymatgen_slab.get_orthogonal_c_slab() for pymatgen_slab in pymatgen_slabs]
+
         # TODO: move to a stacker. Just pass vacuum config
         for i, slab in enumerate(pymatgen_slabs):
             material = Material.create(from_pymatgen(slab))
