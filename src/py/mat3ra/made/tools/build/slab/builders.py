@@ -9,7 +9,7 @@ from mat3ra.made.material import Material
 from .configuration import SlabConfiguration, AtomicLayersUniqueRepeated, VacuumConfiguration
 from .termination import Termination
 from ..supercell import create_supercell
-from ..utils import stack_two_materials
+from ..utils import stack_two_materials, create_vacuum_material, stack_two_components
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
@@ -28,6 +28,7 @@ class PymatgenSlabGeneratorParameters(PymatgenSlabGeneratorParametersSchema):
 
 class SlabBuilderParameters(PymatgenSlabGeneratorParameters):
     make_primitive: bool = True
+    use_orthogonal_c: bool = True
 
 
 class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
@@ -40,21 +41,6 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         self._configuration = configuration
         return super().get_material(configuration)
 
-    @staticmethod
-    def _create_vacuum_material(reference: Material, vacuum: VacuumConfiguration) -> Material:
-        a_vec, b_vec = reference.lattice.vector_arrays[:2]
-        vac_lattice = reference.lattice.from_vectors_array(
-            [a_vec, b_vec, [0, 0, vacuum.size]], reference.lattice.units, reference.lattice.type
-        )
-        return Material.create(
-            {
-                "name": "Vacuum",
-                "lattice": vac_lattice.to_dict(),
-                "basis": {"elements": [], "coordinates": []},
-                "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-            }
-        )
-
     def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         atomic_layers: AtomicLayersUniqueRepeated = configuration.stack_components[0]
         vacuum: VacuumConfiguration = configuration.stack_components[1]
@@ -65,12 +51,11 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             make_primitive=params.make_primitive,
             symmetrize=params.symmetrize,
         )
-        if vacuum.is_orthogonal:
+        if params.use_orthogonal_c:
             slabs = [slab.get_orthogonal_c_slab() for slab in slabs]
         for idx, slab in enumerate(slabs):
             mat = Material.create(from_pymatgen(slab))
-            vacuum_mat = self._create_vacuum_material(mat, vacuum)
-            stacked = stack_two_materials(mat, vacuum_mat, direction=configuration.direction)
+            stacked = stack_two_components(mat, vacuum, direction=configuration.direction, reference_material=mat)
             slabs[idx] = to_pymatgen(stacked)
         return slabs
 

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union, TYPE_CHECKING
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
@@ -8,10 +8,12 @@ from scipy.spatial import cKDTree
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import get_atomic_coordinates_extremum, translate_by_vector, add_vacuum
-from .slab.configuration import VacuumConfiguration
 from .supercell import create_supercell
 from ..modify import filter_by_box
 from ..utils import AXIS_TO_INDEX_MAP
+
+if TYPE_CHECKING:
+    from .slab.configuration import VacuumConfiguration
 
 
 def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.1) -> Basis:
@@ -76,7 +78,10 @@ def merge_two_materials(
     new_material = Material.create(
         {"name": name, "lattice": merged_lattice.to_dict(), "basis": resolved_basis.to_dict()}
     )
-    new_material.metadata = {**material1.metadata, **material2.metadata}
+    # Handle None metadata gracefully
+    metadata1 = material1.metadata or {}
+    metadata2 = material2.metadata or {}
+    new_material.metadata = {**metadata1, **metadata2}
     return new_material
 
 
@@ -232,3 +237,71 @@ def stack_two_materials_xy(
         [phase_1_material, phase_2_material], distance_tolerance=distance_tolerance, merge_dangerously=True
     )
     return interface
+
+
+def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration") -> Material:
+    """
+    Create a vacuum material based on a reference material and vacuum configuration.
+    
+    Args:
+        reference: Reference material to base the vacuum lattice on.
+        vacuum: Vacuum configuration with size and direction.
+        
+    Returns:
+        Material: Vacuum material with empty basis.
+    """
+    a_vec, b_vec = reference.lattice.vector_arrays[:2]
+    vac_lattice = reference.lattice.from_vectors_array(
+        [a_vec, b_vec, [0, 0, vacuum.size]], reference.lattice.units, reference.lattice.type
+    )
+    return Material.create(
+        {
+            "name": "Vacuum",
+            "lattice": vac_lattice.to_dict(),
+            "basis": {"elements": [], "coordinates": []},
+            "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+        }
+    )
+
+
+def stack_two_components(
+    component1: Union[Material, "VacuumConfiguration"], 
+    component2: Union[Material, "VacuumConfiguration"],
+    direction: AxisEnum,
+    reference_material: Optional[Material] = None
+) -> Material:
+    """
+    Stack two components along a specified direction.
+    
+    Args:
+        component1: First component (Material or configuration).
+        component2: Second component (Material or configuration).
+        direction: Direction along which to stack.
+        reference_material: Reference material for creating materials from configurations.
+        
+    Returns:
+        Material: Stacked material.
+    """
+    # Import here to avoid circular import
+    from .slab.configuration import VacuumConfiguration
+    
+    # Convert components to materials if they are configurations
+    if isinstance(component1, Material):
+        material1 = component1
+    elif isinstance(component1, VacuumConfiguration):
+        if reference_material is None:
+            raise ValueError("Reference material required for vacuum configuration")
+        material1 = create_vacuum_material(reference_material, component1)
+    else:
+        raise ValueError(f"Unsupported component type: {type(component1)}")
+    
+    if isinstance(component2, Material):
+        material2 = component2
+    elif isinstance(component2, VacuumConfiguration):
+        if reference_material is None:
+            raise ValueError("Reference material required for vacuum configuration")
+        material2 = create_vacuum_material(reference_material, component2)
+    else:
+        raise ValueError(f"Unsupported component type: {type(component2)}")
+    
+    return stack_two_materials(material1, material2, direction)
