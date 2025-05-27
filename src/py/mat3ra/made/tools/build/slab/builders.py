@@ -1,14 +1,15 @@
 from typing import List, Optional
 
-from mat3ra.made.material import Material
 from mat3ra.esse.models.apse.materials.builders.slab.pymatgen.parameters import (
     PymatgenSlabGeneratorParametersSchema,
 )
 from pydantic import BaseModel
 
+from mat3ra.made.material import Material
 from .configuration import SlabConfiguration, AtomicLayersUniqueRepeated, VacuumConfiguration
 from .termination import Termination
 from ..supercell import create_supercell
+from ..utils import stack_two_materials
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
@@ -35,50 +36,43 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     _GeneratedItemType: PymatgenSlab = PymatgenSlab  # type: ignore
     _SelectorParametersType: type(SlabSelectorParameters) = SlabSelectorParameters  # type: ignore
 
-    def get_material(self, configuration: _ConfigurationType) -> Material:
+    def get_material(self, configuration: _ConfigurationType) -> Material:  # type: ignore
         self._configuration = configuration
         return super().get_material(configuration)
 
-    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
-        from ..utils import stack_two_materials
-
-        atomic_layers = configuration.stack_components[0]  # First component is always AtomicLayersUniqueRepeated
-        vacuum = configuration.stack_components[1]  # Second component is always VacuumConfiguration
-
-        build_parameters = self.build_parameters or SlabBuilderParameters()
-        pymatgen_slabs = atomic_layers._generate_pymatgen_slabs(
-            min_vacuum_size=build_parameters.min_vacuum_size,
-            in_unit_planes=True,
-            make_primitive=build_parameters.make_primitive,
-            symmetrize=build_parameters.symmetrize,
+    @staticmethod
+    def _create_vacuum_material(reference: Material, vacuum: VacuumConfiguration) -> Material:
+        a_vec, b_vec = reference.lattice.vector_arrays[:2]
+        vac_lattice = reference.lattice.from_vectors_array(
+            [a_vec, b_vec, [0, 0, vacuum.size]], reference.lattice.units, reference.lattice.type
+        )
+        return Material.create(
+            {
+                "name": "Vacuum",
+                "lattice": vac_lattice.to_dict(),
+                "basis": {"elements": [], "coordinates": []},
+                "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+            }
         )
 
+    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
+        atomic_layers: AtomicLayersUniqueRepeated = configuration.stack_components[0]
+        vacuum: VacuumConfiguration = configuration.stack_components[1]
+        params = self.build_parameters or SlabBuilderParameters()
+        slabs = atomic_layers._generate_pymatgen_slabs(
+            min_vacuum_size=params.min_vacuum_size,
+            in_unit_planes=True,
+            make_primitive=params.make_primitive,
+            symmetrize=params.symmetrize,
+        )
         if vacuum.is_orthogonal:
-            pymatgen_slabs = [pymatgen_slab.get_orthogonal_c_slab() for pymatgen_slab in pymatgen_slabs]
-
-        # TODO: move to a stacker. Just pass vacuum config
-        for i, slab in enumerate(pymatgen_slabs):
-            material = Material.create(from_pymatgen(slab))
-
-            # Create vacuum material with slab's in-plane lattice vectors
-            slab_vectors = material.lattice.vector_arrays
-            vacuum_vectors = [slab_vectors[0], slab_vectors[1], [0, 0, vacuum.size]]
-            vacuum_lattice = material.lattice.from_vectors_array(
-                vacuum_vectors, material.lattice.units, material.lattice.type
-            )
-            vacuum_material = Material.create(
-                {
-                    "name": "Vacuum",
-                    "lattice": vacuum_lattice.to_dict(),
-                    "basis": {"elements": [], "coordinates": []},
-                    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-                }
-            )
-
-            stacked = stack_two_materials(material, vacuum_material, direction=configuration.direction)
-            pymatgen_slabs[i] = to_pymatgen(stacked)
-
-        return pymatgen_slabs
+            slabs = [slab.get_orthogonal_c_slab() for slab in slabs]
+        for idx, slab in enumerate(slabs):
+            mat = Material.create(from_pymatgen(slab))
+            vacuum_mat = self._create_vacuum_material(mat, vacuum)
+            stacked = stack_two_materials(mat, vacuum_mat, direction=configuration.direction)
+            slabs[idx] = to_pymatgen(stacked)
+        return slabs
 
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = super()._post_process(items, post_process_parameters)
@@ -98,9 +92,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         atomic_layers = configuration.stack_components[0]
 
         formula = get_chemical_formula(atomic_layers.crystal)
-        miller_indices = "".join([str(i) for i in atomic_layers.miller_indices])
+        miller_indices = "".join(str(i) for i in atomic_layers.miller_indices)
         termination = material.metadata.get("build", {}).get("termination", "")
-        # for example: "Si8(001), termination Si_P4/mmm_1, Slab"
-        new_name = f"{formula}({miller_indices}), termination {termination}, Slab"
-        material.name = new_name
+        material.name = f"{formula}({miller_indices}), termination {termination}, Slab"
         return material
