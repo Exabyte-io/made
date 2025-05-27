@@ -170,7 +170,8 @@ def stack_two_materials(
 
     stacked_lattice_vectors_values = [vec.copy() for vec in material_1_lattice_vectors]
     stacked_lattice_vectors_values[lattice_vector_index] = (
-        np.array(material_1_lattice_vectors[lattice_vector_index]) + np.array(material_2_lattice_vectors[lattice_vector_index])
+        np.array(material_1_lattice_vectors[lattice_vector_index])
+        + np.array(material_2_lattice_vectors[lattice_vector_index])
     ).tolist()
 
     material_1_final_lattice_config = material_1.clone()
@@ -242,11 +243,11 @@ def stack_two_materials_xy(
 def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration") -> Material:
     """
     Create a vacuum material based on a reference material and vacuum configuration.
-    
+
     Args:
         reference: Reference material to base the vacuum lattice on.
         vacuum: Vacuum configuration with size and direction.
-        
+
     Returns:
         Material: Vacuum material with empty basis.
     """
@@ -265,43 +266,29 @@ def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration") -
 
 
 def stack_two_components(
-    component1: Union[Material, "VacuumConfiguration"], 
+    component1: Union[Material, "VacuumConfiguration"],
     component2: Union[Material, "VacuumConfiguration"],
     direction: AxisEnum,
-    reference_material: Optional[Material] = None
 ) -> Material:
-    """
-    Stack two components along a specified direction.
-    
-    Args:
-        component1: First component (Material or configuration).
-        component2: Second component (Material or configuration).
-        direction: Direction along which to stack.
-        reference_material: Reference material for creating materials from configurations.
-        
-    Returns:
-        Material: Stacked material.
-    """
     # Import here to avoid circular import
     from .slab.configuration import VacuumConfiguration
-    
-    # Convert components to materials if they are configurations
+
     if isinstance(component1, Material):
-        material1 = component1
-    elif isinstance(component1, VacuumConfiguration):
-        if reference_material is None:
-            raise ValueError("Reference material required for vacuum configuration")
+        reference_material = component1
+    elif isinstance(component2, Material):
+        reference_material = component2
+    else:
+        raise ValueError("At least one component must be a Material to serve as reference for configurations")
+
+    # Convert components to materials if they are configurations
+    if isinstance(component1, VacuumConfiguration):
         material1 = create_vacuum_material(reference_material, component1)
     else:
-        raise ValueError(f"Unsupported component type: {type(component1)}")
-    
-    if isinstance(component2, Material):
-        material2 = component2
-    elif isinstance(component2, VacuumConfiguration):
-        if reference_material is None:
-            raise ValueError("Reference material required for vacuum configuration")
+        material1 = component1
+
+    if isinstance(component2, VacuumConfiguration):
         material2 = create_vacuum_material(reference_material, component2)
     else:
-        raise ValueError(f"Unsupported component type: {type(component2)}")
-    
+        material2 = component2
+
     return stack_two_materials(material1, material2, direction)

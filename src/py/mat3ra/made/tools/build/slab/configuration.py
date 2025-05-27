@@ -67,6 +67,24 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
     def get_terminations(self):
         return [Termination.from_string(label_pymatgen_slab_termination(slab)) for slab in self._pymatgen_slabs]
 
+    def get_slabs(
+        self,
+        min_slab_size=1,
+        min_vacuum_size=1,
+        in_unit_planes: bool = True,
+        make_primitive: bool = False,
+        symmetrize: bool = False,
+    ) -> List[Material]:
+
+        pymatgen_slabs = self._generate_pymatgen_slabs(
+            min_slab_size=min_slab_size,
+            min_vacuum_size=min_vacuum_size,
+            in_unit_planes=in_unit_planes,
+            make_primitive=make_primitive,
+            symmetrize=symmetrize,
+        )
+        return [Material.create(from_pymatgen(slab)) for slab in pymatgen_slabs]
+
 
 # termination = CrystalLatticePlanesSchema.get_terminations()
 

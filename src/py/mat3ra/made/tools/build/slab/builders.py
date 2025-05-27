@@ -45,19 +45,34 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         atomic_layers: AtomicLayersUniqueRepeated = configuration.stack_components[0]
         vacuum: VacuumConfiguration = configuration.stack_components[1]
         params = self.build_parameters or SlabBuilderParameters()
-        slabs = atomic_layers._generate_pymatgen_slabs(
-            min_vacuum_size=params.min_vacuum_size,
-            in_unit_planes=True,
-            make_primitive=params.make_primitive,
-            symmetrize=params.symmetrize,
-        )
+
         if params.use_orthogonal_c:
-            slabs = [slab.get_orthogonal_c_slab() for slab in slabs]
-        for idx, slab in enumerate(slabs):
-            mat = Material.create(from_pymatgen(slab))
-            stacked = stack_two_components(mat, vacuum, direction=configuration.direction, reference_material=mat)
-            slabs[idx] = to_pymatgen(stacked)
-        return slabs
+            # If we need orthogonal_c, work with pymatgen slabs first
+            pymatgen_slabs = atomic_layers._generate_pymatgen_slabs(
+                min_vacuum_size=params.min_vacuum_size,
+                in_unit_planes=True,
+                make_primitive=params.make_primitive,
+                symmetrize=params.symmetrize,
+            )
+            orthogonal_slabs = [slab.get_orthogonal_c_slab() for slab in pymatgen_slabs]
+            slab_materials = [Material.create(from_pymatgen(slab)) for slab in orthogonal_slabs]
+        else:
+            # Use the new get_slabs method to get Material objects directly
+            slab_materials = atomic_layers.get_slabs(
+                min_vacuum_size=params.min_vacuum_size,
+                in_unit_planes=True,
+                make_primitive=params.make_primitive,
+                symmetrize=params.symmetrize,
+            )
+
+        stacked_slabs = []
+        for slab_material in slab_materials:
+            stacked = stack_two_components(
+                slab_material, vacuum, direction=configuration.direction
+            )
+            stacked_slabs.append(to_pymatgen(stacked))
+
+        return stacked_slabs
 
     def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
         materials = super()._post_process(items, post_process_parameters)
