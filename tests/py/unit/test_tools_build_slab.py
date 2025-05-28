@@ -71,7 +71,7 @@ def test_build_slab():
     #     termination_top=terminations[0],
     # )
 
-    vacuum = VacuumConfiguration(direction=AxisEnum.z, size=5.0, is_orthogonal=True)
+    vacuum = VacuumConfiguration(direction=AxisEnum.z, size=5.0)
 
     slab_config = SlabConfiguration(
         supercell_xy=[[1, 0], [0, 1]], stack_components=[atomic_layers, vacuum], direction=AxisEnum.z

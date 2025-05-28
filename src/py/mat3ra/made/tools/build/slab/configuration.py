@@ -13,15 +13,17 @@ from mat3ra.esse.models.material.reusable.two_dimensional.crystal_lattice_planes
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import (
     SlabSchema,
     AxisEnum,
+    VacuumSchema,
 )
-from pydantic import BaseModel
+from pymatgen.core import Lattice
 
 from mat3ra.made.material import Material
 from .termination import Termination
 from .. import BaseConfigurationPydantic
 from ...convert import to_pymatgen, from_pymatgen
-from ...third_party import PymatgenSlab, PymatgenSpacegroupAnalyzer
+from ...third_party import PymatgenSlab
 from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination
+from ...third_party import PymatgenSpacegroupAnalyzer
 
 
 class CrystalLatticePlanes(CrystalLatticePlanesSchema):
@@ -85,53 +87,44 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
         )
         return [Material.create(from_pymatgen(slab)) for slab in pymatgen_slabs]
 
+    @staticmethod
+    def _strip_vacuum_from_pymatgen_slab(slab: PymatgenSlab, vacuum_to_remove: float) -> PymatgenSlab:
+        """Return a copy of *slab* with its c lattice vector shortened by
+        *vacuum_to_remove* Å (negative values add vacuum).  Works only when the
+        c‑vector is the out‑of‑plane direction, as is the case for PymatgenSlab."""
+        old_c = slab.lattice.c
+        new_c = old_c - vacuum_to_remove
+        scale = old_c / new_c
 
-# termination = CrystalLatticePlanesSchema.get_terminations()
+        # new lattice
+        a, b, c_vec = slab.lattice.matrix
+        new_lattice = Lattice([a, b, c_vec * (new_c / old_c)])
+
+        # rescale fractional z so atoms stay in place
+        new_frac = slab.frac_coords.copy()
+        new_frac[:, 2] *= scale
+        new_frac %= 1.0  # wrap back into cell
+
+        return PymatgenSlab(
+            lattice=new_lattice,
+            species=slab.species_and_occu,
+            coords=new_frac,
+            miller_index=slab.miller_index,
+            oriented_unit_cell=slab.oriented_unit_cell,
+            shift=slab.shift,
+            scale_factor=slab.scale_factor,
+            reorient_lattice=slab.reorient_lattice,
+            site_properties=slab.site_properties,
+            energy=slab.energy,
+        )
 
 
 class AtomicLayers(AtomicLayersSchema, CrystalLatticePlanes):
-    # terminations: List[Termination]
     pass
 
 
 class AtomicLayersUnique(AtomicLayersUniqueSchema, CrystalLatticePlanes):
-    # terminations: List[Termination]
     pass
-
-
-from pymatgen.core import Lattice
-from ...third_party import PymatgenSlab
-
-
-def _strip_vacuum_from_pymatgen_slab(slab: PymatgenSlab, vacuum_to_remove: float) -> PymatgenSlab:
-    """Return a copy of *slab* with its c lattice vector shortened by
-    *vacuum_to_remove* Å (negative values add vacuum).  Works only when the
-    c‑vector is the out‑of‑plane direction, as is the case for PymatgenSlab."""
-    old_c = slab.lattice.c
-    new_c = old_c - vacuum_to_remove
-    scale = old_c / new_c
-
-    # new lattice
-    a, b, c_vec = slab.lattice.matrix
-    new_lattice = Lattice([a, b, c_vec * (new_c / old_c)])
-
-    # rescale fractional z so atoms stay in place
-    new_frac = slab.frac_coords.copy()
-    new_frac[:, 2] *= scale
-    new_frac %= 1.0  # wrap back into cell
-
-    return PymatgenSlab(
-        lattice=new_lattice,
-        species=slab.species_and_occu,
-        coords=new_frac,
-        miller_index=slab.miller_index,
-        oriented_unit_cell=slab.oriented_unit_cell,
-        shift=slab.shift,
-        scale_factor=slab.scale_factor,
-        reorient_lattice=slab.reorient_lattice,
-        site_properties=slab.site_properties,
-        energy=slab.energy,
-    )
 
 
 class AtomicLayersUniqueRepeated(AtomicLayersUniqueRepeatedSchema, CrystalLatticePlanes):
@@ -151,24 +144,21 @@ class AtomicLayersUniqueRepeated(AtomicLayersUniqueRepeatedSchema, CrystalLattic
         in_unit_planes = kwargs.get("in_unit_planes", True)
         added_vacuum = min_vacuum_size * self.crystal.lattice.c if in_unit_planes else min_vacuum_size
 
-        no_vac_slabs = [_strip_vacuum_from_pymatgen_slab(slab, added_vacuum) for slab in raw_slabs]
+        no_vac_slabs = [self._strip_vacuum_from_pymatgen_slab(slab, added_vacuum) for slab in raw_slabs]
         return no_vac_slabs
 
 
-# TODO: fix pydantic generation in ESSE and use
-class VacuumConfiguration(BaseModel):
+class VacuumConfiguration(VacuumSchema):
     """
     Configuration for adding vacuum to a material.
 
     Args:
         direction (AxisEnum): The direction to add vacuum along (x, y, or z).
         size (float): Size of the vacuum gap in angstroms. Defaults to 10.0.
-        is_orthogonal (bool): Whether the vacuum slab is orthogonal to the specified direction. Defaults to True.
     """
 
-    direction: AxisEnum
-    size: float = 10.0
-    is_orthogonal: bool = True
+    direction: AxisEnum = VacuumSchema.model_fields["direction"].default
+    size: float = VacuumSchema.model_fields["size"].default
 
 
 class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
@@ -254,7 +244,6 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
         vacuum_config = VacuumConfiguration(
             direction=AxisEnum.z,
             size=vacuum,
-            is_orthogonal=use_orthogonal_z,
         )
 
         return cls(
