@@ -40,6 +40,7 @@ from ...utils import (
 )
 from ..utils import merge_materials
 from ..slab import SlabConfiguration, create_slab, Termination
+from ..slab.configuration import AtomicLayersUniqueRepeated, VacuumConfiguration
 from ..supercell import create_supercell
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import (
@@ -197,10 +198,35 @@ class SlabDefectBuilder(DefectBuilder):
 
         if build_config["type"] != "SlabConfiguration":
             raise ValueError("Material is not a slab.")
-        build_config.pop("type")
-        build_config["number_of_layers"] = build_config["number_of_layers"] + added_thickness
 
-        new_slab_config = SlabConfiguration(**build_config)
+        # Handle both old and new configuration formats
+        if "number_of_layers" in build_config:
+            # Old format - use from_legacy_parameters
+            build_config_copy = build_config.copy()
+            build_config_copy.pop("type", None)
+            build_config_copy["number_of_layers"] = build_config_copy["number_of_layers"] + added_thickness
+            new_slab_config = SlabConfiguration.from_parameters(**build_config_copy)
+        else:
+            # New format - extract information from stack_components
+            original_config = SlabConfiguration(**build_config)
+            atomic_layers = original_config.stack_components[0]
+            vacuum_config = original_config.stack_components[1] if len(original_config.stack_components) > 1 else None
+
+            # Create new atomic layers with increased repetitions
+            new_atomic_layers = AtomicLayersUniqueRepeated(
+                crystal=atomic_layers.crystal,
+                miller_indices=atomic_layers.miller_indices,
+                number_of_repetitions=atomic_layers.number_of_repetitions + added_thickness,
+                use_conventional_cell=getattr(atomic_layers, "use_conventional_cell", False),
+                termination_top=atomic_layers.termination_top,
+            )
+
+            new_slab_config = SlabConfiguration(
+                stack_components=[new_atomic_layers, vacuum_config] if vacuum_config else [new_atomic_layers],
+                supercell_xy=original_config.supercell_xy,
+                direction=original_config.direction,
+            )
+
         material_with_additional_layers = create_slab(new_slab_config, termination)
 
         return material_with_additional_layers

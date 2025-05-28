@@ -61,7 +61,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
             supercell_matrix = np.zeros((3, 3))
             supercell_matrix[:2, :2] = configuration.slab_configuration.xy_supercell_matrix
             supercell_matrix[2, 2] = configuration.slab_configuration.thickness
-            final_slab_config = SlabConfiguration.from_legacy_parameters(
+            final_slab_config = SlabConfiguration.from_parameters(
                 bulk=interface,
                 vacuum=configuration.slab_configuration.vacuum,
                 miller_indices=configuration.slab_configuration.miller_indices,

@@ -177,8 +177,36 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
     supercell_xy: List[List[int]]
     direction: AxisEnum = AxisEnum.z
 
+    # TODO: This is for backward compatibility with legacy code.
+    @property
+    def bulk(self) -> Material:
+        """Get the bulk material from the first atomic layer component for backward compatibility."""
+        atomic_layers = self.stack_components[0]
+        if hasattr(atomic_layers, "crystal"):
+            return atomic_layers.crystal
+        else:
+            raise AttributeError("No crystal found in stack components")
+
+    @property
+    def miller_indices(self) -> tuple:
+        """Get the miller indices from the first atomic layer component for backward compatibility."""
+        atomic_layers = self.stack_components[0]
+        if hasattr(atomic_layers, "miller_indices"):
+            return atomic_layers.miller_indices
+        else:
+            raise AttributeError("No miller_indices found in stack components")
+
+    @property
+    def number_of_layers(self) -> int:
+        """Get the number of layers from the first atomic layer component for backward compatibility."""
+        atomic_layers = self.stack_components[0]
+        if hasattr(atomic_layers, "number_of_repetitions"):
+            return atomic_layers.number_of_repetitions
+        else:
+            raise AttributeError("No number_of_repetitions found in stack components")
+
     @classmethod
-    def from_legacy_parameters(
+    def from_parameters(
         cls,
         bulk: Material,
         miller_indices: tuple = (0, 0, 1),
@@ -187,12 +215,12 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
         xy_supercell_matrix: List[List[int]] = None,
         use_conventional_cell: bool = False,
         use_orthogonal_z: bool = True,
-        make_primitive: bool = False,
-        **kwargs
+        termination_index: int = 0,
+        **kwargs,
     ) -> "SlabConfiguration":
         """
         Create SlabConfiguration from legacy parameters for backward compatibility.
-        
+
         Args:
             bulk: The bulk material
             miller_indices: Miller indices for the surface
@@ -201,23 +229,20 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
             xy_supercell_matrix: Supercell matrix for xy directions
             use_conventional_cell: Whether to use conventional cell
             use_orthogonal_z: Whether to use orthogonal z
-            make_primitive: Whether to make primitive
+            termination_index: Index of the termination to use
         """
         if xy_supercell_matrix is None:
             xy_supercell_matrix = [[1, 0], [0, 1]]
-            
-        # Create atomic layers component with a temporary configuration to get terminations
+
         temp_planes = CrystalLatticePlanes(
             crystal=bulk,
             miller_indices=miller_indices,
             use_conventional_cell=use_conventional_cell,
         )
-        
-        # Get the first available termination
+
         available_terminations = temp_planes.get_terminations()
-        termination = available_terminations[0] if available_terminations else Termination("Si", "P4/mmm_1")
-        
-        # Create atomic layers component
+        termination = available_terminations[termination_index]
+
         atomic_layers = AtomicLayersUniqueRepeated(
             crystal=bulk,
             miller_indices=miller_indices,
@@ -225,17 +250,16 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
             use_conventional_cell=use_conventional_cell,
             termination_top=termination,
         )
-        
-        # Create vacuum component
+
         vacuum_config = VacuumConfiguration(
             direction=AxisEnum.z,
             size=vacuum,
             is_orthogonal=use_orthogonal_z,
         )
-        
+
         return cls(
             stack_components=[atomic_layers, vacuum_config],
             supercell_xy=xy_supercell_matrix,
             direction=AxisEnum.z,
-            **kwargs
+            **kwargs,
         )

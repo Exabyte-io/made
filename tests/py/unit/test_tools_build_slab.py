@@ -77,7 +77,7 @@ def test_build_slab():
         supercell_xy=[[1, 0], [0, 1]], stack_components=[atomic_layers, vacuum], direction=AxisEnum.z
     )
 
-    params = SlabBuilderParameters(min_vacuum_size=1, reorient_lattice=True, symmetrize=True)
+    params = SlabBuilderParameters(min_vacuum_size=1, reorient_lattice=True, symmetrize=True, make_primitive=True)
 
     slab = create_slab(slab_config, build_parameters=params)
 

@@ -21,8 +21,8 @@ INTERFACE_ATOMS.set_tags([1] * len(substrate) + [2] * len(film))
 SUBSTRATE_MATERIAL = Material.create(from_ase(substrate))
 FILM_MATERIAL = Material.create(from_ase(film))
 
-SUBSTRATE_CONFIGURATION = SlabConfiguration.from_legacy_parameters(bulk=SUBSTRATE_MATERIAL, number_of_layers=3)
-FILM_CONFIGURATION = SlabConfiguration.from_legacy_parameters(bulk=FILM_MATERIAL)
+SUBSTRATE_CONFIGURATION = SlabConfiguration.from_parameters(bulk=SUBSTRATE_MATERIAL, number_of_layers=3)
+FILM_CONFIGURATION = SlabConfiguration.from_parameters(bulk=FILM_MATERIAL)
 
 substrate_terminations = get_terminations(SUBSTRATE_CONFIGURATION)
 film_terminations = get_terminations(FILM_CONFIGURATION)
@@ -62,7 +62,7 @@ INTERFACE_NAME = "Cu4(001)-Si8(001), Interface, Strain 0.062pct"
 
 
 clean_material = Material.create_default()
-slab_111_config = SlabConfiguration.from_legacy_parameters(
+slab_111_config = SlabConfiguration.from_parameters(
     bulk=clean_material,
     miller_indices=(1, 1, 1),
     number_of_layers=4,
@@ -73,7 +73,7 @@ slab_111_config = SlabConfiguration.from_legacy_parameters(
 t_111 = get_terminations(slab_111_config)[0]
 SLAB_111 = create_slab(slab_111_config, t_111)
 
-slab_001_config = SlabConfiguration.from_legacy_parameters(
+slab_001_config = SlabConfiguration.from_parameters(
     bulk=clean_material,
     miller_indices=(0, 0, 1),
     number_of_layers=3,
