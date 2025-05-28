@@ -34,7 +34,7 @@ class SlabBasedNanoparticleBuilder(BaseBuilder):
         return coordinate_condition.condition
 
     def _create_slab(self, config: _ConfigurationType) -> Material:
-        slab_config = SlabConfiguration(
+        slab_config = SlabConfiguration.from_legacy_parameters(
             bulk=config.material,
             miller_indices=config.orientation_z,
             number_of_layers=config.supercell_size,

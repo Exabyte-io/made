@@ -176,3 +176,66 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
     stack_components: List[Union[AtomicLayersUniqueRepeated, VacuumConfiguration]]
     supercell_xy: List[List[int]]
     direction: AxisEnum = AxisEnum.z
+
+    @classmethod
+    def from_legacy_parameters(
+        cls,
+        bulk: Material,
+        miller_indices: tuple = (0, 0, 1),
+        number_of_layers: int = 1,
+        vacuum: float = 10.0,
+        xy_supercell_matrix: List[List[int]] = None,
+        use_conventional_cell: bool = False,
+        use_orthogonal_z: bool = True,
+        make_primitive: bool = False,
+        **kwargs
+    ) -> "SlabConfiguration":
+        """
+        Create SlabConfiguration from legacy parameters for backward compatibility.
+        
+        Args:
+            bulk: The bulk material
+            miller_indices: Miller indices for the surface
+            number_of_layers: Number of atomic layers
+            vacuum: Vacuum size in Angstroms
+            xy_supercell_matrix: Supercell matrix for xy directions
+            use_conventional_cell: Whether to use conventional cell
+            use_orthogonal_z: Whether to use orthogonal z
+            make_primitive: Whether to make primitive
+        """
+        if xy_supercell_matrix is None:
+            xy_supercell_matrix = [[1, 0], [0, 1]]
+            
+        # Create atomic layers component with a temporary configuration to get terminations
+        temp_planes = CrystalLatticePlanes(
+            crystal=bulk,
+            miller_indices=miller_indices,
+            use_conventional_cell=use_conventional_cell,
+        )
+        
+        # Get the first available termination
+        available_terminations = temp_planes.get_terminations()
+        termination = available_terminations[0] if available_terminations else Termination("Si", "P4/mmm_1")
+        
+        # Create atomic layers component
+        atomic_layers = AtomicLayersUniqueRepeated(
+            crystal=bulk,
+            miller_indices=miller_indices,
+            number_of_repetitions=number_of_layers,
+            use_conventional_cell=use_conventional_cell,
+            termination_top=termination,
+        )
+        
+        # Create vacuum component
+        vacuum_config = VacuumConfiguration(
+            direction=AxisEnum.z,
+            size=vacuum,
+            is_orthogonal=use_orthogonal_z,
+        )
+        
+        return cls(
+            stack_components=[atomic_layers, vacuum_config],
+            supercell_xy=xy_supercell_matrix,
+            direction=AxisEnum.z,
+            **kwargs
+        )
