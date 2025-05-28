@@ -1,13 +1,13 @@
 from typing import List, Union
 
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.atomic_layers import AtomicLayersSchema
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.atomic_layers_unique import (
+from mat3ra.esse.models.material.reusable.two_dimensional.atomic_layers import AtomicLayersSchema
+from mat3ra.esse.models.material.reusable.two_dimensional.atomic_layers_unique import (
     AtomicLayersUniqueSchema,
 )
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.atomic_layers_unique_repeated import (
+from mat3ra.esse.models.material.reusable.two_dimensional.atomic_layers_unique_repeated import (
     AtomicLayersUniqueRepeatedSchema,
 )
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.crystal_lattice_planes import (
+from mat3ra.esse.models.material.reusable.two_dimensional.crystal_lattice_planes import (
     CrystalLatticePlanesSchema,
 )
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import (
@@ -147,9 +147,9 @@ class AtomicLayersUniqueRepeated(AtomicLayersUniqueRepeatedSchema, CrystalLattic
             symmetrize=kwargs.get("symmetrize", False),
         )
 
-        min_vacuum_size_uc = kwargs.get("min_vacuum_size", 1)
+        min_vacuum_size = kwargs.get("min_vacuum_size", 1)
         in_unit_planes = kwargs.get("in_unit_planes", True)
-        added_vacuum = min_vacuum_size_uc * self.crystal.lattice.c if in_unit_planes else min_vacuum_size_uc
+        added_vacuum = min_vacuum_size * self.crystal.lattice.c if in_unit_planes else min_vacuum_size
 
         no_vac_slabs = [_strip_vacuum_from_pymatgen_slab(slab, added_vacuum) for slab in raw_slabs]
         return no_vac_slabs

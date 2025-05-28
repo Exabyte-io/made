@@ -1,4 +1,4 @@
-from mat3ra.esse.models.material.reusable.slab.termination import TerminationSchema
+from mat3ra.esse.models.material.primitive.two_dimensional.termination import TerminationSchema
 
 
 class Termination(TerminationSchema):
