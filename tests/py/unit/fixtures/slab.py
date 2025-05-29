@@ -53,7 +53,7 @@ SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
 }
 
 SI_SLAB_001: Dict[str, Any] = {
-    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "constraints": [],
         "coordinates": [
@@ -93,7 +93,7 @@ SI_SLAB_001: Dict[str, Any] = {
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
-            "termination": "Si_P4/mmm_1",
+            "termination": "Si_P4/mmm_2",
             "configuration": {
                 "type": "SlabConfiguration",
                 "stack_components": [

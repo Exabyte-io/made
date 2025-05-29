@@ -56,7 +56,7 @@ def test_build_slab():
 
     slab = create_slab(slab_config, build_parameters=params)
 
-    assert_two_entities_deep_almost_equal(slab, SI_SLAB_001_2_ATOMS)
+    assert_two_entities_deep_almost_equal(slab, SI_SLAB_001)
 
 
 def test_build_slab_from_parameters():
