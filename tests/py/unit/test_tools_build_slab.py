@@ -26,11 +26,11 @@ XY_SUPERCELL_MATRIX = SI_SLAB_001_CONFIGURATION["xy_supercell_matrix"]
 
 
 def test_get_terminations():
-
     crystal_lattice_planes = CrystalLatticePlanes(crystal=material, miller_indices=MILLER_INDICES)
     terminations = crystal_lattice_planes.get_terminations()
     print("Available terminations:", [str(t) for t in terminations])
-    assert len(terminations) > 0, "No terminations found for the given crystal and miller indices."
+    expected_termination = Termination.from_string("Si_R-3m_1")
+    assert_two_entities_deep_almost_equal(terminations[0], expected_termination)
 
 
 def test_build_slab():

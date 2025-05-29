@@ -1,7 +1,8 @@
+from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.material.primitive.two_dimensional.termination import TerminationSchema
 
 
-class Termination(TerminationSchema):
+class Termination(TerminationSchema, InMemoryEntityPydantic):
     def __str__(self):
         return f"{self.chemical_elements}_{self.space_group_symmetry_label}"
 
