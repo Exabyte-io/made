@@ -157,6 +157,7 @@ class VacuumConfiguration(VacuumConfigurationSchema):
         size (float): Size of the vacuum gap in angstroms. Defaults to 10.0.
     """
 
+    type: str = "VacuumConfiguration"
     direction: AxisEnum = VacuumConfigurationSchema.model_fields["direction"].default
     size: float = VacuumConfigurationSchema.model_fields["size"].default
 
@@ -241,8 +242,8 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
         )
 
         # Get direction from kwargs or use default
-        direction = kwargs.pop('direction', AxisEnum.z)
-        
+        direction = kwargs.pop("direction", AxisEnum.z)
+
         return cls(
             stack_components=[atomic_layers, vacuum_config],
             xy_supercell_matrix=xy_supercell_matrix,
