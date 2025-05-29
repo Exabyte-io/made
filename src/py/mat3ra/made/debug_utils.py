@@ -5,9 +5,11 @@ import webbrowser
 
 # Use a default div id
 default_div_id = "wave-div"
+default_width = 1200
+default_height = 1200
 
 
-def get_wave_html(div_id=default_div_id, width=600, height=600, title="Material"):
+def get_wave_html(div_id=default_div_id, width=default_width, height=default_height, title="Material"):
     size = min(width, height)  # Make it square using the smaller dimension
     return f"""
     <h2>{title}</h2>
@@ -34,7 +36,7 @@ def get_wave_js(material_json, div_id=default_div_id):
     )
 
 
-def debug_visualize_material(material, width=600, height=600, title="Material"):
+def debug_visualize_material(material, width=default_width, height=default_height, title="Material"):
     """
     Generates a temporary HTML file that uses Wave.js to visualize the material,
     and opens it in the default browser.
@@ -44,7 +46,7 @@ def debug_visualize_material(material, width=600, height=600, title="Material"):
     # Convert your material to JSON.
     # (Assuming material.to_json() returns a JSON-serializable object)
     material_json = material.to_json()
-    title = material.name
+    title = material.name if hasattr(material, "name") else title
     # Generate a unique div id so multiple calls don't conflict
     div_id = f"wave-{int(time.time())}"
 
