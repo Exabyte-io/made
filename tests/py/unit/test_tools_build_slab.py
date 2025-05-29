@@ -1,9 +1,10 @@
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab import (
     SlabBuilderParameters,
     SlabConfiguration,
     create_slab,
-    get_terminations,
 )
 from mat3ra.made.tools.build.slab.configuration import (
     CrystalLatticePlanes,
@@ -11,11 +12,8 @@ from mat3ra.made.tools.build.slab.configuration import (
     VacuumConfiguration,
     Termination,
 )
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import AxisEnum
-from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_DEFAULT_PARAMETERS, SI_SLAB_001_2_ATOMS, SI_SLAB_001_CONFIGURATION
-
+from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_DEFAULT_PARAMETERS, SI_SLAB_001_CONFIGURATION, SI_SLAB_001_2_ATOMS
 from .utils import assert_two_entities_deep_almost_equal
-
 
 material = Material.create_default()
 MILLER_INDICES = SI_SLAB_001_CONFIGURATION["miller_indices"]
@@ -72,21 +70,10 @@ def test_build_slab_from_parameters():
 
 
 def test_build_slab_with_default_parameters():
-    # Create atomic layers component with default parameters
-    atomic_layers = AtomicLayersUniqueRepeated(
-        crystal=material,
-        miller_indices=MILLER_INDICES,
-        number_of_repetitions=1,
-        termination_top=Termination.from_string("Si_P4/mmm_1"),
-        use_conventional_cell=True,
-    )
 
-    # Create vacuum component with default parameters
-    vacuum = VacuumConfiguration(direction=AxisEnum.z)
-
-    # Create slab configuration with required fields
-    slab_config = SlabConfiguration(
-        xy_supercell_matrix=[[1, 0], [0, 1]], stack_components=[atomic_layers, vacuum], direction=AxisEnum.z
+    # Create slab configuration with minimal set up
+    slab_config = SlabConfiguration.from_parameters(
+        bulk=material,
     )
     slab = create_slab(slab_config)
     assert_two_entities_deep_almost_equal(slab, SI_SLAB_DEFAULT_PARAMETERS)

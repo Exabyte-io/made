@@ -200,7 +200,7 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
         number_of_layers: int = 1,
         vacuum: float = 10.0,
         xy_supercell_matrix: List[List[int]] = None,
-        use_conventional_cell: bool = False,
+        use_conventional_cell: bool = True,
         termination_index: int = 0,
         **kwargs,
     ) -> "SlabConfiguration":
