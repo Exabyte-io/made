@@ -122,7 +122,7 @@ def test_create_adatom():
     defect = create_slab_defect(configuration=configuration, builder=None)
 
     assert defect.basis.elements.values[-1] == "Si"
-    assertion_utils.assert_deep_almost_equal([0.5, 0.5, 0.872332562], defect.basis.coordinates.values[-1])
+    assertion_utils.assert_deep_almost_equal([0.5, 0.5, 0.7217315], defect.basis.coordinates.values[-1])
 
 
 def test_create_adatom_equidistant():

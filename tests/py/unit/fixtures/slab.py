@@ -8,16 +8,22 @@ SI_SLAB_001_CONFIGURATION: Dict[str, Any] = {
     "type": "SlabConfiguration",
     "bulk": SI_CONVENTIONAL_CELL,
     "miller_indices": (0, 0, 1),
-    "number_of_layers": 1,
+    "number_of_layers": 2,
     "vacuum": 5.0,
     "xy_supercell_matrix": [[1, 0], [0, 1]],
     "use_conventional_cell": True,
-    "use_orthogonal_z": True,
+}
+
+SI_SLAB_001_BUILD_PARAMETERS: Dict[str, Any] = {
+    "min_vacuum_size": 1.0,
+    "reorient_lattice": True,
+    "symmetrize": True,
     "make_primitive": True,
+    "use_orthogonal_c": True,
 }
 
 
-SI_SLAB_001: Dict[str, Any] = {
+SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
     "name": "Si8(001), termination Si_P4/mmm_1, Slab",
     "basis": {
         "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
@@ -46,8 +52,8 @@ SI_SLAB_001: Dict[str, Any] = {
     },
 }
 
-SI_SLAB_100: Dict[str, Any] = {
-    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+SI_SLAB_001: Dict[str, Any] = {
+    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -87,8 +93,8 @@ SI_SLAB_100: Dict[str, Any] = {
             "b": [0.0, 3.867, 0.0],
             "c": [0.0, 0.0, 15.937527692],
             "alat": 1,
-            "units": "angstrom"
-        }
+            "units": "angstrom",
+        },
     },
     "isNonPeriodic": False,
     "metadata": {
@@ -185,7 +191,7 @@ SI_SLAB_PASSIVATED = {
             "configuration": {
                 "type": "PassivationConfiguration",
                 # TODO: `basis` retains "cell" leading to a mismatch in the test
-                "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], SI_SLAB_001).pop("cell", None),
+                "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], SI_SLAB_001_2_ATOMS).pop("cell", None),
                 "passivant": "H",
                 "bond_length": 1.48,
                 "surface": "both",
@@ -196,7 +202,7 @@ SI_SLAB_PASSIVATED = {
 }
 
 
-SI_SLAB_001_WITH_VACUUM = copy.deepcopy(SI_SLAB_001)
+SI_SLAB_001_WITH_VACUUM = copy.deepcopy(SI_SLAB_001_2_ATOMS)
 SI_SLAB_001_WITH_VACUUM["lattice"]["c"] = 13.157392279
 # The crystal xy coordinates are the same as SI_SLAB_001, but the z-coordinates are different
 SI_SLAB_001_WITH_VACUUM["basis"]["coordinates"] = [

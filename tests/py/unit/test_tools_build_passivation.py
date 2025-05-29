@@ -9,13 +9,13 @@ from mat3ra.made.tools.build.passivation.builders import (
 from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
 
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED
-from .fixtures.slab import SI_SLAB_001, SI_SLAB_PASSIVATED
+from .fixtures.slab import SI_SLAB_001_2_ATOMS, SI_SLAB_PASSIVATED
 from .utils import assert_two_entities_deep_almost_equal
 
 
 def test_passivate_surface():
     config = PassivationConfiguration(
-        slab=Material.create(SI_SLAB_001), passivant="H", bond_length=1.48, surface="both"
+        slab=Material.create(SI_SLAB_001_2_ATOMS), passivant="H", bond_length=1.48, surface="both"
     )
     builder = SurfacePassivationBuilder(
         build_parameters=SurfacePassivationBuilderParameters(shadowing_radius=2.5, depth=2.0)

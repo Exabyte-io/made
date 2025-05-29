@@ -7,7 +7,6 @@ from ..third_party import PymatgenSpacegroupAnalyzer
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
     def __init__(self, material: Material):
-        material.basis.cell = material.lattice.vectors
         super().__init__(material)
         self.spacegroup_analyzer = PymatgenSpacegroupAnalyzer(to_pymatgen(self.material))
 

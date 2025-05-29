@@ -18,9 +18,12 @@ def get_terminations(
 
 def create_slab(
     configuration: SlabConfiguration,
+    termination: Optional[Termination] = None,
     build_parameters: Optional[SlabBuilderParameters] = None,
     use_cached_builder: bool = True,
 ) -> Material:
+    if termination:
+        configuration.stack_components[0].termination_top = termination
     builder = (
         CACHED_BUILDER if use_cached_builder and CACHED_BUILDER else SlabBuilder(build_parameters=build_parameters)
     )

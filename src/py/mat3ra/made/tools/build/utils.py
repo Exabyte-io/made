@@ -185,7 +185,7 @@ def stack_two_materials(
     material2_translated = material_2.clone()
     # The translation amount is the original lattice vector of material1 in the stacking direction
     translation_vec = material_1_lattice_vectors[lattice_vector_index]
-    translate_by_vector(material2_translated, translation_vec, use_cartesian_coordinates=True)
+    material2_translated = translate_by_vector(material2_translated, translation_vec, use_cartesian_coordinates=True)
 
     stacked_material = merge_two_materials(
         material1=material_1_final_lattice_config,

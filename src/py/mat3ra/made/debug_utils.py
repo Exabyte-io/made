@@ -44,7 +44,7 @@ def debug_visualize_material(material, width=600, height=600, title="Material"):
     # Convert your material to JSON.
     # (Assuming material.to_json() returns a JSON-serializable object)
     material_json = material.to_json()
-
+    title = material.name
     # Generate a unique div id so multiple calls don't conflict
     div_id = f"wave-{int(time.time())}"
 

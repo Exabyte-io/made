@@ -31,7 +31,7 @@ class SlabBuilderParameters(PymatgenSlabGeneratorParameters):
 
 
 class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
-    build_parameters: Optional[SlabBuilderParameters] = None
+    build_parameters: Optional[SlabBuilderParameters] = SlabBuilderParameters()
     _ConfigurationType: type(SlabConfiguration) = SlabConfiguration  # type: ignore
     _GeneratedItemType: Material = Material  # type: ignore
     _SelectorParametersType: type(SlabSelectorParameters) = SlabSelectorParameters  # type: ignore
@@ -76,7 +76,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
 
     def _post_process(self, items: List[Material], post_process_parameters=None) -> List[Material]:
         materials = items
-        materials = [create_supercell(material, self._configuration.supercell_xy) for material in materials]
+        materials = [create_supercell(material, self._configuration.xy_supercell_matrix) for material in materials]
 
         for material in materials:
             if "build" not in material.metadata:
@@ -84,6 +84,9 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             atomic_layers = self._configuration.stack_components[0]
             material.metadata["build"]["termination"] = str(atomic_layers.termination_top)
             material.metadata["build"]["configuration"] = self._configuration.to_dict()
+            material.metadata["build"]["build_parameters"] = (
+                self.build_parameters.model_dump() if self.build_parameters else {}
+            )
 
         return materials
 

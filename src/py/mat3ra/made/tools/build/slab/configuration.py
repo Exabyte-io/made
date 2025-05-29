@@ -11,9 +11,9 @@ from mat3ra.esse.models.material.reusable.two_dimensional.crystal_lattice_planes
     CrystalLatticePlanesSchema,
 )
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import (
-    SlabSchema,
+    SlabConfigurationSchema,
     AxisEnum,
-    VacuumSchema,
+    VacuumConfigurationSchema,
 )
 from pymatgen.core import Lattice
 
@@ -148,7 +148,7 @@ class AtomicLayersUniqueRepeated(AtomicLayersUniqueRepeatedSchema, CrystalLattic
         return no_vac_slabs
 
 
-class VacuumConfiguration(VacuumSchema):
+class VacuumConfiguration(VacuumConfigurationSchema):
     """
     Configuration for adding vacuum to a material.
 
@@ -157,20 +157,18 @@ class VacuumConfiguration(VacuumSchema):
         size (float): Size of the vacuum gap in angstroms. Defaults to 10.0.
     """
 
-    direction: AxisEnum = VacuumSchema.model_fields["direction"].default
-    size: float = VacuumSchema.model_fields["size"].default
+    direction: AxisEnum = VacuumConfigurationSchema.model_fields["direction"].default
+    size: float = VacuumConfigurationSchema.model_fields["size"].default
 
 
-class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
+class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
     type: str = "SlabConfiguration"
     stack_components: List[Union[AtomicLayersUniqueRepeated, VacuumConfiguration]]
-    supercell_xy: List[List[int]]
+    xy_supercell_matrix: List[List[int]] = SlabConfigurationSchema.model_fields["xy_supercell_matrix"].default
     direction: AxisEnum = AxisEnum.z
 
-    # TODO: This is for backward compatibility with legacy code.
     @property
     def bulk(self) -> Material:
-        """Get the bulk material from the first atomic layer component for backward compatibility."""
         atomic_layers = self.stack_components[0]
         if hasattr(atomic_layers, "crystal"):
             return atomic_layers.crystal
@@ -179,7 +177,6 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
 
     @property
     def miller_indices(self) -> tuple:
-        """Get the miller indices from the first atomic layer component for backward compatibility."""
         atomic_layers = self.stack_components[0]
         if hasattr(atomic_layers, "miller_indices"):
             return atomic_layers.miller_indices
@@ -188,7 +185,6 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
 
     @property
     def number_of_layers(self) -> int:
-        """Get the number of layers from the first atomic layer component for backward compatibility."""
         atomic_layers = self.stack_components[0]
         if hasattr(atomic_layers, "number_of_repetitions"):
             return atomic_layers.number_of_repetitions
@@ -204,12 +200,11 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
         vacuum: float = 10.0,
         xy_supercell_matrix: List[List[int]] = None,
         use_conventional_cell: bool = False,
-        use_orthogonal_z: bool = True,
         termination_index: int = 0,
         **kwargs,
     ) -> "SlabConfiguration":
         """
-        Create SlabConfiguration from legacy parameters for backward compatibility.
+        Create SlabConfiguration from parameters.
 
         Args:
             bulk: The bulk material
@@ -218,7 +213,6 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
             vacuum: Vacuum size in Angstroms
             xy_supercell_matrix: Supercell matrix for xy directions
             use_conventional_cell: Whether to use conventional cell
-            use_orthogonal_z: Whether to use orthogonal z
             termination_index: Index of the termination to use
         """
         if xy_supercell_matrix is None:
@@ -246,9 +240,12 @@ class SlabConfiguration(SlabSchema, BaseConfigurationPydantic):
             size=vacuum,
         )
 
+        # Get direction from kwargs or use default
+        direction = kwargs.pop('direction', AxisEnum.z)
+        
         return cls(
             stack_components=[atomic_layers, vacuum_config],
-            supercell_xy=xy_supercell_matrix,
-            direction=AxisEnum.z,
+            xy_supercell_matrix=xy_supercell_matrix,
+            direction=direction,
             **kwargs,
         )
