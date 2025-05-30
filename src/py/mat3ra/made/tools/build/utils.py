@@ -1,4 +1,4 @@
-from typing import List, Optional, Union, TYPE_CHECKING
+from typing import List, Optional, Union
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
@@ -7,13 +7,12 @@ from scipy.spatial import cKDTree
 
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
-from mat3ra.made.tools.modify import get_atomic_coordinates_extremum, translate_by_vector, add_vacuum
+from mat3ra.made.tools.modify import translate_by_vector
+
+from .slab.configuration import VacuumConfiguration
 from .supercell import create_supercell
 from ..modify import filter_by_box
 from ..utils import AXIS_TO_INDEX_MAP
-
-if TYPE_CHECKING:
-    from .slab.configuration import VacuumConfiguration
 
 
 def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.1) -> Basis:
@@ -251,16 +250,15 @@ def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration") -
     Returns:
         Material: Vacuum material with empty basis.
     """
-    a_vec, b_vec = reference.lattice.vector_arrays[:2]
-    vac_lattice = reference.lattice.from_vectors_array(
-        [a_vec, b_vec, [0, 0, vacuum.size]], reference.lattice.units, reference.lattice.type
+    a_vector, b_vector = reference.lattice.vector_arrays[:2]
+    vacuum_lattice = reference.lattice.from_vectors_array(
+        [a_vector, b_vector, [0, 0, vacuum.size]], reference.lattice.units, reference.lattice.type
     )
     return Material.create(
         {
             "name": "Vacuum",
-            "lattice": vac_lattice.to_dict(),
+            "lattice": vacuum_lattice.to_dict(),
             "basis": {"elements": [], "coordinates": []},
-            "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
         }
     )
 
@@ -270,8 +268,6 @@ def stack_two_components(
     component2: Union[Material, "VacuumConfiguration"],
     direction: AxisEnum,
 ) -> Material:
-    # Import here to avoid circular import
-    from .slab.configuration import VacuumConfiguration
 
     if isinstance(component1, Material):
         reference_material = component1

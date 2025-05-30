@@ -1,4 +1,4 @@
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import AxisEnum
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab import (
@@ -12,7 +12,7 @@ from mat3ra.made.tools.build.slab.configuration import (
     VacuumConfiguration,
     Termination,
 )
-from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_DEFAULT_PARAMETERS, SI_SLAB_001_CONFIGURATION, SI_SLAB_001_2_ATOMS
+from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_DEFAULT_PARAMETERS, SI_SLAB_001_CONFIGURATION
 from .utils import assert_two_entities_deep_almost_equal
 
 material = Material.create_default()

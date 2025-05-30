@@ -97,8 +97,8 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
         scale = old_c / new_c
 
         # new lattice
-        a, b, c_vec = slab.lattice.matrix
-        new_lattice = Lattice([a, b, c_vec * (new_c / old_c)])
+        a, b, c_vector = slab.lattice.matrix
+        new_lattice = Lattice([a, b, c_vector * (new_c / old_c)])
 
         # rescale fractional z so atoms stay in place
         new_frac = slab.frac_coords.copy()
@@ -144,8 +144,8 @@ class AtomicLayersUniqueRepeated(AtomicLayersUniqueRepeatedSchema, CrystalLattic
         in_unit_planes = kwargs.get("in_unit_planes", True)
         added_vacuum = min_vacuum_size * self.crystal.lattice.c if in_unit_planes else min_vacuum_size
 
-        no_vac_slabs = [self._strip_vacuum_from_pymatgen_slab(slab, added_vacuum) for slab in raw_slabs]
-        return no_vac_slabs
+        no_vacuum_slabs = [self._strip_vacuum_from_pymatgen_slab(slab, added_vacuum) for slab in raw_slabs]
+        return no_vacuum_slabs
 
 
 class VacuumConfiguration(VacuumConfigurationSchema):
