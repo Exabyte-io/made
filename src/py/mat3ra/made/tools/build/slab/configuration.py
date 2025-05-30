@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Optional
 
 from mat3ra.esse.models.material.reusable.two_dimensional.atomic_layers import AtomicLayersSchema
 from mat3ra.esse.models.material.reusable.two_dimensional.atomic_layers_unique import (
@@ -165,32 +165,27 @@ class VacuumConfiguration(VacuumConfigurationSchema):
 class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
     type: str = "SlabConfiguration"
     stack_components: List[Union[AtomicLayersUniqueRepeated, VacuumConfiguration]]
-    xy_supercell_matrix: List[List[int]] = SlabConfigurationSchema.model_fields["xy_supercell_matrix"].default
+    xy_supercell_matrix: Optional[List[List[int]]] = SlabConfigurationSchema.model_fields["xy_supercell_matrix"].default
     direction: AxisEnum = AxisEnum.z
 
     @property
+    def atomic_layers(self) -> Union[AtomicLayersUniqueRepeated, AtomicLayersUnique]:
+        return self.stack_components[0]
+
+    @property
     def bulk(self) -> Material:
-        atomic_layers = self.stack_components[0]
-        if hasattr(atomic_layers, "crystal"):
-            return atomic_layers.crystal
-        else:
-            raise AttributeError("No crystal found in stack components")
+        atomic_layers = self.atomic_layers
+        return atomic_layers.crystal
 
     @property
     def miller_indices(self) -> tuple:
-        atomic_layers = self.stack_components[0]
-        if hasattr(atomic_layers, "miller_indices"):
-            return atomic_layers.miller_indices
-        else:
-            raise AttributeError("No miller_indices found in stack components")
+        atomic_layers = self.atomic_layers
+        return atomic_layers.miller_indices
 
     @property
     def number_of_layers(self) -> int:
-        atomic_layers = self.stack_components[0]
-        if hasattr(atomic_layers, "number_of_repetitions"):
-            return atomic_layers.number_of_repetitions
-        else:
-            raise AttributeError("No number_of_repetitions found in stack components")
+        atomic_layers = self.atomic_layers
+        return atomic_layers.number_of_repetitions
 
     @classmethod
     def from_parameters(
@@ -241,7 +236,6 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
             size=vacuum,
         )
 
-        # Get direction from kwargs or use default
         direction = kwargs.pop("direction", AxisEnum.z)
 
         return cls(

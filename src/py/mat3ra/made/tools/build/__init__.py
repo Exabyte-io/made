@@ -152,4 +152,7 @@ class BaseBuilder(BaseModel):
         if "build" not in material.metadata:
             material.metadata["build"] = {}
         material.metadata["build"]["configuration"] = configuration.to_json()
+        material.metadata["build"]["build_parameters"] = (
+            self.build_parameters.model_dump() if self.build_parameters else {}
+        )
         return material

@@ -42,11 +42,11 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
 
     def get_terminations(self, configuration: _ConfigurationType) -> List[Termination]:
         """Get available terminations for the given configuration."""
-        atomic_layers: AtomicLayersUniqueRepeated = configuration.stack_components[0]
+        atomic_layers: AtomicLayersUniqueRepeated = configuration.atomic_layers
         return atomic_layers.get_terminations()
 
     def _generate(self, configuration: _ConfigurationType) -> List[Material]:  # type: ignore
-        atomic_layers: AtomicLayersUniqueRepeated = configuration.stack_components[0]
+        atomic_layers: AtomicLayersUniqueRepeated = configuration.atomic_layers
         vacuum: VacuumConfiguration = configuration.stack_components[1]
         params = self.build_parameters or SlabBuilderParameters()
 
@@ -81,7 +81,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         for material in materials:
             if "build" not in material.metadata:
                 material.metadata["build"] = {}
-            atomic_layers = self._configuration.stack_components[0]
+            atomic_layers = self._configuration.atomic_layers
             material.metadata["build"]["termination"] = str(atomic_layers.termination_top)
             material.metadata["build"]["configuration"] = self._configuration.to_dict()
             material.metadata["build"]["build_parameters"] = (
@@ -91,7 +91,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         return materials
 
     def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
-        atomic_layers = configuration.stack_components[0]
+        atomic_layers = configuration.atomic_layers
 
         formula = get_chemical_formula(atomic_layers.crystal)
         miller_indices = "".join(str(i) for i in atomic_layers.miller_indices)
