@@ -13,7 +13,6 @@ from ..utils import stack_two_components
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from ...convert import from_pymatgen
 
 
 class SlabSelectorParameters(BaseModel):
@@ -50,23 +49,14 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         vacuum: VacuumConfiguration = configuration.stack_components[1]
         params = self.build_parameters or SlabBuilderParameters()
 
-        if params.use_orthogonal_c:
-            pymatgen_slabs = atomic_layers._generate_pymatgen_slabs(
-                min_vacuum_size=params.min_vacuum_size,
-                in_unit_planes=True,
-                make_primitive=params.make_primitive,
-                symmetrize=params.symmetrize,
-            )
-            orthogonal_slabs = [slab.get_orthogonal_c_slab() for slab in pymatgen_slabs]
-            slab_materials = [Material.create(from_pymatgen(slab)) for slab in orthogonal_slabs]
-        else:
-            slab_materials = atomic_layers.get_slabs(
-                min_vacuum_size=params.min_vacuum_size,
-                in_unit_planes=True,
-                make_primitive=params.make_primitive,
-                symmetrize=params.symmetrize,
-            )
-
+        slab_materials = atomic_layers.get_slabs(
+            min_slab_size=self._configuration.number_of_layers,
+            min_vacuum_size=0,
+            in_unit_planes=params.in_unit_planes,
+            make_primitive=False,
+            symmetrize=params.symmetrize,
+            use_orthogonal_c=params.use_orthogonal_c,
+        )
         stacked_materials = []
         for slab_material in slab_materials:
             stacked = stack_two_components(slab_material, vacuum, direction=configuration.direction)

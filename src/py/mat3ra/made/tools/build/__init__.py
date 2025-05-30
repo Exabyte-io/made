@@ -35,6 +35,9 @@ class BaseConfigurationPydantic(InMemoryEntityPydantic):
     def to_json(self):  # typing: ignore
         return self.to_dict()
 
+    def to_metadata(self) -> dict:
+        return self.model_dump(mode="json", exclude_none=True, exclude_unset=True)
+
 
 class BaseSelectorParameters(BaseModel):
     default_index: int = 0
