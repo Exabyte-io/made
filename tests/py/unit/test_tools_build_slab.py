@@ -15,7 +15,6 @@ from mat3ra.made.tools.build.slab.configuration import (
 from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_DEFAULT_PARAMETERS, SI_SLAB_001_CONFIGURATION
 from .utils import assert_two_entities_deep_almost_equal
 
-material = Material.create_default()
 MILLER_INDICES = SI_SLAB_001_CONFIGURATION["miller_indices"]
 USE_CONVENTIONAL_CELL = SI_SLAB_001_CONFIGURATION["use_conventional_cell"]
 NUMBER_OF_LAYERS = SI_SLAB_001_CONFIGURATION["number_of_layers"]
@@ -24,6 +23,7 @@ XY_SUPERCELL_MATRIX = SI_SLAB_001_CONFIGURATION["xy_supercell_matrix"]
 
 
 def test_get_terminations():
+    material = Material.create_default()
     crystal_lattice_planes = CrystalLatticePlanes(crystal=material, miller_indices=MILLER_INDICES)
     terminations = crystal_lattice_planes.get_terminations()
     print("Available terminations:", [str(t) for t in terminations])
@@ -32,6 +32,7 @@ def test_get_terminations():
 
 
 def test_build_slab():
+    material = Material.create_default()
     crystal_lattice_planes = CrystalLatticePlanes(
         crystal=material, miller_indices=MILLER_INDICES, use_conventional_cell=USE_CONVENTIONAL_CELL
     )
@@ -58,6 +59,7 @@ def test_build_slab():
 
 
 def test_build_slab_from_parameters():
+    material = Material.create_default()
     slab_config = SlabConfiguration.from_parameters(
         bulk=material,
         miller_indices=MILLER_INDICES,
@@ -70,6 +72,7 @@ def test_build_slab_from_parameters():
 
 
 def test_build_slab_with_default_parameters():
+    material = Material.create_default()
 
     # Create slab configuration with minimal set up
     slab_config = SlabConfiguration.from_parameters(
