@@ -72,12 +72,12 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
 
     def get_slabs(
         self,
-        min_slab_size=1,
-        min_vacuum_size=0,
-        in_unit_planes: bool = True,
-        make_primitive: bool = False,
-        symmetrize: bool = False,
-        use_orthogonal_c: bool = True,
+        min_slab_size: Union[float, int],
+        min_vacuum_size: Union[float, int],
+        in_unit_planes: bool,
+        make_primitive: bool,
+        symmetrize: bool,
+        use_orthogonal_c: bool,
     ) -> List[Material]:
 
         pymatgen_slabs = self._generate_pymatgen_slabs(

@@ -9,7 +9,6 @@ from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector
 
-from .slab.configuration import VacuumConfiguration
 from .supercell import create_supercell
 from ..modify import filter_by_box
 from ..utils import AXIS_TO_INDEX_MAP
@@ -250,6 +249,8 @@ def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration") -
     Returns:
         Material: Vacuum material with empty basis.
     """
+    from .slab.configuration import VacuumConfiguration
+    
     a_vector, b_vector = reference.lattice.vector_arrays[:2]
     vacuum_lattice = reference.lattice.from_vectors_array(
         [a_vector, b_vector, [0, 0, vacuum.size]], reference.lattice.units, reference.lattice.type
@@ -268,6 +269,7 @@ def stack_two_components(
     component2: Union[Material, "VacuumConfiguration"],
     direction: AxisEnum,
 ) -> Material:
+    from .slab.configuration import VacuumConfiguration
 
     if isinstance(component1, Material):
         reference_material = component1

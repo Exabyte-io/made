@@ -27,7 +27,7 @@ def test_get_terminations():
     crystal_lattice_planes = CrystalLatticePlanes(crystal=material, miller_indices=MILLER_INDICES)
     terminations = crystal_lattice_planes.get_terminations()
     print("Available terminations:", [str(t) for t in terminations])
-    expected_termination = Termination.from_string("Si_R-3m_1")
+    expected_termination = Termination.from_string("Si_Fm-3m_1")
     assert_two_entities_deep_almost_equal(terminations[0], expected_termination)
 
 
@@ -46,11 +46,11 @@ def test_build_slab():
         number_of_repetitions=NUMBER_OF_LAYERS,
         termination_top=terminations[0],
     )
-    vacuum = VacuumConfiguration(direction=AxisEnum.z, size=VACUUM)
+    vacuum = VacuumConfiguration(direction="z", size=VACUUM)
     slab_config = SlabConfiguration(
-        xy_supercell_matrix=XY_SUPERCELL_MATRIX, stack_components=[atomic_layers, vacuum], direction=AxisEnum.z
+        xy_supercell_matrix=XY_SUPERCELL_MATRIX, stack_components=[atomic_layers, vacuum], direction="z"
     )
-    params = SlabBuilderParameters(min_vacuum_size=1, reorient_lattice=True, symmetrize=True, make_primitive=True)
+    params = SlabBuilderParameters(min_vacuum_size=0, reorient_lattice=True, symmetrize=True, make_primitive=False)
 
     slab = create_slab(slab_config, build_parameters=params)
 

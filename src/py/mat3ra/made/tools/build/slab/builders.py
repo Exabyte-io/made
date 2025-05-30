@@ -25,7 +25,7 @@ class PymatgenSlabGeneratorParameters(PymatgenSlabGeneratorParametersSchema):
 
 
 class SlabBuilderParameters(PymatgenSlabGeneratorParameters):
-    make_primitive: bool = True
+    make_primitive: bool = False
     use_orthogonal_c: bool = True
 
 
@@ -51,9 +51,9 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
 
         slab_materials = atomic_layers.get_slabs(
             min_slab_size=self._configuration.number_of_layers,
-            min_vacuum_size=0,
+            min_vacuum_size=params.min_vacuum_size,
             in_unit_planes=params.in_unit_planes,
-            make_primitive=False,
+            make_primitive=params.make_primitive,
             symmetrize=params.symmetrize,
             use_orthogonal_c=params.use_orthogonal_c,
         )
