@@ -1,5 +1,3 @@
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab import (
     SlabBuilderParameters,
@@ -12,7 +10,11 @@ from mat3ra.made.tools.build.slab.configuration import (
     VacuumConfiguration,
     Termination,
 )
-from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_DEFAULT_PARAMETERS, SI_SLAB_001_CONFIGURATION
+from unit.fixtures.slab import (
+    SI_SLAB_001,
+    SI_SLAB_DEFAULT_PARAMETERS,
+    SI_SLAB_001_CONFIGURATION,
+)
 from .utils import assert_two_entities_deep_almost_equal
 
 MILLER_INDICES = SI_SLAB_001_CONFIGURATION["miller_indices"]
