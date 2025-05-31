@@ -2,47 +2,9 @@ from typing import List, Callable, Optional, Union
 
 import numpy as np
 from pydantic import BaseModel
+
 from mat3ra.made.material import Material
-
-
 from mat3ra.made.utils import get_center_of_coordinates
-
-from ...third_party import (
-    PymatgenStructure,
-    PymatgenPeriodicSite,
-    PymatgenVacancy,
-    PymatgenSubstitution,
-    PymatgenInterstitial,
-    PymatgenVoronoiInterstitialGenerator,
-)
-
-from ...modify import (
-    add_vacuum,
-    filter_by_ids,
-    filter_by_box,
-    filter_by_condition_on_coordinates,
-    translate_to_z_level,
-    rotate,
-)
-from ...build import BaseBuilder
-from ...convert import to_pymatgen
-from ...analyze.other import (
-    get_atomic_coordinates_extremum,
-    get_closest_site_id_from_coordinate,
-    get_closest_site_id_from_coordinate_and_element,
-    get_local_extremum_atom_index,
-)
-from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
-from ...utils import (
-    transform_coordinate_to_supercell,
-    coordinate as CoordinateCondition,
-    get_distance_between_coordinates,
-)
-from ..utils import merge_materials
-from ..slab import SlabConfiguration, create_slab, Termination
-from ..slab.configuration import AtomicLayersUniqueRepeated, VacuumConfiguration
-from ..supercell import create_supercell
-from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import (
     PointDefectConfiguration,
     AdatomSlabPointDefectConfiguration,
@@ -51,6 +13,40 @@ from .configuration import (
     PointDefectPairConfiguration,
 )
 from .factories import DefectBuilderFactory
+from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
+from ..slab import SlabConfiguration, create_slab
+from ..supercell import create_supercell
+from ..utils import merge_materials
+from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
+from ...analyze.other import (
+    get_atomic_coordinates_extremum,
+    get_closest_site_id_from_coordinate,
+    get_closest_site_id_from_coordinate_and_element,
+    get_local_extremum_atom_index,
+)
+from ...build import BaseBuilder
+from ...convert import to_pymatgen
+from ...modify import (
+    add_vacuum,
+    filter_by_ids,
+    filter_by_box,
+    filter_by_condition_on_coordinates,
+    translate_to_z_level,
+    rotate,
+)
+from ...third_party import (
+    PymatgenStructure,
+    PymatgenPeriodicSite,
+    PymatgenVacancy,
+    PymatgenSubstitution,
+    PymatgenInterstitial,
+    PymatgenVoronoiInterstitialGenerator,
+)
+from ...utils import (
+    transform_coordinate_to_supercell,
+    coordinate as CoordinateCondition,
+    get_distance_between_coordinates,
+)
 
 
 class PointDefectBuilderParameters(BaseModel):

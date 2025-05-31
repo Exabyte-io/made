@@ -1,9 +1,16 @@
 from typing import Optional, List, Union, Generic, TypeVar
-from pydantic import BaseModel
 
 from mat3ra.code.entity import InMemoryEntity
-from mat3ra.made.material import Material
+from pydantic import BaseModel
 
+from mat3ra.made.material import Material
+from .enums import (
+    PointDefectTypeEnum,
+    SlabDefectTypeEnum,
+    AtomPlacementMethodEnum,
+    ComplexDefectTypeEnum,
+    CoordinatesShapeEnum,
+)
 from ...analyze.other import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
 from ...utils.coordinate import (
     CylinderCoordinateCondition,
@@ -12,13 +19,6 @@ from ...utils.coordinate import (
     TriangularPrismCoordinateCondition,
     PlaneCoordinateCondition,
     CoordinateCondition,
-)
-from .enums import (
-    PointDefectTypeEnum,
-    SlabDefectTypeEnum,
-    AtomPlacementMethodEnum,
-    ComplexDefectTypeEnum,
-    CoordinatesShapeEnum,
 )
 
 

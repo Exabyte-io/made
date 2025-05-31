@@ -1,4 +1,6 @@
 import pytest
+from mat3ra.utils import assertion as assertion_utils
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.grain_boundary import (
     SlabGrainBoundaryBuilder,
@@ -10,8 +12,6 @@ from mat3ra.made.tools.build.grain_boundary import (
 )
 from mat3ra.made.tools.build.grain_boundary.builders import SlabGrainBoundaryBuilderParameters
 from mat3ra.made.tools.build.slab import SlabConfiguration, get_terminations
-from mat3ra.utils import assertion as assertion_utils
-
 from .fixtures.monolayer import GRAPHENE
 
 
