@@ -146,6 +146,15 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
         atomic_layers = self.atomic_layers
         return atomic_layers.number_of_repetitions
 
+    def get_terminations(self) -> List[Termination]:
+        return self.atomic_layers.get_terminations()
+
+    def get_termination_by_index(self, index=0) -> Termination:
+        all_terminations = self.atomic_layers.get_terminations()
+        if index < 0 or index >= len(all_terminations):
+            raise IndexError(f"Termination index {index} is out of range.")
+        return all_terminations[index]
+
     @classmethod
     def from_parameters(
         cls,

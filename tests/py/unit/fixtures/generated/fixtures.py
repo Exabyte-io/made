@@ -23,8 +23,8 @@ FILM_MATERIAL = Material.create(from_ase(film))
 SUBSTRATE_CONFIGURATION = SlabConfiguration.from_parameters(bulk=SUBSTRATE_MATERIAL, number_of_layers=3)
 FILM_CONFIGURATION = SlabConfiguration.from_parameters(bulk=FILM_MATERIAL)
 
-substrate_terminations = get_terminations(SUBSTRATE_CONFIGURATION)
-film_terminations = get_terminations(FILM_CONFIGURATION)
+substrate_terminations = SUBSTRATE_CONFIGURATION.get_terminations()
+film_terminations = FILM_CONFIGURATION.get_terminations()
 
 # Pymatgen Interface fixtures
 INTERFACE_TERMINATION_PAIR: TerminationPair = TerminationPair(
@@ -69,7 +69,7 @@ slab_111_config = SlabConfiguration.from_parameters(
     xy_supercell_matrix=[[1, 0], [0, 1]],
     use_orthogonal_z=True,
 )
-t_111 = get_terminations(slab_111_config)[0]
+t_111 = slab_111_config.get_termination_by_index(0)
 SLAB_111 = create_slab(slab_111_config, t_111)
 
 slab_001_config = SlabConfiguration.from_parameters(
@@ -80,5 +80,5 @@ slab_001_config = SlabConfiguration.from_parameters(
     xy_supercell_matrix=[[2, 0], [0, 1]],
     use_orthogonal_z=True,
 )
-t_001 = get_terminations(slab_001_config)[0]
+t_001 = slab_001_config.get_termination_by_index(0)
 SLAB_001 = create_slab(slab_001_config, t_001)

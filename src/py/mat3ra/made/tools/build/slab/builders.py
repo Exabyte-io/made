@@ -40,11 +40,6 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
         self._configuration = configuration
         return super().get_material(configuration)
 
-    def get_terminations(self, configuration: _ConfigurationType) -> List[Termination]:
-        """Get available terminations for the given configuration."""
-        atomic_layers: AtomicLayersUniqueRepeated = configuration.atomic_layers
-        return atomic_layers.get_terminations()
-
     def _generate(self, configuration: _ConfigurationType) -> List[Material]:  # type: ignore
         atomic_layers: AtomicLayersUniqueRepeated = configuration.atomic_layers
         vacuum: VacuumConfiguration = configuration.stack_components[1]
