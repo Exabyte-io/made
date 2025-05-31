@@ -48,7 +48,7 @@ class BaseConfigurationPydantic(InMemoryEntityPydantic):
             kwargs["type"] = cls.__name__
         return cls(*args, **kwargs)
 
-    def clone_with_updated_parameters(self, **kwargs) -> BaseConfigurationPydanticChild:
+    def clone_with_updated_parameters(self: BaseConfigurationPydanticChild, **kwargs) -> BaseConfigurationPydanticChild:
         new_params = self.parameters.copy()
         new_params.update(**kwargs)
         return self.from_parameters(**new_params)

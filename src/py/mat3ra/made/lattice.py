@@ -3,8 +3,8 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.esse.models.properties_directory.structural.lattice import LatticeSchema
 from mat3ra.esse.models.properties_directory.structural.lattice import (
+    LatticeSchema,
     LatticeTypeEnum,
     LatticeUnitsSchema,
 )
@@ -22,8 +22,9 @@ class LatticeVectors(Cell):
 
 class LatticeSchemaVectorless(BaseModel):
     """LatticeSchema without the vectors field to avoid conflicts."""
+
     a: float
-    b: float  
+    b: float
     c: float
     alpha: float
     beta: float

@@ -8,7 +8,6 @@ from scipy.optimize import root_scalar
 from . import AXIS_TO_INDEX_MAP
 from .functions import FunctionHolder
 
-
 EQUATION_RANGE_COEFFICIENT = 5
 
 

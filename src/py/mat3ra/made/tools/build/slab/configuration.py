@@ -28,7 +28,6 @@ from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_terminatio
 
 
 class CrystalLatticePlanes(CrystalLatticePlanesSchema):
-
     crystal: Material
     _pymatgen_slabs: List[PymatgenSlab]
 
@@ -86,7 +85,6 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
         symmetrize: bool,
         use_orthogonal_c: bool,
     ) -> List[Material]:
-
         pymatgen_slabs = self._generate_pymatgen_slabs(
             min_slab_size=min_slab_size,
             min_vacuum_size=min_vacuum_size,
@@ -210,7 +208,7 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
         miller_indices: MillerIndicesSchema = (0, 0, 1),
         number_of_layers: int = 1,
         vacuum: float = 10.0,
-        xy_supercell_matrix: List[List[int]] = None,
+        xy_supercell_matrix: Optional[List[List[int]]] = None,
         use_conventional_cell: bool = True,
         termination_index: int = 0,
         **kwargs,

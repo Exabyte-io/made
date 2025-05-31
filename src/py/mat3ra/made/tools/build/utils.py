@@ -8,7 +8,7 @@ from scipy.spatial import cKDTree
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector
-
+from .slab.configuration import VacuumConfiguration
 from .supercell import create_supercell
 from ..modify import filter_by_box
 from ..utils import AXIS_TO_INDEX_MAP
@@ -238,7 +238,7 @@ def stack_two_materials_xy(
     return interface
 
 
-def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration") -> Material:
+def create_vacuum_material(reference: Material, vacuum: VacuumConfiguration) -> Material:
     """
     Create a vacuum material based on a reference material and vacuum configuration.
 
@@ -249,8 +249,7 @@ def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration") -
     Returns:
         Material: Vacuum material with empty basis.
     """
-    from .slab.configuration import VacuumConfiguration
-    
+
     a_vector, b_vector = reference.lattice.vector_arrays[:2]
     vacuum_lattice = reference.lattice.from_vectors_array(
         [a_vector, b_vector, [0, 0, vacuum.size]], reference.lattice.units, reference.lattice.type

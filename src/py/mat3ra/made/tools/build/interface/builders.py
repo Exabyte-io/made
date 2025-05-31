@@ -2,15 +2,15 @@ from typing import Any, List, Optional
 
 import numpy as np
 from ase.build.tools import niggli_reduce
-from mat3ra.made.lattice import Lattice
-from mat3ra.made.material import Material
-from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
 )
 
+from mat3ra.made.lattice import Lattice
+from mat3ra.made.material import Material
+from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from .commensurate_lattice_pair import CommensurateLatticePair
 from .configuration import (
     InterfaceConfiguration,
@@ -25,7 +25,7 @@ from ..mixins import (
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from ..slab import create_slab, Termination, SlabConfiguration
+from ..slab import create_slab, SlabConfiguration
 from ..supercell import create_supercell
 from ..utils import merge_materials
 from ...analyze.other import get_chemical_formula

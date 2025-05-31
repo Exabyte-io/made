@@ -43,7 +43,7 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
     def _generate(self, configuration: _ConfigurationType) -> List[Material]:  # type: ignore
         atomic_layers: AtomicLayersUniqueRepeated = configuration.atomic_layers
         vacuum: VacuumConfiguration = configuration.stack_components[1]
-        params = self.build_parameters
+        params = self.build_parameters or self._DefaultBuildParameters
 
         slab_materials = atomic_layers.get_slabs(
             min_slab_size=self._configuration.number_of_layers,

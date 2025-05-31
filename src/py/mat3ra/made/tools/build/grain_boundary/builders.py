@@ -1,21 +1,20 @@
 from typing import List
 
 import numpy as np
+
 from mat3ra.made.material import Material
-
-from ...third_party import PymatgenInterface
-from ...analyze.other import get_chemical_formula
-from ..slab import SlabConfiguration, get_terminations, create_slab
+from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
-
 from ..interface.builders import (
     ZSLStrainMatchingInterfaceBuilder,
     CommensurateLatticeTwistedInterfaceBuilder,
     CommensurateLatticeTwistedInterfaceBuilderParameters,
 )
+from ..slab import SlabConfiguration, create_slab
 from ..supercell import create_supercell
 from ..utils import stack_two_materials_xy
-from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
+from ...analyze.other import get_chemical_formula
+from ...third_party import PymatgenInterface
 
 
 class SlabGrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters):

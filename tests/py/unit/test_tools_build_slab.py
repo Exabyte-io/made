@@ -1,20 +1,13 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab import (
-    SlabBuilderParameters,
-    SlabConfiguration,
-    create_slab,
-)
+from mat3ra.made.tools.build.slab import SlabBuilderParameters, SlabConfiguration, create_slab
 from mat3ra.made.tools.build.slab.configuration import (
-    CrystalLatticePlanes,
     AtomicLayersUniqueRepeated,
-    VacuumConfiguration,
+    CrystalLatticePlanes,
     Termination,
+    VacuumConfiguration,
 )
-from unit.fixtures.slab import (
-    SI_SLAB_001,
-    SI_SLAB_DEFAULT_PARAMETERS,
-    SI_SLAB_001_CONFIGURATION,
-)
+from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION, SI_SLAB_DEFAULT_PARAMETERS
+
 from .utils import assert_two_entities_deep_almost_equal
 
 MILLER_INDICES = SI_SLAB_001_CONFIGURATION["miller_indices"]
@@ -73,7 +66,6 @@ def test_build_slab_from_parameters():
 
 
 def test_build_slab_with_default_parameters():
-
     # Create slab configuration with minimal set up
     slab_config = SlabConfiguration.from_parameters(
         bulk=material,
