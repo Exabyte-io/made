@@ -192,25 +192,22 @@ class SlabDefectBuilder(DefectBuilder):
             A new Material instance with the added layers.
         """
 
-        new_material = material.clone()
-        termination = Termination.from_string(new_material.metadata.get("build").get("termination"))
-        build_config = new_material.metadata.get("build").get("configuration")
-
-        if build_config["type"] != "SlabConfiguration":
+        slab_build_configuration_dict = material.metadata.get("build").get("configuration")
+        if slab_build_configuration_dict["type"] != "SlabConfiguration":
             raise ValueError("Material is not a slab.")
+        slab_build_configuration = SlabConfiguration(**slab_build_configuration_dict)
 
-        new_slab_config = SlabConfiguration.from_parameters(
-            bulk=new_material,
-            miller_indices=build_config["stack_components"][0]["miller_indices"],
-            number_of_layers=added_thickness,
+        new_parameters = slab_build_configuration.parameters
+        new_parameters.update(
+            number_of_layers=new_parameters["number_of_layers"] + added_thickness,
             vacuum=self.build_parameters.vacuum_thickness,
-            use_conventional_cell=build_config["stack_components"][0].get("use_conventional_cell"),
-            xy_supercell_matrix=build_config.get("xy_supercell_matrix"),
-            direction=build_config.get("direction", "z"),
         )
 
-        material_with_additional_layers = create_slab(new_slab_config, termination)
+        new_slab_configuration = SlabConfiguration.from_parameters(
+            **new_parameters,
+        )
 
+        material_with_additional_layers = create_slab(new_slab_configuration)
         return material_with_additional_layers
 
     def create_material_with_additional_layers_float(
@@ -433,6 +430,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         original_material: Material,
         configuration: AdatomSlabPointDefectConfiguration,
     ) -> Material:
+        # TODO: throw an error if the material already has an atom at the position
         material: Material = configuration.crystal
         approximate_adatom_coordinate_cartesian: List[float] = self.calculate_approximate_adatom_coordinate(
             original_material, configuration.position_on_surface, configuration.distance_z

@@ -4,9 +4,10 @@ from scipy.spatial.distance import pdist
 
 
 class BaseMaterialAnalyzer:
-    def __init__(self, material: Material):
+    def __init__(self, material: Material, use_cartesian: bool = True):
         self.material = material.clone()
-        self.material.to_cartesian()
+        if use_cartesian:
+            self.material.to_cartesian()
 
     @property
     def volume(self):

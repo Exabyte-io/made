@@ -69,8 +69,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
                 use_conventional_cell=False,  # Keep false to prevent Pymatgen from simplifying the interface
                 use_orthogonal_z=True,
             )
-            termination = configuration.slab_termination or get_terminations(final_slab_config)[0]
-            final_slab = create_slab(final_slab_config, termination)
+            final_slab = create_slab(final_slab_config)
             final_slabs.append(final_slab)
 
         return super()._finalize(final_slabs, configuration)

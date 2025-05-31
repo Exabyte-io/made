@@ -1,9 +1,11 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Type, TypeVar
 
 from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
 from pydantic import BaseModel
 
 from ...material import Material
+
+BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound="BaseConfigurationPydantic")
 
 
 class BaseConfiguration(BaseModel, InMemoryEntity):
@@ -37,6 +39,23 @@ class BaseConfigurationPydantic(InMemoryEntityPydantic):
 
     def to_metadata(self) -> dict:
         return self.model_dump(mode="json", exclude_none=True, exclude_unset=True)
+
+    @classmethod
+    def from_parameters(
+        cls: Type[BaseConfigurationPydanticChild], *args: Any, **kwargs: Any
+    ) -> BaseConfigurationPydanticChild:
+        if "type" not in kwargs:
+            kwargs["type"] = cls.__name__
+        return cls(*args, **kwargs)
+
+    def clone_with_updated_parameters(self, **kwargs) -> BaseConfigurationPydanticChild:
+        new_params = self.parameters.copy()
+        new_params.update(**kwargs)
+        return self.from_parameters(**new_params)
+
+    @property
+    def parameters(self) -> dict:
+        raise NotImplementedError("Subclasses must implement the 'parameters' property.")
 
 
 class BaseSelectorParameters(BaseModel):

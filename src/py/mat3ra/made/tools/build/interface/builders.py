@@ -75,10 +75,8 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
     _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 
-    def __preprocess_slab_configuration(
-        self, configuration: SlabConfiguration, termination: Termination, create_slabs=False
-    ) -> ASEAtoms:
-        slab = create_slab(configuration, termination) if create_slabs else configuration.bulk
+    def __preprocess_slab_configuration(self, configuration: SlabConfiguration, create_slabs=False) -> ASEAtoms:
+        slab = create_slab(configuration) if create_slabs else configuration.bulk
         ase_slab = to_ase(slab)
 
         niggli_reduce(ase_slab)
@@ -106,12 +104,10 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         film_slab_ase = self.__preprocess_slab_configuration(
             configuration.film_configuration,
-            configuration.film_termination,
             create_slabs=self.build_parameters.create_slabs,
         )
         substrate_slab_ase = self.__preprocess_slab_configuration(
             configuration.substrate_configuration,
-            configuration.substrate_termination,
             create_slabs=self.build_parameters.create_slabs,
         )
 

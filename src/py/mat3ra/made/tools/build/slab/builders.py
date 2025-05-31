@@ -53,34 +53,23 @@ class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
             symmetrize=params.symmetrize,
             use_orthogonal_c=params.use_orthogonal_c,
         )
+
         stacked_materials = []
         for slab_material in slab_materials:
             stacked = stack_two_components(slab_material, vacuum, direction=configuration.direction)
             stacked_materials.append(stacked)
 
-        return stacked_materials
+        supercells_of_stacked_materials = [
+            create_supercell(material, configuration.xy_supercell_matrix) for material in stacked_materials
+        ]
 
-    def _post_process(self, items: List[Material], post_process_parameters=None) -> List[Material]:
-        materials = items
-        materials = [create_supercell(material, self._configuration.xy_supercell_matrix) for material in materials]
-
-        for material in materials:
-            if "build" not in material.metadata:
-                material.metadata["build"] = {}
-            atomic_layers = self._configuration.atomic_layers
-            material.metadata["build"]["termination"] = str(atomic_layers.termination_top)
-            material.metadata["build"]["configuration"] = self._configuration.to_dict()
-            material.metadata["build"]["build_parameters"] = (
-                self.build_parameters.model_dump() if self.build_parameters else {}
-            )
-
-        return materials
+        return supercells_of_stacked_materials
 
     def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
         atomic_layers = configuration.atomic_layers
 
         formula = get_chemical_formula(atomic_layers.crystal)
         miller_indices = "".join(str(i) for i in atomic_layers.miller_indices)
-        termination = material.metadata.get("build", {}).get("termination", "")
+        termination = configuration.termination
         material.name = f"{formula}({miller_indices}), termination {termination}, Slab"
         return material

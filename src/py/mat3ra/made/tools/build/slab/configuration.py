@@ -1,5 +1,6 @@
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Any
 
+from mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import MillerIndicesSchema
 from mat3ra.esse.models.material.reusable.two_dimensional.atomic_layers import AtomicLayersSchema
 from mat3ra.esse.models.material.reusable.two_dimensional.atomic_layers_unique import (
     AtomicLayersUniqueSchema,
@@ -19,11 +20,11 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
 from mat3ra.made.material import Material
 from .termination import Termination
 from .. import BaseConfigurationPydantic
+from ...analyze.lattice import LatticeMaterialAnalyzer
 from ...convert import to_pymatgen, from_pymatgen
 from ...modify import wrap_to_unit_cell
 from ...third_party import PymatgenSlab
 from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination
-from ...third_party import PymatgenSpacegroupAnalyzer
 
 
 class CrystalLatticePlanes(CrystalLatticePlanesSchema):
@@ -31,16 +32,23 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
     crystal: Material
     _pymatgen_slabs: List[PymatgenSlab]
 
-    def __init__(self, **kwargs):
-        crystal = kwargs.pop("crystal")
-        use_conventional = kwargs.get("use_conventional_cell", False)
-        if use_conventional:
-            # TODO: use from LatticeAnalyzer
-            crystal = Material.create(
-                from_pymatgen(PymatgenSpacegroupAnalyzer(to_pymatgen(crystal)).get_conventional_standard_structure())
-            )
-        kwargs["crystal"] = crystal
-        super().__init__(**kwargs)
+    @classmethod
+    def from_dict(cls, crystal: dict, **kwargs: Any) -> "CrystalLatticePlanes":
+        crystal_material = Material(**crystal)
+        return cls(
+            crystal=crystal_material,
+            **kwargs,
+        )
+
+    def __init__(
+        self, crystal: Material, miller_indices: MillerIndicesSchema, use_conventional_cell=True, **kwargs: Any
+    ):
+        if use_conventional_cell:
+            lattice_analyzer = LatticeMaterialAnalyzer(crystal, use_cartesian=False)
+            crystal = lattice_analyzer.material_with_conventional_lattice
+        super().__init__(
+            crystal=crystal, miller_indices=miller_indices, use_conventional_cell=use_conventional_cell, **kwargs
+        )
         self._pymatgen_slabs = self._generate_pymatgen_slabs()
 
     def _generate_pymatgen_slabs(
@@ -127,9 +135,28 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
     xy_supercell_matrix: Optional[List[List[int]]] = SlabConfigurationSchema.model_fields["xy_supercell_matrix"].default
     direction: AxisEnum = AxisEnum.z
 
+    def __init__(self, stack_components: List[Any], **kwargs: Any):
+        stack_components_as_class_instances = []
+        for component in stack_components:
+            if isinstance(component, dict):
+                if component.get("number_of_repetitions", None) is not None:
+                    stack_components_as_class_instances.append(AtomicLayersUniqueRepeated.from_dict(**component))
+                elif component.get("lattice", None) is not None:
+                    stack_components_as_class_instances.append(Material(**component))
+            else:
+                stack_components_as_class_instances.append(component)
+
+        super().__init__(stack_components=stack_components_as_class_instances, **kwargs)
+
     @property
     def atomic_layers(self) -> Union[AtomicLayersUniqueRepeated, AtomicLayersUnique]:
         return self.stack_components[0]
+
+    @property
+    def vacuum(self) -> float:
+        if len(self.stack_components) < 2:
+            return 0
+        return self.stack_components[1].size
 
     @property
     def bulk(self) -> Material:
@@ -137,7 +164,7 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
         return atomic_layers.crystal
 
     @property
-    def miller_indices(self) -> tuple:
+    def miller_indices(self) -> MillerIndicesSchema:
         atomic_layers = self.atomic_layers
         return atomic_layers.miller_indices
 
@@ -155,11 +182,32 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
             raise IndexError(f"Termination index {index} is out of range.")
         return all_terminations[index]
 
+    @property
+    def termination(self) -> Termination:
+        return self.atomic_layers.termination_top
+
+    @property
+    def termination_index(self) -> int:
+        all_terminations = self.atomic_layers.get_terminations()
+        return all_terminations.index(self.termination)
+
+    @property
+    def parameters(self):
+        return {
+            "bulk": self.bulk,
+            "miller_indices": self.miller_indices,
+            "number_of_layers": self.number_of_layers,
+            "vacuum": self.vacuum,
+            "xy_supercell_matrix": self.xy_supercell_matrix,
+            "use_conventional_cell": self.atomic_layers.use_conventional_cell,
+            "termination_index": self.termination_index,
+        }
+
     @classmethod
     def from_parameters(
         cls,
         bulk: Material,
-        miller_indices: tuple = (0, 0, 1),
+        miller_indices: MillerIndicesSchema = (0, 0, 1),
         number_of_layers: int = 1,
         vacuum: float = 10.0,
         xy_supercell_matrix: List[List[int]] = None,
@@ -167,18 +215,6 @@ class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
         termination_index: int = 0,
         **kwargs,
     ) -> "SlabConfiguration":
-        """
-        Create SlabConfiguration from parameters.
-
-        Args:
-            bulk: The bulk material
-            miller_indices: Miller indices for the surface
-            number_of_layers: Number of atomic layers
-            vacuum: Vacuum size in Angstroms
-            xy_supercell_matrix: Supercell matrix for xy directions
-            use_conventional_cell: Whether to use conventional cell
-            termination_index: Index of the termination to use
-        """
         if xy_supercell_matrix is None:
             xy_supercell_matrix = [[1, 0], [0, 1]]
 
