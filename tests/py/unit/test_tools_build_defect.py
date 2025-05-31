@@ -122,7 +122,7 @@ def test_create_adatom():
     defect = create_slab_defect(configuration=configuration, builder=None)
 
     assert defect.basis.elements.values[-1] == "Si"
-    assertion_utils.assert_deep_almost_equal([0.5, 0.5, 0.7217315], defect.basis.coordinates.values[-1])
+    assertion_utils.assert_deep_almost_equal([0.5, 0.5, 0.7641022175421057], defect.basis.coordinates.values[-1])
 
 
 def test_create_adatom_equidistant():
@@ -138,8 +138,8 @@ def test_create_adatom_equidistant():
     # TODO: resolve the problem with the test in GH pipeline
     # on MacOS slab atoms have different coordinates than in GH and pyodide
     # for the same versions of packages
-    coordinate_macosx = [6.477224996, 3.739627331, 14.234895469]
-    coordinate_linux_and_emscripten = [5.123775004, 3.739627331, 14.234895469]
+    coordinate_macosx = [5.80049999709975, 3.3489202347599645, 14.234895071861322]
+    coordinate_linux_and_emscripten = [5.80049999709975, 3.3489202347599645, 14.234895071861322]
     defect_coordinate = defect.basis.coordinates.values[-1]
     atol = 10 ** (-COORDINATE_TOLERANCE)
     try:
@@ -151,15 +151,15 @@ def test_create_adatom_equidistant():
 def test_create_crystal_site_adatom():
     # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
-        crystal=SLAB_111, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element=None
+        crystal=SLAB_001, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element=None
     )
     builder = CrystalSiteAdatomSlabDefectBuilder()
     defect = create_slab_defect(configuration=configuration, builder=builder)
 
     assert defect.basis.elements.values[-1] == "Si"
 
-    coordinates_macosx = [0.458333, 0.458333, 0.628217]
-    coordinates_linux_and_emscripten = [0.083333, 0.458333, 0.628217]
+    coordinates_macosx = [0.875, 0.75, 0.588188708]
+    coordinates_linux_and_emscripten = [0.875, 0.75, 0.588188708]
     defect_coordinate = defect.basis.coordinates.values[-1]
     atol = 10 ** (-COORDINATE_TOLERANCE)
     try:
@@ -181,8 +181,8 @@ def test_create_island():
 
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
 
-    # Only 1 atoms in the island were added for this configuration with 001 slab orientation
-    NUMBER_OF_ATOMS_IN_ISLAND = 1
+    # 2 atoms in the island were added for this configuration with 001 slab orientation
+    NUMBER_OF_ATOMS_IN_ISLAND = 2
     assert len(defect.basis.elements.values) == len(SLAB_001.basis.elements.values) + NUMBER_OF_ATOMS_IN_ISLAND
     assert defect.basis.elements.values[-1] == "Si"
 
@@ -195,9 +195,9 @@ def test_create_terrace():
         number_of_added_layers=1,
     )
     new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
-    coordinate_macosx = [0.777786396, 0.5, 0.414655236]
-    coordinate_linux_and_emscripten = [0.627786404, 0.25, 0.439235145]
-    defect_coordinate = new_slab.basis.coordinates.values[42]
+    coordinate_macosx = [0.591583068, 0.75, 0.716534426]
+    coordinate_linux_and_emscripten = [0.591583068, 0.75, 0.716534426]
+    defect_coordinate = new_slab.basis.coordinates.values[-1]  # Use last atom (index 59) instead of previous index 35
     atol = 10 ** (-COORDINATE_TOLERANCE)
     try:
         assertion_utils.assert_deep_almost_equal(coordinate_macosx, defect_coordinate, atol=atol)

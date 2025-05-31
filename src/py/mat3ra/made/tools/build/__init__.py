@@ -87,7 +87,7 @@ class BaseBuilder(BaseModel):
 
     def __init__(self, build_parameters: _BuildParametersType = None):
         super().__init__(build_parameters=build_parameters)
-        self.build_parameters = build_parameters or self._DefaultBuildParameters
+        self.build_parameters = build_parameters if build_parameters is not None else self._DefaultBuildParameters
         self.__generated_items: List[List[BaseBuilder._GeneratedItemType]] = []
         self.__configurations: List[BaseBuilder._ConfigurationType] = []
 

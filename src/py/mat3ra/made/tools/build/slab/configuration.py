@@ -15,7 +15,6 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
     AxisEnum,
     VacuumConfigurationSchema,
 )
-from pymatgen.core import Lattice
 
 from mat3ra.made.material import Material
 from .termination import Termination
@@ -33,7 +32,7 @@ class CrystalLatticePlanes(CrystalLatticePlanesSchema):
     _pymatgen_slabs: List[PymatgenSlab]
 
     def __init__(self, **kwargs):
-        crystal = kwargs.pop("crystal", None) or Material.create_default()
+        crystal = kwargs.pop("crystal")
         use_conventional = kwargs.get("use_conventional_cell", False)
         if use_conventional:
             # TODO: use from LatticeAnalyzer
