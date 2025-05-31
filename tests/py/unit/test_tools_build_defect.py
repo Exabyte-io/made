@@ -26,7 +26,7 @@ from mat3ra.made.tools.build.defect.configuration import (
 from mat3ra.made.tools.utils import coordinate as CoordinateCondition
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.generated.fixtures import SLAB_001, SLAB_111
-from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_ADDED_LAYER
+from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_ADDED_LAYER, SI_SLAB_001_ADDED_FRACTIONAL_LAYER
 
 clean_material = Material.create_default()
 
@@ -219,14 +219,21 @@ def test_create_material_with_additional_layers():
     original_slab = Material.create(SI_SLAB_001)
     slab_with_additional_layer = builder.create_material_with_additional_layers(original_slab, 1)
 
-    # Should have more atoms than the original
-    assert len(slab_with_additional_layer.basis.coordinates.values) > len(original_slab.basis.coordinates.values)
-
-    # Should have 3 layers instead of 2
-    slab_config = slab_with_additional_layer.metadata["build"]["configuration"]
-    assert slab_config["stack_components"][0]["number_of_repetitions"] == 3
-
     assertion_utils.assert_deep_almost_equal(slab_with_additional_layer, SI_SLAB_001_ADDED_LAYER)
+
+
+def test_create_material_with_additional_fractional_layers():
+    """Test adding fractional layers to a slab material"""
+    # Create the builder
+    builder_params = SlabDefectBuilderParameters(auto_add_vacuum=True, vacuum_thickness=5.0)
+    builder = SlabDefectBuilder(build_parameters=builder_params)
+
+    # Test adding 1.5 layers to SI_SLAB_001
+    original_slab = Material.create(SI_SLAB_001)
+    slab_with_fractional_layer = builder.create_material_with_additional_layers(original_slab, 1.5)
+
+    # Compare with expected fixture
+    assertion_utils.assert_deep_almost_equal(slab_with_fractional_layer, SI_SLAB_001_ADDED_FRACTIONAL_LAYER)
 
 
 def test_create_defect_pair():
