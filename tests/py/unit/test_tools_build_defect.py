@@ -151,14 +151,14 @@ def test_create_adatom_equidistant():
 def test_create_crystal_site_adatom():
     # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
-        crystal=SLAB_001, position_on_surface=[0.5, 0.5], distance_z=2, chemical_element=None
+        crystal=SLAB_001, position_on_surface=[0.5, 0.5], distance_z=2.5, chemical_element=None
     )
     builder = CrystalSiteAdatomSlabDefectBuilder()
     defect = create_slab_defect(configuration=configuration, builder=builder)
 
     assert defect.basis.elements.values[-1] == "Si"
 
-    coordinates_macosx = [0.875, 0.75, 0.588188708]
+    coordinates_macosx = [0.875, 0.75, 0.534157228]
     coordinates_linux_and_emscripten = [0.875, 0.75, 0.588188708]
     defect_coordinate = defect.basis.coordinates.values[-1]
     atol = 10 ** (-COORDINATE_TOLERANCE)
@@ -169,6 +169,7 @@ def test_create_crystal_site_adatom():
 
 
 def test_create_island():
+    # TODO: use TiN
     condition = CoordinateCondition.CylinderCoordinateCondition(
         center_position=[0.5, 0.5], radius=0.15, min_z=0, max_z=1
     )
@@ -181,8 +182,8 @@ def test_create_island():
 
     defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
 
-    # 2 atoms in the island were added for this configuration with 001 slab orientation
-    NUMBER_OF_ATOMS_IN_ISLAND = 2
+    # 1 atom in the island were added for this configuration with 001 slab orientation
+    NUMBER_OF_ATOMS_IN_ISLAND = 1
     assert len(defect.basis.elements.values) == len(SLAB_001.basis.elements.values) + NUMBER_OF_ATOMS_IN_ISLAND
     assert defect.basis.elements.values[-1] == "Si"
 
@@ -195,7 +196,7 @@ def test_create_terrace():
         number_of_added_layers=1,
     )
     new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
-    coordinate_macosx = [0.591583068, 0.75, 0.716534426]
+    coordinate_macosx = [0.627786405, 0.75, 0.671264194]
     coordinate_linux_and_emscripten = [0.591583068, 0.75, 0.716534426]
     defect_coordinate = new_slab.basis.coordinates.values[-1]  # Use last atom (index 59) instead of previous index 35
     atol = 10 ** (-COORDINATE_TOLERANCE)

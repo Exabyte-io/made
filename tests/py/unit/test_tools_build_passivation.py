@@ -14,6 +14,7 @@ from .utils import assert_two_entities_deep_almost_equal
 
 
 def test_passivate_surface():
+    # TODO: use Silicon SLAB with vacuum same as for adatom
     config = PassivationConfiguration(
         slab=Material.create(SI_SLAB_001_2_ATOMS), passivant="H", bond_length=1.48, surface="both"
     )

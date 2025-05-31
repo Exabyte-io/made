@@ -48,7 +48,7 @@ SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {"configuration": SI_SLAB_001_CONFIGURATION, "termination": "Si_P4/mmm_1"},
+        "build": {"configuration": SI_SLAB_001_CONFIGURATION, "build_parameters": SI_SLAB_001_BUILD_PARAMETERS},
     },
 }
 
@@ -108,7 +108,6 @@ SI_SLAB_001: Dict[str, Any] = {
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
-            "termination": "Si_P4/mmm_2",
             "configuration": {
                 "type": "SlabConfiguration",
                 "stack_components": [
@@ -138,10 +137,10 @@ SI_SLAB_PASSIVATED = {
             {"id": 3, "value": "H"},
         ],
         "coordinates": [
-            {"id": 0, "value": [0.583333333, 0.833333333, 0.548382368]},
-            {"id": 1, "value": [0.25, 0.5, 0.451617612]},
-            {"id": 2, "value": [0.25, 0.5, 0.270187076]},
-            {"id": 3, "value": [0.583333333, 0.833333333, 0.729812904]},
+            {"id": 0, "value": [0.583333333, 0.833333333, 0.548382378]},
+            {"id": 1, "value": [0.25, 0.5, 0.451617622]},
+            {"id": 2, "value": [0.25, 0.5, 0.270187093]},
+            {"id": 3, "value": [0.583333333, 0.833333333, 0.729812907]},
         ],
         "units": "crystal",
         "labels": [],
@@ -168,7 +167,6 @@ SI_SLAB_PASSIVATED = {
                 "bond_length": 1.48,
                 "surface": "both",
             },
-            "termination": "Si_P4/mmm_1",
         },
     },
 }
@@ -214,9 +212,9 @@ SI_SLAB_DEFAULT_PARAMETERS = {
         "a": 5.468763846,
         "b": 5.468763846,
         "c": 15.468763846,
-        "alpha": 90,
-        "beta": 90,
-        "gamma": 90,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
         "type": "TRI",
         "units": {"angle": "degree", "length": "angstrom"},
     },
@@ -237,7 +235,6 @@ SI_SLAB_DEFAULT_PARAMETERS = {
                 ],
                 "xy_supercell_matrix": [[1, 0], [0, 1]],
             },
-            "termination": "Si_P4/mmm_2",
         },
     },
     "name": "Si8(001), termination Si_P4/mmm_2, Slab",

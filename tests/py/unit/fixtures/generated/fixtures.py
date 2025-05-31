@@ -69,8 +69,7 @@ slab_111_config = SlabConfiguration.from_parameters(
     xy_supercell_matrix=[[1, 0], [0, 1]],
     use_orthogonal_z=True,
 )
-t_111 = slab_111_config.get_termination_by_index(0)
-SLAB_111 = create_slab(slab_111_config, t_111)
+SLAB_111 = create_slab(slab_111_config)
 
 slab_001_config = SlabConfiguration.from_parameters(
     bulk=clean_material,
@@ -80,5 +79,4 @@ slab_001_config = SlabConfiguration.from_parameters(
     xy_supercell_matrix=[[2, 0], [0, 1]],
     use_orthogonal_z=True,
 )
-t_001 = slab_001_config.get_termination_by_index(0)
-SLAB_001 = create_slab(slab_001_config, t_001)
+SLAB_001 = create_slab(slab_001_config)

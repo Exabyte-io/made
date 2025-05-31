@@ -30,7 +30,7 @@ def test_get_terminations():
     crystal_lattice_planes = CrystalLatticePlanes(crystal=material, miller_indices=MILLER_INDICES)
     terminations = crystal_lattice_planes.get_terminations()
     print("Available terminations:", [str(t) for t in terminations])
-    expected_termination = Termination.from_string("Si_Fm-3m_1")
+    expected_termination = Termination.from_string("Si_P4/mmm_2")
     assert_two_entities_deep_almost_equal(terminations[0], expected_termination)
 
 
