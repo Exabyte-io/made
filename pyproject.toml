@@ -71,7 +71,10 @@ build-backend = "setuptools.build_meta"
 git_describe_command = "git describe --tags --long"
 
 [tool.setuptools.packages.find]
-where = ["src/py"]
+where = [
+    "src/py",
+    "tests/py/mat3ra"
+]
 
 [tool.black]
 line-length = 120
