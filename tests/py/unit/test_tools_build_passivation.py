@@ -1,5 +1,5 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.passivation import get_unique_coordination_numbers, get_coordination_numbers_distribution
+from mat3ra.made.tools.build.passivation import get_coordination_numbers_distribution, get_unique_coordination_numbers
 from mat3ra.made.tools.build.passivation.builders import (
     CoordinationBasedPassivationBuilder,
     CoordinationBasedPassivationBuilderParameters,

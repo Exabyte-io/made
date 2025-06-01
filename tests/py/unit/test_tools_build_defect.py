@@ -1,5 +1,3 @@
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
@@ -16,9 +14,9 @@ from mat3ra.made.tools.build.defect import (
 from mat3ra.made.tools.build.defect.builders import (
     IslandSlabDefectBuilder,
     PointDefectPairBuilder,
-    TerraceSlabDefectBuilder,
     SlabDefectBuilder,
     SlabDefectBuilderParameters,
+    TerraceSlabDefectBuilder,
 )
 from mat3ra.made.tools.build.defect.configuration import (
     IslandSlabDefectConfiguration,
@@ -26,8 +24,9 @@ from mat3ra.made.tools.build.defect.configuration import (
     TerraceSlabDefectConfiguration,
 )
 from mat3ra.made.tools.utils import coordinate as CoordinateCondition
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.generated.fixtures import SLAB_001, SLAB_111
-from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_ADDED_LAYER, SI_SLAB_001_ADDED_FRACTIONAL_LAYER
+from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER
 
 clean_material = Material.create_default()
 
