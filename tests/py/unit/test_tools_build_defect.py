@@ -1,3 +1,5 @@
+from mat3ra.utils import assertion as assertion_utils
+
 from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
@@ -24,7 +26,6 @@ from mat3ra.made.tools.build.defect.configuration import (
     TerraceSlabDefectConfiguration,
 )
 from mat3ra.made.tools.utils import coordinate as CoordinateCondition
-from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.generated.fixtures import SLAB_001, SLAB_111
 from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_ADDED_LAYER, SI_SLAB_001_ADDED_FRACTIONAL_LAYER
 
@@ -234,6 +235,22 @@ def test_create_material_with_additional_fractional_layers():
 
     # Compare with expected fixture
     assertion_utils.assert_deep_almost_equal(slab_with_fractional_layer, SI_SLAB_001_ADDED_FRACTIONAL_LAYER)
+
+
+def test_get_equidistant_position():
+    builder = EquidistantAdatomSlabDefectBuilder()
+
+    slab_material = Material.create(SI_SLAB_001)
+
+    position_on_surface = [0.5, 0.5]
+    distance_z = 2.5
+
+    equidistant_position = builder.get_equidistant_position(
+        material=slab_material, position_on_surface=position_on_surface, distance_z=distance_z
+    )
+
+    expected_center = [0.5, 0.5, 0.800245]
+    assertion_utils.assert_deep_almost_equal(equidistant_position, expected_center)
 
 
 def test_create_defect_pair():

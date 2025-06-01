@@ -1,5 +1,5 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.passivation import get_unique_coordination_numbers
+from mat3ra.made.tools.build.passivation import get_unique_coordination_numbers, get_coordination_numbers_distribution
 from mat3ra.made.tools.build.passivation.builders import (
     CoordinationBasedPassivationBuilder,
     CoordinationBasedPassivationBuilderParameters,
@@ -31,6 +31,18 @@ def test_get_unique_coordination_numbers():
     )
     unique_coordination_numbers = get_unique_coordination_numbers(config, cutoff=3.0)
     assert unique_coordination_numbers == [2, 3]
+
+
+def test_get_coordination_numbers_distribution():
+    """Test getting coordination numbers distribution for passivation analysis"""
+    config = PassivationConfiguration(
+        slab=Material.create(GRAPHENE_ZIGZAG_NANORIBBON), passivant="H", bond_length=1.48, surface="both"
+    )
+    distribution = get_coordination_numbers_distribution(config, cutoff=3.0)
+    # Should return a dictionary with coordination numbers as keys and counts as values
+    expected_distribution = {2: 8, 3: 8}
+
+    assert distribution == expected_distribution
 
 
 def test_passivate_coordination_based():
