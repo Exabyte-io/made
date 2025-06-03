@@ -17,7 +17,6 @@ import {
 describe("Parsers.POSCAR", () => {
     it("should return a valid poscar", () => {
         const material = new Material(Na4Cl4);
-        console.log(material.getAsPOSCAR());
         expect(`${material.getAsPOSCAR()}\n`).to.be.equal(Na4Cl4Poscar);
     });
 

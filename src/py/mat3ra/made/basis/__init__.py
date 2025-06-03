@@ -2,8 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.esse.models.material import BasisSchema
-from mat3ra.esse.models.material import BasisUnitsEnum
+from mat3ra.esse.models.material import BasisSchema, BasisUnitsEnum
 from mat3ra.made.basis.coordinates import Coordinates
 from mat3ra.made.cell import Cell
 from mat3ra.made.utils import get_overlapping_coordinates

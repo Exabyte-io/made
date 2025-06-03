@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from mat3ra.made.material import Material
-from .builders import SlabBuilder, SlabSelectorParameters, PymatgenSlabGeneratorParameters
+from .builders import SlabBuilder, SlabSelectorParameters, SlabBuilderParameters
 from .configuration import SlabConfiguration
 from .termination import Termination
 
@@ -9,7 +9,7 @@ CACHED_BUILDER = None
 
 
 def get_terminations(
-    configuration: SlabConfiguration, build_parameters: Optional[PymatgenSlabGeneratorParameters] = None
+    configuration: SlabConfiguration, build_parameters: Optional[SlabBuilderParameters] = None
 ) -> List[Termination]:
     global CACHED_BUILDER
     CACHED_BUILDER = SlabBuilder(build_parameters=build_parameters)
@@ -19,7 +19,7 @@ def get_terminations(
 def create_slab(
     configuration: SlabConfiguration,
     termination: Optional[Termination] = None,
-    build_parameters: Optional[PymatgenSlabGeneratorParameters] = None,
+    build_parameters: Optional[SlabBuilderParameters] = None,
     use_cached_builder: bool = True,
 ) -> Material:
     builder = (

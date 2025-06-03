@@ -27,7 +27,7 @@ describe("Tools:Supercell", () => {
     });
 
     it("should generate supercell with removed constraints", () => {
-        const newBasisXYZ = `Si     0.000000    0.000000    0.000000 
+        const newBasisXYZ = `Si     0.000000    0.000000    0.000000
 Ge     0.250000    0.250000    0.250000
 `;
         const poscarNoConstraints = `Silicon FCC - supercell [[2,0,0],[0,1,0],[0,0,1]]

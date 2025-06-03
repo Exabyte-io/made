@@ -1,15 +1,14 @@
-from typing import List, Tuple
-
-import numpy as np
+from mat3ra.esse.models.materials_category.single_material.two_dimensional.slab.configuration import (
+    SlabConfigurationSchema,
+)
 
 from mat3ra.made.material import Material
-
-from .. import BaseConfiguration
-from ...third_party import PymatgenSpacegroupAnalyzer
+from .. import BaseConfigurationPydantic
 from ...convert import to_pymatgen, from_pymatgen
+from ...third_party import PymatgenSpacegroupAnalyzer
 
 
-class SlabConfiguration(BaseConfiguration):
+class SlabConfiguration(SlabConfigurationSchema, BaseConfigurationPydantic):
     """
     Configuration for building a slab.
 
@@ -24,56 +23,20 @@ class SlabConfiguration(BaseConfiguration):
         make_primitive (bool): Whether to try to find primitive cell for the created slab.
     """
 
+    type: str = "SlabConfiguration"
     bulk: Material
-    miller_indices: Tuple[int, int, int] = (0, 0, 1)
-    thickness: int = 1
-    vacuum: float = 5.0
-    xy_supercell_matrix: List[List[int]] = np.eye(2).tolist()
-    use_conventional_cell: bool = True
-    use_orthogonal_z: bool = False
-    make_primitive: bool = False
 
-    def __init__(
-        self,
-        bulk=None,
-        miller_indices=miller_indices,
-        thickness=thickness,
-        vacuum=vacuum,
-        xy_supercell_matrix=None,
-        use_conventional_cell=use_conventional_cell,
-        use_orthogonal_z=use_orthogonal_z,
-        make_primitive=make_primitive,
-    ):
-        if xy_supercell_matrix is None:
-            xy_supercell_matrix = np.eye(2).tolist()
-        bulk = bulk or Material.create_default()
-        __bulk_pymatgen_structure = (
-            PymatgenSpacegroupAnalyzer(to_pymatgen(bulk)).get_conventional_standard_structure()
-            if use_conventional_cell
-            else to_pymatgen(bulk)
-        )
-        __bulk_config = from_pymatgen(__bulk_pymatgen_structure)
-        super().__init__(
-            bulk=Material.create(__bulk_config),
-            miller_indices=miller_indices,
-            thickness=thickness,
-            vacuum=vacuum,
-            xy_supercell_matrix=xy_supercell_matrix,
-            use_conventional_cell=use_conventional_cell,
-            use_orthogonal_z=use_orthogonal_z,
-            make_primitive=make_primitive,
+    def __init__(self, **kwargs):
+        bulk = kwargs.pop("bulk", None) or Material.create_default()
+        use_conventional = kwargs.get(
+            "use_conventional_cell", SlabConfigurationSchema.model_fields["use_conventional_cell"].default
         )
 
-    @property
-    def _json(self):
-        return {
-            "type": "SlabConfiguration",
-            "bulk": self.bulk.to_dict(),
-            "miller_indices": self.miller_indices,
-            "thickness": self.thickness,
-            "vacuum": self.vacuum,
-            "xy_supercell_matrix": self.xy_supercell_matrix,
-            "use_conventional_cell": self.use_conventional_cell,
-            "use_orthogonal_z": self.use_orthogonal_z,
-            "make_primitive": self.make_primitive,
-        }
+        bulk_pmg = to_pymatgen(bulk)
+        if use_conventional:
+            bulk_pmg = PymatgenSpacegroupAnalyzer(bulk_pmg).get_conventional_standard_structure()
+
+        bulk_config = from_pymatgen(bulk_pmg)
+        kwargs["bulk"] = Material.create(bulk_config)
+
+        super().__init__(**kwargs)
