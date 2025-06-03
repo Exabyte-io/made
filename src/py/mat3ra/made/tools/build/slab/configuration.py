@@ -16,6 +16,7 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
     AxisEnum,
     VacuumConfigurationSchema,
 )
+from pydantic import BaseModel
 
 from mat3ra.made.material import Material
 from .termination import Termination
@@ -23,8 +24,67 @@ from .. import BaseConfigurationPydantic
 from ...analyze.lattice import LatticeMaterialAnalyzer
 from ...convert import to_pymatgen, from_pymatgen
 from ...modify import wrap_to_unit_cell
+from ...operations.core.unary import supercell
 from ...third_party import PymatgenSlab
 from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination
+
+
+def generate_pymatgen_slabs(
+    crystal: Material,
+    miller_indices: Union[MillerIndicesSchema, List[int]] = (0, 0, 1),
+    min_slab_size=1,
+    min_vacuum_size=0,
+    in_unit_planes: bool = True,
+    make_primitive: bool = False,
+    symmetrize: bool = False,
+) -> List[PymatgenSlab]:  # type: ignore
+    generator = PymatgenSlabGenerator(
+        initial_structure=to_pymatgen(crystal),
+        miller_index=miller_indices,
+        min_slab_size=min_slab_size,
+        min_vacuum_size=min_vacuum_size,
+        in_unit_planes=in_unit_planes,
+        primitive=make_primitive,
+    )
+    raw_slabs = generator.get_slabs(
+        # We need to preserve symmetric slabs for different terminations at the surface
+        symmetrize=symmetrize
+    )
+
+    return raw_slabs
+
+
+class MillerSupercell(BaseModel):
+    miller_indices: MillerIndicesSchema
+
+    @property
+    def miller_supercell(self):
+        return ...
+
+        # use pymatgen
+
+
+class OrientedCrystal(MillerSupercell):
+    crystal: Material
+
+    @property
+    def rotational_matrix(self) -> List[List[float]]:
+        miller_supercell_material = supercell(self.crystal, self.miller_supercell)
+        return calculate_rotation_matrix(self.crystal, miller_supercell_material)  # to reorient
+
+    @property
+    def terminations(self):
+        return get_terminations(self.crystal)
+
+
+class AtomicLayersRepeated(OrientedCrystal):
+    @property
+    def orthogonal_c_cell(self):
+        return calculate_orthogonal_lattice(self.crystal, self.miller_supercell)
+
+    def get_translation_vector(self, termination: Termination) -> List[float]:
+        # Implement logic to calculate translation vector based on termination
+        return [0.0, 0.0, 0.0]
 
 
 class CrystalLatticePlanes(CrystalLatticePlanesSchema):
