@@ -1,3 +1,5 @@
+from typing import List
+
 from mat3ra.code.vector import Vector3D
 
 from mat3ra.made.material import Material
@@ -21,4 +23,9 @@ def orient_cell(material: Material, rotational_matrix) -> Material:
 
 def edit_cell():
     # set lattice vectors, keep basis in cartesian
+    pass
+
+
+def stack(materials: List[Material], direction: str) -> Material:
+    # use stack_two_materials
     pass

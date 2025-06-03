@@ -238,31 +238,6 @@ def stack_two_materials_xy(
     return interface
 
 
-def create_vacuum_material(reference: Material, vacuum: VacuumConfiguration) -> Material:
-    """
-    Create a vacuum material based on a reference material and vacuum configuration.
-
-    Args:
-        reference: Reference material to base the vacuum lattice on.
-        vacuum: Vacuum configuration with size and direction.
-
-    Returns:
-        Material: Vacuum material with empty basis.
-    """
-
-    a_vector, b_vector = reference.lattice.vector_arrays[:2]
-    vacuum_lattice = reference.lattice.from_vectors_array(
-        [a_vector, b_vector, [0, 0, vacuum.size]], reference.lattice.units, reference.lattice.type
-    )
-    return Material.create(
-        {
-            "name": "Vacuum",
-            "lattice": vacuum_lattice.to_dict(),
-            "basis": {"elements": [], "coordinates": []},
-        }
-    )
-
-
 def stack_two_components(
     component1: Union[Material, "VacuumConfiguration"],
     component2: Union[Material, "VacuumConfiguration"],
