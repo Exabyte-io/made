@@ -7,6 +7,7 @@ exports.materialMixinStaticProps = exports.materialMixin = exports.defaultMateri
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const constrained_basis_1 = require("./basis/constrained_basis");
 const conventional_cell_1 = require("./cell/conventional_cell");
+const constraints_1 = require("./constraints/constraints");
 const lattice_1 = require("./lattice/lattice");
 const parsers_1 = __importDefault(require("./parsers/parsers"));
 const supercell_1 = __importDefault(require("./tools/supercell"));
@@ -56,9 +57,9 @@ function materialMixin(item) {
         toJSON() {
             return {
                 ...originalToJSON(),
-                name: this.name,
                 lattice: this.Lattice.toJSON(),
                 basis: this.Basis.toJSON(),
+                name: this.name,
                 isNonPeriodic: this.isNonPeriodic,
             };
         },
@@ -74,6 +75,10 @@ function materialMixin(item) {
         set src(src) {
             item.setProp("src", src);
         },
+        updateFormula() {
+            item.setProp("formula", this.Basis.formula);
+            item.setProp("unitCellFormula", this.Basis.unitCellFormula);
+        },
         /**
          * Gets Bolean value for whether or not a material is non-periodic vs periodic.
          * False = periodic, True = non-periodic
@@ -88,6 +93,18 @@ function materialMixin(item) {
             item.setProp("isNonPeriodic", bool);
         },
         /**
+         * @summary Returns the specific derived property (as specified by name) for a material.
+         */
+        getDerivedPropertyByName(name) {
+            return this.getDerivedProperties().find((x) => x.name === name);
+        },
+        /**
+         * @summary Returns the derived properties array for a material.
+         */
+        getDerivedProperties() {
+            return item.prop("derivedProperties", []);
+        },
+        /**
          * Gets material's formula
          */
         get formula() {
@@ -95,6 +112,41 @@ function materialMixin(item) {
         },
         get unitCellFormula() {
             return item.prop("unitCellFormula") || this.Basis.unitCellFormula;
+        },
+        unsetFileProps() {
+            item.unsetProp("src");
+            item.unsetProp("icsdId");
+            item.unsetProp("external");
+        },
+        /**
+         * @param textOrObject Basis text or JSON object.
+         * @param format Format (xyz, etc.)
+         * @param unitz crystal/cartesian
+         */
+        setBasis(textOrObject, format, unitz) {
+            let basis;
+            if (typeof textOrObject === "string" && format === "xyz") {
+                basis = parsers_1.default.xyz.toBasisConfig(textOrObject, unitz);
+            }
+            else {
+                basis = textOrObject;
+            }
+            item.setProp("basis", basis);
+            this.unsetFileProps();
+            this.updateFormula();
+        },
+        setBasisConstraints(constraints) {
+            const basisWithConstraints = {
+                ...this.basis,
+                constraints: constraints.map((c) => c.toJSON()),
+            };
+            this.setBasis(basisWithConstraints);
+        },
+        setBasisConstraintsFromArrayOfObjects(constraints) {
+            const constraintsInstances = constraints.map((c) => {
+                return constraints_1.Constraint.fromValueAndId(c.value, c.id);
+            });
+            this.setBasisConstraints(constraintsInstances);
         },
         get basis() {
             return item.prop("basis");
@@ -134,17 +186,17 @@ function materialMixin(item) {
         get Lattice() {
             return new lattice_1.Lattice(this.lattice);
         },
-        set hash(hash) {
-            item.setProp("hash", hash);
-        },
-        get hash() {
-            return item.prop("hash");
-        },
         /**
-         * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
+         * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
+         *  inchi cannot be found.
+         *  @returns {String}
          */
-        get scaledHash() {
-            return this.calculateHash("", true);
+        getInchiStringForHash() {
+            const inchi = this.getDerivedPropertyByName("inchi");
+            if (inchi) {
+                return inchi.value;
+            }
+            throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
         },
         /**
          * Calculates hash from basis and lattice. Algorithm expects the following:
@@ -167,62 +219,17 @@ function materialMixin(item) {
             }
             return crypto_js_1.default.MD5(message).toString();
         },
-        /**
-         * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
-         *  inchi cannot be found.
-         *  @returns {String}
-         */
-        getInchiStringForHash() {
-            const inchi = this.getDerivedPropertyByName("inchi");
-            if (inchi) {
-                return inchi.value;
-            }
-            throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
+        set hash(hash) {
+            item.setProp("hash", hash);
+        },
+        get hash() {
+            return item.prop("hash");
         },
         /**
-         * @summary Returns the specific derived property (as specified by name) for a material.
+         * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
          */
-        getDerivedPropertyByName(name) {
-            return this.getDerivedProperties().find((x) => x.name === name);
-        },
-        /**
-         * @summary Returns the derived properties array for a material.
-         */
-        getDerivedProperties() {
-            return item.prop("derivedProperties", []);
-        },
-        unsetFileProps() {
-            item.unsetProp("src");
-            item.unsetProp("icsdId");
-            item.unsetProp("external");
-        },
-        /**
-         * @param textOrObject Basis text or JSON object.
-         * @param format Format (xyz, etc.)
-         * @param unitz crystal/cartesian
-         */
-        setBasis(textOrObject, format, unitz) {
-            let basis;
-            if (typeof textOrObject === "string" && format === "xyz") {
-                basis = parsers_1.default.xyz.toBasisConfig(textOrObject, unitz);
-            }
-            else {
-                basis = textOrObject;
-            }
-            item.setProp("basis", basis);
-            this.unsetFileProps();
-            this.updateFormula();
-        },
-        updateFormula() {
-            item.setProp("formula", this.Basis.formula);
-            item.setProp("unitCellFormula", this.Basis.unitCellFormula);
-        },
-        setBasisConstraints(constraints) {
-            const basisWithConstraints = {
-                ...this.basis,
-                constraints: constraints.map((c) => c.toJSON()),
-            };
-            this.setBasis(basisWithConstraints);
+        get scaledHash() {
+            return this.calculateHash("", true);
         },
         /**
          * Converts basis to crystal/fractional coordinates.

@@ -3,6 +3,7 @@ import type { NamedInMemoryEntity } from "@mat3ra/code/dist/js/entity/mixins/Nam
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type {
+    AtomicConstraintsSchema,
     ConsistencyCheck,
     DerivedPropertiesSchema,
     FileSourceSchema,
@@ -19,7 +20,7 @@ import {
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
     PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS,
 } from "./cell/conventional_cell";
-import type { Constraint } from "./constraints/constraints";
+import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
@@ -86,9 +87,9 @@ export function materialMixin<T extends Base = Base>(item: T) {
         toJSON(): MaterialJSON {
             return {
                 ...originalToJSON(),
-                name: this.name,
                 lattice: this.Lattice.toJSON(),
                 basis: this.Basis.toJSON(),
+                name: this.name,
                 isNonPeriodic: this.isNonPeriodic,
             };
         },
@@ -109,6 +110,11 @@ export function materialMixin<T extends Base = Base>(item: T) {
             item.setProp("src", src);
         },
 
+        updateFormula() {
+            item.setProp("formula", this.Basis.formula);
+            item.setProp("unitCellFormula", this.Basis.unitCellFormula);
+        },
+
         /**
          * Gets Bolean value for whether or not a material is non-periodic vs periodic.
          * False = periodic, True = non-periodic
@@ -125,6 +131,20 @@ export function materialMixin<T extends Base = Base>(item: T) {
         },
 
         /**
+         * @summary Returns the specific derived property (as specified by name) for a material.
+         */
+        getDerivedPropertyByName(name: string) {
+            return this.getDerivedProperties().find((x) => x.name === name);
+        },
+
+        /**
+         * @summary Returns the derived properties array for a material.
+         */
+        getDerivedProperties(): DerivedPropertiesSchema {
+            return item.prop("derivedProperties", []);
+        },
+
+        /**
          * Gets material's formula
          */
         get formula(): string {
@@ -133,6 +153,44 @@ export function materialMixin<T extends Base = Base>(item: T) {
 
         get unitCellFormula(): string {
             return item.prop("unitCellFormula") || this.Basis.unitCellFormula;
+        },
+
+        unsetFileProps() {
+            item.unsetProp("src");
+            item.unsetProp("icsdId");
+            item.unsetProp("external");
+        },
+
+        /**
+         * @param textOrObject Basis text or JSON object.
+         * @param format Format (xyz, etc.)
+         * @param unitz crystal/cartesian
+         */
+        setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string) {
+            let basis: BasisConfig | undefined;
+            if (typeof textOrObject === "string" && format === "xyz") {
+                basis = parsers.xyz.toBasisConfig(textOrObject, unitz);
+            } else {
+                basis = textOrObject as BasisConfig;
+            }
+            item.setProp("basis", basis);
+            this.unsetFileProps();
+            this.updateFormula();
+        },
+
+        setBasisConstraints(constraints: Constraint[]) {
+            const basisWithConstraints = {
+                ...this.basis,
+                constraints: constraints.map((c) => c.toJSON()),
+            };
+            this.setBasis(basisWithConstraints);
+        },
+
+        setBasisConstraintsFromArrayOfObjects(constraints: AtomicConstraintsSchema) {
+            const constraintsInstances = constraints.map((c) => {
+                return Constraint.fromValueAndId(c.value, c.id);
+            });
+            this.setBasisConstraints(constraintsInstances);
         },
 
         get basis(): OptionallyConstrainedBasisConfig {
@@ -183,19 +241,17 @@ export function materialMixin<T extends Base = Base>(item: T) {
             return new Lattice(this.lattice);
         },
 
-        set hash(hash: string) {
-            item.setProp("hash", hash);
-        },
-
-        get hash(): string {
-            return item.prop("hash") as string;
-        },
-
         /**
-         * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
+         * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
+         *  inchi cannot be found.
+         *  @returns {String}
          */
-        get scaledHash(): string {
-            return this.calculateHash("", true);
+        getInchiStringForHash(): string {
+            const inchi = this.getDerivedPropertyByName("inchi");
+            if (inchi) {
+                return (inchi as InChIRepresentationSchema).value;
+            }
+            throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
         },
 
         /**
@@ -219,67 +275,19 @@ export function materialMixin<T extends Base = Base>(item: T) {
             return CryptoJS.MD5(message).toString();
         },
 
-        /**
-         * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
-         *  inchi cannot be found.
-         *  @returns {String}
-         */
-        getInchiStringForHash(): string {
-            const inchi = this.getDerivedPropertyByName("inchi");
-            if (inchi) {
-                return (inchi as InChIRepresentationSchema).value;
-            }
-            throw new Error("Hash cannot be created. Missing InChI string in derivedProperties");
+        set hash(hash: string) {
+            item.setProp("hash", hash);
+        },
+
+        get hash(): string {
+            return item.prop("hash") as string;
         },
 
         /**
-         * @summary Returns the specific derived property (as specified by name) for a material.
+         * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
          */
-        getDerivedPropertyByName(name: string) {
-            return this.getDerivedProperties().find((x) => x.name === name);
-        },
-
-        /**
-         * @summary Returns the derived properties array for a material.
-         */
-        getDerivedProperties(): DerivedPropertiesSchema {
-            return item.prop("derivedProperties", []);
-        },
-
-        unsetFileProps() {
-            item.unsetProp("src");
-            item.unsetProp("icsdId");
-            item.unsetProp("external");
-        },
-
-        /**
-         * @param textOrObject Basis text or JSON object.
-         * @param format Format (xyz, etc.)
-         * @param unitz crystal/cartesian
-         */
-        setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string) {
-            let basis: BasisConfig | undefined;
-            if (typeof textOrObject === "string" && format === "xyz") {
-                basis = parsers.xyz.toBasisConfig(textOrObject, unitz);
-            } else {
-                basis = textOrObject as BasisConfig;
-            }
-            item.setProp("basis", basis);
-            this.unsetFileProps();
-            this.updateFormula();
-        },
-
-        updateFormula() {
-            item.setProp("formula", this.Basis.formula);
-            item.setProp("unitCellFormula", this.Basis.unitCellFormula);
-        },
-
-        setBasisConstraints(constraints: Constraint[]) {
-            const basisWithConstraints = {
-                ...this.basis,
-                constraints: constraints.map((c) => c.toJSON()),
-            };
-            this.setBasis(basisWithConstraints);
+        get scaledHash(): string {
+            return this.calculateHash("", true);
         },
 
         /**
@@ -340,7 +348,7 @@ export function materialMixin<T extends Base = Base>(item: T) {
          * Returns a copy of the material with conventional cell constructed instead of primitive.
          */
         getACopyWithConventionalCell(): T {
-            const material = item.clone() as T & MaterialMixin;
+            const material = item.clone() as T & typeof properties;
 
             // if conventional and primitive cells are the same => return a copy.
             if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type)) return material;

@@ -2,10 +2,10 @@ import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { NamedInMemoryEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
-import type { ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
+import type { AtomicConstraintsSchema, ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import type { BasisConfig } from "./basis/basis";
 import { type ConstrainedBasisConfig, ConstrainedBasis } from "./basis/constrained_basis";
-import type { Constraint } from "./constraints/constraints";
+import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import { MaterialJSON } from "./types";
 export declare const defaultMaterialConfig: MaterialSchema;
@@ -21,46 +21,12 @@ export declare function materialMixin<T extends Base = Base>(item: T): {
     toJSON(): MaterialJSON;
     name: string;
     src: FileSourceSchema | undefined;
+    updateFormula(): void;
     /**
      * Gets Bolean value for whether or not a material is non-periodic vs periodic.
      * False = periodic, True = non-periodic
      */
     isNonPeriodic: boolean;
-    /**
-     * Gets material's formula
-     */
-    readonly formula: string;
-    readonly unitCellFormula: string;
-    readonly basis: OptionallyConstrainedBasisConfig;
-    readonly Basis: ConstrainedBasis;
-    /**
-     * High-level access to unique elements from material instead of basis.
-     */
-    readonly uniqueElements: string[];
-    lattice: LatticeSchema;
-    readonly Lattice: Lattice;
-    hash: string;
-    /**
-     * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
-     */
-    readonly scaledHash: string;
-    /**
-     * Calculates hash from basis and lattice. Algorithm expects the following:
-     * - asserts lattice units to be angstrom
-     * - asserts basis units to be crystal
-     * - asserts basis coordinates and lattice measurements are rounded to hash precision
-     * - forms strings for lattice and basis
-     * - creates MD5 hash from basisStr + latticeStr + salt
-     * @param salt Salt for hashing, empty string by default.
-     * @param isScaled Whether to scale the lattice parameter 'a' to 1.
-     */
-    calculateHash(salt?: string, isScaled?: boolean, bypassNonPeriodicCheck?: boolean): string;
-    /**
-     * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
-     *  inchi cannot be found.
-     *  @returns {String}
-     */
-    getInchiStringForHash(): string;
     /**
      * @summary Returns the specific derived property (as specified by name) for a material.
      */
@@ -99,6 +65,11 @@ export declare function materialMixin<T extends Base = Base>(item: T): {
      * @summary Returns the derived properties array for a material.
      */
     getDerivedProperties(): DerivedPropertiesSchema;
+    /**
+     * Gets material's formula
+     */
+    readonly formula: string;
+    readonly unitCellFormula: string;
     unsetFileProps(): void;
     /**
      * @param textOrObject Basis text or JSON object.
@@ -106,8 +77,38 @@ export declare function materialMixin<T extends Base = Base>(item: T): {
      * @param unitz crystal/cartesian
      */
     setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
-    updateFormula(): void;
     setBasisConstraints(constraints: Constraint[]): void;
+    setBasisConstraintsFromArrayOfObjects(constraints: AtomicConstraintsSchema): void;
+    readonly basis: OptionallyConstrainedBasisConfig;
+    readonly Basis: ConstrainedBasis;
+    /**
+     * High-level access to unique elements from material instead of basis.
+     */
+    readonly uniqueElements: string[];
+    lattice: LatticeSchema;
+    readonly Lattice: Lattice;
+    /**
+     * Returns the inchi string from the derivedProperties for a non-periodic material, or throws an error if the
+     *  inchi cannot be found.
+     *  @returns {String}
+     */
+    getInchiStringForHash(): string;
+    /**
+     * Calculates hash from basis and lattice. Algorithm expects the following:
+     * - asserts lattice units to be angstrom
+     * - asserts basis units to be crystal
+     * - asserts basis coordinates and lattice measurements are rounded to hash precision
+     * - forms strings for lattice and basis
+     * - creates MD5 hash from basisStr + latticeStr + salt
+     * @param salt Salt for hashing, empty string by default.
+     * @param isScaled Whether to scale the lattice parameter 'a' to 1.
+     */
+    calculateHash(salt?: string, isScaled?: boolean, bypassNonPeriodicCheck?: boolean): string;
+    hash: string;
+    /**
+     * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
+     */
+    readonly scaledHash: string;
     /**
      * Converts basis to crystal/fractional coordinates.
      */
