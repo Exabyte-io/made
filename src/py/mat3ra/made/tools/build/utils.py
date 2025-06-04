@@ -8,7 +8,6 @@ from scipy.spatial import cKDTree
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector
-from .slab.configuration import VacuumConfiguration
 from .supercell import create_supercell
 from ..modify import filter_by_box
 from ..utils import AXIS_TO_INDEX_MAP
@@ -238,29 +237,33 @@ def stack_two_materials_xy(
     return interface
 
 
-def stack_two_components(
-    component1: Union[Material, "VacuumConfiguration"],
-    component2: Union[Material, "VacuumConfiguration"],
-    direction: AxisEnum,
-) -> Material:
-    from .slab.configuration import VacuumConfiguration
+import numpy as np
 
-    if isinstance(component1, Material):
-        reference_material = component1
-    elif isinstance(component2, Material):
-        reference_material = component2
+
+def miller_to_supercell_matrix(miller_indices: Union[List[int], np.ndarray]) -> np.ndarray:
+    h, k, l = np.array(miller_indices, dtype=int)
+    # Step 1: Define the surface normal vector
+    normal = np.array([h, k, l])
+
+    # Step 2: Choose a vector not parallel to normal
+    if h != 0 or k != 0:
+        ref = np.array([0, 0, 1])
     else:
-        raise ValueError("At least one component must be a Material to serve as reference for configurations")
+        ref = np.array([0, 1, 0])
 
-    # Convert components to materials if they are configurations
-    if isinstance(component1, VacuumConfiguration):
-        material1 = create_vacuum_material(reference_material, component1)
-    else:
-        material1 = component1
+    # Step 3: Create two in-plane vectors via cross products
+    a = np.cross(normal, ref)
+    b = np.cross(normal, a)
 
-    if isinstance(component2, VacuumConfiguration):
-        material2 = create_vacuum_material(reference_material, component2)
-    else:
-        material2 = component2
+    # Step 4: Ensure all vectors are integers (scale if needed)
+    def to_integer_vector(v):
+        v = v / np.gcd.reduce(v.astype(int))
+        return v.astype(int)
 
-    return stack_two_materials(material1, material2, direction)
+    A = to_integer_vector(a)
+    B = to_integer_vector(b)
+    C = to_integer_vector(normal)
+
+    # Step 5: Stack into transformation matrix
+    T = np.vstack([A, B, C])
+    return T

@@ -1,14 +1,22 @@
-from typing import List, Union
+from typing import List, Union, Any
 
 from mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import MillerIndicesSchema
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import (
-    VacuumConfigurationSchema,
-)
+
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material
+from mat3ra.esse.models.material.primitive.combinations.stack import StackSchema
+from mat3ra.esse.models.material.reusable.two_dimensional.crystal_lattice_planes import (
+    CrystalLatticePlanesSchema,
+)
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import (
+    SlabConfigurationSchema,
+)
 from .termination import Termination
 from .. import BaseBuilder
+from ..utils import miller_to_supercell_matrix
+from ..vacuum.builders import VacuumBuilder
+from ..vacuum.configuration import VacuumConfiguration
 from ...convert import to_pymatgen
 from ...operations.core.unary import supercell, stack
 from ...third_party import PymatgenSlab
@@ -24,9 +32,15 @@ def generate_pymatgen_slabs(
     make_primitive: bool = False,
     symmetrize: bool = False,
 ) -> List[PymatgenSlab]:  # type: ignore
+    # Extract actual values from MillerIndicesSchema if needed
+    if isinstance(miller_indices, MillerIndicesSchema):
+        miller_values = miller_indices.root
+    else:
+        miller_values = miller_indices
+        
     generator = PymatgenSlabGenerator(
         initial_structure=to_pymatgen(crystal),
-        miller_index=miller_indices,
+        miller_index=miller_values,
         min_slab_size=min_slab_size,
         min_vacuum_size=min_vacuum_size,
         in_unit_planes=in_unit_planes,
@@ -40,18 +54,7 @@ def generate_pymatgen_slabs(
     return raw_slabs
 
 
-class MillerSupercell(BaseModel):
-    miller_indices: MillerIndicesSchema
-
-    @property
-    def miller_supercell(self):
-        return ...
-
-        # use pymatgen
-
-
 def calculate_rotation_matrix(crystal, miller_supercell_material):
-
     # Implement logic to calculate the rotation matrix based on crystal and miller_supercell_material
     return [[1, 0, 0], [0, 1, 0], [0, 0, 1]]  # Identity matrix as a placeholder
 
@@ -66,37 +69,21 @@ def get_terminations(crystal: Material, miller_indices: Union[MillerIndicesSchem
 def choose_termination(terminations: List[Termination], stoichiometry: str) -> Termination:
     # choose a termination by stochiometry or symmetry provided
     for termination in terminations:
-        if str(termination.chemical_elements) == name:
+        if str(termination.chemical_elements) == stoichiometry:
             return termination
     return terminations[0] if terminations else None
 
 
-def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration") -> Material:
-    """
-    Create a vacuum material based on a reference material and vacuum configuration.
+class MillerSupercell(BaseModel):
+    miller_indices: MillerIndicesSchema
 
-    Args:
-        reference: Reference material to base the vacuum lattice on.
-        vacuum: Vacuum configuration with size and direction.
-
-    Returns:
-        Material: Vacuum material with empty basis.
-    """
-
-    a_vector, b_vector = reference.lattice.vector_arrays[:2]
-    vacuum_lattice = reference.lattice.from_vectors_array(
-        [a_vector, b_vector, [0, 0, vacuum.size]], reference.lattice.units, reference.lattice.type
-    )
-    return Material.create(
-        {
-            "name": "Vacuum",
-            "lattice": vacuum_lattice.to_dict(),
-            "basis": {"elements": [], "coordinates": []},
-        }
-    )
+    @property
+    def miller_supercell(self):
+        # use pymatgen to generate the supercell based on miller indices
+        return miller_to_supercell_matrix(self.miller_indices.root)
 
 
-class OrientedCrystal(MillerSupercell):
+class CrystalLatticePlanesConfiguration(MillerSupercell, CrystalLatticePlanesSchema):
     crystal: Material
 
     @property
@@ -109,71 +96,54 @@ class OrientedCrystal(MillerSupercell):
         return get_terminations(self.crystal, self.miller_indices)
 
 
-def calculate_orthogonal_lattice(crystal, miller_supercell):
-    # Implement logic to calculate the orthogonal lattice based on crystal and miller_supercell
-    return supercell(crystal, miller_supercell)  # Placeholder implementation
+class CrystalLatticePlanesBuilder(BaseBuilder):
+    def calculate_orthogonal_lattice(self, crystal, miller_supercell):
+        # Implement logic to calculate the orthogonal lattice based on crystal and miller_supercell
+        return supercell(crystal, miller_supercell)  # Placeholder implementation
+
+    def get_material(self, configuration: CrystalLatticePlanesConfiguration) -> Material:
+        orthogonal_c_cell = self.calculate_orthogonal_lattice(configuration.crystal, configuration.miller_supercell)
+        return supercell(orthogonal_c_cell, configuration.rotational_matrix)
 
 
-class AtomicLayersUnique(OrientedCrystal):
+class AtomicLayersUnique(CrystalLatticePlanesConfiguration):
     @property
     def orthogonal_c_cell(self):
-        return calculate_orthogonal_lattice(self.crystal, self.miller_supercell)
+        # return calculate_orthogonal_lattice(self.crystal, self.miller_supercell)
+        return supercell(self.crystal, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])  # Placeholder implementation
 
     def get_translation_vector(self, termination: Termination) -> List[float]:
         # Implement logic to calculate translation vector based on termination
         return [0.0, 0.0, 0.0]
 
 
-class AtomicLayersUniqueRepeated(AtomicLayersUnique):
+class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUnique):
+    pass
+
+
+class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
+    _ConfigurationType = AtomicLayersUniqueRepeatedConfiguration
     number_of_repetitions: int
 
-    @property
-    def repeated_layers(self) -> Material:
+    def get_material(self, configuration: _ConfigurationType) -> Material:
         """
         Returns the repeated cell based on the number of repetitions.
         """
         return supercell(self.orthogonal_c_cell, [[1, 0, 0], [0, 1, 0], [0, 0, self.number_of_repetitions]])
 
 
-class VacuumConfiguration(VacuumConfigurationSchema):
-    size: float
+class StackConfiguration(StackSchema):
+
+    stack_components: List[Union[AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]]
 
     @property
-    def vacuum_layer(self, reference: Material) -> Material:
-        return create_vacuum_material(reference, self.size)
+    def atomic_layers(self) -> AtomicLayersUniqueRepeatedConfiguration:
+        return self.stack_components[0]
+
+    @property
+    def vacuum_configuration(self) -> VacuumConfiguration:
+        return self.stack_components[1]
 
 
-class SlabConfiguration(BaseModel):
-    atomic_layers: AtomicLayersUniqueRepeated
-    vacuum_configuration: VacuumConfigurationSchema
-
-    def from_parameters(
-        crystal: Material,
-        miller_indices: Union[MillerIndicesSchema, List[int]] = (0, 0, 1),
-        use_conventional_cell: bool = True,
-        termination: Termination = None,
-        number_of_layers: int = 1,
-        vacuum: float = 10.0,
-        xy_supercell_matrix: List[List[int]] = None,
-    ) -> "SlabConfiguration":
-        atomic_layers = AtomicLayersUniqueRepeated(
-            crystal=crystal,
-            miller_indices=miller_indices,
-            use_conventional_cell=use_conventional_cell,
-            number_of_repetitions=number_of_layers,
-        )
-        vacuum_configuration = VacuumConfiguration(size=vacuum)
-        return SlabConfiguration(atomic_layers=atomic_layers, vacuum_configuration=vacuum_configuration)
-
-
-class SlabBuilder(BaseBuilder):
-
-    def generate(self, configuration: SlabConfiguration) -> Material:
-        repeated_layers = configuration.atomic_layers.repeated_layers
-        vacuum_layer = configuration.vacuum_configuration.vacuum_layer
-        stacked_materials = stack([repeated_layers, vacuum_layer], "z")
-        supercell_slab = supercell(stacked_materials, configuration.xy_supercell_matrix)
-        return supercell_slab
-
-    def get_material(self, configuration: SlabConfiguration) -> Material:
-        return self.generate(configuration)
+class SlabConfiguration(StackConfiguration, SlabConfigurationSchema):
+    stack_components: List[Union[AtomicLayersUnique, VacuumConfiguration]]
