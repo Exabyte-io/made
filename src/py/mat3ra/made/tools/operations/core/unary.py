@@ -3,17 +3,20 @@ from typing import List
 from mat3ra.code.vector import Vector3D
 
 from mat3ra.made.material import Material
+from mat3ra.esse.models.material.primitive.combinations.stack import AxisEnum
+
+from mat3ra.made.tools.build.utils import stack_two_materials
 
 
 def translate(material: Material, vector: Vector3D) -> Material:
     # reuse translate_by_vector, remove ASE
     # Figure out convention for use_cartesian_coordinates
-    pass
+    return material
 
 
 def supercell(material: Material, supercell_matrix) -> Material:
     # reuse create_supercell, keep ASE
-    pass
+    return material
 
 
 def orient_cell(material: Material, rotational_matrix) -> Material:
@@ -21,11 +24,11 @@ def orient_cell(material: Material, rotational_matrix) -> Material:
     pass
 
 
-def edit_cell():
+def edit_cell(material: Material, lattice_vectors=None, basis=None) -> Material:
     # set lattice vectors, keep basis in cartesian
-    pass
+    return material
 
 
-def stack(materials: List[Material], direction: str) -> Material:
+def stack(materials: List[Material], direction: AxisEnum) -> Material:
     # use stack_two_materials
-    pass
+    return stack_two_materials(material_1=materials[0], material_2=materials[1], direction=direction)

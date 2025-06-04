@@ -1,3 +1,5 @@
+from mat3ra.code.vector import Vector3D
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab import SlabBuilderParameters, SlabConfiguration, create_slab, SlabBuilder
 from mat3ra.made.tools.build.slab.configuration import (
@@ -10,11 +12,12 @@ from mat3ra.made.tools.build.slab.configuration import (
     CrystalLatticePlanesConfiguration,
     AtomicLayersUnique,
     CrystalLatticePlanesBuilder,
+    AtomicLayersUniqueRepeatedBuilder,
 )
 from mat3ra.made.tools.modify import translate_to_z_level
 from mat3ra.made.tools.operations.core.unary import orient_cell, translate, stack, supercell
-from src.py.mat3ra.esse.models.material.primitive.combinations.stack import AxisEnum
-from src.py.mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import MillerIndicesSchema
+from mat3ra.esse.models.material.primitive.two_dimensional.vacuum import AxisEnum
+from mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import MillerIndicesSchema
 from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION, SI_SLAB_DEFAULT_PARAMETERS
 
 from .utils import assert_two_entities_deep_almost_equal
@@ -38,15 +41,20 @@ def test_build_slab():
         miller_indices=MILLER_INDICES,
     )
     atomic_layers_orthogonal_c = atomic_layers.orthogonal_c_cell
-    translation_vector = atomic_layers.get_translation_vector(termination)
-    atomic_layers_repeated = AtomicLayersUniqueRepeatedConfiguration(
+    translation_vector: Vector3D = atomic_layers.get_translation_vector(termination)
+    atomic_layers_repeated_config = AtomicLayersUniqueRepeatedConfiguration(
         crystal=oriented_crystal.crystal,
         miller_indices=MILLER_INDICES,
         number_of_repetitions=NUMBER_OF_LAYERS,
     )
-    atomic_layers_repeated_terminated = translate(atomic_layers_repeated.repeated_layers, translation_vector)
+    atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
+        atomic_layers_repeated_config
+    )
+    atomic_layers_repeated_terminated = translate(atomic_layers_repeated_orthogonal_c, translation_vector)
 
-    vacuum_configuration = VacuumConfiguration(size=VACUUM, crystal=oriented_crystal.crystal)
+    vacuum_configuration = VacuumConfiguration(
+        size=VACUUM, crystal=atomic_layers_repeated_terminated, direction=AxisEnum.z
+    )
 
     slab_configuration = SlabConfiguration(
         stack_components=[atomic_layers_repeated_terminated, vacuum_configuration],
