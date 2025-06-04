@@ -1,0 +1,40 @@
+from typing import Any
+
+from mat3ra.made.material import Material
+from mat3ra.made.tools.build import BaseBuilder
+from mat3ra.made.tools.build.slab.configuration import (
+    AtomicLayersUniqueRepeatedConfiguration,
+    AtomicLayersUniqueRepeatedBuilder,
+    SlabConfiguration,
+)
+from mat3ra.made.tools.build.stack.configuration import StackConfiguration
+from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.operations.core.unary import stack
+from src.py.mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
+
+class StackBuilder2Components(BaseBuilder):
+    _ConfigurationType = StackConfiguration
+
+    def configuration_to_material(self, configuration_or_material: Any) -> Material:
+        if isinstance(configuration_or_material, Material):
+            return configuration_or_material
+        if isinstance(configuration_or_material, AtomicLayersUniqueRepeatedConfiguration):
+            builder = AtomicLayersUniqueRepeatedBuilder()
+        if isinstance(configuration_or_material, VacuumConfiguration):
+            builder = VacuumBuilder()
+        return builder.get_material(configuration_or_material)
+
+    def generate(self, configuration: StackConfiguration) -> Material:
+        first_entity_config = configuration.stack_components[0]
+        first_material = self.configuration_to_material(first_entity_config)
+        second_entity_config = configuration.stack_components[1]
+        second_material = self.configuration_to_material(second_entity_config)
+
+        # Stack the two materials
+        stacked_materials = stack([first_material, second_material], configuration.direction or AxisEnum.z)
+        return stacked_materials
+
+    def get_material(self, configuration: StackConfiguration) -> Material:
+        return self.generate(configuration)

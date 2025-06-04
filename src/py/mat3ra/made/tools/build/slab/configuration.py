@@ -1,21 +1,21 @@
-from typing import List, Union, Any
+from typing import List, Union
 
-from mat3ra.esse.models.material.primitive.combinations.stack import StackSchema
-from mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import MillerIndicesSchema
-from mat3ra.esse.models.material.reusable.two_dimensional.crystal_lattice_planes import (
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
+    MillerIndicesSchema,
+)
+from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.crystal_lattice_planes import (
     CrystalLatticePlanesSchema,
 )
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material
 from .termination import Termination
 from .. import BaseBuilder
+from ..stack.configuration import StackConfiguration
 from ..utils import miller_to_supercell_matrix
-from ..vacuum.builders import VacuumBuilder
 from ..vacuum.configuration import VacuumConfiguration
 from ...convert import to_pymatgen
-from ...operations.core.unary import supercell, stack
+from ...operations.core.unary import supercell
 from ...third_party import PymatgenSlab
 from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination
 
@@ -94,6 +94,7 @@ class CrystalLatticePlanesConfiguration(MillerSupercell, CrystalLatticePlanesSch
 
 
 class CrystalLatticePlanesBuilder(BaseBuilder):
+    @staticmethod
     def calculate_orthogonal_lattice(crystal, miller_supercell):
         # Implement logic to calculate the orthogonal lattice based on crystal and miller_supercell
         return supercell(crystal, miller_supercell)  # Placeholder implementation
@@ -130,43 +131,6 @@ class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
         )
 
 
-class StackConfiguration(StackSchema):
-
-    stack_components: List[Union[Material, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]]
-    direction: AxisEnum = AxisEnum.z
-
-    @property
-    def atomic_layers(self) -> AtomicLayersUniqueRepeatedConfiguration:
-        return self.stack_components[0]
-
-    @property
-    def vacuum_configuration(self) -> VacuumConfiguration:
-        return self.stack_components[1]
-
-
 class SlabConfiguration(StackConfiguration):
     stack_components: List[Union[AtomicLayersUnique, VacuumConfiguration]]
     xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
-
-
-class StackBuilder2Components(BaseBuilder):
-
-    def configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, Material):
-            return configuration_or_material
-        if isinstance(configuration_or_material, AtomicLayersUniqueRepeatedConfiguration):
-            builder = AtomicLayersUniqueRepeatedBuilder()
-        if isinstance(configuration_or_material, VacuumConfiguration):
-            builder = VacuumBuilder()
-        return builder.get_material(configuration_or_material)
-
-    def generate(self, configuration: StackConfiguration) -> Material:
-        first_entity_config = self.configuration.stack_components[0]
-        first_material = self.configuration_to_material(first_entity_config)
-        second_entity_config = self.configuration.stack_components[1]
-        second_material = self.configuration_to_material(second_entity_config)
-        # Stack the two materials
-        stacked_materials = stack([first_material, second_material], AxisEnum.z)
-
-    def get_material(self, configuration: SlabConfiguration) -> Material:
-        return self.generate(configuration)

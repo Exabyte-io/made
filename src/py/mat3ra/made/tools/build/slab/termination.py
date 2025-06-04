@@ -1,5 +1,7 @@
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.esse.models.material.primitive.two_dimensional.termination import TerminationSchema
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.termination import (
+    TerminationSchema,
+)
 
 
 class Termination(TerminationSchema, InMemoryEntityPydantic):

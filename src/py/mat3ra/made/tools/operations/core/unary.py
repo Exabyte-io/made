@@ -3,8 +3,9 @@ from typing import List
 from mat3ra.code.vector import Vector3D
 
 from mat3ra.made.material import Material
-from mat3ra.esse.models.material.primitive.combinations.stack import AxisEnum
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
+from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.build.utils import stack_two_materials
 
 
@@ -15,13 +16,13 @@ def translate(material: Material, vector: Vector3D) -> Material:
 
 
 def supercell(material: Material, supercell_matrix) -> Material:
-    # reuse create_supercell, keep ASE
-    return material
+    supercell = create_supercell(material, supercell_matrix)
+    return supercell
 
 
 def orient_cell(material: Material, rotational_matrix) -> Material:
     # reuse ase.rotate(rotate_cell=True)
-    pass
+    return material
 
 
 def edit_cell(material: Material, lattice_vectors=None, basis=None) -> Material:

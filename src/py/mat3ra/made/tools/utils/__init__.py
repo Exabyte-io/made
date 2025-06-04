@@ -2,7 +2,7 @@ from functools import wraps
 from typing import Any, Callable, List, Optional, Union, cast
 
 import numpy as np
-from mat3ra.esse.models.material.primitive.two_dimensional.supercell_matrix_2d import (
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
     SupercellMatrix2DSchemaItem,
 )
