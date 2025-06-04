@@ -53,7 +53,7 @@ def test_build_slab():
     )
 
     slab_configuration = SlabConfiguration(
-        stack_components=[atomic_layers_repeated_terminated, vacuum_configuration],
+        stack_components=[atomic_layers, vacuum_configuration],
         direction=AxisEnum.z,
         xy_supercell_matrix=XY_SUPERCELL_MATRIX,
     )

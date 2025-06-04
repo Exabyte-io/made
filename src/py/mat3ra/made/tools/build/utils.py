@@ -160,7 +160,7 @@ def stack_two_materials(
     Returns:
         Material: Stacked material with combined lattice and atoms.
     """
-    lattice_vector_index = AXIS_TO_INDEX_MAP[direction.value]
+    lattice_vector_index = AXIS_TO_INDEX_MAP[direction]
 
     material_1_lattice_vectors = material_1.lattice.vector_arrays
     material_2_lattice_vectors = material_2.lattice.vector_arrays

@@ -146,6 +146,7 @@ class StackConfiguration(StackSchema):
 
 class SlabConfiguration(StackConfiguration):
     stack_components: List[Union[AtomicLayersUnique, VacuumConfiguration]]
+    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
 
 
 class StackBuilder2Components(BaseBuilder):
