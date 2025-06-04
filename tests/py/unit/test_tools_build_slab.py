@@ -1,10 +1,10 @@
 from mat3ra.code.vector import Vector3D
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab import SlabBuilderParameters, SlabConfiguration, create_slab, SlabBuilder
+from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, SlabBuilder
 from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
-    Termination,
     VacuumConfiguration,
     get_terminations,
     choose_termination,
@@ -14,12 +14,8 @@ from mat3ra.made.tools.build.slab.configuration import (
     CrystalLatticePlanesBuilder,
     AtomicLayersUniqueRepeatedBuilder,
 )
-from mat3ra.made.tools.modify import translate_to_z_level
-from mat3ra.made.tools.operations.core.unary import orient_cell, translate, stack, supercell
-from mat3ra.esse.models.material.primitive.two_dimensional.vacuum import AxisEnum
-from mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import MillerIndicesSchema
-from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION, SI_SLAB_DEFAULT_PARAMETERS
-
+from mat3ra.made.tools.operations.core.unary import translate
+from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION
 from .utils import assert_two_entities_deep_almost_equal
 
 MILLER_INDICES = SI_SLAB_001_CONFIGURATION["miller_indices"]

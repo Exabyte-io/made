@@ -1,6 +1,6 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
-from mat3ra.esse.models.material.primitive.combinations.stack import AxisEnum
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from .configuration import VacuumConfiguration
 
 

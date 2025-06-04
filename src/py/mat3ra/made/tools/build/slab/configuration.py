@@ -5,10 +5,7 @@ from mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import
 from mat3ra.esse.models.material.reusable.two_dimensional.crystal_lattice_planes import (
     CrystalLatticePlanesSchema,
 )
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import (
-    SlabConfigurationSchema,
-    AxisEnum,
-)
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material
@@ -135,7 +132,8 @@ class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
 
 class StackConfiguration(StackSchema):
 
-    stack_components: List[Union[AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]]
+    stack_components: List[Union[Material, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]]
+    direction: AxisEnum = AxisEnum.z
 
     @property
     def atomic_layers(self) -> AtomicLayersUniqueRepeatedConfiguration:
@@ -146,7 +144,7 @@ class StackConfiguration(StackSchema):
         return self.stack_components[1]
 
 
-class SlabConfiguration(SlabConfigurationSchema):
+class SlabConfiguration(StackConfiguration):
     stack_components: List[Union[AtomicLayersUnique, VacuumConfiguration]]
 
 
