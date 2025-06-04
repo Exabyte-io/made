@@ -13,8 +13,8 @@ from mat3ra.made.tools.build.slab.configuration import (
 )
 from mat3ra.made.tools.modify import translate_to_z_level
 from mat3ra.made.tools.operations.core.unary import orient_cell, translate, stack, supercell
-from mat3ra.esse.models.material.primitive.combinations.stack import AxisEnum
-from mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import MillerIndicesSchema
+from src.py.mat3ra.esse.models.material.primitive.combinations.stack import AxisEnum
+from src.py.mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import MillerIndicesSchema
 from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION, SI_SLAB_DEFAULT_PARAMETERS
 
 from .utils import assert_two_entities_deep_almost_equal

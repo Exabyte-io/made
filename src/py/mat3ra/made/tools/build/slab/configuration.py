@@ -5,11 +5,11 @@ from mat3ra.esse.models.material.primitive.two_dimensional.miller_indices import
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material
-from mat3ra.esse.models.material.primitive.combinations.stack import StackSchema
-from mat3ra.esse.models.material.reusable.two_dimensional.crystal_lattice_planes import (
+from src.py.mat3ra.esse.models.material.primitive.combinations.stack import StackSchema
+from src.py.mat3ra.esse.models.material.reusable.two_dimensional.crystal_lattice_planes import (
     CrystalLatticePlanesSchema,
 )
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import (
+from src.py.mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import (
     SlabConfigurationSchema,
 )
 from .termination import Termination
@@ -37,7 +37,7 @@ def generate_pymatgen_slabs(
         miller_values = miller_indices.root
     else:
         miller_values = miller_indices
-        
+
     generator = PymatgenSlabGenerator(
         initial_structure=to_pymatgen(crystal),
         miller_index=miller_values,
@@ -97,7 +97,7 @@ class CrystalLatticePlanesConfiguration(MillerSupercell, CrystalLatticePlanesSch
 
 
 class CrystalLatticePlanesBuilder(BaseBuilder):
-    def calculate_orthogonal_lattice(self, crystal, miller_supercell):
+    def calculate_orthogonal_lattice(crystal, miller_supercell):
         # Implement logic to calculate the orthogonal lattice based on crystal and miller_supercell
         return supercell(crystal, miller_supercell)  # Placeholder implementation
 
@@ -118,18 +118,17 @@ class AtomicLayersUnique(CrystalLatticePlanesConfiguration):
 
 
 class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUnique):
-    pass
+    number_of_repetitions: int = 1
 
 
 class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
     _ConfigurationType = AtomicLayersUniqueRepeatedConfiguration
-    number_of_repetitions: int
 
     def get_material(self, configuration: _ConfigurationType) -> Material:
         """
         Returns the repeated cell based on the number of repetitions.
         """
-        return supercell(self.orthogonal_c_cell, [[1, 0, 0], [0, 1, 0], [0, 0, self.number_of_repetitions]])
+        return supercell(self.orthogonal_c_cell, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]])
 
 
 class StackConfiguration(StackSchema):
@@ -145,5 +144,38 @@ class StackConfiguration(StackSchema):
         return self.stack_components[1]
 
 
-class SlabConfiguration(StackConfiguration, SlabConfigurationSchema):
+class SlabConfiguration(SlabConfigurationSchema):
     stack_components: List[Union[AtomicLayersUnique, VacuumConfiguration]]
+
+
+class StackBuilder2Components(BaseBuilder):
+
+    def configuration_to_material(self, configuration_or_material: Any) -> Material:
+        if isinstance(configuration_or_material, Material):
+            return configuration_or_material
+        if isinstance(configuration_or_material, AtomicLayersUniqueRepeatedConfiguration):
+            builder = AtomicLayersUniqueRepeatedBuilder()
+        if isinstance(configuration_or_material, VacuumConfiguration):
+            builder = VacuumBuilder()
+        return builder.get_material(configuration_or_material)
+
+    def generate(self, configuration: StackConfiguration) -> Material:
+        first_entity_config = self.configuration.stack_components[0]
+        first_material = self.configuration_to_material(first_entity_config)
+        second_entity_config = self.configuration.stack_components[1]
+
+    def get_material(self, configuration: SlabConfiguration) -> Material:
+        return self.generate(configuration)
+
+
+class SlabBuilder(StackBuilder2Components):
+
+    def generate(self, configuration: SlabConfiguration) -> Material:
+        repeated_layers = configuration.atomic_layers.repeated_layers
+        vacuum_layer = configuration.vacuum_configuration.vacuum_layer
+        stacked_materials = stack([repeated_layers, vacuum_layer], "z")
+        supercell_slab = supercell(stacked_materials, configuration.xy_supercell_matrix)
+        return supercell_slab
+
+    def get_material(self, configuration: SlabConfiguration) -> Material:
+        return self.generate(configuration)

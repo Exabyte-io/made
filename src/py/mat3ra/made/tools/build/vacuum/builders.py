@@ -1,9 +1,10 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
+from mat3ra.esse.models.material.primitive.combinations.stack import AxisEnum
 from .configuration import VacuumConfiguration
 
 
-def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration", direction: str) -> Material:
+def create_vacuum_material(reference: Material, vacuum: "VacuumConfiguration", direction: AxisEnum) -> Material:
     # TODO: update to handle other directions
     a_vector, b_vector = reference.lattice.vector_arrays[:2]
     vacuum_lattice = reference.lattice.from_vectors_array(
@@ -25,4 +26,4 @@ class VacuumBuilder(BaseBuilder):
         reference = configuration.crystal
         size = configuration.size
         direction = configuration.direction
-        return create_vacuum_material(reference, self.crystal.size)
+        return create_vacuum_material(reference, configuration, direction)

@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import Any
 
 from mat3ra.esse.models.apse.materials.builders.slab.pymatgen.parameters import (
     PymatgenSlabGeneratorParametersSchema,
@@ -14,11 +14,8 @@ from .configuration import (
     StackConfiguration,
 )
 from .termination import Termination
-from ..supercell import create_supercell
 from ..vacuum.builders import VacuumBuilder
-from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
-from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from ...operations.core.unary import stack, supercell
 
 
@@ -43,14 +40,22 @@ class StackBuilder2Components(BaseBuilder):
             return configuration_or_material
         if isinstance(configuration_or_material, AtomicLayersUniqueRepeatedConfiguration):
             builder = AtomicLayersUniqueRepeatedBuilder()
+            return builder.get_material(configuration_or_material)
         if isinstance(configuration_or_material, VacuumConfiguration):
             builder = VacuumBuilder()
-        return builder.get_material(configuration_or_material)
+            return builder.get_material(configuration_or_material)
+        # If we reach here, we don't know how to handle this configuration
+        raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
 
     def generate(self, configuration: StackConfiguration) -> Material:
-        first_entity_config = self.configuration.stack_components[0]
+        first_entity_config = configuration.stack_components[0]
         first_material = self.configuration_to_material(first_entity_config)
-        second_entity_config = self.configuration.stack_components[1]
+        second_entity_config = configuration.stack_components[1]
+        second_material = self.configuration_to_material(second_entity_config)
+
+        # Stack the two materials
+        stacked_materials = stack([first_material, second_material], "z")
+        return stacked_materials
 
     def get_material(self, configuration: SlabConfiguration) -> Material:
         return self.generate(configuration)
@@ -59,8 +64,23 @@ class StackBuilder2Components(BaseBuilder):
 class SlabBuilder(StackBuilder2Components):
 
     def generate(self, configuration: SlabConfiguration) -> Material:
-        repeated_layers = configuration.atomic_layers.repeated_layers
-        vacuum_layer = configuration.vacuum_configuration.vacuum_layer
+        # Use builders to construct materials from configurations
+        atomic_layers_config = configuration.atomic_layers
+        vacuum_config = configuration.vacuum_configuration
+
+        # Build the atomic layers material
+        if isinstance(atomic_layers_config, AtomicLayersUniqueRepeatedConfiguration):
+            atomic_builder = AtomicLayersUniqueRepeatedBuilder()
+            repeated_layers = atomic_builder.get_material(atomic_layers_config)
+        else:
+            # For AtomicLayersUnique, just use the orthogonal_c_cell
+            repeated_layers = atomic_layers_config.orthogonal_c_cell
+
+        # Build the vacuum material
+        vacuum_builder = VacuumBuilder()
+        vacuum_layer = vacuum_builder.get_material(vacuum_config)
+
+        # Stack the materials
         stacked_materials = stack([repeated_layers, vacuum_layer], "z")
         supercell_slab = supercell(stacked_materials, configuration.xy_supercell_matrix)
         return supercell_slab
