@@ -4,14 +4,12 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
 from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
-    AtomicLayersUniqueRepeatedBuilder,
-    SlabConfiguration,
 )
 from mat3ra.made.tools.build.stack.configuration import StackConfiguration
 from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.unary import stack
-from src.py.mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 
 class StackBuilder2Components(BaseBuilder):
@@ -21,10 +19,15 @@ class StackBuilder2Components(BaseBuilder):
         if isinstance(configuration_or_material, Material):
             return configuration_or_material
         if isinstance(configuration_or_material, AtomicLayersUniqueRepeatedConfiguration):
+            # Local import to avoid circular dependency
+            from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder
             builder = AtomicLayersUniqueRepeatedBuilder()
+            return builder.get_material(configuration_or_material)
         if isinstance(configuration_or_material, VacuumConfiguration):
             builder = VacuumBuilder()
-        return builder.get_material(configuration_or_material)
+            return builder.get_material(configuration_or_material)
+        # If we reach here, we don't know how to handle this configuration
+        raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
 
     def generate(self, configuration: StackConfiguration) -> Material:
         first_entity_config = configuration.stack_components[0]

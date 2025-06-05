@@ -3,18 +3,19 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, SlabBuilder
+from mat3ra.made.tools.build.slab.builders import (
+    ConventionalCellBuilder,
+    AtomicLayersUniqueRepeatedBuilder,
+    CrystalLatticePlanesBuilder,
+)
 from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     VacuumConfiguration,
     get_terminations,
     choose_termination,
-    MillerSupercell,
     CrystalLatticePlanesConfiguration,
     AtomicLayersUnique,
-    CrystalLatticePlanesBuilder,
-    AtomicLayersUniqueRepeatedBuilder,
     ConventionalCellConfiguration,
-    ConventionalCellBuilder,
 )
 from mat3ra.made.tools.operations.core.unary import translate
 from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION

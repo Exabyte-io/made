@@ -7,13 +7,13 @@ from .termination import Termination
 
 CACHED_BUILDER = None
 
-
-def get_terminations(
-    configuration: SlabConfiguration, build_parameters: Optional[SlabBuilderParameters] = None
-) -> List[Termination]:
-    global CACHED_BUILDER
-    CACHED_BUILDER = SlabBuilder(build_parameters=build_parameters)
-    return CACHED_BUILDER.get_terminations(configuration)
+#
+# def get_terminations(
+#     configuration: SlabConfiguration, build_parameters: Optional[SlabBuilderParameters] = None
+# ) -> List[Termination]:
+#     global CACHED_BUILDER
+#     CACHED_BUILDER = SlabBuilder(build_parameters=build_parameters)
+#     return CACHED_BUILDER.get_terminations(configuration)
 
 
 def create_slab(
