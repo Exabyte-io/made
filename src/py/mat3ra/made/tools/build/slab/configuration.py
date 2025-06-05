@@ -134,11 +134,13 @@ class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
     _ConfigurationType = AtomicLayersUniqueRepeatedConfiguration
 
     def get_material(self, configuration: _ConfigurationType) -> Material:
-        translation_vector: Vector3D = configuration.get_translation_vector(configuration.termination_top)
         material = configuration.orthogonal_c_cell
+        translation_vector: Vector3D = configuration.get_translation_vector(configuration.termination_top)
         material_translated = translate(material, translation_vector)
-
-        return supercell(material_translated, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]])
+        material_translated_with_repetitions = supercell(
+            material_translated, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
+        )
+        return material_translated_with_repetitions
 
 
 class SlabConfiguration(StackConfiguration):
