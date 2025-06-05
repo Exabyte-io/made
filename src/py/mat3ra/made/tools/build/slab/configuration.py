@@ -108,8 +108,7 @@ class CrystalLatticePlanesConfiguration(MillerSupercell, CrystalLatticePlanesSch
 class CrystalLatticePlanesBuilder(BaseBuilder):
     @staticmethod
     def calculate_orthogonal_lattice(crystal, miller_supercell):
-        # Implement logic to calculate the orthogonal lattice based on crystal and miller_supercell
-        return supercell(crystal, miller_supercell)  # Placeholder implementation
+        return supercell(crystal, miller_supercell)
 
     def get_material(self, configuration: CrystalLatticePlanesConfiguration) -> Material:
         orthogonal_c_cell = self.calculate_orthogonal_lattice(configuration.crystal, configuration.miller_supercell)
@@ -119,8 +118,7 @@ class CrystalLatticePlanesBuilder(BaseBuilder):
 class AtomicLayersUnique(CrystalLatticePlanesConfiguration):
     @property
     def orthogonal_c_cell(self):
-        # return calculate_orthogonal_lattice(self.crystal, self.miller_supercell)
-        return supercell(self.crystal, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])  # Placeholder implementation
+        return supercell(self.crystal, self.miller_supercell)
 
     def get_translation_vector(self, termination: Termination) -> List[float]:
         # Implement logic to calculate translation vector based on termination
