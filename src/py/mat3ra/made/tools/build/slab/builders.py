@@ -44,11 +44,6 @@ class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
         return material_translated_with_repetitions
 
 
-class SlabBuilderParameters(BaseBuilder):
-    make_primitive: bool = False
-    use_orthogonal_c: bool = True
-
-
 class SlabBuilder(StackBuilder2Components):
 
     def generate(self, configuration: SlabConfiguration) -> Material:

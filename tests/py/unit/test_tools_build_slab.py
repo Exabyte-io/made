@@ -39,11 +39,6 @@ def test_build_slab():
     terminations = crystal_lattice_planes.terminations
     termination = choose_termination(terminations, "Si")
 
-    atomic_layers = AtomicLayersUnique(
-        crystal=crystal_lattice_planes.crystal,
-        miller_indices=MILLER_INDICES,
-    )
-
     atomic_layers_repeated_config = AtomicLayersUniqueRepeatedConfiguration(
         crystal=crystal_lattice_planes.crystal,
         miller_indices=MILLER_INDICES,
@@ -54,7 +49,7 @@ def test_build_slab():
         atomic_layers_repeated_config
     )
 
-    translation_vector: Vector3D = atomic_layers.get_translation_vector(termination)
+    translation_vector: Vector3D = atomic_layers_repeated_config.get_translation_vector(termination)
     atomic_layers_repeated_terminated = translate(atomic_layers_repeated_orthogonal_c, translation_vector)
 
     vacuum_configuration = VacuumConfiguration(

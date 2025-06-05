@@ -1,6 +1,8 @@
 from typing import Union, List
 
-from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import MillerIndicesSchema
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
+    MillerIndicesSchema,
+)
 
 from mat3ra.made.material import Material
 from .termination import Termination
@@ -48,19 +50,11 @@ def generate_miller_supercell_matrix(
     make_primitive: bool = False,
     symmetrize: bool = False,
 ) -> List[List[int]]:
-    # Extract actual values from MillerIndicesSchema if needed
-    print(f"DEBUG: miller_indices type: {type(miller_indices)}")
-    print(f"DEBUG: isinstance MillerIndicesSchema check: {isinstance(miller_indices, MillerIndicesSchema)}")
-    print(f"DEBUG: miller_indices value: {miller_indices}")
-    
+
     if isinstance(miller_indices, MillerIndicesSchema):
         miller_values = list(miller_indices.root)
-        print(f"DEBUG: Extracted miller_values from MillerIndicesSchema: {miller_values}, type: {type(miller_values)}")
     else:
         miller_values = miller_indices
-        print(f"DEBUG: Using miller_indices directly: {miller_values}, type: {type(miller_values)}")
-
-    print(f"DEBUG: About to pass miller_index={miller_values} to PymatgenSlabGenerator")
 
     generator = PymatgenSlabGenerator(
         initial_structure=to_pymatgen(crystal),
