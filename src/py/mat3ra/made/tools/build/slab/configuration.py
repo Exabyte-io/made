@@ -52,6 +52,34 @@ def generate_pymatgen_slabs(
     return raw_slabs
 
 
+def generate_miller_supercell_matrix(
+    crystal: Material,
+    miller_indices: Union[MillerIndicesSchema, List[int]] = (0, 0, 1),
+    min_slab_size=1,
+    min_vacuum_size=0,
+    in_unit_planes: bool = True,
+    make_primitive: bool = False,
+    symmetrize: bool = False,
+) -> List[List[int]]:
+    # Extract actual values from MillerIndicesSchema if needed
+    if isinstance(miller_indices, MillerIndicesSchema):
+        miller_values = miller_indices.root
+    else:
+        miller_values = miller_indices
+
+    generator = PymatgenSlabGenerator(
+        initial_structure=to_pymatgen(crystal),
+        miller_index=miller_values,
+        min_slab_size=min_slab_size,
+        min_vacuum_size=min_vacuum_size,
+        in_unit_planes=in_unit_planes,
+        primitive=make_primitive,
+    )
+
+    supercell_matrix = generator.slab_scale_factor.tolist()
+    return supercell_matrix
+
+
 def calculate_rotation_matrix(crystal, miller_supercell_material):
     # Implement logic to calculate the rotation matrix based on crystal and miller_supercell_material
     return [[1, 0, 0], [0, 1, 0], [0, 0, 1]]  # Identity matrix as a placeholder
@@ -75,11 +103,6 @@ def choose_termination(terminations: List[Termination], stoichiometry: str) -> T
 class MillerSupercell(BaseModel):
     miller_indices: MillerIndicesSchema
 
-    @property
-    def miller_supercell(self):
-        # use pymatgen to generate the supercell based on miller indices
-        return miller_to_supercell_matrix(self.miller_indices.root)
-
 
 class ConventionalCellConfiguration(BaseModel):
     crystal: Material
@@ -94,6 +117,10 @@ class ConventionalCellBuilder(BaseBuilder):
 
 class CrystalLatticePlanesConfiguration(MillerSupercell, CrystalLatticePlanesSchema):
     crystal: Material
+
+    @property
+    def miller_supercell(self) -> List[List[int]]:
+        return generate_miller_supercell_matrix(crystal=self.crystal, miller_indices=self.miller_indices)
 
     @property
     def rotational_matrix(self) -> List[List[float]]:
