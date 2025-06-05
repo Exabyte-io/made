@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from mat3ra.made.material import Material
-from .builders import SlabBuilder, SlabSelectorParameters, SlabBuilderParameters
+from .builders import SlabBuilder, SlabBuilderParameters
 from .configuration import SlabConfiguration
 from .termination import Termination
 

@@ -1,5 +1,6 @@
 from typing import List, Union
 
+from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
     MillerIndicesSchema,
 )
@@ -14,10 +15,10 @@ from .. import BaseBuilder
 from ..stack.configuration import StackConfiguration
 from ..utils import miller_to_supercell_matrix
 from ..vacuum.configuration import VacuumConfiguration
-from ...convert import to_pymatgen
-from ...operations.core.unary import supercell
+from ...convert import to_pymatgen, from_pymatgen
+from ...operations.core.unary import supercell, translate
 from ...third_party import PymatgenSlab
-from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination
+from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination, PymatgenSpacegroupAnalyzer
 
 
 def generate_pymatgen_slabs(
@@ -80,6 +81,17 @@ class MillerSupercell(BaseModel):
         return miller_to_supercell_matrix(self.miller_indices.root)
 
 
+class ConventionalCellConfiguration(BaseModel):
+    crystal: Material
+
+
+class ConventionalCellBuilder(BaseBuilder):
+    def get_material(self, configuration: ConventionalCellConfiguration) -> Material:
+        bulk_pmg = to_pymatgen(configuration.crystal)
+        conventional_cell = PymatgenSpacegroupAnalyzer(bulk_pmg).get_conventional_standard_structure()
+        return Material.create(from_pymatgen(conventional_cell))
+
+
 class CrystalLatticePlanesConfiguration(MillerSupercell, CrystalLatticePlanesSchema):
     crystal: Material
 
@@ -116,6 +128,7 @@ class AtomicLayersUnique(CrystalLatticePlanesConfiguration):
 
 
 class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUnique):
+    termination_top: Termination
     number_of_repetitions: int = 1
 
 
@@ -123,14 +136,15 @@ class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
     _ConfigurationType = AtomicLayersUniqueRepeatedConfiguration
 
     def get_material(self, configuration: _ConfigurationType) -> Material:
-        """
-        Returns the repeated cell based on the number of repetitions.
-        """
-        return supercell(
-            configuration.orthogonal_c_cell, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
-        )
+        translation_vector: Vector3D = configuration.get_translation_vector(configuration.termination_top)
+        material = configuration.orthogonal_c_cell
+        material_translated = translate(material, translation_vector)
+
+        return supercell(material_translated, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]])
 
 
 class SlabConfiguration(StackConfiguration):
-    stack_components: List[Union[AtomicLayersUnique, VacuumConfiguration]]
+    stack_components: List[
+        Union[Material, AtomicLayersUnique, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]
+    ]
     xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
