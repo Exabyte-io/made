@@ -159,6 +159,7 @@ def stack_two_materials(
         material2=material2_translated,
         distance_tolerance=0,
         merge_dangerously=True,  # Allows merging, assumes compatibility handled by stacking logic
+        material_name=material_1.name,
     )
 
     return stacked_material

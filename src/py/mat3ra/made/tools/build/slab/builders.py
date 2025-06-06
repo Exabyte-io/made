@@ -9,6 +9,7 @@ from .configuration import (
     ConventionalCellConfiguration,
 )
 from ..stack.builders import StackBuilder2Components
+from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...convert import to_pymatgen, from_pymatgen
 from ...operations.core.unary import supercell, translate, edit_cell
@@ -56,7 +57,9 @@ class SlabBuilder(StackBuilder2Components):
         return supercell_slab
 
     def get_material(self, configuration: SlabConfiguration) -> Material:
-        return self.generate(configuration)
+        material = self.generate(configuration)
+        material = self._update_material_name(material, configuration)
+        return material
 
     def _make_orthogonal_c(self, material: Material) -> Material:
         """
@@ -85,3 +88,12 @@ class SlabBuilder(StackBuilder2Components):
         ]
 
         return edit_cell(material, new_vectors)
+
+    def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
+        formula = get_chemical_formula(configuration.atomic_layers.crystal)
+        miller_indices = "".join([str(i) for i in configuration.stack_components[0].miller_indices])
+        termination = configuration.stack_components[0].termination_top
+        # for example: "Si8(001), termination Si_P4/mmm_1, Slab"
+        new_name = f"{formula}({miller_indices}), termination {termination}, Slab"
+        material.name = new_name
+        return material
