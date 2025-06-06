@@ -1,5 +1,5 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.utils import merge_materials
+from mat3ra.made.tools.operations.core.binary import merge_materials
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.cuts import (
     CAVITY_MATERIAL_BASIS,
