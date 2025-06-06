@@ -4,10 +4,8 @@ import numpy as np
 
 from mat3ra.made.material import Material
 from ..operations.core.unary import supercell
-from ..utils import decorator_convert_2x2_to_3x3
 
 
-@decorator_convert_2x2_to_3x3
 def create_supercell(
     material: Material, supercell_matrix: Optional[List[List[int]]] = None, scaling_factor: Optional[List[int]] = None
 ) -> Material:

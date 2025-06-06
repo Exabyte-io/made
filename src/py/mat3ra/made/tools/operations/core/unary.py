@@ -1,13 +1,14 @@
 from typing import List
 
 from mat3ra.code.vector import Vector3D
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.utils import stack_two_materials
 from mat3ra.made.tools.modify import translate_by_vector, wrap_to_unit_cell
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from ...convert import from_ase, to_ase
 from ...third_party import ase_make_supercell
+from ...utils import decorator_convert_2x2_to_3x3
+from .binary import stack_two_materials
 
 
 def translate(material: Material, vector: Vector3D) -> Material:
@@ -15,6 +16,7 @@ def translate(material: Material, vector: Vector3D) -> Material:
     return translate_by_vector(material, vector)
 
 
+@decorator_convert_2x2_to_3x3
 def supercell(material: Material, supercell_matrix) -> Material:
     atoms = to_ase(material)
 
@@ -33,8 +35,3 @@ def edit_cell(material: Material, lattice_vectors=None) -> Material:
         )
     wrapped_material = wrap_to_unit_cell(material)
     return wrapped_material
-
-
-def stack(materials: List[Material], direction: AxisEnum) -> Material:
-    # use stack_two_materials
-    return stack_two_materials(material_1=materials[0], material_2=materials[1], direction=direction)
