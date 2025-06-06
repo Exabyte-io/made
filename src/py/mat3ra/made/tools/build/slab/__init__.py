@@ -47,19 +47,14 @@ def create_slab(
         number_of_repetitions=number_of_layers,
     )
 
-    atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
-        atomic_layers_repeated_config
-    )
-
-    translation_vector: Vector3D = atomic_layers_repeated_config.get_translation_vector(termination)
-    atomic_layers_repeated_terminated = translate(atomic_layers_repeated_orthogonal_c, translation_vector)
+    atomic_layers_material = AtomicLayersUniqueRepeatedBuilder().get_material(atomic_layers_repeated_config)
 
     vacuum_configuration = VacuumConfiguration(
-        size=vacuum, crystal=atomic_layers_repeated_terminated, direction=AxisEnum.z
+        size=vacuum, crystal=atomic_layers_material, direction=AxisEnum.z
     )
 
     slab_configuration = SlabConfiguration(
-        stack_components=[atomic_layers_repeated_terminated, vacuum_configuration],
+        stack_components=[atomic_layers_repeated_config, vacuum_configuration],
         direction=AxisEnum.z,
         xy_supercell_matrix=xy_supercell_matrix,
         use_orthogonal_c=use_orthogonal_c,

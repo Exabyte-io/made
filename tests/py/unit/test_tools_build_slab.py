@@ -43,19 +43,21 @@ def test_build_slab():
         termination_top=termination,
         number_of_repetitions=NUMBER_OF_LAYERS,
     )
+    
+    # For VacuumConfiguration, we still need a material to determine dimensions
     atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
         atomic_layers_repeated_config
     )
-
-    translation_vector: Vector3D = atomic_layers_repeated_config.get_translation_vector(termination)
+    translation_vector = atomic_layers_repeated_config.get_translation_vector(termination)
     atomic_layers_repeated_terminated = translate(atomic_layers_repeated_orthogonal_c, translation_vector)
 
     vacuum_configuration = VacuumConfiguration(
         size=VACUUM, crystal=atomic_layers_repeated_terminated, direction=AxisEnum.z
     )
 
+    # Pass configuration objects, not materials, to preserve metadata
     slab_configuration = SlabConfiguration(
-        stack_components=[atomic_layers_repeated_terminated, vacuum_configuration],
+        stack_components=[atomic_layers_repeated_config, vacuum_configuration],
         direction=AxisEnum.z,
         xy_supercell_matrix=XY_SUPERCELL_MATRIX,
     )

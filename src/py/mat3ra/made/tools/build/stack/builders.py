@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
@@ -31,7 +31,7 @@ class StackBuilder2Components(BaseBuilder):
         # If we reach here, we don't know how to handle this configuration
         raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
 
-    def generate(self, configuration: StackConfiguration) -> Material:
+    def _generate(self, configuration: StackConfiguration) -> List[Material]:
         first_entity_config = configuration.stack_components[0]
         first_material = self.configuration_to_material(first_entity_config)
         second_entity_config = configuration.stack_components[1]
@@ -39,7 +39,4 @@ class StackBuilder2Components(BaseBuilder):
 
         # Stack the two materials
         stacked_materials = stack([first_material, second_material], configuration.direction or AxisEnum.z)
-        return stacked_materials
-
-    def get_material(self, configuration: StackConfiguration) -> Material:
-        return self.generate(configuration)
+        return [stacked_materials]

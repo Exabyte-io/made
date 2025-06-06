@@ -56,7 +56,7 @@ class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUnique):
 
 class SlabConfiguration(StackConfiguration):
     stack_components: List[
-        Union[Material, AtomicLayersUnique, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]
+        Union[AtomicLayersUnique, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]  # No Materials!
     ]
     xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
     use_orthogonal_c: bool = True
@@ -64,3 +64,7 @@ class SlabConfiguration(StackConfiguration):
     @property
     def atomic_layers(self):
         return self.stack_components[0]
+
+    @property
+    def vacuum_configuration(self) -> VacuumConfiguration:
+        return self.stack_components[1]
