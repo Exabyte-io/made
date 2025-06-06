@@ -9,6 +9,6 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 
 class VacuumConfiguration(VacuumConfigurationSchema):
-    size: float
+    size: float = VacuumConfigurationSchema.model_fields["size"].default
     crystal: Material
-    direction: Optional[AxisEnum]
+    direction: Optional[AxisEnum] = VacuumConfigurationSchema.model_fields["direction"].default
