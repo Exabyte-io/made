@@ -1,4 +1,5 @@
 from typing import Union, List
+import numpy as np
 
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
     MillerIndicesSchema,

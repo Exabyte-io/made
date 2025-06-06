@@ -23,19 +23,20 @@ class ConventionalCellBuilder(BaseBuilder):
 
 class CrystalLatticePlanesBuilder(BaseBuilder):
     @staticmethod
-    def calculate_orthogonal_lattice(crystal, miller_supercell):
+    def calculate_plane_lattice(crystal, miller_supercell):
         return supercell(crystal, miller_supercell)
 
     def get_material(self, configuration: CrystalLatticePlanesConfiguration) -> Material:
-        orthogonal_c_cell = self.calculate_orthogonal_lattice(configuration.crystal, configuration.miller_supercell)
-        return supercell(orthogonal_c_cell, configuration.rotational_matrix)
+        plane_cell = self.calculate_plane_lattice(configuration.crystal, configuration.miller_supercell)
+        # return supercell(plane_cell, configuration.rotational_matrix)
+        return plane_cell
 
 
 class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
     _ConfigurationType = AtomicLayersUniqueRepeatedConfiguration
 
     def get_material(self, configuration: _ConfigurationType) -> Material:
-        material = configuration.orthogonal_c_cell
+        material = configuration.orthogonal_surface_supercell
         translation_vector: Vector3D = configuration.get_translation_vector(configuration.termination_top)
         material_translated = translate(material, translation_vector)
         material_translated_with_repetitions = supercell(
