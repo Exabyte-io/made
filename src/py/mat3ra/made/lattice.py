@@ -1,6 +1,6 @@
-import math
 from typing import List, Optional
 
+import math
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.properties_directory.structural.lattice import (
@@ -47,6 +47,8 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
 
     @property
     def vectors(self) -> LatticeVectors:
+        if hasattr(self, "_preserved_vectors"):
+            return self._preserved_vectors
         vectors = self.calculate_vectors()
         return LatticeVectors.from_vectors_array(vectors)
 
@@ -92,7 +94,7 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
         beta = np.degrees(np.arccos(np.dot(vectors[0], vectors[2]) / (a * c)))
         gamma = np.degrees(np.arccos(np.dot(vectors[0], vectors[1]) / (a * b)))
 
-        return cls(
+        lattice = cls(
             a=float(a),
             b=float(b),
             c=float(c),
@@ -102,6 +104,11 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
             units=units,
             type=type,
         )
+
+        # Preserve the original vectors by storing them directly
+        setattr(lattice, "_preserved_vectors", LatticeVectors.from_vectors_array(vectors))
+
+        return lattice
 
     @property
     def vector_arrays(self) -> List[List[float]]:
