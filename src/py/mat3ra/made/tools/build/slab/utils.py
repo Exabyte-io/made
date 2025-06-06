@@ -70,11 +70,6 @@ def generate_miller_supercell_matrix(
     return supercell_matrix
 
 
-def calculate_rotation_matrix(crystal, miller_supercell_material):
-    # Implement logic to calculate the rotation matrix based on crystal and miller_supercell_material
-    return [[1, 0, 0], [0, 1, 0], [0, 0, 1]]  # Identity matrix as a placeholder
-
-
 def get_terminations(crystal: Material, miller_indices: Union[MillerIndicesSchema, List[int]]) -> List[Termination]:
     return [
         Termination.from_string(label_pymatgen_slab_termination(slab))

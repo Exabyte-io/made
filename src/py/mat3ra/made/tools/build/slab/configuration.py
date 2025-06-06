@@ -16,7 +16,7 @@ from .utils import (
 )
 from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
-from ...operations.core.unary import supercell, orient_cell
+from ...operations.core.unary import supercell
 
 
 class MillerSupercell(BaseModel):
@@ -43,11 +43,6 @@ class AtomicLayersUnique(CrystalLatticePlanesConfiguration):
     @property
     def surface_supercell(self):
         return supercell(self.crystal, self.miller_supercell)
-
-    @property
-    def surface_supercell_rotated(self):
-        # Rotate the surface supercell to have the Miller indices in the XY plane
-        return orient_cell(self.surface_supercell, self.rotational_matrix)
 
     def get_translation_vector(self, termination: Termination) -> List[float]:
         # Implement logic to calculate translation vector based on termination
