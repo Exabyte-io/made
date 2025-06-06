@@ -60,3 +60,7 @@ class SlabConfiguration(StackConfiguration):
     ]
     xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
     use_orthogonal_c: bool = True
+
+    @property
+    def atomic_layers(self):
+        return self.stack_components[0]

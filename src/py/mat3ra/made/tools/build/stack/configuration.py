@@ -13,9 +13,5 @@ class StackConfiguration(StackSchema):
     direction: AxisEnum = AxisEnum.z
 
     @property
-    def atomic_layers(self):
-        return self.stack_components[0]
-
-    @property
     def vacuum_configuration(self) -> VacuumConfiguration:
         return self.stack_components[1]

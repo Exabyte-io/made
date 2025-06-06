@@ -1,32 +1,26 @@
 from typing import Union, List
-import numpy as np
-
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
     MillerIndicesSchema,
 )
-
 from mat3ra.made.material import Material
 from .termination import Termination
 from ...convert import to_pymatgen
 from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 
 
-def generate_pymatgen_slabs(
+def create_pymatgen_slab_generator(
     crystal: Material,
-    miller_indices: Union[MillerIndicesSchema, List[int]] = (0, 0, 1),
-    min_slab_size=1,
-    min_vacuum_size=0,
-    in_unit_planes: bool = True,
-    make_primitive: bool = False,
-    symmetrize: bool = False,
-) -> List[PymatgenSlab]:  # type: ignore
-    # Extract actual values from MillerIndicesSchema if needed
+    miller_indices: Union[MillerIndicesSchema, List[int]],
+    min_slab_size: float,
+    min_vacuum_size: float,
+    in_unit_planes: bool,
+    make_primitive: bool,
+) -> PymatgenSlabGenerator:
     if isinstance(miller_indices, MillerIndicesSchema):
         miller_values = list(miller_indices.root)
     else:
         miller_values = miller_indices
-
-    generator = PymatgenSlabGenerator(
+    return PymatgenSlabGenerator(
         initial_structure=to_pymatgen(crystal),
         miller_index=miller_values,
         min_slab_size=min_slab_size,
@@ -34,51 +28,43 @@ def generate_pymatgen_slabs(
         in_unit_planes=in_unit_planes,
         primitive=make_primitive,
     )
-    raw_slabs = generator.get_slabs(
-        # We need to preserve symmetric slabs for different terminations at the surface
-        symmetrize=symmetrize
-    )
 
-    return raw_slabs
+
+def generate_pymatgen_slabs(
+    crystal: Material,
+    miller_indices: Union[MillerIndicesSchema, List[int]] = (0, 0, 1),
+    min_slab_size: float = 1.0,
+    min_vacuum_size: float = 0.0,
+    in_unit_planes: bool = True,
+    make_primitive: bool = False,
+    symmetrize: bool = False,
+) -> List[PymatgenSlab]:  # type: ignore
+    generator = create_pymatgen_slab_generator(
+        crystal, miller_indices, min_slab_size, min_vacuum_size, in_unit_planes, make_primitive
+    )
+    return generator.get_slabs(symmetrize=symmetrize)
 
 
 def generate_miller_supercell_matrix(
     crystal: Material,
     miller_indices: Union[MillerIndicesSchema, List[int]] = (0, 0, 1),
-    min_slab_size=1,
-    min_vacuum_size=0,
+    min_slab_size: float = 1.0,
+    min_vacuum_size: float = 0.0,
     in_unit_planes: bool = True,
     make_primitive: bool = False,
-    symmetrize: bool = False,
 ) -> List[List[int]]:
-
-    if isinstance(miller_indices, MillerIndicesSchema):
-        miller_values = list(miller_indices.root)
-    else:
-        miller_values = miller_indices
-
-    generator = PymatgenSlabGenerator(
-        initial_structure=to_pymatgen(crystal),
-        miller_index=miller_values,
-        min_slab_size=min_slab_size,
-        min_vacuum_size=min_vacuum_size,
-        in_unit_planes=in_unit_planes,
-        primitive=make_primitive,
+    generator = create_pymatgen_slab_generator(
+        crystal, miller_indices, min_slab_size, min_vacuum_size, in_unit_planes, make_primitive
     )
-
-    supercell_matrix = generator.slab_scale_factor.tolist()
-    return supercell_matrix
+    return generator.slab_scale_factor.tolist()
 
 
 def get_terminations(crystal: Material, miller_indices: Union[MillerIndicesSchema, List[int]]) -> List[Termination]:
-    return [
-        Termination.from_string(label_pymatgen_slab_termination(slab))
-        for slab in generate_pymatgen_slabs(crystal, miller_indices)
-    ]
+    slabs = generate_pymatgen_slabs(crystal, miller_indices)
+    return [Termination.from_string(label_pymatgen_slab_termination(slab)) for slab in slabs]
 
 
-def choose_termination(terminations: List[Termination], stoichiometry: str) -> Termination:
-    # choose a termination by stochiometry or symmetry provided
+def select_termination(terminations: List[Termination], stoichiometry: str) -> Termination:
     for termination in terminations:
         if str(termination.chemical_elements) == stoichiometry:
             return termination
