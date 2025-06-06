@@ -6,17 +6,15 @@ from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, SlabBui
 from mat3ra.made.tools.build.slab.builders import (
     ConventionalCellBuilder,
     AtomicLayersUniqueRepeatedBuilder,
-    CrystalLatticePlanesBuilder,
 )
 from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     VacuumConfiguration,
     get_terminations,
-    choose_termination,
     CrystalLatticePlanesConfiguration,
-    AtomicLayersUnique,
     ConventionalCellConfiguration,
 )
+from mat3ra.made.tools.build.slab.utils import select_termination
 from mat3ra.made.tools.operations.core.unary import translate
 from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION
 from .utils import assert_two_entities_deep_almost_equal
@@ -37,7 +35,7 @@ def test_build_slab():
     )
     crystal_lattice_planes = CrystalLatticePlanesConfiguration(crystal=conventional_cell, miller_indices=MILLER_INDICES)
     terminations = crystal_lattice_planes.terminations
-    termination = choose_termination(terminations, "Si")
+    termination = select_termination(terminations, "Si")
 
     atomic_layers_repeated_config = AtomicLayersUniqueRepeatedConfiguration(
         crystal=crystal_lattice_planes.crystal,
@@ -68,19 +66,11 @@ def test_build_slab():
     assert_two_entities_deep_almost_equal(slab, SI_SLAB_001)
 
 
-def test_build_slab_human_usage():
+def test_create_slab():
     crystal = material
     hkl = MILLER_INDICES
-    crystal_planes_configuration = CrystalLatticePlanesConfiguration(
-        crystal=crystal,
-        miller_indices=hkl,
-        use_conventional_cell=USE_CONVENTIONAL_CELL,
-    )
-
     terminations = get_terminations(crystal=crystal, miller_indices=hkl)
-    crystal_planes = CrystalLatticePlanesBuilder().get_material(crystal_planes_configuration)
-    # visualize(crystal_planes)
-    termination = choose_termination(terminations, "Si")
+    termination = select_termination(terminations, "Si")
     slab = create_slab(
         crystal=crystal,
         miller_indices=hkl,
