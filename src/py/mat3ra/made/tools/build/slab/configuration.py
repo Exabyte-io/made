@@ -17,11 +17,10 @@ from .utils import (
 )
 from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
-from ...operations.core.unary import supercell
 
 
 # TODO: should be moved to analyze module
-class TerminationDetector:
+class TerminationAnalyzer:
     """Detects and calculates translation vectors for slab terminations."""
 
     def __init__(self, crystal: Material, miller_indices: Union[MillerIndicesSchema, List[int]]):
@@ -54,15 +53,11 @@ class TerminationDetector:
         return [0.0, 0.0, 0.0]
 
 
-class MillerSupercell(BaseModel):
-    miller_indices: MillerIndicesSchema
-
-
 class ConventionalCellConfiguration(BaseModel):
     crystal: Material
 
 
-class CrystalLatticePlanesConfiguration(MillerSupercell, CrystalLatticePlanesSchema):
+class CrystalLatticePlanesConfiguration(CrystalLatticePlanesSchema):
     crystal: Material
 
     @property
@@ -75,15 +70,7 @@ class CrystalLatticePlanesConfiguration(MillerSupercell, CrystalLatticePlanesSch
 
 
 class AtomicLayersUnique(CrystalLatticePlanesConfiguration):
-    @property
-    def surface_supercell(self):
-        return supercell(self.crystal, self.miller_supercell)
-
-    def get_translation_vector(self, termination: Termination) -> List[float]:
-        detector = TerminationDetector(self.crystal, self.miller_indices)
-        vector_crystal = detector.find_translation_vector(termination)
-        vector_cartesian = self.surface_supercell.basis.cell.convert_point_to_cartesian(vector_crystal)
-        return vector_cartesian
+    pass
 
 
 class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUnique):

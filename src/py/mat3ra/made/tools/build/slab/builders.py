@@ -9,6 +9,7 @@ from .configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     CrystalLatticePlanesConfiguration,
     ConventionalCellConfiguration,
+    TerminationAnalyzer,
 )
 from .. import BaseBuilderParameters
 from ..stack.builders import StackBuilder2Components
@@ -41,9 +42,20 @@ class CrystalLatticePlanesBuilder(BaseBuilder):
 class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
     _ConfigurationType = AtomicLayersUniqueRepeatedConfiguration
 
+    def get_surface_supercell(self, configuration: _ConfigurationType) -> Material:
+        return supercell(configuration.crystal, configuration.miller_supercell)
+
+    def get_translation_vector(self, configuration) -> Vector3D:
+        termination_analyzer = TerminationAnalyzer(configuration.crystal, configuration.miller_indices)
+        vector_crystal = termination_analyzer.find_translation_vector(configuration.termination_top)
+        vector_cartesian = self.get_surface_supercell(configuration).basis.cell.convert_point_to_cartesian(
+            vector_crystal
+        )
+        return vector_cartesian
+
     def get_material(self, configuration: _ConfigurationType) -> Material:
-        material = configuration.surface_supercell
-        translation_vector: Vector3D = configuration.get_translation_vector(configuration.termination_top)
+        material = self.get_surface_supercell(configuration)
+        translation_vector: Vector3D = self.get_translation_vector(configuration)
         material_translated = translate(material, translation_vector)
         material_translated_wrapped = wrap_to_unit_cell(material_translated)
         material_translated_with_repetitions = supercell(
@@ -62,10 +74,10 @@ class SlabBuilder(StackBuilder2Components):
     DefaultBuilderParameters: SlabBuilderParameters = SlabBuilderParameters()
 
     def _generate(self, configuration: SlabConfiguration) -> List[Material]:
-        stacked_materials_list = super()._generate(configuration)
-        stacked_materials = stacked_materials_list[0]
+        stack_as_material_list = super()._generate(configuration)
+        stack_as_material = stack_as_material_list[0]
 
-        supercell_slab = supercell(stacked_materials, self.build_parameters.xy_supercell_matrix)
+        supercell_slab = supercell(stack_as_material, self.build_parameters.xy_supercell_matrix)
         if self.build_parameters.use_orthogonal_c:
             supercell_slab = self._make_orthogonal_c(supercell_slab)
         return [supercell_slab]
@@ -102,7 +114,7 @@ class SlabBuilder(StackBuilder2Components):
         atomic_layers = configuration.atomic_layers
 
         formula = get_chemical_formula(configuration.atomic_layers.crystal)
-        miller_indices_str = "".join([str(i) for i in atomic_layers.miller_indices.root])
+        miller_indices_str = "".join([str(i) for i in atomic_layers.miller_indices])
         termination = atomic_layers.termination_top
 
         new_name = f"{formula}({miller_indices_str}), termination {termination}, Slab"
