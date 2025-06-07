@@ -1,4 +1,3 @@
-from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
@@ -6,6 +5,7 @@ from mat3ra.made.tools.build.slab import SlabConfiguration, create_slab, SlabBui
 from mat3ra.made.tools.build.slab.builders import (
     ConventionalCellBuilder,
     AtomicLayersUniqueRepeatedBuilder,
+    SlabBuilderParameters,
 )
 from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
@@ -15,11 +15,10 @@ from mat3ra.made.tools.build.slab.configuration import (
     ConventionalCellConfiguration,
 )
 from mat3ra.made.tools.build.slab.utils import select_termination
-from mat3ra.made.tools.operations.core.unary import translate
 from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION
 from .utils import assert_two_entities_deep_almost_equal
 
-MILLER_INDICES = SI_SLAB_001_CONFIGURATION["miller_indices"]
+MILLER_INDICES = (0, 1, 1)
 USE_CONVENTIONAL_CELL = SI_SLAB_001_CONFIGURATION["use_conventional_cell"]
 NUMBER_OF_LAYERS = SI_SLAB_001_CONFIGURATION["number_of_layers"]
 VACUUM = SI_SLAB_001_CONFIGURATION["vacuum"]
@@ -43,26 +42,22 @@ def test_build_slab():
         termination_top=termination,
         number_of_repetitions=NUMBER_OF_LAYERS,
     )
-    
-    # For VacuumConfiguration, we still need a material to determine dimensions
+
     atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
         atomic_layers_repeated_config
     )
-    translation_vector = atomic_layers_repeated_config.get_translation_vector(termination)
-    atomic_layers_repeated_terminated = translate(atomic_layers_repeated_orthogonal_c, translation_vector)
 
     vacuum_configuration = VacuumConfiguration(
-        size=VACUUM, crystal=atomic_layers_repeated_terminated, direction=AxisEnum.z
+        size=VACUUM, crystal=atomic_layers_repeated_orthogonal_c, direction=AxisEnum.z
     )
 
-    # Pass configuration objects, not materials, to preserve metadata
+    build_params = SlabBuilderParameters(use_orthogonal_c=True, xy_supercell_matrix=XY_SUPERCELL_MATRIX)
     slab_configuration = SlabConfiguration(
         stack_components=[atomic_layers_repeated_config, vacuum_configuration],
         direction=AxisEnum.z,
-        xy_supercell_matrix=XY_SUPERCELL_MATRIX,
     )
 
-    builder = SlabBuilder()
+    builder = SlabBuilder(build_parameters=build_params)
     slab = builder.get_material(slab_configuration)
 
     assert_two_entities_deep_almost_equal(slab, SI_SLAB_001)
