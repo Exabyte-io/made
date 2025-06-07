@@ -48,6 +48,7 @@ tests = [
     "gradio",
     "pydantic",
     "mat3ra-made[tools]",
+    "mat3ra-standata"
 ]
 all = [
     "mat3ra-made[tests]",
