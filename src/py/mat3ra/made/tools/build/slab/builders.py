@@ -14,6 +14,7 @@ from ..stack.builders import StackBuilder2Components
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...convert import to_pymatgen, from_pymatgen
+from ...modify import wrap_to_unit_cell
 from ...operations.core.unary import supercell, translate, edit_cell
 from ...third_party import PymatgenSpacegroupAnalyzer
 
@@ -43,8 +44,9 @@ class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
         material = configuration.surface_supercell
         translation_vector: Vector3D = configuration.get_translation_vector(configuration.termination_top)
         material_translated = translate(material, translation_vector)
+        material_translated_wrapped = wrap_to_unit_cell(material_translated)
         material_translated_with_repetitions = supercell(
-            material_translated, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
+            material_translated_wrapped, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
         )
         return material_translated_with_repetitions
 
