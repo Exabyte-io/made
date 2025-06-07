@@ -30,7 +30,6 @@ class TerminationDetector:
 
     def find_translation_vector(self, target_termination: Termination) -> List[float]:
         """Find translation vector in crystal units to achieve target termination at slab top."""
-        # Use conventional cell to get proper terminations
         from .builders import ConventionalCellBuilder
 
         conv_config = ConventionalCellConfiguration(crystal=self.crystal)
@@ -48,13 +47,10 @@ class TerminationDetector:
             slab_termination = Termination.from_string(slab_termination_str)
 
             if slab_termination == target_termination:
-                # Extract shift information from slab's shift property
                 if hasattr(slab, "shift"):
                     shift = slab.shift
-                    # Convert shift to translation vector (only z-component for slab termination)
                     return [0.0, 0.0, float(shift)]
 
-        # If termination not found, return zero vector as fallback
         return [0.0, 0.0, 0.0]
 
 
@@ -99,8 +95,6 @@ class SlabConfiguration(StackConfiguration):
     stack_components: List[
         Union[AtomicLayersUnique, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]  # No Materials!
     ]
-    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
-    use_orthogonal_c: bool = True
 
     @property
     def atomic_layers(self):

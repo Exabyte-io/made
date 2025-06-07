@@ -10,6 +10,7 @@ from .configuration import (
     CrystalLatticePlanesConfiguration,
     ConventionalCellConfiguration,
 )
+from .. import BaseBuilderParameters
 from ..stack.builders import StackBuilder2Components
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
@@ -51,13 +52,21 @@ class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
         return material_translated_with_repetitions
 
 
+class SlabBuilderParameters(BaseBuilderParameters):
+    use_orthogonal_c: bool = True
+    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
+
+
 class SlabBuilder(StackBuilder2Components):
+    _BuildParametersType = SlabBuilderParameters
+    DefaultBuilderParameters: SlabBuilderParameters = SlabBuilderParameters()
 
     def _generate(self, configuration: SlabConfiguration) -> List[Material]:
         stacked_materials_list = super()._generate(configuration)
         stacked_materials = stacked_materials_list[0]
-        supercell_slab = supercell(stacked_materials, configuration.xy_supercell_matrix)
-        if configuration.use_orthogonal_c:
+
+        supercell_slab = supercell(stacked_materials, self.build_parameters.xy_supercell_matrix)
+        if self.build_parameters.use_orthogonal_c:
             supercell_slab = self._make_orthogonal_c(supercell_slab)
         return [supercell_slab]
 
@@ -90,15 +99,12 @@ class SlabBuilder(StackBuilder2Components):
         return edit_cell(material, new_vectors)
 
     def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
-        atomic_layers = configuration.stack_components[0]
+        atomic_layers = configuration.atomic_layers
 
-        crystal = atomic_layers.crystal
-        miller_indices = atomic_layers.miller_indices
+        formula = get_chemical_formula(configuration.atomic_layers.crystal)
+        miller_indices_str = "".join([str(i) for i in atomic_layers.miller_indices.root])
         termination = atomic_layers.termination_top
 
-        formula = get_chemical_formula(crystal)
-        # TODO: Should be MillerIndices class
-        miller_indices_str = "".join([str(i) for i in miller_indices.root])
         new_name = f"{formula}({miller_indices_str}), termination {termination}, Slab"
         material.name = new_name
         return material
