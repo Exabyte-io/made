@@ -13,10 +13,49 @@ from .termination import Termination
 from .utils import (
     generate_miller_supercell_matrix,
     get_terminations,
+    generate_pymatgen_slabs,
 )
 from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 from ...operations.core.unary import supercell
+
+
+# TODO: should be moved to analyze module
+class TerminationDetector:
+    """Detects and calculates translation vectors for slab terminations."""
+
+    def __init__(self, crystal: Material, miller_indices: Union[MillerIndicesSchema, List[int]]):
+        self.crystal = crystal
+        self.miller_indices = miller_indices
+
+    def find_translation_vector(self, target_termination: Termination) -> List[float]:
+        """Find translation vector in crystal units to achieve target termination at slab top."""
+        # Use conventional cell to get proper terminations
+        from .builders import ConventionalCellBuilder
+
+        conv_config = ConventionalCellConfiguration(crystal=self.crystal)
+        conv_crystal = ConventionalCellBuilder().get_material(conv_config)
+
+        slabs = generate_pymatgen_slabs(
+            crystal=conv_crystal,
+            miller_indices=self.miller_indices,
+            min_vacuum_size=5.0,  # Add vacuum for termination detection
+        )
+        for slab in slabs:
+            from ...third_party import label_pymatgen_slab_termination
+
+            slab_termination_str = label_pymatgen_slab_termination(slab)
+            slab_termination = Termination.from_string(slab_termination_str)
+
+            if slab_termination == target_termination:
+                # Extract shift information from slab's shift property
+                if hasattr(slab, "shift"):
+                    shift = slab.shift
+                    # Convert shift to translation vector (only z-component for slab termination)
+                    return [0.0, 0.0, float(shift)]
+
+        # If termination not found, return zero vector as fallback
+        return [0.0, 0.0, 0.0]
 
 
 class MillerSupercell(BaseModel):
@@ -45,8 +84,10 @@ class AtomicLayersUnique(CrystalLatticePlanesConfiguration):
         return supercell(self.crystal, self.miller_supercell)
 
     def get_translation_vector(self, termination: Termination) -> List[float]:
-        # Implement logic to calculate translation vector based on termination
-        return [0.0, 0.0, 0.0]
+        detector = TerminationDetector(self.crystal, self.miller_indices)
+        vector_crystal = detector.find_translation_vector(termination)
+        vector_cartesian = self.surface_supercell.basis.cell.convert_point_to_cartesian(vector_crystal)
+        return vector_cartesian
 
 
 class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUnique):

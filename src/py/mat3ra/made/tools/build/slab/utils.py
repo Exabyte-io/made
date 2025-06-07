@@ -1,4 +1,5 @@
 from typing import Union, List
+
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
     MillerIndicesSchema,
 )
@@ -42,7 +43,9 @@ def generate_pymatgen_slabs(
     generator = create_pymatgen_slab_generator(
         crystal, miller_indices, min_slab_size, min_vacuum_size, in_unit_planes, make_primitive
     )
-    return generator.get_slabs(symmetrize=symmetrize)
+    return generator.get_slabs(
+        symmetrize=symmetrize,
+    )
 
 
 def generate_miller_supercell_matrix(
@@ -60,7 +63,11 @@ def generate_miller_supercell_matrix(
 
 
 def get_terminations(crystal: Material, miller_indices: Union[MillerIndicesSchema, List[int]]) -> List[Termination]:
-    slabs = generate_pymatgen_slabs(crystal, miller_indices)
+    DEFAULT_THICKNESS = 3
+    DEFAULT_VACUUM_SIZE = 1
+    slabs = generate_pymatgen_slabs(
+        crystal, miller_indices, min_slab_size=DEFAULT_THICKNESS, min_vacuum_size=DEFAULT_VACUUM_SIZE, symmetrize=True
+    )
     return [Termination.from_string(label_pymatgen_slab_termination(slab)) for slab in slabs]
 
 
@@ -68,4 +75,5 @@ def select_termination(terminations: List[Termination], stoichiometry: str) -> T
     for termination in terminations:
         if str(termination.chemical_elements) == stoichiometry:
             return termination
+    print("No stoichiometry found. Selecting the first termination.")
     return terminations[0] if terminations else None
