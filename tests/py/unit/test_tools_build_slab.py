@@ -18,7 +18,7 @@ from mat3ra.made.tools.build.slab.utils import select_termination
 from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION
 from .utils import assert_two_entities_deep_almost_equal
 
-MILLER_INDICES = (0, 1, 1)
+MILLER_INDICES = SI_SLAB_001_CONFIGURATION["miller_indices"]
 USE_CONVENTIONAL_CELL = SI_SLAB_001_CONFIGURATION["use_conventional_cell"]
 NUMBER_OF_LAYERS = SI_SLAB_001_CONFIGURATION["number_of_layers"]
 VACUUM = SI_SLAB_001_CONFIGURATION["vacuum"]
