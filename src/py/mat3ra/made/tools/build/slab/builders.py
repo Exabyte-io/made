@@ -27,7 +27,7 @@ class CrystalLatticePlanesBuilder(BaseBuilder):
         crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
             material=configuration.crystal, miller_indices=configuration.miller_indices
         )
-        miller_supercell_matrix = crystal_lattice_planes_analyzer.miller_supercell
+        miller_supercell_matrix = crystal_lattice_planes_analyzer.miller_supercell_matrix
         miller_supercell_material = supercell(configuration.crystal, miller_supercell_matrix)
         return [miller_supercell_material]
 
