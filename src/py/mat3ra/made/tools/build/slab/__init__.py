@@ -1,19 +1,23 @@
-from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.operations.core.unary import translate
-from .builders import SlabBuilder, ConventionalCellBuilder, AtomicLayersUniqueRepeatedBuilder
+from .builders import (
+    SlabBuilder,
+    AtomicLayersUniqueRepeatedBuilder,
+    CrystalLatticePlanesBuilder,
+    SlabBuilderParameters,
+)
 from .configuration import (
     SlabConfiguration,
     ConventionalCellConfiguration,
     CrystalLatticePlanesConfiguration,
     AtomicLayersUniqueRepeatedConfiguration,
     VacuumConfiguration,
-    get_terminations,
 )
-from .utils import select_termination
-from .termination import Termination
+from ...analyze import Termination
+from ...analyze.crystal_planes import CrystalLatticePlanesMaterialAnalyzer
+
+DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 
 
 def create_slab(
@@ -24,43 +28,48 @@ def create_slab(
     termination: Termination = None,
     number_of_layers=1,
     vacuum=10.0,
-    xy_supercell_matrix=None,
+    xy_supercell_matrix=DEFAULT_XY_SUPERCELL_MATRIX,
 ) -> Material:
-    if xy_supercell_matrix is None:
-        xy_supercell_matrix = [[1, 0], [0, 1]]
 
-    conventional_cell_config = ConventionalCellConfiguration(crystal=crystal)
-    working_crystal = (
-        ConventionalCellBuilder().get_material(conventional_cell_config) if use_conventional_cell else crystal
+    crystal_lattice_planes_configuration = CrystalLatticePlanesConfiguration(
+        crystal=crystal, miller_indices=miller_indices
     )
+    crystal_lattice_planes_material = CrystalLatticePlanesBuilder().get_material(crystal_lattice_planes_configuration)
+    crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(crystal_lattice_planes_material)
 
-    crystal_lattice_planes = CrystalLatticePlanesConfiguration(crystal=working_crystal, miller_indices=miller_indices)
+    terminations = crystal_lattice_planes_analyzer.terminations
 
     if termination is None:
-        terminations = get_terminations(crystal=working_crystal, miller_indices=miller_indices)
-        termination = terminations[0] if terminations else None
+        termination = crystal_lattice_planes_analyzer.default_termination
+        print(f"No termination provided. Using default termination: {termination}")
+    elif termination not in terminations:
+        raise ValueError(f"Termination {termination} not found in available terminations: {terminations}")
 
-    atomic_layers_repeated_config = AtomicLayersUniqueRepeatedConfiguration(
-        crystal=crystal_lattice_planes.crystal,
+    atomic_layers_unique_repeated_configuration = AtomicLayersUniqueRepeatedConfiguration(
+        crystal=crystal_lattice_planes_configuration.crystal,
         miller_indices=miller_indices,
         termination_top=termination,
         number_of_repetitions=number_of_layers,
     )
 
-    atomic_layers_material = AtomicLayersUniqueRepeatedBuilder().get_material(atomic_layers_repeated_config)
+    atomic_layers_unique_repeated_material = AtomicLayersUniqueRepeatedBuilder().get_material(
+        atomic_layers_unique_repeated_configuration
+    )
 
     vacuum_configuration = VacuumConfiguration(
-        size=vacuum, crystal=atomic_layers_material, direction=AxisEnum.z
+        size=vacuum, crystal=atomic_layers_unique_repeated_material, direction=AxisEnum.z
     )
 
     slab_configuration = SlabConfiguration(
-        stack_components=[atomic_layers_repeated_config, vacuum_configuration],
+        stack_components=[atomic_layers_unique_repeated_configuration, vacuum_configuration],
         direction=AxisEnum.z,
+    )
+
+    slab_builder_parameters = SlabBuilderParameters(
         xy_supercell_matrix=xy_supercell_matrix,
         use_orthogonal_c=use_orthogonal_c,
     )
-
-    builder = SlabBuilder()
+    builder = SlabBuilder(build_parameters=slab_builder_parameters)
     return builder.get_material(slab_configuration)
 
 
@@ -70,3 +79,21 @@ def create_slab_if_not(material: Material, default_slab_configuration: SlabConfi
         print("The material is not a slab. Creating a new slab...")
         slab = create_slab(default_slab_configuration)
     return slab
+
+
+def get_slab_terminations(material: Material, miller_indices: tuple[int, int, int] = (0, 0, 1)) -> list[Termination]:
+    crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
+        material=material, miller_indices=miller_indices
+    )
+    return crystal_lattice_planes_analyzer.terminations
+
+
+def select_slab_termination(terminations: list[Termination], formula: str = None) -> Termination:
+    if not terminations:
+        raise ValueError("No terminations available.")
+    if formula is None:
+        return terminations[0]
+    for termination in terminations:
+        if termination.formula == formula:
+            return termination
+    raise ValueError(f"Termination with formula {formula} not found in available terminations: {terminations}")

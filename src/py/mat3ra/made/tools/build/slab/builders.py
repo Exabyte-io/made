@@ -1,6 +1,5 @@
-from typing import List
+from typing import List, Optional
 
-import numpy as np
 from mat3ra.code.vector import Vector3D
 
 from mat3ra.made.material import Material
@@ -8,60 +7,59 @@ from .configuration import (
     SlabConfiguration,
     AtomicLayersUniqueRepeatedConfiguration,
     CrystalLatticePlanesConfiguration,
-    ConventionalCellConfiguration,
-    TerminationAnalyzer,
 )
+from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters
 from ..stack.builders import StackBuilder2Components
+from ...analyze.crystal_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
-from ...convert import to_pymatgen, from_pymatgen
-from ...modify import wrap_to_unit_cell
-from ...operations.core.unary import supercell, translate, edit_cell
-from ...third_party import PymatgenSpacegroupAnalyzer
-
-
-class ConventionalCellBuilder(BaseBuilder):
-    def get_material(self, configuration: ConventionalCellConfiguration) -> Material:
-        bulk_pmg = to_pymatgen(configuration.crystal)
-        conventional_cell = PymatgenSpacegroupAnalyzer(bulk_pmg).get_conventional_standard_structure()
-        return Material.create(from_pymatgen(conventional_cell))
+from ...modify import wrap_to_unit_cell, translate_to_z_level
+from ...operations.core.unary import supercell, translate
 
 
 class CrystalLatticePlanesBuilder(BaseBuilder):
-    @staticmethod
-    def calculate_plane_lattice(crystal, miller_supercell):
-        return supercell(crystal, miller_supercell)
+    _GeneratedItemType: Material = Material
+    _PostProcessParametersType = None
+    use_enforce_convention: bool = True
 
-    def get_material(self, configuration: CrystalLatticePlanesConfiguration) -> Material:
-        plane_cell = self.calculate_plane_lattice(configuration.crystal, configuration.miller_supercell)
-        # return supercell(plane_cell, configuration.rotational_matrix)
-        return plane_cell
+    def _generate(self, configuration: CrystalLatticePlanesConfiguration) -> List[Material]:
+        crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
+            material=configuration.crystal, miller_indices=configuration.miller_indices
+        )
+        miller_supercell_matrix = crystal_lattice_planes_analyzer.miller_supercell
+        miller_supercell_material = supercell(configuration.crystal, miller_supercell_matrix)
+        return [miller_supercell_material]
+
+    def _enforce_convention(self, material: Material) -> Material:
+        if not self.use_enforce_convention:
+            return material
+        return translate_to_z_level(material, "bottom")
+
+    def _post_process(
+        self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType]
+    ) -> List[Material]:
+        items = super()._post_process(items, post_process_parameters)
+        return [self._enforce_convention(i) for i in items]
 
 
-class AtomicLayersUniqueRepeatedBuilder(BaseBuilder):
+class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
     _ConfigurationType = AtomicLayersUniqueRepeatedConfiguration
 
-    def get_surface_supercell(self, configuration: _ConfigurationType) -> Material:
-        return supercell(configuration.crystal, configuration.miller_supercell)
-
-    def get_translation_vector(self, configuration) -> Vector3D:
-        termination_analyzer = TerminationAnalyzer(configuration.crystal, configuration.miller_indices)
-        vector_crystal = termination_analyzer.find_translation_vector(configuration.termination_top)
-        vector_cartesian = self.get_surface_supercell(configuration).basis.cell.convert_point_to_cartesian(
-            vector_crystal
+    def _generate(self, configuration: _ConfigurationType) -> List[Material]:
+        crystal_lattice_planes_material = super().get_material(configuration)
+        crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
+            material=configuration.crystal, miller_indices=configuration.miller_indices
         )
-        return vector_cartesian
-
-    def get_material(self, configuration: _ConfigurationType) -> Material:
-        material = self.get_surface_supercell(configuration)
-        translation_vector: Vector3D = self.get_translation_vector(configuration)
-        material_translated = translate(material, translation_vector)
+        translation_vector = crystal_lattice_planes_analyzer.get_translation_vector_for_termination_without_vacuum(
+            configuration.termination_top
+        )
+        material_translated = translate(crystal_lattice_planes_material, translation_vector)
         material_translated_wrapped = wrap_to_unit_cell(material_translated)
-        material_translated_with_repetitions = supercell(
+        material_translated_wrapped_layered = supercell(
             material_translated_wrapped, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
         )
-        return material_translated_with_repetitions
+        return [material_translated_wrapped_layered]
 
 
 class SlabBuilderParameters(BaseBuilderParameters):
@@ -79,36 +77,9 @@ class SlabBuilder(StackBuilder2Components):
 
         supercell_slab = supercell(stack_as_material, self.build_parameters.xy_supercell_matrix)
         if self.build_parameters.use_orthogonal_c:
-            supercell_slab = self._make_orthogonal_c(supercell_slab)
+            supercell_slab = get_orthogonal_c_slab(supercell_slab)
+
         return [supercell_slab]
-
-    def _make_orthogonal_c(self, material: Material) -> Material:
-        """
-        Make the c-vector orthogonal to the ab plane after slab construction is complete.
-        This should be applied after vacuum has been added to the slab.
-        """
-        current_vectors = material.lattice.vector_arrays
-        a = np.array(current_vectors[0])
-        b = np.array(current_vectors[1])
-        c_old = np.array(current_vectors[2])
-
-        normal = np.cross(a, b)
-        norm_norm = np.linalg.norm(normal)
-        if norm_norm < 1e-8:
-            raise ValueError("Vectors a and b are collinear or too small to define a plane.")
-        n_hat = normal / norm_norm
-
-        height = float(np.dot(c_old, n_hat))
-
-        new_orthogonal_vector_c = (n_hat * height).tolist()
-
-        new_vectors = [
-            current_vectors[0],
-            current_vectors[1],
-            new_orthogonal_vector_c,
-        ]
-
-        return edit_cell(material, new_vectors)
 
     def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
         atomic_layers = configuration.atomic_layers
