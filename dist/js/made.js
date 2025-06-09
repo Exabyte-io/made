@@ -21,7 +21,6 @@ exports.Made = {
     ATOMIC_COORD_UNITS: constants_1.ATOMIC_COORD_UNITS,
     math: math_1.default,
     Material: material_1.Material,
-    MaterialMixin: material_1.MaterialMixin,
     defaultMaterialConfig: material_1.defaultMaterialConfig,
     Lattice: lattice_1.Lattice,
     nonPeriodicLatticeScalingFactor: lattice_1.nonPeriodicLatticeScalingFactor,
