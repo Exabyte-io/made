@@ -97,3 +97,16 @@ def select_slab_termination(terminations: list[Termination], formula: str = None
         if termination.formula == formula:
             return termination
     raise ValueError(f"Termination with formula {formula} not found in available terminations: {terminations}")
+
+
+def get_slab_material_in_standard_representation(slab_material: Material) -> Material:
+    """
+    Get the slab material in a standard representation.
+
+    Args:
+        slab_material (Material): The slab material to convert.
+
+    Returns:
+        Material: The slab material in standard representation.
+    """
+    pass
