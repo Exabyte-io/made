@@ -1,16 +1,16 @@
 from typing import List, Union
 
+from mat3ra.esse.models.core.abstract.vector_3d import Vector3dSchema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
     MillerIndicesSchema,
 )
+from mat3ra.made.material import Material
 from pydantic import BaseModel
 
-from mat3ra.made.material import Material
-from mat3ra.esse.models.core.abstract.vector_3d import Vector3dSchema
+from ..convert import from_pymatgen, to_pymatgen
+from ..third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 from .lattice import LatticeMaterialAnalyzer
 from .termination import Termination
-from ..convert import from_pymatgen, to_pymatgen
-from ..third_party import PymatgenSlab, label_pymatgen_slab_termination, PymatgenSlabGenerator
 
 
 def select_slab_with_termination_by_formula(slabs: List[PymatgenSlab], termination: Termination) -> PymatgenSlab:

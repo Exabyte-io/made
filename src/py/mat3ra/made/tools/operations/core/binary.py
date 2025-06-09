@@ -11,37 +11,6 @@ from mat3ra.made.tools.modify import translate_by_vector
 from ...utils import AXIS_TO_INDEX_MAP
 
 
-def stack(materials: List[Material], direction: AxisEnum) -> Material:
-    # use stack_two_materials
-    return stack_two_materials(material_1=materials[0], material_2=materials[1], direction=direction)
-
-
-def resolve_close_coordinates_basis(basis: Basis, distance_tolerance: float = 0.1) -> Basis:
-    """
-    Find all atoms that are within distance tolerance and only keep the last one, remove other sites
-
-    Args:
-        basis (Basis): The basis to resolve.
-        distance_tolerance (float): The distance tolerance in angstroms.
-    """
-    basis.to_cartesian()
-    coordinates = np.array(basis.coordinates.values)
-    tree = cKDTree(coordinates)
-    colliding_pairs = tree.query_pairs(r=distance_tolerance)
-
-    ids_to_remove = set()
-    if len(colliding_pairs) == 0:
-        basis.to_crystal()
-        return basis
-    for index_1, index_2 in colliding_pairs:
-        ids_to_remove.add(index_1)
-
-    ids_to_keep = [id for id in basis.coordinates.ids if id not in ids_to_remove]
-    basis = basis.filter_atoms_by_ids(ids_to_keep)
-    basis.to_crystal()
-    return basis
-
-
 def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
     basis1.to_crystal()
     basis2.to_crystal()
@@ -56,10 +25,9 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
     new_basis.coordinates = Coordinates.from_values(values=merged_coordinates_values)
     new_basis.labels = ArrayWithIds.from_values(values=merged_labels_values)
     new_basis.constraints = ArrayWithIds.from_values(values=merged_constraints_values)
+    new_basis.resolve_colliding_coordinates()
 
-    resolved_basis = resolve_close_coordinates_basis(new_basis, distance_tolerance)
-
-    return resolved_basis
+    return new_basis
 
 
 def merge_two_materials(
@@ -112,6 +80,11 @@ def merge_materials(
         )
 
     return merged_material
+
+
+def stack(materials: List[Material], direction: AxisEnum) -> Material:
+    # use stack_two_materials
+    return stack_two_materials(material_1=materials[0], material_2=materials[1], direction=direction)
 
 
 def stack_two_materials(
