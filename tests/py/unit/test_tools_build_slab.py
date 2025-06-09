@@ -1,7 +1,7 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.crystal_planes import CrystalLatticePlanesMaterialAnalyzer
+from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build.slab import (
     SlabConfiguration,
     create_slab,
@@ -16,7 +16,6 @@ from mat3ra.made.tools.build.slab.builders import (
 from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     VacuumConfiguration,
-    CrystalLatticePlanesConfiguration,
 )
 from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_CONFIGURATION
 from .utils import assert_two_entities_deep_almost_equal
@@ -31,8 +30,6 @@ material = Material.create_default()
 
 
 def test_build_slab():
-
-    # Explicitly create the material from the configuration
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
         material=material, miller_indices=MILLER_INDICES
     )
