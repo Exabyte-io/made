@@ -28,6 +28,7 @@ def test_build_slab():
 def test_build_slab_with_default_parameters():
     slab_config = SlabConfiguration(
         bulk=material,
+        make_primitive=False,
     )
     slab = create_slab(slab_config)
     assert_two_entities_deep_almost_equal(slab, SI_SLAB_DEFAULT_PARAMETERS)

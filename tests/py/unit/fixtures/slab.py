@@ -245,7 +245,7 @@ SI_SLAB_DEFAULT_PARAMETERS = {
                 "number_of_layers": 1,
                 "type": "SlabConfiguration",
                 "use_conventional_cell": True,
-                "use_orthogonal_z": False,
+                "use_orthogonal_z": True,
                 "vacuum": 5.0,
                 "xy_supercell_matrix": [[1, 0], [0, 1]],
             },
