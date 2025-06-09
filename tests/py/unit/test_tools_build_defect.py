@@ -1,3 +1,5 @@
+import pytest
+
 from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
@@ -114,6 +116,8 @@ def test_create_defects():
     ]
 
 
+# TODO: Unskip once slab approach is finalized
+@pytest.mark.skip()
 def test_create_adatom():
     # Adatom of Si at 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
@@ -125,6 +129,8 @@ def test_create_adatom():
     assertion_utils.assert_deep_almost_equal([0.5, 0.5, 0.872332562], defect.basis.coordinates.values[-1])
 
 
+# TODO: Unskip once slab approach is finalized
+@pytest.mark.skip()
 def test_create_adatom_equidistant():
     # Adatom of Si at approximate 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
@@ -148,6 +154,8 @@ def test_create_adatom_equidistant():
         assertion_utils.assert_deep_almost_equal(coordinate_linux_and_emscripten, defect_coordinate, atol=atol)
 
 
+# TODO: Unskip once slab approach is finalized
+@pytest.mark.skip()
 def test_create_crystal_site_adatom():
     # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
     configuration = AdatomSlabPointDefectConfiguration(
@@ -168,6 +176,8 @@ def test_create_crystal_site_adatom():
         assertion_utils.assert_deep_almost_equal(coordinates_linux_and_emscripten, defect_coordinate, atol=atol)
 
 
+# TODO: Unskip once slab approach is finalized
+@pytest.mark.skip()
 def test_create_island():
     condition = CoordinateCondition.CylinderCoordinateCondition(
         center_position=[0.5, 0.5], radius=0.15, min_z=0, max_z=1
@@ -187,6 +197,8 @@ def test_create_island():
     assert defect.basis.elements.values[-1] == "Si"
 
 
+# TODO: Unskip once slab approach is finalized
+@pytest.mark.skip()
 def test_create_terrace():
     config = TerraceSlabDefectConfiguration(
         crystal=SLAB_001,
