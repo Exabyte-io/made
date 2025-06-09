@@ -7,7 +7,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector, wrap_to_unit_cell
 from ...convert import from_ase, to_ase
 from ...third_party import ase_make_supercell
-from ...utils import decorator_convert_2x2_to_3x3
+from ...utils import decorator_convert_supercell_matrix_2x2_to_3x3
 from .binary import stack_two_materials
 
 
@@ -16,7 +16,7 @@ def translate(material: Material, vector: Vector3D) -> Material:
     return translate_by_vector(material, vector)
 
 
-@decorator_convert_2x2_to_3x3
+@decorator_convert_supercell_matrix_2x2_to_3x3
 def supercell(material: Material, supercell_matrix) -> Material:
     atoms = to_ase(material)
 

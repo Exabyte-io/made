@@ -47,8 +47,6 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
 
     @property
     def vectors(self) -> LatticeVectors:
-        if hasattr(self, "_preserved_vectors"):
-            return self._preserved_vectors
         vectors = self.calculate_vectors()
         return LatticeVectors.from_vectors_array(vectors)
 
@@ -66,7 +64,6 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
         cos_beta = math.cos(beta_rad)
         cos_gamma = math.cos(gamma_rad)
         sin_alpha = math.sin(alpha_rad)
-        sin_beta = math.sin(beta_rad)
 
         # Compute gamma star (used in matrix calculation)
         gamma_star = math.acos((cos_alpha * cos_beta - cos_gamma) / (sin_alpha * sin_beta))
@@ -94,7 +91,7 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
         beta = np.degrees(np.arccos(np.dot(vectors[0], vectors[2]) / (a * c)))
         gamma = np.degrees(np.arccos(np.dot(vectors[0], vectors[1]) / (a * b)))
 
-        lattice = cls(
+        return cls(
             a=float(a),
             b=float(b),
             c=float(c),
@@ -104,11 +101,6 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
             units=units,
             type=type,
         )
-
-        # Preserve the original vectors by storing them directly
-        setattr(lattice, "_preserved_vectors", LatticeVectors.from_vectors_array(vectors))
-
-        return lattice
 
     @property
     def vector_arrays(self) -> List[List[float]]:
