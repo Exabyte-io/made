@@ -64,6 +64,7 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
         cos_beta = math.cos(beta_rad)
         cos_gamma = math.cos(gamma_rad)
         sin_alpha = math.sin(alpha_rad)
+        sin_beta = math.sin(beta_rad)
 
         # Compute gamma star (used in matrix calculation)
         gamma_star = math.acos((cos_alpha * cos_beta - cos_gamma) / (sin_alpha * sin_beta))
