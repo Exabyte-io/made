@@ -20,6 +20,10 @@ class Termination(TerminationSchema, InMemoryEntityPydantic):
             and self.space_group_symmetry_label == other.space_group_symmetry_label
         )
 
+    @property
+    def formula(self):
+        return self.chemical_elements
+
     @classmethod
     def from_string(cls, termination: str):
         chemical_elements = termination.split("_")[0]
