@@ -2,8 +2,6 @@ import numpy as np
 from mat3ra.made.material import Material
 from scipy.spatial.distance import pdist
 
-from .termination import Termination
-
 
 class BaseMaterialAnalyzer:
     def __init__(self, material: Material, use_cartesian: bool = True):

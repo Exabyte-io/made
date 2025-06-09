@@ -17,7 +17,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     cell: Cell = Field(Cell(), exclude=True)
     labels: ArrayWithIds = Field(ArrayWithIds.from_values([]))
     constraints: ArrayWithIds = Field(ArrayWithIds.from_values([]))
-    DEFAULT_COORDINATE_PROXIMITY_TOLERANCE = 0.1  # Angstroms, used for checking overlapping coordinates
+    DEFAULT_COORDINATE_PROXIMITY_TOLERANCE: float = 0.1  # Angstroms, used for checking overlapping coordinates
 
     def __convert_kwargs__(self, **kwargs: Any) -> Dict[str, Any]:
         if isinstance(kwargs.get("elements"), list):

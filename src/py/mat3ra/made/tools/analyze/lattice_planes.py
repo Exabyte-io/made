@@ -1,16 +1,17 @@
 from typing import List, Union
 
-from mat3ra.esse.models.core.abstract.vector_3d import Vector3dSchema
+from mat3ra.code.vector import Vector3D
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
     MillerIndicesSchema,
 )
-from mat3ra.made.material import Material
 from pydantic import BaseModel
 
-from ..convert import from_pymatgen, to_pymatgen
-from ..third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
+from mat3ra.made.material import Material
 from .lattice import LatticeMaterialAnalyzer
 from .termination import Termination
+from ..convert import from_pymatgen, to_pymatgen
+from ..third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 
 
 def select_slab_with_termination_by_formula(slabs: List[PymatgenSlab], termination: Termination) -> PymatgenSlab:
@@ -34,7 +35,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
     def __init__(self, material: Material, miller_indices: Union[MillerIndicesSchema, List[int]]):
         super().__init__(material)
         self.miller_indices = miller_indices
-        self.termination_holder = self.get_termination_holders()
+        self.termination_holder = self.termination_holders
 
     def get_pymatgen_slab_generator(
         self,
@@ -68,7 +69,8 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
     def all_planes_as_pymatgen_slabs_without_vacuum(self) -> List[PymatgenSlab]:
         return self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE)
 
-    def get_termination_holders(self):
+    @property
+    def termination_holders(self):
         termination_holders = []
         slabs_with_vacuum = self.all_planes_as_pymatgen_slabs_with_vacuum
         slabs_without_vacuum = self.all_planes_as_pymatgen_slabs_without_vacuum
@@ -111,7 +113,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         return self.terminations[0]
 
     @property
-    def miller_supercell_matrix(self) -> Matrix3D:  # TODO: import from mat3ra.esse.models.core
+    def miller_supercell_matrix(self) -> Matrix3x3Schema:  # TODO: import from mat3ra.esse.models.core
         return self.pymatgen_slab_generator_without_vacuum.slab_scale_factor.tolist()
 
     def get_material_with_termination_without_vacuum(self, termination: Termination) -> Material:
@@ -122,8 +124,8 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         slab = self.all_planes_as_pymatgen_slabs_without_vacuum[holder.index]
         return Material.create(from_pymatgen(slab))
 
-    def get_translation_vector_for_termination_without_vacuum(self, termination: Termination) -> Vector3dSchema:
+    def get_translation_vector_for_termination_without_vacuum(self, termination: Termination) -> Vector3D:
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
         if holder is None:
             raise ValueError(f"Termination {termination} not found.")
-        return holder.shift
+        return [0.0, 0.0, holder.shift]

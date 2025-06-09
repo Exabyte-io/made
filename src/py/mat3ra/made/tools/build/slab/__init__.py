@@ -9,13 +9,12 @@ from .builders import (
 )
 from .configuration import (
     SlabConfiguration,
-    ConventionalCellConfiguration,
     CrystalLatticePlanesConfiguration,
     AtomicLayersUniqueRepeatedConfiguration,
     VacuumConfiguration,
 )
-from ...analyze import Termination
-from ...analyze.crystal_planes import CrystalLatticePlanesMaterialAnalyzer
+from ...analyze.termination import Termination
+from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 
 DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 

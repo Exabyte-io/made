@@ -11,7 +11,7 @@ from .configuration import (
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters
 from ..stack.builders import StackBuilder2Components
-from ...analyze.crystal_planes import CrystalLatticePlanesMaterialAnalyzer
+from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...modify import wrap_to_unit_cell, translate_to_z_level
