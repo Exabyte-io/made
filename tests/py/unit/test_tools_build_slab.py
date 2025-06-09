@@ -1,10 +1,5 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab import (
-    SlabBuilderParameters,
-    SlabConfiguration,
-    create_slab,
-    get_terminations,
-)
+from mat3ra.made.tools.build.slab import SlabBuilderParameters, SlabConfiguration, create_slab, get_terminations
 from unit.fixtures.slab import SI_SLAB_100, SI_SLAB_DEFAULT_PARAMETERS
 
 from .utils import assert_two_entities_deep_almost_equal
