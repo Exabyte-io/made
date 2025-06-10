@@ -14,7 +14,8 @@ from .configuration import (
 )
 from .factories import DefectBuilderFactory
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from ..slab import SlabConfiguration, create_slab
+from ..slab.configuration import SlabConfiguration
+from ..slab.helpers import create_slab
 from ..supercell import create_supercell
 from ..utils import merge_materials
 from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
@@ -293,37 +294,31 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         distance_z: float = 2.0,
     ) -> Material:
         """
-        Create an adatom at the specified position on the surface of the material.
+        Create an adatom on the surface of the material.
 
         Args:
-            material: The material to add the adatom to.
-            chemical_element: The chemical element of the adatom.
-            position_on_surface: The position on the surface of the material.
-            distance_z: The distance of the adatom from the surface.
+            material (Material): The slab material.
+            chemical_element (str): The chemical element of the adatom.
+            position_on_surface (List[float]): The 2D coordinates on the surface.
+            distance_z (float): The distance from the surface.
 
         Returns:
-            The material with the adatom added.
+            The material with the adatom.
         """
-        if position_on_surface is None:
-            position_on_surface = [0.5, 0.5]
-        new_material = material.clone()
-        new_basis = new_material.basis
+
         adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
             material, position_on_surface, distance_z
         )
-        new_basis.add_atom(chemical_element, adatom_coordinate)
-        new_material.basis = new_basis
-        return new_material
+        material.add_atom(chemical_element, adatom_coordinate)
+        return material
 
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
-        max_z_id = get_local_extremum_atom_index(
-            material, position_on_surface, "max", vicinity=3.0, use_cartesian_coordinates=False
-        )
-        max_z = material.basis.coordinates.get_element_value_by_index(max_z_id)[2]
-        distance_in_crystal_units = distance_z / material.lattice.c
-        return [position_on_surface[0], position_on_surface[1], max_z + distance_in_crystal_units]
+        max_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=True)
+        z_coordinate_cartesian = max_z + distance_z
+        z_crystal = material.basis.cell.convert_point_to_crystal([0, 0, z_coordinate_cartesian])[2]
+        return [position_on_surface[0], position_on_surface[1], z_crystal]
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         updated_material = super()._update_material_name(material, configuration)

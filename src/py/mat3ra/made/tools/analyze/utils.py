@@ -101,14 +101,14 @@ def decorator_perform_operation_in_cartesian_coordinates(func):
 
     @wraps(func)
     def wrapper(material, *args, **kwargs):
-        original_basis_is_in_cartesian = material.basis.is_in_cartesian_units
+        original_basis_is_in_cartesian = material.material.basis.is_in_cartesian_units
         if not original_basis_is_in_cartesian:
-            material.to_cartesian()
+            material.material.to_cartesian()
 
         result = func(material, *args, **kwargs)
 
         if not original_basis_is_in_cartesian:
-            material.to_crystal()
+            material.material.to_crystal()
 
         return result
 
