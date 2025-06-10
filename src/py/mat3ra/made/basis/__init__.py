@@ -175,7 +175,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         return new_basis
 
     # TODO: add/update test for this method
-    def resolved_colliding_coordinates(self, tolerance=DEFAULT_COORDINATE_PROXIMITY_TOLERANCE) -> "Basis":
+    def resolved_colliding_coordinates(self, tolerance=DEFAULT_COORDINATE_PROXIMITY_TOLERANCE):
         """
         Find all atoms that are within distance tolerance and only keep the last one, remove other sites.
 
@@ -184,10 +184,11 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         """
         original_is_in_crystal = self.is_in_crystal_units
         self.to_cartesian()
-        ids_to_remove = []
+        ids_to_remove = set()
+        atom_ids = self.coordinates.ids
         for index_1, index_2 in self.get_coordinates_colliding_pairs(tolerance):
-            ids_to_remove.add(index_1)  # Keep the last one in the pair
+            ids_to_remove.add(atom_ids[index_1])  # Keep the last one in the pair
 
-        self.filter_atoms_by_ids(ids_to_remove, invert=True)
+        self.filter_atoms_by_ids(list(ids_to_remove), invert=True)
         if original_is_in_crystal:
             self.to_crystal()
