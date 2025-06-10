@@ -87,6 +87,7 @@ class SlabBuilder(StackBuilder2Components):
         miller_indices_str = "".join([str(i) for i in atomic_layers.miller_indices])
         termination = atomic_layers.termination_top
 
+        # for example: "Si8(001), termination Si_P4/mmm_1, Slab"
         new_name = f"{formula}({miller_indices_str}), termination {termination}, Slab"
         material.name = new_name
         return material
