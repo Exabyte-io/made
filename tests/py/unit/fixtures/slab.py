@@ -140,6 +140,58 @@ SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
     },
 }
 
+SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
+    "name": "Si2(001), termination Si_P4/mmm_2, Slab",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [6.66e-7, 6.66e-7, 6.07e-7]},
+            {"id": 1, "value": [0.333334, 0.333334, 0.075919407]},
+            {"id": 2, "value": [0.333334, 0.333334, 0.303675808]},
+            {"id": 3, "value": [0.666667334, 0.666667334, 0.379594608]},
+        ],
+        "units": "crystal",
+        "labels": [],
+        "constraints": [],
+        "DEFAULT_COORDINATE_PROXIMITY_TOLERANCE": 0.1,
+    },
+    "lattice": {
+        "a": 3.867,
+        "b": 3.867,
+        "c": 10.397267462,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 60.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+    },
+    "metadata": {
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "build": {
+            "configuration": {
+                "type": "SlabConfiguration",
+                "stack_components": [
+                    {
+                        "crystal": SI_PRIMITIVE_CELL_MATERIAL.to_dict(),
+                        "miller_indices": [0, 0, 1],
+                        "number_of_repetitions": 2,
+                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                        "use_conventional_cell": False,
+                    },
+                    {"type": "VacuumConfiguration", "direction": "z", "size": 5.0},
+                ],
+                "xy_supercell_matrix": [[1, 0], [0, 1]],
+            },
+            "build_parameters": {"use_orthogonal_c": True, "xy_supercell_matrix": [[1, 0], [0, 1]]},
+        },
+    },
+}
+
 
 SI_SLAB_PASSIVATED = {
     "name": "Si8(001), termination Si_P4/mmm_1, Slab H-passivated",

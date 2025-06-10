@@ -18,7 +18,11 @@ from mat3ra.made.tools.build.slab.helpers import (
     select_slab_termination,
     get_slab_terminations,
 )
-from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001, SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL
+from unit.fixtures.slab import (
+    SI_CONVENTIONAL_SLAB_001,
+    SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL,
+    SI_PRIMITIVE_SLAB_001,
+)
 from .utils import assert_two_entities_deep_almost_equal
 
 MILLER_INDICES = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["miller_indices"]
@@ -28,6 +32,9 @@ VACUUM = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["vacuum"]
 XY_SUPERCELL_MATRIX = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["xy_supercell_matrix"]
 
 from unit.fixtures.bulk import SI_PRIMITIVE_CELL_MATERIAL, SI_CONVENTIONAL_CELL
+
+SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA = SI_CONVENTIONAL_SLAB_001.copy()
+SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA["metadata"].pop("build", None)
 
 
 def get_slab_with_builder(
@@ -62,11 +69,11 @@ def get_slab_with_builder(
     return slab
 
 
-@pytest.mark.skip("Should use primitive slab fixture")
 def test_build_slab_primitive():
     slab = get_slab_with_builder(SI_PRIMITIVE_CELL_MATERIAL, MILLER_INDICES, "Si")
-
-    assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001)
+    slab.metadata.pop("build")  # Remove build metadata for comparison
+    SI_PRIMITIVE_SLAB_001["metadata"].pop("build")  # Remove build metadata for comparison
+    assert_two_entities_deep_almost_equal(slab, SI_PRIMITIVE_SLAB_001)
 
 
 def test_build_slab_conventional():
@@ -76,12 +83,11 @@ def test_build_slab_conventional():
     conventional_material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
     slab = get_slab_with_builder(conventional_material, MILLER_INDICES, "Si")
     slab.metadata.pop("build")
-    SI_CONVENTIONAL_SLAB_001["metadata"].pop("build")  # Remove build metadata for comparison
-    assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001)
+    assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA)
 
 
 def test_create_slab():
-    crystal = Material.create(SI_CONVENTIONAL_CELL)
+    crystal = SI_PRIMITIVE_CELL_MATERIAL
     terminations = get_slab_terminations(material=crystal, miller_indices=MILLER_INDICES)
     termination = select_slab_termination(terminations, "Si")
     slab = create_slab(
@@ -93,4 +99,5 @@ def test_create_slab():
         vacuum=VACUUM,
         xy_supercell_matrix=XY_SUPERCELL_MATRIX,
     )
-    assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001)
+    slab.metadata.pop("build")  # Remove build metadata for comparison
+    assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA)
