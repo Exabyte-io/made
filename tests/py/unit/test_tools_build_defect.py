@@ -26,7 +26,7 @@ from mat3ra.made.tools.build.defect.configuration import (
 from mat3ra.made.tools.utils import coordinate as CoordinateCondition
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.generated.fixtures import SLAB_001, SLAB_111
-from unit.fixtures.slab import SI_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER
+from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER
 
 clean_material = Material.create_default()
 
@@ -216,7 +216,7 @@ def test_create_material_with_additional_layers():
     builder = SlabDefectBuilder(build_parameters=builder_params)
 
     # Test adding 1 layer to SI_SLAB_001
-    original_slab = Material.create(SI_SLAB_001)
+    original_slab = Material.create(SI_CONVENTIONAL_SLAB_001)
     slab_with_additional_layer = builder.create_material_with_additional_layers(original_slab, 1)
 
     assertion_utils.assert_deep_almost_equal(slab_with_additional_layer, SI_SLAB_001_ADDED_LAYER)
@@ -229,7 +229,7 @@ def test_create_material_with_additional_fractional_layers():
     builder = SlabDefectBuilder(build_parameters=builder_params)
 
     # Test adding 1.5 layers to SI_SLAB_001
-    original_slab = Material.create(SI_SLAB_001)
+    original_slab = Material.create(SI_CONVENTIONAL_SLAB_001)
     slab_with_fractional_layer = builder.create_material_with_additional_layers(original_slab, 1.5)
 
     # Compare with expected fixture
@@ -239,7 +239,7 @@ def test_create_material_with_additional_fractional_layers():
 def test_get_equidistant_position():
     builder = EquidistantAdatomSlabDefectBuilder()
 
-    slab_material = Material.create(SI_SLAB_001)
+    slab_material = Material.create(SI_CONVENTIONAL_SLAB_001)
 
     position_on_surface = [0.5, 0.5]
     distance_z = 2.5

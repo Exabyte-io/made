@@ -19,7 +19,7 @@ from mat3ra.made.tools.modify import (
 )
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures.cell import SI_CONVENTIONAL_CELL, SI_CONVENTIONAL_CELL_FILTERED
+from .fixtures.bulk import SI_CONVENTIONAL_CELL, SI_CONVENTIONAL_CELL_FILTERED
 from .fixtures.interface import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_SLAB_001_2_ATOMS, SI_SLAB_001_WITH_VACUUM
 from .utils import assert_two_entities_deep_almost_equal

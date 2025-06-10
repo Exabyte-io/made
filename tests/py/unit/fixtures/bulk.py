@@ -1,5 +1,7 @@
 from typing import Any, Dict
 
+from .generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL  # noqa: F401
+
 SI_CONVENTIONAL_CELL: Dict[str, Any] = {
     "name": "Si8",
     "basis": {
