@@ -4,6 +4,7 @@ from copy import deepcopy
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.code.entity import InMemoryEntityPydantic
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material import BasisSchema, BasisUnitsEnum
 from mat3ra.made.basis.coordinates import Coordinates
 from mat3ra.made.cell import Cell
@@ -150,29 +151,23 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.coordinates.filter_by_ids(ids)
         return self
 
-    def get_rebased_by_matrix(self, matrix: np.ndarray) -> "Basis":
+    def transform_by_matrix(self, matrix: Matrix3x3Schema) -> None:
         """
-        Create a new Basis object with coordinates transformed by a given matrix.
+        Adjust Basis object with coordinates transformed by a given matrix.
 
         This method applies a linear transformation to the atomic coordinates.
-        It handles both crystal and Cartesian coordinates by converting to
-        Cartesian, applying the transformation, and then converting back to the
-        original unit system.
 
         Args:
             matrix (np.ndarray): A 3x3 transformation matrix.
 
-        Returns:
-            Basis: A new Basis object with the transformed coordinates.
         """
-        new_basis = deepcopy(self)
-        original_is_in_crystal_units = new_basis.is_in_crystal_units
-        new_basis.to_crystal()
-        new_coordinates = np.dot(new_basis.coordinates.values, matrix)
-        new_basis.coordinates.values = new_coordinates.tolist()
+        original_is_in_crystal_units = self.is_in_crystal_units
+        self.to_crystal()
+        matrix_np = np.array(matrix)
+        new_coordinates = np.dot(self.coordinates.values, matrix_np)
+        self.coordinates.values = new_coordinates.tolist()
         if not original_is_in_crystal_units:
-            new_basis.to_cartesian()
-        return new_basis
+            self.to_cartesian()
 
     # TODO: add/update test for this method
     def resolve_colliding_coordinates(self, tolerance=DEFAULT_COORDINATE_PROXIMITY_TOLERANCE):

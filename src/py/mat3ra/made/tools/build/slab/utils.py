@@ -6,7 +6,7 @@ from mat3ra.made.lattice import Lattice
 from mat3ra.made.tools.operations.core.unary import edit_cell
 
 
-def get_orthogonal_c_slab_and_update_basis(material: Material) -> Material:
+def get_orthogonal_c_slab(material: Material) -> Material:
     """
     Make the c-vector orthogonal to the ab plane and update the basis.
 
@@ -25,7 +25,7 @@ def get_orthogonal_c_slab_and_update_basis(material: Material) -> Material:
         Material: A new material object with an orthogonalized c-vector and
                   updated basis.
     """
-    new_material = deepcopy(material)
+    new_material = material.clone()
     current_vectors = np.array(new_material.lattice.vector_arrays)
     a_vec, b_vec, c_old_vec = current_vectors
 
@@ -37,16 +37,9 @@ def get_orthogonal_c_slab_and_update_basis(material: Material) -> Material:
     new_vectors = np.array([a_vec, b_vec, c_new_vec])
     transform_matrix = np.dot(current_vectors, np.linalg.inv(new_vectors))
 
-    new_basis = new_material.basis.get_rebased_by_matrix(transform_matrix)
+    new_basis = new_material.basis.clone()
+    new_basis.transform_by_matrix(transform_matrix)
     new_lattice_from_vectors = Lattice.from_vectors_array(new_vectors.tolist())
     new_material = edit_cell(new_material, new_lattice_from_vectors.vector_arrays)
     new_material.basis = new_basis
     return new_material
-
-
-def get_orthogonal_c_slab(material: Material) -> Material:
-    """
-    Make the c-vector orthogonal to the ab plane after slab construction is complete.
-    This should be applied after vacuum has been added to the slab.
-    """
-    return get_orthogonal_c_slab_and_update_basis(material)
