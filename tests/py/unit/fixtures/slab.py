@@ -2,9 +2,20 @@ import copy
 from functools import reduce
 from typing import Any, Dict
 
-from .cell import SI_CONVENTIONAL_CELL
+from .bulk import SI_CONVENTIONAL_CELL, SI_CONVENTIONAL_CELL_FILTERED
+from .generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL
 
-SI_SLAB_001_CONFIGURATION: Dict[str, Any] = {
+SI_SLAB_001_CONFIGURATION_FROM_PRIMITIVE = {
+    "type": "SlabConfiguration",
+    "bulk": SI_PRIMITIVE_CELL_MATERIAL.to_dict(),
+    "miller_indices": (0, 0, 1),
+    "number_of_layers": 2,
+    "vacuum": 5.0,
+    "xy_supercell_matrix": [[1, 0], [0, 1]],
+    "use_conventional_cell": False,
+}
+
+SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL: Dict[str, Any] = {
     "type": "SlabConfiguration",
     "bulk": SI_CONVENTIONAL_CELL,
     "miller_indices": (0, 0, 1),
@@ -48,31 +59,34 @@ SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {"configuration": SI_SLAB_001_CONFIGURATION, "build_parameters": SI_SLAB_001_BUILD_PARAMETERS},
+        "build": {
+            "configuration": SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL,
+            "build_parameters": SI_SLAB_001_BUILD_PARAMETERS,
+        },
     },
 }
 
-SI_SLAB_001: Dict[str, Any] = {
+SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
     "name": "Si8(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "constraints": [],
         "coordinates": [
-            {"id": 0, "value": [0.5, 0, 0.300245337]},
-            {"id": 1, "value": [0.25, 0.25, 0.214460955]},
-            {"id": 2, "value": [0.5, 0.5, 0.128676573]},
-            {"id": 3, "value": [0.25, 0.75, 0.042892191]},
-            {"id": 4, "value": [0, 0, 0.128676573]},
-            {"id": 5, "value": [0.75, 0.25, 0.042892191]},
-            {"id": 6, "value": [0, 0.5, 0.300245337]},
-            {"id": 7, "value": [0.75, 0.75, 0.214460955]},
-            {"id": 8, "value": [0.5, 0, 0.643382864]},
-            {"id": 9, "value": [0.25, 0.25, 0.557598482]},
-            {"id": 10, "value": [0.5, 0.5, 0.4718141]},
-            {"id": 11, "value": [0.25, 0.75, 0.386029718]},
-            {"id": 12, "value": [0, 0, 0.4718141]},
-            {"id": 13, "value": [0.75, 0.25, 0.386029718]},
-            {"id": 14, "value": [0, 0.5, 0.643382864]},
-            {"id": 15, "value": [0.75, 0.75, 0.557598482]},
+            {"id": 0, "value": [0.5, 0, 6.86e-7]},
+            {"id": 1, "value": [0.25, 0.25, 0.257353832]},
+            {"id": 2, "value": [0.5, 0.5, 0.17156945]},
+            {"id": 3, "value": [0.25, 0.75, 0.085785068]},
+            {"id": 4, "value": [0, 0, 0.17156945]},
+            {"id": 5, "value": [0.75, 0.25, 0.085785068]},
+            {"id": 6, "value": [0, 0.5, 6.86e-7]},
+            {"id": 7, "value": [0.75, 0.75, 0.257353832]},
+            {"id": 8, "value": [0.5, 0, 0.343138214]},
+            {"id": 9, "value": [0.25, 0.25, 0.600491359]},
+            {"id": 10, "value": [0.5, 0.5, 0.514706977]},
+            {"id": 11, "value": [0.25, 0.75, 0.428922596]},
+            {"id": 12, "value": [0, 0, 0.514706977]},
+            {"id": 13, "value": [0.75, 0.25, 0.428922596]},
+            {"id": 14, "value": [0, 0.5, 0.343138214]},
+            {"id": 15, "value": [0.75, 0.75, 0.600491359]},
         ],
         "elements": [
             {"id": 0, "value": "Si"},

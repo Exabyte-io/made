@@ -1,7 +1,5 @@
 from typing import List, Optional
 
-from mat3ra.code.vector import Vector3D
-
 from mat3ra.made.material import Material
 from .configuration import (
     SlabConfiguration,
@@ -47,7 +45,8 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
     _ConfigurationType = AtomicLayersUniqueRepeatedConfiguration
 
     def _generate(self, configuration: _ConfigurationType) -> List[Material]:
-        crystal_lattice_planes_material = super().get_material(configuration)
+        crystal_lattice_planes_material = super()._generate(configuration)[0]
+
         crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
             material=configuration.crystal, miller_indices=configuration.miller_indices
         )
