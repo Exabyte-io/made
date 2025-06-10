@@ -3,7 +3,7 @@ from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.cell import SI_CONVENTIONAL_CELL
+from unit.fixtures.slab import SI_CONVENTIONAL_CELL
 from unit.utils import assert_two_entities_deep_almost_equal
 
 
