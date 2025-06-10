@@ -1,15 +1,12 @@
-from typing import List, Union
+from typing import List, Union, Tuple
 
 from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
-from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
-    MillerIndicesSchema,
-)
-from pydantic import BaseModel
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.slab.entities import Termination, TerminationHolder
 from .lattice import LatticeMaterialAnalyzer
-from .termination import Termination
+from ..build.slab.entities import MillerIndices
 from ..convert import from_pymatgen, to_pymatgen
 from ..third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 
@@ -21,21 +18,11 @@ def select_slab_with_termination_by_formula(slabs: List[PymatgenSlab], terminati
     raise ValueError(f"No slab found with termination: {termination}")
 
 
-class TerminationHolder(BaseModel):
-    termination_with_vacuum: Termination
-    termination_without_vacuum: Termination
-    shift: float
-
-
 class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
-    DEFAULT_THICKNESS = 3
-    DEFAULT_VACUUM_SIZE = 1
-    DEFAULT_SYMMETRIZE = False
-
-    def __init__(self, material: Material, miller_indices: Union[MillerIndicesSchema, List[int]]):
-        super().__init__(material)
-        self.miller_indices = miller_indices
-        self.termination_holder = self.termination_holders
+    DEFAULT_THICKNESS: int = 3
+    DEFAULT_VACUUM_SIZE: int = 1
+    DEFAULT_SYMMETRIZE: bool = False
+    miller_indices: Union[List[int], Tuple[int, ...]]
 
     def get_pymatgen_slab_generator(
         self,
@@ -44,9 +31,10 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         in_unit_planes: bool = True,
         make_primitive: bool = False,
     ):
+
         return PymatgenSlabGenerator(
             initial_structure=to_pymatgen(self.material_with_conventional_lattice),
-            miller_index=self.miller_indices,
+            miller_index=MillerIndices(root=self.miller_indices).to_tuple(),
             min_slab_size=min_slab_size,
             min_vacuum_size=min_vacuum_size,
             in_unit_planes=in_unit_planes,
