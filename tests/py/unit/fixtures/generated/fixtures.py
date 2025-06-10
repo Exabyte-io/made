@@ -1,12 +1,12 @@
-from ase.build import bulk
+# from ase.build import bulk
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.interface.termination_pair import TerminationPair
-from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
-from mat3ra.made.tools.build.slab.helpers import create_slab
-from mat3ra.made.tools.convert import from_ase
-from pymatgen.analysis.elasticity.strain import Strain
-from pymatgen.core.interface import Interface
-from unit.utils import atoms_to_interface_structure
+# from mat3ra.made.tools.build.interface.termination_pair import TerminationPair
+# from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
+# from mat3ra.made.tools.build.slab.helpers import create_slab
+# from mat3ra.made.tools.convert import from_ase
+# from pymatgen.analysis.elasticity.strain import Strain
+# from pymatgen.core.interface import Interface
+# from unit.utils import atoms_to_interface_structure
 
 # # ASE Atoms fixtures
 # substrate = bulk("Si", cubic=True)

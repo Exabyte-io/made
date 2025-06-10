@@ -5,8 +5,8 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
-from mat3ra.made.tools.convert import to_pymatgen
-from mat3ra.made.tools.third_party import PymatgenSpacegroupAnalyzer
+# from mat3ra.made.tools.convert import to_pymatgen
+# from mat3ra.made.tools.third_party import PymatgenSpacegroupAnalyzer
 from unit.fixtures.generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL
 
 from .fixtures.bulk import SI_CONVENTIONAL_CELL
@@ -16,8 +16,9 @@ from .utils import assert_two_entities_deep_almost_equal
 
 @pytest.mark.skip
 def test_calculate_average_interlayer_distance():
-    distance = get_average_interlayer_distance(INTERFACE_ATOMS, 1, 2)
-    assert np.isclose(distance, 4.0725)
+    # distance = get_average_interlayer_distance(INTERFACE_ATOMS, 1, 2)
+    # assert np.isclose(distance, 4.0725)
+    pass
 
 
 def test_calculate_surface_area():

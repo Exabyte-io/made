@@ -2,7 +2,7 @@ import copy
 from functools import reduce
 from typing import Any, Dict
 
-from .bulk import SI_CONVENTIONAL_CELL, SI_CONVENTIONAL_CELL_FILTERED
+from .bulk import SI_CONVENTIONAL_CELL  # , SI_CONVENTIONAL_CELL_FILTERED
 from .generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL
 
 SI_SLAB_001_CONFIGURATION_FROM_PRIMITIVE = {
