@@ -19,8 +19,8 @@ dependencies = [
     # new verison of numpy==2.0.0 is not handled by pymatgen yet
     "numpy<=1.26.4",
     "mat3ra-utils",
-    "mat3ra-esse",
-    "mat3ra-code",
+    "mat3ra-esse==2025.5.16post0",
+    "mat3ra-code==2025.4.27.post0",
 ]
 
 [project.optional-dependencies]
