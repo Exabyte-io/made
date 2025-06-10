@@ -3,6 +3,9 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     TerminationSchema,
 )
 
+from mat3ra.esse.models.material.reusable.slab.miller_indices import MillerIndicesSchema
+from pydantic import BaseModel
+
 
 class Termination(TerminationSchema, InMemoryEntityPydantic):
     def __str__(self):
@@ -29,3 +32,14 @@ class Termination(TerminationSchema, InMemoryEntityPydantic):
         chemical_elements = termination.split("_")[0]
         space_group_symmetry_label = "_".join(termination.split("_")[1:])
         return cls(chemical_elements=chemical_elements, space_group_symmetry_label=space_group_symmetry_label)
+
+
+class TerminationHolder(BaseModel):
+    termination_with_vacuum: Termination
+    termination_without_vacuum: Termination
+    shift: float
+
+
+class MillerIndices(MillerIndicesSchema, InMemoryEntityPydantic):
+    def to_tuple(self) -> tuple[int, int, int]:
+        return (self.root[0], self.root[1], self.root[2])
