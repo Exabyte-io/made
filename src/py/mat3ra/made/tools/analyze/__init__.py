@@ -1,13 +1,14 @@
 import numpy as np
+from pydantic import BaseModel
+
 from mat3ra.made.material import Material
 from scipy.spatial.distance import pdist
 
+from mat3ra.made.tools.analyze.utils import decorator_perform_operation_in_cartesian_coordinates
 
-class BaseMaterialAnalyzer:
-    def __init__(self, material: Material, use_cartesian: bool = True):
-        self.material = material.clone()
-        if use_cartesian:
-            self.material.to_cartesian()
+
+class BaseMaterialAnalyzer(BaseModel):
+    material: Material
 
     @property
     def volume(self):
@@ -18,5 +19,6 @@ class BaseMaterialAnalyzer:
         return len(self.material.coordinates_array) / self.volume
 
     @property
+    @decorator_perform_operation_in_cartesian_coordinates
     def pairwise_distances(self):
         return pdist(np.array(self.material.coordinates_array))

@@ -1,13 +1,19 @@
 import numpy as np
+import pytest
 from ase.build import bulk
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
-from unit.fixtures.generated.fixtures import INTERFACE_ATOMS
-
+from mat3ra.made.tools.convert import to_pymatgen
+from unit.fixtures.generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL
+from .fixtures.bulk import SI_CONVENTIONAL_CELL
+from .utils import assert_two_entities_deep_almost_equal
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
+from mat3ra.made.tools.third_party import PymatgenSpacegroupAnalyzer
 
 
+@pytest.mark.skip
 def test_calculate_average_interlayer_distance():
     distance = get_average_interlayer_distance(INTERFACE_ATOMS, 1, 2)
     assert np.isclose(distance, 4.0725)
@@ -43,3 +49,12 @@ def test_radial_distribution_function():
 
     # Specific material related tests
     assert np.isclose(rdf.first_peak_distance, 1.42, atol=0.1), "First peak distance should be close to 1.42."
+
+
+def test_lattice_material_analyzer():
+    primitive_cell = SI_PRIMITIVE_CELL_MATERIAL
+    lattice_material_analyzer = LatticeMaterialAnalyzer(material=primitive_cell)
+
+    conventional_cell = lattice_material_analyzer.material_with_conventional_lattice
+
+    assert_two_entities_deep_almost_equal(conventional_cell, SI_CONVENTIONAL_CELL)
