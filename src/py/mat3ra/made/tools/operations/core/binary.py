@@ -25,7 +25,7 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
     new_basis.coordinates = Coordinates.from_values(values=merged_coordinates_values)
     new_basis.labels = ArrayWithIds.from_values(values=merged_labels_values)
     new_basis.constraints = ArrayWithIds.from_values(values=merged_constraints_values)
-    new_basis.resolved_colliding_coordinates(tolerance=distance_tolerance)
+    new_basis.resolve_colliding_coordinates(tolerance=distance_tolerance)
 
     return new_basis
 

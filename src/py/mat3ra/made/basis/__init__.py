@@ -175,7 +175,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         return new_basis
 
     # TODO: add/update test for this method
-    def resolved_colliding_coordinates(self, tolerance=DEFAULT_COORDINATE_PROXIMITY_TOLERANCE):
+    def resolve_colliding_coordinates(self, tolerance=DEFAULT_COORDINATE_PROXIMITY_TOLERANCE):
         """
         Find all atoms that are within distance tolerance and only keep the last one, remove other sites.
 
