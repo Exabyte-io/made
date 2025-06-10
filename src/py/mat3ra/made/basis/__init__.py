@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional, Union
+from copy import deepcopy
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
@@ -148,6 +149,30 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.elements.filter_by_ids(ids)
         self.coordinates.filter_by_ids(ids)
         return self
+
+    def get_rebased_by_matrix(self, matrix: np.ndarray) -> "Basis":
+        """
+        Create a new Basis object with coordinates transformed by a given matrix.
+
+        This method applies a linear transformation to the atomic coordinates.
+        It handles both crystal and Cartesian coordinates by converting to
+        Cartesian, applying the transformation, and then converting back to the
+        original unit system.
+
+        Args:
+            matrix (np.ndarray): A 3x3 transformation matrix.
+
+        Returns:
+            Basis: A new Basis object with the transformed coordinates.
+        """
+        new_basis = deepcopy(self)
+        original_is_in_crystal_units = new_basis.is_in_crystal_units
+        new_basis.to_crystal()
+        new_coordinates = np.dot(new_basis.coordinates.values, matrix)
+        new_basis.coordinates.values = new_coordinates.tolist()
+        if not original_is_in_crystal_units:
+            new_basis.to_cartesian()
+        return new_basis
 
     # TODO: add/update test for this method
     def resolved_colliding_coordinates(self, tolerance=DEFAULT_COORDINATE_PROXIMITY_TOLERANCE) -> "Basis":

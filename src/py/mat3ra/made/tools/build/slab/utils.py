@@ -1,7 +1,47 @@
+from copy import deepcopy
 import numpy as np
 
 from mat3ra.made.material import Material
-from ...operations.core.unary import edit_cell
+from mat3ra.made.lattice import Lattice
+from mat3ra.made.tools.operations.core.unary import edit_cell
+
+
+def get_orthogonal_c_slab_and_update_basis(material: Material) -> Material:
+    """
+    Make the c-vector orthogonal to the ab plane and update the basis.
+
+    This function calculates a new c-vector that is orthogonal to the a and b vectors
+    of the lattice. It then computes the transformation matrix between the old and new
+    lattice vectors and applies this transformation to the atomic coordinates.
+
+    A new material is returned with an updated lattice and basis, where the new
+    lattice is defined by its parameters (a, b, c, alpha, beta, gamma) to avoid
+    storing raw vectors, preserving a standard representation.
+
+    Args:
+        material (Material): The input material object.
+
+    Returns:
+        Material: A new material object with an orthogonalized c-vector and
+                  updated basis.
+    """
+    new_material = deepcopy(material)
+    current_vectors = np.array(new_material.lattice.vector_arrays)
+    a_vec, b_vec, c_old_vec = current_vectors
+
+    normal = np.cross(a_vec, b_vec)
+    n_hat = normal / np.linalg.norm(normal)
+    height = float(np.dot(c_old_vec, n_hat))
+    c_new_vec = n_hat * height
+
+    new_vectors = np.array([a_vec, b_vec, c_new_vec])
+    transform_matrix = np.dot(current_vectors, np.linalg.inv(new_vectors))
+
+    new_basis = new_material.basis.get_rebased_by_matrix(transform_matrix)
+    new_lattice_from_vectors = Lattice.from_vectors_array(new_vectors.tolist())
+    new_material = edit_cell(new_material, new_lattice_from_vectors.vector_arrays)
+    new_material.basis = new_basis
+    return new_material
 
 
 def get_orthogonal_c_slab(material: Material) -> Material:
@@ -9,23 +49,4 @@ def get_orthogonal_c_slab(material: Material) -> Material:
     Make the c-vector orthogonal to the ab plane after slab construction is complete.
     This should be applied after vacuum has been added to the slab.
     """
-    current_vectors = material.lattice.vector_arrays
-    a = np.array(current_vectors[0])
-    b = np.array(current_vectors[1])
-    c_old = np.array(current_vectors[2])
-
-    normal = np.cross(a, b)
-    normal_unit = np.linalg.norm(normal)
-    n_hat = normal / normal_unit
-
-    height = float(np.dot(c_old, n_hat))
-
-    new_orthogonal_vector_c = (n_hat * height).tolist()
-
-    new_vectors = [
-        current_vectors[0],
-        current_vectors[1],
-        new_orthogonal_vector_c,
-    ]
-
-    return edit_cell(material, new_vectors)
+    return get_orthogonal_c_slab_and_update_basis(material)
