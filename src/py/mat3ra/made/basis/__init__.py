@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Optional, Union
 from copy import deepcopy
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds

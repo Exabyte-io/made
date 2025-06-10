@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any, Type
 
 from mat3ra.made.material import Material
 from .configuration import (
@@ -18,7 +18,7 @@ from ...operations.core.unary import supercell, translate
 
 class CrystalLatticePlanesBuilder(BaseBuilder):
     _GeneratedItemType: Material = Material
-    _PostProcessParametersType = None
+    _PostProcessParametersType: Any = None
     use_enforce_convention: bool = True
 
     def _generate(self, configuration: CrystalLatticePlanesConfiguration) -> List[Material]:
@@ -42,9 +42,9 @@ class CrystalLatticePlanesBuilder(BaseBuilder):
 
 
 class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
-    _ConfigurationType = AtomicLayersUniqueRepeatedConfiguration
+    _ConfigurationType: Type[AtomicLayersUniqueRepeatedConfiguration] = AtomicLayersUniqueRepeatedConfiguration
 
-    def _generate(self, configuration: _ConfigurationType) -> List[Material]:
+    def _generate(self, configuration: AtomicLayersUniqueRepeatedConfiguration) -> List[Material]:
         crystal_lattice_planes_material = super()._generate(configuration)[0]
 
         crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(

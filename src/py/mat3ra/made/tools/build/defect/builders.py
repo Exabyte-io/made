@@ -23,7 +23,6 @@ from ...analyze.other import (
     get_atomic_coordinates_extremum,
     get_closest_site_id_from_coordinate,
     get_closest_site_id_from_coordinate_and_element,
-    get_local_extremum_atom_index,
 )
 from ...build import BaseBuilder
 from ...convert import to_pymatgen
@@ -305,6 +304,8 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         Returns:
             The material with the adatom.
         """
+        if position_on_surface is None:
+            position_on_surface = [0.5, 0.5]
 
         adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
             material, position_on_surface, distance_z

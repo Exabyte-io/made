@@ -1,8 +1,7 @@
-from copy import deepcopy
 import numpy as np
 
-from mat3ra.made.material import Material
 from mat3ra.made.lattice import Lattice
+from mat3ra.made.material import Material
 from mat3ra.made.tools.operations.core.unary import edit_cell
 
 

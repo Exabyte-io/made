@@ -1,14 +1,14 @@
-from typing import List, Union, Tuple
+from typing import List, Tuple, Union
 
 from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.entities import Termination, TerminationHolder
-from .lattice import LatticeMaterialAnalyzer
+
 from ..build.slab.entities import MillerIndices
 from ..convert import from_pymatgen, to_pymatgen
 from ..third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
+from .lattice import LatticeMaterialAnalyzer
 
 
 def select_slab_with_termination_by_formula(slabs: List[PymatgenSlab], termination: Termination) -> PymatgenSlab:
@@ -31,7 +31,6 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         in_unit_planes: bool = True,
         make_primitive: bool = False,
     ):
-
         return PymatgenSlabGenerator(
             initial_structure=to_pymatgen(self.material_with_conventional_lattice),
             miller_index=MillerIndices(root=self.miller_indices).to_tuple(),

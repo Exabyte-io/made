@@ -1,28 +1,22 @@
+from typing import Tuple
+
 import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from mat3ra.made.tools.build.slab.builders import (
-    AtomicLayersUniqueRepeatedBuilder,
-    SlabBuilderParameters,
-)
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
+from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder, SlabBuilder, SlabBuilderParameters
 from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
-    VacuumConfiguration,
     SlabConfiguration,
+    VacuumConfiguration,
 )
-from mat3ra.made.tools.build.slab.helpers import (
-    create_slab,
-    select_slab_termination,
-    get_slab_terminations,
-)
+from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations, select_slab_termination
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
-    SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL,
     SI_PRIMITIVE_SLAB_001,
+    SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL,
 )
+
 from .utils import assert_two_entities_deep_almost_equal
 
 MILLER_INDICES = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["miller_indices"]
@@ -31,14 +25,14 @@ NUMBER_OF_LAYERS = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["number_of_layers
 VACUUM = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["vacuum"]
 XY_SUPERCELL_MATRIX = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["xy_supercell_matrix"]
 
-from unit.fixtures.bulk import SI_PRIMITIVE_CELL_MATERIAL, SI_CONVENTIONAL_CELL
+from unit.fixtures.bulk import SI_CONVENTIONAL_CELL, SI_PRIMITIVE_CELL_MATERIAL
 
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA = SI_CONVENTIONAL_SLAB_001.copy()
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA["metadata"].pop("build", None)
 
 
 def get_slab_with_builder(
-    material: Material, miller_indices: tuple[int, int, int], termination_formula: str
+    material: Material, miller_indices: Tuple[int, int, int], termination_formula: str
 ) -> Material:
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
         material=material, miller_indices=miller_indices

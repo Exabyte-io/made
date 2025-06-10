@@ -1,6 +1,6 @@
+import math
 from typing import List, Optional
 
-import math
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.properties_directory.structural.lattice import (

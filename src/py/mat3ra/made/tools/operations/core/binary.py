@@ -3,11 +3,10 @@ from typing import List, Optional
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from scipy.spatial import cKDTree
-
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector
+
 from ...utils import AXIS_TO_INDEX_MAP
 
 

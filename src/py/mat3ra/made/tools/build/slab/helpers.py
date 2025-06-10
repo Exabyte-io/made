@@ -1,3 +1,5 @@
+from typing import List, Optional, Tuple
+
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
@@ -21,7 +23,7 @@ DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 
 def create_slab(
     crystal: Material,
-    miller_indices: tuple[int, int, int] = (0, 0, 1),
+    miller_indices: Tuple[int, int, int] = (0, 0, 1),
     use_conventional_cell=True,
     use_orthogonal_c: bool = True,
     termination: Termination = None,
@@ -29,7 +31,6 @@ def create_slab(
     vacuum=10.0,
     xy_supercell_matrix=DEFAULT_XY_SUPERCELL_MATRIX,
 ) -> Material:
-
     crystal_lattice_planes_configuration = CrystalLatticePlanesConfiguration(
         crystal=crystal, miller_indices=miller_indices
     )
@@ -85,14 +86,14 @@ def create_slab_if_not(material: Material, default_slab_configuration: SlabConfi
     return slab
 
 
-def get_slab_terminations(material: Material, miller_indices: tuple[int, int, int] = (0, 0, 1)) -> list[Termination]:
+def get_slab_terminations(material: Material, miller_indices: Tuple[int, int, int] = (0, 0, 1)) -> List[Termination]:
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
         material=material, miller_indices=miller_indices
     )
     return crystal_lattice_planes_analyzer.terminations
 
 
-def select_slab_termination(terminations: list[Termination], formula: str = None) -> Termination:
+def select_slab_termination(terminations: List[Termination], formula: Optional[str] = None) -> Termination:
     if not terminations:
         raise ValueError("No terminations available.")
     if formula is None:

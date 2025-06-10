@@ -6,7 +6,6 @@ from ..third_party import PymatgenSpacegroupAnalyzer
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
-
     @property
     def spacegroup_analyzer(self):
         return PymatgenSpacegroupAnalyzer(to_pymatgen(self.material))
