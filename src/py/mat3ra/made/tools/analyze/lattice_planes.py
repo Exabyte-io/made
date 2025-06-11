@@ -26,7 +26,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
 
     def get_pymatgen_slab_generator(
         self,
-        min_slab_size: float = DEFAULT_VACUUM_SIZE,
+        min_slab_size: float = DEFAULT_THICKNESS,
         min_vacuum_size: float = DEFAULT_VACUUM_SIZE,
         in_unit_planes: bool = True,
         make_primitive: bool = False,
@@ -46,11 +46,14 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
 
     @property
     def pymatgen_slab_generator_without_vacuum(self) -> PymatgenSlabGenerator:
-        return self.get_pymatgen_slab_generator(min_vacuum_size=0)
+        return self.get_pymatgen_slab_generator(min_slab_size=1, min_vacuum_size=0)
 
     @property
     def all_planes_as_pymatgen_slabs_with_vacuum(self) -> List[PymatgenSlab]:
-        return self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE)
+        return [
+            *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=True),
+            # *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=False),
+        ]
 
     @property
     def all_planes_as_pymatgen_slabs_without_vacuum(self) -> List[PymatgenSlab]:
@@ -65,14 +68,16 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         for slab_with_vacuum in slabs_with_vacuum:
             termination_with_vacuum_string = label_pymatgen_slab_termination(slab_with_vacuum)
             termination_with_vacuum = Termination.from_string(termination_with_vacuum_string)
+            termination_without_vacuum = None
+            try:
+                matching_slab_without_vacuum = select_slab_with_termination_by_formula(
+                    slabs_without_vacuum, termination_with_vacuum
+                )
 
-            matching_slab_without_vacuum = select_slab_with_termination_by_formula(
-                slabs_without_vacuum, termination_with_vacuum
-            )
-
-            termination_without_vacuum_string = label_pymatgen_slab_termination(matching_slab_without_vacuum)
-            termination_without_vacuum = Termination.from_string(termination_without_vacuum_string)
-
+                termination_without_vacuum_string = label_pymatgen_slab_termination(matching_slab_without_vacuum)
+                termination_without_vacuum = Termination.from_string(termination_without_vacuum_string)
+            except:
+                pass
             termination_holders.append(
                 TerminationHolder(
                     termination_with_vacuum=termination_with_vacuum,

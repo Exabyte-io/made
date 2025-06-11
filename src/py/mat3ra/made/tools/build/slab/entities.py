@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.material.reusable.slab.miller_indices import MillerIndicesSchema
@@ -37,7 +37,7 @@ class Termination(TerminationSchema, InMemoryEntityPydantic):
 
 class TerminationHolder(BaseModel):
     termination_with_vacuum: Termination
-    termination_without_vacuum: Termination
+    termination_without_vacuum: Optional[Termination]
     shift: float
 
 
