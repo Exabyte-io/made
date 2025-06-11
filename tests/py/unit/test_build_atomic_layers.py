@@ -1,20 +1,15 @@
-from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-
-from mat3ra.made.tools.build.slab.helpers import select_slab_termination, get_slab_terminations
 from mat3ra.standata.materials import Materials
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+from mat3ra.made.tools.analyze.other import get_local_extremum_atom_index
 from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder
 from mat3ra.made.tools.build.slab.configuration import (
-    CrystalLatticePlanesConfiguration,
     AtomicLayersUniqueRepeatedConfiguration,
 )
+from mat3ra.made.tools.build.slab.helpers import select_slab_termination
 from mat3ra.made.tools.modify import wrap_to_unit_cell
 from mat3ra.made.tools.operations.core.unary import translate
-from mat3ra.made.tools.analyze.other import get_surface_atom_indices, get_local_extremum_atom_index
-from mat3ra.made.tools.enums import SurfaceTypes
-from unit.utils import assert_two_entities_deep_almost_equal
-
 
 SrTiO_BULK = Material.create(Materials.get_by_name_first_match("SrTiO3"))
 material = SrTiO_BULK
