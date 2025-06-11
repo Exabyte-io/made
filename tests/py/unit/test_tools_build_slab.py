@@ -79,6 +79,26 @@ def test_build_slab_conventional():
     assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA)
 
 
+def test_build_slab_conventional_with_multiple_terminations():
+    from mat3ra.standata.materials import Materials
+
+    SrTiO_BULK = Material.create(Materials().get_by_name_first_match("SrTiO3"))
+    SrTiO_MILLER_INDICES = (0, 1, 1)
+    crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
+        material=SrTiO_BULK, miller_indices=SrTiO_MILLER_INDICES
+    )
+    conventional_material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
+    terminations = get_slab_terminations(material=conventional_material, miller_indices=SrTiO_MILLER_INDICES)
+    termination_1 = select_slab_termination(terminations, "SrTiO")
+    slab_1 = get_slab_with_builder(conventional_material, SrTiO_MILLER_INDICES, termination_1.formula)
+    termination_2 = select_slab_termination(terminations, "O2")
+    slab_2 = get_slab_with_builder(conventional_material, SrTiO_MILLER_INDICES, termination_2.formula)
+
+    slab_1.metadata.pop("build")  # Remove build metadata for comparison
+    slab_2.metadata.pop("build")  # Remove build metadata for comparison
+    assert_two_entities_deep_almost_equal(slab_1, SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA)
+
+
 def test_create_slab():
     crystal = SI_PRIMITIVE_CELL_MATERIAL
     terminations = get_slab_terminations(material=crystal, miller_indices=MILLER_INDICES)
