@@ -2,35 +2,31 @@ import pytest
 
 # from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
+
+# fmt: off
 from mat3ra.made.tools.build.defect import (
-    # AdatomSlabPointDefectConfiguration,
-    # CrystalSiteAdatomSlabDefectBuilder,
     EquidistantAdatomSlabDefectBuilder,
     PointDefectBuilderParameters,
     PointDefectConfiguration,
     PointDefectTypeEnum,
     create_defect,
     create_defects,
-    # create_slab_defect,
 )
-from mat3ra.made.tools.build.defect.builders import (
-    # IslandSlabDefectBuilder,
-    # PointDefectPairBuilder,
-    SlabDefectBuilder,
-    SlabDefectBuilderParameters,
-    # TerraceSlabDefectBuilder,
-)
+from mat3ra.made.tools.build.defect.builders import SlabDefectBuilder, SlabDefectBuilderParameters
 
 # from mat3ra.made.tools.build.defect.configuration import (
-# IslandSlabDefectConfiguration,
-# PointDefectPairConfiguration,
-# TerraceSlabDefectConfiguration,
+#     IslandSlabDefectConfiguration,
+#     PointDefectPairConfiguration,
+#     TerraceSlabDefectConfiguration,
 # )
 # from mat3ra.made.tools.utils import coordinate as CoordinateCondition
 from mat3ra.utils import assertion as assertion_utils
 
 # from unit.fixtures.generated.fixtures import SLAB_001, SLAB_111
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER
+
+# fmt: on
+
 
 clean_material = Material.create_default()
 

@@ -3,8 +3,9 @@ from ase import Atoms
 from ase.build import bulk
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.made.material import Material
-from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
-from mat3ra.utils import assertion as assertion_utils
+from mat3ra.made.tools.convert import from_ase, from_poscar, to_ase, to_poscar, to_pymatgen  # from_pymatgen
+
+# from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Element, Lattice, Structure
 
 # from unit.fixtures.generated.fixtures import INTERFACE_PROPERTIES_JSON, INTERFACE_STRUCTURE

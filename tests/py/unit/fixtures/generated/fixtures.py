@@ -1,5 +1,6 @@
 # from ase.build import bulk
 from mat3ra.made.material import Material
+
 # from mat3ra.made.tools.build.interface.termination_pair import TerminationPair
 # from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
 # from mat3ra.made.tools.build.slab.helpers import create_slab

@@ -3,8 +3,9 @@ import pytest
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
-from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
+from mat3ra.made.tools.analyze.other import get_surface_area  # get_average_interlayer_distance
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
+
 # from mat3ra.made.tools.convert import to_pymatgen
 # from mat3ra.made.tools.third_party import PymatgenSpacegroupAnalyzer
 from unit.fixtures.generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL

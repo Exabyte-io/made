@@ -1,12 +1,10 @@
 import platform
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.interface import (
-    InterfaceConfiguration,
+from mat3ra.made.tools.build.interface import (  # InterfaceConfiguration,; create_interfaces,
     ZSLStrainMatchingInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilderParameters,
     ZSLStrainMatchingParameters,
-    create_interfaces,
 )
 from mat3ra.made.tools.build.interface.builders import (
     CommensurateLatticeTwistedInterfaceBuilder,

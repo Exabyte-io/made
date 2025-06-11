@@ -1,6 +1,6 @@
 from typing import Tuple
 
-import pytest
+# import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
@@ -11,6 +11,7 @@ from mat3ra.made.tools.build.slab.configuration import (
     VacuumConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations, select_slab_termination
+from unit.fixtures.bulk import SI_PRIMITIVE_CELL_MATERIAL
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
     SI_PRIMITIVE_SLAB_001,
@@ -24,8 +25,6 @@ USE_CONVENTIONAL_CELL = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["use_convent
 NUMBER_OF_LAYERS = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["number_of_layers"]
 VACUUM = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["vacuum"]
 XY_SUPERCELL_MATRIX = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["xy_supercell_matrix"]
-
-from unit.fixtures.bulk import SI_CONVENTIONAL_CELL, SI_PRIMITIVE_CELL_MATERIAL
 
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA = SI_CONVENTIONAL_SLAB_001.copy()
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA["metadata"].pop("build", None)
