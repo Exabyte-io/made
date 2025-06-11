@@ -1,13 +1,10 @@
 from mat3ra.standata.materials import Materials
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab import (
-    ConventionalCellConfiguration,
-    ConventionalCellBuilder,
+from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder
+from mat3ra.made.tools.build.slab.configuration import (
     CrystalLatticePlanesConfiguration,
-    select_termination,
     AtomicLayersUniqueRepeatedConfiguration,
-    AtomicLayersUniqueRepeatedBuilder,
 )
 from mat3ra.made.tools.modify import wrap_to_unit_cell
 from mat3ra.made.tools.operations.core.unary import translate
@@ -47,9 +44,7 @@ def get_topmost_atom_element(slab):
 
 
 def test_termination_translation():
-    conventional_cell_config = ConventionalCellConfiguration(crystal=material)
-    conventional_cell = ConventionalCellBuilder().get_material(conventional_cell_config)
-    crystal_lattice_planes = CrystalLatticePlanesConfiguration(crystal=conventional_cell, miller_indices=MILLER_INDICES)
+    crystal_lattice_planes = CrystalLatticePlanesConfiguration(crystal=SrTiO_BULK, miller_indices=MILLER_INDICES)
     terminations = crystal_lattice_planes.terminations
 
     termination = select_termination(terminations, "SrTiO")
