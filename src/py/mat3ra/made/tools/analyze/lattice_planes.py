@@ -57,7 +57,10 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
 
     @property
     def all_planes_as_pymatgen_slabs_without_vacuum(self) -> List[PymatgenSlab]:
-        return self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE)
+        return [
+            *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE),
+            *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=not self.DEFAULT_SYMMETRIZE),
+        ]
 
     @property
     def termination_holders(self):
@@ -116,11 +119,10 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
         if holder is None:
             raise ValueError(f"Termination {termination} not found.")
-        return from_pymatgen(
-            select_slab_with_termination_by_formula(
-                self.all_planes_as_pymatgen_slabs_without_vacuum, termination
-            )
-        )
+        slab = self.all_planes_as_pymatgen_slabs_without_vacuum[
+            self.terminations_without_vacuum.index(holder.termination_without_vacuum)
+        ]
+        return Material.create(from_pymatgen(slab))
 
     def get_translation_vector_for_termination_without_vacuum(self, termination: Termination) -> Vector3D:
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
