@@ -1,3 +1,6 @@
+from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+
+from mat3ra.made.tools.build.slab.helpers import select_slab_termination, get_slab_terminations
 from mat3ra.standata.materials import Materials
 
 from mat3ra.made.material import Material
@@ -19,9 +22,9 @@ MILLER_INDICES = (1, 1, 0)
 NUMBER_OF_LAYERS = 3
 
 
-def process_termination(crystal_lattice_planes, termination):
+def process_termination(material, termination):
     atomic_layers_repeated_config = AtomicLayersUniqueRepeatedConfiguration(
-        crystal=crystal_lattice_planes.crystal,
+        crystal=material,
         miller_indices=MILLER_INDICES,
         termination_top=termination,
         number_of_repetitions=NUMBER_OF_LAYERS,
@@ -44,16 +47,20 @@ def get_topmost_atom_element(slab):
 
 
 def test_termination_translation():
-    crystal_lattice_planes = CrystalLatticePlanesConfiguration(crystal=SrTiO_BULK, miller_indices=MILLER_INDICES)
-    terminations = crystal_lattice_planes.terminations
+    material = SrTiO_BULK
 
-    termination = select_termination(terminations, "SrTiO")
-    slab_1 = process_termination(crystal_lattice_planes, termination)
+    crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
+        material=material, miller_indices=MILLER_INDICES
+    )
+    terminations = crystal_lattice_planes_analyzer.terminations
+
+    termination = select_slab_termination(terminations, "SrTiO")
+    slab_1 = process_termination(material, termination)
     topmost_atom_element = get_topmost_atom_element(slab_1)
     assert topmost_atom_element == "Sr"
 
-    termination = select_termination(terminations, "O2")
-    slab_2 = process_termination(crystal_lattice_planes, termination)
+    termination = select_slab_termination(terminations, "O2")
+    slab_2 = process_termination(material, termination)
 
     topmost_atom_element = get_topmost_atom_element(slab_2)
     assert topmost_atom_element == "O"
