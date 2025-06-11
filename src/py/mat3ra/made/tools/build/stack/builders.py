@@ -28,7 +28,6 @@ class StackBuilder2Components(BaseBuilder):
         if isinstance(configuration_or_material, VacuumConfiguration):
             builder = VacuumBuilder()
             return builder.get_material(configuration_or_material)
-        # If we reach here, we don't know how to handle this configuration
         raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
 
     def _generate(self, configuration: StackConfiguration) -> List[Material]:

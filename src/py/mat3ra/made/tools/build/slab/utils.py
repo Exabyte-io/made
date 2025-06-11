@@ -1,79 +1,44 @@
-from typing import Union, List
+import numpy as np
 
-from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
-    MillerIndicesSchema,
-)
+from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from .termination import Termination
-from ...convert import to_pymatgen
-from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
+from mat3ra.made.tools.operations.core.unary import edit_cell
 
 
-def create_pymatgen_slab_generator(
-    crystal: Material,
-    miller_indices: Union[MillerIndicesSchema, List[int]],
-    min_slab_size: float,
-    min_vacuum_size: float,
-    in_unit_planes: bool,
-    make_primitive: bool,
-) -> PymatgenSlabGenerator:
-    if isinstance(miller_indices, MillerIndicesSchema):
-        miller_values = list(miller_indices.root)
-    else:
-        miller_values = miller_indices
-    return PymatgenSlabGenerator(
-        initial_structure=to_pymatgen(crystal),
-        miller_index=miller_values,
-        min_slab_size=min_slab_size,
-        min_vacuum_size=min_vacuum_size,
-        in_unit_planes=in_unit_planes,
-        primitive=make_primitive,
-    )
+def get_orthogonal_c_slab(material: Material) -> Material:
+    """
+    Make the c-vector orthogonal to the ab plane and update the basis.
 
+    This function calculates a new c-vector that is orthogonal to the a and b vectors
+    of the lattice. It then computes the transformation matrix between the old and new
+    lattice vectors and applies this transformation to the atomic coordinates.
 
-def generate_pymatgen_slabs(
-    crystal: Material,
-    miller_indices: Union[MillerIndicesSchema, List[int]] = (0, 0, 1),
-    min_slab_size: float = 1.0,
-    min_vacuum_size: float = 0.0,
-    in_unit_planes: bool = True,
-    make_primitive: bool = False,
-    symmetrize: bool = False,
-) -> List[PymatgenSlab]:  # type: ignore
-    generator = create_pymatgen_slab_generator(
-        crystal, miller_indices, min_slab_size, min_vacuum_size, in_unit_planes, make_primitive
-    )
-    return generator.get_slabs(
-        symmetrize=symmetrize,
-    )
+    A new material is returned with an updated lattice and basis, where the new
+    lattice is defined by its parameters (a, b, c, alpha, beta, gamma) to avoid
+    storing raw vectors, preserving a standard representation.
 
+    Args:
+        material (Material): The input material object.
 
-def generate_miller_supercell_matrix(
-    crystal: Material,
-    miller_indices: Union[MillerIndicesSchema, List[int]] = (0, 0, 1),
-    min_slab_size: float = 1.0,
-    min_vacuum_size: float = 0.0,
-    in_unit_planes: bool = True,
-    make_primitive: bool = False,
-) -> List[List[int]]:
-    generator = create_pymatgen_slab_generator(
-        crystal, miller_indices, min_slab_size, min_vacuum_size, in_unit_planes, make_primitive
-    )
-    return generator.slab_scale_factor.tolist()
+    Returns:
+        Material: A new material object with an orthogonalized c-vector and
+                  updated basis.
+    """
+    new_material = material.clone()
+    current_vectors = np.array(new_material.lattice.vector_arrays)
+    a_vec, b_vec, c_old_vec = current_vectors
 
+    normal = np.cross(a_vec, b_vec)
+    n_hat = normal / np.linalg.norm(normal)
+    height = float(np.dot(c_old_vec, n_hat))
+    c_new_vec = n_hat * height
 
-def get_terminations(crystal: Material, miller_indices: Union[MillerIndicesSchema, List[int]]) -> List[Termination]:
-    DEFAULT_THICKNESS = 3
-    DEFAULT_VACUUM_SIZE = 1
-    slabs = generate_pymatgen_slabs(
-        crystal, miller_indices, min_slab_size=DEFAULT_THICKNESS, min_vacuum_size=DEFAULT_VACUUM_SIZE, symmetrize=True
-    )
-    return [Termination.from_string(label_pymatgen_slab_termination(slab)) for slab in slabs]
+    new_vectors = np.array([a_vec, b_vec, c_new_vec])
+    transform_matrix = np.dot(current_vectors, np.linalg.inv(new_vectors))
 
-
-def select_termination(terminations: List[Termination], stoichiometry: str) -> Termination:
-    for termination in terminations:
-        if str(termination.chemical_elements) == stoichiometry:
-            return termination
-    print("No stoichiometry found. Selecting the first termination.")
-    return terminations[0] if terminations else None
+    new_basis = new_material.basis.clone()
+    new_basis.transform_by_matrix(transform_matrix)
+    new_lattice_from_vectors = Lattice.from_vectors_array(new_vectors.tolist())
+    new_material = edit_cell(new_material, new_lattice_from_vectors.vector_arrays)
+    new_material.basis = new_basis
+    return new_material

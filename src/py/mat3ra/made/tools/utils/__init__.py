@@ -49,7 +49,7 @@ def normalize_2x2_matrix(
     return None  # unrecognized format
 
 
-def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
+def decorator_convert_supercell_matrix_2x2_to_3x3(func: Callable) -> Callable:
     """
     Decorator that converts a 2x2 matrix input to a 3x3 matrix.
     Supports schema-based formats and raw nested lists.

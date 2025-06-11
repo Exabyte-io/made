@@ -10,7 +10,8 @@ from ..interface.builders import (
     CommensurateLatticeTwistedInterfaceBuilder,
     CommensurateLatticeTwistedInterfaceBuilderParameters,
 )
-from ..slab import SlabConfiguration, create_slab
+from ..slab.configuration import SlabConfiguration
+from ..slab.helpers import create_slab
 from ..supercell import create_supercell
 from ..utils import stack_two_materials_xy
 from ...analyze.other import get_chemical_formula

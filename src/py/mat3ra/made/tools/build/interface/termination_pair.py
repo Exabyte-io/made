@@ -1,7 +1,7 @@
 from typing import Tuple, List
 from pydantic import BaseModel
 
-from ..slab.termination import Termination
+from mat3ra.made.tools.build.slab.entities import Termination
 
 
 class TerminationPair(BaseModel):

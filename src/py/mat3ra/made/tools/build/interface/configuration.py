@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from mat3ra.made.material import Material
 from .termination_pair import TerminationPair
 from .. import BaseConfiguration
-from ..slab import Termination
+from ..slab.entities import Termination
 from ..slab.configuration import SlabConfiguration
 
 

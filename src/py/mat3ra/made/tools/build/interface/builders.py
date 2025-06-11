@@ -25,7 +25,8 @@ from ..mixins import (
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from ..slab import create_slab, SlabConfiguration
+from ..slab.configuration import SlabConfiguration
+from ..slab.helpers import create_slab
 from ..supercell import create_supercell
 from ..utils import merge_materials
 from ...analyze.other import get_chemical_formula

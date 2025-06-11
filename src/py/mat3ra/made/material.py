@@ -1,5 +1,4 @@
 from typing import Any, List
-import numpy as np
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
