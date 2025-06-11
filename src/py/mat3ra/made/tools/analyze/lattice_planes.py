@@ -69,6 +69,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
             termination_with_vacuum_string = label_pymatgen_slab_termination(slab_with_vacuum)
             termination_with_vacuum = Termination.from_string(termination_with_vacuum_string)
             termination_without_vacuum = None
+            shift_without_vacuum = None
             try:
                 matching_slab_without_vacuum = select_slab_with_termination_by_formula(
                     slabs_without_vacuum, termination_with_vacuum
@@ -76,6 +77,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
 
                 termination_without_vacuum_string = label_pymatgen_slab_termination(matching_slab_without_vacuum)
                 termination_without_vacuum = Termination.from_string(termination_without_vacuum_string)
+                shift_without_vacuum = matching_slab_without_vacuum.shift
             except:
                 pass
             termination_holders.append(
@@ -83,7 +85,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
                     termination_with_vacuum=termination_with_vacuum,
                     termination_without_vacuum=termination_without_vacuum,
                     shift_with_vacuum=slab_with_vacuum.shift,
-                    shift_without_vacuum=matching_slab_without_vacuum.shift if termination_without_vacuum else None,
+                    shift_without_vacuum=shift_without_vacuum,
                 )
             )
 
@@ -114,10 +116,11 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
         if holder is None:
             raise ValueError(f"Termination {termination} not found.")
-        slab = self.all_planes_as_pymatgen_slabs_without_vacuum[
-            self.terminations_without_vacuum.index(holder.termination_without_vacuum)
-        ]
-        return Material.create(from_pymatgen(slab))
+        return from_pymatgen(
+            select_slab_with_termination_by_formula(
+                self.all_planes_as_pymatgen_slabs_without_vacuum, termination
+            )
+        )
 
     def get_translation_vector_for_termination_without_vacuum(self, termination: Termination) -> Vector3D:
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)

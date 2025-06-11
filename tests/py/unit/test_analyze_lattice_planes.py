@@ -1,7 +1,7 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from mat3ra.made.tools.build.slab.entities import TerminationHolder, Termination
+from mat3ra.made.tools.build.slab.entities import Termination, TerminationHolder
 from mat3ra.made.tools.convert import from_pymatgen
 from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
 from .utils import assert_two_entities_deep_almost_equal
@@ -29,8 +29,10 @@ def test_crystal_lattice_planes_analyzer_011():
     slabs_with_vacuum = [
         Material.create(from_pymatgen(slab)) for slab in analyzer.all_planes_as_pymatgen_slabs_with_vacuum
     ]
-    shifts_without_vacuum = [slab.shift for slab in analyzer.all_planes_as_pymatgen_slabs_with_vacuum]
-    shifts_with_vacuum = [slab.shift for slab in analyzer.all_planes_as_pymatgen_slabs_without_vacuum]
+    shifts_with_vacuum = [h.shift_with_vacuum for h in analyzer.termination_holders]
+    shifts_without_vacuum = [
+        h.shift_without_vacuum for h in analyzer.termination_holders if h.shift_without_vacuum is not None
+    ]
 
     # 3 slabs
     SLAB_WITH_VACUUM_NAMES = ["Sr3 Ti3 O7", "Sr2 Ti2 O8", "Sr3 Ti3 O9"]
@@ -53,18 +55,33 @@ def test_crystal_lattice_planes_analyzer_011():
 
 
 def test_termination_holders_for_011():
-    MILLER_INDICES = (0, 1, 1)
-    analyzer = create_analyzer(MATERIAL, (0, 1, 1))
-    termination_holders = analyzer.termination_holders
+    miller_indices = (0, 1, 1)
+    expected_data = [
+        TerminationHolder(
+            termination_with_vacuum=Termination.from_string("SrTiO_Pmmm_3"),
+            termination_without_vacuum=Termination.from_string("SrTiO_Pmmm_3"),
+            shift_with_vacuum=0.25,
+            shift_without_vacuum=0.25,
+        ),
+        TerminationHolder(
+            termination_with_vacuum=Termination.from_string("SrTiO_Pmmm_3"),
+            termination_without_vacuum=Termination.from_string("SrTiO_Pmmm_3"),
+            shift_with_vacuum=0.25,
+            shift_without_vacuum=0.25,
+        ),
+        TerminationHolder(
+            termination_with_vacuum=Termination.from_string("O2_Pmmm_2"),
+            termination_without_vacuum=Termination.from_string("O2_Pmmm_2"),
+            shift_with_vacuum=0.0,
+            shift_without_vacuum=0.0,
+        ),
+    ]
 
-    expected_data = TerminationHolder(
-        termination_with_vacuum=Termination.from_string("SrTiO"),
-        termination_without_vacuum=Termination.from_string(EXPECTED_TERMINATIONS["TiO2"]),
-        shift_with_vacuum=Termination.from_string(EXPECTED_TERMINATIONS["SrTiO"]),
-        shift_without_vacuum=Termination.from_string(EXPECTED_TERMINATIONS["O2"]),
-    )
+    analyzer = create_analyzer(MATERIAL, miller_indices)
+    actual_holders = analyzer.termination_holders
 
-    assert_two_entities_deep_almost_equal(termination_holders, expected_data)
+    for expected, actual in zip(expected_data, actual_holders):
+        assert_two_entities_deep_almost_equal(expected, actual)
 
 
 def test_terminations():
@@ -103,22 +120,3 @@ def test_termination_holders():
     for miller_indices, expected_data in EXPECTED_HOLDERS_DATA.items():
         analyzer = create_analyzer(MATERIAL, miller_indices)
         termination_holders = analyzer.termination_holders
-
-        actual_holders_as_dict = [
-            {
-                "termination_with_vacuum": h.termination_with_vacuum.formula,
-                "termination_without_vacuum": h.termination_without_vacuum.formula,
-                "shift": h.shift,
-            }
-            for h in termination_holders
-        ]
-
-        # Sorting by a consistent key to ensure order doesn't matter
-        sorted_actual = sorted(actual_holders_as_dict, key=lambda x: x["termination_with_vacuum"])
-        sorted_expected = sorted(expected_data, key=lambda x: x["termination_with_vacuum"])
-
-        assert len(sorted_actual) == len(sorted_expected)
-        for actual, expected_holder in zip(sorted_actual, sorted_expected):
-            assert actual["termination_with_vacuum"] == expected_holder["termination_with_vacuum"]
-            assert actual["termination_without_vacuum"] == expected_holder["termination_without_vacuum"]
-            assert abs(actual["shift"] - expected_holder["shift"]) < 1e-4, f"Shift mismatch for {miller_indices}"
