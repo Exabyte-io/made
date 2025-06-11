@@ -14,14 +14,25 @@ EXPECTED_TERMINATIONS = {
     (0, 1, 1): ["O2", "SrTiO"],
 }
 
+# 3 slabs
+SLAB_WITH_VACUUM_NAMES = ["Sr3 Ti3 O7", "Sr2 Ti2 O8", "Sr3 Ti3 O9"]
+# Only one possibility
+SLAB_WITHOUT_VACUUM_NAMES = [
+    "Sr1 Ti1 O3",
+]
+
+# shifts for 3 slabs
+SHIFTS_WITH_VACUUM = [0.0, 0.25, 0.25]
+# Only one possibility
+SHIFTS_WITHOUT_VACUUM = [0.0]
+
 
 def create_analyzer(material, miller_indices):
     return CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
 
 
-def test_crystal_lattice_planes_analyzer_011():
-    conventional_material = LatticeMaterialAnalyzer(material=MATERIAL).material_with_conventional_lattice
-    analyzer = create_analyzer(conventional_material, (1, 1, 0))
+def test_crystal_lattice_planes_analyzer_slabs_011():
+    analyzer = create_analyzer(MATERIAL, (1, 1, 0))
 
     slabs_without_vacuum = [
         Material.create(from_pymatgen(slab)) for slab in analyzer.all_planes_as_pymatgen_slabs_without_vacuum
@@ -29,27 +40,18 @@ def test_crystal_lattice_planes_analyzer_011():
     slabs_with_vacuum = [
         Material.create(from_pymatgen(slab)) for slab in analyzer.all_planes_as_pymatgen_slabs_with_vacuum
     ]
+
+    assert all(slab.name in SLAB_WITH_VACUUM_NAMES for slab in slabs_with_vacuum)
+    assert all(slab.name in SLAB_WITHOUT_VACUUM_NAMES for slab in slabs_without_vacuum)
+
+
+def test_crystal_lattice_planes_analyzer_shifts_011():
+    analyzer = create_analyzer(MATERIAL, (1, 1, 0))
     shifts_with_vacuum = [h.shift_with_vacuum for h in analyzer.termination_holders]
     shifts_without_vacuum = [
         h.shift_without_vacuum for h in analyzer.termination_holders if h.shift_without_vacuum is not None
     ]
 
-    # 3 slabs
-    SLAB_WITH_VACUUM_NAMES = ["Sr3 Ti3 O7", "Sr2 Ti2 O8", "Sr3 Ti3 O9"]
-
-    # Only one possibility
-    SLAB_WITHOUT_VACUUM_NAMES = [
-        "Sr1 Ti1 O3",
-    ]
-
-    # shifts for 3 slabs
-    SHIFTS_WITH_VACUUM = [0.0, 0.25, 0.25]
-
-    # Only one possibility
-    SHIFTS_WITHOUT_VACUUM = [0.0]
-
-    assert all(slab.name in SLAB_WITH_VACUUM_NAMES for slab in slabs_with_vacuum)
-    assert all(slab.name in SLAB_WITHOUT_VACUUM_NAMES for slab in slabs_without_vacuum)
     assert shifts_with_vacuum == SHIFTS_WITH_VACUUM
     assert shifts_without_vacuum == SHIFTS_WITHOUT_VACUUM
 
