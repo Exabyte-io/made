@@ -10,9 +10,8 @@ from mat3ra.made.tools.build.slab.configuration import (
 )
 from mat3ra.made.tools.modify import wrap_to_unit_cell
 from mat3ra.made.tools.operations.core.unary import translate
-from mat3ra.standata.materials import Materials
+from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
 
-SrTiO_BULK = Material.create(Materials.get_by_name_first_match("SrTiO3"))
 MILLER_INDICES = (1, 1, 0)
 NUMBER_OF_LAYERS = 1
 
@@ -41,7 +40,7 @@ def get_topmost_atom_element(slab):
 
 
 def test_termination_translation():
-    material = SrTiO_BULK
+    material = SrTiO3_BULK_MATERIAL
 
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=MILLER_INDICES)
     terminations = analyzer.terminations
