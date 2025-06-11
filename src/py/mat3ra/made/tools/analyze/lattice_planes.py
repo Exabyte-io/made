@@ -22,7 +22,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
     DEFAULT_THICKNESS: int = 3
     DEFAULT_VACUUM_SIZE: int = 1
     DEFAULT_SYMMETRIZE: bool = False
-    miller_indices: Union[List[int], Tuple[int, ...]]
+    miller_indices: Union[List[int], Tuple[int, int, int]]
 
     def get_pymatgen_slab_generator(
         self,
@@ -52,7 +52,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
     def all_planes_as_pymatgen_slabs_with_vacuum(self) -> List[PymatgenSlab]:
         return [
             *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=True),
-            # *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=False),
+            *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=False),
         ]
 
     @property
@@ -82,7 +82,8 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
                 TerminationHolder(
                     termination_with_vacuum=termination_with_vacuum,
                     termination_without_vacuum=termination_without_vacuum,
-                    shift=slab_with_vacuum.shift,
+                    shift_with_vacuum=slab_with_vacuum.shift,
+                    shift_without_vacuum=matching_slab_without_vacuum.shift if termination_without_vacuum else None,
                 )
             )
 
@@ -105,7 +106,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         return self.terminations[0]
 
     @property
-    def miller_supercell_matrix(self) -> Matrix3x3Schema:  # TODO: import from mat3ra.esse.models.core
+    def miller_supercell_matrix(self) -> Matrix3x3Schema:
         return self.pymatgen_slab_generator_without_vacuum.slab_scale_factor.tolist()
 
     def get_material_with_termination_without_vacuum(self, termination: Termination) -> Material:
@@ -113,11 +114,13 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
         if holder is None:
             raise ValueError(f"Termination {termination} not found.")
-        slab = self.all_planes_as_pymatgen_slabs_without_vacuum[holder.index]
+        slab = self.all_planes_as_pymatgen_slabs_without_vacuum[
+            self.terminations_without_vacuum.index(holder.termination_without_vacuum)
+        ]
         return Material.create(from_pymatgen(slab))
 
     def get_translation_vector_for_termination_without_vacuum(self, termination: Termination) -> Vector3D:
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
         if holder is None:
             raise ValueError(f"Termination {termination} not found.")
-        return [0.0, 0.0, holder.shift]
+        return [0.0, 0.0, holder.shift_without_vacuum]

@@ -38,7 +38,8 @@ class Termination(TerminationSchema, InMemoryEntityPydantic):
 class TerminationHolder(BaseModel):
     termination_with_vacuum: Termination
     termination_without_vacuum: Optional[Termination]
-    shift: float
+    shift_with_vacuum: float
+    shift_without_vacuum: Optional[float]
 
 
 class MillerIndices(MillerIndicesSchema, InMemoryEntityPydantic):
