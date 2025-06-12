@@ -31,6 +31,22 @@ def create_slab(
     vacuum=10.0,
     xy_supercell_matrix=DEFAULT_XY_SUPERCELL_MATRIX,
 ) -> Material:
+    """
+    Creates a slab material from a crystal material with specified Miller indices and other parameters.
+
+    Args:
+        crystal (Material): The crystal material to create the slab from.
+        miller_indices (Tuple[int, int, int]): Miller indices for the slab surface.
+        use_conventional_cell (bool): Whether to use the conventional cell for the crystal to apply Miller indices.
+        use_orthogonal_c (bool): Whether to make slab with c-lattice orthogonal to miller indices plane, along z-axis.
+        termination (Termination): The termination to use for the slab.
+        number_of_layers (int): Number of atomic layers in the slab, in the number of unit cells.
+        vacuum (float): Size of the vacuum layer in Angstroms.
+        xy_supercell_matrix (List[List[int]]): Supercell matrix for the xy plane to apply to the generated slab.
+
+    Returns:
+        Material: The generated slab material.
+    """
     crystal_lattice_planes_configuration = CrystalLatticePlanesConfiguration(
         crystal=crystal, miller_indices=miller_indices
     )

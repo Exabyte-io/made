@@ -152,15 +152,6 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         return self
 
     def transform_by_matrix(self, matrix: Matrix3x3Schema) -> None:
-        """
-        Adjust Basis object with coordinates transformed by a given matrix.
-
-        This method applies a linear transformation to the atomic coordinates.
-
-        Args:
-            matrix (np.ndarray): A 3x3 transformation matrix.
-
-        """
         original_is_in_crystal_units = self.is_in_crystal_units
         self.to_crystal()
         matrix_np = np.array(matrix)
