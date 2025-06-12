@@ -35,6 +35,7 @@ def test_to_pymatgen():
     assert (structure.frac_coords == [[0.0, 0.0, 0.0], [0.25, 0.25, 0.25]]).all()
 
 
+# TODO: uncomment and fix before epic-7623 is merged
 # def test_from_pymatgen():
 #     material_data = from_pymatgen(PYMATGEN_STRUCTURE)
 #     assert material_data["lattice"]["a"] == 3.84

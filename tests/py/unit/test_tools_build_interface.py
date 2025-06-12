@@ -44,6 +44,7 @@ build_parameters = ZSLStrainMatchingInterfaceBuilderParameters(
 matched_interfaces_builder = ZSLStrainMatchingInterfaceBuilder(build_parameters=build_parameters)
 
 
+# TODO: uncomment and fix before epic-7623 is merged
 # def test_create_interfaces():
 #     interfaces = create_interfaces(matched_interfaces_builder, interface_configuration)
 #

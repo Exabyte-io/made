@@ -117,6 +117,7 @@ def test_create_defects():
     ]
 
 
+# TODO: uncomment and fix before epic-7623 is merged
 # def test_create_adatom():
 #     # Adatom of Si at 0.5, 0.5 position
 #     configuration = AdatomSlabPointDefectConfiguration(
@@ -129,6 +130,7 @@ def test_create_defects():
 #
 
 #
+# TODO: uncomment and fix before epic-7623 is merged
 # def test_create_adatom_equidistant():
 #     # Adatom of Si at approximate 0.5, 0.5 position
 #     configuration = AdatomSlabPointDefectConfiguration(
@@ -152,6 +154,7 @@ def test_create_defects():
 #         assertion_utils.assert_deep_almost_equal(coordinate_linux_and_emscripten, defect_coordinate, atol=atol)
 #
 #
+# TODO: uncomment and fix before epic-7623 is merged
 # def test_create_crystal_site_adatom():
 #     # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
 #     configuration = AdatomSlabPointDefectConfiguration(
@@ -172,6 +175,7 @@ def test_create_defects():
 #         assertion_utils.assert_deep_almost_equal(coordinates_linux_and_emscripten, defect_coordinate, atol=atol)
 #
 #
+# TODO: uncomment and fix before epic-7623 is merged
 # def test_create_island():
 #     # TODO: use TiN
 #     condition = CoordinateCondition.CylinderCoordinateCondition(
@@ -192,6 +196,7 @@ def test_create_defects():
 #     assert defect.basis.elements.values[-1] == "Si"
 #
 #
+# TODO: uncomment and fix before epic-7623 is merged
 # def test_create_terrace():
 #     config = TerraceSlabDefectConfiguration(
 #         crystal=SLAB_001,
@@ -253,23 +258,3 @@ def test_get_equidistant_position():
 
     expected_center = [0.5, 0.5, 0.7573538315436493]
     assertion_utils.assert_deep_almost_equal(equidistant_position, expected_center)
-
-
-#
-# def test_create_defect_pair():
-#     defect1_config = PointDefectConfiguration.from_approximate_coordinate(
-#         crystal=SLAB_001,
-#         defect_type=PointDefectTypeEnum.VACANCY,
-#         approximate_coordinate=[0.5, 0.5, 0.25],
-#     )
-#     defect2_config = PointDefectConfiguration(
-#         defect_type=PointDefectTypeEnum.INTERSTITIAL, coordinate=[0.5, 0.55, 0.35], chemical_element="P"
-#     )
-#     defect_pair_config = PointDefectPairConfiguration(
-#         primary_defect_configuration=defect1_config,
-#         secondary_defect_configuration=defect2_config,
-#     )
-#     defect_material = PointDefectPairBuilder().get_material(defect_pair_config)
-#
-#     assertion_utils.assert_deep_almost_equal("P", defect_material.basis.elements.values[0])
-#     assertion_utils.assert_deep_almost_equal([0.5, 0.55, 0.35], defect_material.basis.coordinates.values[0])
