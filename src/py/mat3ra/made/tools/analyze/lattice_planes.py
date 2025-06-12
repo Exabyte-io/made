@@ -60,7 +60,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
     def all_planes_as_pymatgen_slabs_without_vacuum(self) -> List[PymatgenSlab]:
         return [
             *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE),
-            # *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=not self.DEFAULT_SYMMETRIZE),
+            *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=not self.DEFAULT_SYMMETRIZE),
         ]
 
     @property
@@ -131,4 +131,9 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
         if holder is None:
             raise ValueError(f"Termination {termination} not found.")
-        return [0.0, 0.0, holder.shift_without_vacuum]
+        
+        # NOTE: pymatgen shift values are in fractional crystal coordinates and need to be negated
+        # Convert from crystal to cartesian coordinates using the conventional material's lattice
+        crystal_shift = [0.0, 0.0, -holder.shift_without_vacuum]
+        cartesian_shift = self.material_with_conventional_lattice.basis.cell.convert_point_to_cartesian(crystal_shift)
+        return cartesian_shift

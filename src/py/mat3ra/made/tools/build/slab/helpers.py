@@ -17,6 +17,8 @@ from .configuration import (
 )
 from mat3ra.made.tools.build.slab.entities import Termination
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+from ...convert import to_pymatgen
+from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination
 
 DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 
@@ -103,6 +105,7 @@ def create_slab_if_not(material: Material, default_slab_configuration: SlabConfi
 
 
 def get_slab_terminations(material: Material, miller_indices: Tuple[int, int, int] = (0, 0, 1)) -> List[Termination]:
+    # TODO: revert to jun 6
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
         material=material, miller_indices=miller_indices
     )
