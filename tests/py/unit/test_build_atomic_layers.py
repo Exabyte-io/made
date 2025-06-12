@@ -45,13 +45,14 @@ def test_termination_translation():
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=MILLER_INDICES)
     terminations = analyzer.terminations
 
-    termination = select_slab_termination(terminations, "SrTiO")
-    slab_1 = process_termination(material, termination)
-    topmost_atom_element = get_topmost_atom_element(slab_1)
-    assert topmost_atom_element == "Sr"
+    termination_1 = select_slab_termination(terminations, "SrTiO")
+    slab_1 = process_termination(material, termination_1)
+    topmost_atom_element_1 = get_topmost_atom_element(slab_1)
 
     # Test O2 termination
-    termination = select_slab_termination(terminations, "O2")
-    slab_2 = process_termination(material, termination)
-    topmost_atom_element = get_topmost_atom_element(slab_2)
-    assert topmost_atom_element == "O"
+    termination_2 = select_slab_termination(terminations, "O2")
+    slab_2 = process_termination(material, termination_2)
+    topmost_atom_element_2 = get_topmost_atom_element(slab_2)
+
+    assert topmost_atom_element_1 == "Sr"
+    assert topmost_atom_element_2 == "O"
