@@ -3,9 +3,16 @@ from ase import Atoms
 from ase.build import bulk
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.made.material import Material
-from mat3ra.made.tools.convert import from_ase, from_poscar, to_ase, to_poscar, to_pymatgen  # from_pymatgen
+from mat3ra.made.tools.convert import (
+    from_ase,
+    from_poscar,
+    to_ase,
+    to_poscar,
+    to_pymatgen,
+    from_pymatgen,
+)
 
-# from mat3ra.utils import assertion as assertion_utils
+from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Element, Lattice, Structure
 
 # from unit.fixtures.generated.fixtures import INTERFACE_PROPERTIES_JSON, INTERFACE_STRUCTURE
@@ -35,7 +42,19 @@ def test_to_pymatgen():
     assert (structure.frac_coords == [[0.0, 0.0, 0.0], [0.25, 0.25, 0.25]]).all()
 
 
-# def test_from_pymatgen():
+def test_from_pymatgen():
+    material_data = from_pymatgen(PYMATGEN_STRUCTURE)
+    assert material_data["lattice"]["a"] == 3.84
+    assert material_data["lattice"]["alpha"] == 120
+    assert material_data["basis"]["elements"] == [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}]
+
+    converted_material = Material.create(material_data)
+    default_material = Material.create_default()
+    assertion_utils.assert_deep_almost_equal(converted_material, default_material)
+
+
+# TODO: uncomment and fix before epic-7623 is merged
+# def test_from_pymatgen_interface():
 #     material_data = from_pymatgen(PYMATGEN_STRUCTURE)
 #     assert material_data["lattice"]["a"] == 3.84
 #     assert material_data["lattice"]["alpha"] == 120
