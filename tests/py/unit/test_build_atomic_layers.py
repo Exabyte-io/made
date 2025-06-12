@@ -5,7 +5,9 @@ from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     CrystalLatticePlanesConfiguration,
 )
+from mat3ra.made.tools.build.slab.entities import Termination
 from mat3ra.made.tools.build.slab.helpers import select_slab_termination
+from mat3ra.made.tools.third_party import label_pymatgen_slab_termination
 from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL, HfO2_BULK_MATERIAL
 
 NUMBER_OF_LAYERS = 1
