@@ -5,7 +5,6 @@ from mat3ra.esse.models.material.reusable.slab.miller_indices import MillerIndic
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.termination import (
     TerminationSchema,
 )
-from pydantic import BaseModel
 
 
 class Termination(TerminationSchema, InMemoryEntityPydantic):

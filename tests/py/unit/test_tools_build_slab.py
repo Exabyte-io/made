@@ -96,6 +96,8 @@ def test_build_slab_conventional_with_multiple_terminations():
 
     slab_1.metadata.pop("build")  # Remove build metadata for comparison
     slab_2.metadata.pop("build")  # Remove build metadata for comparison
+    assert slab_1.formula != slab_2.formula
+    # TODO: should be an SrTiO3 slabs
     assert_two_entities_deep_almost_equal(slab_1, SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA)
 
 

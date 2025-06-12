@@ -1,6 +1,3 @@
-from mat3ra.made.tools.build.slab.helpers import select_slab_termination
-
-from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_local_extremum_atom_index
 from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder, CrystalLatticePlanesBuilder
@@ -8,8 +5,7 @@ from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     CrystalLatticePlanesConfiguration,
 )
-from mat3ra.made.tools.modify import wrap_to_unit_cell
-from mat3ra.made.tools.operations.core.unary import translate
+from mat3ra.made.tools.build.slab.helpers import select_slab_termination
 from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
 
 MILLER_INDICES = (1, 1, 0)
@@ -49,7 +45,6 @@ def test_termination_translation():
     slab_1 = process_termination(material, termination_1)
     topmost_atom_element_1 = get_topmost_atom_element(slab_1)
 
-    # Test O2 termination
     termination_2 = select_slab_termination(terminations, "O2")
     slab_2 = process_termination(material, termination_2)
     topmost_atom_element_2 = get_topmost_atom_element(slab_2)

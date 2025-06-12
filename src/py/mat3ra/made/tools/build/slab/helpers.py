@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.slab.entities import Termination
 from .builders import (
     SlabBuilder,
     AtomicLayersUniqueRepeatedBuilder,
@@ -15,10 +16,7 @@ from .configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     VacuumConfiguration,
 )
-from mat3ra.made.tools.build.slab.entities import Termination
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from ...convert import to_pymatgen
-from ...third_party import PymatgenSlabGenerator, label_pymatgen_slab_termination
 
 DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 

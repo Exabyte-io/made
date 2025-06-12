@@ -72,18 +72,17 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         for slab_with_vacuum in slabs_with_vacuum:
             termination_with_vacuum_string = label_pymatgen_slab_termination(slab_with_vacuum)
             termination_with_vacuum = Termination.from_string(termination_with_vacuum_string)
-            termination_without_vacuum = None
-            shift_without_vacuum = 0.0
+
             try:
                 matching_slab_without_vacuum = select_slab_with_termination_by_formula(
                     slabs_without_vacuum, termination_with_vacuum
                 )
-
                 termination_without_vacuum_string = label_pymatgen_slab_termination(matching_slab_without_vacuum)
                 termination_without_vacuum = Termination.from_string(termination_without_vacuum_string)
                 shift_without_vacuum = matching_slab_without_vacuum.shift
-            except:
-                pass
+            except ValueError:
+                termination_without_vacuum = None
+                shift_without_vacuum = 0.0
             shift_with_vacuum = slab_with_vacuum.shift
 
             termination_holders.append(
@@ -131,7 +130,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
         if holder is None:
             raise ValueError(f"Termination {termination} not found.")
-        
+
         # NOTE: pymatgen shift values are in fractional crystal coordinates and need to be negated
         # Convert from crystal to cartesian coordinates using the conventional material's lattice
         crystal_shift = [0.0, 0.0, -holder.shift_without_vacuum]

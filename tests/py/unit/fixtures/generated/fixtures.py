@@ -1,6 +1,5 @@
 # from ase.build import bulk
 from mat3ra.made.material import Material
-
 from mat3ra.standata.materials import Materials
 
 SrTiO3_BULK_MATERIAL = Material.create(Materials.get_by_name_first_match("SrTiO3"))

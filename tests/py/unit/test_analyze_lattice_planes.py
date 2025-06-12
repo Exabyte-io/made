@@ -3,6 +3,7 @@ from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMateria
 from mat3ra.made.tools.build.slab.entities import Termination, TerminationHolder
 from mat3ra.made.tools.convert import from_pymatgen
 from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
+
 from .utils import assert_two_entities_deep_almost_equal
 
 MATERIAL = SrTiO3_BULK_MATERIAL
@@ -124,3 +125,4 @@ def test_termination_holders():
     for miller_indices, expected_data in EXPECTED_HOLDERS_DATA.items():
         analyzer = create_analyzer(MATERIAL, miller_indices)
         termination_holders = analyzer.termination_holders
+        assert len(termination_holders) == len(expected_data)
