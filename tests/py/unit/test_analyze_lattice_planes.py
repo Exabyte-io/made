@@ -63,20 +63,20 @@ def test_termination_holders_for_011():
     miller_indices = (0, 1, 1)
     expected_data = [
         TerminationHolder(
-            termination_with_vacuum=Termination.from_string("SrTiO_Pmmm_3"),
+            termination_with_vacuum=Termination.from_string("SrTiO_Pmmm_2"),
             termination_without_vacuum=Termination.from_string("SrTiO_Pmmm_3"),
             shift_with_vacuum=0.25,
-            shift_without_vacuum=0.25,
+            shift_without_vacuum=0.0,
         ),
         TerminationHolder(
-            termination_with_vacuum=Termination.from_string("SrTiO_Pmmm_3"),
+            termination_with_vacuum=Termination.from_string("SrTiO_Pmmm_2"),
             termination_without_vacuum=Termination.from_string("SrTiO_Pmmm_3"),
             shift_with_vacuum=0.25,
-            shift_without_vacuum=0.25,
+            shift_without_vacuum=0.0,
         ),
         TerminationHolder(
             termination_with_vacuum=Termination.from_string("O2_Pmmm_2"),
-            termination_without_vacuum=Termination.from_string("O2_Pmmm_2"),
+            termination_without_vacuum=Termination.from_string("O2_Pmmm_3"),
             shift_with_vacuum=0.0,
             shift_without_vacuum=0.0,
         ),

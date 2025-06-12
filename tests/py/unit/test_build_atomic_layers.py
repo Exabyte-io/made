@@ -6,19 +6,18 @@ from mat3ra.made.tools.build.slab.configuration import (
     CrystalLatticePlanesConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import select_slab_termination
-from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
+from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL, HfO2_BULK_MATERIAL
 
-MILLER_INDICES = (1, 1, 0)
 NUMBER_OF_LAYERS = 1
 
 
-def process_termination(material, termination):
-    crystal_lattice_planes_config = CrystalLatticePlanesConfiguration(crystal=material, miller_indices=MILLER_INDICES)
+def process_termination(material, miller_indices, termination):
+    crystal_lattice_planes_config = CrystalLatticePlanesConfiguration(crystal=material, miller_indices=miller_indices)
     crystal_lattice_planes_material = CrystalLatticePlanesBuilder().get_material(crystal_lattice_planes_config)
 
     atomic_layers_config = AtomicLayersUniqueRepeatedConfiguration(
         crystal=crystal_lattice_planes_material,
-        miller_indices=MILLER_INDICES,
+        miller_indices=miller_indices,
         termination_top=termination,
         number_of_repetitions=NUMBER_OF_LAYERS,
     )
@@ -35,19 +34,39 @@ def get_topmost_atom_element(slab):
     return slab.basis.elements.get_element_value_by_index(topmost_index)
 
 
-def test_termination_translation():
+def test_termination_translation_srtio3():
     material = SrTiO3_BULK_MATERIAL
+    miller_indices = (1, 1, 0)
 
-    analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=MILLER_INDICES)
+    analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
     terminations = analyzer.terminations
 
     termination_1 = select_slab_termination(terminations, "SrTiO")
-    slab_1 = process_termination(material, termination_1)
+    slab_1 = process_termination(material, miller_indices, termination_1)
     topmost_atom_element_1 = get_topmost_atom_element(slab_1)
 
     termination_2 = select_slab_termination(terminations, "O2")
-    slab_2 = process_termination(material, termination_2)
+    slab_2 = process_termination(material, miller_indices, termination_2)
     topmost_atom_element_2 = get_topmost_atom_element(slab_2)
 
     assert topmost_atom_element_1 == "Sr"
+    assert topmost_atom_element_2 == "O"
+
+
+def test_termination_translation_hfo2():
+    material = HfO2_BULK_MATERIAL
+    miller_indices = (1, 1, 1)
+
+    analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
+    terminations = analyzer.terminations
+
+    termination_1 = select_slab_termination(terminations, "Hf2O")
+    slab_1 = process_termination(material, miller_indices, termination_1)
+    topmost_atom_element_1 = get_topmost_atom_element(slab_1)
+
+    termination_2 = select_slab_termination(terminations, "O2")
+    slab_2 = process_termination(material, miller_indices, termination_2)
+    topmost_atom_element_2 = get_topmost_atom_element(slab_2)
+
+    assert topmost_atom_element_1 == "Hf"
     assert topmost_atom_element_2 == "O"
