@@ -2,6 +2,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build.slab.entities import Termination
 from mat3ra.made.tools.convert import from_pymatgen
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.generated.fixtures import HfO2_BULK_MATERIAL, SrTiO3_BULK_MATERIAL
 
 MILLER_INDICES = [(0, 0, 1), (1, 1, 0), (0, 1, 1)]
@@ -95,8 +96,8 @@ def test_crystal_lattice_planes_analyzer_shifts_011():
         h.shift_without_vacuum for h in analyzer.termination_holders if h.shift_without_vacuum is not None
     ]
 
-    assert shifts_with_vacuum == SrTiO3_SHIFTS_WITH_VACUUM
-    assert shifts_without_vacuum == SrTiO3_SHIFTS_WITHOUT_VACUUM
+    assertion_utils.assert_deep_almost_equal(shifts_with_vacuum, SrTiO3_SHIFTS_WITH_VACUUM)
+    assertion_utils.assert_deep_almost_equal(shifts_without_vacuum, SrTiO3_SHIFTS_WITHOUT_VACUUM)
 
 
 def test_crystal_lattice_planes_analyzer_terminations_011():
