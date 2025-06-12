@@ -103,7 +103,6 @@ def create_slab_if_not(material: Material, default_slab_configuration: SlabConfi
 
 
 def get_slab_terminations(material: Material, miller_indices: Tuple[int, int, int] = (0, 0, 1)) -> List[Termination]:
-    # TODO: revert to jun 6
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
         material=material, miller_indices=miller_indices
     )
