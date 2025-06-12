@@ -1,10 +1,8 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from mat3ra.made.tools.build.slab.entities import Termination, TerminationHolder
+from mat3ra.made.tools.build.slab.entities import Termination
 from mat3ra.made.tools.convert import from_pymatgen
-from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL, HfO2_BULK_MATERIAL
-
-from .utils import assert_two_entities_deep_almost_equal
+from unit.fixtures.generated.fixtures import HfO2_BULK_MATERIAL, SrTiO3_BULK_MATERIAL
 
 MILLER_INDICES = [(0, 0, 1), (1, 1, 0), (0, 1, 1)]
 SrTiO3_EXPECTED_TERMINATION_FORMULAS = {

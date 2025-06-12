@@ -1,7 +1,6 @@
 from typing import Tuple
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder, SlabBuilder, SlabBuilderParameters
@@ -19,6 +18,7 @@ from unit.fixtures.slab import (
     SrTiO3_SLAB_011_O2,
     SrTiO3_SLAB_011_SrTiO,
 )
+
 from .fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
 from .utils import assert_two_entities_deep_almost_equal
 
