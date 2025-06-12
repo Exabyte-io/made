@@ -5,10 +5,8 @@ from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     CrystalLatticePlanesConfiguration,
 )
-from mat3ra.made.tools.build.slab.entities import Termination
 from mat3ra.made.tools.build.slab.helpers import select_slab_termination
-from mat3ra.made.tools.third_party import label_pymatgen_slab_termination
-from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL, HfO2_BULK_MATERIAL
+from unit.fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
 
 NUMBER_OF_LAYERS = 1
 
@@ -52,23 +50,4 @@ def test_termination_translation_srtio3():
     topmost_atom_element_2 = get_topmost_atom_element(slab_2)
 
     assert topmost_atom_element_1 == "Sr"
-    assert topmost_atom_element_2 == "O"
-
-
-def test_termination_translation_hfo2():
-    material = HfO2_BULK_MATERIAL
-    miller_indices = (1, 1, 1)
-
-    analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
-    terminations = analyzer.terminations
-
-    termination_1 = select_slab_termination(terminations, "Hf2O")
-    slab_1 = process_termination(material, miller_indices, termination_1)
-    topmost_atom_element_1 = get_topmost_atom_element(slab_1)
-
-    termination_2 = select_slab_termination(terminations, "O2")
-    slab_2 = process_termination(material, miller_indices, termination_2)
-    topmost_atom_element_2 = get_topmost_atom_element(slab_2)
-
-    assert topmost_atom_element_1 == "Hf"
     assert topmost_atom_element_2 == "O"

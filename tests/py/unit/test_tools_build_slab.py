@@ -1,7 +1,7 @@
 from typing import Tuple
 
-# import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder, SlabBuilder, SlabBuilderParameters
@@ -19,7 +19,7 @@ from unit.fixtures.slab import (
     SrTiO3_SLAB_011_O2,
     SrTiO3_SLAB_011_SrTiO,
 )
-
+from .fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
 from .utils import assert_two_entities_deep_almost_equal
 
 MILLER_INDICES = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["miller_indices"]
@@ -82,12 +82,9 @@ def test_build_slab_conventional():
 
 
 def test_build_slab_conventional_with_multiple_terminations():
-    from mat3ra.standata.materials import Materials
-
-    SrTiO_BULK = Material.create(Materials().get_by_name_first_match("SrTiO3"))
     SrTiO_MILLER_INDICES = (0, 1, 1)
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-        material=SrTiO_BULK, miller_indices=SrTiO_MILLER_INDICES
+        material=SrTiO3_BULK_MATERIAL, miller_indices=SrTiO_MILLER_INDICES
     )
     conventional_material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
     terminations = get_slab_terminations(material=conventional_material, miller_indices=SrTiO_MILLER_INDICES)
