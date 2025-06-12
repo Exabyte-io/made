@@ -50,6 +50,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
 
     @property
     def all_planes_as_pymatgen_slabs_with_vacuum(self) -> List[PymatgenSlab]:
+        # Getting all slabs with and without symmetrization, to cover all terminations that should be found
         return [
             *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=True),
             *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=False),
@@ -59,7 +60,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
     def all_planes_as_pymatgen_slabs_without_vacuum(self) -> List[PymatgenSlab]:
         return [
             *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE),
-            *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=not self.DEFAULT_SYMMETRIZE),
+            # *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=not self.DEFAULT_SYMMETRIZE),
         ]
 
     @property
@@ -72,7 +73,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
             termination_with_vacuum_string = label_pymatgen_slab_termination(slab_with_vacuum)
             termination_with_vacuum = Termination.from_string(termination_with_vacuum_string)
             termination_without_vacuum = None
-            shift_without_vacuum = None
+            shift_without_vacuum = 0.0
             try:
                 matching_slab_without_vacuum = select_slab_with_termination_by_formula(
                     slabs_without_vacuum, termination_with_vacuum
@@ -83,11 +84,13 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
                 shift_without_vacuum = matching_slab_without_vacuum.shift
             except:
                 pass
+            shift_with_vacuum = slab_with_vacuum.shift
+
             termination_holders.append(
                 TerminationHolder(
                     termination_with_vacuum=termination_with_vacuum,
                     termination_without_vacuum=termination_without_vacuum,
-                    shift_with_vacuum=slab_with_vacuum.shift,
+                    shift_with_vacuum=shift_with_vacuum,
                     shift_without_vacuum=shift_without_vacuum,
                 )
             )

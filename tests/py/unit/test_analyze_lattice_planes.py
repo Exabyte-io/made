@@ -18,12 +18,13 @@ SLAB_WITH_VACUUM_NAMES = ["Sr3 Ti3 O7", "Sr2 Ti2 O8", "Sr3 Ti3 O9"]
 # Only one possibility
 SLAB_WITHOUT_VACUUM_NAMES = [
     "Sr1 Ti1 O3",
+    "Sr1 Ti1 O3",
 ]
 
 # shifts for 3 slabs
 SHIFTS_WITH_VACUUM = [0.0, 0.25, 0.25]
 # Only one possibility
-SHIFTS_WITHOUT_VACUUM = [0.0]
+SHIFTS_WITHOUT_VACUUM = [0.0, 0.0]
 
 
 def create_analyzer(material, miller_indices):
@@ -93,7 +94,7 @@ def test_terminations():
         terminations = analyzer.terminations
         actual_formulas = sorted([t.formula for t in terminations])
         expected_formulas = sorted(EXPECTED_TERMINATIONS[miller_indices])
-        assert actual_formulas == expected_formulas, f"Mismatch for MI {miller_indices}"
+        assert actual_formulas == expected_formulas
 
 
 def test_110_and_011_terminations_are_the_same():
