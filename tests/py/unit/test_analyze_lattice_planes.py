@@ -53,13 +53,21 @@ SrTiO3_SHIFTS_WITH_VACUUM = [0.25, 0.25]
 # Only one possibility
 SrTiO3_SHIFTS_WITHOUT_VACUUM = [0.0, 0.25]
 
-# TODO: adjust to match real results (13 terminations)
 # shifts for 3 slabs
 HfO2_SHIFTS_WITH_VACUUM = [0.0, 0.25, 0.25]
 HfO2_SHIFTS_WITHOUT_VACUUM = [0.0, 0.0]
 # shifts for 3 slabs
-HfO2_SLAB_WITH_VACUUM_NAMES = ["Hf1 O2", "Hf2 O4", "Hf3 O6"]
-HfO2_SLAB_WITHOUT_VACUUM_NAMES = ["Hf1 O2", "Hf1 O2"]
+HfO2_SLAB_WITH_VACUUM_NAMES = [
+    "Hf8 O22",
+    "Hf8 O20",
+    "Hf8 O18",
+    "Hf12 O24",
+    "Hf12 O22",
+    "Hf12 O20",
+    "Hf12 O18",
+    "Hf16 O24",
+]
+HfO2_SLAB_WITHOUT_VACUUM_NAMES = ["Hf4 O8"]
 
 
 def create_analyzer(material, miller_indices):
