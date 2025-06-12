@@ -42,7 +42,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
 
     @property
     def pymatgen_slab_generator_with_vacuum(self) -> PymatgenSlabGenerator:
-        return self.get_pymatgen_slab_generator()
+        return self.get_pymatgen_slab_generator(min_slab_size=self.DEFAULT_THICKNESS, min_vacuum_size=1)
 
     @property
     def pymatgen_slab_generator_without_vacuum(self) -> PymatgenSlabGenerator:

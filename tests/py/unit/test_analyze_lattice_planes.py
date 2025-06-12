@@ -1,5 +1,4 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build.slab.entities import Termination, TerminationHolder
 from mat3ra.made.tools.convert import from_pymatgen
@@ -41,6 +40,8 @@ def test_crystal_lattice_planes_analyzer_slabs_011():
         Material.create(from_pymatgen(slab)) for slab in analyzer.all_planes_as_pymatgen_slabs_with_vacuum
     ]
 
+    assert len(slabs_with_vacuum) == len(SLAB_WITH_VACUUM_NAMES)
+    assert len(slabs_without_vacuum) == len(SLAB_WITHOUT_VACUUM_NAMES)
     assert all(slab.name in SLAB_WITH_VACUUM_NAMES for slab in slabs_with_vacuum)
     assert all(slab.name in SLAB_WITHOUT_VACUUM_NAMES for slab in slabs_without_vacuum)
 
