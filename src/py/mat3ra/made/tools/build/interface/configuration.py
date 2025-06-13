@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material.reusable.supercell_matrix_3d import SupercellMatrix3DSchema
@@ -11,7 +11,7 @@ from ..slab.configuration import SlabConfiguration
 
 class InterfaceConfiguration(BaseConfigurationPydantic):
     # components and their modifiers added in the order they are stacked, from bottom to top
-    stack_components: list[SlabConfiguration, VacuumConfiguration]
+    stack_components: list[Union[SlabConfiguration, VacuumConfiguration]]
     supercell_matrices: list[SupercellMatrix3DSchema]
     strain_matrices: list[Matrix3x3Schema]
     gap: Optional[float] = None  # If provided, the film is shifted to have it as smallest distance to the substrate.
