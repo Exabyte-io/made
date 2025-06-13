@@ -42,6 +42,7 @@ from ...modify import (
     translate_by_vector,
     add_vacuum_sides,
     add_vacuum,
+    wrap_to_unit_cell,
 )
 from ...operations.core.unary import mirror, strain
 
@@ -95,7 +96,8 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
         if configuration.vacuum_configuration:
             vacuum_material = VacuumBuilder().get_material(configuration.vacuum_configuration)
             stack_components.append(vacuum_material)
-        # How slabs are oriented if stacked in x direction? Where miller indices face?
+
+        # TODO: How slabs are oriented if stacked in x direction? Where do miller indices face?
         interface = stack(stack_components, direction=configuration.direction)
 
         # After stacking, we can select film atoms and translate them in z direction to create a specified gap
@@ -104,7 +106,9 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
         # Later, XY-translation can be applied to film
         ...
 
-        return [interface]
+        # We wrap after possible z, x, y translations
+        wrapped_interface = wrap_to_unit_cell(interface)
+        return [wrapped_interface]
 
 
 ########################################################################################
