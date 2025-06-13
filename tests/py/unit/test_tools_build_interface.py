@@ -5,6 +5,8 @@ from mat3ra.made.tools.build.interface import (  # InterfaceConfiguration,; crea
     ZSLStrainMatchingInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilderParameters,
     ZSLStrainMatchingParameters,
+    SimpleInterfaceBuilder,
+    InterfaceConfiguration,
 )
 from mat3ra.made.tools.build.interface.builders import (
     CommensurateLatticeTwistedInterfaceBuilder,
@@ -13,9 +15,12 @@ from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceConfiguration,
     TwistedInterfaceConfiguration,
 )
+from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures.monolayer import GRAPHENE
+from .fixtures.slab import SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL
 
 # from unit.fixtures.generated.fixtures import (
 #     FILM_CONFIGURATION,
@@ -89,3 +94,30 @@ def test_create_commensurate_supercell_twisted_interface():
     assertion_utils.assert_deep_almost_equal(expected_cell_vectors, interface.basis.cell.vector_arrays)
     expected_angle = 13.174
     assert interface.metadata["build"]["configuration"]["actual_twist_angle"] == expected_angle
+
+
+def test_simple_interface_builder():
+    builder = SimpleInterfaceBuilder()
+    film_configuration = SlabConfiguration(SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL)
+    substrate_configuration = SlabConfiguration(SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL)
+    vacuum_configuration = film_configuration.vacuum_configuration
+
+    film_supercell_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    substrate_supercell_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+
+    film_strain_matrix = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+    substrate_strain_matrix = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+
+    config = InterfaceConfiguration(
+        stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
+        supercell_matrices=[
+            substrate_supercell_matrix,
+            film_supercell_matrix,
+        ],
+        strain_matrices=[
+            substrate_strain_matrix,
+            film_strain_matrix,
+        ],
+    )
+    interface = builder.get_material(config)
+    assert len(interface.basis.atomic_numbers) == 24
