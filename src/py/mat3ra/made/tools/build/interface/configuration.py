@@ -1,50 +1,58 @@
 from typing import Optional
 
-from mat3ra.code.entity import InMemoryEntity
-from pydantic import BaseModel
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
+from mat3ra.esse.models.material.reusable.supercell_matrix_3d import SupercellMatrix3DSchema
 
 from mat3ra.made.material import Material
-from .termination_pair import TerminationPair
-from .. import BaseConfiguration
-from ..slab.entities import Termination
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from .. import BaseConfiguration, BaseConfigurationPydantic
 from ..slab.configuration import SlabConfiguration
 
 
-class InterfaceConfiguration(BaseModel, InMemoryEntity):
-    """
-    Configuration for an interface between two slabs.
+class InterfaceConfiguration(BaseConfigurationPydantic):
+    # components and their modifiers added in the order they are stacked, from bottom to top
+    stack_components: list[SlabConfiguration, VacuumConfiguration]
+    supercell_matrices: list[SupercellMatrix3DSchema]
+    strain_matrices: list[Matrix3x3Schema]
+    gap: Optional[float] = None  # If provided, the film is shifted to have it as smallest distance to the substrate.
+    xy_shift: Optional[list[float]] = None  # If provided, the film is shifted in xy plane by the values, in Angstroms.
 
-    Args:
-        film_configuration (SlabConfiguration): The configuration of the film slab.
-        substrate_configuration (SlabConfiguration): The configuration of the substrate slab.
-        film_termination (Termination): The termination of the film.
-        substrate_termination (Termination): The termination of the substrate.
-        distance_z (float): The distance between the film and the substrate in Angstroms.
-        vacuum (float): The vacuum thickness, in Angstroms.
-    """
 
-    film_configuration: SlabConfiguration
-    substrate_configuration: SlabConfiguration
-    film_termination: Termination
-    substrate_termination: Termination
-    distance_z: float = 3.0
-    vacuum: float = 5.0
-
-    @property
-    def termination_pair(self):
-        return TerminationPair(self.film_termination, self.substrate_termination)
-
-    @property
-    def _json(self):
-        return {
-            "type": "InterfaceConfiguration",
-            "film_configuration": self.film_configuration.to_json(),
-            "substrate_configuration": self.substrate_configuration.to_json(),
-            "film_termination": str(self.film_termination),
-            "substrate_termination": str(self.substrate_termination),
-            "distance_z": self.distance_z,
-            "vacuum": self.vacuum,
-        }
+# class InterfaceConfiguration(BaseModel, InMemoryEntity):
+#     """
+#     Configuration for an interface between two slabs.
+#
+#     Args:
+#         film_configuration (SlabConfiguration): The configuration of the film slab.
+#         substrate_configuration (SlabConfiguration): The configuration of the substrate slab.
+#         film_termination (Termination): The termination of the film.
+#         substrate_termination (Termination): The termination of the substrate.
+#         distance_z (float): The distance between the film and the substrate in Angstroms.
+#         vacuum (float): The vacuum thickness, in Angstroms.
+#     """
+#
+#     film_configuration: SlabConfiguration
+#     substrate_configuration: SlabConfiguration
+#     film_termination: Termination
+#     substrate_termination: Termination
+#     distance_z: float = 3.0
+#     vacuum: float = 5.0
+#
+#     @property
+#     def termination_pair(self):
+#         return TerminationPair(self.film_termination, self.substrate_termination)
+#
+#     @property
+#     def _json(self):
+#         return {
+#             "type": "InterfaceConfiguration",
+#             "film_configuration": self.film_configuration.to_json(),
+#             "substrate_configuration": self.substrate_configuration.to_json(),
+#             "film_termination": str(self.film_termination),
+#             "substrate_termination": str(self.substrate_termination),
+#             "distance_z": self.distance_z,
+#             "vacuum": self.vacuum,
+#         }
 
 
 class TwistedInterfaceConfiguration(BaseConfiguration):
