@@ -2,6 +2,9 @@ from typing import Any, List, Optional
 
 import numpy as np
 from ase.build.tools import niggli_reduce
+from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
+
+from mat3ra.made.tools.operations.core.binary import stack
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
@@ -25,6 +28,7 @@ from ..mixins import (
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
+from ..slab.builders import SlabBuilder
 from ..slab.configuration import SlabConfiguration
 from ..slab.helpers import create_slab
 from ..supercell import create_supercell
@@ -39,6 +43,7 @@ from ...modify import (
     add_vacuum_sides,
     add_vacuum,
 )
+from ...operations.core.unary import mirror, strain
 
 
 class InterfaceBuilderParameters(BaseModel):
@@ -74,58 +79,32 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
 
     _BuildParametersType = SimpleInterfaceBuilderParameters
     _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
-    _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
+    _GeneratedItemType: type(Material) = Material
 
-    def __preprocess_slab_configuration(self, configuration: SlabConfiguration, create_slabs=False) -> ASEAtoms:
-        slab = create_slab(configuration) if create_slabs else configuration.bulk
-        ase_slab = to_ase(slab)
+    def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[Material]:
+        substrate_slab = SlabBuilder().get_material(configuration.substrate_configuration)
+        film_slab = SlabBuilder().get_material(configuration.film_configuration)
+        film_slab_strained = strain(film_slab, configuration.film_strain_matrix)
+        substrate_slab_strained = strain(substrate_slab, configuration.substrate_strain_matrix)
 
-        niggli_reduce(ase_slab)
-        return ase_slab
+        film_slab_strained_inverted = mirror(film_slab_strained, direction=configuration.direction)
+        # Film and substrate should get labels (or additional metadata field for labeling) to distinguish them
+        ...
 
-    @staticmethod
-    def __combine_two_slabs_ase(substrate_slab_ase: ASEAtoms, film_slab_ase: ASEAtoms, distance_z: float) -> ASEAtoms:
-        total_z_height = substrate_slab_ase.cell[2][2] + film_slab_ase.cell[2][2] + distance_z
-        substrate_slab_ase.cell[2][2] = total_z_height
-        film_slab_ase.cell[2][2] = total_z_height
-        max_z_substrate = max(substrate_slab_ase.positions[:, 2])
-        min_z_film = min(film_slab_ase.positions[:, 2])
-        shift_z = max_z_substrate - min_z_film + distance_z
+        stack_components = [substrate_slab_strained, film_slab_strained_inverted]
+        if configuration.vacuum_configuration:
+            vacuum_material = VacuumBuilder().get_material(configuration.vacuum_configuration)
+            stack_components.append(vacuum_material)
+        # How slabs are oriented if stacked in x direction? Where miller indices face?
+        interface = stack(stack_components, direction=configuration.direction)
 
-        film_slab_ase.translate([0, 0, shift_z])
+        # After stacking, we can select film atoms and translate them in z direction to create a specified gap
+        ...
 
-        return substrate_slab_ase + film_slab_ase
+        # Later, XY-translation can be applied to film
+        ...
 
-    @staticmethod
-    def __add_vacuum_along_c_ase(interface_ase: ASEAtoms, vacuum: float) -> ASEAtoms:
-        cell_c_with_vacuum = max(interface_ase.positions[:, 2]) + vacuum
-        interface_ase.cell[2, 2] = cell_c_with_vacuum
-        return interface_ase
-
-    def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
-        film_slab_ase = self.__preprocess_slab_configuration(
-            configuration.film_configuration,
-            create_slabs=self.build_parameters.create_slabs,
-        )
-        substrate_slab_ase = self.__preprocess_slab_configuration(
-            configuration.substrate_configuration,
-            create_slabs=self.build_parameters.create_slabs,
-        )
-
-        if self.build_parameters.scale_film:
-            temp_cell = [substrate_slab_ase.cell[0], substrate_slab_ase.cell[1], film_slab_ase.cell[2]]
-            # We scale the film in XY direction only, and use two scaling steps and a temporary cell
-            film_slab_ase.set_cell(temp_cell, scale_atoms=True)
-            film_slab_ase.set_cell(substrate_slab_ase.cell, scale_atoms=False)
-            film_slab_ase.wrap()
-
-        interface_ase = self.__combine_two_slabs_ase(substrate_slab_ase, film_slab_ase, configuration.distance_z)
-        interface_ase_with_vacuum = self.__add_vacuum_along_c_ase(interface_ase, configuration.vacuum)
-
-        return [interface_ase_with_vacuum]
-
-    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
-        return [Material.create(from_ase(slab)) for slab in items]
+        return [interface]
 
 
 ########################################################################################
