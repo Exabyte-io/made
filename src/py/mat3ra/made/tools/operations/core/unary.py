@@ -44,10 +44,8 @@ def strain(material: Material, strain_matrix: Matrix3x3Schema) -> Material:
     # It should be a small perturbation to the identity matrix.
     if not isinstance(strain_matrix, Matrix3x3Schema):
         raise ValueError("strain_matrix must be an instance of Matrix3x3Schema")
-    if strain_matrix.is_identity():
-        return material
 
-    strain_matrix_np = np.array(strain_matrix)
+    strain_matrix_np = np.array([row.root for row in strain_matrix.root])
     lattice_vectors_np = np.array(material.lattice.vector_arrays)
     new_lattice_vectors_np = lattice_vectors_np @ strain_matrix_np
     new_lattice_vectors = new_lattice_vectors_np.tolist()

@@ -56,10 +56,12 @@ class InterfaceBuilder(BaseBuilder):
     _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        film_formula = get_chemical_formula(configuration.film_configuration.bulk)
-        substrate_formula = get_chemical_formula(configuration.substrate_configuration.bulk)
-        film_miller_indices = "".join([str(i) for i in configuration.film_configuration.miller_indices])
-        substrate_miller_indices = "".join([str(i) for i in configuration.substrate_configuration.miller_indices])
+        film_formula = get_chemical_formula(configuration.film_configuration.atomic_layers.crystal)
+        substrate_formula = get_chemical_formula(configuration.substrate_configuration.atomic_layers.crystal)
+        film_miller_indices = "".join([str(i) for i in configuration.film_configuration.atomic_layers.miller_indices])
+        substrate_miller_indices = "".join(
+            [str(i) for i in configuration.substrate_configuration.atomic_layers.miller_indices]
+        )
         new_name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
         material.name = new_name
         return material
@@ -115,8 +117,8 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
         ...
 
         stack_components = [substrate_slab_strained, film_slab_strained_inverted]
-        if configuration.vacuum_configuration:
-            vacuum_material = VacuumBuilder().get_material(configuration.vacuum_configuration)
+        if configuration.stack_components[2]:
+            vacuum_material = VacuumBuilder().get_material(configuration.stack_components[2])
             stack_components.append(vacuum_material)
 
         # TODO: How slabs are oriented if stacked in x direction? Where do miller indices face?
