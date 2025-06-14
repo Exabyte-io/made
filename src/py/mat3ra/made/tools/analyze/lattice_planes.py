@@ -47,6 +47,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
 
     @property
     def pymatgen_slab_generator_with_vacuum(self) -> PymatgenSlabGenerator:
+        # This generator is used to create slabs with vacuum and thick enough to allow for all terminations to be found.
         return self.get_pymatgen_slab_generator(
             min_slab_size=self.DEFAULT_THICKNESS_FOR_TERMINATIONS,
             min_vacuum_size=self.DEFAULT_VACUUM_SIZE_FOR_TERMINATIONS,
@@ -54,6 +55,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
 
     @property
     def pymatgen_slab_generator_without_vacuum(self) -> PymatgenSlabGenerator:
+        # This generator is used to create slabs without vacuum and with a single layer thickness.
         return self.get_pymatgen_slab_generator(
             min_slab_size=self.DEFAULT_THICKNESS_FOR_GENERATION, min_vacuum_size=self.DEFAULT_VACUUM_SIZE_FOR_GENERATION
         )
