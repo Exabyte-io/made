@@ -18,9 +18,10 @@ from mat3ra.made.tools.build.interface.builders import (
 from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.utils import assertion as assertion_utils
+from mat3ra.made.tools.build.stack.configuration import StackConfiguration
 
 from .fixtures.monolayer import GRAPHENE
-from .fixtures.slab import SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL
+from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
 # from unit.fixtures.generated.fixtures import (
 #     FILM_CONFIGURATION,
@@ -98,8 +99,9 @@ def test_create_commensurate_supercell_twisted_interface():
 
 def test_simple_interface_builder():
     builder = SimpleInterfaceBuilder()
-    film_configuration = SlabConfiguration(SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL)
-    substrate_configuration = SlabConfiguration(SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL)
+    slab_config = SI_CONVENTIONAL_SLAB_001["metadata"]["build"]["configuration"]
+    film_configuration = SlabConfiguration.from_dict(slab_config)
+    substrate_configuration = SlabConfiguration.from_dict(slab_config)
     vacuum_configuration = film_configuration.vacuum_configuration
 
     film_supercell_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
