@@ -15,8 +15,7 @@ SI_SLAB_001_CONFIGURATION_FROM_PRIMITIVE = {
     "use_conventional_cell": False,
 }
 
-SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL: Dict[str, Any] = {
-    "type": "SlabConfiguration",
+CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL: Dict[str, Any] = {
     "bulk": SI_CONVENTIONAL_CELL,
     "miller_indices": (0, 0, 1),
     "number_of_layers": 2,
@@ -60,7 +59,7 @@ SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
-            "configuration": SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL,
+            "configuration": CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL,
             "build_parameters": SI_SLAB_001_BUILD_PARAMETERS,
         },
     },
