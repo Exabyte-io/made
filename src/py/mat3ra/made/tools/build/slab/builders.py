@@ -68,12 +68,11 @@ class SlabBuilderParameters(BaseBuilderParameters):
 
 class SlabBuilder(StackBuilder2Components):
     _BuildParametersType = SlabBuilderParameters
-    DefaultBuilderParameters: SlabBuilderParameters = SlabBuilderParameters()
+    _DefaultBuildParameters: SlabBuilderParameters = SlabBuilderParameters()
 
     def _generate(self, configuration: SlabConfiguration) -> List[Material]:
         stack_as_material_list = super()._generate(configuration)
         stack_as_material = stack_as_material_list[0]
-
         supercell_slab = supercell(stack_as_material, self.build_parameters.xy_supercell_matrix)
         if self.build_parameters.use_orthogonal_c:
             supercell_slab = get_orthogonal_c_slab(supercell_slab)
