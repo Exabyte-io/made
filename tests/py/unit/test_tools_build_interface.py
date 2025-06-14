@@ -122,4 +122,4 @@ def test_simple_interface_builder():
         ],
     )
     interface = builder.get_material(config)
-    assert len(interface.basis.atomic_numbers) == 24
+    assert len(interface.basis.elements) == 24
