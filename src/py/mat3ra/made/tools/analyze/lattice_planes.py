@@ -51,10 +51,10 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
     @property
     def all_planes_as_pymatgen_slabs_with_vacuum(self) -> List[PymatgenSlab]:
         return [
-            *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=not self.DEFAULT_SYMMETRIZE),
+            *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=True),
             # Leaving option to create a non-symmetrized slabs too for additional terminations.
             # As of now, looks like symmetrize=True gives all the unique terminations needed.
-            # *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE),
+            # *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=False),
         ]
 
     @property

@@ -21,6 +21,26 @@ from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 
 
+def create_atomic_layers(
+    material: Material,
+    miller_indices: Tuple[int, int, int] = (0, 0, 1),
+    termination: Termination = None,
+    number_of_layers: int = 1,
+) -> Material:
+
+    atomic_layers_config = AtomicLayersUniqueRepeatedConfiguration(
+        crystal=material,
+        miller_indices=miller_indices,
+        termination_top=termination,
+        number_of_repetitions=number_of_layers,
+    )
+
+    atomic_layers_builder = AtomicLayersUniqueRepeatedBuilder()
+    atomic_layers_material = atomic_layers_builder.get_material(atomic_layers_config)
+
+    return atomic_layers_material
+
+
 def create_slab(
     crystal: Material,
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
@@ -53,8 +73,9 @@ def create_slab(
 
     crystal_lattice_planes_material = CrystalLatticePlanesBuilder().get_material(crystal_lattice_planes_configuration)
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-        material=crystal_lattice_planes_material, miller_indices=miller_indices
+        material=crystal, miller_indices=miller_indices
     )
+
     if use_conventional_cell:
         crystal_lattice_planes_material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
 
