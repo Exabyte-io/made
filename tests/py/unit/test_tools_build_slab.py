@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
@@ -10,30 +11,28 @@ from mat3ra.made.tools.build.slab.configuration import (
     VacuumConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations, select_slab_termination
-from unit.fixtures.bulk import SI_PRIMITIVE_CELL_MATERIAL
+from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
     SI_PRIMITIVE_SLAB_001,
-    SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL,
-    SrTiO3_SLAB_011_O2,
-    SrTiO3_SLAB_011_SrTiO,
+    SLAB_SrTiO3_011_TERMINATION_O2,
+    SLAB_SrTiO3_011_TERMINATION_SrTiO,
 )
 
-from .fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
+from .fixtures.generated.fixtures import BULK_SrTiO3
 from .utils import assert_two_entities_deep_almost_equal
-
-MILLER_INDICES = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["miller_indices"]
-USE_CONVENTIONAL_CELL = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["use_conventional_cell"]
-NUMBER_OF_LAYERS = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["number_of_layers"]
-VACUUM = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["vacuum"]
-XY_SUPERCELL_MATRIX = SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL["xy_supercell_matrix"]
 
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA = SI_CONVENTIONAL_SLAB_001.copy()
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA["metadata"].pop("build", None)
 
 
 def get_slab_with_builder(
-    material: Material, miller_indices: Tuple[int, int, int], termination_formula: str
+    material: Material,
+    miller_indices: Tuple[int, int, int],
+    termination_formula: str,
+    number_of_layers: int,
+    vacuum: float,
+    xy_supercell_matrix: list,
 ) -> Material:
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
         material=material, miller_indices=miller_indices
@@ -45,15 +44,15 @@ def get_slab_with_builder(
         crystal=material,
         miller_indices=miller_indices,
         termination_top=termination,
-        number_of_repetitions=NUMBER_OF_LAYERS,
+        number_of_repetitions=number_of_layers,
     )
     atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
         atomic_layers_repeated_configuration
     )
     vacuum_configuration = VacuumConfiguration(
-        size=VACUUM, crystal=atomic_layers_repeated_orthogonal_c, direction=AxisEnum.z
+        size=vacuum, crystal=atomic_layers_repeated_orthogonal_c, direction=AxisEnum.z
     )
-    build_params = SlabBuilderParameters(use_orthogonal_c=True, xy_supercell_matrix=XY_SUPERCELL_MATRIX)
+    build_params = SlabBuilderParameters(use_orthogonal_c=True, xy_supercell_matrix=xy_supercell_matrix)
     slab_configuration = SlabConfiguration(
         stack_components=[atomic_layers_repeated_configuration, vacuum_configuration],
         direction=AxisEnum.z,
@@ -64,54 +63,160 @@ def get_slab_with_builder(
     return slab
 
 
-def test_build_slab_primitive():
-    slab = get_slab_with_builder(SI_PRIMITIVE_CELL_MATERIAL, MILLER_INDICES, "Si")
+@pytest.mark.parametrize(
+    "material_config, miller_indices, termination_formula, number_of_layers,"
+    + " vacuum, xy_supercell_matrix, expected_slab_config",
+    [
+        (BULK_Si_PRIMITIVE, (0, 0, 1), "Si", 2, 5.0, [[1, 0], [0, 1]], SI_PRIMITIVE_SLAB_001),
+    ],
+)
+def test_build_slab_primitive(
+    material_config,
+    miller_indices,
+    termination_formula,
+    number_of_layers,
+    vacuum,
+    xy_supercell_matrix,
+    expected_slab_config,
+):
+    material = Material.create(material_config)
+    slab = get_slab_with_builder(
+        material, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix
+    )
     slab.metadata.pop("build")  # Remove build metadata for comparison
-    SI_PRIMITIVE_SLAB_001["metadata"].pop("build")  # Remove build metadata for comparison
-    assert_two_entities_deep_almost_equal(slab, SI_PRIMITIVE_SLAB_001)
+    expected_slab_config.get("metadata", {}).pop("build", None)  # Remove build metadata for comparison
+    assert_two_entities_deep_almost_equal(slab, expected_slab_config)
 
 
-def test_build_slab_conventional():
+@pytest.mark.parametrize(
+    "material_config, miller_indices, termination_formula, number_of_layers,"
+    + " vacuum, xy_supercell_matrix, expected_slab_config",
+    [
+        (
+            BULK_Si_PRIMITIVE,
+            (0, 0, 1),
+            "Si",
+            2,
+            5.0,
+            [[1, 0], [0, 1]],
+            SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA,
+        ),
+    ],
+)
+def test_build_slab_conventional(
+    material_config,
+    miller_indices,
+    termination_formula,
+    number_of_layers,
+    vacuum,
+    xy_supercell_matrix,
+    expected_slab_config,
+):
+    material = Material.create(material_config)
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-        material=SI_PRIMITIVE_CELL_MATERIAL, miller_indices=MILLER_INDICES
+        material=material, miller_indices=miller_indices
     )
     conventional_material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
-    slab = get_slab_with_builder(conventional_material, MILLER_INDICES, "Si")
+    slab = get_slab_with_builder(
+        conventional_material,
+        miller_indices,
+        termination_formula,
+        number_of_layers,
+        vacuum,
+        xy_supercell_matrix,
+    )
     slab.metadata.pop("build")
-    assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA)
+    assert_two_entities_deep_almost_equal(slab, expected_slab_config)
 
 
-def test_build_slab_conventional_with_multiple_terminations():
-    SrTiO_MILLER_INDICES = (0, 1, 1)
+@pytest.mark.parametrize(
+    "material_config, miller_indices, termination_formula, number_of_layers,"
+    + " vacuum, xy_supercell_matrix, expected_slab_config",
+    [
+        (
+            BULK_SrTiO3,
+            (0, 1, 1),
+            "SrTiO",
+            2,
+            5.0,
+            [[1, 0], [0, 1]],
+            SLAB_SrTiO3_011_TERMINATION_SrTiO,
+        ),
+        (
+            BULK_SrTiO3,
+            (0, 1, 1),
+            "O2",
+            2,
+            5.0,
+            [[1, 0], [0, 1]],
+            SLAB_SrTiO3_011_TERMINATION_O2,
+        ),
+    ],
+)
+def test_build_slab_conventional_with_multiple_terminations(
+    material_config,
+    miller_indices,
+    termination_formula,
+    number_of_layers,
+    vacuum,
+    xy_supercell_matrix,
+    expected_slab_config,
+):
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-        material=SrTiO3_BULK_MATERIAL, miller_indices=SrTiO_MILLER_INDICES
+        material=material_config, miller_indices=miller_indices
     )
     conventional_material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
-    terminations = get_slab_terminations(material=conventional_material, miller_indices=SrTiO_MILLER_INDICES)
-    termination_1 = select_slab_termination(terminations, "SrTiO")
-    slab_1 = get_slab_with_builder(conventional_material, SrTiO_MILLER_INDICES, termination_1.formula)
-    termination_2 = select_slab_termination(terminations, "O2")
-    slab_2 = get_slab_with_builder(conventional_material, SrTiO_MILLER_INDICES, termination_2.formula)
+    slab = get_slab_with_builder(
+        conventional_material,
+        miller_indices,
+        termination_formula,
+        number_of_layers,
+        vacuum,
+        xy_supercell_matrix,
+    )
 
-    slab_1.metadata.pop("build")  # Remove build metadata for comparison
-    slab_2.metadata.pop("build")  # Remove build metadata for comparison
-    assert slab_1.name != slab_2.name
-    assert_two_entities_deep_almost_equal(slab_1, SrTiO3_SLAB_011_SrTiO)
-    assert_two_entities_deep_almost_equal(slab_2, SrTiO3_SLAB_011_O2)
+    slab.metadata.pop("build")  # Remove build metadata for comparison
+    expected_slab_config.get("metadata", {}).pop("build", None)
+    assert_two_entities_deep_almost_equal(slab, expected_slab_config)
 
 
-def test_create_slab():
-    crystal = SI_PRIMITIVE_CELL_MATERIAL
-    terminations = get_slab_terminations(material=crystal, miller_indices=MILLER_INDICES)
-    termination = select_slab_termination(terminations, "Si")
+@pytest.mark.parametrize(
+    "material_config, miller_indices, termination_formula, number_of_layers,"
+    + " vacuum, xy_supercell, use_conventional_cell, expected_slab",
+    [
+        (
+            BULK_Si_CONVENTIONAL,
+            (0, 0, 1),
+            "Si",
+            2,
+            5,
+            [[1, 0], [0, 1]],
+            True,
+            SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA,
+        ),
+    ],
+)
+def test_create_slab(
+    material_config,
+    miller_indices,
+    termination_formula,
+    number_of_layers,
+    vacuum,
+    xy_supercell,
+    use_conventional_cell,
+    expected_slab,
+):
+    crystal = Material.create(material_config)
+    terminations = get_slab_terminations(material=crystal, miller_indices=miller_indices)
+    termination = select_slab_termination(terminations, termination_formula)
     slab = create_slab(
         crystal=crystal,
-        miller_indices=MILLER_INDICES,
-        use_conventional_cell=USE_CONVENTIONAL_CELL,
+        miller_indices=miller_indices,
+        use_conventional_cell=True,
         termination=termination,
-        number_of_layers=NUMBER_OF_LAYERS,
-        vacuum=VACUUM,
-        xy_supercell_matrix=XY_SUPERCELL_MATRIX,
+        number_of_layers=2,
+        vacuum=5.0,
+        xy_supercell_matrix=[[1, 0], [0, 1]],
     )
     slab.metadata.pop("build")  # Remove build metadata for comparison
     assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA)
