@@ -2,46 +2,9 @@ from typing import List, Callable, Optional, Union
 
 import numpy as np
 from pydantic import BaseModel
+
 from mat3ra.made.material import Material
-
-
 from mat3ra.made.utils import get_center_of_coordinates
-
-from ...third_party import (
-    PymatgenStructure,
-    PymatgenPeriodicSite,
-    PymatgenVacancy,
-    PymatgenSubstitution,
-    PymatgenInterstitial,
-    PymatgenVoronoiInterstitialGenerator,
-)
-
-from ...modify import (
-    add_vacuum,
-    filter_by_ids,
-    filter_by_box,
-    filter_by_condition_on_coordinates,
-    translate_to_z_level,
-    rotate,
-)
-from ...build import BaseBuilder
-from ...convert import to_pymatgen
-from ...analyze.other import (
-    get_atomic_coordinates_extremum,
-    get_closest_site_id_from_coordinate,
-    get_closest_site_id_from_coordinate_and_element,
-    get_local_extremum_atom_index,
-)
-from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
-from ...utils import (
-    transform_coordinate_to_supercell,
-    coordinate as CoordinateCondition,
-    get_distance_between_coordinates,
-)
-from ..utils import merge_materials
-from ..slab import SlabConfiguration, create_slab, Termination
-from ..supercell import create_supercell
-from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from .configuration import (
     PointDefectConfiguration,
     AdatomSlabPointDefectConfiguration,
@@ -50,6 +13,40 @@ from .configuration import (
     PointDefectPairConfiguration,
 )
 from .factories import DefectBuilderFactory
+from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
+from ..slab.configuration import SlabConfiguration
+from ..slab.helpers import create_slab
+from ..supercell import create_supercell
+from ..utils import merge_materials
+from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
+from ...analyze.other import (
+    get_atomic_coordinates_extremum,
+    get_closest_site_id_from_coordinate,
+    get_closest_site_id_from_coordinate_and_element,
+)
+from ...build import BaseBuilder
+from ...convert import to_pymatgen
+from ...modify import (
+    add_vacuum,
+    filter_by_ids,
+    filter_by_box,
+    filter_by_condition_on_coordinates,
+    translate_to_z_level,
+    rotate,
+)
+from ...third_party import (
+    PymatgenStructure,
+    PymatgenPeriodicSite,
+    PymatgenVacancy,
+    PymatgenSubstitution,
+    PymatgenInterstitial,
+    PymatgenVoronoiInterstitialGenerator,
+)
+from ...utils import (
+    transform_coordinate_to_supercell,
+    coordinate as CoordinateCondition,
+    get_distance_between_coordinates,
+)
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -191,18 +188,22 @@ class SlabDefectBuilder(DefectBuilder):
             A new Material instance with the added layers.
         """
 
-        new_material = material.clone()
-        termination = Termination.from_string(new_material.metadata.get("build").get("termination"))
-        build_config = new_material.metadata.get("build").get("configuration")
-
-        if build_config["type"] != "SlabConfiguration":
+        slab_build_configuration_dict = material.metadata.get("build").get("configuration")
+        if slab_build_configuration_dict["type"] != "SlabConfiguration":
             raise ValueError("Material is not a slab.")
-        build_config.pop("type")
-        build_config["number_of_layers"] = build_config["number_of_layers"] + added_thickness
+        slab_build_configuration = SlabConfiguration(**slab_build_configuration_dict)
 
-        new_slab_config = SlabConfiguration(**build_config)
-        material_with_additional_layers = create_slab(new_slab_config, termination)
+        new_parameters = slab_build_configuration.parameters
+        new_parameters.update(
+            number_of_layers=new_parameters["number_of_layers"] + added_thickness,
+            vacuum=self.build_parameters.vacuum_thickness,
+        )
 
+        new_slab_configuration = SlabConfiguration.from_parameters(
+            **new_parameters,
+        )
+
+        material_with_additional_layers = create_slab(new_slab_configuration)
         return material_with_additional_layers
 
     def create_material_with_additional_layers_float(
@@ -292,37 +293,33 @@ class AdatomSlabDefectBuilder(SlabDefectBuilder):
         distance_z: float = 2.0,
     ) -> Material:
         """
-        Create an adatom at the specified position on the surface of the material.
+        Create an adatom on the surface of the material.
 
         Args:
-            material: The material to add the adatom to.
-            chemical_element: The chemical element of the adatom.
-            position_on_surface: The position on the surface of the material.
-            distance_z: The distance of the adatom from the surface.
+            material (Material): The slab material.
+            chemical_element (str): The chemical element of the adatom.
+            position_on_surface (List[float]): The 2D coordinates on the surface.
+            distance_z (float): The distance from the surface.
 
         Returns:
-            The material with the adatom added.
+            The material with the adatom.
         """
         if position_on_surface is None:
             position_on_surface = [0.5, 0.5]
-        new_material = material.clone()
-        new_basis = new_material.basis
+
         adatom_coordinate = self._calculate_coordinate_from_position_and_distance(
             material, position_on_surface, distance_z
         )
-        new_basis.add_atom(chemical_element, adatom_coordinate)
-        new_material.basis = new_basis
-        return new_material
+        material.add_atom(chemical_element, adatom_coordinate)
+        return material
 
     def _calculate_coordinate_from_position_and_distance(
         self, material: Material, position_on_surface: List[float], distance_z: float
     ) -> List[float]:
-        max_z_id = get_local_extremum_atom_index(
-            material, position_on_surface, "max", vicinity=3.0, use_cartesian_coordinates=False
-        )
-        max_z = material.basis.coordinates.get_element_value_by_index(max_z_id)[2]
-        distance_in_crystal_units = distance_z / material.lattice.c
-        return [position_on_surface[0], position_on_surface[1], max_z + distance_in_crystal_units]
+        max_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=True)
+        z_coordinate_cartesian = max_z + distance_z
+        z_crystal = material.basis.cell.convert_point_to_crystal([0, 0, z_coordinate_cartesian])[2]
+        return [position_on_surface[0], position_on_surface[1], z_crystal]
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         updated_material = super()._update_material_name(material, configuration)
@@ -425,6 +422,7 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
         original_material: Material,
         configuration: AdatomSlabPointDefectConfiguration,
     ) -> Material:
+        # TODO: throw an error if the material already has an atom at the position
         material: Material = configuration.crystal
         approximate_adatom_coordinate_cartesian: List[float] = self.calculate_approximate_adatom_coordinate(
             original_material, configuration.position_on_surface, configuration.distance_z

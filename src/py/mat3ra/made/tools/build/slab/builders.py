@@ -1,107 +1,93 @@
-from typing import List, Optional
-
-from mat3ra.esse.models.material.builders.single_material.two_dimensional.slab.selector_parameters import (
-    SlabSelectorParametersSchema,
-)
+from typing import List, Optional, Any, Type
 
 from mat3ra.made.material import Material
-from mat3ra.esse.models.apse.materials.builders.slab.pymatgen.parameters import (
-    PymatgenSlabGeneratorParametersSchema,
+from .configuration import (
+    SlabConfiguration,
+    AtomicLayersUniqueRepeatedConfiguration,
+    CrystalLatticePlanesConfiguration,
 )
-from .configuration import SlabConfiguration
-from .termination import Termination
-from ..supercell import create_supercell
+from .utils import get_orthogonal_c_slab
+from .. import BaseBuilderParameters
+from ..stack.builders import StackBuilder2Components
+from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
-from ...build.mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from ...convert import to_pymatgen
-from ...modify import add_vacuum
-from ...third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
+from ...modify import wrap_to_unit_cell, translate_to_z_level
+from ...operations.core.unary import supercell, translate
 
 
-class SlabSelectorParameters(SlabSelectorParametersSchema):
-    termination: Termination
+class CrystalLatticePlanesBuilder(BaseBuilder):
+    _GeneratedItemType: Material = Material
+    _PostProcessParametersType: Any = None
+    use_enforce_convention: bool = True
 
-
-class PymatgenSlabGeneratorParameters(PymatgenSlabGeneratorParametersSchema):
-    # Parameters described in https://github.com/materialsproject/pymatgen/blob/585bb673c4aa222669c4b0d72ffeec3dbf092630/pymatgen/core/surface.py#L1187
-    pass
-
-
-class SlabBuilderParameters(PymatgenSlabGeneratorParameters):
-    pass
-
-
-class SlabBuilder(ConvertGeneratedItemsPymatgenStructureMixin, BaseBuilder):
-    build_parameters: Optional[SlabBuilderParameters] = None
-    _ConfigurationType: type(SlabConfiguration) = SlabConfiguration  # type: ignore
-    _GeneratedItemType: PymatgenSlab = PymatgenSlab  # type: ignore
-    _SelectorParametersType: type(SlabSelectorParameters) = SlabSelectorParameters  # type: ignore
-    __configuration: SlabConfiguration
-
-    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
-        build_parameters = self.build_parameters or SlabBuilderParameters()
-        generator = PymatgenSlabGenerator(
-            initial_structure=to_pymatgen(configuration.bulk),
-            miller_index=configuration.miller_indices,
-            min_slab_size=configuration.number_of_layers,
-            min_vacuum_size=build_parameters.min_vacuum_size,
-            in_unit_planes=build_parameters.in_unit_planes,
-            reorient_lattice=build_parameters.reorient_lattice,
-            primitive=configuration.make_primitive,
+    def _generate(self, configuration: CrystalLatticePlanesConfiguration) -> List[Material]:
+        crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
+            material=configuration.crystal, miller_indices=configuration.miller_indices
         )
-        raw_slabs = generator.get_slabs(
-            # We need to preserve symmetric slabs for different terminations at the surface
-            symmetrize=build_parameters.symmetrize
+        miller_supercell_matrix = crystal_lattice_planes_analyzer.miller_supercell_matrix
+        miller_supercell_material = supercell(configuration.crystal, miller_supercell_matrix)
+        return [miller_supercell_material]
+
+    def _enforce_convention(self, material: Material) -> Material:
+        if not self.use_enforce_convention:
+            return material
+        return translate_to_z_level(material, "bottom")
+
+    def _post_process(
+        self, items: List[_GeneratedItemType], post_process_parameters: Optional[_PostProcessParametersType]
+    ) -> List[Material]:
+        items = super()._post_process(items, post_process_parameters)
+        return [self._enforce_convention(i) for i in items]
+
+
+class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
+    _ConfigurationType: Type[AtomicLayersUniqueRepeatedConfiguration] = AtomicLayersUniqueRepeatedConfiguration
+
+    def _generate(self, configuration: AtomicLayersUniqueRepeatedConfiguration) -> List[Material]:
+        crystal_lattice_planes_material = super()._generate(configuration)[0]
+
+        crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
+            material=configuration.crystal, miller_indices=configuration.miller_indices
         )
-        self.__configuration = configuration
-
-        return [self.__conditionally_convert_slab_to_orthogonal_pymatgen(slab) for slab in raw_slabs]
-
-    def _select(
-        self, items: List[_GeneratedItemType], selector_parameters: _SelectorParametersType
-    ) -> List[_GeneratedItemType]:
-        termination = selector_parameters.termination
-        return [slab for slab in items if self.__create_termination_from_slab_pymatgen(slab) == termination]
-
-    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
-        materials = super()._post_process(items, post_process_parameters)
-        materials = [create_supercell(material, self.__configuration.xy_supercell_matrix) for material in materials]
-        build_parameters = self.build_parameters or SlabBuilderParameters()
-
-        # Adding total vacuum to be exactly as specified in configuration, including already added vacuum
-        added_vacuum = (
-            build_parameters.min_vacuum_size * self.__configuration.bulk.lattice.c
-            if build_parameters.in_unit_planes
-            else build_parameters.min_vacuum_size
+        translation_vector = crystal_lattice_planes_analyzer.get_translation_vector_for_termination_without_vacuum(
+            configuration.termination_top
         )
-        vacuum_to_add = self.__configuration.vacuum - added_vacuum
+        material_translated = translate(crystal_lattice_planes_material, translation_vector)
+        material_translated_wrapped = wrap_to_unit_cell(material_translated)
+        material_translated_wrapped_layered = supercell(
+            material_translated_wrapped, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
+        )
+        return [material_translated_wrapped_layered]
 
-        materials_with_vacuum = [add_vacuum(material, vacuum_to_add) for material in materials]
-        for idx, material in enumerate(materials_with_vacuum):
-            if "build" not in material.metadata:
-                material.metadata["build"] = {}
-            material.metadata["build"]["termination"] = label_pymatgen_slab_termination(items[idx])
 
-        return materials_with_vacuum
+class SlabBuilderParameters(BaseBuilderParameters):
+    use_orthogonal_c: bool = True
+    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
 
-    def get_terminations(self, configuration: _ConfigurationType) -> List[Termination]:
-        return [
-            self.__create_termination_from_slab_pymatgen(slab)
-            for slab in self._generate_or_get_from_cache(configuration)
-        ]
 
-    def __conditionally_convert_slab_to_orthogonal_pymatgen(self, slab: PymatgenSlab) -> PymatgenSlab:
-        return slab.get_orthogonal_c_slab() if self.__configuration.use_orthogonal_z else slab
+class SlabBuilder(StackBuilder2Components):
+    _BuildParametersType = SlabBuilderParameters
+    DefaultBuilderParameters: SlabBuilderParameters = SlabBuilderParameters()
 
-    def __create_termination_from_slab_pymatgen(self, slab: PymatgenSlab) -> Termination:
-        return Termination.from_string(label_pymatgen_slab_termination(slab))
+    def _generate(self, configuration: SlabConfiguration) -> List[Material]:
+        stack_as_material_list = super()._generate(configuration)
+        stack_as_material = stack_as_material_list[0]
+
+        supercell_slab = supercell(stack_as_material, self.build_parameters.xy_supercell_matrix)
+        if self.build_parameters.use_orthogonal_c:
+            supercell_slab = get_orthogonal_c_slab(supercell_slab)
+
+        return [supercell_slab]
 
     def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
-        formula = get_chemical_formula(configuration.bulk)
-        miller_indices = "".join([str(i) for i in configuration.miller_indices])
-        termination = material.metadata.get("build").get("termination", "")
+        atomic_layers = configuration.atomic_layers
+
+        formula = get_chemical_formula(configuration.atomic_layers.crystal)
+        miller_indices_str = "".join([str(i) for i in atomic_layers.miller_indices])
+        termination = atomic_layers.termination_top
+
         # for example: "Si8(001), termination Si_P4/mmm_1, Slab"
-        new_name = f"{formula}({miller_indices}), termination {termination}, Slab"
+        new_name = f"{formula}({miller_indices_str}), termination {termination}, Slab"
         material.name = new_name
         return material

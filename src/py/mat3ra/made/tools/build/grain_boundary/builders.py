@@ -1,21 +1,21 @@
 from typing import List
 
 import numpy as np
+
 from mat3ra.made.material import Material
-
-from ...third_party import PymatgenInterface
-from ...analyze.other import get_chemical_formula
-from ..slab import SlabConfiguration, get_terminations, create_slab
+from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
-
 from ..interface.builders import (
     ZSLStrainMatchingInterfaceBuilder,
     CommensurateLatticeTwistedInterfaceBuilder,
     CommensurateLatticeTwistedInterfaceBuilderParameters,
 )
+from ..slab.configuration import SlabConfiguration
+from ..slab.helpers import create_slab
 from ..supercell import create_supercell
 from ..utils import stack_two_materials_xy
-from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
+from ...analyze.other import get_chemical_formula
+from ...third_party import PymatgenInterface
 
 
 class SlabGrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters):
@@ -61,7 +61,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
             supercell_matrix = np.zeros((3, 3))
             supercell_matrix[:2, :2] = configuration.slab_configuration.xy_supercell_matrix
             supercell_matrix[2, 2] = configuration.slab_configuration.thickness
-            final_slab_config = SlabConfiguration(
+            final_slab_config = SlabConfiguration.from_parameters(
                 bulk=interface,
                 vacuum=configuration.slab_configuration.vacuum,
                 miller_indices=configuration.slab_configuration.miller_indices,
@@ -69,8 +69,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
                 use_conventional_cell=False,  # Keep false to prevent Pymatgen from simplifying the interface
                 use_orthogonal_z=True,
             )
-            termination = configuration.slab_termination or get_terminations(final_slab_config)[0]
-            final_slab = create_slab(final_slab_config, termination)
+            final_slab = create_slab(final_slab_config)
             final_slabs.append(final_slab)
 
         return super()._finalize(final_slabs, configuration)

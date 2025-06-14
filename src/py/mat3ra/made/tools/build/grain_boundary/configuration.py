@@ -2,7 +2,7 @@ from typing import Optional, List
 
 from .. import BaseConfiguration
 from ..slab.configuration import SlabConfiguration
-from ..slab.termination import Termination
+from ..slab.entities import Termination
 from ..interface.configuration import TwistedInterfaceConfiguration
 
 

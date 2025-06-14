@@ -2,15 +2,15 @@ from typing import Any, List, Optional
 
 import numpy as np
 from ase.build.tools import niggli_reduce
-from mat3ra.made.lattice import Lattice
-from mat3ra.made.material import Material
-from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
 )
 
+from mat3ra.made.lattice import Lattice
+from mat3ra.made.material import Material
+from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from .commensurate_lattice_pair import CommensurateLatticePair
 from .configuration import (
     InterfaceConfiguration,
@@ -25,7 +25,8 @@ from ..mixins import (
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from ..slab import create_slab, Termination, SlabConfiguration
+from ..slab.configuration import SlabConfiguration
+from ..slab.helpers import create_slab
 from ..supercell import create_supercell
 from ..utils import merge_materials
 from ...analyze.other import get_chemical_formula
@@ -75,10 +76,8 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
     _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
 
-    def __preprocess_slab_configuration(
-        self, configuration: SlabConfiguration, termination: Termination, create_slabs=False
-    ) -> ASEAtoms:
-        slab = create_slab(configuration, termination) if create_slabs else configuration.bulk
+    def __preprocess_slab_configuration(self, configuration: SlabConfiguration, create_slabs=False) -> ASEAtoms:
+        slab = create_slab(configuration) if create_slabs else configuration.bulk
         ase_slab = to_ase(slab)
 
         niggli_reduce(ase_slab)
@@ -106,12 +105,10 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
         film_slab_ase = self.__preprocess_slab_configuration(
             configuration.film_configuration,
-            configuration.film_termination,
             create_slabs=self.build_parameters.create_slabs,
         )
         substrate_slab_ase = self.__preprocess_slab_configuration(
             configuration.substrate_configuration,
-            configuration.substrate_termination,
             create_slabs=self.build_parameters.create_slabs,
         )
 

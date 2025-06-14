@@ -178,6 +178,13 @@ pip install ".[tests]"
 pytest tests/py
 ```
 
+To visualize material from a debugger, run the following command in the "Evaluate expression" console:
+
+```python
+from mat3ra.debug_utils import debug_visualize_material; debug_visualize_material(material)
+```
+
+
 #### 5.2.2. Important Notes
 
 Conventions:

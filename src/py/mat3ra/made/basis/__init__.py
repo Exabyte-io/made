@@ -1,12 +1,16 @@
+from copy import deepcopy
 from typing import Any, Dict, List, Optional, Union
 
+import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.code.entity import InMemoryEntityPydantic
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material import BasisSchema, BasisUnitsEnum
 from mat3ra.made.basis.coordinates import Coordinates
 from mat3ra.made.cell import Cell
 from mat3ra.made.utils import get_overlapping_coordinates
 from pydantic import Field
+from scipy.spatial import cKDTree
 
 
 class Basis(BasisSchema, InMemoryEntityPydantic):
@@ -15,6 +19,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     cell: Cell = Field(Cell(), exclude=True)
     labels: ArrayWithIds = Field(ArrayWithIds.from_values([]))
     constraints: ArrayWithIds = Field(ArrayWithIds.from_values([]))
+    DEFAULT_COORDINATE_PROXIMITY_TOLERANCE: float = 0.1  # Angstroms, used for checking overlapping coordinates
 
     def __convert_kwargs__(self, **kwargs: Any) -> Dict[str, Any]:
         if isinstance(kwargs.get("elements"), list):
@@ -32,6 +37,13 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     def __init__(self, *args: Any, **kwargs: Any):
         kwargs = self.__convert_kwargs__(**kwargs)
         super().__init__(*args, **kwargs)
+
+    @property
+    def coordinates_as_kdtree(self):
+        return cKDTree(np.array(self.coordinates.values))
+
+    def get_coordinates_colliding_pairs(self, tolerance=DEFAULT_COORDINATE_PROXIMITY_TOLERANCE):
+        return self.coordinates_as_kdtree.query_pairs(r=tolerance)
 
     @classmethod
     def from_dict(
@@ -80,9 +92,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         force: bool = False,
     ):
         """
-        Add an atom to the basis.
-
-        Before adding the atom at the specified coordinate, checks that no other atom is overlapping within a threshold.
+        Add an atom to the basis at a specified coordinate. Check that no other atom is overlapping with it.
 
         Args:
             element (str): Element symbol of the atom to be added.
@@ -140,3 +150,31 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.elements.filter_by_ids(ids)
         self.coordinates.filter_by_ids(ids)
         return self
+
+    def transform_by_matrix(self, matrix: Matrix3x3Schema) -> None:
+        original_is_in_crystal_units = self.is_in_crystal_units
+        self.to_crystal()
+        matrix_np = np.array(matrix)
+        new_coordinates = np.dot(self.coordinates.values, matrix_np)
+        self.coordinates.values = new_coordinates.tolist()
+        if not original_is_in_crystal_units:
+            self.to_cartesian()
+
+    # TODO: add/update test for this method
+    def resolve_colliding_coordinates(self, tolerance=DEFAULT_COORDINATE_PROXIMITY_TOLERANCE):
+        """
+        Find all atoms that are within distance tolerance and only keep the last one, remove other sites.
+
+        Args:
+            tolerance (float): The distance tolerance in angstroms.
+        """
+        original_is_in_crystal = self.is_in_crystal_units
+        self.to_cartesian()
+        ids_to_remove = set()
+        atom_ids = self.coordinates.ids
+        for index_1, index_2 in self.get_coordinates_colliding_pairs(tolerance):
+            ids_to_remove.add(atom_ids[index_1])  # Keep the last one in the pair
+
+        self.filter_atoms_by_ids(list(ids_to_remove), invert=True)
+        if original_is_in_crystal:
+            self.to_crystal()

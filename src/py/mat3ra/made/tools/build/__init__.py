@@ -1,10 +1,11 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Type, TypeVar
 
 from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
-from mat3ra.esse.models.material.builders.base.selector_parameters import BaseSelectorParametersSchema
 from pydantic import BaseModel
 
 from ...material import Material
+
+BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound="BaseConfigurationPydantic")
 
 
 class BaseConfiguration(BaseModel, InMemoryEntity):
@@ -36,9 +37,12 @@ class BaseConfigurationPydantic(InMemoryEntityPydantic):
     def to_json(self):  # typing: ignore
         return self.to_dict()
 
+    def to_metadata(self) -> dict:
+        return self.model_dump(mode="json", exclude_none=True, exclude_unset=True)
 
-class BaseSelectorParameters(BaseSelectorParametersSchema):
-    pass
+
+class BaseSelectorParameters(BaseModel):
+    default_index: int = 0
 
 
 class BaseBuilderParameters(BaseModel):
@@ -85,7 +89,7 @@ class BaseBuilder(BaseModel):
 
     def __init__(self, build_parameters: _BuildParametersType = None):
         super().__init__(build_parameters=build_parameters)
-        self.build_parameters = build_parameters or self._DefaultBuildParameters
+        self.build_parameters = build_parameters if build_parameters is not None else self._DefaultBuildParameters
         self.__generated_items: List[List[BaseBuilder._GeneratedItemType]] = []
         self.__configurations: List[BaseBuilder._ConfigurationType] = []
 
@@ -153,4 +157,7 @@ class BaseBuilder(BaseModel):
         if "build" not in material.metadata:
             material.metadata["build"] = {}
         material.metadata["build"]["configuration"] = configuration.to_json()
+        material.metadata["build"]["build_parameters"] = (
+            self.build_parameters.model_dump() if self.build_parameters else {}
+        )
         return material
