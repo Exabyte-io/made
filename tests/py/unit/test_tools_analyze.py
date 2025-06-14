@@ -8,9 +8,8 @@ from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 
 # from mat3ra.made.tools.convert import to_pymatgen
 # from mat3ra.made.tools.third_party import PymatgenSpacegroupAnalyzer
-from unit.fixtures.generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL
 
-from .fixtures.bulk import SI_CONVENTIONAL_CELL
+from .fixtures.bulk import SI_CONVENTIONAL_CELL, SI_PRIMITIVE_CELL
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from .utils import assert_two_entities_deep_almost_equal
 
@@ -55,7 +54,7 @@ def test_radial_distribution_function():
 
 
 def test_lattice_material_analyzer():
-    primitive_cell = SI_PRIMITIVE_CELL_MATERIAL
+    primitive_cell = Material.create(SI_PRIMITIVE_CELL)
     lattice_material_analyzer = LatticeMaterialAnalyzer(material=primitive_cell)
 
     conventional_cell = lattice_material_analyzer.material_with_conventional_lattice

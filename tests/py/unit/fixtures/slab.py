@@ -2,12 +2,11 @@ import copy
 from functools import reduce
 from typing import Any, Dict
 
-from .bulk import SI_CONVENTIONAL_CELL  # , SI_CONVENTIONAL_CELL_FILTERED
-from .generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL
+from .bulk import SI_CONVENTIONAL_CELL, SI_PRIMITIVE_CELL  # , SI_CONVENTIONAL_CELL_FILTERED
 
 SI_SLAB_001_CONFIGURATION_FROM_PRIMITIVE = {
     "type": "SlabConfiguration",
-    "bulk": SI_PRIMITIVE_CELL_MATERIAL.to_dict(),
+    "bulk": SI_PRIMITIVE_CELL,
     "miller_indices": (0, 0, 1),
     "number_of_layers": 2,
     "vacuum": 5.0,
@@ -175,7 +174,7 @@ SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
                 "type": "SlabConfiguration",
                 "stack_components": [
                     {
-                        "crystal": SI_PRIMITIVE_CELL_MATERIAL.to_dict(),
+                        "crystal": SI_PRIMITIVE_CELL,
                         "miller_indices": [0, 0, 1],
                         "number_of_repetitions": 2,
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},

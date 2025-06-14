@@ -1,6 +1,27 @@
 from typing import Any, Dict
 
-from .generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL  # noqa: F401
+
+SI_PRIMITIVE_CELL: Dict[str, Any] = {
+    "name": "Silicon FCC",
+    "basis": {
+        "constraints": [],
+        "coordinates": [{"id": 0, "value": [0.0, 0.0, 0.0]}, {"id": 1, "value": [0.25, 0.25, 0.25]}],
+        "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
+        "labels": [],
+        "units": "crystal",
+    },
+    "lattice": {
+        "a": 3.867,
+        "alpha": 60.0,
+        "b": 3.867,
+        "beta": 60.0,
+        "c": 3.867,
+        "gamma": 60.0,
+        "type": "FCC",
+        "units": {"angle": "degree", "length": "angstrom"},
+    },
+}
+
 
 SI_CONVENTIONAL_CELL: Dict[str, Any] = {
     "name": "Si8",
