@@ -1,14 +1,10 @@
 import pytest
+from mat3ra.utils import assertion as assertion_utils
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from mat3ra.made.tools.build.slab.entities import Termination
-from mat3ra.made.tools.convert import from_pymatgen
-from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.generated.fixtures import HfO2_BULK_MATERIAL, SrTiO3_BULK_MATERIAL
+from unit.fixtures.generated.fixtures import SrTiO3_BULK
 
-SrTiO3_EXPECTED_TERMINATION_FORMULAS = [
-    [(1, 1, 0), ["SrTiO", "O2"]],
-]
 SrTiO3_EXPECTED_TERMINATIONS_WITH_VACUUM = [
     [
         (1, 1, 0),
@@ -26,58 +22,58 @@ SrTiO3_EXPECTED_TERMINATIONS_WITHOUT_VACUUM = [
     ]
 ]
 
-# shifts for 3 slabs
-# Only one possibility
-SrTiO3_SHIFTS_WITHOUT_VACUUM = [0.0, 0.25]
-
 
 @pytest.mark.parametrize(
-    "material, miller_indices, number_of_slabs",
+    "material_config, miller_indices, number_of_slabs",
     [
         (
-            SrTiO3_BULK_MATERIAL,
+            SrTiO3_BULK,
             (1, 1, 0),
             2,
         ),
     ],
 )
-def test_all_planes_as_pymatgen_slabs_with_vacuum(material, miller_indices, number_of_slabs):
+def test_all_planes_as_pymatgen_slabs_with_vacuum(material_config, miller_indices, number_of_slabs):
+    material = Material.create(material_config)
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
     slabs_with_vacuum = analyzer.all_planes_as_pymatgen_slabs_with_vacuum
     assert len(slabs_with_vacuum) == number_of_slabs
 
 
 @pytest.mark.parametrize(
-    "material, miller_indices, number_of_slabs",
+    "material_config, miller_indices, number_of_slabs",
     [
-        (SrTiO3_BULK_MATERIAL, (1, 1, 0), 1),
+        (SrTiO3_BULK, (1, 1, 0), 1),
     ],
 )
-def test_all_planes_as_pymatgen_slabs_without_vacuum(material, miller_indices, number_of_slabs):
+def test_all_planes_as_pymatgen_slabs_without_vacuum(material_config, miller_indices, number_of_slabs):
+    material = Material.create(material_config)
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
     slabs_without_vacuum = analyzer.all_planes_as_pymatgen_slabs_without_vacuum
     assert len(slabs_without_vacuum) == number_of_slabs
 
 
 @pytest.mark.parametrize(
-    "material, miller_indices, expected_shifts_with_vacuum",
+    "material_config, miller_indices, expected_shifts_with_vacuum",
     [
-        (SrTiO3_BULK_MATERIAL, (1, 1, 0), [0.25, 0.25]),
+        (SrTiO3_BULK, (1, 1, 0), [0.25, 0.25]),
     ],
 )
-def test_termination_holders_shifts_with_vacuum(material, miller_indices, expected_shifts_with_vacuum):
+def test_termination_holders_shifts_with_vacuum(material_config, miller_indices, expected_shifts_with_vacuum):
+    material = Material.create(material_config)
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
     shifts_with_vacuum = [h.shift_with_vacuum for h in analyzer.termination_holders]
     assertion_utils.assert_deep_almost_equal(shifts_with_vacuum, expected_shifts_with_vacuum)
 
 
 @pytest.mark.parametrize(
-    "material, miller_indices, expected_shifts_without_vacuum",
+    "material_config, miller_indices, expected_shifts_without_vacuum",
     [
-        (SrTiO3_BULK_MATERIAL, (1, 1, 0), [0.0, 0.25]),
+        (SrTiO3_BULK, (1, 1, 0), [0.0, 0.25]),
     ],
 )
-def test_termination_holders_shifts_without_vacuum(material, miller_indices, expected_shifts_without_vacuum):
+def test_termination_holders_shifts_without_vacuum(material_config, miller_indices, expected_shifts_without_vacuum):
+    material = Material.create(material_config)
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
     shifts_without_vacuum = [
         h.shift_without_vacuum for h in analyzer.termination_holders if h.shift_without_vacuum is not None
@@ -86,16 +82,17 @@ def test_termination_holders_shifts_without_vacuum(material, miller_indices, exp
 
 
 @pytest.mark.parametrize(
-    "material, miller_indices, expected_terminations_with_vacuum_str",
+    "material_config, miller_indices, expected_terminations_with_vacuum_str",
     [
         (
-            SrTiO3_BULK_MATERIAL,
+            SrTiO3_BULK,
             (1, 1, 0),
             SrTiO3_EXPECTED_TERMINATIONS_WITH_VACUUM[0][1],
         )
     ],
 )
-def test_terminations_with_vacuum(material, miller_indices, expected_terminations_with_vacuum_str):
+def test_terminations_with_vacuum(material_config, miller_indices, expected_terminations_with_vacuum_str):
+    material = Material.create(material_config)
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
     terminations_with_vacuum = analyzer.terminations_with_vacuum
     terminations_with_vacuum_str_list = [str(t) for t in terminations_with_vacuum]
@@ -103,16 +100,17 @@ def test_terminations_with_vacuum(material, miller_indices, expected_termination
 
 
 @pytest.mark.parametrize(
-    "material, miller_indices, expected_terminations_without_vacuum_str",
+    "material_config, miller_indices, expected_terminations_without_vacuum_str",
     [
         (
-            SrTiO3_BULK_MATERIAL,
+            SrTiO3_BULK,
             (1, 1, 0),
             SrTiO3_EXPECTED_TERMINATIONS_WITHOUT_VACUUM[0][1],
         ),
     ],
 )
-def test_terminations_without_vacuum(material, miller_indices, expected_terminations_without_vacuum_str):
+def test_terminations_without_vacuum(material_config, miller_indices, expected_terminations_without_vacuum_str):
+    material = Material.create(material_config)
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
     terminations_without_vacuum = analyzer.terminations_without_vacuum
     terminations_without_vacuum_str_list = [str(t) for t in terminations_without_vacuum]
@@ -120,10 +118,11 @@ def test_terminations_without_vacuum(material, miller_indices, expected_terminat
 
 
 @pytest.mark.parametrize(
-    "material, miller_indices, expected_formulas",
-    [(SrTiO3_BULK_MATERIAL, (1, 1, 0), ["SrTiO", "O2"])],
+    "material_config, miller_indices, expected_formulas",
+    [(SrTiO3_BULK, (1, 1, 0), ["SrTiO", "O2"])],
 )
-def test_terminations(material, miller_indices, expected_formulas):
+def test_terminations(material_config, miller_indices, expected_formulas):
+    material = Material.create(material_config)
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
     terminations = analyzer.terminations
     actual_formulas = sorted([t.formula for t in terminations])

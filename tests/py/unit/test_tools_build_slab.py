@@ -20,7 +20,7 @@ from unit.fixtures.slab import (
     SrTiO3_SLAB_011_SrTiO,
 )
 
-from .fixtures.generated.fixtures import SrTiO3_BULK_MATERIAL
+from .fixtures.generated.fixtures import SrTiO3_BULK
 from .utils import assert_two_entities_deep_almost_equal
 
 MILLER_INDICES = CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL["miller_indices"]
@@ -85,7 +85,7 @@ def test_build_slab_conventional():
 def test_build_slab_conventional_with_multiple_terminations():
     SrTiO_MILLER_INDICES = (0, 1, 1)
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-        material=SrTiO3_BULK_MATERIAL, miller_indices=SrTiO_MILLER_INDICES
+        material=SrTiO3_BULK, miller_indices=SrTiO_MILLER_INDICES
     )
     conventional_material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
     terminations = get_slab_terminations(material=conventional_material, miller_indices=SrTiO_MILLER_INDICES)
