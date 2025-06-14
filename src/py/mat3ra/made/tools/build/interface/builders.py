@@ -28,7 +28,7 @@ from ..mixins import (
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from ..slab.builders import SlabBuilder
+from ..slab.builders import SlabBuilder, SlabBuilderParameters
 from ..slab.configuration import SlabConfiguration
 from ..slab.helpers import create_slab
 from ..supercell import create_supercell
@@ -83,10 +83,32 @@ class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilde
     _GeneratedItemType: type(Material) = Material
 
     def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[Material]:
-        substrate_slab = SlabBuilder().get_material(configuration.substrate_configuration)
-        film_slab = SlabBuilder().get_material(configuration.film_configuration)
-        film_slab_strained = strain(film_slab, configuration.film_strain_matrix)
-        substrate_slab_strained = strain(substrate_slab, configuration.substrate_strain_matrix)
+        if configuration.supercell_matrices:
+            substrate_supercell_matrix_2x2 = configuration.supercell_matrices[0].model_dump()
+            film_supercell_matrix_2x2 = configuration.supercell_matrices[1].model_dump()
+        else:
+            substrate_supercell_matrix_2x2 = configuration.substrate_configuration.xy_supercell_matrix.model_dump()
+            film_supercell_matrix_2x2 = configuration.film_configuration.xy_supercell_matrix.model_dump()
+
+        substrate_builder = SlabBuilder(
+            build_parameters=SlabBuilderParameters(xy_supercell_matrix=substrate_supercell_matrix_2x2)
+        )
+        film_builder = SlabBuilder(
+            build_parameters=SlabBuilderParameters(xy_supercell_matrix=film_supercell_matrix_2x2)
+        )
+
+        substrate_slab = substrate_builder.get_material(configuration.stack_components[0])
+        film_slab = film_builder.get_material(configuration.stack_components[1])
+
+        if configuration.strain_matrices:
+            substrate_strain_matrix = configuration.strain_matrices[0]
+            film_strain_matrix = configuration.strain_matrices[1]
+        else:
+            substrate_strain_matrix = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+            film_strain_matrix = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+
+        film_slab_strained = strain(film_slab, film_strain_matrix)
+        substrate_slab_strained = strain(substrate_slab, substrate_strain_matrix)
 
         film_slab_strained_inverted = mirror(film_slab_strained, direction=configuration.direction)
         # Film and substrate should get labels (or additional metadata field for labeling) to distinguish them
