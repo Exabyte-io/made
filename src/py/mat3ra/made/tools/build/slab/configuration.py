@@ -5,11 +5,10 @@ from mat3ra.esse.models.materials_category_components.entities.reusable.two_dime
 )
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.slab.entities import Termination
 from .. import BaseConfigurationPydantic
-
 from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
-from mat3ra.made.tools.build.slab.entities import Termination
 
 
 class CrystalLatticePlanesConfiguration(CrystalLatticePlanesSchema, BaseConfigurationPydantic):

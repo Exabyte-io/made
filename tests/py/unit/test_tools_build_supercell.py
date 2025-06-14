@@ -1,6 +1,6 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.supercell import create_supercell
-from unit.fixtures.supercell import SI_SUPERCELL_2X2X1
+from unit.fixtures.supercell import SI_SUPERCELL_2X2X1, SI_SUPERCELL_FLIPPED_Z
 
 from .utils import assert_two_entities_deep_almost_equal
 
@@ -11,3 +11,11 @@ def test_create_supercell():
     supercell_material = create_supercell(material, supercell_matrix)
 
     assert_two_entities_deep_almost_equal(supercell_material, SI_SUPERCELL_2X2X1)
+
+
+def test_create_supercell_mirror():
+    material = Material.create_default()
+    supercell_matrix = [[0, 1, 0], [1, 0, 0], [0, 0, -1]]
+    z_flipped_material = create_supercell(material, supercell_matrix)
+
+    assert_two_entities_deep_almost_equal(z_flipped_material, SI_SUPERCELL_FLIPPED_Z)

@@ -40,6 +40,10 @@ class BaseConfigurationPydantic(InMemoryEntityPydantic):
     def to_metadata(self) -> dict:
         return self.model_dump(mode="json", exclude_none=True, exclude_unset=True)
 
+    @classmethod
+    def from_dict(cls: Type[BaseConfigurationPydanticChild], data: dict) -> BaseConfigurationPydanticChild:
+        return cls.model_validate(data)
+
 
 class BaseSelectorParameters(BaseModel):
     default_index: int = 0

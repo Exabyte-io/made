@@ -130,7 +130,7 @@ SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
                         "use_conventional_cell": True,
                     },
-                    {"type": "VacuumConfiguration", "direction": "z", "size": 5.0},
+                    {"type": "VacuumConfiguration", "direction": "z", "size": 5.0, "crystal": BULK_Si_CONVENTIONAL},
                 ],
                 "xy_supercell_matrix": [[1, 0], [0, 1]],
             },
