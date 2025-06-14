@@ -2,16 +2,16 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.generated.fixtures import SrTiO3_BULK
+from unit.fixtures.generated.fixtures import BULK_SrTiO3
 
-SrTiO3_EXPECTED_TERMINATIONS_WITH_VACUUM = [
+SLAB_SrTiO3_EXPECTED_TERMINATIONS_WITH_VACUUM = [
     [
         (1, 1, 0),
         ["SrTiO_Pmmm_3", "O2_Pmmm_2"],
     ]
 ]
 
-SrTiO3_EXPECTED_TERMINATIONS_WITHOUT_VACUUM = [
+SLAB_SrTiO3_EXPECTED_TERMINATIONS_WITHOUT_VACUUM = [
     [
         (1, 1, 0),
         [
@@ -26,7 +26,7 @@ SrTiO3_EXPECTED_TERMINATIONS_WITHOUT_VACUUM = [
     "material_config, miller_indices, number_of_slabs",
     [
         (
-            SrTiO3_BULK,
+            BULK_SrTiO3,
             (1, 1, 0),
             2,
         ),
@@ -42,7 +42,7 @@ def test_all_planes_as_pymatgen_slabs_with_vacuum(material_config, miller_indice
 @pytest.mark.parametrize(
     "material_config, miller_indices, number_of_slabs",
     [
-        (SrTiO3_BULK, (1, 1, 0), 1),
+        (BULK_SrTiO3, (1, 1, 0), 1),
     ],
 )
 def test_all_planes_as_pymatgen_slabs_without_vacuum(material_config, miller_indices, number_of_slabs):
@@ -55,7 +55,7 @@ def test_all_planes_as_pymatgen_slabs_without_vacuum(material_config, miller_ind
 @pytest.mark.parametrize(
     "material_config, miller_indices, expected_shifts_with_vacuum",
     [
-        (SrTiO3_BULK, (1, 1, 0), [0.25, 0.25]),
+        (BULK_SrTiO3, (1, 1, 0), [0.25, 0.25]),
     ],
 )
 def test_termination_holders_shifts_with_vacuum(material_config, miller_indices, expected_shifts_with_vacuum):
@@ -68,7 +68,7 @@ def test_termination_holders_shifts_with_vacuum(material_config, miller_indices,
 @pytest.mark.parametrize(
     "material_config, miller_indices, expected_shifts_without_vacuum",
     [
-        (SrTiO3_BULK, (1, 1, 0), [0.0, 0.25]),
+        (BULK_SrTiO3, (1, 1, 0), [0.0, 0.25]),
     ],
 )
 def test_termination_holders_shifts_without_vacuum(material_config, miller_indices, expected_shifts_without_vacuum):
@@ -84,9 +84,9 @@ def test_termination_holders_shifts_without_vacuum(material_config, miller_indic
     "material_config, miller_indices, expected_terminations_with_vacuum_str",
     [
         (
-            SrTiO3_BULK,
+            BULK_SrTiO3,
             (1, 1, 0),
-            SrTiO3_EXPECTED_TERMINATIONS_WITH_VACUUM[0][1],
+            SLAB_SrTiO3_EXPECTED_TERMINATIONS_WITH_VACUUM[0][1],
         )
     ],
 )
@@ -102,9 +102,9 @@ def test_terminations_with_vacuum(material_config, miller_indices, expected_term
     "material_config, miller_indices, expected_terminations_without_vacuum_str",
     [
         (
-            SrTiO3_BULK,
+            BULK_SrTiO3,
             (1, 1, 0),
-            SrTiO3_EXPECTED_TERMINATIONS_WITHOUT_VACUUM[0][1],
+            SLAB_SrTiO3_EXPECTED_TERMINATIONS_WITHOUT_VACUUM[0][1],
         ),
     ],
 )
@@ -118,7 +118,7 @@ def test_terminations_without_vacuum(material_config, miller_indices, expected_t
 
 @pytest.mark.parametrize(
     "material_config, miller_indices, expected_formulas",
-    [(SrTiO3_BULK, (1, 1, 0), ["SrTiO", "O2"])],
+    [(BULK_SrTiO3, (1, 1, 0), ["SrTiO", "O2"])],
 )
 def test_terminations(material_config, miller_indices, expected_formulas):
     material = Material.create(material_config)

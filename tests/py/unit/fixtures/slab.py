@@ -2,11 +2,11 @@ import copy
 from functools import reduce
 from typing import Any, Dict
 
-from .bulk import SI_CONVENTIONAL_CELL, SI_PRIMITIVE_CELL  # , SI_CONVENTIONAL_CELL_FILTERED
+from .bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE  # , SI_CONVENTIONAL_CELL_FILTERED
 
 SI_SLAB_001_CONFIGURATION_FROM_PRIMITIVE = {
     "type": "SlabConfiguration",
-    "bulk": SI_PRIMITIVE_CELL,
+    "bulk": BULK_Si_PRIMITIVE,
     "miller_indices": (0, 0, 1),
     "number_of_layers": 2,
     "vacuum": 5.0,
@@ -15,7 +15,7 @@ SI_SLAB_001_CONFIGURATION_FROM_PRIMITIVE = {
 }
 
 CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL: Dict[str, Any] = {
-    "bulk": SI_CONVENTIONAL_CELL,
+    "bulk": BULK_Si_CONVENTIONAL,
     "miller_indices": (0, 0, 1),
     "number_of_layers": 2,
     "vacuum": 5.0,
@@ -124,7 +124,7 @@ SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
                 "type": "SlabConfiguration",
                 "stack_components": [
                     {
-                        "crystal": SI_CONVENTIONAL_CELL,
+                        "crystal": BULK_Si_CONVENTIONAL,
                         "miller_indices": [0, 0, 1],
                         "number_of_repetitions": 2,
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
@@ -174,7 +174,7 @@ SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
                 "type": "SlabConfiguration",
                 "stack_components": [
                     {
-                        "crystal": SI_PRIMITIVE_CELL,
+                        "crystal": BULK_Si_PRIMITIVE,
                         "miller_indices": [0, 0, 1],
                         "number_of_repetitions": 2,
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
@@ -288,7 +288,7 @@ SI_SLAB_DEFAULT_PARAMETERS = {
                 "type": "SlabConfiguration",
                 "stack_components": [
                     {
-                        "crystal": SI_CONVENTIONAL_CELL,
+                        "crystal": BULK_Si_CONVENTIONAL,
                         "miller_indices": [0, 0, 1],
                         "number_of_repetitions": 1,
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
@@ -534,7 +534,7 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
                 "xy_supercell_matrix": [[1, 0], [0, 1]],
                 "stack_components": [
                     {
-                        "crystal": SI_CONVENTIONAL_CELL,
+                        "crystal": BULK_Si_CONVENTIONAL,
                         "miller_indices": [0, 0, 1],
                         "use_conventional_cell": True,
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
@@ -556,7 +556,7 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
     },
 }
 
-SrTiO3_SLAB_011_O2 = {
+SLAB_SrTiO3_011_TERMINATION_O2 = {
     "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
     "name": "O3SrTi(011), termination O2_Pmmm_2, Slab",
     "basis": {
@@ -600,7 +600,7 @@ SrTiO3_SLAB_011_O2 = {
     },
 }
 
-SrTiO3_SLAB_011_SrTiO = {
+SLAB_SrTiO3_011_TERMINATION_SrTiO = {
     "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
     "name": "O3SrTi(011), termination SrTiO_Pmmm_3, Slab",
     "basis": {

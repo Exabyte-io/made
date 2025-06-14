@@ -12,7 +12,7 @@ from mat3ra.made.tools.build.slab.configuration import (
     VacuumConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations, select_slab_termination
-from unit.fixtures.bulk import SI_CONVENTIONAL_CELL, SI_PRIMITIVE_CELL
+from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
     SI_PRIMITIVE_SLAB_001,
@@ -66,7 +66,7 @@ def get_slab_with_builder(
 @pytest.mark.parametrize(
     "material_config, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix, expected_slab_config",
     [
-        (SI_PRIMITIVE_CELL, (0, 0, 1), "Si", 2, 5.0, [[1, 0], [0, 1]], SI_PRIMITIVE_SLAB_001),
+        (BULK_Si_PRIMITIVE, (0, 0, 1), "Si", 2, 5.0, [[1, 0], [0, 1]], SI_PRIMITIVE_SLAB_001),
     ],
 )
 def test_build_slab_primitive(
@@ -91,7 +91,7 @@ def test_build_slab_primitive(
     "material_config, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix, expected_slab_config",
     [
         (
-            SI_PRIMITIVE_CELL,
+            BULK_Si_PRIMITIVE,
             (0, 0, 1),
             "Si",
             2,
@@ -182,7 +182,7 @@ def test_build_slab_conventional_with_multiple_terminations(
     + " vacuum, xy_supercell, use_conventional_cell, expected_slab",
     [
         (
-            SI_CONVENTIONAL_CELL,
+            BULK_Si_CONVENTIONAL,
             (0, 0, 1),
             "Si",
             2,

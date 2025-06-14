@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-SI_PRIMITIVE_CELL: Dict[str, Any] = {
+BULK_Si_PRIMITIVE: Dict[str, Any] = {
     "name": "Silicon FCC",
     "basis": {
         "constraints": [],
@@ -22,7 +22,7 @@ SI_PRIMITIVE_CELL: Dict[str, Any] = {
 }
 
 
-SI_CONVENTIONAL_CELL: Dict[str, Any] = {
+BULK_Si_CONVENTIONAL: Dict[str, Any] = {
     "name": "Si8",
     "basis": {
         "elements": [
@@ -63,7 +63,7 @@ SI_CONVENTIONAL_CELL: Dict[str, Any] = {
     "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
 }
 
-SI_CONVENTIONAL_CELL_FILTERED: Dict[str, Any] = {
+BULK_Si_CONVENTIONAL_FILTERED: Dict[str, Any] = {
     "name": "Si2",
     "basis": {
         "elements": [

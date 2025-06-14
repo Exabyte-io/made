@@ -6,14 +6,12 @@ from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_surface_area  # get_average_interlayer_distance
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 
-from .fixtures.bulk import SI_CONVENTIONAL_CELL, SI_PRIMITIVE_CELL
+from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from .utils import assert_two_entities_deep_almost_equal
 
-# from mat3ra.made.tools.convert import to_pymatgen
-# from mat3ra.made.tools.third_party import PymatgenSpacegroupAnalyzer
 
-
+# TODO: Uncomment and unskip before merging epic/SOF-7623
 @pytest.mark.skip
 def test_calculate_average_interlayer_distance():
     # distance = get_average_interlayer_distance(INTERFACE_ATOMS, 1, 2)
@@ -54,9 +52,9 @@ def test_radial_distribution_function():
 
 
 def test_lattice_material_analyzer():
-    primitive_cell = Material.create(SI_PRIMITIVE_CELL)
+    primitive_cell = Material.create(BULK_Si_PRIMITIVE)
     lattice_material_analyzer = LatticeMaterialAnalyzer(material=primitive_cell)
 
     conventional_cell = lattice_material_analyzer.material_with_conventional_lattice
 
-    assert_two_entities_deep_almost_equal(conventional_cell, SI_CONVENTIONAL_CELL)
+    assert_two_entities_deep_almost_equal(conventional_cell, BULK_Si_CONVENTIONAL)
