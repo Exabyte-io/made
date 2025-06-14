@@ -19,15 +19,20 @@ def select_slab_with_termination_by_formula(slabs: List[PymatgenSlab], terminati
 
 
 class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
-    DEFAULT_THICKNESS: int = 3
-    DEFAULT_VACUUM_SIZE: int = 1
+    # Values used to generate slabs with terminations, these values are set to allow for all terminations to be found.
+    # Heuristic showed that these values are sufficient for all slabs configurations.
+    DEFAULT_THICKNESS_FOR_TERMINATIONS: int = 3
+    DEFAULT_VACUUM_SIZE_FOR_TERMINATIONS: int = 1
+    # Values used to generate slabs for later use. A single layer thickness and no vacuum.
+    DEFAULT_THICKNESS_FOR_GENERATION: int = 1
+    DEFAULT_VACUUM_SIZE_FOR_GENERATION: int = 0
     DEFAULT_SYMMETRIZE: bool = False
-    miller_indices: Union[List[int], Tuple[int, ...]]
+    miller_indices: Union[List[int], Tuple[int, int, int]]
 
     def get_pymatgen_slab_generator(
         self,
-        min_slab_size: float = DEFAULT_VACUUM_SIZE,
-        min_vacuum_size: float = DEFAULT_VACUUM_SIZE,
+        min_slab_size: float = DEFAULT_VACUUM_SIZE_FOR_GENERATION,
+        min_vacuum_size: float = DEFAULT_VACUUM_SIZE_FOR_GENERATION,
         in_unit_planes: bool = True,
         make_primitive: bool = False,
     ):
@@ -42,19 +47,35 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
 
     @property
     def pymatgen_slab_generator_with_vacuum(self) -> PymatgenSlabGenerator:
-        return self.get_pymatgen_slab_generator()
+        # This generator is used to create slabs with vacuum and thick enough to allow for all terminations to be found.
+        return self.get_pymatgen_slab_generator(
+            min_slab_size=self.DEFAULT_THICKNESS_FOR_TERMINATIONS,
+            min_vacuum_size=self.DEFAULT_VACUUM_SIZE_FOR_TERMINATIONS,
+        )
 
     @property
     def pymatgen_slab_generator_without_vacuum(self) -> PymatgenSlabGenerator:
-        return self.get_pymatgen_slab_generator(min_vacuum_size=0)
+        # This generator is used to create slabs without vacuum and with a single layer thickness.
+        return self.get_pymatgen_slab_generator(
+            min_slab_size=self.DEFAULT_THICKNESS_FOR_GENERATION, min_vacuum_size=self.DEFAULT_VACUUM_SIZE_FOR_GENERATION
+        )
 
     @property
     def all_planes_as_pymatgen_slabs_with_vacuum(self) -> List[PymatgenSlab]:
-        return self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE)
+        return [
+            *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=True),
+            # Leaving option to create a non-symmetrized slabs too for additional terminations.
+            # As of now, looks like symmetrize=True gives all the unique terminations needed.
+            # *self.pymatgen_slab_generator_with_vacuum.get_slabs(symmetrize=False),
+        ]
 
     @property
     def all_planes_as_pymatgen_slabs_without_vacuum(self) -> List[PymatgenSlab]:
-        return self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE)
+        return [
+            *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=self.DEFAULT_SYMMETRIZE),
+            # Leaving option to create symmetrized slabs for layers generation.
+            # *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=not self.DEFAULT_SYMMETRIZE),
+        ]
 
     @property
     def termination_holders(self):
@@ -66,18 +87,24 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
             termination_with_vacuum_string = label_pymatgen_slab_termination(slab_with_vacuum)
             termination_with_vacuum = Termination.from_string(termination_with_vacuum_string)
 
-            matching_slab_without_vacuum = select_slab_with_termination_by_formula(
-                slabs_without_vacuum, termination_with_vacuum
-            )
-
-            termination_without_vacuum_string = label_pymatgen_slab_termination(matching_slab_without_vacuum)
-            termination_without_vacuum = Termination.from_string(termination_without_vacuum_string)
+            try:
+                matching_slab_without_vacuum = select_slab_with_termination_by_formula(
+                    slabs_without_vacuum, termination_with_vacuum
+                )
+                termination_without_vacuum_string = label_pymatgen_slab_termination(matching_slab_without_vacuum)
+                termination_without_vacuum = Termination.from_string(termination_without_vacuum_string)
+                shift_without_vacuum = matching_slab_without_vacuum.shift
+            except ValueError:
+                termination_without_vacuum = None
+                shift_without_vacuum = 0.0
+            shift_with_vacuum = slab_with_vacuum.shift
 
             termination_holders.append(
                 TerminationHolder(
                     termination_with_vacuum=termination_with_vacuum,
                     termination_without_vacuum=termination_without_vacuum,
-                    shift=slab_with_vacuum.shift,
+                    shift_with_vacuum=shift_with_vacuum,
+                    shift_without_vacuum=shift_without_vacuum,
                 )
             )
 
@@ -100,7 +127,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         return self.terminations[0]
 
     @property
-    def miller_supercell_matrix(self) -> Matrix3x3Schema:  # TODO: import from mat3ra.esse.models.core
+    def miller_supercell_matrix(self) -> Matrix3x3Schema:
         return self.pymatgen_slab_generator_without_vacuum.slab_scale_factor.tolist()
 
     def get_material_with_termination_without_vacuum(self, termination: Termination) -> Material:
@@ -108,11 +135,18 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
         if holder is None:
             raise ValueError(f"Termination {termination} not found.")
-        slab = self.all_planes_as_pymatgen_slabs_without_vacuum[holder.index]
+        slab = self.all_planes_as_pymatgen_slabs_without_vacuum[
+            self.terminations_without_vacuum.index(holder.termination_without_vacuum)
+        ]
         return Material.create(from_pymatgen(slab))
 
     def get_translation_vector_for_termination_without_vacuum(self, termination: Termination) -> Vector3D:
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
         if holder is None:
             raise ValueError(f"Termination {termination} not found.")
-        return [0.0, 0.0, holder.shift]
+
+        # NOTE: pymatgen shift values are in fractional crystal coordinates and need to be negated
+        # Convert from crystal to cartesian coordinates using the conventional lattice
+        crystal_shift = [0.0, 0.0, -holder.shift_without_vacuum]
+        cartesian_shift = self.material_with_conventional_lattice.basis.cell.convert_point_to_cartesian(crystal_shift)
+        return cartesian_shift

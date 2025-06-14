@@ -4,12 +4,12 @@ from mat3ra.made.material import Material
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsASEAtomsMixin
-from ...build.slab import SlabConfiguration
+from ...build.slab.configuration import SlabConfiguration
 from ...modify import filter_by_condition_on_coordinates
 from ...utils.coordinate import SphereCoordinateCondition
 from ...analyze.other import get_closest_site_id_from_coordinate
 from ...third_party import ASEAtoms
-from ..slab import create_slab
+from ..slab.helpers import create_slab
 from .configuration import ASEBasedNanoparticleConfiguration, SphereSlabBasedNanoparticleConfiguration
 from .enums import ASENanoparticleShapesEnum
 

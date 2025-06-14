@@ -19,7 +19,7 @@ from mat3ra.made.tools.modify import (
 )
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures.bulk import SI_CONVENTIONAL_CELL, SI_CONVENTIONAL_CELL_FILTERED
+from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_CONVENTIONAL_FILTERED
 from .fixtures.interface import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_SLAB_001_2_ATOMS, SI_SLAB_001_WITH_VACUUM
 from .utils import assert_two_entities_deep_almost_equal
@@ -95,10 +95,10 @@ CRYSTAL_CENTER_3D = [0.5, 0.5, 0.5]  # in crystal coordinates
 
 
 def test_filter_by_ids():
-    material = Material.create(SI_CONVENTIONAL_CELL)
+    material = Material.create(BULK_Si_CONVENTIONAL)
     material_filtered = filter_by_ids(material, [0, 2])
     # Move to fixtures
-    expected_material = Material.create(SI_CONVENTIONAL_CELL_FILTERED)
+    expected_material = Material.create(BULK_Si_CONVENTIONAL_FILTERED)
     assert_two_entities_deep_almost_equal(material_filtered.basis, expected_material.basis)
 
 
@@ -117,7 +117,7 @@ def test_filter_by_label():
 
 
 def test_filter_by_layers():
-    material = Material.create(SI_CONVENTIONAL_CELL)
+    material = Material.create(BULK_Si_CONVENTIONAL)
     section = filter_by_layers(material=material, central_atom_id=0, layer_thickness=3.0)
     cavity = filter_by_layers(material=material, central_atom_id=0, layer_thickness=3.0, invert_selection=True)
     assert_two_entities_deep_almost_equal(section.basis, expected_basis_layers_section)
@@ -125,7 +125,7 @@ def test_filter_by_layers():
 
 
 def test_filter_by_sphere():
-    material = Material.create(SI_CONVENTIONAL_CELL)
+    material = Material.create(BULK_Si_CONVENTIONAL)
     cluster = filter_by_sphere(material, center_coordinate=CRYSTAL_CENTER_3D, radius=CRYSTAL_RADIUS)
     cavity = filter_by_sphere(material, center_coordinate=CRYSTAL_CENTER_3D, radius=CRYSTAL_RADIUS, invert=True)
     assert_two_entities_deep_almost_equal(cluster.basis, expected_basis_sphere_cluster)
@@ -133,7 +133,7 @@ def test_filter_by_sphere():
 
 
 def test_filter_by_circle_projection():
-    material = Material.create(SI_CONVENTIONAL_CELL)
+    material = Material.create(BULK_Si_CONVENTIONAL)
     # Small cylinder in the middle of the cell containing the central atom will be removed -- the same as with sphere
     section = filter_by_circle_projection(material, 0.5, 0.5, CRYSTAL_RADIUS)
     cavity = filter_by_circle_projection(material, 0.5, 0.5, CRYSTAL_RADIUS, invert_selection=True)
@@ -142,7 +142,7 @@ def test_filter_by_circle_projection():
 
 
 def test_filter_by_rectangle_projection():
-    material = Material.create(SI_CONVENTIONAL_CELL)
+    material = Material.create(BULK_Si_CONVENTIONAL)
     # Default will contain all the atoms
     section = filter_by_rectangle_projection(material)
     assert_two_entities_deep_almost_equal(material.basis, section.basis)
@@ -150,7 +150,7 @@ def test_filter_by_rectangle_projection():
 
 def test_filter_by_triangle_projection():
     # Small prism in the middle of the cell containing the central atom will be removed -- the same as with sphere
-    material = Material.create(SI_CONVENTIONAL_CELL)
+    material = Material.create(BULK_Si_CONVENTIONAL)
     section = filter_by_triangle_projection(material, [0.4, 0.4], [0.4, 0.5], [0.5, 0.5])
     cavity = filter_by_triangle_projection(material, [0.4, 0.4], [0.4, 0.5], [0.5, 0.5], invert_selection=True)
     assert_two_entities_deep_almost_equal(section.basis, expected_basis_sphere_cluster)

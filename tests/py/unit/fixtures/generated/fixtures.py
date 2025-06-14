@@ -1,5 +1,7 @@
 # from ase.build import bulk
-from mat3ra.made.material import Material
+from mat3ra.standata.materials import Materials
+
+BULK_SrTiO3 = Materials.get_by_name_first_match("SrTiO3")
 
 # from mat3ra.made.tools.build.interface.termination_pair import TerminationPair
 # from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
@@ -57,10 +59,8 @@ from mat3ra.made.material import Material
 # }
 
 
-SI_PRIMITIVE_CELL_MATERIAL = Material.create_default()
-
 # slab_111_config = SlabConfiguration.from_parameters(
-#     bulk=SI_PRIMITIVE_CELL_MATERIAL,
+#     bulk=SI_PRIMITIVE_CELL,
 #     miller_indices=(1, 1, 1),
 #     number_of_layers=4,
 #     vacuum=6,
@@ -70,7 +70,7 @@ SI_PRIMITIVE_CELL_MATERIAL = Material.create_default()
 # SLAB_111 = create_slab(slab_111_config)
 
 # slab_001_config = SlabConfiguration.from_parameters(
-#     bulk=SI_PRIMITIVE_CELL_MATERIAL,
+#     bulk=SI_PRIMITIVE_CELL,
 #     miller_indices=(0, 0, 1),
 #     number_of_layers=3,
 #     vacuum=3,

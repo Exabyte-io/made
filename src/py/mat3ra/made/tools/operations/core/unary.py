@@ -9,7 +9,7 @@ from ...utils import decorator_convert_supercell_matrix_2x2_to_3x3
 
 def translate(material: Material, vector: Vector3D) -> Material:
     # Figure out convention for use_cartesian_coordinates
-    return translate_by_vector(material, vector)
+    return translate_by_vector(material, vector, use_cartesian_coordinates=True)
 
 
 @decorator_convert_supercell_matrix_2x2_to_3x3
