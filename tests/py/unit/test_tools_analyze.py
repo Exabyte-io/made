@@ -6,12 +6,12 @@ from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_surface_area  # get_average_interlayer_distance
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 
-# from mat3ra.made.tools.convert import to_pymatgen
-# from mat3ra.made.tools.third_party import PymatgenSpacegroupAnalyzer
-
 from .fixtures.bulk import SI_CONVENTIONAL_CELL, SI_PRIMITIVE_CELL
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from .utils import assert_two_entities_deep_almost_equal
+
+# from mat3ra.made.tools.convert import to_pymatgen
+# from mat3ra.made.tools.third_party import PymatgenSpacegroupAnalyzer
 
 
 @pytest.mark.skip

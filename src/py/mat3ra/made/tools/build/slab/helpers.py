@@ -27,7 +27,6 @@ def create_atomic_layers(
     termination: Termination = None,
     number_of_layers: int = 1,
 ) -> Material:
-
     atomic_layers_config = AtomicLayersUniqueRepeatedConfiguration(
         crystal=material,
         miller_indices=miller_indices,

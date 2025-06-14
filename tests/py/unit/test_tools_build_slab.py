@@ -11,11 +11,11 @@ from mat3ra.made.tools.build.slab.configuration import (
     VacuumConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations, select_slab_termination
-from unit.fixtures.bulk import SI_PRIMITIVE_CELL, SI_CONVENTIONAL_CELL
+from unit.fixtures.bulk import SI_CONVENTIONAL_CELL, SI_PRIMITIVE_CELL
 from unit.fixtures.slab import (
+    CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL,
     SI_CONVENTIONAL_SLAB_001,
     SI_PRIMITIVE_SLAB_001,
-    CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL,
     SrTiO3_SLAB_011_O2,
     SrTiO3_SLAB_011_SrTiO,
 )
@@ -66,15 +66,17 @@ def get_slab_with_builder(
 
 
 def test_build_slab_primitive():
-    slab = get_slab_with_builder(SI_PRIMITIVE_CELL, MILLER_INDICES, "Si")
+    material = Material.create(SI_PRIMITIVE_CELL)
+    slab = get_slab_with_builder(material, MILLER_INDICES, "Si")
     slab.metadata.pop("build")  # Remove build metadata for comparison
     SI_PRIMITIVE_SLAB_001["metadata"].pop("build")  # Remove build metadata for comparison
     assert_two_entities_deep_almost_equal(slab, SI_PRIMITIVE_SLAB_001)
 
 
 def test_build_slab_conventional():
+    material = Material.create(SI_PRIMITIVE_CELL)
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-        material=SI_PRIMITIVE_CELL, miller_indices=MILLER_INDICES
+        material=material, miller_indices=MILLER_INDICES
     )
     conventional_material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
     slab = get_slab_with_builder(conventional_material, MILLER_INDICES, "Si")

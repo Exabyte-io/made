@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-
 SI_PRIMITIVE_CELL: Dict[str, Any] = {
     "name": "Silicon FCC",
     "basis": {
