@@ -2,7 +2,6 @@ from typing import Tuple
 
 import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder, SlabBuilder, SlabBuilderParameters
@@ -19,6 +18,7 @@ from unit.fixtures.slab import (
     SLAB_SrTiO3_011_TERMINATION_O2,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
 )
+
 from .fixtures.generated.fixtures import BULK_SrTiO3
 from .utils import assert_two_entities_deep_almost_equal
 
@@ -64,7 +64,8 @@ def get_slab_with_builder(
 
 
 @pytest.mark.parametrize(
-    "material_config, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix, expected_slab_config",
+    "material_config, miller_indices, termination_formula, number_of_layers,"
+    + " vacuum, xy_supercell_matrix, expected_slab_config",
     [
         (BULK_Si_PRIMITIVE, (0, 0, 1), "Si", 2, 5.0, [[1, 0], [0, 1]], SI_PRIMITIVE_SLAB_001),
     ],
@@ -88,7 +89,8 @@ def test_build_slab_primitive(
 
 
 @pytest.mark.parametrize(
-    "material_config, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix, expected_slab_config",
+    "material_config, miller_indices, termination_formula, number_of_layers,"
+    + " vacuum, xy_supercell_matrix, expected_slab_config",
     [
         (
             BULK_Si_PRIMITIVE,
@@ -128,7 +130,8 @@ def test_build_slab_conventional(
 
 
 @pytest.mark.parametrize(
-    "material_config, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix, expected_slab_config",
+    "material_config, miller_indices, termination_formula, number_of_layers,"
+    + " vacuum, xy_supercell_matrix, expected_slab_config",
     [
         (
             BULK_SrTiO3,
