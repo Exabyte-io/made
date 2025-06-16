@@ -1,40 +1,37 @@
-from typing import Any, Dict, Type, TypeVar
+import json
+from typing import Any, Dict
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-MetadataChild = TypeVar("MetadataChild", bound="BaseMetadata")
+from mat3ra.code.entity import InMemoryEntityPydantic
 
 
-class BaseMetadata(BaseModel):
-    model_config = {"extra": "allow"}
+class BaseMetadata(InMemoryEntityPydantic):
+    model_config = {"arbitrary_types_allowed": True, "extra": "allow"}
 
-    @classmethod
-    def from_dict(cls: Type[MetadataChild], data: dict) -> MetadataChild:
-        return cls.model_validate(data or {})
+    @staticmethod
+    def _to_dict(obj: Any) -> dict:
+        if not obj:
+            return {}
+
+        if hasattr(obj, "to_dict") and callable(obj.to_dict):
+            return obj.to_dict()
+        if hasattr(obj, "to_json") and callable(obj.to_json):
+            data = obj.to_json()
+            if isinstance(data, str):
+                return json.loads(data)
+            return data
+        return {}
+
+    def update(self, **kwargs: Any):
+        for key, value in kwargs.items():
+            if hasattr(self, key) and isinstance(getattr(self, key), dict):
+                getattr(self, key).update(self._to_dict(value))
 
 
 class BuildMetadata(BaseMetadata):
     configuration: Dict[str, Any] = Field(default_factory=dict)
     build_parameters: Dict[str, Any] = Field(default_factory=dict)
-
-    def update(self, configuration: Any, build_parameters: Any = None):
-        # TODO: remove conditional checks when all configurations moved to Pydantic
-        if hasattr(configuration, "to_dict") and callable(configuration.to_dict):
-            config_dict = configuration.to_dict()
-        elif hasattr(configuration, "to_json") and callable(configuration.to_json):
-            config_dict = configuration.to_json()
-        else:
-            config_dict = {}
-
-        self.configuration.update(config_dict)
-
-        build_parameters_dict = {}
-        if hasattr(build_parameters, "to_dict"):
-            build_parameters_dict = build_parameters.model_dump()
-        elif hasattr(build_parameters, "to_json"):
-            build_parameters_dict = build_parameters.to_json()
-
-        self.build_parameters.update(build_parameters_dict)
 
 
 class MaterialMetadata(BaseMetadata):

@@ -143,7 +143,7 @@ class BaseBuilder(BaseModel):
         return material
 
     def _update_material_metadata(self, material, configuration) -> Material:
-        metadata = MaterialMetadata.from_dict(material.metadata)
-        metadata.build.update(configuration, self.build_parameters)
+        metadata = MaterialMetadata(**material.metadata or {})
+        metadata.build.update(configuration=configuration, build_parameters=self.build_parameters)
         material.metadata.update(metadata.model_dump(exclude_defaults=True))
         return material
