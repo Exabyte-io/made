@@ -8,6 +8,7 @@ from .analyze.other import (
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,
 )
+from .build.metadata import MaterialMetadata
 from .convert import from_ase, to_ase
 from .convert.utils import InterfacePartsEnum
 from .third_party import ase_add_vacuum
@@ -17,7 +18,6 @@ from .utils.coordinate import (
     is_coordinate_in_triangular_prism,
     is_coordinate_within_layer,
 )
-from .build.metadata import MaterialMetadata
 
 
 def filter_by_label(material: Material, label: Union[int, str]) -> Material:
