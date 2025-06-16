@@ -88,7 +88,7 @@ export class ConstrainedBasis extends Basis {
      * E.g., ``` ['Si  0 0 0  0 1 0', 'Li  0.5 0.5 0.5  1 0 1']```
      */
     getAtomicPositionsWithConstraintsAsStrings(
-        coordinatePrintFormat: string,
+        coordinatePrintFormat?: string,
         precision?: number,
     ): string[] {
         const omitConstraints = this._constraints.areUnconstrained;
