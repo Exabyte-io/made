@@ -1,33 +1,29 @@
 import json
 import pytest
+from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
 from pydantic import BaseModel
 
 from mat3ra.made.tools.build.metadata import MaterialMetadata, BuildMetadata
 
 
-class ConfigWithToDict(BaseModel):
+class ConfigWithToDict(InMemoryEntityPydantic):
     value: str = "test_dict"
-
-    def to_dict(self):
-        return self.model_dump()
 
 
 # TODO: Remove this class when all configurations moved to Pydantic
-class ConfigWithToJsonReturnsDict(BaseModel):
+class ConfigWithToJsonReturnsDict(BaseModel, InMemoryEntity):
     value: str = "test_json_dict"
 
-    def to_json(self):
-        return self.model_dump()
+    @property
+    def _json(self):
+        return {"value": self.value}
 
 
-class ConfigWithToJsonReturnsStr(BaseModel):
+class ConfigWithToJsonReturnsStr(InMemoryEntityPydantic):
     value: str = "test_json_str"
 
-    def to_json(self):
-        return self.model_dump_json()
 
-
-class MockParameters(BaseModel):
+class MockParameters(InMemoryEntityPydantic):
     param: str = "param_value"
 
 
