@@ -145,5 +145,5 @@ class BaseBuilder(BaseModel):
     def _update_material_metadata(self, material, configuration) -> Material:
         metadata = MaterialMetadata(**material.metadata or {})
         metadata.build.update(configuration=configuration, build_parameters=self.build_parameters)
-        material.metadata.update(metadata.model_dump(exclude_defaults=True))
+        material.metadata = metadata.to_dict()
         return material
