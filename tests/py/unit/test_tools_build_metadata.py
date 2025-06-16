@@ -1,9 +1,7 @@
-import json
 import pytest
-from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
+from mat3ra.code.entity import InMemoryEntity, InMemoryEntityPydantic
+from mat3ra.made.tools.build.metadata import BuildMetadata, MaterialMetadata
 from pydantic import BaseModel
-
-from mat3ra.made.tools.build.metadata import MaterialMetadata, BuildMetadata
 
 
 class ConfigWithToDict(InMemoryEntityPydantic):
