@@ -47,6 +47,7 @@ from ...utils import (
     coordinate as CoordinateCondition,
     get_distance_between_coordinates,
 )
+from ..metadata import MaterialMetadata
 
 
 class PointDefectBuilderParameters(BaseModel):
@@ -187,9 +188,9 @@ class SlabDefectBuilder(DefectBuilder):
         Returns:
             A new Material instance with the added layers.
         """
-
-        slab_build_configuration_dict = material.metadata.get("build").get("configuration")
-        if slab_build_configuration_dict["type"] != "SlabConfiguration":
+        metadata = MaterialMetadata(**material.metadata)
+        slab_build_configuration_dict = metadata.build.configuration
+        if slab_build_configuration_dict.get("type") != "SlabConfiguration":
             raise ValueError("Material is not a slab.")
         slab_build_configuration = SlabConfiguration(**slab_build_configuration_dict)
 

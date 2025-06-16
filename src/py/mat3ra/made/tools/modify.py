@@ -17,6 +17,7 @@ from .utils.coordinate import (
     is_coordinate_in_triangular_prism,
     is_coordinate_within_layer,
 )
+from .build.metadata import MaterialMetadata
 
 
 def filter_by_label(material: Material, label: Union[int, str]) -> Material:
@@ -638,7 +639,8 @@ def interface_get_part(
     interface: Material,
     part: InterfacePartsEnum = InterfacePartsEnum.FILM,
 ) -> Material:
-    if interface.metadata["build"]["configuration"]["type"] != "InterfaceConfiguration":
+    metadata = MaterialMetadata(**interface.metadata)
+    if metadata.build.configuration.get("type") != "InterfaceConfiguration":
         raise ValueError("The material is not an interface.")
     interface_part_material = interface.clone()
     film_atoms_basis = interface_part_material.basis.filter_atoms_by_labels([int(part)])
