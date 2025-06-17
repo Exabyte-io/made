@@ -1,34 +1,51 @@
 import numpy as np
 import pytest
-from ase.build import bulk
-from mat3ra.made.material import Material
+from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
-from mat3ra.made.tools.analyze.other import get_surface_area  # get_average_interlayer_distance
+from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
+from .fixtures.interface import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from .utils import assert_two_entities_deep_almost_equal
 
 
-# TODO: Uncomment and unskip before merging epic/SOF-7623
-@pytest.mark.skip
-def test_calculate_average_interlayer_distance():
-    # distance = get_average_interlayer_distance(INTERFACE_ATOMS, 1, 2)
-    # assert np.isclose(distance, 4.0725)
-    pass
+@pytest.mark.parametrize(
+    "material_config, layer_indices, expected_distance",
+    [
+        (GRAPHENE_NICKEL_INTERFACE, [0, 1], 3.0),
+    ],
+)
+def test_calculate_average_interlayer_distance(material_config, layer_indices, expected_distance):
+    material = Material.create(material_config)
+    distance = get_average_interlayer_distance(material, *layer_indices)
+    assert np.isclose(distance, expected_distance)
 
 
-def test_calculate_surface_area():
-    atoms = bulk("Si", cubic=False)
-    area = get_surface_area(atoms)
-    assert np.isclose(area, 12.7673)
+@pytest.mark.parametrize(
+    "material_config, expected_area",
+    [
+        (defaultMaterialConfig, 12.950),
+    ],
+)
+def test_calculate_surface_area(material_config, expected_area):
+    material = Material.create(material_config)
+    area = get_surface_area(material)
+    assert np.isclose(area, expected_area, atol=1e-3)
 
 
-def test_radial_distribution_function():
-    material = Material.create(GRAPHENE_ZIGZAG_NANORIBBON)
+@pytest.mark.parametrize(
+    "material_config, rdf_params, expected_first_peak_distance",
+    [
+        (GRAPHENE_ZIGZAG_NANORIBBON, {"cutoff": 10.0, "bin_size": 0.1}, 1.42),
+        (BULK_Si_CONVENTIONAL, {"cutoff": 10.0, "bin_size": 0.1}, 2.35),
+    ],
+)
+def test_radial_distribution_function(material_config, rdf_params, expected_first_peak_distance):
+    material = Material.create(material_config)
 
-    rdf = RadialDistributionFunction.from_material(material, cutoff=10.0, bin_size=0.1)
+    rdf = RadialDistributionFunction.from_material(material, **rdf_params)
 
     # Test that RDF is non-negative
     assert np.all(rdf.rdf >= 0), "RDF contains negative values."
@@ -42,19 +59,23 @@ def test_radial_distribution_function():
     # Test that `is_within_first_peak` works as expected
     assert rdf.is_within_first_peak(rdf.first_peak_distance), "First peak distance should be within the first peak."
     assert not rdf.is_within_first_peak(0), "Zero distance should not be within the first peak."
-    assert not rdf.is_within_first_peak(10.0), "Cutoff distance should not be within the first peak."
+    assert not rdf.is_within_first_peak(rdf_params["cutoff"]), "Cutoff distance should not be within the first peak."
 
     # Test that RDF drops to zero near the cutoff
     assert np.isclose(rdf.rdf[-1], 0, atol=1e-2), "RDF should approach zero near the cutoff."
 
     # Specific material related tests
-    assert np.isclose(rdf.first_peak_distance, 1.42, atol=0.1), "First peak distance should be close to 1.42."
+    assert np.isclose(rdf.first_peak_distance, expected_first_peak_distance, atol=0.1)
 
 
-def test_lattice_material_analyzer():
-    primitive_cell = Material.create(BULK_Si_PRIMITIVE)
+@pytest.mark.parametrize(
+    "primitive_material_config, expected_conventional_material_config",
+    [(BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL)],
+)
+def test_lattice_material_analyzer(primitive_material_config, expected_conventional_material_config):
+    primitive_cell = Material.create(primitive_material_config)
     lattice_material_analyzer = LatticeMaterialAnalyzer(material=primitive_cell)
 
     conventional_cell = lattice_material_analyzer.material_with_conventional_lattice
 
-    assert_two_entities_deep_almost_equal(conventional_cell, BULK_Si_CONVENTIONAL)
+    assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)

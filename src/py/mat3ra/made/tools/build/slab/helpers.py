@@ -17,6 +17,7 @@ from .configuration import (
     VacuumConfiguration,
 )
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+from ..metadata import MaterialMetadata
 
 DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 
@@ -132,9 +133,10 @@ def create_slab(
 
 def create_slab_if_not(material: Material, default_slab_configuration: SlabConfiguration) -> Material:
     slab = material
-    if not slab.metadata or slab.metadata["build"]["configuration"]["type"] != SlabConfiguration.__name__:
+    metadata = MaterialMetadata(**slab.metadata or {})
+    if not metadata.build.configuration or metadata.build.configuration.get("type") != "SlabConfiguration":
         print("The material is not a slab. Creating a new slab...")
-        slab = create_slab(default_slab_configuration)
+        slab = create_slab(**default_slab_configuration.to_dict())
     return slab
 
 
