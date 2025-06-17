@@ -213,7 +213,7 @@ def test_build_slab_conventional_with_multiple_terminations(
 
 @pytest.mark.parametrize(
     "material_config, miller_indices, termination_formula, number_of_layers,"
-    + " vacuum, xy_supercell, use_conventional_cell, expected_slab",
+    + " vacuum, xy_supercell, use_conventional_cell, expected_slab_config",
     [
         (
             *PARAMS_CREATE_SLAB,
@@ -229,7 +229,7 @@ def test_create_slab(
     vacuum,
     xy_supercell,
     use_conventional_cell,
-    expected_slab,
+    expected_slab_config,
 ):
     crystal = Material.create(material_config)
     terminations = get_slab_terminations(material=crystal, miller_indices=miller_indices)
@@ -244,4 +244,4 @@ def test_create_slab(
         xy_supercell_matrix=xy_supercell,
     )
     slab.metadata.pop("build")  # Remove build metadata for comparison
-    assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA)
+    assert_two_entities_deep_almost_equal(slab, expected_slab_config)
