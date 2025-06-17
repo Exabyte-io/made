@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Final, Tuple
 
 import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
@@ -24,6 +24,52 @@ from .utils import assert_two_entities_deep_almost_equal
 
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA = SI_CONVENTIONAL_SLAB_001.copy()
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA["metadata"].pop("build", None)
+
+PARAMS_SI_PRIMITIVE_SLAB_001: Final = (
+    BULK_Si_PRIMITIVE,
+    (0, 0, 1),
+    "Si",
+    2,
+    5.0,
+    [[1, 0], [0, 1]],
+)
+
+PARAMS_BUILD_SLAB_CONVENTIONAL: Final = (
+    BULK_Si_PRIMITIVE,
+    (0, 0, 1),
+    "Si",
+    2,
+    5.0,
+    [[1, 0], [0, 1]],
+)
+
+PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_SrTiO: Final = (
+    BULK_SrTiO3,
+    (0, 1, 1),
+    "SrTiO",
+    2,
+    5.0,
+    [[1, 0], [0, 1]],
+)
+
+PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2: Final = (
+    BULK_SrTiO3,
+    (0, 1, 1),
+    "O2",
+    2,
+    5.0,
+    [[1, 0], [0, 1]],
+)
+
+PARAMS_CREATE_SLAB: Final = (
+    BULK_Si_CONVENTIONAL,
+    (0, 0, 1),
+    "Si",
+    2,
+    5,
+    [[1, 0], [0, 1]],
+    True,
+)
 
 
 def get_slab_with_builder(
@@ -67,7 +113,7 @@ def get_slab_with_builder(
     "material_config, miller_indices, termination_formula, number_of_layers,"
     + " vacuum, xy_supercell_matrix, expected_slab_config",
     [
-        (BULK_Si_PRIMITIVE, (0, 0, 1), "Si", 2, 5.0, [[1, 0], [0, 1]], SI_PRIMITIVE_SLAB_001),
+        (*PARAMS_SI_PRIMITIVE_SLAB_001, SI_PRIMITIVE_SLAB_001),
     ],
 )
 def test_build_slab_primitive(
@@ -93,12 +139,7 @@ def test_build_slab_primitive(
     + " vacuum, xy_supercell_matrix, expected_slab_config",
     [
         (
-            BULK_Si_PRIMITIVE,
-            (0, 0, 1),
-            "Si",
-            2,
-            5.0,
-            [[1, 0], [0, 1]],
+            *PARAMS_BUILD_SLAB_CONVENTIONAL,
             SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA,
         ),
     ],
@@ -134,21 +175,11 @@ def test_build_slab_conventional(
     + " vacuum, xy_supercell_matrix, expected_slab_config",
     [
         (
-            BULK_SrTiO3,
-            (0, 1, 1),
-            "SrTiO",
-            2,
-            5.0,
-            [[1, 0], [0, 1]],
+            *PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_SrTiO,
             SLAB_SrTiO3_011_TERMINATION_SrTiO,
         ),
         (
-            BULK_SrTiO3,
-            (0, 1, 1),
-            "O2",
-            2,
-            5.0,
-            [[1, 0], [0, 1]],
+            *PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2,
             SLAB_SrTiO3_011_TERMINATION_O2,
         ),
     ],
@@ -182,16 +213,10 @@ def test_build_slab_conventional_with_multiple_terminations(
 
 @pytest.mark.parametrize(
     "material_config, miller_indices, termination_formula, number_of_layers,"
-    + " vacuum, xy_supercell, use_conventional_cell, expected_slab",
+    + " vacuum, xy_supercell, use_conventional_cell, expected_slab_config",
     [
         (
-            BULK_Si_CONVENTIONAL,
-            (0, 0, 1),
-            "Si",
-            2,
-            5,
-            [[1, 0], [0, 1]],
-            True,
+            *PARAMS_CREATE_SLAB,
             SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA,
         ),
     ],
@@ -204,7 +229,7 @@ def test_create_slab(
     vacuum,
     xy_supercell,
     use_conventional_cell,
-    expected_slab,
+    expected_slab_config,
 ):
     crystal = Material.create(material_config)
     terminations = get_slab_terminations(material=crystal, miller_indices=miller_indices)
@@ -212,11 +237,11 @@ def test_create_slab(
     slab = create_slab(
         crystal=crystal,
         miller_indices=miller_indices,
-        use_conventional_cell=True,
+        use_conventional_cell=use_conventional_cell,
         termination=termination,
-        number_of_layers=2,
-        vacuum=5.0,
-        xy_supercell_matrix=[[1, 0], [0, 1]],
+        number_of_layers=number_of_layers,
+        vacuum=vacuum,
+        xy_supercell_matrix=xy_supercell,
     )
     slab.metadata.pop("build")  # Remove build metadata for comparison
-    assert_two_entities_deep_almost_equal(slab, SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA)
+    assert_two_entities_deep_almost_equal(slab, expected_slab_config)
