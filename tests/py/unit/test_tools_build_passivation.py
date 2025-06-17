@@ -1,5 +1,4 @@
 import pytest
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.passivation import get_coordination_numbers_distribution, get_unique_coordination_numbers
 from mat3ra.made.tools.build.passivation.builders import (
@@ -9,6 +8,7 @@ from mat3ra.made.tools.build.passivation.builders import (
     SurfacePassivationBuilderParameters,
 )
 from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
+
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED
 from .fixtures.slab import SI_SLAB_001_2_ATOMS, SI_SLAB_PASSIVATED
 from .utils import assert_two_entities_deep_almost_equal

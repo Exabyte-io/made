@@ -1,7 +1,7 @@
+import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from mat3ra.made.tools.build.nanoribbon.enums import EdgeTypes
-import pytest
 
 from .fixtures.monolayer import GRAPHENE
 from .fixtures.nanoribbon import GRAPHENE_ARMCHAIR_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON

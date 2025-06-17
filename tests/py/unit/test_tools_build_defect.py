@@ -1,8 +1,6 @@
 import sys
 
 import pytest
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
@@ -27,6 +25,7 @@ from mat3ra.made.tools.build.defect.configuration import (
     TerraceSlabDefectConfiguration,
 )
 from mat3ra.made.tools.utils import coordinate as CoordinateCondition
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER
 
 clean_material = Material.create_default()
@@ -95,7 +94,8 @@ def test_create_interstitial(crystal_config, defect_type, chemical_element, coor
 
 
 @pytest.mark.parametrize(
-    "crystal_config, defect_type, chemical_element, coordinate, placement_method, expected_element, expected_coords_platform",
+    "crystal_config, defect_type, chemical_element, coordinate, placement_method,"
+    + " expected_element, expected_coords_platform",
     [
         (
             Material.__default_config__,
@@ -225,7 +225,8 @@ def test_create_adatom(
 
 @pytest.mark.skip(reason="we'll fix before epic-7623 is merged")
 @pytest.mark.parametrize(
-    "crystal_config, position_on_surface, distance_z, chemical_element, expected_last_element, expected_coords_platform",
+    "crystal_config, position_on_surface, distance_z, chemical_element,"
+    + " expected_last_element, expected_coords_platform",
     [
         (
             SI_CONVENTIONAL_SLAB_001,
@@ -271,7 +272,8 @@ def test_create_adatom_equidistant(
 
 @pytest.mark.skip(reason="we'll fix before epic-7623 is merged")
 @pytest.mark.parametrize(
-    "crystal_config, position_on_surface, distance_z, chemical_element, expected_last_element, expected_coords_platform",
+    "crystal_config, position_on_surface, distance_z, chemical_element,"
+    + " expected_last_element, expected_coords_platform",
     [
         (
             SI_CONVENTIONAL_SLAB_001,

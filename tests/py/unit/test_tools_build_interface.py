@@ -1,13 +1,12 @@
 import platform
-import pytest
 
+import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.interface import (
-    InterfaceConfiguration,
-    create_interfaces,
     ZSLStrainMatchingInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilderParameters,
     ZSLStrainMatchingParameters,
+    create_interfaces,
 )
 from mat3ra.made.tools.build.interface.builders import (
     CommensurateLatticeTwistedInterfaceBuilder,
@@ -19,7 +18,6 @@ from mat3ra.made.tools.build.interface.builders import (
 from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures.monolayer import GRAPHENE
-
 
 MAX_AREA = 100
 # pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2
@@ -74,7 +72,8 @@ def test_create_twisted_nanoribbon_interface(
 
 
 @pytest.mark.parametrize(
-    "material_config, config_params, builder_params_dict, expected_interfaces_len, expected_cell_vectors, expected_angle",
+    "material_config, config_params, builder_params_dict,"
+    + " expected_interfaces_len, expected_cell_vectors, expected_angle",
     [
         (
             GRAPHENE,
