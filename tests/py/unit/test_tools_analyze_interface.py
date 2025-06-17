@@ -53,24 +53,28 @@ def get_slab_configuration(
 
 
 def test_interface_analyzer():
-    substrate_config = get_slab_configuration(BULK_Si_CONVENTIONAL, (0, 0, 1), 2, 1.0)
+    # Prepare fixtures
+    substrate_slab_config = get_slab_configuration(BULK_Si_CONVENTIONAL, (0, 0, 1), 2, 1.0)
+    film_slab_config = get_slab_configuration(BULK_Ge_CONVENTIONAL, (0, 0, 1), 2, 5.0)
 
-    film_config = get_slab_configuration(BULK_Ge_CONVENTIONAL, (0, 0, 1), 2, 5.0)
-
-    analyzer = InterfaceAnalyzer(substrate_config=substrate_config, film_config=film_config)
+    # Run the interface analyzer
+    analyzer = InterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config, film_slab_configuration=film_slab_config
+    )
     substrate_strained_config, film_strained_config = analyzer.get_strained_configurations()
 
-    substrate_slab = SlabBuilder().get_material(substrate_config)
+    # Check the results with materials
+    substrate_slab = SlabBuilder().get_material(substrate_slab_config)
     substrate_strained_slab = SlabBuilder().get_material(substrate_strained_config)
     film_strained_slab = SlabBuilder().get_material(film_strained_config)
 
     assert_deep_almost_equal(substrate_strained_slab, substrate_slab)
 
-    # Check that lattice vectors orthogonal to the stacking direction are the same
     substrate_in_plane_vectors = substrate_strained_slab.lattice.vector_arrays[:2]
     film_in_plane_vectors = film_strained_slab.lattice.vector_arrays[:2]
     assert_deep_almost_equal(substrate_in_plane_vectors, film_in_plane_vectors)
 
+    # TODO: remove interface generation. This is temporary development test. only test slabs + matrices
     stacked_interface = stack_two_materials(
         substrate_strained_slab,
         film_strained_slab,
