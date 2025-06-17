@@ -1,11 +1,11 @@
 import numpy as np
-
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material.reusable.supercell_matrix_2d import SupercellMatrix2DSchema
 from pydantic import BaseModel
 
-from mat3ra.made.tools.build.interface.configuration import SlabStrainedSupercellConfiguration
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellConfiguration
 
 
 class InterfaceAnalyzer(BaseModel):
@@ -27,8 +27,8 @@ class InterfaceAnalyzer(BaseModel):
                 A tuple containing the strained supercell configurations for the
                 substrate and the film.
         """
-        substrate_material = self.substrate_slab_configuration.atomic_layers.crystal
-        film_material = self.film_slab_configuration.atomic_layers.crystal
+        substrate_material = SlabBuilder().get_material(self.substrate_slab_configuration)
+        film_material = SlabBuilder().get_material(self.film_slab_configuration)
 
         substrate_vectors = np.array(substrate_material.lattice.vector_arrays)
         film_vectors = np.array(film_material.lattice.vector_arrays)

@@ -125,14 +125,6 @@ def test_simple_interface_builder():
 
     config = InterfaceConfiguration(
         stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
-        supercell_matrices=[
-            substrate_supercell_matrix,
-            film_supercell_matrix,
-        ],
-        strain_matrices=[
-            substrate_strain_matrix,
-            film_strain_matrix,
-        ],
     )
     interface = builder.get_material(config)
-    assert len(interface.basis.elements) == 24
+    assert len(interface.basis.elements.values) == 24

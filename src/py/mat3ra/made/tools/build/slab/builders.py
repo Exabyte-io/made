@@ -8,12 +8,13 @@ from .configuration import (
 )
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters
+from ..slab.configuration import SlabStrainedSupercellConfiguration
 from ..stack.builders import StackBuilder2Components
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...modify import wrap_to_unit_cell, translate_to_z_level
-from ...operations.core.unary import supercell, translate
+from ...operations.core.unary import supercell, translate, strain
 
 
 class CrystalLatticePlanesBuilder(BaseBuilder):
@@ -90,3 +91,17 @@ class SlabBuilder(StackBuilder2Components):
         new_name = f"{formula}({miller_indices_str}), termination {termination}, Slab"
         material.name = new_name
         return material
+
+
+class SlabStrainedSupercellBuilder(SlabBuilder):
+
+    def _generate(self, configuration: SlabStrainedSupercellConfiguration) -> List[Material]:
+        materials = super()._generate(configuration)
+
+        material = materials[0]
+        if configuration.xy_supercell_matrix:
+            material = supercell(material, configuration.xy_supercell_matrix)
+        if configuration.strain_matrix:
+            material = strain(material, configuration.strain_matrix)
+
+        return [material]

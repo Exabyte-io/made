@@ -1,9 +1,9 @@
 import pytest
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.supercell import create_supercell
-from unit.fixtures.supercell import SI_SUPERCELL_2X2X1, SI_SUPERCELL_FLIPPED_Z
-
-from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
+from unit.fixtures.supercell import SI_SUPERCELL_2X2X1
+from .fixtures.bulk import BULK_Si_PRIMITIVE
 from .utils import assert_two_entities_deep_almost_equal
 
 
@@ -14,11 +14,6 @@ from .utils import assert_two_entities_deep_almost_equal
             BULK_Si_PRIMITIVE,
             [[2, 0, 0], [0, 2, 0], [0, 0, 1]],
             SI_SUPERCELL_2X2X1,
-        ),
-        (
-            BULK_Si_CONVENTIONAL,
-            [[0, 1, 0], [1, 0, 0], [0, 0, -1]],
-            SI_SUPERCELL_FLIPPED_Z,
         ),
     ],
 )

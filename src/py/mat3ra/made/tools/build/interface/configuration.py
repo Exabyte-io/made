@@ -8,16 +8,7 @@ from mat3ra.esse.models.material.reusable.supercell_matrix_3d import SupercellMa
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from .. import BaseConfiguration, BaseConfigurationPydantic
-from ..slab.configuration import SlabConfiguration
-
-
-class SlabStrainedSupercellConfiguration(SlabConfiguration):
-    xy_supercell_matrix: SupercellMatrix2DSchema
-    strain_matrix: Matrix3x3Schema
-
-
-class SlabStrainedSupercellWithGapConfiguration(SlabStrainedSupercellConfiguration):
-    gap: Optional[float] = None  # If provided, the film is shifted to have it as smallest distance to the substrate.
+from ..slab.configuration import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
 
 
 class InterfaceConfiguration(BaseConfigurationPydantic):

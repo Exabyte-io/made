@@ -7,7 +7,11 @@ from mat3ra.utils.assertion import assert_deep_almost_equal
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder, SlabBuilder
+from mat3ra.made.tools.build.slab.builders import (
+    AtomicLayersUniqueRepeatedBuilder,
+    SlabBuilder,
+    SlabStrainedSupercellBuilder,
+)
 from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     SlabConfiguration,
@@ -55,7 +59,7 @@ def get_slab_configuration(
 def test_interface_analyzer():
     # Prepare fixtures
     substrate_slab_config = get_slab_configuration(BULK_Si_CONVENTIONAL, (0, 0, 1), 2, 1.0)
-    film_slab_config = get_slab_configuration(BULK_Ge_CONVENTIONAL, (0, 0, 1), 2, 5.0)
+    film_slab_config = get_slab_configuration(BULK_Ge_CONVENTIONAL, (0, 0, 1), 2, 1.0)
 
     # Run the interface analyzer
     analyzer = InterfaceAnalyzer(
@@ -65,8 +69,8 @@ def test_interface_analyzer():
 
     # Check the results with materials
     substrate_slab = SlabBuilder().get_material(substrate_slab_config)
-    substrate_strained_slab = SlabBuilder().get_material(substrate_strained_config)
-    film_strained_slab = SlabBuilder().get_material(film_strained_config)
+    substrate_strained_slab = SlabStrainedSupercellBuilder().get_material(substrate_strained_config)
+    film_strained_slab = SlabStrainedSupercellBuilder().get_material(film_strained_config)
 
     assert_deep_almost_equal(substrate_strained_slab, substrate_slab)
 
