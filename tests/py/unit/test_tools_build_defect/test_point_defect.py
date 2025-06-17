@@ -7,12 +7,13 @@ from mat3ra.made.tools.build.defect import (
     create_defect,
     create_defects,
 )
+from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 
 
 @pytest.mark.parametrize(
     "crystal_config, defect_type, site_id, expected_elements_len",
     [
-        (Material.__default_config__, "vacancy", 0, 1),
+        (BULK_Si_PRIMITIVE, "vacancy", 0, 1),
     ],
 )
 def test_create_vacancy(crystal_config, defect_type, site_id, expected_elements_len):
@@ -28,7 +29,7 @@ def test_create_vacancy(crystal_config, defect_type, site_id, expected_elements_
     "crystal_config, defect_type, chemical_element, expected_elements, expected_coordinate",
     [
         (
-            Material.__default_config__,
+            BULK_Si_PRIMITIVE,
             "substitution",
             "Ge",
             [{"id": 0, "value": "Ge"}, {"id": 1, "value": "Si"}],
@@ -52,7 +53,7 @@ def test_create_substitution(crystal_config, defect_type, chemical_element, expe
     "crystal_config, defect_type, chemical_element, coordinate, expected_elements",
     [
         (
-            Material.__default_config__,
+            BULK_Si_PRIMITIVE,
             "interstitial",
             "Ge",
             [0.5, 0.5, 0.5],
@@ -76,7 +77,7 @@ def test_create_interstitial(crystal_config, defect_type, chemical_element, coor
     + " expected_element, expected_coords_platform",
     [
         (
-            Material.__default_config__,
+            BULK_Si_PRIMITIVE,
             "interstitial",
             "Ge",
             [0.25, 0.25, 0.5],
@@ -119,7 +120,7 @@ def test_create_interstitial_voronoi(
     "crystal_config, defect_type, chemical_element, site_id, center_defect, expected_elements",
     [
         (
-            Material.__default_config__,
+            BULK_Si_PRIMITIVE,
             "substitution",
             "Ge",
             1,
@@ -148,7 +149,7 @@ def test_create_defect_from_site_id(
     "crystal_config, defect_configs_params, builder_params, expected_elements",
     [
         (
-            Material.__default_config__,
+            BULK_Si_PRIMITIVE,
             [
                 {"defect_type": PointDefectTypeEnum.SUBSTITUTION, "chemical_element": "Ge", "site_id": 1},
                 {"defect_type": PointDefectTypeEnum.SUBSTITUTION, "chemical_element": "Ge", "site_id": 0},

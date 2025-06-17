@@ -11,9 +11,8 @@ from .fixtures.bulk import BULK_Si_PRIMITIVE
 @pytest.mark.parametrize(
     "material1_config, material2_config, stacking_axis, expected_a, expected_b, expected_c",
     [
-        (Material.__default_config__, Material.__default_config__, AxisEnum.z, 3.867, 3.867, 7.734),
-        (Material.__default_config__, Material.__default_config__, AxisEnum.x, 7.734, 3.867, 3.867),
-        (BULK_Si_PRIMITIVE, Material.__default_config__, AxisEnum.z, 3.867, 3.867, 7.734),
+        (BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVE, AxisEnum.z, 3.867, 3.867, 7.734),
+        (BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVE, AxisEnum.x, 7.734, 3.867, 3.867),
     ],
 )
 def test_stack_two_materials(

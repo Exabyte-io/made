@@ -11,6 +11,7 @@ from mat3ra.made.tools.build.grain_boundary.builders import SlabGrainBoundaryBui
 from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
 from mat3ra.utils import assertion as assertion_utils
 
+from .fixtures.bulk import BULK_Si_PRIMITIVE
 from .fixtures.monolayer import GRAPHENE
 
 
@@ -19,7 +20,7 @@ from .fixtures.monolayer import GRAPHENE
     "material_config, slab_params, gap, expected_elements_len, expected_coordinate_checks, expected_lattice_vectors",
     [
         (
-            Material.__default_config__,
+            BULK_Si_PRIMITIVE,
             {"vacuum": 0, "number_of_layers": 2, "miller_indices": (0, 0, 1)},
             3.0,
             32,

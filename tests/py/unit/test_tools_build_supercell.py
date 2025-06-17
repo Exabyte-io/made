@@ -3,6 +3,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build.supercell import create_supercell
 from unit.fixtures.supercell import SI_SUPERCELL_2X2X1
 
+from .fixtures.bulk import BULK_Si_PRIMITIVE
 from .utils import assert_two_entities_deep_almost_equal
 
 
@@ -10,7 +11,7 @@ from .utils import assert_two_entities_deep_almost_equal
     "material_config, supercell_matrix, expected_material_config",
     [
         (
-            Material.__default_config__,
+            BULK_Si_PRIMITIVE,
             [[2, 0, 0], [0, 2, 0], [0, 0, 1]],
             SI_SUPERCELL_2X2X1,
         )
