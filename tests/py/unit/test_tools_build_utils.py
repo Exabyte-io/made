@@ -1,41 +1,39 @@
+import math
+
+import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.operations.core.binary import stack_two_materials
+from .fixtures.bulk import BULK_Si_PRIMITIVE
 
 
-def test_stack_two_materials_z_direction():
-    """Test stacking two materials along z direction"""
-    material1 = Material.create_default()
-    material2 = Material.create_default()
+@pytest.mark.parametrize(
+    "material1_config, material2_config, stacking_axis, expected_a, expected_b, expected_c",
+    [
+        (Material.__default_config__, Material.__default_config__, AxisEnum.z, 3.867, 3.867, 7.734),
+        (Material.__default_config__, Material.__default_config__, AxisEnum.x, 7.734, 3.867, 3.867),
+        (BULK_Si_PRIMITIVE, Material.__default_config__, AxisEnum.z, 3.867, 3.867, 7.734),
+    ],
+)
+def test_stack_two_materials(
+    material1_config: dict,
+    material2_config: dict,
+    stacking_axis: AxisEnum,
+    expected_a: float,
+    expected_b: float,
+    expected_c: float,
+):
+    material1 = Material.create(material1_config)
+    material2 = Material.create(material2_config)
 
-    original_c = material1.lattice.c
-    original_atom_count = len(material1.basis.coordinates.values)
+    original_atom_count1 = len(material1.basis.coordinates.values)
+    original_atom_count2 = len(material2.basis.coordinates.values)
 
-    stacked_material_z = stack_two_materials(material1, material2, AxisEnum.z)
+    stacked_material = stack_two_materials(material1, material2, stacking_axis)
 
-    # Check that c lattice parameter is doubled
-    assert abs(stacked_material_z.lattice.c - 2 * original_c) < 1e-10
-    # Check that a and b parameters remain the same
-    assert abs(stacked_material_z.lattice.a - material1.lattice.a) < 1e-10
-    assert abs(stacked_material_z.lattice.b - material1.lattice.b) < 1e-10
-    # Check that atom count is doubled
-    assert len(stacked_material_z.basis.coordinates.values) == 2 * original_atom_count
+    assert len(stacked_material.basis.coordinates.values) == original_atom_count1 + original_atom_count2
 
-
-def test_stack_two_materials_x_direction():
-    """Test stacking two materials along x direction"""
-    material1 = Material.create_default()
-    material2 = Material.create_default()
-
-    original_a = material1.lattice.a
-    original_atom_count = len(material1.basis.coordinates.values)
-
-    stacked_material_x = stack_two_materials(material1, material2, AxisEnum.x)
-
-    # Check that a lattice parameter is doubled
-    assert abs(stacked_material_x.lattice.a - 2 * original_a) < 1e-10
-    # Check that b and c parameters remain the same
-    assert abs(stacked_material_x.lattice.b - material1.lattice.b) < 1e-10
-    assert abs(stacked_material_x.lattice.c - material1.lattice.c) < 1e-10
-    # Check that atom count is doubled
-    assert len(stacked_material_x.basis.coordinates.values) == 2 * original_atom_count
+    assert math.isclose(stacked_material.lattice.a, expected_a)
+    assert math.isclose(stacked_material.lattice.b, expected_b)
+    assert math.isclose(stacked_material.lattice.c, expected_c)
