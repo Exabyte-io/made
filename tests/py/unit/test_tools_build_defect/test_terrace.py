@@ -11,7 +11,7 @@ from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
 @pytest.mark.skip(reason="we'll fix before epic-7623 is merged")
 @pytest.mark.parametrize(
-    "crystal_config, cut_direction, pivot_coordinate, num_added_layers, expected_coords_platform",
+    "crystal_config, cut_direction, pivot_coordinate, num_added_layers, expected_coordinates_platform",
     [
         (
             SI_CONVENTIONAL_SLAB_001,
@@ -22,7 +22,9 @@ from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
         )
     ],
 )
-def test_create_terrace(crystal_config, cut_direction, pivot_coordinate, num_added_layers, expected_coords_platform):
+def test_create_terrace(
+    crystal_config, cut_direction, pivot_coordinate, num_added_layers, expected_coordinates_platform
+):
     crystal = Material.create(crystal_config)
     config = TerraceSlabDefectConfiguration(
         crystal=crystal,
@@ -32,9 +34,9 @@ def test_create_terrace(crystal_config, cut_direction, pivot_coordinate, num_add
     )
     new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
     if sys.platform == "darwin":
-        coordinate_expected = expected_coords_platform["darwin"]
+        coordinate_expected = expected_coordinates_platform["darwin"]
     else:
-        coordinate_expected = expected_coords_platform["other"]
+        coordinate_expected = expected_coordinates_platform["other"]
     defect_coordinate = new_slab.basis.coordinates.values[-1]  # Use last atom (index 59) instead of previous index 35
     atol = 10 ** (-COORDINATE_TOLERANCE)
     assertion_utils.assert_deep_almost_equal(coordinate_expected, defect_coordinate, atol=atol)

@@ -11,7 +11,7 @@ from .fixtures.monolayer import GRAPHENE
 
 
 @pytest.mark.parametrize(
-    "material_config, supercell_matrix, perturbation_function_params, use_cartesian, coords_to_check",
+    "material_config, supercell_matrix, perturbation_function_params, use_cartesian, coordinates_to_check",
     [
         (
             GRAPHENE,
@@ -23,7 +23,7 @@ from .fixtures.monolayer import GRAPHENE
     ],
 )
 def test_sine_perturbation(
-    material_config, supercell_matrix, perturbation_function_params, use_cartesian, coords_to_check
+    material_config, supercell_matrix, perturbation_function_params, use_cartesian, coordinates_to_check
 ):
     material = Material.create(material_config)
     slab = create_supercell(material, supercell_matrix)
@@ -36,13 +36,13 @@ def test_sine_perturbation(
     builder = SlabPerturbationBuilder()
     perturbed_slab = builder.get_material(perturbation_config)
     # Check selected atoms to avoid using 100+ atoms fixture
-    for index, expected_coord in coords_to_check.items():
+    for index, expected_coord in coordinates_to_check.items():
         assertion_utils.assert_deep_almost_equal(expected_coord, perturbed_slab.basis.coordinates.values[index])
 
 
 @pytest.mark.parametrize(
     "material_config, supercell_matrix, perturbation_function_params, use_cartesian, preserve_distance,"
-    + " coords_to_check, expected_cell",
+    + " coordinates_to_check, expected_cell",
     [
         (
             GRAPHENE,
@@ -61,7 +61,7 @@ def test_distance_preserved_sine_perturbation(
     perturbation_function_params,
     use_cartesian,
     preserve_distance,
-    coords_to_check,
+    coordinates_to_check,
     expected_cell,
 ):
     material = Material.create(material_config)
@@ -74,7 +74,7 @@ def test_distance_preserved_sine_perturbation(
     )
     perturbed_slab = create_perturbation(configuration=perturbation_config, preserve_distance=preserve_distance)
     # Check selected atoms to avoid using 100+ atoms fixture
-    for index, expected_coord in coords_to_check.items():
+    for index, expected_coord in coordinates_to_check.items():
         assertion_utils.assert_deep_almost_equal(expected_coord, perturbed_slab.basis.coordinates.values[index])
     # Value taken from visually inspected notebook
     assertion_utils.assert_deep_almost_equal(expected_cell, perturbed_slab.lattice.vector_arrays)

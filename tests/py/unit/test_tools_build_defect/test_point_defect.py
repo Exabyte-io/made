@@ -74,7 +74,7 @@ def test_create_interstitial(crystal_config, defect_type, chemical_element, coor
 
 @pytest.mark.parametrize(
     "crystal_config, defect_type, chemical_element, coordinate, placement_method,"
-    + " expected_element, expected_coords_platform",
+    + " expected_element, expected_coordinates_platform",
     [
         (
             BULK_Si_PRIMITIVE,
@@ -94,7 +94,7 @@ def test_create_interstitial_voronoi(
     coordinate,
     placement_method,
     expected_element,
-    expected_coords_platform,
+    expected_coordinates_platform,
 ):
     crystal = Material.create(crystal_config)
     configuration = PointDefectConfiguration(
@@ -108,8 +108,8 @@ def test_create_interstitial_voronoi(
     defect = create_defect(configuration)
     assert defect.basis.elements.values[-1] == expected_element
 
-    coordinate_x86 = expected_coords_platform["x86"]
-    coordinate_arm64 = expected_coords_platform["arm64"]
+    coordinate_x86 = expected_coordinates_platform["x86"]
+    coordinate_arm64 = expected_coordinates_platform["arm64"]
     defect_coordinate = defect.basis.coordinates.values[-1]
     is_passing_on_x86 = coordinate_x86 == defect_coordinate
     is_passing_on_arm64 = coordinate_arm64 == defect_coordinate

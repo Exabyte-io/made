@@ -44,7 +44,7 @@ def test_create_adatom(
 @pytest.mark.skip(reason="we'll fix before epic-7623 is merged")
 @pytest.mark.parametrize(
     "crystal_config, position_on_surface, distance_z, chemical_element,"
-    + " expected_last_element, expected_coords_platform",
+    + " expected_last_element, expected_coordinates_platform",
     [
         (
             SI_CONVENTIONAL_SLAB_001,
@@ -60,7 +60,12 @@ def test_create_adatom(
     ],
 )
 def test_create_adatom_equidistant(
-    crystal_config, position_on_surface, distance_z, chemical_element, expected_last_element, expected_coords_platform
+    crystal_config,
+    position_on_surface,
+    distance_z,
+    chemical_element,
+    expected_last_element,
+    expected_coordinates_platform,
 ):
     # Adatom of Si at approximate 0.5, 0.5 position
     crystal = Material.create(crystal_config)
@@ -79,9 +84,9 @@ def test_create_adatom_equidistant(
     # on MacOS slab atoms have different coordinates than in GH and pyodide
     # for the same versions of packages
     if sys.platform == "darwin":
-        coordinate_expected = expected_coords_platform["darwin"]
+        coordinate_expected = expected_coordinates_platform["darwin"]
     else:
-        coordinate_expected = expected_coords_platform["other"]
+        coordinate_expected = expected_coordinates_platform["other"]
 
     defect_coordinate = defect.basis.coordinates.values[-1]
     atol = 10 ** (-COORDINATE_TOLERANCE)
@@ -91,7 +96,7 @@ def test_create_adatom_equidistant(
 @pytest.mark.skip(reason="we'll fix before epic-7623 is merged")
 @pytest.mark.parametrize(
     "crystal_config, position_on_surface, distance_z, chemical_element,"
-    + " expected_last_element, expected_coords_platform",
+    + " expected_last_element, expected_coordinates_platform",
     [
         (
             SI_CONVENTIONAL_SLAB_001,
@@ -104,7 +109,12 @@ def test_create_adatom_equidistant(
     ],
 )
 def test_create_crystal_site_adatom(
-    crystal_config, position_on_surface, distance_z, chemical_element, expected_last_element, expected_coords_platform
+    crystal_config,
+    position_on_surface,
+    distance_z,
+    chemical_element,
+    expected_last_element,
+    expected_coordinates_platform,
 ):
     # Adatom of Si (autodetect) at approximate 0.5, 0.5 position
     crystal = Material.create(crystal_config)
@@ -120,9 +130,9 @@ def test_create_crystal_site_adatom(
     assert defect.basis.elements.values[-1] == expected_last_element
 
     if sys.platform == "darwin":
-        coordinates_expected = expected_coords_platform["darwin"]
+        coordinates_expected = expected_coordinates_platform["darwin"]
     else:
-        coordinates_expected = expected_coords_platform["other"]
+        coordinates_expected = expected_coordinates_platform["other"]
     defect_coordinate = defect.basis.coordinates.values[-1]
     atol = 10 ** (-COORDINATE_TOLERANCE)
     assertion_utils.assert_deep_almost_equal(coordinates_expected, defect_coordinate, atol=atol)
