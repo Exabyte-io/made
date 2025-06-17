@@ -3,11 +3,11 @@ from typing import List, Optional
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector
-
-from ...utils import AXIS_TO_INDEX_MAP
+from mat3ra.made.tools.utils import AXIS_TO_INDEX_MAP
 
 
 def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
@@ -36,7 +36,7 @@ def merge_two_materials(
     distance_tolerance: float = 0.1,
     merge_dangerously=False,
 ) -> Material:
-    if material1.lattice != material2.lattice and not merge_dangerously:
+    if not np.allclose(material1.lattice.vector_arrays, material2.lattice.vector_arrays) and not merge_dangerously:
         raise ValueError("Lattices of the two materials must be the same.")
     merged_lattice = material1.lattice
     resolved_basis = merge_two_bases(material1.basis, material2.basis, distance_tolerance)
@@ -89,7 +89,7 @@ def stack(materials: List[Material], direction: AxisEnum) -> Material:
 def stack_two_materials(
     material_1: Material,
     material_2: Material,
-    direction: AxisEnum,
+    direction: AxisEnum = AxisEnum.z,
 ) -> Material:
     """
     Stack two materials along a specified direction by expanding lattices and merging.
@@ -107,6 +107,16 @@ def stack_two_materials(
     material_1_lattice_vectors = material_1.lattice.vector_arrays
     material_2_lattice_vectors = material_2.lattice.vector_arrays
 
+    # Check that in-plane vectors are the same
+    all_indices = [0, 1, 2]
+    in_plane_indices = [i for i in all_indices if i != lattice_vector_index]
+
+    material_1_in_plane_vectors = np.array(material_1_lattice_vectors)[in_plane_indices]
+    material_2_in_plane_vectors = np.array(material_2_lattice_vectors)[in_plane_indices]
+
+    if not np.allclose(material_1_in_plane_vectors, material_2_in_plane_vectors):
+        raise ValueError("In-plane lattice vectors of the two materials must be the same for stacking.")
+
     stacked_lattice_vectors_values = [vec.copy() for vec in material_1_lattice_vectors]
     stacked_lattice_vectors_values[lattice_vector_index] = (
         np.array(material_1_lattice_vectors[lattice_vector_index])
@@ -121,16 +131,21 @@ def stack_two_materials(
     )
 
     # Translate material2 so its atoms are positioned correctly relative to material1
-    material2_translated = material_2.clone()
+    material_2_adjusted_c = material_2.clone()
+    material_2_adjusted_c.set_new_lattice_vectors(
+        lattice_vector1=stacked_lattice_vectors_values[0],
+        lattice_vector2=stacked_lattice_vectors_values[1],
+        lattice_vector3=stacked_lattice_vectors_values[2],
+    )
     # The translation amount is the original lattice vector of material1 in the stacking direction
     translation_vec = material_1_lattice_vectors[lattice_vector_index]
-    material2_translated = translate_by_vector(material2_translated, translation_vec, use_cartesian_coordinates=True)
+    material_2_translated = translate_by_vector(material_2_adjusted_c, translation_vec, use_cartesian_coordinates=True)
 
     stacked_material = merge_two_materials(
         material1=material_1_final_lattice_config,
-        material2=material2_translated,
+        material2=material_2_translated,
         distance_tolerance=0,
-        merge_dangerously=True,  # Allows merging, assumes compatibility handled by stacking logic
+        merge_dangerously=False,
         material_name=material_1.name,
     )
 
