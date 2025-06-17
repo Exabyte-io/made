@@ -2,6 +2,7 @@ import numpy as np
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
+from mat3ra.made.tools.modify import wrap_to_unit_cell
 from mat3ra.made.tools.operations.core.unary import edit_cell
 
 
@@ -41,4 +42,5 @@ def get_orthogonal_c_slab(material: Material) -> Material:
     new_lattice_from_vectors = Lattice.from_vectors_array(new_vectors.tolist())
     new_material = edit_cell(new_material, new_lattice_from_vectors.vector_arrays)
     new_material.basis = new_basis
+    new_material = wrap_to_unit_cell(new_material)
     return new_material
