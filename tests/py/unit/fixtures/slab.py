@@ -2,12 +2,11 @@ import copy
 from functools import reduce
 from typing import Any, Dict
 
-from .bulk import SI_CONVENTIONAL_CELL  # , SI_CONVENTIONAL_CELL_FILTERED
-from .generated.fixtures import SI_PRIMITIVE_CELL_MATERIAL
+from .bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE  # , SI_CONVENTIONAL_CELL_FILTERED
 
 SI_SLAB_001_CONFIGURATION_FROM_PRIMITIVE = {
     "type": "SlabConfiguration",
-    "bulk": SI_PRIMITIVE_CELL_MATERIAL.to_dict(),
+    "bulk": BULK_Si_PRIMITIVE,
     "miller_indices": (0, 0, 1),
     "number_of_layers": 2,
     "vacuum": 5.0,
@@ -15,9 +14,8 @@ SI_SLAB_001_CONFIGURATION_FROM_PRIMITIVE = {
     "use_conventional_cell": False,
 }
 
-SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL: Dict[str, Any] = {
-    "type": "SlabConfiguration",
-    "bulk": SI_CONVENTIONAL_CELL,
+CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL: Dict[str, Any] = {
+    "bulk": BULK_Si_CONVENTIONAL,
     "miller_indices": (0, 0, 1),
     "number_of_layers": 2,
     "vacuum": 5.0,
@@ -60,7 +58,7 @@ SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": {
-            "configuration": SI_SLAB_001_CONFIGURATION_FROM_CONVENTIONAL,
+            "configuration": CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL,
             "build_parameters": SI_SLAB_001_BUILD_PARAMETERS,
         },
     },
@@ -71,22 +69,22 @@ SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
     "basis": {
         "constraints": [],
         "coordinates": [
-            {"id": 0, "value": [0.5, 0, 6.86e-7]},
-            {"id": 1, "value": [0.25, 0.25, 0.257353832]},
-            {"id": 2, "value": [0.5, 0.5, 0.17156945]},
-            {"id": 3, "value": [0.25, 0.75, 0.085785068]},
-            {"id": 4, "value": [0, 0, 0.17156945]},
-            {"id": 5, "value": [0.75, 0.25, 0.085785068]},
-            {"id": 6, "value": [0, 0.5, 6.86e-7]},
-            {"id": 7, "value": [0.75, 0.75, 0.257353832]},
-            {"id": 8, "value": [0.5, 0, 0.343138214]},
-            {"id": 9, "value": [0.25, 0.25, 0.600491359]},
-            {"id": 10, "value": [0.5, 0.5, 0.514706977]},
-            {"id": 11, "value": [0.25, 0.75, 0.428922596]},
-            {"id": 12, "value": [0, 0, 0.514706977]},
-            {"id": 13, "value": [0.75, 0.25, 0.428922596]},
-            {"id": 14, "value": [0, 0.5, 0.343138214]},
-            {"id": 15, "value": [0.75, 0.75, 0.600491359]},
+            {"id": 0, "value": [0.5, 0.0, 0.257353832]},
+            {"id": 1, "value": [0.25, 0.25, 0.17156945]},
+            {"id": 2, "value": [0.5, 0.5, 0.085785068]},
+            {"id": 3, "value": [0.25, 0.75, 6.86e-07]},
+            {"id": 4, "value": [0.0, 0.0, 0.085785068]},
+            {"id": 5, "value": [0.75, 0.25, 6.86e-07]},
+            {"id": 6, "value": [0.0, 0.5, 0.257353832]},
+            {"id": 7, "value": [0.75, 0.75, 0.17156945]},
+            {"id": 8, "value": [0.5, 0.0, 0.600491359]},
+            {"id": 9, "value": [0.25, 0.25, 0.514706977]},
+            {"id": 10, "value": [0.5, 0.5, 0.428922596]},
+            {"id": 11, "value": [0.25, 0.75, 0.343138214]},
+            {"id": 12, "value": [0.0, 0.0, 0.428922596]},
+            {"id": 13, "value": [0.75, 0.25, 0.343138214]},
+            {"id": 14, "value": [0.0, 0.5, 0.600491359]},
+            {"id": 15, "value": [0.75, 0.75, 0.514706977]},
         ],
         "elements": [
             {"id": 0, "value": "Si"},
@@ -126,7 +124,7 @@ SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
                 "type": "SlabConfiguration",
                 "stack_components": [
                     {
-                        "crystal": SI_CONVENTIONAL_CELL,
+                        "crystal": BULK_Si_CONVENTIONAL,
                         "miller_indices": [0, 0, 1],
                         "number_of_repetitions": 2,
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
@@ -150,15 +148,14 @@ SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
             {"id": 3, "value": "Si"},
         ],
         "coordinates": [
-            {"id": 0, "value": [6.66e-7, 6.66e-7, 6.07e-7]},
-            {"id": 1, "value": [0.333334, 0.333334, 0.075919407]},
-            {"id": 2, "value": [0.333334, 0.333334, 0.303675808]},
-            {"id": 3, "value": [0.666667334, 0.666667334, 0.379594608]},
+            {"id": 0, "value": [0.250000667, 0.250000667, 0.227757008]},
+            {"id": 1, "value": [0.250000666, 0.250000666, 6.07e-07]},
+            {"id": 2, "value": [0.583334, 0.583334, 0.531432208]},
+            {"id": 3, "value": [0.583334, 0.583334, 0.303675808]},
         ],
         "units": "crystal",
         "labels": [],
         "constraints": [],
-        "DEFAULT_COORDINATE_PROXIMITY_TOLERANCE": 0.1,
     },
     "lattice": {
         "a": 3.867,
@@ -177,7 +174,7 @@ SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
                 "type": "SlabConfiguration",
                 "stack_components": [
                     {
-                        "crystal": SI_PRIMITIVE_CELL_MATERIAL.to_dict(),
+                        "crystal": BULK_Si_PRIMITIVE,
                         "miller_indices": [0, 0, 1],
                         "number_of_repetitions": 2,
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
@@ -291,7 +288,7 @@ SI_SLAB_DEFAULT_PARAMETERS = {
                 "type": "SlabConfiguration",
                 "stack_components": [
                     {
-                        "crystal": SI_CONVENTIONAL_CELL,
+                        "crystal": BULK_Si_CONVENTIONAL,
                         "miller_indices": [0, 0, 1],
                         "number_of_repetitions": 1,
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
@@ -537,7 +534,7 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
                 "xy_supercell_matrix": [[1, 0], [0, 1]],
                 "stack_components": [
                     {
-                        "crystal": SI_CONVENTIONAL_CELL,
+                        "crystal": BULK_Si_CONVENTIONAL,
                         "miller_indices": [0, 0, 1],
                         "use_conventional_cell": True,
                         "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
@@ -556,5 +553,93 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
                 "use_orthogonal_c": True,
             },
         },
+    },
+}
+
+SLAB_SrTiO3_011_TERMINATION_O2 = {
+    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+    "name": "O3SrTi(011), termination O2_Pmmm_2, Slab",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Sr"},
+            {"id": 1, "value": "Ti"},
+            {"id": 2, "value": "O"},
+            {"id": 3, "value": "O"},
+            {"id": 4, "value": "O"},
+            {"id": 5, "value": "Sr"},
+            {"id": 6, "value": "Ti"},
+            {"id": 7, "value": "O"},
+            {"id": 8, "value": "O"},
+            {"id": 9, "value": "O"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0, 0.999999, 6.1e-7]},
+            {"id": 1, "value": [0.5, 0.499999, 6.1e-7]},
+            {"id": 2, "value": [0.5, 0.249999, 0.152537778]},
+            {"id": 3, "value": [0.5, 0.749999, 0.152537778]},
+            {"id": 4, "value": [0, 0.499999, 6.1e-7]},
+            {"id": 5, "value": [0, 0.499999, 0.305074946]},
+            {"id": 6, "value": [0.5, 0.999999, 0.305074946]},
+            {"id": 7, "value": [0.5, 0.749999, 0.457612114]},
+            {"id": 8, "value": [0.5, 0.249999, 0.457612114]},
+            {"id": 9, "value": [0, 0.999999, 0.305074946]},
+        ],
+        "units": "crystal",
+        "labels": [],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 3.912701,
+        "b": 5.53339482,
+        "c": 9.068928726,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+    },
+}
+
+SLAB_SrTiO3_011_TERMINATION_SrTiO = {
+    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+    "name": "O3SrTi(011), termination SrTiO_Pmmm_3, Slab",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Sr"},
+            {"id": 1, "value": "Ti"},
+            {"id": 2, "value": "O"},
+            {"id": 3, "value": "O"},
+            {"id": 4, "value": "O"},
+            {"id": 5, "value": "Sr"},
+            {"id": 6, "value": "Ti"},
+            {"id": 7, "value": "O"},
+            {"id": 8, "value": "O"},
+            {"id": 9, "value": "O"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0, 0.749999, 0.152537778]},
+            {"id": 1, "value": [0.5, 0.249999, 0.152537778]},
+            {"id": 2, "value": [0.5, 0.499999, 6.1e-7]},
+            {"id": 3, "value": [0.5, 0.999999, 6.1e-7]},
+            {"id": 4, "value": [0, 0.249999, 0.152537778]},
+            {"id": 5, "value": [0, 0.249999, 0.457612114]},
+            {"id": 6, "value": [0.5, 0.749999, 0.457612114]},
+            {"id": 7, "value": [0.5, 0.999999, 0.305074946]},
+            {"id": 8, "value": [0.5, 0.499999, 0.305074946]},
+            {"id": 9, "value": [0, 0.749999, 0.457612114]},
+        ],
+        "units": "crystal",
+        "labels": [],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 3.912701,
+        "b": 5.53339482,
+        "c": 9.068928726,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
     },
 }

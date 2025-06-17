@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.slab.entities import Termination
 from .builders import (
     SlabBuilder,
     AtomicLayersUniqueRepeatedBuilder,
@@ -15,10 +16,44 @@ from .configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
     VacuumConfiguration,
 )
-from mat3ra.made.tools.build.slab.entities import Termination
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 
 DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
+
+
+def create_atomic_layers(
+    material: Material,
+    miller_indices: Tuple[int, int, int] = (0, 0, 1),
+    termination: Termination = None,
+    number_of_layers: int = 1,
+) -> Material:
+    """
+    Creates a material composed of repeated unique atomic layers from a given crystal.
+
+    This function identifies the sequence of unique atomic layers for the given Miller
+    indices and then constructs the material by repeating this sequence, starting
+    with a given surface termination.
+
+    Args:
+        material (Material): The crystal material to create atomic layers from.
+        miller_indices (Tuple[int, int, int]): Miller indices for the atomic layers.
+        termination (Termination): The termination to use for the atomic layers.
+        number_of_layers (int): Number of times to repeat the sequence of unique atomic layers.
+    Returns:
+        Material: The atomic layers material.
+
+    """
+    atomic_layers_config = AtomicLayersUniqueRepeatedConfiguration(
+        crystal=material,
+        miller_indices=miller_indices,
+        termination_top=termination,
+        number_of_repetitions=number_of_layers,
+    )
+
+    atomic_layers_builder = AtomicLayersUniqueRepeatedBuilder()
+    atomic_layers_material = atomic_layers_builder.get_material(atomic_layers_config)
+
+    return atomic_layers_material
 
 
 def create_slab(
@@ -53,8 +88,9 @@ def create_slab(
 
     crystal_lattice_planes_material = CrystalLatticePlanesBuilder().get_material(crystal_lattice_planes_configuration)
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-        material=crystal_lattice_planes_material, miller_indices=miller_indices
+        material=crystal, miller_indices=miller_indices
     )
+
     if use_conventional_cell:
         crystal_lattice_planes_material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
 
