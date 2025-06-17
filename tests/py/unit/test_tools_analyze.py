@@ -3,19 +3,27 @@ import pytest
 
 from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
-from mat3ra.made.tools.analyze.other import get_surface_area  # get_average_interlayer_distance
+from mat3ra.made.tools.analyze.other import (
+    get_surface_area,
+    get_average_interlayer_distance,
+)
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
+from .fixtures.interface import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from .utils import assert_two_entities_deep_almost_equal
 
 
-# TODO: Uncomment and unskip before merging epic/SOF-7623
-@pytest.mark.skip
-def test_calculate_average_interlayer_distance():
-    # distance = get_average_interlayer_distance(INTERFACE_ATOMS, 1, 2)
-    # assert np.isclose(distance, 4.0725)
-    pass
+@pytest.mark.parametrize(
+    "material_config, layer_indices, expected_distance",
+    [
+        (GRAPHENE_NICKEL_INTERFACE, [0, 1], 3.0),
+    ],
+)
+def test_calculate_average_interlayer_distance(material_config, layer_indices, expected_distance):
+    material = Material.create(material_config)
+    distance = get_average_interlayer_distance(material, *layer_indices)
+    assert np.isclose(distance, expected_distance)
 
 
 @pytest.mark.parametrize(
