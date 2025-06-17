@@ -4,6 +4,7 @@ from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
 from pydantic import BaseModel
 
 from ...material import Material
+from .metadata import MaterialMetadata
 
 BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound="BaseConfigurationPydantic")
 
@@ -26,27 +27,15 @@ class BaseConfiguration(BaseModel, InMemoryEntity):
 
 
 class BaseConfigurationPydantic(InMemoryEntityPydantic):
-    """
-    Base class for material build configurations.
-    This class provides an interface for defining the configuration parameters.
-    """
-
-    type: str = "BaseConfiguration"
-
-    # TODO: remove this in the next PR
-    def to_json(self):  # typing: ignore
-        return self.to_dict()
-
-    def to_metadata(self) -> dict:
-        return self.model_dump(mode="json", exclude_none=True, exclude_unset=True)
+    pass
 
 
 class BaseSelectorParameters(BaseModel):
     default_index: int = 0
 
 
-class BaseBuilderParameters(BaseModel):
-    model_config = {"arbitrary_types_allowed": True}
+class BaseBuilderParameters(InMemoryEntityPydantic):
+    pass
 
 
 class BaseBuilder(BaseModel):
@@ -154,10 +143,7 @@ class BaseBuilder(BaseModel):
         return material
 
     def _update_material_metadata(self, material, configuration) -> Material:
-        if "build" not in material.metadata:
-            material.metadata["build"] = {}
-        material.metadata["build"]["configuration"] = configuration.to_json()
-        material.metadata["build"]["build_parameters"] = (
-            self.build_parameters.model_dump() if self.build_parameters else {}
-        )
+        metadata = MaterialMetadata(**material.metadata or {})
+        metadata.build.update(configuration=configuration, build_parameters=self.build_parameters)
+        material.metadata = metadata.to_dict()
         return material

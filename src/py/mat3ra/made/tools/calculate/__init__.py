@@ -3,6 +3,7 @@ from typing import List, Optional, Union
 from ...material import Material
 from ..analyze.other import get_surface_area
 from ..build.interface.utils import get_slab
+from ..build.metadata import MaterialMetadata
 from ..convert import decorator_convert_material_args_kwargs_to_atoms, from_ase
 from ..third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
 from .interaction_functions import sum_of_inverse_distances_squared
@@ -112,15 +113,18 @@ def calculate_interfacial_energy(
     substrate_slab = get_slab(interface, part="substrate") if substrate_slab is None else substrate_slab
     film_slab = get_slab(interface, part="film") if film_slab is None else film_slab
 
-    build_configuration = interface.metadata["build"]["configuration"] if "build" in interface.metadata else {}
+    metadata = MaterialMetadata(**interface.metadata)
+    build_configuration = metadata.build.configuration
     try:
         substrate_bulk = (
-            Material.create(build_configuration["substrate_configuration"]["bulk"])
+            Material.create(build_configuration.get("substrate_configuration", {}).get("bulk"))
             if substrate_bulk is None
             else substrate_bulk
         )
         film_bulk = (
-            Material.create(build_configuration["film_configuration"]["bulk"]) if film_bulk is None else film_bulk
+            Material.create(build_configuration.get("film_configuration", {}).get("bulk"))
+            if film_bulk is None
+            else film_bulk
         )
     except KeyError:
         raise ValueError("The substrate and film bulk materials must be provided or defined in the interface metadata.")
