@@ -39,6 +39,7 @@ from ...modify import (
     add_vacuum_sides,
     add_vacuum,
 )
+from ..metadata import MaterialMetadata
 
 
 class InterfaceBuilderParameters(BaseModel):
@@ -395,9 +396,9 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
     def _update_material_metadata(self, material, configuration) -> Material:
         updated_material = super()._update_material_metadata(material, configuration)
         if "actual_twist_angle" in material.metadata:
-            updated_material.metadata["build"]["configuration"]["actual_twist_angle"] = material.metadata[
-                "actual_twist_angle"
-            ]
+            new_metadata = MaterialMetadata(**material.metadata)
+            new_metadata.build.configuration.update(actual_twist_angle=material.metadata["actual_twist_angle"])
+            updated_material.metadata = new_metadata.to_dict()
         return updated_material
 
     def _update_material_name(

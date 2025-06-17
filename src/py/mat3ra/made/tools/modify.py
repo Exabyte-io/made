@@ -8,6 +8,7 @@ from .analyze.other import (
     get_atom_indices_within_radius_pbc,
     get_atomic_coordinates_extremum,
 )
+from .build.metadata import MaterialMetadata
 from .convert import from_ase, to_ase
 from .convert.utils import InterfacePartsEnum
 from .third_party import ase_add_vacuum
@@ -638,7 +639,8 @@ def interface_get_part(
     interface: Material,
     part: InterfacePartsEnum = InterfacePartsEnum.FILM,
 ) -> Material:
-    if interface.metadata["build"]["configuration"]["type"] != "InterfaceConfiguration":
+    metadata = MaterialMetadata(**interface.metadata)
+    if metadata.build.configuration.get("type") != "InterfaceConfiguration":
         raise ValueError("The material is not an interface.")
     interface_part_material = interface.clone()
     film_atoms_basis = interface_part_material.basis.filter_atoms_by_labels([int(part)])
