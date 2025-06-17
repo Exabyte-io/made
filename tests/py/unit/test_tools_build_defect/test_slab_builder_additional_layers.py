@@ -1,15 +1,8 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.builders import (
-    SlabDefectBuilder,
-    SlabDefectBuilderParameters,
-)
+from mat3ra.made.tools.build.defect.builders import SlabDefectBuilder, SlabDefectBuilderParameters
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.slab import (
-    SI_CONVENTIONAL_SLAB_001,
-    SI_SLAB_001_ADDED_FRACTIONAL_LAYER,
-    SI_SLAB_001_ADDED_LAYER,
-)
+from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER
 
 
 @pytest.mark.skip(reason="Slab with additional layers should be adjusted")
@@ -59,4 +52,4 @@ def test_create_material_with_additional_fractional_layers(
     slab_with_fractional_layer = builder.create_material_with_additional_layers(original_slab, layers_to_add)
 
     # Compare with expected fixture
-    assertion_utils.assert_deep_almost_equal(slab_with_fractional_layer, expected_slab) 
+    assertion_utils.assert_deep_almost_equal(slab_with_fractional_layer, expected_slab)

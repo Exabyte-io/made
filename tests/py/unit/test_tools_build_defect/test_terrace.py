@@ -37,4 +37,4 @@ def test_create_terrace(crystal_config, cut_direction, pivot_coordinate, num_add
         coordinate_expected = expected_coords_platform["other"]
     defect_coordinate = new_slab.basis.coordinates.values[-1]  # Use last atom (index 59) instead of previous index 35
     atol = 10 ** (-COORDINATE_TOLERANCE)
-    assertion_utils.assert_deep_almost_equal(coordinate_expected, defect_coordinate, atol=atol) 
+    assertion_utils.assert_deep_almost_equal(coordinate_expected, defect_coordinate, atol=atol)

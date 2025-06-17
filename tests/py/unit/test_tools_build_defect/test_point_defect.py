@@ -1,6 +1,5 @@
-import sys
-
 import pytest
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
     PointDefectBuilderParameters,
@@ -169,4 +168,4 @@ def test_create_defects(crystal_config, defect_configs_params, builder_params, e
     defect_builder_parameters = PointDefectBuilderParameters(**builder_params) if builder_params else None
     material_with_defect = create_defects(builder_parameters=defect_builder_parameters, configurations=configurations)
 
-    assert material_with_defect.basis.elements.to_dict() == expected_elements 
+    assert material_with_defect.basis.elements.to_dict() == expected_elements

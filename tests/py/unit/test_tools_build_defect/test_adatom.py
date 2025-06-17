@@ -3,10 +3,7 @@ import sys
 import pytest
 from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect import (
-    EquidistantAdatomSlabDefectBuilder,
-    create_slab_defect,
-)
+from mat3ra.made.tools.build.defect import EquidistantAdatomSlabDefectBuilder, create_slab_defect
 from mat3ra.made.tools.build.defect.builders import CrystalSiteAdatomSlabDefectBuilder
 from mat3ra.made.tools.build.defect.configuration import AdatomSlabPointDefectConfiguration
 from mat3ra.utils import assertion as assertion_utils
@@ -144,4 +141,4 @@ def test_get_equidistant_position(slab_material_config, position_on_surface, dis
         material=slab_material, position_on_surface=position_on_surface, distance_z=distance_z
     )
 
-    assertion_utils.assert_deep_almost_equal(equidistant_position, expected_center) 
+    assertion_utils.assert_deep_almost_equal(equidistant_position, expected_center)

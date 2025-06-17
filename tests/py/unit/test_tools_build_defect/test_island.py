@@ -38,4 +38,4 @@ def test_create_island(
 
     # 1 atom in the island were added for this configuration with 001 slab orientation
     assert len(defect.basis.elements.values) == len(crystal.basis.elements.values) + num_atoms_in_island
-    assert defect.basis.elements.values[-1] == expected_last_element 
+    assert defect.basis.elements.values[-1] == expected_last_element
