@@ -1,5 +1,4 @@
 import pytest
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
     PointDefectBuilderParameters,

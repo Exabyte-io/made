@@ -1,13 +1,10 @@
 import numpy as np
 import pytest
-
 from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
-from mat3ra.made.tools.analyze.other import (
-    get_surface_area,
-    get_average_interlayer_distance,
-)
+from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
+
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from .fixtures.interface import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
