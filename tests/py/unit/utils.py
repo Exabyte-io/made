@@ -59,41 +59,14 @@ def show_difference(expected_data, actual_data):
         raise AssertionError(f"Entities differ:\n{diff_str}")
 
 
-def normalize_pydantic_data(entity: Any) -> Any:
-    """
-    Centralized function to normalize any Pydantic models to plain Python data structures.
-    Handles RootModels, regular BaseModels, lists, dicts, and primitives uniformly.
-    """
-    try:
-        # Try to serialize using Pydantic's model_dump if available (v2)
-        if hasattr(entity, "model_dump"):
-            return entity.model_dump()
-        # Fall back to dict() for Pydantic v1
-        elif hasattr(entity, "dict"):
-            return entity.dict()
-        # Handle lists recursively
-        elif isinstance(entity, list):
-            return [normalize_pydantic_data(item) for item in entity]
-        # Handle dicts recursively
-        elif isinstance(entity, dict):
-            return {k: normalize_pydantic_data(v) for k, v in entity.items()}
-        # Return primitives as-is
-        else:
-            return entity
-    except Exception:
-        # If all else fails, return as-is
-        return entity
-
-
 def assert_two_entities_deep_almost_equal(entity1, entity2, rtol=1e-5, atol=1e-9):
-    # Normalize both entities to plain Python data structures
-    normalized_entity1 = normalize_pydantic_data(entity1)
-    normalized_entity2 = normalize_pydantic_data(entity2)
+    dict_1 = entity1 if isinstance(entity1, dict) else json.loads(entity1.to_json())
+    dict_2 = entity2 if isinstance(entity2, dict) else json.loads(entity2.to_json())
 
-    cleaned_dict_1 = prune_extra_keys(normalized_entity1, normalized_entity2)
+    cleaned_dict_1 = prune_extra_keys(dict_1, dict_2)
 
     sorted_dict_1 = sort_dict_recursively(cleaned_dict_1)
-    sorted_dict_2 = sort_dict_recursively(normalized_entity2)
+    sorted_dict_2 = sort_dict_recursively(dict_2)
 
     actual_data = json.loads(json.dumps(sorted_dict_1))
     expected_data = json.loads(json.dumps(sorted_dict_2))
