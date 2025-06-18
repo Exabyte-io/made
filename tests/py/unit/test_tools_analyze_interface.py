@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
-from mat3ra.utils.assertion import assert_deep_almost_equal
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .helpers import get_slab_configuration
+from .utils import assert_two_entities_deep_almost_equal
 
 TEST_CASES = [
     (
@@ -18,7 +18,7 @@ TEST_CASES = [
         0.0,
         np.identity(3).tolist(),
         [[1.0, 0.0], [0.0, 1.0]],
-        [[0.96, 0.0, 0.0], [0.0, 0.96, 0.0], [0.0, 0.0, 1.0]],
+        [[0.9643, 0.0, 0.0], [0.0, 0.9643, 0.0], [0.0, 0.0, 1.0]],
         [[1.0, 0.0], [0.0, 1.0]],
     )
 ]
@@ -56,14 +56,17 @@ def test_interface_analyzer(
         film_slab_configuration=film_slab_config,
     )
 
-    assert_deep_almost_equal(interface_analyzer.substrate_strain_matrix.root, expected_substrate_strain_matrix)
-    assert_deep_almost_equal(
+    assert_two_entities_deep_almost_equal(
+        interface_analyzer.substrate_strain_matrix.root, expected_substrate_strain_matrix
+    )
+    assert_two_entities_deep_almost_equal(
         interface_analyzer.substrate_supercell_matrix.root,
         expected_substrate_supercell_matrix,
     )
 
-    assert_deep_almost_equal(
+    assert_two_entities_deep_almost_equal(
         interface_analyzer.film_strain_matrix.root,
         expected_film_strain_matrix,
+        atol=1e-4,
     )
-    assert_deep_almost_equal(interface_analyzer.film_supercell_matrix.root, expected_film_supercell_matrix)
+    assert_two_entities_deep_almost_equal(interface_analyzer.film_supercell_matrix, expected_film_supercell_matrix)
