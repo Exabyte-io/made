@@ -30,23 +30,21 @@ def normalize_2x2_matrix(
     Normalize any matrix-like structure to a plain 2x2 list of floats.
     Returns None if normalization is not possible.
     """
-    if isinstance(matrix, SupercellMatrix2DSchema) and matrix.root:
-        matrix = matrix.root
 
-    if isinstance(matrix, SupercellMatrix2DSchemaItem):
-        return [matrix.root]
+    def unwrap(value: Any) -> Any:
+        """Recursively unwraps objects with a .root attribute and lists."""
+        if hasattr(value, "root"):
+            return unwrap(value.root)
+        if isinstance(value, list):
+            return [unwrap(item) for item in value]
+        return value
 
-    if (
-        isinstance(matrix, list)
-        and len(matrix) == 2
-        and all(isinstance(row, SupercellMatrix2DSchemaItem) for row in matrix)
-    ):
-        return [cast(SupercellMatrix2DSchemaItem, row).root for row in matrix]
+    unwrapped_matrix = unwrap(matrix)
 
-    if is_primitive_2x2_matrix(matrix):
-        return matrix  # already normalized
+    if is_primitive_2x2_matrix(unwrapped_matrix):
+        return unwrapped_matrix
 
-    return None  # unrecognized format
+    return None
 
 
 def decorator_convert_supercell_matrix_2x2_to_3x3(func: Callable) -> Callable:
