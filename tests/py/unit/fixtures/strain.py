@@ -1,4 +1,4 @@
-from typing import Dict, Any, Final
+from typing import Final
 
 BULK_Si_CONVENTIONAL_STRAINED: Final = {
     "name": "Si8",

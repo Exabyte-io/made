@@ -18,13 +18,8 @@ from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceConfiguration,
     TwistedInterfaceConfiguration,
 )
-from mat3ra.made.tools.build.slab.configuration import (
-    SlabConfiguration,
-    SlabStrainedSupercellWithGapConfiguration,
-)
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellWithGapConfiguration
 from mat3ra.utils import assertion as assertion_utils
-from mat3ra.made.tools.build.stack.configuration import StackConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE
