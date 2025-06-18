@@ -1,90 +1,39 @@
-from typing import Tuple
-
 import numpy as np
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+import pytest
 from mat3ra.utils.assertion import assert_deep_almost_equal
 
-from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
-from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from mat3ra.made.tools.build.slab.builders import (
-    AtomicLayersUniqueRepeatedBuilder,
-    SlabBuilder,
-    SlabStrainedSupercellBuilder,
-)
-from mat3ra.made.tools.build.slab.configuration import (
-    AtomicLayersUniqueRepeatedConfiguration,
-    SlabConfiguration,
-    VacuumConfiguration,
-)
-from mat3ra.made.tools.build.slab.helpers import select_slab_termination, create_slab
-from mat3ra.made.tools.operations.core.binary import stack_two_materials
-from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_Ge_CONVENTIONAL
+from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+from .helpers import get_slab_configuration, calculate_expected_film_strain_matrix
 
 
-def get_slab_configuration(
-    material_dict: dict,
-    miller_indices: Tuple[int, int, int],
-    number_of_layers: int,
-    vacuum: float,
-) -> SlabConfiguration:
-    """
-    Helper function to create a SlabConfiguration.
-    """
-    material = Material.model_validate(material_dict)
-    crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-        material=material, miller_indices=miller_indices
-    )
-    terminations = crystal_lattice_planes_analyzer.terminations
-    termination = select_slab_termination(terminations, None)
-
-    atomic_layers_repeated_configuration = AtomicLayersUniqueRepeatedConfiguration(
-        crystal=material,
-        miller_indices=miller_indices,
-        termination_top=termination,
-        number_of_repetitions=number_of_layers,
-    )
-    atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
-        atomic_layers_repeated_configuration
-    )
-    vacuum_configuration = VacuumConfiguration(
-        size=vacuum, crystal=atomic_layers_repeated_orthogonal_c, direction=AxisEnum.z
-    )
-    return SlabConfiguration(
-        stack_components=[atomic_layers_repeated_configuration, vacuum_configuration],
-        direction=AxisEnum.z,
+@pytest.fixture(name="interface_analyzer")
+def get_interface_analyzer() -> InterfaceAnalyzer:
+    substrate_slab_config = get_slab_configuration(BULK_Si_CONVENTIONAL, (0, 0, 1), 2, vacuum=0.0)
+    film_slab_config = get_slab_configuration(BULK_Ge_CONVENTIONAL, (0, 0, 1), 2, vacuum=0.0)
+    return InterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
     )
 
 
-def test_interface_analyzer():
-    # Prepare fixtures
-    substrate_slab_config = get_slab_configuration(BULK_Si_CONVENTIONAL, (0, 0, 1), 2, 1.0)
-    film_slab_config = get_slab_configuration(BULK_Ge_CONVENTIONAL, (0, 0, 1), 2, 1.0)
+def test_substrate_strain_matrix(interface_analyzer: InterfaceAnalyzer):
+    assert_deep_almost_equal(interface_analyzer.substrate_strain_matrix.root, np.identity(3).tolist())
 
-    # Run the interface analyzer
-    analyzer = InterfaceAnalyzer(
-        substrate_slab_configuration=substrate_slab_config, film_slab_configuration=film_slab_config
+
+def test_substrate_supercell_matrix(interface_analyzer: InterfaceAnalyzer):
+    assert_deep_almost_equal(interface_analyzer.substrate_supercell_matrix.root, [[1.0, 0.0], [0.0, 1.0]])
+
+
+def test_film_supercell_matrix(interface_analyzer: InterfaceAnalyzer):
+    assert_deep_almost_equal(interface_analyzer.film_supercell_matrix.root, [[1.0, 0.0], [0.0, 1.0]])
+
+
+def test_film_strain_matrix(interface_analyzer: InterfaceAnalyzer):
+    film_material = interface_analyzer.film_material
+    substrate_material = interface_analyzer.substrate_material
+    expected_film_strain_matrix = calculate_expected_film_strain_matrix(film_material, substrate_material)
+    assert_deep_almost_equal(
+        interface_analyzer.film_strain_matrix.root,
+        expected_film_strain_matrix.tolist(),
     )
-    substrate_strained_config, film_strained_config = analyzer.get_strained_configurations()
-
-    # Check the results with materials
-    substrate_slab = SlabBuilder().get_material(substrate_slab_config)
-    substrate_strained_slab = SlabStrainedSupercellBuilder().get_material(substrate_strained_config)
-    film_strained_slab = SlabStrainedSupercellBuilder().get_material(film_strained_config)
-
-    assert_deep_almost_equal(substrate_strained_slab, substrate_slab)
-
-    substrate_in_plane_vectors = substrate_strained_slab.lattice.vector_arrays[:2]
-    film_in_plane_vectors = film_strained_slab.lattice.vector_arrays[:2]
-    assert_deep_almost_equal(substrate_in_plane_vectors, film_in_plane_vectors)
-
-    # TODO: remove interface generation. This is temporary development test. only test slabs + matrices
-    stacked_interface = stack_two_materials(
-        substrate_strained_slab,
-        film_strained_slab,
-    )
-
-    assert stacked_interface.basis.elements.values == [
-        *substrate_strained_slab.basis.elements.values,
-        *film_strained_slab.basis.elements.values,
-    ]

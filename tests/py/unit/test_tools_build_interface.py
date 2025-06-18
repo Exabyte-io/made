@@ -16,13 +16,18 @@ from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceConfiguration,
     TwistedInterfaceConfiguration,
 )
-from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.slab.configuration import (
+    SlabConfiguration,
+    SlabStrainedSupercellWithGapConfiguration,
+)
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.utils import assertion as assertion_utils
 from mat3ra.made.tools.build.stack.configuration import StackConfiguration
+from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 
+from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Ge_CONVENTIONAL
+from .helpers import get_slab_configuration
 from .fixtures.monolayer import GRAPHENE
-from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
 MAX_AREA = 100
 # pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2
@@ -112,19 +117,21 @@ def test_create_commensurate_supercell_twisted_interface(
 
 def test_simple_interface_builder():
     builder = SimpleInterfaceBuilder()
-    slab_config = SI_CONVENTIONAL_SLAB_001["metadata"]["build"]["configuration"]
-    film_configuration = SlabConfiguration.from_dict(slab_config)
-    substrate_configuration = SlabConfiguration.from_dict(slab_config)
-    vacuum_configuration = film_configuration.vacuum_configuration
+    substrate_slab_config = get_slab_configuration(BULK_Si_CONVENTIONAL, (0, 0, 1), 2, vacuum=0.0)
+    film_slab_config = get_slab_configuration(BULK_Ge_CONVENTIONAL, (0, 0, 1), 2, vacuum=0.0)
 
-    film_supercell_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-    substrate_supercell_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-
-    film_strain_matrix = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-    substrate_strain_matrix = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+    analyzer = InterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
+    )
+    film_configuration = SlabStrainedSupercellWithGapConfiguration(**analyzer.film_strained_configuration.model_dump())
+    substrate_configuration = SlabStrainedSupercellWithGapConfiguration(
+        **analyzer.substrate_strained_configuration.model_dump()
+    )
+    vacuum_configuration = film_slab_config.vacuum_configuration
 
     config = InterfaceConfiguration(
         stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
     )
     interface = builder.get_material(config)
-    assert len(interface.basis.elements.values) == 24
+    assert len(interface.basis.elements.values) == 32
