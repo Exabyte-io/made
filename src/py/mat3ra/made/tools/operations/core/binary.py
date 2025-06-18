@@ -107,6 +107,10 @@ def stack_two_materials(
     material_1_lattice_vectors = material_1.lattice.vector_arrays
     material_2_lattice_vectors = material_2.lattice.vector_arrays
 
+    is_zero_thickness = np.allclose(material_2_lattice_vectors[lattice_vector_index], [0, 0, 0])
+    if is_zero_thickness:
+        return material_1.clone()
+
     # Check that in-plane vectors are the same
     all_indices = [0, 1, 2]
     in_plane_indices = [i for i in all_indices if i != lattice_vector_index]
