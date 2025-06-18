@@ -1,7 +1,8 @@
 import numpy as np
+from functools import cached_property
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material.reusable.supercell_matrix_2d import SupercellMatrix2DSchema
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
@@ -9,31 +10,23 @@ from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellConf
 
 
 class InterfaceAnalyzer(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     substrate_slab_configuration: SlabConfiguration
     film_slab_configuration: SlabConfiguration
 
-    def get_strained_configurations(
-        self,
-    ) -> tuple[SlabStrainedSupercellConfiguration, SlabStrainedSupercellConfiguration]:
-        """
-        Calculates the strain for the film to match the substrate's lattice and returns
-        the configurations for both slabs.
+    @cached_property
+    def substrate_material(self):
+        return SlabBuilder().get_material(self.substrate_slab_configuration)
 
-        The substrate is assumed to be rigid, and the film is strained to match the
-        substrate's in-plane lattice vectors.
+    @cached_property
+    def film_material(self):
+        return SlabBuilder().get_material(self.film_slab_configuration)
 
-        Returns:
-            tuple[SlabStrainedSupercellConfiguration, SlabStrainedSupercellConfiguration]:
-                A tuple containing the strained supercell configurations for the
-                substrate and the film.
-        """
-        substrate_material = SlabBuilder().get_material(self.substrate_slab_configuration)
-        film_material = SlabBuilder().get_material(self.film_slab_configuration)
+    @cached_property
+    def film_strain_matrix(self) -> Matrix3x3Schema:
+        substrate_vectors = np.array(self.substrate_material.lattice.vector_arrays)
+        film_vectors = np.array(self.film_material.lattice.vector_arrays)
 
-        substrate_vectors = np.array(substrate_material.lattice.vector_arrays)
-        film_vectors = np.array(film_material.lattice.vector_arrays)
-
-        # Assuming in-plane vectors are the first two lattice vectors
         substrate_2d_vectors = substrate_vectors[:2, :2]
         film_2d_vectors = film_vectors[:2, :2]
 
@@ -46,21 +39,32 @@ class InterfaceAnalyzer(BaseModel):
 
         film_strain_matrix_3x3 = np.identity(3)
         film_strain_matrix_3x3[:2, :2] = strain_2d_matrix
+        return Matrix3x3Schema(root=film_strain_matrix_3x3.tolist())
 
-        substrate_strain_matrix_3x3 = np.identity(3)
+    @property
+    def substrate_strain_matrix(self) -> Matrix3x3Schema:
+        return Matrix3x3Schema(root=np.identity(3).tolist())
 
-        identity_supercell_matrix = [[1.0, 0.0], [0.0, 1.0]]
+    @property
+    def substrate_supercell_matrix(self) -> SupercellMatrix2DSchema:
+        return SupercellMatrix2DSchema(root=[[1.0, 0.0], [0.0, 1.0]])
 
-        substrate_strained_config = SlabStrainedSupercellConfiguration(
+    @property
+    def film_supercell_matrix(self) -> SupercellMatrix2DSchema:
+        return SupercellMatrix2DSchema(root=[[1.0, 0.0], [0.0, 1.0]])
+
+    @cached_property
+    def substrate_strained_configuration(self) -> SlabStrainedSupercellConfiguration:
+        return SlabStrainedSupercellConfiguration(
             **self.substrate_slab_configuration.to_dict(),
-            xy_supercell_matrix=SupercellMatrix2DSchema(root=identity_supercell_matrix),
-            strain_matrix=Matrix3x3Schema(root=substrate_strain_matrix_3x3.tolist()),
+            xy_supercell_matrix=self.substrate_supercell_matrix,
+            strain_matrix=self.substrate_strain_matrix,
         )
 
-        film_strained_config = SlabStrainedSupercellConfiguration(
+    @cached_property
+    def film_strained_configuration(self) -> SlabStrainedSupercellConfiguration:
+        return SlabStrainedSupercellConfiguration(
             **self.film_slab_configuration.to_dict(),
-            xy_supercell_matrix=SupercellMatrix2DSchema(root=identity_supercell_matrix),
-            strain_matrix=Matrix3x3Schema(root=film_strain_matrix_3x3.tolist()),
+            xy_supercell_matrix=self.film_supercell_matrix,
+            strain_matrix=self.film_strain_matrix,
         )
-
-        return substrate_strained_config, film_strained_config
