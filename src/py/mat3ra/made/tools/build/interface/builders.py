@@ -1,10 +1,6 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Type
 
 import numpy as np
-from ase.build.tools import niggli_reduce
-from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
-
-from mat3ra.made.tools.operations.core.binary import stack, stack_two_materials
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
@@ -13,6 +9,8 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
+from mat3ra.made.tools.operations.core.binary import stack
 from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from .commensurate_lattice_pair import CommensurateLatticePair
 from .configuration import (
@@ -23,19 +21,17 @@ from .configuration import (
 from .enums import StrainModes, angle_to_supercell_matrix_values_for_hex
 from .termination_pair import TerminationPair, safely_select_termination_pair
 from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
+from ..metadata import MaterialMetadata
 from ..mixins import (
-    ConvertGeneratedItemsASEAtomsMixin,
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from ..slab.builders import SlabBuilder, SlabBuilderParameters, SlabStrainedSupercellBuilder
-from ..slab.configuration import SlabConfiguration
-from ..slab.helpers import create_slab
+from ..slab.builders import SlabStrainedSupercellBuilder
 from ..supercell import create_supercell
 from ..utils import merge_materials
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder, BaseBuilderParameters
-from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
+from ...convert import to_pymatgen, PymatgenInterface
 from ...modify import (
     translate_to_z_level,
     rotate,
@@ -44,8 +40,6 @@ from ...modify import (
     add_vacuum,
     wrap_to_unit_cell,
 )
-from ...operations.core.unary import mirror, strain
-from ..metadata import MaterialMetadata
 
 
 class InterfaceBuilderParameters(BaseModel):
@@ -84,7 +78,7 @@ class SimpleInterfaceBuilder(InterfaceBuilder):
     _ConfigurationType = InterfaceConfiguration
     _BuildParametersType = SimpleInterfaceBuilderParameters
     _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
-    _GeneratedItemType: type(Material) = Material
+    _GeneratedItemType: Type[Material] = Material
 
     def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[Material]:
         substrate_strained_config = configuration.substrate_configuration

@@ -15,9 +15,9 @@ from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
     SI_PRIMITIVE_SLAB_001,
+    SLAB_SI_CONVENTIONAL_001_NO_VACUUM,
     SLAB_SrTiO3_011_TERMINATION_O2,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
-    SLAB_SI_CONVENTIONAL_001_NO_VACUUM,
 )
 
 from .fixtures.generated.fixtures import BULK_SrTiO3

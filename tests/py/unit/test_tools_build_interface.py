@@ -2,12 +2,14 @@ import platform
 
 import pytest
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.build.interface import (
+    InterfaceConfiguration,
+    SimpleInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilderParameters,
     ZSLStrainMatchingParameters,
-    SimpleInterfaceBuilder,
-    InterfaceConfiguration,
+    create_interfaces,
 )
 from mat3ra.made.tools.build.interface.builders import (
     CommensurateLatticeTwistedInterfaceBuilder,
@@ -16,18 +18,12 @@ from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceConfiguration,
     TwistedInterfaceConfiguration,
 )
-from mat3ra.made.tools.build.slab.configuration import (
-    SlabConfiguration,
-    SlabStrainedSupercellWithGapConfiguration,
-)
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellWithGapConfiguration
 from mat3ra.utils import assertion as assertion_utils
-from mat3ra.made.tools.build.stack.configuration import StackConfiguration
-from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
+from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
-from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Ge_CONVENTIONAL
-from .helpers import get_slab_configuration
 from .fixtures.monolayer import GRAPHENE
+from .helpers import get_slab_configuration
 
 MAX_AREA = 100
 # pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2

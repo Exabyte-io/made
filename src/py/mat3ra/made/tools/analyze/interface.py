@@ -1,12 +1,11 @@
-import numpy as np
 from functools import cached_property
+
+import numpy as np
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material.reusable.supercell_matrix_2d import SupercellMatrix2DSchema
-from pydantic import BaseModel, ConfigDict
-
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
-from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
-from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellConfiguration
+from mat3ra.made.tools.build.slab.configuration import SlabConfiguration, SlabStrainedSupercellConfiguration
+from pydantic import BaseModel, ConfigDict
 
 
 class InterfaceAnalyzer(BaseModel):

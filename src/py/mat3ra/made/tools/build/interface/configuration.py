@@ -1,9 +1,6 @@
-from typing import Optional, Union
+from typing import Optional, Union, List
 
-from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from mat3ra.esse.models.material.reusable.supercell_matrix_2d import SupercellMatrix2DSchema
-from mat3ra.esse.models.material.reusable.supercell_matrix_3d import SupercellMatrix3DSchema
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
@@ -13,9 +10,9 @@ from ..slab.configuration import SlabConfiguration, SlabStrainedSupercellWithGap
 
 class InterfaceConfiguration(BaseConfigurationPydantic):
     # components and their modifiers added in the order they are stacked, from bottom to top
-    stack_components: list[Union[SlabStrainedSupercellWithGapConfiguration, VacuumConfiguration]]
+    stack_components: List[Union[SlabStrainedSupercellWithGapConfiguration, VacuumConfiguration]]
     direction: AxisEnum = AxisEnum.z
-    xy_shift: Optional[list[float]] = None  # If provided, the film is shifted in xy plane by the values, in Angstroms.
+    xy_shift: Optional[List[float]] = None  # If provided, the film is shifted in xy plane by the values, in Angstroms.
 
     @property
     def substrate_configuration(self) -> SlabConfiguration:

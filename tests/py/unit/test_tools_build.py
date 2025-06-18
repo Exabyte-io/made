@@ -1,5 +1,6 @@
 import pytest
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build import BaseConfigurationPydantic
 from mat3ra.made.tools.operations.core.binary import merge_materials
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.cuts import (
@@ -10,7 +11,6 @@ from unit.fixtures.cuts import (
     SECTION_MATERIAL_BASIS,
     SECTION_MATERIAL_BASIS_EXTRA_ATOM,
 )
-from mat3ra.made.tools.build import BaseConfigurationPydantic
 
 section = Material.create({**FULL_MATERIAL, **SECTION_MATERIAL_BASIS})
 cavity = Material.create({**FULL_MATERIAL, **CAVITY_MATERIAL_BASIS})

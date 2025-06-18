@@ -1,7 +1,6 @@
 from typing import Optional, Tuple
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder

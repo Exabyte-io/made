@@ -1,6 +1,5 @@
 import numpy as np
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.operations.core.unary import strain
 from mat3ra.utils import assertion as assertion_utils

@@ -94,7 +94,6 @@ class SlabBuilder(StackBuilder2Components):
 
 
 class SlabStrainedSupercellBuilder(SlabBuilder):
-
     def _generate(self, configuration: SlabStrainedSupercellConfiguration) -> List[Material]:
         materials = super()._generate(configuration)
 

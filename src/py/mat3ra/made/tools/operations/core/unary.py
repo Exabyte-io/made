@@ -2,7 +2,6 @@ import numpy as np
 from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector, wrap_to_unit_cell
 
