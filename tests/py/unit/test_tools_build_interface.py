@@ -1,4 +1,5 @@
 import platform
+from typing import Final
 
 import pytest
 from mat3ra.made.material import Material
@@ -111,37 +112,54 @@ def test_create_commensurate_supercell_twisted_interface(
     assert interface.metadata["build"]["configuration"]["actual_twist_angle"] == expected_angle
 
 
-# TODO: cehck against real fixture for interface, not number of atoms
+SUBSTRATE_SI_011: Final = {
+    "bulk_config": BULK_Si_CONVENTIONAL,
+    "miller_indices": (0, 1, 1),
+    "number_of_layers": 2,
+    "vacuum": 0.0,
+}
+
+SUBSTRATE_SI_001: Final = {
+    "bulk_config": BULK_Si_CONVENTIONAL,
+    "miller_indices": (0, 0, 1),
+    "number_of_layers": 2,
+    "vacuum": 0.0,
+}
+
+FILM_GE_001: Final = {
+    "bulk_config": BULK_Ge_CONVENTIONAL,
+    "miller_indices": (0, 0, 1),
+    "number_of_layers": 2,
+    "vacuum": 0.0,
+}
+
+FILM_SI_001: Final = {
+    "bulk_config": BULK_Si_CONVENTIONAL,
+    "miller_indices": (0, 0, 1),
+    "number_of_layers": 2,
+    "vacuum": 0.0,
+}
+
+EXPECTED_32_ATOMS: Final = {
+    "number_of_atoms": 32,
+}
+
+# TODO: check against real fixture for interface, not number of atoms
 SIMPLE_INTERFACE_BUILDER_TEST_CASES = [
-    (BULK_Si_CONVENTIONAL, (0, 1, 1), 2, 0.0, BULK_Ge_CONVENTIONAL, (0, 0, 1), 2, 0.0, 32),
-    (BULK_Si_CONVENTIONAL, (0, 0, 1), 2, 0.0, BULK_Ge_CONVENTIONAL, (0, 0, 1), 2, 0.0, 32),
-    (BULK_Si_CONVENTIONAL, (0, 0, 1), 2, 0.0, BULK_Si_CONVENTIONAL, (0, 0, 1), 2, 0.0, 32),
+    (SUBSTRATE_SI_011, FILM_GE_001, EXPECTED_32_ATOMS),
+    (SUBSTRATE_SI_001, FILM_GE_001, EXPECTED_32_ATOMS),
+    (SUBSTRATE_SI_001, FILM_SI_001, EXPECTED_32_ATOMS),
 ]
 
 
-@pytest.mark.parametrize(
-    "substrate_bulk_config, substrate_miller_indices, substrate_number_of_layers, substrate_vacuum, "
-    "film_bulk_config, film_miller_indices, film_number_of_layers, film_vacuum, "
-    "expected_number_of_atoms",
-    SIMPLE_INTERFACE_BUILDER_TEST_CASES,
-)
-def test_simple_interface_builder(
-    substrate_bulk_config,
-    substrate_miller_indices,
-    substrate_number_of_layers,
-    substrate_vacuum,
-    film_bulk_config,
-    film_miller_indices,
-    film_number_of_layers,
-    film_vacuum,
-    expected_number_of_atoms,
-):
+@pytest.mark.parametrize("substrate, film, expected", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
+def test_simple_interface_builder(substrate, film, expected):
     builder = SimpleInterfaceBuilder()
     substrate_slab_config = get_slab_configuration(
-        substrate_bulk_config, substrate_miller_indices, substrate_number_of_layers, vacuum=substrate_vacuum
+        substrate["bulk_config"], substrate["miller_indices"], substrate["number_of_layers"], vacuum=substrate["vacuum"]
     )
     film_slab_config = get_slab_configuration(
-        film_bulk_config, film_miller_indices, film_number_of_layers, vacuum=film_vacuum
+        film["bulk_config"], film["miller_indices"], film["number_of_layers"], vacuum=film["vacuum"]
     )
 
     analyzer = InterfaceAnalyzer(
@@ -158,4 +176,4 @@ def test_simple_interface_builder(
         stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
     )
     interface = builder.get_material(config)
-    assert len(interface.basis.elements.values) == expected_number_of_atoms
+    assert len(interface.basis.elements.values) == expected["number_of_atoms"]

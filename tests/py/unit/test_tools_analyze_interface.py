@@ -1,3 +1,5 @@
+from typing import Final
+
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
@@ -6,67 +8,51 @@ from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 from .helpers import get_slab_configuration
 from .utils import assert_two_entities_deep_almost_equal
 
-TEST_CASES = [
-    (
-        BULK_Si_CONVENTIONAL,
-        (0, 0, 1),
-        2,
-        0.0,
-        BULK_Ge_CONVENTIONAL,
-        (0, 0, 1),
-        2,
-        0.0,
-        np.identity(3).tolist(),
-        [[1.0, 0.0], [0.0, 1.0]],
-        [[0.9643, 0.0, 0.0], [0.0, 0.9643, 0.0], [0.0, 0.0, 1.0]],
-        [[1.0, 0.0], [0.0, 1.0]],
-    )
-]
+SUBSTRATE_SI_001: Final = {
+    "bulk_config": BULK_Si_CONVENTIONAL,
+    "miller_indices": (0, 0, 1),
+    "number_of_layers": 2,
+    "vacuum": 0.0,
+}
+
+FILM_GE_001: Final = {
+    "bulk_config": BULK_Ge_CONVENTIONAL,
+    "miller_indices": (0, 0, 1),
+    "number_of_layers": 2,
+    "vacuum": 0.0,
+}
+
+EXPECTED_SI_GE_001: Final = {
+    "substrate_strain_matrix": np.identity(3).tolist(),
+    "substrate_supercell_matrix": [[1.0, 0.0], [0.0, 1.0]],
+    "film_strain_matrix": [[0.9643, 0.0, 0.0], [0.0, 0.9643, 0.0], [0.0, 0.0, 1.0]],
+    "film_supercell_matrix": [[1.0, 0.0], [0.0, 1.0]],
+}
+
+TEST_CASES = [(SUBSTRATE_SI_001, FILM_GE_001, EXPECTED_SI_GE_001)]
 
 
-@pytest.mark.parametrize(
-    "substrate_bulk_config, substrate_miller_indices, substrate_number_of_layers, substrate_vacuum, "
-    + " film_bulk_config, film_miller_indices, film_number_of_layers, film_vacuum, "
-    + " expected_substrate_strain_matrix, expected_substrate_supercell_matrix,"
-    + " expected_film_strain_matrix, expected_film_supercell_matrix",
-    TEST_CASES,
-)
-def test_interface_analyzer(
-    substrate_bulk_config,
-    substrate_miller_indices,
-    substrate_number_of_layers,
-    substrate_vacuum,
-    film_bulk_config,
-    film_miller_indices,
-    film_number_of_layers,
-    film_vacuum,
-    expected_substrate_strain_matrix,
-    expected_substrate_supercell_matrix,
-    expected_film_strain_matrix,
-    expected_film_supercell_matrix,
-):
+@pytest.mark.parametrize("substrate, film, expected", TEST_CASES)
+def test_interface_analyzer(substrate, film, expected):
     substrate_slab_config = get_slab_configuration(
-        substrate_bulk_config, substrate_miller_indices, substrate_number_of_layers, vacuum=substrate_vacuum
+        substrate["bulk_config"], substrate["miller_indices"], substrate["number_of_layers"], vacuum=substrate["vacuum"]
     )
     film_slab_config = get_slab_configuration(
-        film_bulk_config, film_miller_indices, film_number_of_layers, vacuum=film_vacuum
+        film["bulk_config"], film["miller_indices"], film["number_of_layers"], vacuum=film["vacuum"]
     )
+
     interface_analyzer = InterfaceAnalyzer(
         substrate_slab_configuration=substrate_slab_config,
         film_slab_configuration=film_slab_config,
     )
 
     assert_two_entities_deep_almost_equal(
-        interface_analyzer.substrate_strain_matrix.root, expected_substrate_strain_matrix
+        interface_analyzer.substrate_strain_matrix.root, expected["substrate_strain_matrix"]
     )
     assert_two_entities_deep_almost_equal(
-        interface_analyzer.substrate_supercell_matrix.root,
-        expected_substrate_supercell_matrix,
+        interface_analyzer.substrate_supercell_matrix.root, expected["substrate_supercell_matrix"]
     )
-
     assert_two_entities_deep_almost_equal(
-        interface_analyzer.film_strain_matrix.root,
-        expected_film_strain_matrix,
-        atol=1e-4,
+        interface_analyzer.film_strain_matrix.root, expected["film_strain_matrix"], atol=1e-4
     )
-    assert_two_entities_deep_almost_equal(interface_analyzer.film_supercell_matrix, expected_film_supercell_matrix)
+    assert_two_entities_deep_almost_equal(interface_analyzer.film_supercell_matrix, expected["film_supercell_matrix"])
