@@ -4,7 +4,7 @@ import numpy as np
 from ase.build.tools import niggli_reduce
 from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 
-from mat3ra.made.tools.operations.core.binary import stack
+from mat3ra.made.tools.operations.core.binary import stack, stack_two_materials
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
@@ -28,7 +28,7 @@ from ..mixins import (
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from ..slab.builders import SlabBuilder, SlabBuilderParameters
+from ..slab.builders import SlabBuilder, SlabBuilderParameters, SlabStrainedSupercellBuilder
 from ..slab.configuration import SlabConfiguration
 from ..slab.helpers import create_slab
 from ..supercell import create_supercell
@@ -76,51 +76,25 @@ class SimpleInterfaceBuilderParameters(InterfaceBuilderParameters):
     create_slabs: bool = True  # Whether to create slabs from the configurations or use the bulk
 
 
-class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilder):
+class SimpleInterfaceBuilder(InterfaceBuilder):
     """
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
 
+    _ConfigurationType = InterfaceConfiguration
     _BuildParametersType = SimpleInterfaceBuilderParameters
     _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
     _GeneratedItemType: type(Material) = Material
 
     def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[Material]:
-        if configuration.supercell_matrices:
-            substrate_supercell_matrix_2x2 = configuration.supercell_matrices[0].model_dump()
-            film_supercell_matrix_2x2 = configuration.supercell_matrices[1].model_dump()
-        else:
-            substrate_supercell_matrix_2x2 = configuration.substrate_configuration.xy_supercell_matrix.model_dump()
-            film_supercell_matrix_2x2 = configuration.film_configuration.xy_supercell_matrix.model_dump()
+        substrate_strained_config = configuration.substrate_configuration
+        film_strained_config = configuration.film_configuration
+        substrate_strained_slab = SlabStrainedSupercellBuilder().get_material(substrate_strained_config)
+        film_strained_slab = SlabStrainedSupercellBuilder().get_material(film_strained_config)
 
-        substrate_builder = SlabBuilder(
-            build_parameters=SlabBuilderParameters(xy_supercell_matrix=substrate_supercell_matrix_2x2)
-        )
-        film_builder = SlabBuilder(
-            build_parameters=SlabBuilderParameters(xy_supercell_matrix=film_supercell_matrix_2x2)
-        )
+        vacuum_material = VacuumBuilder().get_material(configuration.vacuum_configuration)
 
-        substrate_slab = substrate_builder.get_material(configuration.stack_components[0])
-        film_slab = film_builder.get_material(configuration.stack_components[1])
-
-        if configuration.strain_matrices:
-            substrate_strain_matrix = configuration.strain_matrices[0]
-            film_strain_matrix = configuration.strain_matrices[1]
-        else:
-            substrate_strain_matrix = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-            film_strain_matrix = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-
-        film_slab_strained = strain(film_slab, film_strain_matrix)
-        substrate_slab_strained = strain(substrate_slab, substrate_strain_matrix)
-
-        film_slab_strained_inverted = mirror(film_slab_strained, direction=configuration.direction)
-        # Film and substrate should get labels (or additional metadata field for labeling) to distinguish them
-        ...
-
-        stack_components = [substrate_slab_strained, film_slab_strained_inverted]
-        if configuration.stack_components[2]:
-            vacuum_material = VacuumBuilder().get_material(configuration.stack_components[2])
-            stack_components.append(vacuum_material)
+        stack_components = [substrate_strained_slab, film_strained_slab, vacuum_material]
 
         # TODO: How slabs are oriented if stacked in x direction? Where do miller indices face?
         interface = stack(stack_components, direction=configuration.direction)

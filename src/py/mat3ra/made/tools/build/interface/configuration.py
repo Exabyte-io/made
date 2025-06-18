@@ -25,6 +25,12 @@ class InterfaceConfiguration(BaseConfigurationPydantic):
     def film_configuration(self) -> SlabConfiguration:
         return self.stack_components[1]
 
+    @property
+    def vacuum_configuration(self) -> VacuumConfiguration:
+        if len(self.stack_components) > 2:
+            return self.stack_components[2]
+        return VacuumConfiguration(size=0.0, crystal=self.film_configuration, direction=self.direction)
+
 
 # class InterfaceConfiguration(BaseModel, InMemoryEntity):
 #     """
