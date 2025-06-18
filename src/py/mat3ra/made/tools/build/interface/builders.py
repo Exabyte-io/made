@@ -29,7 +29,6 @@ from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..supercell import create_supercell
 from ..utils import merge_materials
-from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder, BaseBuilderParameters
 from ...convert import to_pymatgen, PymatgenInterface
 from ...modify import (
@@ -51,14 +50,7 @@ class InterfaceBuilder(BaseBuilder):
     _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        film_formula = get_chemical_formula(configuration.film_configuration.atomic_layers.crystal)
-        substrate_formula = get_chemical_formula(configuration.substrate_configuration.atomic_layers.crystal)
-        film_miller_indices = "".join([str(i) for i in configuration.film_configuration.atomic_layers.miller_indices])
-        substrate_miller_indices = "".join(
-            [str(i) for i in configuration.substrate_configuration.atomic_layers.miller_indices]
-        )
-        new_name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
-        material.name = new_name
+        material.name = configuration.name
         return material
 
 

@@ -29,10 +29,6 @@ class BaseConfiguration(BaseModel, InMemoryEntity):
 class BaseConfigurationPydantic(InMemoryEntityPydantic):
     pass
 
-    @classmethod
-    def from_dict(cls: Type[BaseConfigurationPydanticChild], data: dict) -> BaseConfigurationPydanticChild:
-        return cls.model_validate(data)
-
 
 class BaseSelectorParameters(BaseModel):
     default_index: int = 0

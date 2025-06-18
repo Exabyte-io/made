@@ -85,6 +85,47 @@ def stack(materials: List[Material], direction: AxisEnum) -> Material:
     return stack_two_materials(material_1=materials[0], material_2=materials[1], direction=direction)
 
 
+def should_skip_stacking(
+    material_1: Material,
+    material_2: Material,
+    lattice_vector_index: int,
+) -> bool:
+    """
+    Determine if stacking should be skipped due to zero thickness in material_2.
+
+    Also validates that materials are compatible for stacking.
+
+    Args:
+        material_1: First material to stack.
+        material_2: Second material to stack.
+        lattice_vector_index: Index of the lattice vector in the stacking direction.
+
+    Returns:
+        bool: True if stacking should be skipped (material_2 has zero thickness).
+
+    Raises:
+        ValueError: If in-plane lattice vectors are not the same.
+    """
+    material_1_lattice_vectors = material_1.lattice.vector_arrays
+    material_2_lattice_vectors = material_2.lattice.vector_arrays
+
+    is_zero_thickness = np.allclose(material_2_lattice_vectors[lattice_vector_index], [0, 0, 0])
+    if is_zero_thickness:
+        return True
+
+    # Check that in-plane vectors are the same
+    all_indices = [0, 1, 2]
+    in_plane_indices = [i for i in all_indices if i != lattice_vector_index]
+
+    material_1_in_plane_vectors = np.array(material_1_lattice_vectors)[in_plane_indices]
+    material_2_in_plane_vectors = np.array(material_2_lattice_vectors)[in_plane_indices]
+
+    if not np.allclose(material_1_in_plane_vectors, material_2_in_plane_vectors):
+        raise ValueError("In-plane lattice vectors of the two materials must be the same for stacking.")
+
+    return False
+
+
 def stack_two_materials(
     material_1: Material,
     material_2: Material,
@@ -103,43 +144,24 @@ def stack_two_materials(
     """
     lattice_vector_index = AXIS_TO_INDEX_MAP[direction.value]
 
+    if should_skip_stacking(material_1, material_2, lattice_vector_index):
+        return material_1.clone()
+
     material_1_lattice_vectors = material_1.lattice.vector_arrays
     material_2_lattice_vectors = material_2.lattice.vector_arrays
 
-    is_zero_thickness = np.allclose(material_2_lattice_vectors[lattice_vector_index], [0, 0, 0])
-    if is_zero_thickness:
-        return material_1.clone()
-
-    # Check that in-plane vectors are the same
-    all_indices = [0, 1, 2]
-    in_plane_indices = [i for i in all_indices if i != lattice_vector_index]
-
-    material_1_in_plane_vectors = np.array(material_1_lattice_vectors)[in_plane_indices]
-    material_2_in_plane_vectors = np.array(material_2_lattice_vectors)[in_plane_indices]
-
-    if not np.allclose(material_1_in_plane_vectors, material_2_in_plane_vectors):
-        raise ValueError("In-plane lattice vectors of the two materials must be the same for stacking.")
-
-    stacked_lattice_vectors_values = [vec.copy() for vec in material_1_lattice_vectors]
+    stacked_lattice_vectors_values = [vector.copy() for vector in material_1_lattice_vectors]
     stacked_lattice_vectors_values[lattice_vector_index] = (
         np.array(material_1_lattice_vectors[lattice_vector_index])
         + np.array(material_2_lattice_vectors[lattice_vector_index])
     ).tolist()
 
     material_1_final_lattice_config = material_1.clone()
-    material_1_final_lattice_config.set_new_lattice_vectors(
-        lattice_vector1=stacked_lattice_vectors_values[0],
-        lattice_vector2=stacked_lattice_vectors_values[1],
-        lattice_vector3=stacked_lattice_vectors_values[2],
-    )
+    material_1_final_lattice_config.set_new_lattice_vectors_from_vectors_array(stacked_lattice_vectors_values)
 
     # Translate material2 so its atoms are positioned correctly relative to material1
     material_2_adjusted_c = material_2.clone()
-    material_2_adjusted_c.set_new_lattice_vectors(
-        lattice_vector1=stacked_lattice_vectors_values[0],
-        lattice_vector2=stacked_lattice_vectors_values[1],
-        lattice_vector3=stacked_lattice_vectors_values[2],
-    )
+    material_2_adjusted_c.set_new_lattice_vectors_from_vectors_array(stacked_lattice_vectors_values)
     # The translation amount is the original lattice vector of material1 in the stacking direction
     translation_vec = material_1_lattice_vectors[lattice_vector_index]
     material_2_translated = translate_by_vector(material_2_adjusted_c, translation_vec, use_cartesian_coordinates=True)

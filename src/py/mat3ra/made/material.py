@@ -86,6 +86,11 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         if original_is_in_crystal_units:
             self.to_crystal()
 
+    def set_new_lattice_vectors_from_vectors_array(self, lattice_vectors: List[List[float]]) -> None:
+        if len(lattice_vectors) != 3:
+            raise ValueError("Lattice vectors array must contain exactly three vectors.")
+        self.set_new_lattice_vectors(*lattice_vectors)
+
     def set_lattice(self, lattice: Lattice) -> None:
         self.set_new_lattice_vectors(*lattice.vector_arrays)
 

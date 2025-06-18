@@ -6,6 +6,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from .. import BaseConfiguration, BaseConfigurationPydantic
 from ..slab.configuration import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
+from ...analyze.other import get_chemical_formula
 
 
 class InterfaceConfiguration(BaseConfigurationPydantic):
@@ -28,42 +29,13 @@ class InterfaceConfiguration(BaseConfigurationPydantic):
             return self.stack_components[2]
         return VacuumConfiguration(size=0.0, crystal=self.film_configuration, direction=self.direction)
 
-
-# class InterfaceConfiguration(BaseModel, InMemoryEntity):
-#     """
-#     Configuration for an interface between two slabs.
-#
-#     Args:
-#         film_configuration (SlabConfiguration): The configuration of the film slab.
-#         substrate_configuration (SlabConfiguration): The configuration of the substrate slab.
-#         film_termination (Termination): The termination of the film.
-#         substrate_termination (Termination): The termination of the substrate.
-#         distance_z (float): The distance between the film and the substrate in Angstroms.
-#         vacuum (float): The vacuum thickness, in Angstroms.
-#     """
-#
-#     film_configuration: SlabConfiguration
-#     substrate_configuration: SlabConfiguration
-#     film_termination: Termination
-#     substrate_termination: Termination
-#     distance_z: float = 3.0
-#     vacuum: float = 5.0
-#
-#     @property
-#     def termination_pair(self):
-#         return TerminationPair(self.film_termination, self.substrate_termination)
-#
-#     @property
-#     def _json(self):
-#         return {
-#             "type": "InterfaceConfiguration",
-#             "film_configuration": self.film_configuration.to_json(),
-#             "substrate_configuration": self.substrate_configuration.to_json(),
-#             "film_termination": str(self.film_termination),
-#             "substrate_termination": str(self.substrate_termination),
-#             "distance_z": self.distance_z,
-#             "vacuum": self.vacuum,
-#         }
+    @property
+    def name(self) -> str:
+        film_formula = get_chemical_formula(self.film_configuration.atomic_layers.crystal)
+        substrate_formula = get_chemical_formula(self.substrate_configuration.atomic_layers.crystal)
+        film_miller_indices = "".join([str(i) for i in self.film_configuration.atomic_layers.miller_indices])
+        substrate_miller_indices = "".join([str(i) for i in self.substrate_configuration.atomic_layers.miller_indices])
+        return f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
 
 
 class TwistedInterfaceConfiguration(BaseConfiguration):

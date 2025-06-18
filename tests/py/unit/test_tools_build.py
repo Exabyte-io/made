@@ -57,7 +57,7 @@ def test_configuration():
     assert config_dict["component"]["value_1"] == "component_value"
     assert config_dict["component"]["value_2"] == 42
 
-    configuration_from_dict = CompositeMockConfiguration.from_dict(config_dict)
+    configuration_from_dict = CompositeMockConfiguration(**config_dict)
     assert isinstance(configuration_from_dict.component, MockConfiguration)
     assert configuration_from_dict.component.value_1 == "component_value"
     assert configuration_from_dict.component.value_2 == 42

@@ -37,10 +37,9 @@ def edit_cell(material: Material, lattice_vectors=None) -> Material:
 
 
 def strain(material: Material, strain_matrix: Matrix3x3Schema) -> Material:
-    # Applies a strain to the material by modifying its lattice vectors while keeping the basis in crystal coordinates.
-
-    # The strain matrix is a 3x3 matrix that defines the strain to be applied.
-    # It should be a small perturbation to the identity matrix.
+    """
+    Applies a strain to the material by modifying its lattice vectors while keeping the basis in crystal coordinates.
+    """
     if not isinstance(strain_matrix, Matrix3x3Schema):
         raise ValueError("strain_matrix must be an instance of Matrix3x3Schema")
 
@@ -65,7 +64,9 @@ def strain(material: Material, strain_matrix: Matrix3x3Schema) -> Material:
 
 
 def mirror(material: Material, direction: AxisEnum = AxisEnum.z) -> Material:
-    # Flips the material along the specified axis by applying a right-handed supercell transformation.
+    """
+    Mirrors the material along the specified axis by applying a right-handed supercell transformation.
+    """
     supercell_matrix = {
         AxisEnum.x: [[-1, 0, 0], [0, 0, 1], [0, 1, 0]],
         AxisEnum.y: [[0, 0, 1], [0, -1, 0], [1, 0, 0]],
