@@ -1,7 +1,9 @@
 from typing import Tuple, Optional
 
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.esse.models.material.reusable.slab.miller_indices import MillerIndicesSchema
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
+    MillerIndicesSchema,
+)
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.termination import (
     TerminationSchema,
 )

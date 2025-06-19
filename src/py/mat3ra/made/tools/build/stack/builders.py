@@ -1,6 +1,10 @@
 from typing import Any, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab_strained_supercell_with_gap import (
+    AtomicLayersUniqueRepeatedSchema,
+    VacuumConfigurationSchema,
+)
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder
@@ -19,13 +23,15 @@ class StackBuilder2Components(BaseBuilder):
     def configuration_to_material(self, configuration_or_material: Any) -> Material:
         if isinstance(configuration_or_material, Material):
             return configuration_or_material
-        if isinstance(configuration_or_material, AtomicLayersUniqueRepeatedConfiguration):
+        if isinstance(
+            configuration_or_material, (AtomicLayersUniqueRepeatedConfiguration, AtomicLayersUniqueRepeatedSchema)
+        ):
             # Local import to avoid circular dependency
             from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder
 
             builder = AtomicLayersUniqueRepeatedBuilder()
             return builder.get_material(configuration_or_material)
-        if isinstance(configuration_or_material, VacuumConfiguration):
+        if isinstance(configuration_or_material, (VacuumConfiguration, VacuumConfigurationSchema)):
             builder = VacuumBuilder()
             return builder.get_material(configuration_or_material)
         raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")

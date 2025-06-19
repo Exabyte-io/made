@@ -1,17 +1,20 @@
 from typing import Optional, Union, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interfaces.configuration import (
+    InterfaceConfigurationSchema,
+)
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from .. import BaseConfiguration, BaseConfigurationPydantic
-from ..slab.configuration import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
+from ..slab.configuration import SlabConfiguration, SlabStrainedSupercellConfiguration, SlabStrainedSupercellWithGapConfiguration
 from ...analyze.other import get_chemical_formula
 
 
-class InterfaceConfiguration(BaseConfigurationPydantic):
+class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPydantic):
     # components and their modifiers added in the order they are stacked, from bottom to top
-    stack_components: List[Union[SlabStrainedSupercellWithGapConfiguration, VacuumConfiguration]]
+    stack_components: List[Union[SlabConfiguration, SlabStrainedSupercellConfiguration, SlabStrainedSupercellWithGapConfiguration, VacuumConfiguration]]
     direction: AxisEnum = AxisEnum.z
     xy_shift: Optional[List[float]] = None  # If provided, the film is shifted in xy plane by the values, in Angstroms.
 

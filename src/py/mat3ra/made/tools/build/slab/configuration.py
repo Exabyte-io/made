@@ -1,7 +1,13 @@
 from typing import List, Union, Optional
 
-from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
-from mat3ra.esse.models.material.reusable.supercell_matrix_2d import SupercellMatrix2DSchema
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import SlabConfigurationSchema
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab_strained_supercell import (
+    SlabStrainedSupercellConfigurationSchema,
+)
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab_strained_supercell_with_gap import (
+    SlabStrainedSupercellWithGapConfigurationSchema,
+)
 from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.crystal_lattice_planes import (
     CrystalLatticePlanesSchema,
 )
@@ -31,11 +37,12 @@ class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUnique):
     number_of_repetitions: int = 1
 
 
-class SlabConfiguration(StackConfiguration):
+class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     type: str = "SlabConfiguration"
     stack_components: List[
         Union[AtomicLayersUnique, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]  # No Materials!
     ]
+    direction: AxisEnum = AxisEnum.z
 
     @property
     def atomic_layers(self):
@@ -46,10 +53,9 @@ class SlabConfiguration(StackConfiguration):
         return self.stack_components[1]
 
 
-class SlabStrainedSupercellConfiguration(SlabConfiguration):
-    xy_supercell_matrix: SupercellMatrix2DSchema
-    strain_matrix: Matrix3x3Schema
+class SlabStrainedSupercellConfiguration(SlabStrainedSupercellConfigurationSchema, SlabConfiguration):
+    pass
 
 
-class SlabStrainedSupercellWithGapConfiguration(SlabStrainedSupercellConfiguration):
+class SlabStrainedSupercellWithGapConfiguration(SlabStrainedSupercellWithGapConfigurationSchema, SlabConfiguration):
     gap: Optional[float] = None  # If provided, the film is shifted to have it as smallest distance to the substrate.
