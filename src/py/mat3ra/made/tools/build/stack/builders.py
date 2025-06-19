@@ -1,7 +1,7 @@
 from typing import Any, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab_strained_supercell_with_gap import (
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab_strained_supercell import (
     AtomicLayersUniqueRepeatedSchema,
     VacuumConfigurationSchema,
 )

@@ -8,13 +8,13 @@ from .configuration import (
 )
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters
-from ..slab.configuration import SlabStrainedSupercellConfiguration
+from ..slab.configuration import SlabStrainedSupercellConfiguration, SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import StackBuilder2Components
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from ...analyze.other import get_chemical_formula
+from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
 from ...build import BaseBuilder
 from ...modify import wrap_to_unit_cell, translate_to_z_level
-from ...operations.core.unary import supercell, translate, strain
+from ...operations.core.unary import supercell, translate, strain, edit_cell
 
 
 class CrystalLatticePlanesBuilder(BaseBuilder):
@@ -104,3 +104,26 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
             material = strain(material, configuration.strain_matrix)
 
         return [material]
+
+
+class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
+    def _generate(self, configuration: SlabStrainedSupercellWithGapConfiguration) -> List[Material]:
+        materials = super()._generate(configuration)
+        material = materials[0]
+
+        if configuration.gap is not None:
+            material = self._adjust_lattice_for_gap(material, configuration.gap)
+
+        return [material]
+
+    def _adjust_lattice_for_gap(self, material: Material, gap: float) -> Material:
+        topmost_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=True)
+        new_c_length = topmost_z + gap
+
+        current_vectors = material.lattice.vector_arrays
+        new_c_vector = [0.0, 0.0, new_c_length]
+        new_lattice_vectors = [current_vectors[0], current_vectors[1], new_c_vector]
+
+        new_material = edit_cell(material, new_lattice_vectors)
+
+        return new_material
