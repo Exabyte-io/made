@@ -1,5 +1,6 @@
 from typing import List, Union, Optional
 
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import SlabConfigurationSchema
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab_strained_supercell import (
@@ -7,6 +8,9 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
 )
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab_strained_supercell_with_gap import (
     SlabStrainedSupercellWithGapConfigurationSchema,
+)
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
+    SupercellMatrix2DSchema,
 )
 from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.crystal_lattice_planes import (
     CrystalLatticePlanesSchema,
@@ -54,8 +58,15 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
 
 
 class SlabStrainedSupercellConfiguration(SlabStrainedSupercellConfigurationSchema, SlabConfiguration):
-    pass
+    type: str = "SlabStrainedSupercellConfiguration"
+    strain_matrix: Matrix3x3Schema = SlabStrainedSupercellConfigurationSchema.model_fields["strain_matrix"].default
+    xy_supercell_matrix: SupercellMatrix2DSchema = SlabStrainedSupercellConfigurationSchema.model_fields[
+        "xy_supercell_matrix"
+    ].default
 
 
-class SlabStrainedSupercellWithGapConfiguration(SlabStrainedSupercellWithGapConfigurationSchema, SlabConfiguration):
+class SlabStrainedSupercellWithGapConfiguration(
+    SlabStrainedSupercellWithGapConfigurationSchema, SlabStrainedSupercellConfiguration
+):
+    type: str = "SlabStrainedSupercellWithGapConfiguration"
     gap: Optional[float] = None  # If provided, the film is shifted to have it as smallest distance to the substrate.

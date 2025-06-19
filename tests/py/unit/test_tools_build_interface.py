@@ -19,7 +19,6 @@ from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceConfiguration,
     TwistedInterfaceConfiguration,
 )
-from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellWithGapConfiguration
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
@@ -166,10 +165,9 @@ def test_simple_interface_builder(substrate, film, expected):
         substrate_slab_configuration=substrate_slab_config,
         film_slab_configuration=film_slab_config,
     )
-    film_configuration = SlabStrainedSupercellWithGapConfiguration(**analyzer.film_strained_configuration.model_dump())
-    substrate_configuration = SlabStrainedSupercellWithGapConfiguration(
-        **analyzer.substrate_strained_configuration.model_dump()
-    )
+
+    film_configuration = analyzer.film_strained_configuration
+    substrate_configuration = analyzer.substrate_strained_configuration
     vacuum_configuration = film_slab_config.vacuum_configuration
 
     config = InterfaceConfiguration(
