@@ -3,9 +3,9 @@ from typing import Final
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
+from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
-from .helpers import get_slab_configuration
 from .utils import assert_two_entities_deep_almost_equal
 
 SUBSTRATE_SI_001: Final = {
@@ -34,10 +34,10 @@ TEST_CASES = [(SUBSTRATE_SI_001, FILM_GE_001, EXPECTED_SI_GE_001)]
 
 @pytest.mark.parametrize("substrate, film, expected", TEST_CASES)
 def test_interface_analyzer(substrate, film, expected):
-    substrate_slab_config = get_slab_configuration(
+    substrate_slab_config = create_slab_configuration(
         substrate["bulk_config"], substrate["miller_indices"], substrate["number_of_layers"], vacuum=substrate["vacuum"]
     )
-    film_slab_config = get_slab_configuration(
+    film_slab_config = create_slab_configuration(
         film["bulk_config"], film["miller_indices"], film["number_of_layers"], vacuum=film["vacuum"]
     )
 
