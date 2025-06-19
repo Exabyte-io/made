@@ -1,7 +1,7 @@
 from typing import Optional, Union, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interfaces.configuration import (  # noqa: E501
+from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interface.configuration import (  # noqa: E501
     InterfaceConfigurationSchema,
 )
 
