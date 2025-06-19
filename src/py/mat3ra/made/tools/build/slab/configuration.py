@@ -1,4 +1,4 @@
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Any
 
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
@@ -57,7 +57,7 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
         return self.stack_components[1]
 
 
-class SlabStrainedSupercellConfiguration(SlabStrainedSupercellConfigurationSchema, SlabConfiguration):
+class SlabStrainedSupercellConfiguration(SlabConfiguration, SlabStrainedSupercellConfigurationSchema):
     type: str = "SlabStrainedSupercellConfiguration"
     strain_matrix: Matrix3x3Schema = SlabStrainedSupercellConfigurationSchema.model_fields["strain_matrix"].default
     xy_supercell_matrix: SupercellMatrix2DSchema = SlabStrainedSupercellConfigurationSchema.model_fields[
@@ -66,7 +66,7 @@ class SlabStrainedSupercellConfiguration(SlabStrainedSupercellConfigurationSchem
 
 
 class SlabStrainedSupercellWithGapConfiguration(
-    SlabStrainedSupercellWithGapConfigurationSchema, SlabStrainedSupercellConfiguration
+    SlabStrainedSupercellConfiguration, SlabStrainedSupercellWithGapConfigurationSchema
 ):
     type: str = "SlabStrainedSupercellWithGapConfiguration"
     gap: Optional[float] = None  # If provided, the film is shifted to have it as smallest distance to the substrate.

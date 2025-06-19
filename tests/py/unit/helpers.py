@@ -22,7 +22,7 @@ def get_slab_configuration(
     """
     Helper function to create a SlabConfiguration.
     """
-    material = Material.model_validate(material_dict)
+    material = Material.create(material_dict)
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
         material=material, miller_indices=miller_indices
     )

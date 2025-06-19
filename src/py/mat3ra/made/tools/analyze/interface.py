@@ -56,7 +56,8 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
     @cached_property
     def substrate_strained_configuration(self) -> SlabStrainedSupercellConfiguration:
         return SlabStrainedSupercellConfiguration(
-            **self.substrate_slab_configuration.to_dict(),
+            stack_components=self.substrate_slab_configuration.stack_components,
+            direction=self.substrate_slab_configuration.direction,
             xy_supercell_matrix=self.substrate_supercell_matrix,
             strain_matrix=self.substrate_strain_matrix,
         )
@@ -64,7 +65,8 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
     @cached_property
     def film_strained_configuration(self) -> SlabStrainedSupercellConfiguration:
         return SlabStrainedSupercellConfiguration(
-            **self.film_slab_configuration.to_dict(),
+            stack_components=self.film_slab_configuration.stack_components,
+            direction=self.film_slab_configuration.direction,
             xy_supercell_matrix=self.film_supercell_matrix,
             strain_matrix=self.film_strain_matrix,
         )
