@@ -352,7 +352,7 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
                 new_film, [0, 0, item.configuration.distance_z], use_cartesian_coordinates=True
             )
             interface = merge_materials([new_substrate, new_film], merge_dangerously=True)
-            interface.metadata["actual_twist_angle"] = item.angle
+            interface.metadata = {"actual_twist_angle": item.angle}
             if item.configuration.vacuum != 0:
                 interface = add_vacuum(interface, item.configuration.vacuum)
             interfaces.append(interface)

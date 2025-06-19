@@ -6,7 +6,7 @@ from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
-from .fixtures.interface import GRAPHENE_NICKEL_INTERFACE
+from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from .utils import assert_two_entities_deep_almost_equal
 
