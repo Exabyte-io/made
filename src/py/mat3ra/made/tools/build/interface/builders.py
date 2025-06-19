@@ -1,6 +1,7 @@
 from typing import Any, List, Optional, Type
 
 import numpy as np
+from mat3ra.code.entity import InMemoryEntityPydantic
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
@@ -9,8 +10,6 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
-from mat3ra.made.tools.operations.core.binary import stack
 from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from .commensurate_lattice_pair import CommensurateLatticePair
 from .configuration import (
@@ -27,6 +26,9 @@ from ..mixins import (
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
+from ..slab.configuration import SlabStrainedSupercellConfiguration
+from ..stack.builders import StackBuilder2Components
+from ..stack.configuration import StackConfiguration
 from ..supercell import create_supercell
 from ..utils import merge_materials
 from ...build import BaseBuilder, BaseBuilderParameters
@@ -41,59 +43,55 @@ from ...modify import (
 )
 
 
-class InterfaceBuilderParameters(BaseModel):
+class InterfaceBuilderParameters(InMemoryEntityPydantic):
     pass
 
 
-class InterfaceBuilder(BaseBuilder):
-    _BuildParametersType = InterfaceBuilderParameters
-    _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
-
-    def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        material.name = configuration.name
-        return material
-
-
-########################################################################################
-#                           Simple Interface Builder                                   #
-########################################################################################
-class SimpleInterfaceBuilderParameters(InterfaceBuilderParameters):
-    scale_film: bool = True  # Whether to scale the film to match the substrate
-    create_slabs: bool = True  # Whether to create slabs from the configurations or use the bulk
-
-
-class SimpleInterfaceBuilder(InterfaceBuilder):
+class InterfaceBuilder(StackBuilder2Components):
     """
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
 
     _ConfigurationType = InterfaceConfiguration
-    _BuildParametersType = SimpleInterfaceBuilderParameters
-    _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
+    _BuildParametersType = InterfaceBuilderParameters
     _GeneratedItemType: Type[Material] = Material
 
-    def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[Material]:
-        substrate_strained_config = configuration.substrate_configuration
-        film_strained_config = configuration.film_configuration
-        substrate_strained_slab = SlabStrainedSupercellBuilder().get_material(substrate_strained_config)
-        film_strained_slab = SlabStrainedSupercellBuilder().get_material(film_strained_config)
+    def configuration_to_material(self, configuration_or_material: Any) -> Material:
+        if isinstance(configuration_or_material, Material):
+            return configuration_or_material
 
-        vacuum_material = VacuumBuilder().get_material(configuration.vacuum_configuration)
+        if isinstance(configuration_or_material, SlabStrainedSupercellConfiguration):
+            builder = SlabStrainedSupercellBuilder()
+            return builder.get_material(configuration_or_material)
 
-        stack_components = [substrate_strained_slab, film_strained_slab, vacuum_material]
+        return super().configuration_to_material(configuration_or_material)
 
-        # TODO: How slabs are oriented if stacked in x direction? Where do miller indices face?
-        interface = stack(stack_components, direction=configuration.direction)
+    def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
+        substrate_film_stack_config = StackConfiguration(
+            stack_components=[configuration.substrate_configuration, configuration.film_configuration],
+            direction=configuration.direction,
+        )
+        substrate_film_materials = super()._generate(substrate_film_stack_config)
+        interface = substrate_film_materials[0]
 
-        # After stacking, we can select film atoms and translate them in z direction to create a specified gap
-        ...
+        vacuum_config = configuration.vacuum_configuration
+        if vacuum_config.size > 0:
+            interface_vacuum_stack_config = StackConfiguration(
+                stack_components=[interface, vacuum_config], direction=configuration.direction
+            )
+            interface_vacuum_materials = super()._generate(interface_vacuum_stack_config)
+            interface = interface_vacuum_materials[0]
 
-        # Later, XY-translation can be applied to film
-        ...
+        if configuration.xy_shift:
+            interface = translate_by_vector(interface, configuration.xy_shift + [0], use_cartesian_coordinates=True)
 
-        # We wrap after possible z, x, y translations
         wrapped_interface = wrap_to_unit_cell(interface)
         return [wrapped_interface]
+
+    def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
+        """Update the material name to reflect that it's an interface."""
+        material.name = configuration.name
+        return material
 
 
 ########################################################################################

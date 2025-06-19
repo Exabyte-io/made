@@ -1,12 +1,13 @@
 import platform
+from types import SimpleNamespace
 from typing import Final
 
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.build.interface import (
+    InterfaceBuilder,
     InterfaceConfiguration,
-    SimpleInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilderParameters,
     ZSLStrainMatchingParameters,
@@ -19,11 +20,13 @@ from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceConfiguration,
     TwistedInterfaceConfiguration,
 )
+from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
+from .fixtures.interface import INTERFACE_Si_001_Ge_001
 from .fixtures.monolayer import GRAPHENE
-from .helpers import get_slab_configuration
+from .utils import assert_two_entities_deep_almost_equal
 
 MAX_AREA = 100
 # pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2
@@ -111,54 +114,32 @@ def test_create_commensurate_supercell_twisted_interface(
     assert interface.metadata["build"]["configuration"]["actual_twist_angle"] == expected_angle
 
 
-SUBSTRATE_SI_011: Final = {
-    "bulk_config": BULK_Si_CONVENTIONAL,
-    "miller_indices": (0, 1, 1),
-    "number_of_layers": 2,
-    "vacuum": 0.0,
-}
+PARAMETERS_SLAB_Si_001: Final = SimpleNamespace(
+    bulk_config=BULK_Si_CONVENTIONAL,
+    miller_indices=(0, 0, 1),
+    number_of_layers=2,
+    vacuum=0.0,
+)
 
-SUBSTRATE_SI_001: Final = {
-    "bulk_config": BULK_Si_CONVENTIONAL,
-    "miller_indices": (0, 0, 1),
-    "number_of_layers": 2,
-    "vacuum": 0.0,
-}
-
-FILM_GE_001: Final = {
-    "bulk_config": BULK_Ge_CONVENTIONAL,
-    "miller_indices": (0, 0, 1),
-    "number_of_layers": 2,
-    "vacuum": 0.0,
-}
-
-FILM_SI_001: Final = {
-    "bulk_config": BULK_Si_CONVENTIONAL,
-    "miller_indices": (0, 0, 1),
-    "number_of_layers": 2,
-    "vacuum": 0.0,
-}
-
-EXPECTED_32_ATOMS: Final = {
-    "number_of_atoms": 32,
-}
-
-# TODO: check against real fixture for interface, not number of atoms
-SIMPLE_INTERFACE_BUILDER_TEST_CASES = [
-    (SUBSTRATE_SI_011, FILM_GE_001, EXPECTED_32_ATOMS),
-    (SUBSTRATE_SI_001, FILM_GE_001, EXPECTED_32_ATOMS),
-    (SUBSTRATE_SI_001, FILM_SI_001, EXPECTED_32_ATOMS),
-]
+PARAMETERS_SLAB_Ge_001: Final = SimpleNamespace(
+    bulk_config=BULK_Ge_CONVENTIONAL,
+    miller_indices=(0, 0, 1),
+    number_of_layers=2,
+    vacuum=0.0,
+)
 
 
-@pytest.mark.parametrize("substrate, film, expected", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
-def test_simple_interface_builder(substrate, film, expected):
-    builder = SimpleInterfaceBuilder()
-    substrate_slab_config = get_slab_configuration(
-        substrate["bulk_config"], substrate["miller_indices"], substrate["number_of_layers"], vacuum=substrate["vacuum"]
+SIMPLE_INTERFACE_BUILDER_TEST_CASES = [(PARAMETERS_SLAB_Si_001, PARAMETERS_SLAB_Ge_001, INTERFACE_Si_001_Ge_001)]
+
+
+@pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
+def test_simple_interface_builder(substrate, film, expected_interface):
+    builder = InterfaceBuilder()
+    substrate_slab_config = create_slab_configuration(
+        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
     )
-    film_slab_config = get_slab_configuration(
-        film["bulk_config"], film["miller_indices"], film["number_of_layers"], vacuum=film["vacuum"]
+    film_slab_config = create_slab_configuration(
+        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
     )
 
     analyzer = InterfaceAnalyzer(
@@ -174,4 +155,4 @@ def test_simple_interface_builder(substrate, film, expected):
         stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
     )
     interface = builder.get_material(config)
-    assert len(interface.basis.elements.values) == expected["number_of_atoms"]
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
