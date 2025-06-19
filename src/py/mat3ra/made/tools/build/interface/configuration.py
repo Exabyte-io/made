@@ -27,7 +27,7 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
         ]
     ]
     direction: AxisEnum = AxisEnum.z
-    xy_shift: Optional[List[float]] = None  # If provided, the film is shifted in xy plane by the values, in Angstroms.
+    xy_shift: List[float] = InterfaceConfigurationSchema.model_fields["xy_shift"].default  # in Angstroms
 
     @property
     def substrate_configuration(self) -> SlabConfiguration:

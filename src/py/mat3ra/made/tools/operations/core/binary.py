@@ -44,10 +44,6 @@ def merge_two_materials(
     new_material = Material.create(
         {"name": name, "lattice": merged_lattice.to_dict(), "basis": resolved_basis.to_dict()}
     )
-    # Handle None metadata gracefully
-    metadata1 = material1.metadata or {}
-    metadata2 = material2.metadata or {}
-    new_material.metadata = {**metadata1, **metadata2}
     return new_material
 
 
@@ -174,4 +170,5 @@ def stack_two_materials(
         material_name=material_1.name,
     )
 
+    # Don't preserve metadata from stack operations - let builders set proper metadata
     return stacked_material
