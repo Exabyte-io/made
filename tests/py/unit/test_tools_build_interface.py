@@ -93,14 +93,14 @@ def test_zsl_interface_builder():
         max_angle_tol=0.02,
     )
 
-    configs_with_metadata = analyzer.get_strained_slab_configurations_with_metadata()
+    configs_with_metadata = analyzer.get_strained_configurations()
 
     selected_config = configs_with_metadata[0]
 
     interface_config = InterfaceConfiguration(
         stack_components=[
-            selected_config.substrate_config,
-            selected_config.film_config,
+            selected_config[0],
+            selected_config[1],
         ]
     )
 

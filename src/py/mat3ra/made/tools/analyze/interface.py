@@ -1,6 +1,6 @@
 from functools import cached_property
 from functools import cached_property
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
@@ -44,6 +44,16 @@ class BaseInterfaceAnalyzer(InMemoryEntityPydantic):
     @property
     def identity_strain(self) -> Matrix3x3Schema:
         return Matrix3x3Schema(root=np.eye(3).tolist())
+
+    def to_2d(self, lattice) -> np.ndarray:
+        """Extract 2D lattice vectors (a and b vectors) from 3D lattice."""
+        return np.array(lattice.vector_arrays[:2])
+
+    def to_3d_strain(self, strain_2d: np.ndarray) -> Matrix3x3Schema:
+        """Convert 2D strain matrix to 3D strain matrix with identity in z-direction."""
+        strain_3d = np.eye(3)
+        strain_3d[:2, :2] = strain_2d
+        return Matrix3x3Schema(root=strain_3d.tolist())
 
 
 class InterfaceAnalyzer(BaseInterfaceAnalyzer):
@@ -91,14 +101,6 @@ class InterfaceAnalyzer(BaseInterfaceAnalyzer):
         )
 
 
-class ZSLConfigurationWithStrain(InMemoryEntityPydantic):
-    """Configuration with ZSL strain metadata."""
-
-    substrate_config: SlabStrainedSupercellConfiguration
-    film_config: SlabStrainedSupercellConfiguration
-    strain_info: Dict[str, float]
-
-
 class ZSLInterfaceAnalyzer(BaseInterfaceAnalyzer):
     """Interface analyzer using Pymatgen's ZSL algorithm to find matching supercells."""
 
@@ -129,7 +131,7 @@ class ZSLInterfaceAnalyzer(BaseInterfaceAnalyzer):
     @cached_property
     def zsl_match_holders(self) -> List[ZSLMatchHolder]:
         """Get ZSL matches between substrate and film slabs."""
-        zsl_matches = self.get_pymatgen_coherent_interface_builder.zsl_matches()
+        zsl_matches = self.get_pymatgen_coherent_interface_builder.zsl_matches
         match_holders = []
         for match in zsl_matches:
             film_transformation = match.film_transformation
@@ -146,6 +148,45 @@ class ZSLInterfaceAnalyzer(BaseInterfaceAnalyzer):
             match_holders.append(match_holder)
         return match_holders
 
-    def _create_strained_config(self, match: ZSLMatchHolder) -> SlabStrainedSupercellConfiguration:
-        # break transformations into 2D supercell and strain matrices
+    def _create_strained_configs(
+        self, match: ZSLMatchHolder
+    ) -> Tuple[SlabStrainedSupercellConfiguration, SlabStrainedSupercellConfiguration]:
+        # Decompose transformation matrices into supercell and strain components
+        substrate_supercell_matrix = np.round(match.substrate_transformation).astype(int)
+        film_supercell_matrix = np.round(match.film_transformation).astype(int)
 
+        # Calculate strain matrices as the difference between actual transformation and integer supercell
+        substrate_strain_2d = np.linalg.inv(substrate_supercell_matrix) @ match.substrate_transformation
+        film_strain_2d = np.linalg.inv(film_supercell_matrix) @ match.film_transformation
+
+        substrate_supercell_2d = SupercellMatrix2DSchema(root=substrate_supercell_matrix.tolist())
+        film_supercell_2d = SupercellMatrix2DSchema(root=film_supercell_matrix.tolist())
+
+        substrate_strain_3d = self.to_3d_strain(substrate_strain_2d)
+        film_strain_3d = self.to_3d_strain(film_strain_2d)
+
+        substrate_config = SlabStrainedSupercellConfiguration(
+            stack_components=self.substrate_slab_configuration.stack_components,
+            direction=self.substrate_slab_configuration.direction,
+            xy_supercell_matrix=substrate_supercell_2d,
+            strain_matrix=substrate_strain_3d,
+        )
+
+        film_config = SlabStrainedSupercellConfiguration(
+            stack_components=self.film_slab_configuration.stack_components,
+            direction=self.film_slab_configuration.direction,
+            xy_supercell_matrix=film_supercell_2d,
+            strain_matrix=film_strain_3d,
+        )
+
+        return substrate_config, film_config
+
+    def get_strained_configurations(
+        self,
+    ) -> List[Tuple[SlabStrainedSupercellConfiguration, SlabStrainedSupercellConfiguration]]:
+        """Get strained configurations for all ZSL matches."""
+        strained_configs = []
+        for match in self.zsl_match_holders:
+            substrate_config, film_config = self._create_strained_configs(match)
+            strained_configs.append((substrate_config, film_config))
+        return strained_configs
