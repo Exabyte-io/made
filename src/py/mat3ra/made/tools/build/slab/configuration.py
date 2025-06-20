@@ -38,6 +38,7 @@ class AtomicLayersUnique(CrystalLatticePlanesConfiguration):
 
 class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUnique):
     termination_top: Termination
+    termination_bottom: Optional[Termination] = None
     number_of_repetitions: int = 1
 
 

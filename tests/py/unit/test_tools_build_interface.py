@@ -28,7 +28,6 @@ from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
-
 PARAMETERS_SLAB_Si_001: Final = SimpleNamespace(
     bulk_config=BULK_Si_CONVENTIONAL,
     miller_indices=(0, 0, 1),
