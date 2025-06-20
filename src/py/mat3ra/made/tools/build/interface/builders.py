@@ -31,6 +31,7 @@ from ..stack.builders import StackBuilder2Components
 from ..stack.configuration import StackConfiguration
 from ..supercell import create_supercell
 from ..utils import merge_materials
+from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder, BaseBuilderParameters
 from ...convert import to_pymatgen, PymatgenInterface
 from ...modify import (
@@ -74,19 +75,19 @@ class InterfaceBuilder(StackBuilder2Components):
 
     def _get_labeled_film_material(self, configuration: InterfaceConfiguration) -> Material:
         film_material = self._configuration_to_material(configuration.film_configuration)
-        if configuration.xy_shift:
-            film_material = translate_by_vector(
-                film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True
-            )
         film_labeled = film_material.clone()
         film_labeled.set_labels([1] * len(film_labeled.basis.elements.values))
         return film_labeled
 
     def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
+        labeled_film_material = self._get_labeled_film_material(configuration)
+        xy_shifted_labeled_film_material = translate_by_vector(
+            labeled_film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True
+        )
         substrate_film_stack_config = StackConfiguration(
             stack_components=[
                 self._get_labeled_substrate_material(configuration),
-                self._get_labeled_film_material(configuration),
+                xy_shifted_labeled_film_material,
             ],
             direction=configuration.direction,
         )
@@ -105,8 +106,14 @@ class InterfaceBuilder(StackBuilder2Components):
         return [wrapped_interface]
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        """Update the material name to reflect that it's an interface."""
-        material.name = configuration.name
+        film_formula = get_chemical_formula(configuration.film_configuration.atomic_layers.crystal)
+        substrate_formula = get_chemical_formula(configuration.substrate_configuration.atomic_layers.crystal)
+        film_miller_indices = "".join([str(i) for i in configuration.film_configuration.atomic_layers.miller_indices])
+        substrate_miller_indices = "".join(
+            [str(i) for i in configuration.substrate_configuration.atomic_layers.miller_indices]
+        )
+        name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
+        material.name = name
         return material
 
 

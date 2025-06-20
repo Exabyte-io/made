@@ -2,13 +2,9 @@ from typing import Optional
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
-from ...convert import from_ase, to_ase
-from ...third_party import ase_make_supercell
-from ...utils import decorator_convert_supercell_matrix_2x2_to_3x3
 
 
 def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
@@ -88,24 +84,3 @@ def should_skip_stacking(
         raise ValueError("In-plane lattice vectors of the two materials must be the same for stacking.")
 
     return False
-
-
-@decorator_convert_supercell_matrix_2x2_to_3x3
-def mirror(material: Material, direction: AxisEnum = AxisEnum.z) -> Material:
-    """
-    Mirrors the material along the specified axis by applying a right-handed supercell transformation.
-    """
-    supercell_matrix = {
-        AxisEnum.x: [[-1, 0, 0], [0, 0, 1], [0, 1, 0]],
-        AxisEnum.y: [[0, 0, 1], [0, -1, 0], [1, 0, 0]],
-        AxisEnum.z: [[0, 1, 0], [1, 0, 0], [0, 0, -1]],
-    }.get(direction)
-
-    atoms = to_ase(material)
-
-    supercell_atoms = ase_make_supercell(atoms, supercell_matrix)
-    new_material = Material.create(from_ase(supercell_atoms))
-    if material.metadata:
-        new_material.metadata = material.metadata
-    new_material.name = material.name
-    return new_material

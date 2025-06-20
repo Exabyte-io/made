@@ -1,6 +1,9 @@
 from typing import Optional, Union, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interface.configuration import (  # noqa: E501
+    InterfaceConfigurationSchema,
+)
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
@@ -11,10 +14,8 @@ from ..slab.configuration import (
     SlabStrainedSupercellWithGapConfiguration,
 )
 
-from ...analyze.other import get_chemical_formula
 
-
-class InterfaceConfiguration(BaseConfigurationPydantic):
+class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPydantic):
     # components and their modifiers added in the order they are stacked, from bottom to top
     stack_components: List[
         Union[
@@ -25,36 +26,21 @@ class InterfaceConfiguration(BaseConfigurationPydantic):
         ]
     ]
     direction: AxisEnum = AxisEnum.z
-    xy_shift: List[float] = [0.0, 0.0]  # in Angstroms
+    xy_shift: List[float] = InterfaceConfigurationSchema.model_fields["xy_shift"].default  # in Angstroms
 
     @property
-    def substrate_configuration(
-        self,
-    ) -> Union[SlabConfiguration, SlabStrainedSupercellConfiguration, SlabStrainedSupercellWithGapConfiguration]:
+    def substrate_configuration(self) -> SlabConfiguration:
         return self.stack_components[0]
 
     @property
-    def film_configuration(
-        self,
-    ) -> Union[SlabConfiguration, SlabStrainedSupercellConfiguration, SlabStrainedSupercellWithGapConfiguration]:
+    def film_configuration(self) -> SlabConfiguration:
         return self.stack_components[1]
 
     @property
     def vacuum_configuration(self) -> VacuumConfiguration:
         if len(self.stack_components) > 2:
             return self.stack_components[2]
-
-        return VacuumConfiguration(
-            size=0.0, crystal=self.film_configuration.atomic_layers.crystal, direction=self.direction
-        )
-
-    @property
-    def name(self) -> str:
-        film_formula = get_chemical_formula(self.film_configuration.atomic_layers.crystal)
-        substrate_formula = get_chemical_formula(self.substrate_configuration.atomic_layers.crystal)
-        film_miller_indices = "".join([str(i) for i in self.film_configuration.atomic_layers.miller_indices])
-        substrate_miller_indices = "".join([str(i) for i in self.substrate_configuration.atomic_layers.miller_indices])
-        return f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
+        return VacuumConfiguration(size=0.0, crystal=self.film_configuration, direction=self.direction)
 
 
 class TwistedInterfaceConfiguration(BaseConfiguration):
