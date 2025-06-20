@@ -13,7 +13,6 @@ from ..slab.configuration import (
     SlabStrainedSupercellConfiguration,
     SlabStrainedSupercellWithGapConfiguration,
 )
-from ...analyze.other import get_chemical_formula
 
 
 class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPydantic):
@@ -42,14 +41,6 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
         if len(self.stack_components) > 2:
             return self.stack_components[2]
         return VacuumConfiguration(size=0.0, crystal=self.film_configuration, direction=self.direction)
-
-    @property
-    def name(self) -> str:
-        film_formula = get_chemical_formula(self.film_configuration.atomic_layers.crystal)
-        substrate_formula = get_chemical_formula(self.substrate_configuration.atomic_layers.crystal)
-        film_miller_indices = "".join([str(i) for i in self.film_configuration.atomic_layers.miller_indices])
-        substrate_miller_indices = "".join([str(i) for i in self.substrate_configuration.atomic_layers.miller_indices])
-        return f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
 
 
 class TwistedInterfaceConfiguration(BaseConfiguration):

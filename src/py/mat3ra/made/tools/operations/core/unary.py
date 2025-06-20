@@ -50,12 +50,7 @@ def strain(material: Material, strain_matrix: Matrix3x3Schema) -> Material:
 
     original_crystal_coords = new_material.basis.coordinates.values
 
-    new_material.set_new_lattice_vectors(
-        lattice_vector1=new_lattice_vectors[0],
-        lattice_vector2=new_lattice_vectors[1],
-        lattice_vector3=new_lattice_vectors[2],
-    )
-
+    new_material.set_new_lattice_vectors_from_vectors_array(new_lattice_vectors)
     new_material.basis.coordinates.values = original_crystal_coords
 
     return new_material
