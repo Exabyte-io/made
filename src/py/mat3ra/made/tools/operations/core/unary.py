@@ -1,6 +1,8 @@
 import numpy as np
 from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector, wrap_to_unit_cell
 
@@ -53,4 +55,25 @@ def strain(material: Material, strain_matrix: Matrix3x3Schema) -> Material:
     new_material.set_new_lattice_vectors_from_vectors_array(new_lattice_vectors)
     new_material.basis.coordinates.values = original_crystal_coords
 
+    return new_material
+
+
+@decorator_convert_supercell_matrix_2x2_to_3x3
+def mirror(material: Material, direction: AxisEnum = AxisEnum.z) -> Material:
+    """
+    Mirrors the material along the specified axis by applying a right-handed supercell transformation.
+    """
+    supercell_matrix = {
+        AxisEnum.x: [[-1, 0, 0], [0, 0, 1], [0, 1, 0]],
+        AxisEnum.y: [[0, 0, 1], [0, -1, 0], [1, 0, 0]],
+        AxisEnum.z: [[0, 1, 0], [1, 0, 0], [0, 0, -1]],
+    }.get(direction)
+
+    atoms = to_ase(material)
+
+    supercell_atoms = ase_make_supercell(atoms, supercell_matrix)
+    new_material = Material.create(from_ase(supercell_atoms))
+    if material.metadata:
+        new_material.metadata = material.metadata
+    new_material.name = material.name
     return new_material
