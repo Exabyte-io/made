@@ -82,6 +82,7 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
 
 class ZSLConfigurationWithStrain(InMemoryEntityPydantic):
     """Configuration with ZSL strain information."""
+
     substrate_config: SlabStrainedSupercellConfiguration
     film_config: SlabStrainedSupercellConfiguration
     strain_info: Dict[str, float]
@@ -119,24 +120,28 @@ class ZSLInterfaceAnalyzer(InMemoryEntityPydantic):
         film_vectors = np.array(self.film_material.lattice.vector_arrays)
         substrate_2d = substrate_vectors[:2, :2]  # Take first 2 rows and first 2 columns
         film_2d = film_vectors[:2, :2]  # Take first 2 rows and first 2 columns
-        
+
         # Get the superlattice vectors from the ZSL match
         # These are the matched superlattice vectors that should have nearly the same lengths and angles
         substrate_sl_2d = np.array(match.substrate_sl_vectors)  # These are the actual superlattice vectors
         film_sl_2d = np.array(match.film_sl_vectors)  # These are the actual superlattice vectors
-        
+
         # Calculate strains by comparing superlattice vectors to original vectors
         # For substrate strain: (|sl_vector| - |original_vector|) / |original_vector|
-        substrate_a_strain = (np.linalg.norm(substrate_sl_2d[0]) - np.linalg.norm(substrate_2d[0])) / np.linalg.norm(substrate_2d[0])
-        substrate_b_strain = (np.linalg.norm(substrate_sl_2d[1]) - np.linalg.norm(substrate_2d[1])) / np.linalg.norm(substrate_2d[1])
-        
+        substrate_a_strain = (np.linalg.norm(substrate_sl_2d[0]) - np.linalg.norm(substrate_2d[0])) / np.linalg.norm(
+            substrate_2d[0]
+        )
+        substrate_b_strain = (np.linalg.norm(substrate_sl_2d[1]) - np.linalg.norm(substrate_2d[1])) / np.linalg.norm(
+            substrate_2d[1]
+        )
+
         film_a_strain = (np.linalg.norm(film_sl_2d[0]) - np.linalg.norm(film_2d[0])) / np.linalg.norm(film_2d[0])
         film_b_strain = (np.linalg.norm(film_sl_2d[1]) - np.linalg.norm(film_2d[1])) / np.linalg.norm(film_2d[1])
-        
+
         # Calculate average strains
         substrate_avg_strain = (abs(substrate_a_strain) + abs(substrate_b_strain)) / 2
         film_avg_strain = (abs(film_a_strain) + abs(film_b_strain)) / 2
-        
+
         return {
             "substrate_strain": substrate_avg_strain,
             "film_strain": film_avg_strain,
@@ -149,10 +154,10 @@ class ZSLInterfaceAnalyzer(InMemoryEntityPydantic):
     def _get_supercell_matrix_from_sl_vectors(self, sl_vectors) -> np.ndarray:
         """
         Convert superlattice vectors to supercell matrix.
-        
+
         Args:
             sl_vectors: List of superlattice vectors from ZSL match
-            
+
         Returns:
             2x2 supercell matrix as numpy array
         """
@@ -161,73 +166,63 @@ class ZSLInterfaceAnalyzer(InMemoryEntityPydantic):
         matrix = np.array(sl_vectors)
         if matrix.shape != (2, 2):
             raise ValueError(f"Expected 2x2 superlattice vectors, got shape {matrix.shape}")
-        
+
         # Round to nearest integers as supercell matrices should be integers
         return np.round(matrix).astype(int)
 
-    def get_strained_slab_configurations(self) -> List[Tuple[SlabStrainedSupercellConfiguration, SlabStrainedSupercellConfiguration]]:
+    def get_strained_slab_configurations(
+        self,
+    ) -> List[Tuple[SlabStrainedSupercellConfiguration, SlabStrainedSupercellConfiguration]]:
         """
         Generate strained slab configurations for substrate and film using ZSL algorithm.
-        
+
         Returns:
             List of tuples (substrate_config, film_config) for each ZSL match.
         """
         from pymatgen.analysis.interfaces.zsl import vec_area
-        
-        # Get the 2D (in-plane) lattice vectors for ZSL analysis
+
         substrate_vectors = np.array(self.substrate_material.lattice.vector_arrays)
         film_vectors = np.array(self.film_material.lattice.vector_arrays)
-        substrate_2d = substrate_vectors[:2, :2]  # Take first 2 rows and first 2 columns
-        film_2d = film_vectors[:2, :2]  # Take first 2 rows and first 2 columns
-        
-        # Calculate areas of the 2D lattices
+        substrate_2d = substrate_vectors[:2, :2]
+        film_2d = film_vectors[:2, :2]
+
         substrate_area = vec_area(substrate_2d[0], substrate_2d[1])
         film_area = vec_area(film_2d[0], film_2d[1])
-        
+
         configurations = []
-        
-        # Use the cached ZSL generator
+
         zsl_generator = self._zsl_generator
-        
-        # Generate transformation sets for the given areas
+
         transformation_sets = zsl_generator.generate_sl_transformation_sets(film_area, substrate_area)
-        
-        # Get equivalent transformations that produce matching superlattices
+
         zsl_matches = zsl_generator.get_equiv_transformations(transformation_sets, film_2d, substrate_2d)
-        
+
         for match in zsl_matches:
             # match is a list with 4 arrays: [film_sl_vectors, substrate_sl_vectors, film_transformation, substrate_transformation]
             film_sl_vectors = match[0]
             substrate_sl_vectors = match[1]
             film_transformation = match[2]
             substrate_transformation = match[3]
-            
-            # Calculate strain matrices to transform original lattices to matching superlattices
-            # The superlattice vectors should be equal after applying strain: substrate_sl_vectors ≈ film_sl_vectors
-            # We want: strain_matrix @ original_2d @ transformation = target_sl_vectors
-            # So: strain_matrix = target_sl_vectors @ inv(original_2d @ transformation)
-            
-            # For substrate: use the substrate superlattice vectors as target
+
             substrate_transformed_2d = substrate_2d @ substrate_transformation
             try:
                 substrate_strain_2d = substrate_sl_vectors @ np.linalg.inv(substrate_transformed_2d)
             except np.linalg.LinAlgError:
-                substrate_strain_2d = np.eye(2)  # fallback to identity
-            
-            # For film: use the substrate superlattice vectors as target (they should match)
+                substrate_strain_2d = np.eye(2)
+
             film_transformed_2d = film_2d @ film_transformation
             try:
                 film_strain_2d = substrate_sl_vectors @ np.linalg.inv(film_transformed_2d)
             except np.linalg.LinAlgError:
-                film_strain_2d = np.eye(2)  # fallback to identity
-            
+                film_strain_2d = np.eye(2)
+
             # Convert 2D strain matrices to 3D
             substrate_strain_3d = np.eye(3)
             substrate_strain_3d[:2, :2] = substrate_strain_2d
-            
+
             film_strain_3d = np.eye(3)
             film_strain_3d[:2, :2] = film_strain_2d
-            
+
             # Create strained slab configurations
             substrate_config = SlabStrainedSupercellConfiguration(
                 stack_components=self.substrate_slab_configuration.stack_components,
@@ -241,68 +236,68 @@ class ZSLInterfaceAnalyzer(InMemoryEntityPydantic):
                 xy_supercell_matrix=film_transformation.astype(int).tolist(),
                 strain_matrix=film_strain_3d.tolist(),
             )
-            
+
             configurations.append((substrate_config, film_config))
-        
+
         return configurations
 
     def get_strained_slab_configurations_with_metadata(self) -> List[ZSLConfigurationWithStrain]:
         """
         Generate strained slab configurations with strain metadata.
-        
+
         Returns:
             List of ZSLConfigurationWithStrain objects containing configurations and strain info.
         """
         from pymatgen.analysis.interfaces.zsl import vec_area
-        
+
         # Get the 2D (in-plane) lattice vectors for ZSL analysis
         substrate_vectors = np.array(self.substrate_material.lattice.vector_arrays)
         film_vectors = np.array(self.film_material.lattice.vector_arrays)
         substrate_2d = substrate_vectors[:2, :2]  # Take first 2 rows and first 2 columns
         film_2d = film_vectors[:2, :2]  # Take first 2 rows and first 2 columns
-        
+
         # Calculate areas of the 2D lattices
         substrate_area = vec_area(substrate_2d[0], substrate_2d[1])
         film_area = vec_area(film_2d[0], film_2d[1])
-        
+
         configurations = []
-        
+
         # Use the cached ZSL generator
         zsl_generator = self._zsl_generator
-        
+
         # Generate transformation sets for the given areas
         transformation_sets = zsl_generator.generate_sl_transformation_sets(film_area, substrate_area)
-        
+
         # Get equivalent transformations that produce matching superlattices
         zsl_matches = zsl_generator.get_equiv_transformations(transformation_sets, film_2d, substrate_2d)
-        
+
         for match in zsl_matches:
             # match is a list with 4 arrays: [film_sl_vectors, substrate_sl_vectors, film_transformation, substrate_transformation]
             film_sl_vectors = match[0]
             substrate_sl_vectors = match[1]
             film_transformation = match[2]
             substrate_transformation = match[3]
-            
+
             # Calculate strain matrices to transform original lattices to matching superlattices
             substrate_transformed_2d = substrate_2d @ substrate_transformation
             try:
                 substrate_strain_2d = substrate_sl_vectors @ np.linalg.inv(substrate_transformed_2d)
             except np.linalg.LinAlgError:
                 substrate_strain_2d = np.eye(2)
-            
+
             film_transformed_2d = film_2d @ film_transformation
             try:
                 film_strain_2d = substrate_sl_vectors @ np.linalg.inv(film_transformed_2d)
             except np.linalg.LinAlgError:
                 film_strain_2d = np.eye(2)
-            
+
             # Convert 2D strain matrices to 3D
             substrate_strain_3d = np.eye(3)
             substrate_strain_3d[:2, :2] = substrate_strain_2d
-            
+
             film_strain_3d = np.eye(3)
             film_strain_3d[:2, :2] = film_strain_2d
-            
+
             # Create strained slab configurations
             substrate_config = SlabStrainedSupercellConfiguration(
                 stack_components=self.substrate_slab_configuration.stack_components,
@@ -316,21 +311,19 @@ class ZSLInterfaceAnalyzer(InMemoryEntityPydantic):
                 xy_supercell_matrix=film_transformation.astype(int).tolist(),
                 strain_matrix=film_strain_3d.tolist(),
             )
-            
+
             # Calculate strain information using the strain matrices
-            strain_info = self._extract_strain_from_strain_matrices(
-                substrate_strain_2d, film_strain_2d
+            strain_info = self._extract_strain_from_strain_matrices(substrate_strain_2d, film_strain_2d)
+
+            configurations.append(
+                ZSLConfigurationWithStrain(
+                    substrate_config=substrate_config, film_config=film_config, strain_info=strain_info
+                )
             )
-            
-            configurations.append(ZSLConfigurationWithStrain(
-                substrate_config=substrate_config,
-                film_config=film_config,
-                strain_info=strain_info
-            ))
-        
+
         # Sort by average strain (lowest first)
         configurations.sort(key=lambda x: (x.strain_info["substrate_strain"] + x.strain_info["film_strain"]) / 2)
-        
+
         return configurations
 
     def _extract_strain_from_strain_matrices(self, substrate_strain_2d, film_strain_2d) -> Dict[str, float]:
@@ -339,23 +332,23 @@ class ZSLInterfaceAnalyzer(InMemoryEntityPydantic):
         # The strain matrix represents the deformation: strained = strain_matrix @ original
         # For strain calculation: strain = (strained_length - original_length) / original_length
         # If strain_matrix is S, then strain = |S| - 1 for each principal direction
-        
+
         # Calculate the determinant and eigenvalues to get strain information
         substrate_det = np.linalg.det(substrate_strain_2d)
         film_det = np.linalg.det(film_strain_2d)
-        
+
         # Get eigenvalues to understand principal strains
         substrate_eigenvals = np.linalg.eigvals(substrate_strain_2d)
         film_eigenvals = np.linalg.eigvals(film_strain_2d)
-        
+
         # Calculate strains as (stretch_factor - 1)
         substrate_strains = np.abs(substrate_eigenvals - 1.0)
         film_strains = np.abs(film_eigenvals - 1.0)
-        
+
         # Average strain for each material
         substrate_avg_strain = np.mean(substrate_strains)
         film_avg_strain = np.mean(film_strains)
-        
+
         return {
             "substrate_strain": float(substrate_avg_strain),
             "film_strain": float(film_avg_strain),
