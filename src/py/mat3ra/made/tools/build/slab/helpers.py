@@ -67,7 +67,7 @@ def create_slab_configuration(
     """
     if isinstance(material_or_dict, dict):
         material = Material.create(material_or_dict)
-    elif isinstance(material_or_dict, Material):
+    else:
         material = material_or_dict
 
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(

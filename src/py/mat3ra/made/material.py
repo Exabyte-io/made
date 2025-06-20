@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Union
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
@@ -96,3 +96,6 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
 
     def add_atom(self, element: str, coordinate: List[float], use_cartesian_coordinates: bool = False) -> None:
         self.basis.add_atom(element, coordinate, use_cartesian_coordinates)
+
+    def set_labels(self, labels: List[Union[int, str]]) -> None:
+        self.basis.set_labels(labels)

@@ -2,15 +2,15 @@ from typing import Any, List, Optional, Type
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
+from mat3ra.made.lattice import Lattice
+from mat3ra.made.material import Material
+from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
 )
 
-from mat3ra.made.lattice import Lattice
-from mat3ra.made.material import Material
-from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from .commensurate_lattice_pair import CommensurateLatticePair
 from .configuration import (
     InterfaceConfiguration,
@@ -67,8 +67,21 @@ class InterfaceBuilder(StackBuilder2Components):
         return super().configuration_to_material(configuration_or_material)
 
     def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
+        substrate_material = self.configuration_to_material(configuration.substrate_configuration)
+        film_material = self.configuration_to_material(configuration.film_configuration)
+        if configuration.xy_shift:
+            film_material = translate_by_vector(
+                film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True
+            )
+
+        substrate_labeled = substrate_material.clone()
+        substrate_labeled.set_labels([0] * len(substrate_labeled.basis.elements.values))
+
+        film_labeled = film_material.clone()
+        film_labeled.set_labels([1] * len(film_labeled.basis.elements.values))
+
         substrate_film_stack_config = StackConfiguration(
-            stack_components=[configuration.substrate_configuration, configuration.film_configuration],
+            stack_components=[substrate_labeled, film_labeled],
             direction=configuration.direction,
         )
         substrate_film_materials = super()._generate(substrate_film_stack_config)
@@ -81,9 +94,6 @@ class InterfaceBuilder(StackBuilder2Components):
             )
             interface_vacuum_materials = super()._generate(interface_vacuum_stack_config)
             interface = interface_vacuum_materials[0]
-
-        if configuration.xy_shift:
-            interface = translate_by_vector(interface, configuration.xy_shift + [0], use_cartesian_coordinates=True)
 
         wrapped_interface = wrap_to_unit_cell(interface)
         return [wrapped_interface]

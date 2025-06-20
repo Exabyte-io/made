@@ -153,6 +153,14 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.coordinates.filter_by_ids(ids)
         return self
 
+    def set_labels(self, labels: List[Union[int, str]]) -> None:
+        num_atoms = len(self.elements.values)
+
+        if len(labels) != num_atoms:
+            raise ValueError(f"Number of labels ({len(labels)}) must match number of atoms ({num_atoms})")
+
+        self.labels = ArrayWithIds.from_values(values=list(labels))
+
     def transform_by_matrix(self, matrix: Matrix3x3Schema) -> None:
         original_is_in_crystal_units = self.is_in_crystal_units
         self.to_crystal()
