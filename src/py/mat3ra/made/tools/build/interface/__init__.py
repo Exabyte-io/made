@@ -9,22 +9,22 @@ from ...optimize import evaluate_calculator_on_xy_grid
 from .builders import (
     InterfaceBuilder,
     InterfaceBuilderParameters,
-    ZSLStrainMatchingParameters,
-    ZSLStrainMatchingInterfaceBuilder,
-    ZSLStrainMatchingInterfaceBuilderParameters,
 )
-from .configuration import InterfaceConfiguration
+from .configuration import (
+    InterfaceConfiguration,
+)
 
 
 def create_interfaces(
-    builder: Union[InterfaceBuilder, ZSLStrainMatchingInterfaceBuilder], configuration: InterfaceConfiguration
+    builder: InterfaceBuilder, 
+    configuration: InterfaceConfiguration
 ) -> List[Material]:
     return builder.get_materials(configuration)
 
 
 def create_interface(
     configuration: InterfaceConfiguration,
-    builder: Optional[Union[InterfaceBuilder, ZSLStrainMatchingInterfaceBuilder]] = None,
+    builder: Optional[InterfaceBuilder] = None,
 ) -> Material:
     if builder is None:
         builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters())

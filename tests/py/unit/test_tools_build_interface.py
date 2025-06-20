@@ -4,13 +4,10 @@ from typing import Final
 
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer, ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.interface import (
     InterfaceBuilder,
     InterfaceConfiguration,
-    ZSLStrainMatchingInterfaceBuilder,
-    ZSLStrainMatchingInterfaceBuilderParameters,
-    ZSLStrainMatchingParameters,
     create_interfaces,
 )
 from mat3ra.made.tools.build.interface.builders import (
@@ -51,12 +48,6 @@ MAX_AREA = 100
 EXPECTED_NUMBER_OF_INTERFACES = 1 if platform.python_version().startswith("3.8") else 1
 interface_configuration = None
 
-zsl_strain_matching_parameters = ZSLStrainMatchingParameters(max_area=MAX_AREA)
-build_parameters = ZSLStrainMatchingInterfaceBuilderParameters(
-    strain_matching_parameters=zsl_strain_matching_parameters
-)
-matched_interfaces_builder = ZSLStrainMatchingInterfaceBuilder(build_parameters=build_parameters)
-
 
 @pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
 def test_simple_interface_builder(substrate, film, expected_interface):
@@ -84,12 +75,62 @@ def test_simple_interface_builder(substrate, film, expected_interface):
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
+def test_zsl_interface_builder():
+    """Test creating Si/Ge interface using ZSL approach."""
+    # Create slab configurations for Si (substrate) and Ge (film)
+    substrate_slab_config = create_slab_configuration(BULK_Si_CONVENTIONAL, (0, 0, 1), 3, vacuum=10.0)
+    film_slab_config = create_slab_configuration(BULK_Ge_CONVENTIONAL, (0, 0, 1), 3, vacuum=10.0)
+
+    # Use ZSLInterfaceAnalyzer to get strained slab configurations
+    analyzer = ZSLInterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
+        max_area=50.0,  # Keep area reasonable for testing
+        max_area_ratio_tol=0.1,
+        max_length_tol=0.05,
+        max_angle_tol=0.02,
+    )
+
+    # Get strained configurations with metadata
+    configs_with_metadata = analyzer.get_strained_slab_configurations_with_metadata()
+
+    # Should find at least one ZSL match
+    assert len(configs_with_metadata) > 0, "No ZSL matches found"
+
+    # Select the configuration with lowest strain
+    selected_config = configs_with_metadata[0]
+
+    # Verify strain information is present
+    assert "substrate_strain" in selected_config.strain_info
+    assert "film_strain" in selected_config.strain_info
+    assert selected_config.strain_info["substrate_strain"] >= 0
+    assert selected_config.strain_info["film_strain"] >= 0
+
+    # Create interface configuration using the strained slab configs
+    interface_config = InterfaceConfiguration(
+        stack_components=[
+            selected_config.substrate_config,
+            selected_config.film_config,
+        ]
+    )
+
+    # Use regular InterfaceBuilder to create the interface
+    builder = InterfaceBuilder()
+    interface = builder.get_material(interface_config)
+
+    # Should contain both Si and Ge
+    elements = set(interface.basis.elements.values)
+    assert "Si" in elements, "Interface should contain Si atoms"
+    assert "Ge" in elements, "Interface should contain Ge atoms"
+
+
 @pytest.mark.skip(reason="Fixtures are commented out. To be fixed in epic-7623")
 def test_create_interfaces():
-    interfaces = create_interfaces(matched_interfaces_builder, interface_configuration)
+    # interfaces = create_interfaces(matched_interfaces_builder, interface_configuration)
 
-    assert len(interfaces) == EXPECTED_NUMBER_OF_INTERFACES
-    assert interfaces[0].name is not None
+    # assert len(interfaces) == EXPECTED_NUMBER_OF_INTERFACES
+    # assert interfaces[0].name is not None
+    pass
 
 
 @pytest.mark.parametrize(

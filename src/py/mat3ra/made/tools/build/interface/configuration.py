@@ -1,9 +1,6 @@
 from typing import Optional, Union, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interface.configuration import (  # noqa: E501
-    InterfaceConfigurationSchema,
-)
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
@@ -13,10 +10,11 @@ from ..slab.configuration import (
     SlabStrainedSupercellConfiguration,
     SlabStrainedSupercellWithGapConfiguration,
 )
+
 from ...analyze.other import get_chemical_formula
 
 
-class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPydantic):
+class InterfaceConfiguration(BaseConfigurationPydantic):
     # components and their modifiers added in the order they are stacked, from bottom to top
     stack_components: List[
         Union[
@@ -27,28 +25,58 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
         ]
     ]
     direction: AxisEnum = AxisEnum.z
-    xy_shift: List[float] = InterfaceConfigurationSchema.model_fields["xy_shift"].default  # in Angstroms
+    xy_shift: List[float] = [0.0, 0.0]  # in Angstroms
 
     @property
-    def substrate_configuration(self) -> SlabConfiguration:
+    def substrate_configuration(self) -> Union[SlabConfiguration, SlabStrainedSupercellConfiguration, SlabStrainedSupercellWithGapConfiguration]:
         return self.stack_components[0]
 
     @property
-    def film_configuration(self) -> SlabConfiguration:
+    def film_configuration(self) -> Union[SlabConfiguration, SlabStrainedSupercellConfiguration, SlabStrainedSupercellWithGapConfiguration]:
         return self.stack_components[1]
+
+    def _get_crystal_from_slab_config(self, slab_config) -> Material:
+        """Extract crystal material from any slab configuration type."""
+        if hasattr(slab_config, 'atomic_layers'):
+            # SlabConfiguration
+            return slab_config.atomic_layers.crystal
+        elif hasattr(slab_config, 'stack_components') and slab_config.stack_components:
+            # SlabStrainedSupercellConfiguration and SlabStrainedSupercellWithGapConfiguration
+            # The first stack component should be AtomicLayersUniqueRepeatedConfiguration
+            atomic_layers = slab_config.stack_components[0]
+            return atomic_layers.crystal
+        else:
+            raise ValueError(f"Cannot extract crystal from slab configuration: {type(slab_config)}")
 
     @property
     def vacuum_configuration(self) -> VacuumConfiguration:
         if len(self.stack_components) > 2:
             return self.stack_components[2]
-        return VacuumConfiguration(size=0.0, crystal=self.film_configuration, direction=self.direction)
+        # Extract the crystal material from the film configuration
+        film_crystal = self._get_crystal_from_slab_config(self.film_configuration)
+        return VacuumConfiguration(size=0.0, crystal=film_crystal, direction=self.direction)
 
     @property
     def name(self) -> str:
-        film_formula = get_chemical_formula(self.film_configuration.atomic_layers.crystal)
-        substrate_formula = get_chemical_formula(self.substrate_configuration.atomic_layers.crystal)
-        film_miller_indices = "".join([str(i) for i in self.film_configuration.atomic_layers.miller_indices])
-        substrate_miller_indices = "".join([str(i) for i in self.substrate_configuration.atomic_layers.miller_indices])
+        film_crystal = self._get_crystal_from_slab_config(self.film_configuration)
+        substrate_crystal = self._get_crystal_from_slab_config(self.substrate_configuration)
+        
+        film_formula = get_chemical_formula(film_crystal)
+        substrate_formula = get_chemical_formula(substrate_crystal)
+        
+        # Extract miller indices - handle both configuration types
+        if hasattr(self.film_configuration, 'atomic_layers'):
+            film_miller_indices = "".join([str(i) for i in self.film_configuration.atomic_layers.miller_indices])
+        else:
+            # For SlabStrainedSupercellConfiguration, get from first stack component
+            film_miller_indices = "".join([str(i) for i in self.film_configuration.stack_components[0].miller_indices])
+            
+        if hasattr(self.substrate_configuration, 'atomic_layers'):
+            substrate_miller_indices = "".join([str(i) for i in self.substrate_configuration.atomic_layers.miller_indices])
+        else:
+            # For SlabStrainedSupercellConfiguration, get from first stack component
+            substrate_miller_indices = "".join([str(i) for i in self.substrate_configuration.stack_components[0].miller_indices])
+            
         return f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
 
 

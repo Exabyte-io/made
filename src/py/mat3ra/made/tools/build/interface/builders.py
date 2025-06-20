@@ -6,10 +6,6 @@ from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from pydantic import BaseModel
-from pymatgen.analysis.interfaces.coherent_interfaces import (
-    CoherentInterfaceBuilder,
-    ZSLGenerator,
-)
 
 from .commensurate_lattice_pair import CommensurateLatticePair
 from .configuration import (
@@ -17,13 +13,8 @@ from .configuration import (
     NanoRibbonTwistedInterfaceConfiguration,
     TwistedInterfaceConfiguration,
 )
-from .enums import StrainModes, angle_to_supercell_matrix_values_for_hex
-from .termination_pair import TerminationPair, safely_select_termination_pair
-from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
+from .enums import angle_to_supercell_matrix_values_for_hex
 from ..metadata import MaterialMetadata
-from ..mixins import (
-    ConvertGeneratedItemsPymatgenStructureMixin,
-)
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configuration import SlabStrainedSupercellConfiguration
@@ -31,8 +22,8 @@ from ..stack.builders import StackBuilder2Components
 from ..stack.configuration import StackConfiguration
 from ..supercell import create_supercell
 from ..utils import merge_materials
+from ..vacuum.configuration import VacuumConfiguration
 from ...build import BaseBuilder, BaseBuilderParameters
-from ...convert import to_pymatgen, PymatgenInterface
 from ...modify import (
     translate_to_z_level,
     rotate,
@@ -108,94 +99,6 @@ class InterfaceBuilder(StackBuilder2Components):
         """Update the material name to reflect that it's an interface."""
         material.name = configuration.name
         return material
-
-
-########################################################################################
-#                       Strain Matching Interface Builders                             #
-########################################################################################
-class StrainMatchingInterfaceBuilderParameters(BaseBuilderParameters):
-    strain_matching_parameters: Optional[Any] = None
-
-
-class StrainMatchingInterfaceBuilder(InterfaceBuilder):
-    _BuildParametersType = StrainMatchingInterfaceBuilderParameters  # type: ignore
-
-    def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        updated_material = super()._update_material_name(material, configuration)
-        if StrainModes.mean_abs_strain in material.metadata:
-            strain = material.metadata[StrainModes.mean_abs_strain]
-            new_name = f"{updated_material.name}, Strain {strain*100:.3f}pct"
-            updated_material.name = new_name
-        return updated_material
-
-
-class ZSLStrainMatchingParameters(BaseModel):
-    max_area: float = 50.0
-    max_area_ratio_tol: float = 0.09
-    max_length_tol: float = 0.03
-    max_angle_tol: float = 0.01
-
-
-class ZSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilderParameters):
-    strain_matching_parameters: ZSLStrainMatchingParameters = ZSLStrainMatchingParameters()
-
-
-class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMixin, StrainMatchingInterfaceBuilder):
-    """
-    Creates matching interface between substrate and film using the ZSL algorithm.
-    """
-
-    _BuildParametersType: type(  # type: ignore
-        ZSLStrainMatchingInterfaceBuilderParameters
-    ) = ZSLStrainMatchingInterfaceBuilderParameters  # type: ignore
-    _GeneratedItemType: PymatgenInterface = PymatgenInterface  # type: ignore
-
-    def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
-        generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.model_dump())
-        substrate_with_atoms_translated_to_bottom = translate_to_z_level(
-            configuration.substrate_configuration.bulk, "bottom"
-        )
-        film_with_atoms_translated_to_bottom = translate_to_z_level(configuration.film_configuration.bulk, "bottom")
-        builder = CoherentInterfaceBuilder(
-            substrate_structure=to_pymatgen(substrate_with_atoms_translated_to_bottom),
-            film_structure=to_pymatgen(film_with_atoms_translated_to_bottom),
-            substrate_miller=configuration.substrate_configuration.miller_indices,
-            film_miller=configuration.film_configuration.miller_indices,
-            zslgen=generator,
-        )
-
-        generated_termination_pairs = [
-            TerminationPair.from_pymatgen(pymatgen_termination) for pymatgen_termination in builder.terminations
-        ]
-        termination_pair = safely_select_termination_pair(configuration.termination_pair, generated_termination_pairs)
-        interfaces = builder.get_interfaces(
-            termination=termination_pair.to_pymatgen(),
-            gap=configuration.distance_z,
-            vacuum_over_film=configuration.vacuum,
-            film_thickness=configuration.film_configuration.number_of_layers,
-            substrate_thickness=configuration.substrate_configuration.number_of_layers,
-            in_layers=True,
-        )
-
-        return list([interface_patch_with_mean_abs_strain(interface) for interface in interfaces])
-
-    def _sort(self, items: List[_GeneratedItemType]):
-        sorted_by_num_sites = sorted(items, key=lambda x: x.num_sites)
-        sorted_by_num_sites_and_strain = sorted(
-            sorted_by_num_sites, key=lambda x: np.mean(x.interface_properties[StrainModes.mean_abs_strain])
-        )
-        unique_sorted_interfaces = remove_duplicate_interfaces(
-            sorted_by_num_sites_and_strain, strain_mode=StrainModes.mean_abs_strain
-        )
-        return unique_sorted_interfaces
-
-    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
-        materials = super()._post_process(items, post_process_parameters)
-        strains = [interface.interface_properties[StrainModes.mean_abs_strain] for interface in items]
-
-        for material, strain in zip(materials, strains):
-            material.metadata["mean_abs_strain"] = strain
-        return materials
 
 
 ########################################################################################

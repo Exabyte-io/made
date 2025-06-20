@@ -3,9 +3,9 @@ from typing import Optional
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
-
 from ...convert import from_ase, to_ase
 from ...third_party import ase_make_supercell
 from ...utils import decorator_convert_supercell_matrix_2x2_to_3x3
