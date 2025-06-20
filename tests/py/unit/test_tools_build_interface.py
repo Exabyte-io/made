@@ -24,7 +24,7 @@ from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
-from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001
+from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 

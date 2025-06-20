@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
