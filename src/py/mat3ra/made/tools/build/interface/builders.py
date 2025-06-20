@@ -56,7 +56,7 @@ class InterfaceBuilder(StackBuilder2Components):
     _BuildParametersType = InterfaceBuilderParameters
     _GeneratedItemType: Type[Material] = Material
 
-    def configuration_to_material(self, configuration_or_material: Any) -> Material:
+    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
         if isinstance(configuration_or_material, Material):
             return configuration_or_material
 
@@ -64,24 +64,30 @@ class InterfaceBuilder(StackBuilder2Components):
             builder = SlabStrainedSupercellBuilder()
             return builder.get_material(configuration_or_material)
 
-        return super().configuration_to_material(configuration_or_material)
+        return super()._configuration_to_material(configuration_or_material)
 
-    def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
-        substrate_material = self.configuration_to_material(configuration.substrate_configuration)
-        film_material = self.configuration_to_material(configuration.film_configuration)
+    def _get_labeled_substrate_material(self, configuration: InterfaceConfiguration) -> Material:
+        substrate_material = self._configuration_to_material(configuration.substrate_configuration)
+        substrate_labeled = substrate_material.clone()
+        substrate_labeled.set_labels([0] * len(substrate_labeled.basis.elements.values))
+        return substrate_labeled
+
+    def _get_labeled_film_material(self, configuration: InterfaceConfiguration) -> Material:
+        film_material = self._configuration_to_material(configuration.film_configuration)
         if configuration.xy_shift:
             film_material = translate_by_vector(
                 film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True
             )
-
-        substrate_labeled = substrate_material.clone()
-        substrate_labeled.set_labels([0] * len(substrate_labeled.basis.elements.values))
-
         film_labeled = film_material.clone()
         film_labeled.set_labels([1] * len(film_labeled.basis.elements.values))
+        return film_labeled
 
+    def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
         substrate_film_stack_config = StackConfiguration(
-            stack_components=[substrate_labeled, film_labeled],
+            stack_components=[
+                self._get_labeled_substrate_material(configuration),
+                self._get_labeled_film_material(configuration),
+            ],
             direction=configuration.direction,
         )
         substrate_film_materials = super()._generate(substrate_film_stack_config)

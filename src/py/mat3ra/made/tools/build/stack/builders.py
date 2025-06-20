@@ -20,7 +20,7 @@ from mat3ra.made.tools.operations.core.binary import stack
 class StackBuilder2Components(BaseBuilder):
     _ConfigurationType = StackConfiguration
 
-    def configuration_to_material(self, configuration_or_material: Any) -> Material:
+    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
         if isinstance(configuration_or_material, Material):
             return configuration_or_material
         if isinstance(
@@ -38,9 +38,9 @@ class StackBuilder2Components(BaseBuilder):
 
     def _generate(self, configuration: StackConfiguration) -> List[Material]:
         first_entity_config = configuration.stack_components[0]
-        first_material = self.configuration_to_material(first_entity_config)
+        first_material = self._configuration_to_material(first_entity_config)
         second_entity_config = configuration.stack_components[1]
-        second_material = self.configuration_to_material(second_entity_config)
+        second_material = self._configuration_to_material(second_entity_config)
 
         # Stack the two materials
         stacked_materials = stack([first_material, second_material], configuration.direction or AxisEnum.z)
