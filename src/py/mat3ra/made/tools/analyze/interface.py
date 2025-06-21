@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import List, Tuple
+from typing import List
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
@@ -9,21 +9,32 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
 )
 from pymatgen.analysis.interfaces.coherent_interfaces import ZSLGenerator, CoherentInterfaceBuilder
 
+from mat3ra.made.tools.analyze.utils import get_film_strain_matrix
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configuration import (
     SlabConfiguration,
     SlabStrainedSupercellConfiguration,
 )
 from mat3ra.made.tools.convert import to_pymatgen
+from mat3ra.made.tools.operations.core.unary import supercell
+
+
+class StrainedSlabConfigurationHolder(InMemoryEntityPydantic):
+    match_id: int
+    substrate_configuration: SlabStrainedSupercellConfiguration
+    film_configuration: SlabStrainedSupercellConfiguration
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):
-    film_transformation: np.ndarray
+    match_id: int
     substrate_transformation: np.ndarray
+    film_transformation: np.ndarray
+    match_area: float
+    strain_transformation: np.ndarray
+    total_strain_percentage: float
 
 
 class InterfaceAnalyzer(InMemoryEntityPydantic):
-
     """
     Analyzes the interface between two slabs, calculating strain matrices and strained configurations.
     This class is used to prepare the configurations for the substrate and film materials, ensuring that the film
@@ -54,27 +65,17 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
     def identity_strain(self) -> Matrix3x3Schema:
         return Matrix3x3Schema(root=np.eye(3).tolist())
 
-    @cached_property
-    def film_strain_matrix(self) -> Matrix3x3Schema:
-        substrate_vectors = np.array(self.substrate_material.lattice.vector_arrays)
-        film_vectors = np.array(self.film_material.lattice.vector_arrays)
-
-        substrate_2d_vectors = substrate_vectors[:2, :2]
-        film_2d_vectors = film_vectors[:2, :2]
-
-        try:
-            inv_film = np.linalg.inv(film_2d_vectors)
-        except np.linalg.LinAlgError:
-            raise ValueError("Film lattice vectors are not linearly independent.")
-        strain2d = inv_film @ substrate_2d_vectors
-
-        # Convert 2D strain matrix to 3D strain matrix with identity in z-direction
-        strain_3d = np.eye(3)
-        strain_3d[:2, :2] = strain2d
+    def get_film_strain_matrix(
+        self,
+        substrate_lattice_vector_arrays: List[List[float]],
+        film_lattice_vector_arrays: List[List[float]],
+    ) -> Matrix3x3Schema:
+        strain_3d = get_film_strain_matrix(
+            np.array(substrate_lattice_vector_arrays), np.array(film_lattice_vector_arrays)
+        )
         return Matrix3x3Schema(root=strain_3d.tolist())
 
-    @property
-    def substrate_strain_matrix(self) -> Matrix3x3Schema:
+    def get_substrate_strain_matrix(self) -> Matrix3x3Schema:
         return self.identity_strain
 
     def get_component_strained_configuration(
@@ -87,6 +88,7 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
             direction=configuration.direction,
             strain_matrix=strain_matrix,
         )
+
     @property
     def substrate_supercell_matrix(self) -> SupercellMatrix2DSchema:
         return self.identity_supercell
@@ -98,12 +100,17 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
     @cached_property
     def substrate_strained_configuration(self) -> SlabStrainedSupercellConfiguration:
         return self.get_component_strained_configuration(
-            self.substrate_slab_configuration, self.substrate_strain_matrix
+            self.substrate_slab_configuration, self.get_substrate_strain_matrix()
         )
 
     @cached_property
     def film_strained_configuration(self) -> SlabStrainedSupercellConfiguration:
-        return self.get_component_strained_configuration(self.film_slab_configuration, self.film_strain_matrix)
+        return self.get_component_strained_configuration(
+            self.film_slab_configuration,
+            self.get_film_strain_matrix(
+                self.substrate_material.lattice.vector_arrays, self.film_material.lattice.vector_arrays
+            ),
+        )
 
 
 class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
@@ -115,7 +122,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     max_angle_tol: float = 0.01
 
     @cached_property
-    def get_pymatgen_zsl_generator(self) -> ZSLGenerator:
+    def _zsl_generator(self) -> ZSLGenerator:
         return ZSLGenerator(
             max_area=self.max_area,
             max_area_ratio_tol=self.max_area_ratio_tol,
@@ -124,94 +131,94 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         )
 
     @cached_property
-    def get_pymatgen_coherent_interface_builder(self) -> CoherentInterfaceBuilder:
+    def _coherent_interface_builder(self) -> CoherentInterfaceBuilder:
         return CoherentInterfaceBuilder(
             substrate_structure=to_pymatgen(self.substrate_slab_configuration.atomic_layers.crystal),
             film_structure=to_pymatgen(self.film_slab_configuration.atomic_layers.crystal),
             substrate_miller=self.substrate_slab_configuration.atomic_layers.miller_indices,
             film_miller=self.film_slab_configuration.atomic_layers.miller_indices,
-            zslgen=self.get_pymatgen_zsl_generator,
+            zslgen=self._zsl_generator,
         )
+
+    @classmethod
+    def calculate_total_strain_percentage(cls, strain_matrix: np.ndarray) -> float:
+        """Calculate von Mises strain from a 2D strain transformation matrix."""
+        exx = strain_matrix[0, 0] - 1.0
+        eyy = strain_matrix[1, 1] - 1.0
+        exy = strain_matrix[0, 1]
+
+        von_mises = np.sqrt(exx**2 - exx * eyy + eyy**2 + 3 * exy**2) / np.sqrt(2)
+        return abs(von_mises) * 100.0
 
     @cached_property
     def zsl_match_holders(self) -> List[ZSLMatchHolder]:
-        """Get ZSL matches between substrate and film slabs."""
-        zsl_matches = self.get_pymatgen_coherent_interface_builder.zsl_matches
+        zsl_matches = self._coherent_interface_builder.zsl_matches
         match_holders = []
-        for match in zsl_matches:
+
+        for idx, match in enumerate(zsl_matches):
             match_holder = ZSLMatchHolder(
-                film_transformation=match.film_transformation,
+                match_id=idx,
                 substrate_transformation=match.substrate_transformation,
+                film_transformation=match.film_transformation,
+                match_area=match.match_area,
+                strain_transformation=match.match_transformation,
+                total_strain_percentage=self.calculate_total_strain_percentage(match.match_transformation),
             )
             match_holders.append(match_holder)
+
         return match_holders
 
-    def _create_strained_configs(
-        self, match: ZSLMatchHolder
-    ) -> Tuple[SlabStrainedSupercellConfiguration, SlabStrainedSupercellConfiguration]:
-        # Use ZSL transformation matrices as supercell matrices
-        substrate_supercell_matrix = match.substrate_transformation.astype(int)
-        film_supercell_matrix = match.film_transformation.astype(int)
+    def get_strained_configuration_by_match_id(self, match_id: int) -> StrainedSlabConfigurationHolder:
+        """Get strained configurations for a specific ZSL match by ID."""
+        match_holders = self.zsl_match_holders
+        if match_id < 0 or match_id >= len(match_holders):
+            raise ValueError(f"Match ID {match_id} out of range. Available IDs: 0-{len(match_holders)-1}")
 
-        # Substrate remains unstrained (identity strain)
-        substrate_strain_2d = np.eye(2)
+        match_holder = match_holders[match_id]
+        return self._create_strained_configs_from_match(match_holder)
 
-        # Calculate film strain using our existing approach (from InterfaceAnalyzer)
-        film_strain_2d = self._calculate_film_strain_for_supercells(substrate_supercell_matrix, film_supercell_matrix)
+    def _create_strained_configs_from_match(self, match_holder: ZSLMatchHolder) -> StrainedSlabConfigurationHolder:
+        substrate_supercell_matrix_3d = np.eye(3, dtype=int)
+        substrate_supercell_matrix_3d[:2, :2] = match_holder.substrate_transformation.astype(int)
 
-        substrate_supercell_2d = SupercellMatrix2DSchema(root=substrate_supercell_matrix.tolist())
-        film_supercell_2d = SupercellMatrix2DSchema(root=film_supercell_matrix.tolist())
+        film_supercell_matrix_3d = np.eye(3, dtype=int)
+        film_supercell_matrix_3d[:2, :2] = match_holder.film_transformation.astype(int)
 
-        # Convert 2D strain matrices to 3D
-        substrate_strain_3d = np.eye(3)
-        substrate_strain_3d[:2, :2] = substrate_strain_2d
+        substrate_supercell = supercell(self.substrate_material, substrate_supercell_matrix_3d)
+        film_supercell = supercell(self.film_material, film_supercell_matrix_3d)
 
-        film_strain_3d = np.eye(3)
-        film_strain_3d[:2, :2] = film_strain_2d
+        film_strain_3d = self.get_film_strain_matrix(
+            substrate_supercell.lattice.vector_arrays, film_supercell.lattice.vector_arrays
+        )
 
+        # Create configurations with match ID information
         substrate_config = SlabStrainedSupercellConfiguration(
             stack_components=self.substrate_slab_configuration.stack_components,
             direction=self.substrate_slab_configuration.direction,
-            xy_supercell_matrix=substrate_supercell_2d,
-            strain_matrix=Matrix3x3Schema(root=substrate_strain_3d.tolist()),
+            xy_supercell_matrix=match_holder.substrate_transformation.astype(int),
+            strain_matrix=self.identity_strain,
         )
 
         film_config = SlabStrainedSupercellConfiguration(
             stack_components=self.film_slab_configuration.stack_components,
             direction=self.film_slab_configuration.direction,
-            xy_supercell_matrix=film_supercell_2d,
-            strain_matrix=Matrix3x3Schema(root=film_strain_3d.tolist()),
+            xy_supercell_matrix=match_holder.film_transformation.astype(int),
+            strain_matrix=film_strain_3d,
         )
 
-        return substrate_config, film_config
-
-    def _calculate_film_strain_for_supercells(
-        self, substrate_supercell_matrix: np.ndarray, film_supercell_matrix: np.ndarray
-    ) -> np.ndarray:
-        """Calculate film strain to match substrate using our existing approach."""
-        # Get original 2D lattice vectors
-        substrate_original_2d = np.array(self.substrate_material.lattice.vector_arrays[:2])[:, :2]
-        film_original_2d = np.array(self.film_material.lattice.vector_arrays[:2])[:, :2]
-
-        # Calculate supercell lattices
-        substrate_supercell_2d = substrate_original_2d @ substrate_supercell_matrix
-        film_supercell_2d = film_original_2d @ film_supercell_matrix
-
-        # Calculate strain to match substrate supercell
-        try:
-            inv_film_supercell = np.linalg.inv(film_supercell_2d)
-        except np.linalg.LinAlgError:
-            raise ValueError("Film supercell lattice vectors are not linearly independent.")
-
-        strain_2d = inv_film_supercell @ substrate_supercell_2d
-        return strain_2d
+        return StrainedSlabConfigurationHolder(
+            match_id=match_holder.match_id,
+            substrate_configuration=substrate_config,
+            film_configuration=film_config,
+        )
 
     def get_strained_configurations(
         self,
-    ) -> List[Tuple[SlabStrainedSupercellConfiguration, SlabStrainedSupercellConfiguration]]:
-        """Get strained configurations for all ZSL matches."""
+    ) -> List[StrainedSlabConfigurationHolder]:
         strained_configs = []
-        for match in self.zsl_match_holders:
-            substrate_config, film_config = self._create_strained_configs(match)
-            strained_configs.append((substrate_config, film_config))
+
+        for match_holder in self.zsl_match_holders:
+            config_holder = self._create_strained_configs_from_match(match_holder)
+            strained_configs.append(config_holder)
+
         return strained_configs

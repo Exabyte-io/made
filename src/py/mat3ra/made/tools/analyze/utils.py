@@ -113,3 +113,43 @@ def decorator_perform_operation_in_cartesian_coordinates(func):
         return result
 
     return wrapper
+
+
+def get_film_strain_matrix(
+    substrate_lattice_vector_arrays: np.ndarray,
+    film_lattice_vector_arrays: np.ndarray,
+) -> np.ndarray:
+    """Calculate film strain to match substrate using ZSL approach.
+
+    This function calculates the 2D strain matrix needed to transform the film
+    lattice vectors to match the substrate lattice vectors. It works with different
+    lattice types (cubic, hexagonal, etc.) and handles non-collinear vectors.
+
+    Args:
+        substrate_lattice_vector_arrays: 3x3 array of substrate lattice vectors
+        film_lattice_vector_arrays: 3x3 array of film lattice vectors
+
+    Returns:
+        2x2 strain matrix that transforms film vectors to substrate vectors
+
+    Raises:
+        ValueError: If film lattice vectors are not linearly independent
+    """
+    substrate_vectors = np.array(substrate_lattice_vector_arrays)
+    film_vectors = np.array(film_lattice_vector_arrays)
+
+    # Extract in-plane (2D) vectors - first two lattice vectors
+    substrate_2d_vectors = substrate_vectors[:2, :2]
+    film_2d_vectors = film_vectors[:2, :2]
+
+    try:
+        inv_film = np.linalg.inv(film_2d_vectors)
+    except np.linalg.LinAlgError:
+        raise ValueError("Film lattice vectors are not linearly independent.")
+
+    # Calculate strain matrix: strain = inv(film) @ substrate
+    strain2d = inv_film @ substrate_2d_vectors
+
+    strain_3d = np.eye(3)
+    strain_3d[:2, :2] = strain2d
+    return strain_3d
