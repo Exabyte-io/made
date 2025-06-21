@@ -117,6 +117,15 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
         return [material]
 
     def _adjust_lattice_for_gap(self, material: Material, gap: float) -> Material:
+        """
+        Create a gap in Angstroms in the z-direction of the slab by adjusting the c lattice vector.
+
+        Args:
+            material (Material): The slab material to adjust.
+            gap (float): The gap size in Angstroms to create in the z-direction.
+        Returns:
+            Material: The modified slab material with the adjusted c lattice vector.
+        """
         topmost_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=True)
         new_c_length = topmost_z + gap
 
