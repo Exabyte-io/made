@@ -84,22 +84,22 @@ class InterfaceBuilder(StackBuilder2Components):
         xy_shifted_labeled_film_material = translate_by_vector(
             labeled_film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True
         )
-        substrate_film_stack_config = StackConfiguration(
+        substrate_film_stack_configuration = StackConfiguration(
             stack_components=[
                 self._get_labeled_substrate_material(configuration),
                 xy_shifted_labeled_film_material,
             ],
             direction=configuration.direction,
         )
-        substrate_film_materials = super()._generate(substrate_film_stack_config)
+        substrate_film_materials = super()._generate(substrate_film_stack_configuration)
         interface = substrate_film_materials[0]
 
-        vacuum_config = configuration.vacuum_configuration
-        if vacuum_config.size > 0:
-            interface_vacuum_stack_config = StackConfiguration(
-                stack_components=[interface, vacuum_config], direction=configuration.direction
+        vacuum_configuration = configuration.vacuum_configuration
+        if vacuum_configuration.size > 0:
+            interface_vacuum_stack_configuration = StackConfiguration(
+                stack_components=[interface, vacuum_configuration], direction=configuration.direction
             )
-            interface_vacuum_materials = super()._generate(interface_vacuum_stack_config)
+            interface_vacuum_materials = super()._generate(interface_vacuum_stack_configuration)
             interface = interface_vacuum_materials[0]
 
         wrapped_interface = wrap_to_unit_cell(interface)

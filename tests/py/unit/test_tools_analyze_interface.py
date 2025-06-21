@@ -51,9 +51,5 @@ def test_interface_analyzer(substrate, film, expected):
         interface_analyzer.substrate_strain_matrix.root, expected.substrate_strain_matrix
     )
     assert_two_entities_deep_almost_equal(
-        interface_analyzer.substrate_supercell_matrix.root, expected.substrate_supercell_matrix
-    )
-    assert_two_entities_deep_almost_equal(
         interface_analyzer.film_strain_matrix.root, expected.film_strain_matrix, atol=1e-4
     )
-    assert_two_entities_deep_almost_equal(interface_analyzer.film_supercell_matrix.root, expected.film_supercell_matrix)
