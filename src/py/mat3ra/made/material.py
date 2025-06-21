@@ -76,7 +76,7 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
     def set_coordinates(self, coordinates: List[List[float]]) -> None:
         self.basis.coordinates.values = coordinates
 
-    def set_new_lattice_vectors(
+    def set_lattice_vectors(
         self, lattice_vector1: List[float], lattice_vector2: List[float], lattice_vector3: List[float]
     ) -> None:
         original_is_in_crystal_units = self.basis.is_in_crystal_units
@@ -86,16 +86,16 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         if original_is_in_crystal_units:
             self.to_crystal()
 
-    def set_new_lattice_vectors_from_vectors_array(self, lattice_vectors: List[List[float]]) -> None:
+    def set_lattice_vectors_from_array(self, lattice_vectors: List[List[float]]) -> None:
         if len(lattice_vectors) != 3:
             raise ValueError("Lattice vectors array must contain exactly three vectors.")
-        self.set_new_lattice_vectors(*lattice_vectors)
+        self.set_lattice_vectors(*lattice_vectors)
 
     def set_lattice(self, lattice: Lattice) -> None:
-        self.set_new_lattice_vectors(*lattice.vector_arrays)
+        self.set_lattice_vectors(*lattice.vector_arrays)
 
     def add_atom(self, element: str, coordinate: List[float], use_cartesian_coordinates: bool = False) -> None:
         self.basis.add_atom(element, coordinate, use_cartesian_coordinates)
 
-    def set_labels(self, labels: List[Union[int, str]]) -> None:
-        self.basis.set_labels(labels)
+    def set_labels_from_list(self, labels: List[Union[int, str]]) -> None:
+        self.basis.set_labels_from_list(labels)

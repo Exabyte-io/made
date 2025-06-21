@@ -32,7 +32,7 @@ def expand_lattice_vectors(material: Material, gap: float, direction: int = 0) -
     """
     new_lattice_vectors = material.lattice.vector_arrays
     new_lattice_vectors[direction][direction] += gap
-    material.set_new_lattice_vectors(
+    material.set_lattice_vectors(
         lattice_vector1=new_lattice_vectors[0],
         lattice_vector2=new_lattice_vectors[1],
         lattice_vector3=new_lattice_vectors[2],

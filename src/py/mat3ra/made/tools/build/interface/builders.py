@@ -70,13 +70,13 @@ class InterfaceBuilder(StackBuilder2Components):
     def _get_labeled_substrate_material(self, configuration: InterfaceConfiguration) -> Material:
         substrate_material = self._configuration_to_material(configuration.substrate_configuration)
         substrate_labeled = substrate_material.clone()
-        substrate_labeled.set_labels([0] * len(substrate_labeled.basis.elements.values))
+        substrate_labeled.set_labels_from_list([0] * len(substrate_labeled.basis.elements.values))
         return substrate_labeled
 
     def _get_labeled_film_material(self, configuration: InterfaceConfiguration) -> Material:
         film_material = self._configuration_to_material(configuration.film_configuration)
         film_labeled = film_material.clone()
-        film_labeled.set_labels([1] * len(film_labeled.basis.elements.values))
+        film_labeled.set_labels_from_list([1] * len(film_labeled.basis.elements.values))
         return film_labeled
 
     def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:

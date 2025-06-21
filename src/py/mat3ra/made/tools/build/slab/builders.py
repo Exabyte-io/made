@@ -99,7 +99,10 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
 
         material = materials[0]
         if configuration.xy_supercell_matrix:
-            material = supercell(material, configuration.xy_supercell_matrix)
+            # Explicitly convert SupercellMatrix2DSchema to list[list[int]]
+            from ...utils import supercell_matrix_2d_schema_to_list
+            xy_supercell_matrix = supercell_matrix_2d_schema_to_list(configuration.xy_supercell_matrix)
+            material = supercell(material, xy_supercell_matrix)
         if configuration.strain_matrix:
             material = strain(material, configuration.strain_matrix)
 

@@ -24,6 +24,9 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
 
     @cached_property
     def film_strain_matrix(self) -> Matrix3x3Schema:
+        """
+        Calculate the strain matrix for the film material to match the substrate material's lattice vectors.
+        """
         substrate_vectors = np.array(self.substrate_material.lattice.vector_arrays)
         film_vectors = np.array(self.film_material.lattice.vector_arrays)
 

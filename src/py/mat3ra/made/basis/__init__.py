@@ -153,7 +153,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.coordinates.filter_by_ids(ids)
         return self
 
-    def set_labels(self, labels: List[Union[int, str]]) -> None:
+    def set_labels_from_list(self, labels: List[Union[int, str]]) -> None:
         num_atoms = len(self.elements.values)
 
         if len(labels) != num_atoms:
