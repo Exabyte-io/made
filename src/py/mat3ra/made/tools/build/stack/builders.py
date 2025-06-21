@@ -46,7 +46,7 @@ StackConfigurationType = TypeVar("StackConfigurationType", bound=StackConfigurat
 class StackNComponentsBuilder(Stack2ComponentsBuilder):
     _ConfigurationType = StackConfiguration
 
-    def _generate(self, configuration: Generic[StackConfigurationType]) -> Material:
+    def _generate(self, configuration: StackConfigurationType) -> Material:
         materials = []
         for entity_config in configuration.stack_components:
             material = self._configuration_to_material(entity_config)

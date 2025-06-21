@@ -2,14 +2,15 @@ from typing import Any, List, Optional, Type
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.made.lattice import Lattice
-from mat3ra.made.material import Material
-from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
 )
+
+from mat3ra.made.lattice import Lattice
+from mat3ra.made.material import Material
+from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 
 from .commensurate_lattice_pair import CommensurateLatticePair
 from .configuration import (
@@ -27,7 +28,7 @@ from ..mixins import (
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configuration import SlabStrainedSupercellConfiguration
-from ..stack.builders import Stack2ComponentsBuilder, StackNComponentsBuilder
+from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ..supercell import create_supercell
 from ..utils import merge_materials

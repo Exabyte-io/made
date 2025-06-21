@@ -55,7 +55,7 @@ def normalize_2x2_matrix(
     Returns None if normalization is not possible.
     """
     if isinstance(matrix, SupercellMatrix2DSchema):
-        return supercell_matrix_2d_schema_to_list(matrix)
+        return supercell_matrix_2d_schema_to_list(matrix)  # type: ignore
 
     unwrapped_matrix = unwrap(matrix)
 
