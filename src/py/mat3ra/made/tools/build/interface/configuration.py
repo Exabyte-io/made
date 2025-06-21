@@ -19,7 +19,6 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
     # components and their modifiers added in the order they are stacked, from bottom to top
     stack_components: List[
         Union[
-            SlabConfiguration,
             SlabStrainedSupercellConfiguration,
             SlabStrainedSupercellWithGapConfiguration,
             VacuumConfiguration,
