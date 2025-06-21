@@ -2,14 +2,15 @@ from typing import Any, List, Optional, Type
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.made.lattice import Lattice
-from mat3ra.made.material import Material
-from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
     ZSLGenerator,
 )
+
+from mat3ra.made.lattice import Lattice
+from mat3ra.made.material import Material
+from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 
 from .commensurate_lattice_pair import CommensurateLatticePair
 from .configuration import (
@@ -27,7 +28,7 @@ from ..mixins import (
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configuration import SlabStrainedSupercellConfiguration
-from ..stack.builders import StackBuilder2Components
+from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ..supercell import create_supercell
 from ..utils import merge_materials
@@ -48,7 +49,7 @@ class InterfaceBuilderParameters(InMemoryEntityPydantic):
     pass
 
 
-class InterfaceBuilder(StackBuilder2Components):
+class InterfaceBuilder(StackNComponentsBuilder):
     """
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
@@ -58,52 +59,27 @@ class InterfaceBuilder(StackBuilder2Components):
     _GeneratedItemType: Type[Material] = Material
 
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, Material):
-            return configuration_or_material
-
         if isinstance(configuration_or_material, SlabStrainedSupercellConfiguration):
             builder = SlabStrainedSupercellBuilder()
             return builder.get_material(configuration_or_material)
-
         return super()._configuration_to_material(configuration_or_material)
 
-    def _get_labeled_substrate_material(self, configuration: InterfaceConfiguration) -> Material:
-        substrate_material = self._configuration_to_material(configuration.substrate_configuration)
-        substrate_labeled = substrate_material.clone()
-        substrate_labeled.set_labels([0] * len(substrate_labeled.basis.elements.values))
-        return substrate_labeled
-
-    def _get_labeled_film_material(self, configuration: InterfaceConfiguration) -> Material:
+    def _generate(self, configuration: InterfaceConfiguration) -> Material:
         film_material = self._configuration_to_material(configuration.film_configuration)
-        film_labeled = film_material.clone()
-        film_labeled.set_labels([1] * len(film_labeled.basis.elements.values))
-        return film_labeled
+        substrate_material = self._configuration_to_material(configuration.substrate_configuration)
 
-    def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
-        labeled_film_material = self._get_labeled_film_material(configuration)
-        xy_shifted_labeled_film_material = translate_by_vector(
-            labeled_film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True
-        )
-        substrate_film_stack_config = StackConfiguration(
-            stack_components=[
-                self._get_labeled_substrate_material(configuration),
-                xy_shifted_labeled_film_material,
-            ],
-            direction=configuration.direction,
-        )
-        substrate_film_materials = super()._generate(substrate_film_stack_config)
-        interface = substrate_film_materials[0]
+        film_material.set_labels_from_value(0)
+        substrate_material.set_labels_from_value(1)
 
-        vacuum_config = configuration.vacuum_configuration
-        if vacuum_config.size > 0:
-            interface_vacuum_stack_config = StackConfiguration(
-                stack_components=[interface, vacuum_config], direction=configuration.direction
-            )
-            interface_vacuum_materials = super()._generate(interface_vacuum_stack_config)
-            interface = interface_vacuum_materials[0]
+        film_material = translate_by_vector(film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True)
+        stack_configuration = StackConfiguration(
+            stack_components=[substrate_material, film_material, configuration.vacuum_configuration]
+        )
+
+        interface = super()._generate(stack_configuration)
 
         wrapped_interface = wrap_to_unit_cell(interface)
-        return [wrapped_interface]
+        return wrapped_interface
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
         film_formula = get_chemical_formula(configuration.film_configuration.atomic_layers.crystal)

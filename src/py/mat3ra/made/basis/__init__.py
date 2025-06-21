@@ -47,6 +47,10 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     def get_coordinates_colliding_pairs(self, tolerance=DEFAULT_COORDINATE_PROXIMITY_TOLERANCE):
         return self.coordinates_as_kdtree.query_pairs(r=tolerance)
 
+    @property
+    def number_of_atoms(self) -> int:
+        return len(self.elements.values)
+
     @classmethod
     def from_dict(
         cls,
@@ -153,7 +157,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.coordinates.filter_by_ids(ids)
         return self
 
-    def set_labels(self, labels: List[Union[int, str]]) -> None:
+    def set_labels_from_list(self, labels: List[Union[int, str]]) -> None:
         num_atoms = len(self.elements.values)
 
         if len(labels) != num_atoms:

@@ -530,7 +530,7 @@ def add_vacuum_sides(material: Material, vacuum: float = 5.0, on_x=False, on_y=F
         new_y_length = max_y - min_y + 2 * vacuum
         new_lattice_b_vector = [0, new_y_length, 0]
 
-    new_material.set_new_lattice_vectors(new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector)
+    new_material.set_lattice_vectors(new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector)
     new_material = translate_by_vector(
         new_material,
         [-min_x + vacuum if on_x else 0, -min_y + vacuum if on_y else 0, 0],

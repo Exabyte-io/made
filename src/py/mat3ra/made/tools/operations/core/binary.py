@@ -73,11 +73,11 @@ def stack_two_materials(
     ).tolist()
 
     material_1_final_lattice_config = material_1.clone()
-    material_1_final_lattice_config.set_new_lattice_vectors_from_vectors_array(stacked_lattice_vectors_values)
+    material_1_final_lattice_config.set_lattice_vectors_from_array(stacked_lattice_vectors_values)
 
     # Translate material2 so its atoms are positioned correctly relative to material1
     material_2_adjusted_c = material_2.clone()
-    material_2_adjusted_c.set_new_lattice_vectors_from_vectors_array(stacked_lattice_vectors_values)
+    material_2_adjusted_c.set_lattice_vectors_from_array(stacked_lattice_vectors_values)
     # The translation amount is the original lattice vector of material1 in the stacking direction
     translation_vec = material_1_lattice_vectors[lattice_vector_index]
     material_2_translated = translate_by_vector(material_2_adjusted_c, translation_vec, use_cartesian_coordinates=True)

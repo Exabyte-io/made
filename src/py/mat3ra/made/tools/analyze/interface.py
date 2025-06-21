@@ -24,16 +24,27 @@ class ZSLMatchHolder(InMemoryEntityPydantic):
 
 class InterfaceAnalyzer(InMemoryEntityPydantic):
 
+    """
+    Analyzes the interface between two slabs, calculating strain matrices and strained configurations.
+    This class is used to prepare the configurations for the substrate and film materials, ensuring that the film
+    material's lattice vectors match the substrate material's lattice vectors.
+
+    `substrate_strained_configuration` and `film_strained_configuration` properties provide the strained configurations.
+    """
+
     substrate_slab_configuration: SlabConfiguration
     film_slab_configuration: SlabConfiguration
 
+    def get_component_material(self, configuration: SlabConfiguration):
+        return SlabBuilder().get_material(configuration)
+
     @cached_property
     def substrate_material(self):
-        return SlabBuilder().get_material(self.substrate_slab_configuration)
+        return self.get_component_material(self.substrate_slab_configuration)
 
     @cached_property
     def film_material(self):
-        return SlabBuilder().get_material(self.film_slab_configuration)
+        return self.get_component_material(self.film_slab_configuration)
 
     @property
     def identity_supercell(self) -> SupercellMatrix2DSchema:
@@ -45,14 +56,17 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
 
     @cached_property
     def film_strain_matrix(self) -> Matrix3x3Schema:
-        # Extract 2D lattice vectors (a and b vectors) from 3D lattice
-        sub2d = np.array(self.substrate_material.lattice.vector_arrays[:2])[:, :2]
-        film2d = np.array(self.film_material.lattice.vector_arrays[:2])[:, :2]
+        substrate_vectors = np.array(self.substrate_material.lattice.vector_arrays)
+        film_vectors = np.array(self.film_material.lattice.vector_arrays)
+
+        substrate_2d_vectors = substrate_vectors[:2, :2]
+        film_2d_vectors = film_vectors[:2, :2]
+
         try:
-            inv_film = np.linalg.inv(film2d)
+            inv_film = np.linalg.inv(film_2d_vectors)
         except np.linalg.LinAlgError:
             raise ValueError("Film lattice vectors are not linearly independent.")
-        strain2d = inv_film @ sub2d
+        strain2d = inv_film @ substrate_2d_vectors
 
         # Convert 2D strain matrix to 3D strain matrix with identity in z-direction
         strain_3d = np.eye(3)
@@ -63,6 +77,16 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
     def substrate_strain_matrix(self) -> Matrix3x3Schema:
         return self.identity_strain
 
+    def get_component_strained_configuration(
+        self,
+        configuration: SlabConfiguration,
+        strain_matrix: Matrix3x3Schema,
+    ) -> SlabStrainedSupercellConfiguration:
+        return SlabStrainedSupercellConfiguration(
+            stack_components=configuration.stack_components,
+            direction=configuration.direction,
+            strain_matrix=strain_matrix,
+        )
     @property
     def substrate_supercell_matrix(self) -> SupercellMatrix2DSchema:
         return self.identity_supercell
@@ -73,21 +97,13 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
 
     @cached_property
     def substrate_strained_configuration(self) -> SlabStrainedSupercellConfiguration:
-        return SlabStrainedSupercellConfiguration(
-            stack_components=self.substrate_slab_configuration.stack_components,
-            direction=self.substrate_slab_configuration.direction,
-            xy_supercell_matrix=self.identity_supercell,
-            strain_matrix=self.identity_strain,
+        return self.get_component_strained_configuration(
+            self.substrate_slab_configuration, self.substrate_strain_matrix
         )
 
     @cached_property
     def film_strained_configuration(self) -> SlabStrainedSupercellConfiguration:
-        return SlabStrainedSupercellConfiguration(
-            stack_components=self.film_slab_configuration.stack_components,
-            direction=self.film_slab_configuration.direction,
-            xy_supercell_matrix=self.identity_supercell,
-            strain_matrix=self.film_strain_matrix,
-        )
+        return self.get_component_strained_configuration(self.film_slab_configuration, self.film_strain_matrix)
 
 
 class ZSLInterfaceAnalyzer(InterfaceAnalyzer):

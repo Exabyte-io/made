@@ -2,12 +2,24 @@ from typing import Optional
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
-
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
 
 
 def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
+    """
+    Merges two Basis objects into a new Basis object, resolving overlapping coordinates.
+    The function assumes that both Basis objects have the same lattice structure handled separately.
+
+    Args:
+        basis1 (Basis): The first Basis object to merge.
+        basis2 (Basis): The second Basis object to merge.
+        distance_tolerance (float): The tolerance for resolving overlapping coordinates.
+
+
+    Returns:
+        Basis: A new Basis object containing merged elements, coordinates, labels, and constraints.
+    """
     basis1.to_crystal()
     basis2.to_crystal()
 
@@ -33,6 +45,20 @@ def merge_two_materials(
     distance_tolerance: float = 0.1,
     merge_dangerously=False,
 ) -> Material:
+    """
+    Merges two Material objects into a new Material object, resolving overlapping coordinates in their bases.
+    The function requires that both materials have the same lattice vectors unless `merge_dangerously` is set to True.
+
+    Args:
+        material1 (Material): The first Material object to merge.
+        material2 (Material): The second Material object to merge.
+        material_name (Optional[str]): Optional name for the new merged material.
+        distance_tolerance (float): Tolerance for resolving overlapping coordinates in the basis.
+        merge_dangerously (bool): If True, allows merging even if lattices are different; uses the lattice of material1.
+
+    Returns:
+        Material: A new Material object containing merged lattice and basis.
+    """
     if not np.allclose(material1.lattice.vector_arrays, material2.lattice.vector_arrays) and not merge_dangerously:
         raise ValueError("Lattices of the two materials must be the same.")
     merged_lattice = material1.lattice
