@@ -23,6 +23,7 @@ class ZSLMatchHolder(InMemoryEntityPydantic):
     substrate_transformation: np.ndarray
     film_sl_vectors: np.ndarray
     substrate_sl_vectors: np.ndarray
+    match_transformation: np.ndarray
 
 
 class BaseInterfaceAnalyzer(InMemoryEntityPydantic):
@@ -47,7 +48,7 @@ class BaseInterfaceAnalyzer(InMemoryEntityPydantic):
 
     def to_2d(self, lattice) -> np.ndarray:
         """Extract 2D lattice vectors (a and b vectors) from 3D lattice."""
-        return np.array(lattice.vector_arrays[:2])
+        return np.array(lattice.vector_arrays[:2])[:, :2]
 
     def to_3d_strain(self, strain_2d: np.ndarray) -> Matrix3x3Schema:
         """Convert 2D strain matrix to 3D strain matrix with identity in z-direction."""
@@ -101,7 +102,7 @@ class InterfaceAnalyzer(BaseInterfaceAnalyzer):
         )
 
 
-class ZSLInterfaceAnalyzer(BaseInterfaceAnalyzer):
+class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     """Interface analyzer using Pymatgen's ZSL algorithm to find matching supercells."""
 
     max_area: float = 50.0
@@ -138,12 +139,14 @@ class ZSLInterfaceAnalyzer(BaseInterfaceAnalyzer):
             substrate_transformation = match.substrate_transformation
             film_sl_vectors = match.film_sl_vectors
             substrate_sl_vectors = match.substrate_sl_vectors
+            match_transformation = match.match_transformation
 
             match_holder = ZSLMatchHolder(
                 film_transformation=film_transformation,
                 substrate_transformation=substrate_transformation,
                 film_sl_vectors=film_sl_vectors,
                 substrate_sl_vectors=substrate_sl_vectors,
+                match_transformation=match_transformation,
             )
             match_holders.append(match_holder)
         return match_holders
@@ -151,17 +154,21 @@ class ZSLInterfaceAnalyzer(BaseInterfaceAnalyzer):
     def _create_strained_configs(
         self, match: ZSLMatchHolder
     ) -> Tuple[SlabStrainedSupercellConfiguration, SlabStrainedSupercellConfiguration]:
-        # Decompose transformation matrices into supercell and strain components
-        substrate_supercell_matrix = np.round(match.substrate_transformation).astype(int)
-        film_supercell_matrix = np.round(match.film_transformation).astype(int)
-
-        # Calculate strain matrices as the difference between actual transformation and integer supercell
-        substrate_strain_2d = np.linalg.inv(substrate_supercell_matrix) @ match.substrate_transformation
-        film_strain_2d = np.linalg.inv(film_supercell_matrix) @ match.film_transformation
-
+        # Use ZSL transformation matrices as supercell matrices
+        substrate_supercell_matrix = match.substrate_transformation.astype(int)
+        film_supercell_matrix = match.film_transformation.astype(int)
+        
+        # Substrate remains unstrained (identity strain)
+        substrate_strain_2d = np.eye(2)
+        
+        # Calculate film strain using our existing approach (from InterfaceAnalyzer)
+        film_strain_2d = self._calculate_film_strain_for_supercells(
+            substrate_supercell_matrix, film_supercell_matrix
+        )
+        
         substrate_supercell_2d = SupercellMatrix2DSchema(root=substrate_supercell_matrix.tolist())
         film_supercell_2d = SupercellMatrix2DSchema(root=film_supercell_matrix.tolist())
-
+        
         substrate_strain_3d = self.to_3d_strain(substrate_strain_2d)
         film_strain_3d = self.to_3d_strain(film_strain_2d)
 
@@ -180,6 +187,27 @@ class ZSLInterfaceAnalyzer(BaseInterfaceAnalyzer):
         )
 
         return substrate_config, film_config
+
+    def _calculate_film_strain_for_supercells(
+        self, substrate_supercell_matrix: np.ndarray, film_supercell_matrix: np.ndarray
+    ) -> np.ndarray:
+        """Calculate film strain to match substrate using our existing approach."""
+        # Get original 2D lattice vectors
+        substrate_original_2d = self.to_2d(self.substrate_material.lattice)
+        film_original_2d = self.to_2d(self.film_material.lattice)
+        
+        # Calculate supercell lattices
+        substrate_supercell_2d = substrate_original_2d @ substrate_supercell_matrix
+        film_supercell_2d = film_original_2d @ film_supercell_matrix
+        
+        # Calculate strain to match substrate supercell
+        try:
+            inv_film_supercell = np.linalg.inv(film_supercell_2d)
+        except np.linalg.LinAlgError:
+            raise ValueError("Film supercell lattice vectors are not linearly independent.")
+        
+        strain_2d = inv_film_supercell @ substrate_supercell_2d
+        return strain_2d
 
     def get_strained_configurations(
         self,

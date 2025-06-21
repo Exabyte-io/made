@@ -40,7 +40,9 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
     def vacuum_configuration(self) -> VacuumConfiguration:
         if len(self.stack_components) > 2:
             return self.stack_components[2]
-        return VacuumConfiguration(size=0.0, crystal=self.film_configuration, direction=self.direction)
+        return VacuumConfiguration(
+            size=0.0, crystal=self.film_configuration.atomic_layers.crystal, direction=self.direction
+        )
 
 
 class TwistedInterfaceConfiguration(BaseConfiguration):
