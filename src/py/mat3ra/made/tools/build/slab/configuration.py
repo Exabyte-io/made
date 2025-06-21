@@ -61,9 +61,6 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
 class SlabStrainedSupercellConfiguration(SlabConfiguration, SlabStrainedSupercellConfigurationSchema):
     type: str = "SlabStrainedSupercellConfiguration"
     strain_matrix: Matrix3x3Schema = SlabStrainedSupercellConfigurationSchema.model_fields["strain_matrix"].default
-    xy_supercell_matrix: SupercellMatrix2DSchema = SlabStrainedSupercellConfigurationSchema.model_fields[
-        "xy_supercell_matrix"
-    ].default
 
 
 class SlabStrainedSupercellWithGapConfiguration(

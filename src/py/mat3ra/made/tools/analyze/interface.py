@@ -65,7 +65,6 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
         return SlabStrainedSupercellConfiguration(
             stack_components=configuration.stack_components,
             direction=configuration.direction,
-            xy_supercell_matrix=[[1, 0], [0, 1]],
             strain_matrix=strain_matrix,
         )
 
