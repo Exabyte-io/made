@@ -3,11 +3,11 @@ from typing import Final
 
 import numpy as np
 import pytest
-
-from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer, ZSLInterfaceAnalyzer, StrainedSlabConfigurationHolder
+from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer, StrainedSlabConfigurationHolder, ZSLInterfaceAnalyzer
 from mat3ra.made.tools.analyze.utils import get_film_strain_matrix
 from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+
 from .utils import assert_two_entities_deep_almost_equal
 
 SUBSTRATE_SI_001: Final = SimpleNamespace(

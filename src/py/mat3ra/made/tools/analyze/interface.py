@@ -7,16 +7,12 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from pymatgen.analysis.interfaces.coherent_interfaces import ZSLGenerator, CoherentInterfaceBuilder
-
 from mat3ra.made.tools.analyze.utils import get_film_strain_matrix
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
-from mat3ra.made.tools.build.slab.configuration import (
-    SlabConfiguration,
-    SlabStrainedSupercellConfiguration,
-)
+from mat3ra.made.tools.build.slab.configuration import SlabConfiguration, SlabStrainedSupercellConfiguration
 from mat3ra.made.tools.convert import to_pymatgen
 from mat3ra.made.tools.operations.core.unary import supercell
+from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
 
 
 class StrainedSlabConfigurationHolder(InMemoryEntityPydantic):
