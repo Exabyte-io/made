@@ -3,12 +3,13 @@ from types import SimpleNamespace
 from typing import Final
 
 import pytest
+from mat3ra.utils import assertion as assertion_utils
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer, ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.interface import (
     InterfaceBuilder,
     InterfaceConfiguration,
-    create_interfaces,
 )
 from mat3ra.made.tools.build.interface.builders import (
     CommensurateLatticeTwistedInterfaceBuilder,
@@ -18,11 +19,7 @@ from mat3ra.made.tools.build.interface.builders import (
     TwistedInterfaceConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
-from mat3ra.utils import assertion as assertion_utils
-
-from mat3ra.made.tools.operations.core.unary import supercell
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
-
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
@@ -98,10 +95,7 @@ def test_zsl_interface_builder():
     selected_config = configs_with_metadata[0]
 
     interface_config = InterfaceConfiguration(
-        stack_components=[
-            selected_config[0],
-            selected_config[1],
-        ]
+        stack_components=[selected_config.substrate_configuration, selected_config.film_configuration]
     )
 
     # Use regular InterfaceBuilder to create the interface
