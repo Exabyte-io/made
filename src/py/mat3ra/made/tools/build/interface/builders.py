@@ -27,7 +27,7 @@ from ..mixins import (
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configuration import SlabStrainedSupercellConfiguration
-from ..stack.builders import StackBuilder2Components
+from ..stack.builders import Stack2ComponentsBuilder, StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ..supercell import create_supercell
 from ..utils import merge_materials
@@ -48,7 +48,7 @@ class InterfaceBuilderParameters(InMemoryEntityPydantic):
     pass
 
 
-class InterfaceBuilder(StackBuilder2Components):
+class InterfaceBuilder(StackNComponentsBuilder):
     """
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
@@ -58,47 +58,24 @@ class InterfaceBuilder(StackBuilder2Components):
     _GeneratedItemType: Type[Material] = Material
 
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, Material):
-            return configuration_or_material
-
         if isinstance(configuration_or_material, SlabStrainedSupercellConfiguration):
             builder = SlabStrainedSupercellBuilder()
             return builder.get_material(configuration_or_material)
-
         return super()._configuration_to_material(configuration_or_material)
 
-    def _get_labeled_substrate_material(self, configuration: InterfaceConfiguration) -> Material:
-        substrate_material = self._configuration_to_material(configuration.substrate_configuration)
-        substrate_material.set_labels_from_list([0] * len(substrate_material.basis.elements.values))
-        return substrate_material
-
-    def _get_labeled_film_material(self, configuration: InterfaceConfiguration) -> Material:
-        film_material = self._configuration_to_material(configuration.film_configuration)
-        film_material.set_labels_from_list([1] * len(film_material.basis.elements.values))
-        return film_material
-
     def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
-        labeled_film_material = self._get_labeled_film_material(configuration)
-        xy_shifted_labeled_film_material = translate_by_vector(
-            labeled_film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True
-        )
-        substrate_film_stack_configuration = StackConfiguration(
-            stack_components=[
-                self._get_labeled_substrate_material(configuration),
-                xy_shifted_labeled_film_material,
-            ],
-            direction=configuration.direction,
-        )
-        substrate_film_materials = super()._generate(substrate_film_stack_configuration)
-        interface = substrate_film_materials[0]
+        film_material = self._configuration_to_material(configuration.film_configuration)
+        substrate_material = self._configuration_to_material(configuration.substrate_configuration)
 
-        vacuum_configuration = configuration.vacuum_configuration
-        if vacuum_configuration.size > 0:
-            interface_vacuum_stack_configuration = StackConfiguration(
-                stack_components=[interface, vacuum_configuration], direction=configuration.direction
-            )
-            interface_vacuum_materials = super()._generate(interface_vacuum_stack_configuration)
-            interface = interface_vacuum_materials[0]
+        film_material.set_labels_from_value(0)
+        substrate_material.set_labels_from_value(1)
+
+        film_material = translate_by_vector(film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True)
+        stack_configuration = StackConfiguration(
+            stack_components=[substrate_material, film_material, configuration.vacuum_configuration]
+        )
+
+        interface = super()._generate(stack_configuration)
 
         wrapped_interface = wrap_to_unit_cell(interface)
         return [wrapped_interface]

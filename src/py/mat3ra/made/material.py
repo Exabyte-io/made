@@ -99,3 +99,6 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
 
     def set_labels_from_list(self, labels: List[Union[int, str]]) -> None:
         self.basis.set_labels_from_list(labels)
+
+    def set_labels_from_value(self, value: int) -> None:
+        self.basis.set_labels_from_list([value] * self.basis.number_of_atoms)

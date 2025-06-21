@@ -1,11 +1,11 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilder
+from mat3ra.made.tools.build import BaseBuilder, BaseSingleBuilder
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from .configuration import VacuumConfiguration
 from ...utils import AXIS_TO_INDEX_MAP
 
 
-class VacuumBuilder(BaseBuilder):
+class VacuumBuilder(BaseSingleBuilder):
     _ConfigurationType = VacuumConfiguration
 
     def get_material(self, configuration: VacuumConfiguration) -> Material:
