@@ -95,26 +95,25 @@ class SlabBuilder(StackBuilder2Components):
 
 class SlabStrainedSupercellBuilder(SlabBuilder):
     def _generate(self, configuration: SlabStrainedSupercellConfiguration) -> List[Material]:
-        materials = super()._generate(configuration)
+        slab_materials = super()._generate(configuration)
+        slab_material = slab_materials[0]
 
-        material = materials[0]
         if configuration.xy_supercell_matrix:
-            material = supercell(material, configuration.xy_supercell_matrix)
-        if configuration.strain_matrix:
-            material = strain(material, configuration.strain_matrix)
+            slab_material = supercell(slab_material, configuration.xy_supercell_matrix)
+        strained_slab_material = strain(slab_material, configuration.strain_matrix)
 
-        return [material]
+        return [strained_slab_material]
 
 
 class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
     def _generate(self, configuration: SlabStrainedSupercellWithGapConfiguration) -> List[Material]:
-        materials = super()._generate(configuration)
-        material = materials[0]
+        strained_slab_materials = super()._generate(configuration)
+        strained_slab_material = strained_slab_materials[0]
 
         if configuration.gap is not None:
-            material = self._adjust_lattice_for_gap(material, configuration.gap)
+            strained_slab_material = self._adjust_lattice_for_gap(strained_slab_material, configuration.gap)
 
-        return [material]
+        return [strained_slab_material]
 
     def _adjust_lattice_for_gap(self, material: Material, gap: float) -> Material:
         """
