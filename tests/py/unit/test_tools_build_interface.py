@@ -71,11 +71,15 @@ def test_simple_interface_builder(substrate, film, expected_interface):
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
-def test_zsl_interface_builder():
+@pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
+def test_zsl_interface_builder(substrate, film, expected_interface):
     """Test creating Si/Ge interface using ZSL approach."""
-    # Create slab configurations for Si (substrate) and Ge (film)
-    substrate_slab_config = create_slab_configuration(BULK_Si_CONVENTIONAL, (0, 0, 1), 3, vacuum=0.0)
-    film_slab_config = create_slab_configuration(BULK_Ge_CONVENTIONAL, (0, 0, 1), 3, vacuum=0.0)
+    substrate_slab_config = create_slab_configuration(
+        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
+    )
+    film_slab_config = create_slab_configuration(
+        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
+    )
 
     # Use ZSLInterfaceAnalyzer to get strained slab configurations
     analyzer = ZSLInterfaceAnalyzer(
@@ -87,23 +91,21 @@ def test_zsl_interface_builder():
         max_angle_tol=0.02,
     )
 
-    configs_with_metadata = analyzer.get_strained_configurations()
+    interface_configurations = analyzer.get_strained_configurations()
 
-    selected_config = configs_with_metadata[0]
-
+    selected_config = interface_configurations[0]
     interface_config = InterfaceConfiguration(
         stack_components=[selected_config.substrate_configuration, selected_config.film_configuration]
     )
 
-    # Use regular InterfaceBuilder to create the interface
     builder = InterfaceBuilder()
     interface = builder.get_material(interface_config)
 
-    # Should contain both Si and Ge
-    elements = set(interface.basis.elements.values)
-    assert_two_entities_deep_almost_equal(interface, INTERFACE_Si_001_Ge_001)
-    assert "Si" in elements, "Interface should contain Si atoms"
-    assert "Ge" in elements, "Interface should contain Ge atoms"
+    # remove metadata
+    interface.metadata.pop("build", None)
+    expected_interface["metadata"].pop("build", None)
+
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
 @pytest.mark.skip(reason="Fixtures are commented out. To be fixed in epic-7623")
