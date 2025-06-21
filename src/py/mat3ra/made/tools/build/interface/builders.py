@@ -63,7 +63,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
             return builder.get_material(configuration_or_material)
         return super()._configuration_to_material(configuration_or_material)
 
-    def _generate(self, configuration: InterfaceConfiguration) -> List[Material]:
+    def _generate(self, configuration: InterfaceConfiguration) -> Material:
         film_material = self._configuration_to_material(configuration.film_configuration)
         substrate_material = self._configuration_to_material(configuration.substrate_configuration)
 
@@ -78,7 +78,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
         interface = super()._generate(stack_configuration)
 
         wrapped_interface = wrap_to_unit_cell(interface)
-        return [wrapped_interface]
+        return wrapped_interface
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
         film_formula = get_chemical_formula(configuration.film_configuration.atomic_layers.crystal)

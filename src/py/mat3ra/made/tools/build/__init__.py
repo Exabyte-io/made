@@ -94,8 +94,8 @@ class BaseSingleBuilder(BaseModel):
     ) -> Material:
         generated_item = self._generate(configuration)
         materials = self._post_process(generated_item, post_process_parameters)
-        finalized_materials = self._finalize(materials, configuration)
-        return finalized_materials
+        finalized_material = self._finalize(materials, configuration)
+        return finalized_material
 
     def _update_material_name(self, material, configuration) -> Material:
         return material
