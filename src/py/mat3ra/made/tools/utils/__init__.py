@@ -7,6 +7,7 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     SupercellMatrix2DSchemaItem,
 )
 from mat3ra.utils.matrix import convert_2x2_to_3x3
+from unit.utils import unwrap
 
 AXIS_TO_INDEX_MAP = {"x": 0, "y": 1, "z": 2}
 
@@ -55,14 +56,6 @@ def normalize_2x2_matrix(
     """
     if isinstance(matrix, SupercellMatrix2DSchema):
         return supercell_matrix_2d_schema_to_list(matrix)
-
-    def unwrap(value: Any) -> Any:
-        """Recursively unwraps objects with a .root attribute and lists."""
-        if hasattr(value, "root"):
-            return unwrap(value.root)
-        if isinstance(value, list):
-            return [unwrap(item) for item in value]
-        return value
 
     unwrapped_matrix = unwrap(matrix)
 

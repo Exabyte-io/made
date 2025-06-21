@@ -3,7 +3,6 @@ from functools import cached_property
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
-
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configuration import SlabConfiguration, SlabStrainedSupercellConfiguration
 

@@ -9,9 +9,6 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab_strained_supercell_with_gap import (
     SlabStrainedSupercellWithGapConfigurationSchema,
 )
-from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
-    SupercellMatrix2DSchema,
-)
 from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.crystal_lattice_planes import (
     CrystalLatticePlanesSchema,
 )
