@@ -1,9 +1,9 @@
-from typing import Any, List, TypeVar, Generic
+from typing import Any, TypeVar
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilder, BaseSingleBuilder
+from mat3ra.made.tools.build import BaseSingleBuilder
 from mat3ra.made.tools.build.slab.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
 )
