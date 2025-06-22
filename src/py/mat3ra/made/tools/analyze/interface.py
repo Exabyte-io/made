@@ -12,6 +12,7 @@ from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configuration import SlabConfiguration, SlabStrainedSupercellConfiguration
 from mat3ra.made.tools.convert import to_pymatgen
 from mat3ra.made.tools.operations.core.unary import supercell
+from mat3ra.made.tools.utils import supercell_matrix_2d_schema_to_list
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
 
 
@@ -174,7 +175,6 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         return self._create_strained_configs_from_match(match_holder)
 
     def _create_strained_configs_from_match(self, match_holder: ZSLMatchHolder) -> StrainedSlabConfigurationHolder:
-        # Use 3x3 matrices directly from match_holder
         substrate_supercell = supercell(self.substrate_material, match_holder.substrate_transformation)
         film_supercell = supercell(self.film_material, match_holder.film_transformation)
 
@@ -182,18 +182,20 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             substrate_supercell.lattice.vector_arrays, film_supercell.lattice.vector_arrays
         )
 
-        # Create configurations with match ID information
+        substrate_matrix = supercell_matrix_2d_schema_to_list(match_holder.substrate_transformation)
+        film_matrix = supercell_matrix_2d_schema_to_list(match_holder.film_transformation)
+
         substrate_config = SlabStrainedSupercellConfiguration(
             stack_components=self.substrate_slab_configuration.stack_components,
             direction=self.substrate_slab_configuration.direction,
-            xy_supercell_matrix=match_holder.substrate_transformation.root,
+            xy_supercell_matrix=substrate_matrix,
             strain_matrix=self.identity_strain,
         )
 
         film_config = SlabStrainedSupercellConfiguration(
             stack_components=self.film_slab_configuration.stack_components,
             direction=self.film_slab_configuration.direction,
-            xy_supercell_matrix=match_holder.film_transformation.root,
+            xy_supercell_matrix=film_matrix,
             strain_matrix=film_strain_3d,
         )
 
