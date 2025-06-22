@@ -1,8 +1,13 @@
 import platform
+from types import SimpleNamespace
+from typing import Final
 
 import pytest
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.build.interface import (
+    InterfaceBuilder,
+    InterfaceConfiguration,
     ZSLStrainMatchingInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilderParameters,
     ZSLStrainMatchingParameters,
@@ -15,9 +20,31 @@ from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceConfiguration,
     TwistedInterfaceConfiguration,
 )
+from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
 from mat3ra.utils import assertion as assertion_utils
+from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
+from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.monolayer import GRAPHENE
+from .utils import assert_two_entities_deep_almost_equal
+
+PARAMETERS_SLAB_Si_001: Final = SimpleNamespace(
+    bulk_config=BULK_Si_CONVENTIONAL,
+    miller_indices=(0, 0, 1),
+    number_of_layers=2,
+    vacuum=0.0,
+)
+
+PARAMETERS_SLAB_Ge_001: Final = SimpleNamespace(
+    bulk_config=BULK_Ge_CONVENTIONAL,
+    miller_indices=(0, 0, 1),
+    number_of_layers=2,
+    vacuum=0.0,
+)
+
+
+SIMPLE_INTERFACE_BUILDER_TEST_CASES = [(PARAMETERS_SLAB_Si_001, PARAMETERS_SLAB_Ge_001, INTERFACE_Si_001_Ge_001)]
+
 
 MAX_AREA = 100
 # pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2
@@ -29,6 +56,32 @@ build_parameters = ZSLStrainMatchingInterfaceBuilderParameters(
     strain_matching_parameters=zsl_strain_matching_parameters
 )
 matched_interfaces_builder = ZSLStrainMatchingInterfaceBuilder(build_parameters=build_parameters)
+
+
+@pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
+def test_simple_interface_builder(substrate, film, expected_interface):
+    builder = InterfaceBuilder()
+    substrate_slab_config = create_slab_configuration(
+        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
+    )
+    film_slab_config = create_slab_configuration(
+        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
+    )
+
+    analyzer = InterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
+    )
+
+    film_configuration = analyzer.film_strained_configuration
+    substrate_configuration = analyzer.substrate_strained_configuration
+    vacuum_configuration = film_slab_config.vacuum_configuration
+
+    config = InterfaceConfiguration(
+        stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
+    )
+    interface = builder.get_material(config)
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
 @pytest.mark.skip(reason="Fixtures are commented out. To be fixed in epic-7623")

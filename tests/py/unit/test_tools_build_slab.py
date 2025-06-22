@@ -15,6 +15,7 @@ from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
     SI_PRIMITIVE_SLAB_001,
+    SLAB_SI_CONVENTIONAL_001_NO_VACUUM,
     SLAB_SrTiO3_011_TERMINATION_O2,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
 )
@@ -40,6 +41,15 @@ PARAMS_BUILD_SLAB_CONVENTIONAL: Final = (
     "Si",
     2,
     5.0,
+    [[1, 0], [0, 1]],
+)
+
+PARAMS_BUILD_SLAB_CONVENTIONAL_NO_VACUUM: Final = (
+    BULK_Si_PRIMITIVE,
+    (0, 0, 1),
+    "Si",
+    2,
+    0.0,
     [[1, 0], [0, 1]],
 )
 
@@ -141,6 +151,10 @@ def test_build_slab_primitive(
         (
             *PARAMS_BUILD_SLAB_CONVENTIONAL,
             SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA,
+        ),
+        (
+            *PARAMS_BUILD_SLAB_CONVENTIONAL_NO_VACUUM,
+            SLAB_SI_CONVENTIONAL_001_NO_VACUUM,
         ),
     ],
 )

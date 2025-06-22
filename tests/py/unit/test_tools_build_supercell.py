@@ -14,7 +14,7 @@ from .utils import assert_two_entities_deep_almost_equal
             BULK_Si_PRIMITIVE,
             [[2, 0, 0], [0, 2, 0], [0, 0, 1]],
             SI_SUPERCELL_2X2X1,
-        )
+        ),
     ],
 )
 def test_create_supercell(material_config, supercell_matrix, expected_material_config):

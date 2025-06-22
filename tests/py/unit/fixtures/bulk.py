@@ -89,3 +89,42 @@ BULK_Si_CONVENTIONAL_FILTERED: Dict[str, Any] = {
         "type": "TRI",
     },
 }
+
+BULK_Ge_CONVENTIONAL: Dict[str, Any] = {
+    "name": "Germanium FCC",
+    "basis": {
+        "units": "crystal",
+        "elements": [
+            {"id": 0, "value": "Ge"},
+            {"id": 1, "value": "Ge"},
+            {"id": 2, "value": "Ge"},
+            {"id": 3, "value": "Ge"},
+            {"id": 4, "value": "Ge"},
+            {"id": 5, "value": "Ge"},
+            {"id": 6, "value": "Ge"},
+            {"id": 7, "value": "Ge"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0, 0, 0]},
+            {"id": 1, "value": [0.5, 0.5, 0]},
+            {"id": 2, "value": [0.5, 0, 0.5]},
+            {"id": 3, "value": [0, 0.5, 0.5]},
+            {"id": 4, "value": [0.25, 0.25, 0.25]},
+            {"id": 5, "value": [0.75, 0.75, 0.25]},
+            {"id": 6, "value": [0.75, 0.25, 0.75]},
+            {"id": 7, "value": [0.25, 0.75, 0.75]},
+        ],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 5.67099638511611,
+        "b": 5.67099638511611,
+        "c": 5.67099638511611,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "CUB",
+        "vectors": {"a": [5.671, 0, 0], "b": [0, 5.671, 0], "c": [0, 0, 5.671], "alat": 1, "units": "angstrom"},
+    },
+}

@@ -7,6 +7,7 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     SupercellMatrix2DSchemaItem,
 )
 from mat3ra.utils.matrix import convert_2x2_to_3x3
+from unit.utils import unwrap
 
 AXIS_TO_INDEX_MAP = {"x": 0, "y": 1, "z": 2}
 
@@ -20,6 +21,29 @@ def is_primitive_2x2_matrix(matrix: Any) -> bool:
     )
 
 
+def supercell_matrix_2d_schema_to_list(matrix: SupercellMatrix2DSchema) -> List[List[int]]:
+    """
+    Convert a SupercellMatrix2DSchema to a list of lists of integers.
+    This function is specifically designed to handle the structure of SupercellMatrix2DSchema
+    as seen in the error message.
+    """
+    if matrix is None or matrix.root is None:
+        return [[1, 0], [0, 1]]  # Default identity matrix
+
+    if is_primitive_2x2_matrix(matrix.root):
+        return matrix.root
+
+    if (
+        isinstance(matrix.root, list)
+        and len(matrix.root) == 2
+        and all(isinstance(row, SupercellMatrix2DSchemaItem) for row in matrix.root)
+    ):
+        return [[int(val) for val in row.root] for row in matrix.root]
+
+    # If we can't handle the specific structure, return a default identity matrix
+    return [[1, 0], [0, 1]]
+
+
 def normalize_2x2_matrix(
     matrix: Union[
         List[List[float]],
@@ -30,23 +54,15 @@ def normalize_2x2_matrix(
     Normalize any matrix-like structure to a plain 2x2 list of floats.
     Returns None if normalization is not possible.
     """
-    if isinstance(matrix, SupercellMatrix2DSchema) and matrix.root:
-        matrix = matrix.root
+    if isinstance(matrix, SupercellMatrix2DSchema):
+        return supercell_matrix_2d_schema_to_list(matrix)  # type: ignore
 
-    if isinstance(matrix, SupercellMatrix2DSchemaItem):
-        return [matrix.root]
+    unwrapped_matrix = unwrap(matrix)
 
-    if (
-        isinstance(matrix, list)
-        and len(matrix) == 2
-        and all(isinstance(row, SupercellMatrix2DSchemaItem) for row in matrix)
-    ):
-        return [cast(SupercellMatrix2DSchemaItem, row).root for row in matrix]
+    if is_primitive_2x2_matrix(unwrapped_matrix):
+        return unwrapped_matrix
 
-    if is_primitive_2x2_matrix(matrix):
-        return matrix  # already normalized
-
-    return None  # unrecognized format
+    return None
 
 
 def decorator_convert_supercell_matrix_2x2_to_3x3(func: Callable) -> Callable:

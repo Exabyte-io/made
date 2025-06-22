@@ -1,4 +1,4 @@
-from .monolayer import GRAPHENE
+from ..monolayer import GRAPHENE
 
 GRAPHENE_NICKEL_INTERFACE = {
     "name": "C2(001)-Ni4(111), Interface, Strain 0.105pct",

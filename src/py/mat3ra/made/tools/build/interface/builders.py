@@ -1,7 +1,7 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Type
 
 import numpy as np
-from ase.build.tools import niggli_reduce
+from mat3ra.code.entity import InMemoryEntityPydantic
 from pydantic import BaseModel
 from pymatgen.analysis.interfaces.coherent_interfaces import (
     CoherentInterfaceBuilder,
@@ -11,6 +11,7 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
+
 from .commensurate_lattice_pair import CommensurateLatticePair
 from .configuration import (
     InterfaceConfiguration,
@@ -20,113 +21,76 @@ from .configuration import (
 from .enums import StrainModes, angle_to_supercell_matrix_values_for_hex
 from .termination_pair import TerminationPair, safely_select_termination_pair
 from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
+from ..metadata import MaterialMetadata
 from ..mixins import (
-    ConvertGeneratedItemsASEAtomsMixin,
     ConvertGeneratedItemsPymatgenStructureMixin,
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from ..slab.configuration import SlabConfiguration
-from ..slab.helpers import create_slab
+from ..slab.builders import SlabStrainedSupercellBuilder
+from ..slab.configuration import SlabStrainedSupercellConfiguration
+from ..stack.builders import StackNComponentsBuilder
+from ..stack.configuration import StackConfiguration
 from ..supercell import create_supercell
 from ..utils import merge_materials
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder, BaseBuilderParameters
-from ...convert import to_ase, from_ase, to_pymatgen, PymatgenInterface, ASEAtoms
+from ...convert import to_pymatgen, PymatgenInterface
 from ...modify import (
     translate_to_z_level,
     rotate,
     translate_by_vector,
     add_vacuum_sides,
     add_vacuum,
+    wrap_to_unit_cell,
 )
-from ..metadata import MaterialMetadata
 
 
-class InterfaceBuilderParameters(BaseModel):
+class InterfaceBuilderParameters(InMemoryEntityPydantic):
     pass
 
 
-class InterfaceBuilder(BaseBuilder):
-    _BuildParametersType = InterfaceBuilderParameters
-    _ConfigurationType: type(InterfaceConfiguration) = InterfaceConfiguration  # type: ignore
-
-    def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        film_formula = get_chemical_formula(configuration.film_configuration.bulk)
-        substrate_formula = get_chemical_formula(configuration.substrate_configuration.bulk)
-        film_miller_indices = "".join([str(i) for i in configuration.film_configuration.miller_indices])
-        substrate_miller_indices = "".join([str(i) for i in configuration.substrate_configuration.miller_indices])
-        new_name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
-        material.name = new_name
-        return material
-
-
-########################################################################################
-#                           Simple Interface Builder                                   #
-########################################################################################
-class SimpleInterfaceBuilderParameters(InterfaceBuilderParameters):
-    scale_film: bool = True  # Whether to scale the film to match the substrate
-    create_slabs: bool = True  # Whether to create slabs from the configurations or use the bulk
-
-
-class SimpleInterfaceBuilder(ConvertGeneratedItemsASEAtomsMixin, InterfaceBuilder):
+class InterfaceBuilder(StackNComponentsBuilder):
     """
     Creates matching interface between substrate and film by straining the film to match the substrate.
     """
 
-    _BuildParametersType = SimpleInterfaceBuilderParameters
-    _DefaultBuildParameters = SimpleInterfaceBuilderParameters(scale_film=True)
-    _GeneratedItemType: type(ASEAtoms) = ASEAtoms  # type: ignore
+    _ConfigurationType = InterfaceConfiguration
+    _BuildParametersType = InterfaceBuilderParameters
+    _GeneratedItemType: Type[Material] = Material
 
-    def __preprocess_slab_configuration(self, configuration: SlabConfiguration, create_slabs=False) -> ASEAtoms:
-        slab = create_slab(configuration) if create_slabs else configuration.bulk
-        ase_slab = to_ase(slab)
+    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
+        if isinstance(configuration_or_material, SlabStrainedSupercellConfiguration):
+            builder = SlabStrainedSupercellBuilder()
+            return builder.get_material(configuration_or_material)
+        return super()._configuration_to_material(configuration_or_material)
 
-        niggli_reduce(ase_slab)
-        return ase_slab
+    def _generate(self, configuration: InterfaceConfiguration) -> Material:
+        film_material = self._configuration_to_material(configuration.film_configuration)
+        substrate_material = self._configuration_to_material(configuration.substrate_configuration)
 
-    @staticmethod
-    def __combine_two_slabs_ase(substrate_slab_ase: ASEAtoms, film_slab_ase: ASEAtoms, distance_z: float) -> ASEAtoms:
-        total_z_height = substrate_slab_ase.cell[2][2] + film_slab_ase.cell[2][2] + distance_z
-        substrate_slab_ase.cell[2][2] = total_z_height
-        film_slab_ase.cell[2][2] = total_z_height
-        max_z_substrate = max(substrate_slab_ase.positions[:, 2])
-        min_z_film = min(film_slab_ase.positions[:, 2])
-        shift_z = max_z_substrate - min_z_film + distance_z
+        film_material.set_labels_from_value(0)
+        substrate_material.set_labels_from_value(1)
 
-        film_slab_ase.translate([0, 0, shift_z])
-
-        return substrate_slab_ase + film_slab_ase
-
-    @staticmethod
-    def __add_vacuum_along_c_ase(interface_ase: ASEAtoms, vacuum: float) -> ASEAtoms:
-        cell_c_with_vacuum = max(interface_ase.positions[:, 2]) + vacuum
-        interface_ase.cell[2, 2] = cell_c_with_vacuum
-        return interface_ase
-
-    def _generate(self, configuration: InterfaceBuilder._ConfigurationType) -> List[_GeneratedItemType]:  # type: ignore
-        film_slab_ase = self.__preprocess_slab_configuration(
-            configuration.film_configuration,
-            create_slabs=self.build_parameters.create_slabs,
-        )
-        substrate_slab_ase = self.__preprocess_slab_configuration(
-            configuration.substrate_configuration,
-            create_slabs=self.build_parameters.create_slabs,
+        film_material = translate_by_vector(film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True)
+        stack_configuration = StackConfiguration(
+            stack_components=[substrate_material, film_material, configuration.vacuum_configuration]
         )
 
-        if self.build_parameters.scale_film:
-            temp_cell = [substrate_slab_ase.cell[0], substrate_slab_ase.cell[1], film_slab_ase.cell[2]]
-            # We scale the film in XY direction only, and use two scaling steps and a temporary cell
-            film_slab_ase.set_cell(temp_cell, scale_atoms=True)
-            film_slab_ase.set_cell(substrate_slab_ase.cell, scale_atoms=False)
-            film_slab_ase.wrap()
+        interface = super()._generate(stack_configuration)
 
-        interface_ase = self.__combine_two_slabs_ase(substrate_slab_ase, film_slab_ase, configuration.distance_z)
-        interface_ase_with_vacuum = self.__add_vacuum_along_c_ase(interface_ase, configuration.vacuum)
+        wrapped_interface = wrap_to_unit_cell(interface)
+        return wrapped_interface
 
-        return [interface_ase_with_vacuum]
-
-    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
-        return [Material.create(from_ase(slab)) for slab in items]
+    def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
+        film_formula = get_chemical_formula(configuration.film_configuration.atomic_layers.crystal)
+        substrate_formula = get_chemical_formula(configuration.substrate_configuration.atomic_layers.crystal)
+        film_miller_indices = "".join([str(i) for i in configuration.film_configuration.atomic_layers.miller_indices])
+        substrate_miller_indices = "".join(
+            [str(i) for i in configuration.substrate_configuration.atomic_layers.miller_indices]
+        )
+        name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
+        material.name = name
+        return material
 
 
 ########################################################################################
@@ -387,7 +351,7 @@ class CommensurateLatticeTwistedInterfaceBuilder(BaseBuilder):
                 new_film, [0, 0, item.configuration.distance_z], use_cartesian_coordinates=True
             )
             interface = merge_materials([new_substrate, new_film], merge_dangerously=True)
-            interface.metadata["actual_twist_angle"] = item.angle
+            interface.metadata = {"actual_twist_angle": item.angle}
             if item.configuration.vacuum != 0:
                 interface = add_vacuum(interface, item.configuration.vacuum)
             interfaces.append(interface)

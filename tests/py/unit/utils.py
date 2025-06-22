@@ -10,6 +10,16 @@ ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS: Dict = {1: "substrate", 2: "film"}
 INTERFACE_STRUCTURE_LABELS_TO_ATOMS_TAGS: Dict = {v: k for k, v in ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS.items()}
 
 
+# TODO: remove, when propert solution for handling RootModel is added
+def unwrap(value: Any) -> Any:
+    """Recursively unwraps objects with a .root attribute and lists."""
+    if hasattr(value, "root"):
+        return unwrap(value.root)
+    if isinstance(value, list):
+        return [unwrap(item) for item in value]
+    return value
+
+
 def atoms_to_interface_structure(atoms) -> Structure:
     """
     Converts ASE Atoms object to pymatgen Interface object.
@@ -60,8 +70,12 @@ def show_difference(expected_data, actual_data):
 
 
 def assert_two_entities_deep_almost_equal(entity1, entity2, rtol=1e-5, atol=1e-9):
-    dict_1 = entity1 if isinstance(entity1, dict) else json.loads(entity1.to_json())
-    dict_2 = entity2 if isinstance(entity2, dict) else json.loads(entity2.to_json())
+    # First unwrap any nested schema objects
+    entity1 = unwrap(entity1)
+    entity2 = unwrap(entity2)
+
+    dict_1 = entity1 if isinstance(entity1, (dict, list)) else json.loads(entity1.to_json())
+    dict_2 = entity2 if isinstance(entity2, (dict, list)) else json.loads(entity2.to_json())
 
     cleaned_dict_1 = prune_extra_keys(dict_1, dict_2)
 

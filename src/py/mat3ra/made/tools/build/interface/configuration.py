@@ -1,50 +1,45 @@
-from typing import Optional
+from typing import Optional, Union, List
 
-from mat3ra.code.entity import InMemoryEntity
-from pydantic import BaseModel
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interface.configuration import (  # noqa: E501
+    InterfaceConfigurationSchema,
+)
 
 from mat3ra.made.material import Material
-from .termination_pair import TerminationPair
-from .. import BaseConfiguration
-from ..slab.entities import Termination
-from ..slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from .. import BaseConfiguration, BaseConfigurationPydantic
+from ..slab.configuration import (
+    SlabConfiguration,
+    SlabStrainedSupercellConfiguration,
+    SlabStrainedSupercellWithGapConfiguration,
+)
 
 
-class InterfaceConfiguration(BaseModel, InMemoryEntity):
-    """
-    Configuration for an interface between two slabs.
-
-    Args:
-        film_configuration (SlabConfiguration): The configuration of the film slab.
-        substrate_configuration (SlabConfiguration): The configuration of the substrate slab.
-        film_termination (Termination): The termination of the film.
-        substrate_termination (Termination): The termination of the substrate.
-        distance_z (float): The distance between the film and the substrate in Angstroms.
-        vacuum (float): The vacuum thickness, in Angstroms.
-    """
-
-    film_configuration: SlabConfiguration
-    substrate_configuration: SlabConfiguration
-    film_termination: Termination
-    substrate_termination: Termination
-    distance_z: float = 3.0
-    vacuum: float = 5.0
+class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPydantic):
+    # components and their modifiers added in the order they are stacked, from bottom to top
+    stack_components: List[
+        Union[
+            SlabStrainedSupercellConfiguration,
+            SlabStrainedSupercellWithGapConfiguration,
+            VacuumConfiguration,
+        ]
+    ]
+    direction: AxisEnum = AxisEnum.z
+    xy_shift: List[float] = InterfaceConfigurationSchema.model_fields["xy_shift"].default  # in Angstroms
 
     @property
-    def termination_pair(self):
-        return TerminationPair(self.film_termination, self.substrate_termination)
+    def substrate_configuration(self) -> SlabConfiguration:
+        return self.stack_components[0]
 
     @property
-    def _json(self):
-        return {
-            "type": "InterfaceConfiguration",
-            "film_configuration": self.film_configuration.to_json(),
-            "substrate_configuration": self.substrate_configuration.to_json(),
-            "film_termination": str(self.film_termination),
-            "substrate_termination": str(self.substrate_termination),
-            "distance_z": self.distance_z,
-            "vacuum": self.vacuum,
-        }
+    def film_configuration(self) -> SlabConfiguration:
+        return self.stack_components[1]
+
+    @property
+    def vacuum_configuration(self) -> VacuumConfiguration:
+        if len(self.stack_components) > 2:
+            return self.stack_components[2]
+        return VacuumConfiguration(size=0.0, crystal=self.film_configuration, direction=self.direction)
 
 
 class TwistedInterfaceConfiguration(BaseConfiguration):
