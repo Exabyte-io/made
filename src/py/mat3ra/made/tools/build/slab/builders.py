@@ -12,7 +12,6 @@ from ..slab.configuration import SlabStrainedSupercellConfiguration, SlabStraine
 from ..stack.builders import Stack2ComponentsBuilder
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
-from ...build import BaseBuilder
 from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...operations.core.unary import supercell, translate, strain, edit_cell
 
