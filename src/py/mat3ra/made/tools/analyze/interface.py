@@ -23,10 +23,10 @@ class StrainedSlabConfigurationHolder(InMemoryEntityPydantic):
 
 class ZSLMatchHolder(InMemoryEntityPydantic):
     match_id: int
-    substrate_transformation: np.ndarray
-    film_transformation: np.ndarray
+    substrate_transformation: SupercellMatrix2DSchema
+    film_transformation: SupercellMatrix2DSchema
     match_area: float
-    strain_transformation: np.ndarray
+    strain_transformation: Matrix3x3Schema
     total_strain_percentage: float
 
 
@@ -154,10 +154,10 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         for idx, match in enumerate(zsl_matches):
             match_holder = ZSLMatchHolder(
                 match_id=idx,
-                substrate_transformation=match.substrate_transformation,
-                film_transformation=match.film_transformation,
+                substrate_transformation=SupercellMatrix2DSchema(root=match.substrate_transformation.tolist()),
+                film_transformation=SupercellMatrix2DSchema(root=match.film_transformation.tolist()),
                 match_area=match.match_area,
-                strain_transformation=match.match_transformation,
+                strain_transformation=Matrix3x3Schema(root=match.match_transformation.tolist()),
                 total_strain_percentage=self.calculate_total_strain_percentage(match.match_transformation),
             )
             match_holders.append(match_holder)
@@ -174,14 +174,9 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         return self._create_strained_configs_from_match(match_holder)
 
     def _create_strained_configs_from_match(self, match_holder: ZSLMatchHolder) -> StrainedSlabConfigurationHolder:
-        substrate_supercell_matrix_3d = np.eye(3, dtype=int)
-        substrate_supercell_matrix_3d[:2, :2] = match_holder.substrate_transformation.astype(int)
-
-        film_supercell_matrix_3d = np.eye(3, dtype=int)
-        film_supercell_matrix_3d[:2, :2] = match_holder.film_transformation.astype(int)
-
-        substrate_supercell = supercell(self.substrate_material, substrate_supercell_matrix_3d)
-        film_supercell = supercell(self.film_material, film_supercell_matrix_3d)
+        # Use 3x3 matrices directly from match_holder
+        substrate_supercell = supercell(self.substrate_material, match_holder.substrate_transformation)
+        film_supercell = supercell(self.film_material, match_holder.film_transformation)
 
         film_strain_3d = self.get_film_strain_matrix(
             substrate_supercell.lattice.vector_arrays, film_supercell.lattice.vector_arrays
@@ -191,14 +186,14 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         substrate_config = SlabStrainedSupercellConfiguration(
             stack_components=self.substrate_slab_configuration.stack_components,
             direction=self.substrate_slab_configuration.direction,
-            xy_supercell_matrix=match_holder.substrate_transformation.astype(int),
+            xy_supercell_matrix=match_holder.substrate_transformation.root,
             strain_matrix=self.identity_strain,
         )
 
         film_config = SlabStrainedSupercellConfiguration(
             stack_components=self.film_slab_configuration.stack_components,
             direction=self.film_slab_configuration.direction,
-            xy_supercell_matrix=match_holder.film_transformation.astype(int),
+            xy_supercell_matrix=match_holder.film_transformation.root,
             strain_matrix=film_strain_3d,
         )
 
