@@ -4,7 +4,6 @@ from typing import Final
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
-from mat3ra.made.tools.analyze.utils import get_film_strain_matrix
 from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
@@ -54,28 +53,16 @@ def test_interface_analyzer(substrate, film, expected):
     assert_two_entities_deep_almost_equal(
         interface_analyzer.film_strained_configuration.strain_matrix.root, expected.film_strain_matrix, atol=1e-4
     )
+    assert_two_entities_deep_almost_equal(
+        interface_analyzer.get_film_strain_matrix().root, expected.film_strain_matrix, atol=1e-4
+    )
 
+    # Test strain matrix calculation using vectors from substrate and film
+    substrate_vectors = np.array(substrate_slab_config.atomic_layers.crystal.vectors_array)
+    film_vectors = np.array(film_slab_config.lattice.vectors_array)
 
-@pytest.mark.parametrize(
-    "substrate_vectors, film_vectors, expected_strain_2d",
-    [
-        (
-            np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
-            np.array([[0.9, 0.0, 0.0], [0.0, 1.2, 0.0], [0.0, 0.0, 1.0]]),
-            np.array([[1.0 / 0.9, 0.0], [0.0, 1.0 / 1.2]]),
-        ),
-        (
-            np.array([[2.0, 0.0, 0.0], [0.0, 6.0, 0.0], [0.0, 0.0, 3.0]]),
-            np.array([[1.8, 0.0, 0.0], [3.6, 7.2, 0.0], [0.0, 0.0, 2.5]]),
-            np.array([[2.0 / 1.8, 0.0], [-2.0 / 3.6, 6.0 / 7.2]]),
-        ),
-    ],
-)
-def test_get_film_strain_matrix(substrate_vectors, film_vectors, expected_strain_2d):
-    strain_matrix_3d = get_film_strain_matrix(substrate_vectors, film_vectors)
+    strain_matrix_3d = interface_analyzer.get_film_strain_matrix(substrate_vectors, film_vectors)
     strain_matrix_2d = strain_matrix_3d[:2, :2]
-
-    assert np.allclose(strain_matrix_2d, expected_strain_2d, atol=1e-10)
 
     # Verify that strain applied to film vectors yields substrate vectors
     film_2d = film_vectors[:2, :2]
