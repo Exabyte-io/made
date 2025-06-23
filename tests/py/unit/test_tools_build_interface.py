@@ -5,7 +5,7 @@ from typing import Final
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer, ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.interface import InterfaceBuilder, InterfaceConfiguration
+from mat3ra.made.tools.build.interface import InterfaceBuilder, InterfaceConfiguration, create_interface
 from mat3ra.made.tools.build.interface.builders import (
     CommensurateLatticeTwistedInterfaceBuilder,
     CommensurateLatticeTwistedInterfaceBuilderParameters,
@@ -108,13 +108,31 @@ def test_zsl_interface_builder(substrate, film, expected_interface):
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
-@pytest.mark.skip(reason="Fixtures are commented out. To be fixed in epic-7623")
-def test_create_interfaces():
-    # interfaces = create_interfaces(matched_interfaces_builder, interface_configuration)
+@pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
+def test_create_interface(substrate, film, expected_interface):
+    substrate_slab_config = create_slab_configuration(
+        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
+    )
+    film_slab_config = create_slab_configuration(
+        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
+    )
 
-    # assert len(interfaces) == EXPECTED_NUMBER_OF_INTERFACES
-    # assert interfaces[0].name is not None
-    pass
+    analyzer = InterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
+    )
+
+    film_configuration = analyzer.film_strained_configuration
+    substrate_configuration = analyzer.substrate_strained_configuration
+    vacuum_configuration = film_slab_config.vacuum_configuration
+
+    configuration = InterfaceConfiguration(
+        stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
+    )
+
+    interface = create_interface(configuration)
+    interface.metadata.pop("build", None)
+    expected_interface["metadata"].pop("build", None)
 
 
 @pytest.mark.parametrize(

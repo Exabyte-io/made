@@ -18,16 +18,10 @@ from .configuration import (
 )
 
 
-def create_interfaces(builder: InterfaceBuilder, configuration: InterfaceConfiguration) -> List[Material]:
-    return builder.get_materials(configuration)
-
-
 def create_interface(
     configuration: InterfaceConfiguration,
-    builder: Optional[InterfaceBuilder] = None,
 ) -> Material:
-    if builder is None:
-        builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters())
+    builder = InterfaceBuilder()
     return builder.get_material(configuration)
 
 
