@@ -110,4 +110,4 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
             self.get_film_strain_matrix(
                 self.substrate_material.lattice.vector_arrays, self.film_material.lattice.vector_arrays
             ),
-        )
+        ) 

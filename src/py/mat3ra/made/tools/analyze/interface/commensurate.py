@@ -5,8 +5,9 @@ import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.enums import angle_to_supercell_matrix_values_for_hex
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.enums import angle_to_supercell_matrix_values_for_hex
+from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellConfiguration
 from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 
@@ -16,12 +17,6 @@ class CommensurateLatticeMatchHolder(InMemoryEntityPydantic):
     angle: float
     xy_supercell_matrix_film: List[List[int]]
     xy_supercell_matrix_substrate: List[List[int]]
-
-
-class MatchedSubstrateFilmConfigurationHolder(InMemoryEntityPydantic):
-    match_id: int
-    substrate_configuration: SlabStrainedSupercellConfiguration
-    film_configuration: SlabStrainedSupercellConfiguration
 
 
 class CommensurateInterfaceAnalyzer(InterfaceAnalyzer):
