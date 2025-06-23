@@ -1,13 +1,9 @@
-from typing import Union, List, Optional, Tuple
+from typing import List, Tuple
 
 import numpy as np
 
 from mat3ra.made.material import Material
-from ...calculate.calculators import InterfaceMaterialCalculator
-from ...modify import interface_displace_part
-from ...optimize import evaluate_calculator_on_xy_grid
 from .builders import (
-    CommensurateLatticeTwistedInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilderParameters,
     InterfaceBuilder,
@@ -16,6 +12,9 @@ from .builders import (
 from .configuration import (
     InterfaceConfiguration,
 )
+from ...calculate.calculators import InterfaceMaterialCalculator
+from ...modify import interface_displace_part
+from ...optimize import evaluate_calculator_on_xy_grid
 
 
 def create_interface(
