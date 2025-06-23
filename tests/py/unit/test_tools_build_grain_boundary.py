@@ -86,7 +86,7 @@ def test_create_surface_grain_boundary(config_params, builder_params_dict, expec
     config = SurfaceGrainBoundaryConfiguration(**config_params)
     builder_params = SurfaceGrainBoundaryBuilderParameters(**builder_params_dict)
     builder = SurfaceGrainBoundaryBuilder(build_parameters=builder_params)
-    gb = builder.get_materials(config)
+    gb = builder.get_material(config)
 
-    assert len(gb) == 1
-    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, gb[0].basis.cell.vector_arrays)
+    assert isinstance(gb, Material)
+    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, gb.basis.cell.vector_arrays)
