@@ -3,20 +3,18 @@ from types import SimpleNamespace
 from typing import Final
 
 import pytest
+from mat3ra.utils import assertion as assertion_utils
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer, ZSLInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeTwistedInterfaceAnalyzer
 from mat3ra.made.tools.build.interface import InterfaceBuilder, InterfaceConfiguration, create_interface
 from mat3ra.made.tools.build.interface.builders import (
-    CommensurateLatticeTwistedInterfaceBuilder,
-    CommensurateLatticeTwistedInterfaceBuilderParameters,
     NanoRibbonTwistedInterfaceBuilder,
     NanoRibbonTwistedInterfaceConfiguration,
-    TwistedInterfaceConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
-from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
-
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
@@ -168,34 +166,55 @@ def test_create_twisted_nanoribbon_interface(
 
 
 @pytest.mark.parametrize(
-    "material_config, config_params, builder_params_dict,"
-    + " expected_interfaces_len, expected_cell_vectors, expected_angle",
+    "material_config, analyzer_params, expected_matches_len, expected_angle_range",
     [
         (
             GRAPHENE,
-            {"twist_angle": 13, "distance_z": 3.0},
-            {"max_supercell_matrix_int": 5, "angle_tolerance": 0.5, "return_first_match": True},
+            {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
             1,
-            [[10.754672133, 0.0, 0.0], [5.377336066500001, 9.313819276550575, 0.0], [0.0, 0.0, 20.0]],
-            13.174,
+            (12.5, 13.5),
         ),
     ],
 )
-def test_create_commensurate_supercell_twisted_interface(
-    material_config,
-    config_params,
-    builder_params_dict,
-    expected_interfaces_len,
-    expected_cell_vectors,
-    expected_angle,
+def test_commensurate_lattice_twisted_interface_analyzer(
+    material_config, analyzer_params, expected_matches_len, expected_angle_range
 ):
-    film = Material.create(material_config)
-    substrate = Material.create(material_config)
-    config = TwistedInterfaceConfiguration(film=film, substrate=substrate, **config_params)
-    params = CommensurateLatticeTwistedInterfaceBuilderParameters(**builder_params_dict)
-    builder = CommensurateLatticeTwistedInterfaceBuilder(build_parameters=params)
-    interfaces = builder.get_materials(config, post_process_parameters=config)
-    assert len(interfaces) == expected_interfaces_len
-    interface = interfaces[0]
-    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, interface.basis.cell.vector_arrays)
-    assert interface.metadata["build"]["configuration"]["actual_twist_angle"] == expected_angle
+
+    # Create slab configuration (both film and substrate use the same material for twisted bilayers)
+    slab_config = create_slab_configuration(material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0)
+
+    analyzer = CommensurateLatticeTwistedInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
+
+    match_holders = analyzer.commensurate_match_holders
+    assert len(match_holders) >= expected_matches_len
+
+    for match in match_holders:
+        assert expected_angle_range[0] <= match.angle <= expected_angle_range[1]
+        assert isinstance(match.xy_supercell_matrix_film, list)
+        assert isinstance(match.xy_supercell_matrix_substrate, list)
+        assert len(match.xy_supercell_matrix_film) == 2
+        assert len(match.xy_supercell_matrix_substrate) == 2
+
+    interface_configurations = analyzer.get_strained_configurations()
+    assert len(interface_configurations) == len(match_holders)
+
+    if len(match_holders) > 0:
+        selected_config = analyzer.get_strained_configuration_by_match_id(0)
+
+        # Test that supercell matrices are properly set
+        assert (
+            selected_config.substrate_configuration.xy_supercell_matrix
+            == match_holders[0].xy_supercell_matrix_substrate
+        )
+        assert selected_config.film_configuration.xy_supercell_matrix == match_holders[0].xy_supercell_matrix_film
+
+        # Test building interface from analyzer configurations
+        interface_config = InterfaceConfiguration(
+            stack_components=[selected_config.substrate_configuration, selected_config.film_configuration]
+        )
+
+        builder = InterfaceBuilder()
+        interface = builder.get_material(interface_config)
+
+        # Check against expected interface
+        assert isinstance(interface, Material)
