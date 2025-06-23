@@ -3,11 +3,10 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
-
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.enums import angle_to_supercell_matrix_values_for_hex
+from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellConfiguration
 from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 

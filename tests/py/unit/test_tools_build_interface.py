@@ -3,19 +3,19 @@ from types import SimpleNamespace
 from typing import Final
 
 import pytest
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
 from mat3ra.made.tools.build.interface import InterfaceBuilder, InterfaceConfiguration, create_interface
 from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceBuilder,
     NanoRibbonTwistedInterfaceConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
@@ -180,7 +180,6 @@ def test_create_twisted_nanoribbon_interface(
 def test_commensurate_lattice_twisted_interface_analyzer(
     material_config, analyzer_params, expected_matches_len, expected_angle_range
 ):
-
     # Create slab configuration (both film and substrate use the same material for twisted bilayers)
     slab_config = create_slab_configuration(material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0)
 

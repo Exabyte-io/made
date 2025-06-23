@@ -1,7 +1,6 @@
 import numpy as np
-from pydantic import BaseModel
-
 from mat3ra.made.tools.build.interface.configuration import TwistedInterfaceConfiguration
+from pydantic import BaseModel
 
 
 class CommensurateLatticePair(BaseModel):

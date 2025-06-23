@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TypedDict, List
+from typing import List, TypedDict
 
 
 class SupercellTypes(str, Enum):

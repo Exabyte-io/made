@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import TypedDict, List
 
 
 class StrainModes(str, Enum):
