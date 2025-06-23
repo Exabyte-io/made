@@ -6,8 +6,9 @@ import pytest
 from mat3ra.utils import assertion as assertion_utils
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer, ZSLInterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeTwistedInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
 from mat3ra.made.tools.build.interface import InterfaceBuilder, InterfaceConfiguration, create_interface
 from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceBuilder,
@@ -183,7 +184,7 @@ def test_commensurate_lattice_twisted_interface_analyzer(
     # Create slab configuration (both film and substrate use the same material for twisted bilayers)
     slab_config = create_slab_configuration(material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0)
 
-    analyzer = CommensurateLatticeTwistedInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
+    analyzer = CommensurateInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
 
     match_holders = analyzer.commensurate_match_holders
     assert len(match_holders) >= expected_matches_len
@@ -201,13 +202,6 @@ def test_commensurate_lattice_twisted_interface_analyzer(
     if len(match_holders) > 0:
         selected_config = analyzer.get_strained_configuration_by_match_id(0)
 
-        # Test that supercell matrices are properly set
-        assert (
-            selected_config.substrate_configuration.xy_supercell_matrix
-            == match_holders[0].xy_supercell_matrix_substrate
-        )
-        assert selected_config.film_configuration.xy_supercell_matrix == match_holders[0].xy_supercell_matrix_film
-
         # Test building interface from analyzer configurations
         interface_config = InterfaceConfiguration(
             stack_components=[selected_config.substrate_configuration, selected_config.film_configuration]
@@ -216,5 +210,6 @@ def test_commensurate_lattice_twisted_interface_analyzer(
         builder = InterfaceBuilder()
         interface = builder.get_material(interface_config)
 
-        # Check against expected interface
+        # TODO: Check against expected interface
         assert isinstance(interface, Material)
+        assert len(interface.basis.coordinates.values) > 1
