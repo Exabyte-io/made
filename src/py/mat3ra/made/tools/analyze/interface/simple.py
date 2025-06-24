@@ -86,17 +86,14 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
     ) -> SlabStrainedSupercellConfiguration:
         if xy_supercell_matrix is not None:
             matrix_list = [[item.root[0], item.root[1]] for item in xy_supercell_matrix.root]
-            return SlabStrainedSupercellConfiguration(
-                stack_components=configuration.stack_components,
-                direction=configuration.direction,
-                strain_matrix=strain_matrix,
-                xy_supercell_matrix=matrix_list,
-            )
-        
+        else:
+            matrix_list = [[1, 0], [0, 1]]
+
         return SlabStrainedSupercellConfiguration(
             stack_components=configuration.stack_components,
             direction=configuration.direction,
             strain_matrix=strain_matrix,
+            xy_supercell_matrix=matrix_list,
         )
 
     @property
