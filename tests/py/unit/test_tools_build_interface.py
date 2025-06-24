@@ -13,8 +13,7 @@ from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceBuilder,
     NanoRibbonTwistedInterfaceConfiguration,
 )
-from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellWithGapConfiguration
-from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
+from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
@@ -50,10 +49,10 @@ interface_configuration = None
 @pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
 def test_simple_interface_builder(substrate, film, expected_interface):
     builder = InterfaceBuilder()
-    substrate_slab_config = create_slab_configuration(
+    substrate_slab_config = SlabConfiguration.from_parameters(
         substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
     )
-    film_slab_config = create_slab_configuration(
+    film_slab_config = SlabConfiguration.from_parameters(
         film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
     )
 
@@ -76,10 +75,10 @@ def test_simple_interface_builder(substrate, film, expected_interface):
 @pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
 def test_zsl_interface_builder(substrate, film, expected_interface):
     """Test creating Si/Ge interface using ZSL approach."""
-    substrate_slab_config = create_slab_configuration(
+    substrate_slab_config = SlabConfiguration.from_parameters(
         substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
     )
-    film_slab_config = create_slab_configuration(
+    film_slab_config = SlabConfiguration.from_parameters(
         film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
     )
 
@@ -112,10 +111,10 @@ def test_zsl_interface_builder(substrate, film, expected_interface):
 
 @pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
 def test_create_interface(substrate, film, expected_interface):
-    substrate_slab_config = create_slab_configuration(
+    substrate_slab_config = SlabConfiguration.from_parameters(
         substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
     )
-    film_slab_config = create_slab_configuration(
+    film_slab_config = SlabConfiguration.from_parameters(
         film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
     )
 
@@ -189,7 +188,9 @@ def test_create_twisted_nanoribbon_interface(
     ],
 )
 def test_commensurate_interface_creation(material_config, analyzer_params, direction, gap, expected_interface):
-    slab_config = create_slab_configuration(material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0)
+    slab_config = SlabConfiguration.from_parameters(
+        material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0
+    )
 
     analyzer = CommensurateInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
 

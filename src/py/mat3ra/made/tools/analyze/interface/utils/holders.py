@@ -1,5 +1,5 @@
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellConfiguration
+from mat3ra.made.tools.build.slab.configurations import SlabStrainedSupercellConfiguration
 
 
 class MatchedSubstrateFilmConfigurationHolder(InMemoryEntityPydantic):

@@ -8,7 +8,7 @@ from mat3ra.made.tools.build.grain_boundary import (
     create_grain_boundary,
 )
 from mat3ra.made.tools.build.grain_boundary.builders import SlabGrainBoundaryBuilder, SlabGrainBoundaryBuilderParameters
-from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures.bulk import BULK_Si_PRIMITIVE

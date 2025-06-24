@@ -8,7 +8,7 @@ from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dime
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from .. import BaseConfiguration, BaseConfigurationPydantic
-from ..slab.configuration import (
+from ..slab.configurations import (
     SlabConfiguration,
     SlabStrainedSupercellConfiguration,
     SlabStrainedSupercellWithGapConfiguration,

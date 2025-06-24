@@ -22,9 +22,9 @@ from ..mixins import (
 )
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
-from ..slab.configuration import SlabStrainedSupercellConfiguration
+from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..slab.builders import SlabWithGapBuilder
-from ..slab.configuration import SlabStrainedSupercellWithGapConfiguration
+from ..slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ..utils import merge_materials

@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
-from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
+from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE
@@ -37,10 +37,10 @@ TEST_CASES = [(SUBSTRATE_SI_001, FILM_GE_001, EXPECTED_PROPERTIES_SI_GE_001)]
 
 @pytest.mark.parametrize("substrate, film, expected", TEST_CASES)
 def test_interface_analyzer(substrate, film, expected):
-    substrate_slab_config = create_slab_configuration(
+    substrate_slab_config = SlabConfiguration.from_parameters(
         substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
     )
-    film_slab_config = create_slab_configuration(
+    film_slab_config = SlabConfiguration.from_parameters(
         film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
     )
 
@@ -87,7 +87,9 @@ def test_interface_analyzer(substrate, film, expected):
 def test_commensurate_analyzer_functionality(
     material_config, analyzer_params, expected_matches_len, expected_angle_range
 ):
-    slab_config = create_slab_configuration(material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0)
+    slab_config = SlabConfiguration.from_parameters(
+        material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0
+    )
 
     analyzer = CommensurateInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
 

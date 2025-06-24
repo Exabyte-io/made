@@ -7,7 +7,7 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     SupercellMatrix2DSchema,
 )
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
-from mat3ra.made.tools.build.slab.configuration import SlabConfiguration, SlabStrainedSupercellConfiguration
+from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
 
 
 class InterfaceAnalyzer(InMemoryEntityPydantic):
