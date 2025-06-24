@@ -1,5 +1,7 @@
 from typing import List, Optional, Tuple, Union
 
+import numpy as np
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
@@ -132,10 +134,6 @@ def create_strained_configuration_with_gap(
     Returns:
         SlabStrainedSupercellWithGapConfiguration
     """
-    from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
-    import numpy as np
-
-    # Create base slab configuration
     base_config = create_slab_configuration(
         material_or_dict=material_or_dict,
         miller_indices=miller_indices,

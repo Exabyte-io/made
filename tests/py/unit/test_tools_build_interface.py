@@ -4,8 +4,6 @@ from typing import Final
 
 import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
@@ -17,7 +15,9 @@ from mat3ra.made.tools.build.interface.builders import (
 )
 from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellWithGapConfiguration
 from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.interface.twisted import INTERFACE_GRAPHENE_GRAPHENE
 from .fixtures.monolayer import GRAPHENE
