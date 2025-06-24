@@ -1,14 +1,15 @@
 from typing import List, Optional, Any, Type
 
 from mat3ra.made.material import Material
-from .configuration import (
+from .configurations import (
     SlabConfiguration,
     AtomicLayersUniqueRepeatedConfiguration,
     CrystalLatticePlanesConfiguration,
+    SlabStrainedSupercellConfiguration,
+    SlabStrainedSupercellWithGapConfiguration,
 )
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
-from ..slab.configuration import SlabStrainedSupercellConfiguration, SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import Stack2ComponentsBuilder
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
