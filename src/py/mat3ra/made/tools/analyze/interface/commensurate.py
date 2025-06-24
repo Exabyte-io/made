@@ -22,11 +22,11 @@ class CommensurateLatticeMatchHolder(InMemoryEntityPydantic):
     xy_supercell_matrix_substrate: List[List[int]]
 
 
-class CommensurateInterfaceAnalyzer(InterfaceAnalyzer):
+class CommensurateLatticeInterfaceAnalyzer(InterfaceAnalyzer):
     """
-    Interface analyzer using commensurate lattice matching for twisted interfaces.
+    Interface analyzer using commensurate lattice matching for commensurate lattice interfaces.
 
-    For twisted bilayer materials where film and substrate are the same material,
+    For commensurate lattice bilayer materials where film and substrate are the same material,
     this analyzer finds commensurate supercells at a target twist angle.
 
     Attributes:

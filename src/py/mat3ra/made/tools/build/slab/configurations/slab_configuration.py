@@ -63,4 +63,4 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
         return cls(
             stack_components=[atomic_layers_repeated_configuration, vacuum_configuration],
             direction=AxisEnum.z,
-        ) 
+        )

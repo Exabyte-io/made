@@ -3,13 +3,13 @@ from typing import List
 import numpy as np
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
 from ..interface.builders import (
     ZSLStrainMatchingInterfaceBuilder,
-    CommensurateLatticeTwistedInterfaceBuilderParameters,
     InterfaceBuilder,
+    CommensurateLatticeInterfaceBuilderParameters,
 )
 from ..slab.configurations import SlabConfiguration
 from ..slab.builders import SlabBuilder, SlabBuilderParameters
@@ -87,7 +87,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         return material
 
 
-class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceBuilderParameters):
+class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeInterfaceBuilderParameters):
     """
     Parameters for creating a grain boundary between two surface phases.
 
@@ -111,7 +111,7 @@ class SurfaceGrainBoundaryBuilder(InterfaceBuilder):
             configuration.film, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0
         )
 
-        analyzer = CommensurateInterfaceAnalyzer(
+        analyzer = CommensurateLatticeInterfaceAnalyzer(
             substrate_slab_configuration=slab_config,
             target_angle=configuration.twist_angle,
             angle_tolerance=self.build_parameters.angle_tolerance,

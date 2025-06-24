@@ -12,9 +12,9 @@ from .strained_configurations import (
 
 __all__ = [
     "CrystalLatticePlanesConfiguration",
-    "AtomicLayersUnique", 
+    "AtomicLayersUnique",
     "AtomicLayersUniqueRepeatedConfiguration",
     "SlabConfiguration",
     "SlabStrainedSupercellConfiguration",
     "SlabStrainedSupercellWithGapConfiguration",
-] 
+]

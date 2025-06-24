@@ -4,7 +4,7 @@ from typing import Final
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
@@ -91,7 +91,7 @@ def test_commensurate_analyzer_functionality(
         material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0
     )
 
-    analyzer = CommensurateInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
+    analyzer = CommensurateLatticeInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
 
     assert analyzer.substrate_material == analyzer.film_material == analyzer.material
 

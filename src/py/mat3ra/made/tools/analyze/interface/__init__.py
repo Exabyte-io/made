@@ -1,5 +1,5 @@
 from mat3ra.made.tools.analyze.interface.commensurate import (
-    CommensurateInterfaceAnalyzer,
+    CommensurateLatticeInterfaceAnalyzer,
     CommensurateLatticeMatchHolder,
 )
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
@@ -10,7 +10,7 @@ __all__ = [
     "InterfaceAnalyzer",
     "ZSLInterfaceAnalyzer",
     "ZSLMatchHolder",
-    "CommensurateInterfaceAnalyzer",
+    "CommensurateLatticeInterfaceAnalyzer",
     "CommensurateLatticeMatchHolder",
     "MatchedSubstrateFilmConfigurationHolder",
 ]

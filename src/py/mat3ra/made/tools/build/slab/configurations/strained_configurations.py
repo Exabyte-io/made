@@ -35,4 +35,4 @@ class SlabStrainedSupercellWithGapConfiguration(
             strain_matrix=config.strain_matrix,
             xy_supercell_matrix=config.xy_supercell_matrix,
             gap=gap,
-        ) 
+        )
