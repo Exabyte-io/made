@@ -82,7 +82,17 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
         self,
         configuration: SlabConfiguration,
         strain_matrix: Matrix3x3Schema,
+        xy_supercell_matrix: SupercellMatrix2DSchema = None,
     ) -> SlabStrainedSupercellConfiguration:
+        if xy_supercell_matrix is not None:
+            matrix_list = [[item.root[0], item.root[1]] for item in xy_supercell_matrix.root]
+            return SlabStrainedSupercellConfiguration(
+                stack_components=configuration.stack_components,
+                direction=configuration.direction,
+                strain_matrix=strain_matrix,
+                xy_supercell_matrix=matrix_list,
+            )
+        
         return SlabStrainedSupercellConfiguration(
             stack_components=configuration.stack_components,
             direction=configuration.direction,
@@ -110,4 +120,4 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
             self.get_film_strain_matrix(
                 self.substrate_material.lattice.vector_arrays, self.film_material.lattice.vector_arrays
             ),
-        ) 
+        )

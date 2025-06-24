@@ -13,6 +13,8 @@ from .configuration import (
     SlabConfiguration,
     AtomicLayersUniqueRepeatedConfiguration,
     VacuumConfiguration,
+    SlabStrainedSupercellConfiguration,
+    SlabStrainedSupercellWithGapConfiguration,
 )
 from ..metadata import MaterialMetadata
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
@@ -64,6 +66,16 @@ def create_slab_configuration(
 ) -> SlabConfiguration:
     """
     Creates a slab configuration from a material or a dictionary with specified Miller indices and other parameters.
+
+    Args:
+        material_or_dict: Material or dictionary to create material from
+        miller_indices: Miller indices for the slab
+        number_of_layers: Number of layers in the slab
+        termination_formula: Optional termination formula
+        vacuum: Vacuum size in Angstroms
+
+    Returns:
+        SlabConfiguration: The slab configuration with atomic layers and vacuum.
     """
     if isinstance(material_or_dict, dict):
         material = Material.create(material_or_dict)
@@ -92,6 +104,59 @@ def create_slab_configuration(
         stack_components=[atomic_layers_repeated_configuration, vacuum_configuration],
         direction=AxisEnum.z,
     )
+
+
+def create_strained_configuration_with_gap(
+    material_or_dict: Union[Material, dict],
+    miller_indices: Tuple[int, int, int],
+    number_of_layers: int,
+    gap: float,
+    termination_formula: Optional[str] = None,
+    vacuum: float = 10.0,
+    strain_matrix: Optional[List[List[float]]] = None,
+    xy_supercell_matrix: Optional[List[List[int]]] = None,
+):
+    """
+    Creates a strained slab configuration with gap from a material or dictionary.
+
+    Args:
+        material_or_dict: Material or dictionary to create material from
+        miller_indices: Miller indices for the slab
+        number_of_layers: Number of layers in the slab
+        gap: Gap size in Angstroms
+        termination_formula: Optional termination formula
+        vacuum: Vacuum size in Angstroms
+        strain_matrix: Optional 3x3 strain matrix (defaults to identity)
+        xy_supercell_matrix: Optional 2x2 supercell matrix (defaults to identity)
+
+    Returns:
+        SlabStrainedSupercellWithGapConfiguration
+    """
+    from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
+    import numpy as np
+
+    # Create base slab configuration
+    base_config = create_slab_configuration(
+        material_or_dict=material_or_dict,
+        miller_indices=miller_indices,
+        number_of_layers=number_of_layers,
+        termination_formula=termination_formula,
+        vacuum=vacuum,
+    )
+
+    if strain_matrix is None:
+        strain_matrix = np.eye(3).tolist()
+    if xy_supercell_matrix is None:
+        xy_supercell_matrix = [[1, 0], [0, 1]]
+
+    strained_config = SlabStrainedSupercellConfiguration(
+        stack_components=base_config.stack_components,
+        direction=base_config.direction,
+        strain_matrix=Matrix3x3Schema(root=strain_matrix),
+        xy_supercell_matrix=xy_supercell_matrix,
+    )
+
+    return SlabStrainedSupercellWithGapConfiguration.from_strained_configuration(strained_config, gap)
 
 
 def create_slab(

@@ -23,6 +23,8 @@ from ..mixins import (
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configuration import SlabStrainedSupercellConfiguration
+from ..slab.builders import SlabWithGapBuilder
+from ..slab.configuration import SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ..utils import merge_materials
@@ -52,7 +54,10 @@ class InterfaceBuilder(StackNComponentsBuilder):
     _GeneratedItemType: Type[Material] = Material
 
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, SlabStrainedSupercellConfiguration):
+        if isinstance(configuration_or_material, SlabStrainedSupercellWithGapConfiguration):
+            builder = SlabWithGapBuilder()
+            return builder.get_material(configuration_or_material)
+        elif isinstance(configuration_or_material, SlabStrainedSupercellConfiguration):
             builder = SlabStrainedSupercellBuilder()
             return builder.get_material(configuration_or_material)
         return super()._configuration_to_material(configuration_or_material)
