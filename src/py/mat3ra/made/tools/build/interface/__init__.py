@@ -7,27 +7,21 @@ from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import interface_displace_part
 from ...optimize import evaluate_calculator_on_xy_grid
 from .builders import (
-    InterfaceBuilder,
-    InterfaceBuilderParameters,
-    ZSLStrainMatchingParameters,
+    CommensurateLatticeTwistedInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilder,
     ZSLStrainMatchingInterfaceBuilderParameters,
+    InterfaceBuilder,
+    InterfaceBuilderParameters,
 )
-from .configuration import InterfaceConfiguration
-
-
-def create_interfaces(
-    builder: Union[InterfaceBuilder, ZSLStrainMatchingInterfaceBuilder], configuration: InterfaceConfiguration
-) -> List[Material]:
-    return builder.get_materials(configuration)
+from .configuration import (
+    InterfaceConfiguration,
+)
 
 
 def create_interface(
     configuration: InterfaceConfiguration,
-    builder: Optional[Union[InterfaceBuilder, ZSLStrainMatchingInterfaceBuilder]] = None,
 ) -> Material:
-    if builder is None:
-        builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters())
+    builder = InterfaceBuilder()
     return builder.get_material(configuration)
 
 

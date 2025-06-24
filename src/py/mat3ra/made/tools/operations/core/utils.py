@@ -107,6 +107,7 @@ def should_skip_stacking(
     material_2_in_plane_vectors = np.array(material_2_lattice_vectors)[in_plane_indices]
 
     if not np.allclose(material_1_in_plane_vectors, material_2_in_plane_vectors):
-        raise ValueError("In-plane lattice vectors of the two materials must be the same for stacking.")
+        difference = np.abs(material_1_in_plane_vectors - material_2_in_plane_vectors)
+        raise ValueError(f"In-plane lattice vectors of the two materials must be the same for stacking.\n{difference}")
 
     return False

@@ -2,22 +2,13 @@ import difflib
 import json
 from typing import Any, Dict
 
+from mat3ra.made.tools.utils import unwrap
 from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Structure
 from pymatgen.io.ase import AseAtomsAdaptor
 
 ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS: Dict = {1: "substrate", 2: "film"}
 INTERFACE_STRUCTURE_LABELS_TO_ATOMS_TAGS: Dict = {v: k for k, v in ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS.items()}
-
-
-# TODO: remove, when propert solution for handling RootModel is added
-def unwrap(value: Any) -> Any:
-    """Recursively unwraps objects with a .root attribute and lists."""
-    if hasattr(value, "root"):
-        return unwrap(value.root)
-    if isinstance(value, list):
-        return [unwrap(item) for item in value]
-    return value
 
 
 def atoms_to_interface_structure(atoms) -> Structure:

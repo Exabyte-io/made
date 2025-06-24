@@ -48,8 +48,24 @@ def test_interface_analyzer(substrate, film, expected):
     )
 
     assert_two_entities_deep_almost_equal(
-        interface_analyzer.substrate_strain_matrix.root, expected.substrate_strain_matrix
+        interface_analyzer.get_substrate_strain_matrix().root, expected.substrate_strain_matrix
     )
     assert_two_entities_deep_almost_equal(
-        interface_analyzer.film_strain_matrix.root, expected.film_strain_matrix, atol=1e-4
+        interface_analyzer.film_strained_configuration.strain_matrix.root, expected.film_strain_matrix, atol=1e-4
     )
+
+    # Test strain matrix calculation using vectors from substrate and film
+    substrate_vectors = np.array(interface_analyzer.substrate_material.lattice.vector_arrays)
+    film_vectors = np.array(interface_analyzer.film_material.lattice.vector_arrays)
+
+    strain_matrix_3d = interface_analyzer.get_film_strain_matrix(substrate_vectors, film_vectors)
+
+    matrix = [row.root for row in strain_matrix_3d.root]
+    strain_matrix_2d = np.array(matrix)[:2, :2]
+
+    # Verify that strain applied to film vectors yields substrate vectors
+    film_2d = film_vectors[:2, :2]
+    substrate_2d = substrate_vectors[:2, :2]
+    film_strained = film_2d @ strain_matrix_2d
+
+    assert np.allclose(film_strained, substrate_2d, atol=1e-10)
