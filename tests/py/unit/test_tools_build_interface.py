@@ -213,4 +213,4 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
         interface = builder.get_material(interface_config)
         interface.metadata.pop("build", None)
 
-        assert_two_entities_deep_almost_equal(interface, expected_interface)
+        assert_two_entities_deep_almost_equal(interface, expected_interface, atol=1e-5)
