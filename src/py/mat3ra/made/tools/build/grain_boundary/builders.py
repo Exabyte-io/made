@@ -118,7 +118,7 @@ class SurfaceGrainBoundaryBuilder(InterfaceBuilder):
             angle_tolerance=self.build_parameters.angle_tolerance,
         )
 
-        match_holder = analyzer.commensurate_match_holders[0]
+        match_holder = analyzer.commensurate_lattice_match_holders[0]
         matrix1 = np.array(match_holder.xy_supercell_matrix_substrate)
         matrix2 = np.array(match_holder.xy_supercell_matrix_film)
 

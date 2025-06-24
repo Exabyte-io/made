@@ -93,7 +93,7 @@ def test_commensurate_analyzer_functionality(
 
     assert analyzer.substrate_material == analyzer.film_material == analyzer.material
 
-    match_holders = analyzer.commensurate_match_holders
+    match_holders = analyzer.commensurate_lattice_match_holders
     assert len(match_holders) >= expected_matches_len
 
     for match in match_holders:

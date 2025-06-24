@@ -12,6 +12,7 @@ from mat3ra.made.tools.analyze.interface.enums import angle_to_supercell_matrix_
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
+from pydantic import model_validator
 
 
 class CommensurateLatticeMatchHolder(InMemoryEntityPydantic):
@@ -27,6 +28,16 @@ class CommensurateInterfaceAnalyzer(InterfaceAnalyzer):
 
     For twisted bilayer materials where film and substrate are the same material,
     this analyzer finds commensurate supercells at a target twist angle.
+
+    Attributes:
+        target_angle (float): The target twist angle, in degrees.
+        angle_tolerance (float): Tolerance for matching angles, in degrees.
+        max_supercell_matrix_int (Optional[int]): Maximum integer for supercell matrix elements.
+        limit_max_int (int): Limit for maximum integer to search for supercell matrices.
+        return_first_match (bool): If True, returns only the first match found (to speed up the process).
+
+    This class generates strained configurations for both substrate and film based on the commensurate matches found.
+
     """
 
     target_angle: float = 0.0
@@ -35,23 +46,21 @@ class CommensurateInterfaceAnalyzer(InterfaceAnalyzer):
     limit_max_int: int = 50
     return_first_match: bool = True
 
-    def __init__(self, **data):
-        # For twisted bilayers, both film and substrate use the same material
-        if "film_slab_configuration" not in data and "substrate_slab_configuration" in data:
-            data["film_slab_configuration"] = data["substrate_slab_configuration"]
-        elif "substrate_slab_configuration" not in data and "film_slab_configuration" in data:
-            data["substrate_slab_configuration"] = data["film_slab_configuration"]
-        super().__init__(**data)
+    @model_validator(mode="before")
+    def _handle_missing_substrate_or_film(cls, values):
+        substrate = values.get("substrate_slab_configuration")
+        film = values.get("film_slab_configuration")
+        if substrate and not film:
+            values["film_slab_configuration"] = substrate
+        elif film and not substrate:
+            values["substrate_slab_configuration"] = film
+        return values
 
     @property
     def material(self) -> Material:
-        """For twisted bilayers, both layers use the same base material."""
         return self.substrate_material
 
     def _get_initial_guess_for_max_int(self, material: Material, target_angle: float) -> int:
-        """
-        Determine the maximum integer for the transformation matrices based on the target angle.
-        """
         if material.lattice.type == Lattice.__types__.HEX:
             xy_supercell_matrix_for_closest_angle = min(
                 angle_to_supercell_matrix_values_for_hex, key=lambda x: abs(x["angle"] - target_angle)
@@ -65,9 +74,6 @@ class CommensurateInterfaceAnalyzer(InterfaceAnalyzer):
         target_angle: float,
         max_supercell_matrix_element_int: int,
     ) -> List[CommensurateLatticeMatchHolder]:
-        """
-        Generate all commensurate lattices for a given target angle.
-        """
         a = material.lattice.vector_arrays[0][:2]
         b = material.lattice.vector_arrays[1][:2]
 
@@ -102,8 +108,7 @@ class CommensurateInterfaceAnalyzer(InterfaceAnalyzer):
         return solutions
 
     @cached_property
-    def commensurate_match_holders(self) -> List[CommensurateLatticeMatchHolder]:
-        """Find all commensurate lattice matches for the target angle."""
+    def commensurate_lattice_match_holders(self) -> List[CommensurateLatticeMatchHolder]:
         max_int = self.max_supercell_matrix_int or self._get_initial_guess_for_max_int(self.material, self.target_angle)
 
         commensurate_lattice_matches: List[CommensurateLatticeMatchHolder] = []
@@ -117,8 +122,7 @@ class CommensurateInterfaceAnalyzer(InterfaceAnalyzer):
         return commensurate_lattice_matches
 
     def get_strained_configuration_by_match_id(self, match_id: int) -> MatchedSubstrateFilmConfigurationHolder:
-        """Get strained slab configurations for a specific match ID."""
-        match_holders = self.commensurate_match_holders
+        match_holders = self.commensurate_lattice_match_holders
         if match_id < 0 or match_id >= len(match_holders):
             raise ValueError(f"Match ID {match_id} out of range. Available IDs: 0-{len(match_holders)-1}")
 
@@ -146,10 +150,9 @@ class CommensurateInterfaceAnalyzer(InterfaceAnalyzer):
         )
 
     def get_strained_configurations(self) -> List[MatchedSubstrateFilmConfigurationHolder]:
-        """Get all strained configurations for all matches."""
         strained_configs = []
 
-        for match_holder in self.commensurate_match_holders:
+        for match_holder in self.commensurate_lattice_match_holders:
             config_holder = self._create_strained_configs_from_match(match_holder)
             strained_configs.append(config_holder)
 

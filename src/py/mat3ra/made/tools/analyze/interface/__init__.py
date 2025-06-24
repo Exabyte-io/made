@@ -1,5 +1,3 @@
-"""Interface analysis tools for material interfaces."""
-
 from mat3ra.made.tools.analyze.interface.commensurate import (
     CommensurateInterfaceAnalyzer,
     CommensurateLatticeMatchHolder,

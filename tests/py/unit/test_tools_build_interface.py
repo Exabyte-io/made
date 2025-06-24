@@ -193,7 +193,7 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
 
     analyzer = CommensurateInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
 
-    match_holders = analyzer.commensurate_match_holders
+    match_holders = analyzer.commensurate_lattice_match_holders
 
     if len(match_holders) > 0:
         selected_config = analyzer.get_strained_configuration_by_match_id(0)
