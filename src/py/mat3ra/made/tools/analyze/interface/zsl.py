@@ -7,13 +7,12 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
+from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
+
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellConfiguration
 from mat3ra.made.tools.convert import to_pymatgen
 from mat3ra.made.tools.operations.core.unary import supercell
-from mat3ra.made.tools.utils import supercell_matrix_2d_schema_to_list
-from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):
@@ -100,21 +99,14 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             substrate_supercell.lattice.vector_arrays, film_supercell.lattice.vector_arrays
         )
 
-        substrate_matrix = supercell_matrix_2d_schema_to_list(match_holder.substrate_transformation_matrix)
-        film_matrix = supercell_matrix_2d_schema_to_list(match_holder.film_transformation_matrix)
-
-        substrate_config = SlabStrainedSupercellConfiguration(
-            stack_components=self.substrate_slab_configuration.stack_components,
-            direction=self.substrate_slab_configuration.direction,
-            xy_supercell_matrix=substrate_matrix,
-            strain_matrix=self._no_strain_matrix,
+        substrate_config = self.get_component_strained_configuration(
+            self.substrate_slab_configuration,
+            self._no_strain_matrix,
+            xy_supercell_matrix=match_holder.substrate_transformation_matrix,
         )
 
-        film_config = SlabStrainedSupercellConfiguration(
-            stack_components=self.film_slab_configuration.stack_components,
-            direction=self.film_slab_configuration.direction,
-            xy_supercell_matrix=film_matrix,
-            strain_matrix=film_strain_3d,
+        film_config = self.get_component_strained_configuration(
+            self.film_slab_configuration, film_strain_3d, xy_supercell_matrix=match_holder.film_transformation_matrix
         )
 
         return MatchedSubstrateFilmConfigurationHolder(
