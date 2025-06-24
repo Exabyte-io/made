@@ -4,9 +4,11 @@ from typing import Final
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
 from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
+from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
 SUBSTRATE_SI_001: Final = SimpleNamespace(
@@ -69,3 +71,56 @@ def test_interface_analyzer(substrate, film, expected):
     film_strained = film_2d @ strain_matrix_2d
 
     assert np.allclose(film_strained, substrate_2d, atol=1e-10)
+
+
+@pytest.mark.parametrize(
+    "material_config, analyzer_params, expected_matches_len, expected_angle_range",
+    [
+        (
+            GRAPHENE,
+            {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
+            1,
+            (12.5, 13.5),
+        )
+    ],
+)
+def test_commensurate_analyzer_functionality(
+    material_config, analyzer_params, expected_matches_len, expected_angle_range
+):
+    slab_config = create_slab_configuration(material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0)
+
+    analyzer = CommensurateInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
+
+    assert analyzer.substrate_material == analyzer.film_material == analyzer.material
+
+    match_holders = analyzer.commensurate_match_holders
+    assert len(match_holders) >= expected_matches_len
+
+    for match in match_holders:
+        assert expected_angle_range[0] <= match.angle <= expected_angle_range[1]
+        assert isinstance(match.xy_supercell_matrix_film, list)
+        assert isinstance(match.xy_supercell_matrix_substrate, list)
+        assert len(match.xy_supercell_matrix_film) == 2
+        assert len(match.xy_supercell_matrix_substrate) == 2
+        assert isinstance(match.match_id, int)
+        assert match.match_id >= 0
+
+    interface_configurations = analyzer.get_strained_configurations()
+    assert len(interface_configurations) == len(match_holders)
+
+    if len(match_holders) > 0:
+        selected_config = analyzer.get_strained_configuration_by_match_id(0)
+        assert selected_config.match_id == 0
+        assert hasattr(selected_config, "substrate_configuration")
+        assert hasattr(selected_config, "film_configuration")
+
+        assert selected_config.substrate_configuration.stack_components == slab_config.stack_components
+        assert selected_config.film_configuration.stack_components == slab_config.stack_components
+
+        # Test invalid match ID
+        with pytest.raises(ValueError, match="Match ID .* out of range"):
+            analyzer.get_strained_configuration_by_match_id(999)
+
+        # Test negative match ID
+        with pytest.raises(ValueError, match="Match ID .* out of range"):
+            analyzer.get_strained_configuration_by_match_id(-1)

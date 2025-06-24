@@ -7,18 +7,19 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.utils import assertion as assertion_utils
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateInterfaceAnalyzer
 from mat3ra.made.tools.build.interface import InterfaceBuilder, InterfaceConfiguration, create_interface
 from mat3ra.made.tools.build.interface.builders import (
     NanoRibbonTwistedInterfaceBuilder,
     NanoRibbonTwistedInterfaceConfiguration,
 )
+from mat3ra.made.tools.build.slab.configuration import SlabStrainedSupercellWithGapConfiguration
 from mat3ra.made.tools.build.slab.helpers import create_slab_configuration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
-
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
+from .fixtures.interface.twisted import INTERFACE_GRAPHENE_GRAPHENE
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
@@ -169,57 +170,47 @@ def test_create_twisted_nanoribbon_interface(
 
 
 @pytest.mark.parametrize(
-    "material_config, analyzer_params, direction, expected_matches_len, expected_angle_range",
+    "material_config, analyzer_params, direction, gap, expected_interface",
     [
         (
             GRAPHENE,
             {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
             AxisEnum.z,
-            1,
-            (12.5, 13.5),
+            3.0,
+            INTERFACE_GRAPHENE_GRAPHENE,
         ),
         (
             GRAPHENE,
             {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
             AxisEnum.x,
-            1,
-            (12.5, 13.5),
+            3.0,
+            INTERFACE_GRAPHENE_GRAPHENE,
         ),
     ],
 )
-# TODO: Move to analyzer file, add interface creation test here
-def test_commensurate_lattice_twisted_interface_analyzer(
-    material_config, analyzer_params, direction, expected_matches_len, expected_angle_range
-):
-    # Create slab configuration (both film and substrate use the same material for twisted bilayers)
+def test_commensurate_interface_creation(material_config, analyzer_params, direction, gap, expected_interface):
     slab_config = create_slab_configuration(material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0)
 
     analyzer = CommensurateInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
 
     match_holders = analyzer.commensurate_match_holders
-    assert len(match_holders) >= expected_matches_len
-
-    for match in match_holders:
-        assert expected_angle_range[0] <= match.angle <= expected_angle_range[1]
-        assert isinstance(match.xy_supercell_matrix_film, list)
-        assert isinstance(match.xy_supercell_matrix_substrate, list)
-        assert len(match.xy_supercell_matrix_film) == 2
-        assert len(match.xy_supercell_matrix_substrate) == 2
-
-    interface_configurations = analyzer.get_strained_configurations()
-    assert len(interface_configurations) == len(match_holders)
 
     if len(match_holders) > 0:
         selected_config = analyzer.get_strained_configuration_by_match_id(0)
 
+        substrate_config_with_gap = SlabStrainedSupercellWithGapConfiguration.from_strained_configuration(
+            selected_config.substrate_configuration, gap=gap
+        )
+        film_config_with_gap = SlabStrainedSupercellWithGapConfiguration.from_strained_configuration(
+            selected_config.film_configuration, gap=gap
+        )
         interface_config = InterfaceConfiguration(
-            stack_components=[selected_config.substrate_configuration, selected_config.film_configuration],
+            stack_components=[substrate_config_with_gap, film_config_with_gap],
             direction=direction,
         )
 
         builder = InterfaceBuilder()
         interface = builder.get_material(interface_config)
+        interface.metadata.pop("build", None)
 
-        # TODO: Check against expected interface
-        assert isinstance(interface, Material)
-        assert len(interface.basis.coordinates.values) > 1
+        assert_two_entities_deep_almost_equal(interface, expected_interface)
