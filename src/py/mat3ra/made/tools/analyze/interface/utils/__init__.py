@@ -1,3 +1,5 @@
 from .holders import MatchedSubstrateFilmConfigurationHolder
 
-__all__ = ["MatchedSubstrateFilmConfigurationHolder"] 
+__all__ = [
+    "MatchedSubstrateFilmConfigurationHolder",
+]
