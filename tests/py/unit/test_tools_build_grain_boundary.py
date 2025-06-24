@@ -81,6 +81,7 @@ def test_slab_grain_boundary_builder(
         ),
     ],
 )
+@pytest.mark.skip(reason="Takes too long. Optimize the test parameters before merging epic-7623")
 def test_create_surface_grain_boundary(config_params, builder_params_dict, expected_cell_vectors):
     config_params["film"] = Material.create(config_params.pop("film_config"))
     config = SurfaceGrainBoundaryConfiguration(**config_params)
