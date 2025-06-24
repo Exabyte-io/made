@@ -66,8 +66,8 @@ class InterfaceBuilder(StackNComponentsBuilder):
         film_material = self._configuration_to_material(configuration.film_configuration)
         substrate_material = self._configuration_to_material(configuration.substrate_configuration)
 
-        film_material.set_labels_from_value(0)
-        substrate_material.set_labels_from_value(1)
+        film_material.set_labels_from_value(1)
+        substrate_material.set_labels_from_value(0)
 
         film_material = translate_by_vector(film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True)
         stack_configuration = StackConfiguration(
