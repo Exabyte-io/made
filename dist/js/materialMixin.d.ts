@@ -7,7 +7,6 @@ import type { BasisConfig } from "./basis/basis";
 import { type ConstrainedBasisConfig, ConstrainedBasis } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-export type MaterialJSON = MaterialSchema & AnyObject;
 export declare const defaultMaterialConfig: MaterialSchema;
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
 }
@@ -17,7 +16,7 @@ export type MaterialMixinConstructor = Constructor<MaterialMixinProps> & Materia
 export type OptionallyConstrainedBasisConfig = BasisConfig & Partial<Pick<ConstrainedBasisConfig, "constraints">>;
 type Base = InMemoryEntity & NamedInMemoryEntity;
 export declare function materialMixin<T extends Base = Base>(item: T): {
-    toJSON(): MaterialJSON;
+    toJSON(): MaterialSchema;
     name: string;
     src: FileSourceSchema | undefined;
     updateFormula(): void;
