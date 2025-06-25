@@ -1,4 +1,5 @@
 import { Basis } from "./basis/basis";
+import { Cell } from "./cell/cell";
 import { ATOMIC_COORD_UNITS, coefficients, tolerance, units } from "./constants";
 import { AtomicConstraints } from "./constraints/constraints";
 import { Lattice, nonPeriodicLatticeScalingFactor } from "./lattice/lattice";
@@ -19,6 +20,7 @@ export const Made = {
     Material,
     defaultMaterialConfig,
     Lattice,
+    Cell,
     nonPeriodicLatticeScalingFactor,
     ReciprocalLattice,
     Basis,
