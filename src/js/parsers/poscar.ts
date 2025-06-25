@@ -8,8 +8,8 @@ import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
+import { MaterialJSON } from "../materialMixin";
 import math from "../math";
-import { MaterialJSON } from "../types";
 
 const _print = (x: number, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
 const _latticeVectorsToString = (vectors: Vector3DSchema[]) =>
