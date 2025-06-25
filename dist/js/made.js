@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Made = void 0;
 const basis_1 = require("./basis/basis");
+const cell_1 = require("./cell/cell");
 const constants_1 = require("./constants");
 const constraints_1 = require("./constraints/constraints");
 const lattice_1 = require("./lattice/lattice");
@@ -23,6 +24,7 @@ exports.Made = {
     Material: material_1.Material,
     defaultMaterialConfig: material_1.defaultMaterialConfig,
     Lattice: lattice_1.Lattice,
+    Cell: cell_1.Cell,
     nonPeriodicLatticeScalingFactor: lattice_1.nonPeriodicLatticeScalingFactor,
     ReciprocalLattice: lattice_reciprocal_1.ReciprocalLattice,
     Basis: basis_1.Basis,
