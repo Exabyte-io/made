@@ -31,3 +31,5 @@ export const Made = {
     LATTICE_TYPE_CONFIGS,
     DEFAULT_LATTICE_UNITS,
 };
+
+export default Made;

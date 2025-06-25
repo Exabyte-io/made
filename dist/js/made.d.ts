@@ -551,3 +551,4 @@ export declare const Made: {
         };
     };
 };
+export default Made;

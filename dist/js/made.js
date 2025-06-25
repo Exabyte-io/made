@@ -34,3 +34,4 @@ exports.Made = {
     LATTICE_TYPE_CONFIGS: lattice_types_1.LATTICE_TYPE_CONFIGS,
     DEFAULT_LATTICE_UNITS: lattice_types_1.DEFAULT_LATTICE_UNITS,
 };
+exports.default = exports.Made;

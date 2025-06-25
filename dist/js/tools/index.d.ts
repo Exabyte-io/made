@@ -8,7 +8,7 @@ declare const _default: {
             basis: import("@mat3ra/esse/dist/js/types").BasisSchema;
             lattice: import("@mat3ra/esse/dist/js/types").LatticeSchema;
         };
-        generateNewBasisWithinSupercell: (basis: import("../types").Basis | import("../basis/constrained_basis").ConstrainedBasis, cell: import("../cell/cell").Cell, supercell: import("../cell/cell").Cell, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => import("../types").Basis;
+        generateNewBasisWithinSupercell: (basis: import("../types").Basis | import("../basis/constrained_basis").ConstrainedBasis, cell: import("../types").Cell, supercell: import("../types").Cell, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => import("../types").Basis;
     };
     material: {
         scaleOneLatticeVector: (material: import("../material").Material, key?: "a" | "b" | "c", factor?: number) => void;
