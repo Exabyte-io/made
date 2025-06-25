@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Made = void 0;
+exports.UnitCell = exports.Made = void 0;
 const basis_1 = require("./basis/basis");
 const cell_1 = require("./cell/cell");
 const constants_1 = require("./constants");
@@ -11,6 +11,8 @@ const constraints_1 = require("./constraints/constraints");
 const lattice_1 = require("./lattice/lattice");
 const lattice_types_1 = require("./lattice/lattice_types");
 const lattice_reciprocal_1 = require("./lattice/reciprocal/lattice_reciprocal");
+const unit_cell_1 = require("./lattice/unit_cell");
+Object.defineProperty(exports, "UnitCell", { enumerable: true, get: function () { return unit_cell_1.UnitCell; } });
 const material_1 = require("./material");
 const math_1 = __importDefault(require("./math"));
 const parsers_1 = __importDefault(require("./parsers/parsers"));
@@ -25,6 +27,7 @@ exports.Made = {
     defaultMaterialConfig: material_1.defaultMaterialConfig,
     Lattice: lattice_1.Lattice,
     Cell: cell_1.Cell,
+    UnitCell: unit_cell_1.UnitCell,
     nonPeriodicLatticeScalingFactor: lattice_1.nonPeriodicLatticeScalingFactor,
     ReciprocalLattice: lattice_reciprocal_1.ReciprocalLattice,
     Basis: basis_1.Basis,

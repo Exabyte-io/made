@@ -3,6 +3,7 @@ import { Cell } from "./cell/cell";
 import { AtomicConstraints } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import { ReciprocalLattice } from "./lattice/reciprocal/lattice_reciprocal";
+import { UnitCell } from "./lattice/unit_cell";
 import { Material } from "./material";
 export declare const Made: {
     coefficients: {
@@ -489,6 +490,7 @@ export declare const Made: {
     defaultMaterialConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema;
     Lattice: typeof Lattice;
     Cell: typeof Cell;
+    UnitCell: typeof UnitCell;
     nonPeriodicLatticeScalingFactor: number;
     ReciprocalLattice: typeof ReciprocalLattice;
     Basis: typeof Basis;
@@ -552,3 +554,4 @@ export declare const Made: {
     };
 };
 export default Made;
+export { UnitCell };
