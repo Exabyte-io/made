@@ -12,6 +12,7 @@ export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {
 }
 export type MaterialMixinProps = ReturnType<typeof materialMixin>;
 type MaterialMixinStaticProps = ReturnType<typeof materialMixinStaticProps>;
+export type MaterialInMemoryEntity = InMemoryEntity & MaterialMixinProps;
 export type MaterialMixinConstructor = Constructor<MaterialMixinProps> & MaterialMixinStaticProps;
 export type OptionallyConstrainedBasisConfig = BasisConfig & Partial<Pick<ConstrainedBasisConfig, "constraints">>;
 type Base = InMemoryEntity & NamedInMemoryEntity;

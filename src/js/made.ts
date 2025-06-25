@@ -34,6 +34,22 @@ export const Made = {
     DEFAULT_LATTICE_UNITS,
 };
 
-export default Made;
-
-export { UnitCell };
+export {
+    coefficients,
+    tolerance,
+    units,
+    ATOMIC_COORD_UNITS,
+    Material,
+    defaultMaterialConfig,
+    Lattice,
+    Cell,
+    UnitCell,
+    nonPeriodicLatticeScalingFactor,
+    ReciprocalLattice,
+    Basis,
+    AtomicConstraints,
+    parsers,
+    tools,
+    LATTICE_TYPE_CONFIGS,
+    DEFAULT_LATTICE_UNITS,
+};
