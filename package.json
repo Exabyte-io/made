@@ -16,6 +16,9 @@
         "url": "https://github.com/Exabyte-io/made.git"
     },
     "main": "dist/js/made.js",
+    "exports": {
+        "./types": "./dist/js/types.js"
+    },
     "author": "Exabyte Inc.",
     "bugs": {
         "url": "https://github.com/Exabyte-io/made/issues"
