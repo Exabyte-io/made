@@ -4,8 +4,8 @@ import { Basis } from "../basis/basis";
 import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Cell } from "../cell/cell";
 import { Lattice } from "../lattice/lattice";
+import type { Material } from "../material";
 import math from "../math";
-import { MaterialInMemoryEntity } from "../types";
 import cellTools from "./cell";
 
 const ADD = math.add;
@@ -55,7 +55,7 @@ function generateNewBasisWithinSupercell(
  * @param material
  * @param supercellMatrix {Number[][]}
  */
-function generateConfig(material: MaterialInMemoryEntity, supercellMatrix: Matrix3X3Schema) {
+function generateConfig(material: Material, supercellMatrix: Matrix3X3Schema) {
     const det = math.det(supercellMatrix);
     if (det === 0) {
         throw new Error("Scaling matrix is degenerate.");

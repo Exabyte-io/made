@@ -25,7 +25,6 @@ import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 
-export type MaterialJSON = MaterialSchema & AnyObject;
 export const defaultMaterialConfig: MaterialSchema = {
     name: "Silicon FCC",
     basis: {
@@ -83,7 +82,7 @@ export function materialMixin<T extends Base = Base>(item: T) {
     const originalToJSON = item.toJSON.bind(item);
 
     const properties = {
-        toJSON(): MaterialJSON {
+        toJSON(): MaterialSchema {
             return {
                 ...originalToJSON(),
                 lattice: this.Lattice.toJSON(),

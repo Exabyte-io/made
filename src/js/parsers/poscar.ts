@@ -1,4 +1,9 @@
-import { BasisSchema, Coordinate3DSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import {
+    BasisSchema,
+    Coordinate3DSchema,
+    MaterialSchema,
+    Vector3DSchema,
+} from "@mat3ra/esse/dist/js/types";
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
@@ -8,7 +13,6 @@ import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
-import { MaterialJSON } from "../materialMixin";
 import math from "../math";
 
 const _print = (x: number, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
@@ -21,7 +25,7 @@ const atomicConstraintsCharFromBool = (bool: boolean): string => (bool ? "T" : "
  * @param materialOrConfig - material class instance or config object.
  * @param omitConstraints - whether to discard constraints passed with material.
  */
-function toPoscar(materialOrConfig: MaterialJSON, omitConstraints = false): string {
+function toPoscar(materialOrConfig: MaterialSchema, omitConstraints = false): string {
     const lattice = new Lattice(materialOrConfig.lattice);
     const vectorsAsString = _latticeVectorsToString(lattice.vectorArrays);
     // @ts-ignore
