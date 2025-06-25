@@ -6,13 +6,12 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
 from mat3ra.made.material import Material
 from ...stack.configuration import StackConfiguration
 from ...vacuum.configuration import VacuumConfiguration
-from .base_configurations import AtomicLayersUnique, AtomicLayersUniqueRepeatedConfiguration
-
+from .base_configurations import AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration
 
 class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     type: str = "SlabConfiguration"
     stack_components: List[
-        Union[AtomicLayersUnique, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]  # No Materials!
+        Union[AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]  # No Materials!
     ]
     direction: AxisEnum = AxisEnum.z
 
@@ -33,6 +32,7 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
         termination_formula: Optional[str] = None,
         vacuum: float = 10.0,
     ) -> "SlabConfiguration":
+        # Lazy imports to avoid circular dependencies
         from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
         from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder
         from mat3ra.made.tools.build.slab.helpers import select_slab_termination

@@ -4,8 +4,8 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.entities import Termination
 from .builders import (
     SlabBuilder,
-    AtomicLayersUniqueRepeatedBuilder,
     SlabBuilderParameters,
+    AtomicLayersUniqueRepeatedBuilder,
 )
 from .configurations import (
     SlabConfiguration,

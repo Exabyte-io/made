@@ -3,10 +3,10 @@ from typing import List, Optional, Any, Type
 from mat3ra.made.material import Material
 from .configurations import (
     SlabConfiguration,
-    AtomicLayersUniqueRepeatedConfiguration,
-    CrystalLatticePlanesConfiguration,
     SlabStrainedSupercellConfiguration,
     SlabStrainedSupercellWithGapConfiguration,
+    AtomicLayersUniqueRepeatedConfiguration,
+    CrystalLatticePlanesConfiguration,
 )
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
