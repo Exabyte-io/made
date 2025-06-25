@@ -21,18 +21,3 @@ class SlabStrainedSupercellWithGapConfiguration(
 ):
     type: str = "SlabStrainedSupercellWithGapConfiguration"
     gap: Optional[float] = None  # If provided, the film is shifted to have it as smallest distance to the top.
-
-    @classmethod
-    def from_strained_configuration(
-        cls, config: SlabStrainedSupercellConfiguration, gap: float
-    ) -> "SlabStrainedSupercellWithGapConfiguration":
-        """
-        Creates a SlabStrainedSupercellWithGapConfiguration from a SlabStrainedSupercellConfiguration.
-        """
-        return cls(
-            stack_components=config.stack_components,
-            direction=config.direction,
-            strain_matrix=config.strain_matrix,
-            xy_supercell_matrix=config.xy_supercell_matrix,
-            gap=gap,
-        )

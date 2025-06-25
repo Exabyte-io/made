@@ -8,10 +8,13 @@ from ...stack.configuration import StackConfiguration
 from ...vacuum.configuration import VacuumConfiguration
 from .base_configurations import AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration
 
+
 class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     type: str = "SlabConfiguration"
     stack_components: List[
-        Union[AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]  # No Materials!
+        Union[
+            AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration
+        ]  # No Materials!
     ]
     direction: AxisEnum = AxisEnum.z
 

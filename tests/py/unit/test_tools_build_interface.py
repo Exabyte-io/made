@@ -199,11 +199,11 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
     if len(match_holders) > 0:
         selected_config = analyzer.get_strained_configuration_by_match_id(0)
 
-        substrate_config_with_gap = SlabStrainedSupercellWithGapConfiguration.from_strained_configuration(
-            selected_config.substrate_configuration, gap=gap
+        substrate_config_with_gap = SlabStrainedSupercellWithGapConfiguration(
+            **selected_config.substrate_configuration.to_dict(), gap=gap
         )
-        film_config_with_gap = SlabStrainedSupercellWithGapConfiguration.from_strained_configuration(
-            selected_config.film_configuration, gap=gap
+        film_config_with_gap = SlabStrainedSupercellWithGapConfiguration(
+            **selected_config.film_configuration.to_dict(), gap=gap
         )
         interface_config = InterfaceConfiguration(
             stack_components=[substrate_config_with_gap, film_config_with_gap],
