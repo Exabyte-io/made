@@ -8,7 +8,7 @@ declare const _default: {
             basis: import("@mat3ra/esse/dist/js/types").BasisSchema;
             lattice: import("@mat3ra/esse/dist/js/types").LatticeSchema;
         };
-        generateNewBasisWithinSupercell: (basis: import("../basis/basis").Basis | import("../basis/constrained_basis").ConstrainedBasis, cell: import("../cell/cell").Cell, supercell: import("../cell/cell").Cell, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => import("../basis/basis").Basis;
+        generateNewBasisWithinSupercell: (basis: import("../types").Basis | import("../basis/constrained_basis").ConstrainedBasis, cell: import("../cell/cell").Cell, supercell: import("../cell/cell").Cell, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => import("../types").Basis;
     };
     material: {
         scaleOneLatticeVector: (material: import("../material").Material, key?: "a" | "b" | "c", factor?: number) => void;
@@ -16,8 +16,8 @@ declare const _default: {
         translateAtomsToCenter: (material: import("../material").Material) => void;
     };
     basis: {
-        repeat: (basis: import("../basis/basis").Basis, repetitions: number[]) => import("../basis/basis").Basis;
-        interpolate: (initialBasis: import("../basis/basis").Basis, finalBasis: import("../basis/basis").Basis, numberOfSteps?: number) => import("../basis/basis").Basis[];
+        repeat: (basis: import("../types").Basis, repetitions: number[]) => import("../types").Basis;
+        interpolate: (initialBasis: import("../types").Basis, finalBasis: import("../types").Basis, numberOfSteps?: number) => import("../types").Basis[];
     };
 };
 export default _default;
