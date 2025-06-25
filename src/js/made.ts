@@ -53,3 +53,5 @@ export {
     LATTICE_TYPE_CONFIGS,
     DEFAULT_LATTICE_UNITS,
 };
+
+export type { MaterialInMemoryEntity } from "./materialMixin";
