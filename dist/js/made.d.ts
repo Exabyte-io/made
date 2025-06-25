@@ -1,9 +1,14 @@
 import { Basis } from "./basis/basis";
 import { Cell } from "./cell/cell";
+import { ATOMIC_COORD_UNITS, coefficients, tolerance, units } from "./constants";
 import { AtomicConstraints } from "./constraints/constraints";
-import { Lattice } from "./lattice/lattice";
+import { Lattice, nonPeriodicLatticeScalingFactor } from "./lattice/lattice";
+import { DEFAULT_LATTICE_UNITS, LATTICE_TYPE_CONFIGS } from "./lattice/lattice_types";
 import { ReciprocalLattice } from "./lattice/reciprocal/lattice_reciprocal";
-import { Material } from "./material";
+import { UnitCell } from "./lattice/unit_cell";
+import { defaultMaterialConfig, Material } from "./material";
+import parsers from "./parsers/parsers";
+import tools from "./tools/index";
 export declare const Made: {
     coefficients: {
         EV_TO_RY: number;
@@ -489,6 +494,7 @@ export declare const Made: {
     defaultMaterialConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema;
     Lattice: typeof Lattice;
     Cell: typeof Cell;
+    UnitCell: typeof UnitCell;
     nonPeriodicLatticeScalingFactor: number;
     ReciprocalLattice: typeof ReciprocalLattice;
     Basis: typeof Basis;
@@ -503,7 +509,7 @@ export declare const Made: {
         };
         poscar: {
             isPoscar: (text: string) => boolean;
-            toPoscar: (materialOrConfig: import("./types").MaterialJSON, omitConstraints?: boolean) => string;
+            toPoscar: (materialOrConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema, omitConstraints?: boolean) => string;
             fromPoscar: (fileContent: string) => object;
             atomicConstraintsCharFromBool: (bool: boolean) => string;
             atomsCount: typeof import("./parsers/poscar").atomsCount;
@@ -524,7 +530,7 @@ export declare const Made: {
             generateConfig: (material: Material, millerIndices: import("@mat3ra/esse/dist/js/types").Coordinate3DSchema, numberOfLayers?: number, vx?: number, vy?: number) => import("./tools/surface").SlabConfigSchema;
         };
         supercell: {
-            generateConfig: (material: import("./types").MaterialInterface, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => {
+            generateConfig: (material: Material, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => {
                 name: string;
                 basis: import("@mat3ra/esse/dist/js/types").BasisSchema;
                 lattice: import("@mat3ra/esse/dist/js/types").LatticeSchema;
@@ -551,3 +557,5 @@ export declare const Made: {
         };
     };
 };
+export { coefficients, tolerance, units, ATOMIC_COORD_UNITS, Material, defaultMaterialConfig, Lattice, Cell, UnitCell, nonPeriodicLatticeScalingFactor, ReciprocalLattice, Basis, AtomicConstraints, parsers, tools, LATTICE_TYPE_CONFIGS, DEFAULT_LATTICE_UNITS, };
+export type { MaterialInMemoryEntity } from "./materialMixin";
