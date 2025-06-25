@@ -18,7 +18,10 @@
     "main": "dist/js/made.js",
     "exports": {
         ".": "./dist/js/made.js",
-        "./types": "./dist/js/types.js"
+        "./types": {
+            "import": "./dist/js/types.js",
+            "types": "./dist/js/types.d.ts"
+        }
     },
     "author": "Exabyte Inc.",
     "bugs": {
