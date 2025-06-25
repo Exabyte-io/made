@@ -291,9 +291,9 @@ function materialMixin(item) {
                 return material;
             const conventionalSupercellMatrix = conventional_cell_1.PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[this.Lattice.type];
             const conventionalLatticeType = conventional_cell_1.PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES[this.Lattice.type];
-            const config = supercell_1.default.generateConfig(material, conventionalSupercellMatrix);
+            const config = supercell_1.default.generateConfig(this, conventionalSupercellMatrix);
             config.lattice.type = conventionalLatticeType;
-            config.name = `${material.name} - conventional cell`;
+            config.name = `${this.name} - conventional cell`;
             return new this.constructor(config);
         },
         /**

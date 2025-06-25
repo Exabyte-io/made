@@ -1,4 +1,4 @@
-import { MaterialJSON } from "../types";
+import { MaterialJSON } from "../materialMixin";
 /**
  * Obtain a textual representation of a material in POSCAR format.
  * @param materialOrConfig - material class instance or config object.

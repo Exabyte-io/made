@@ -503,7 +503,7 @@ export declare const Made: {
         };
         poscar: {
             isPoscar: (text: string) => boolean;
-            toPoscar: (materialOrConfig: import("./types").MaterialJSON, omitConstraints?: boolean) => string;
+            toPoscar: (materialOrConfig: import("./materialMixin").MaterialJSON, omitConstraints?: boolean) => string;
             fromPoscar: (fileContent: string) => object;
             atomicConstraintsCharFromBool: (bool: boolean) => string;
             atomsCount: typeof import("./parsers/poscar").atomsCount;
@@ -524,7 +524,7 @@ export declare const Made: {
             generateConfig: (material: Material, millerIndices: import("@mat3ra/esse/dist/js/types").Coordinate3DSchema, numberOfLayers?: number, vx?: number, vy?: number) => import("./tools/surface").SlabConfigSchema;
         };
         supercell: {
-            generateConfig: (material: import("./types").MaterialInterface, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => {
+            generateConfig: (material: import("./types").MaterialInMemoryEntity, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => {
                 name: string;
                 basis: import("@mat3ra/esse/dist/js/types").BasisSchema;
                 lattice: import("@mat3ra/esse/dist/js/types").LatticeSchema;

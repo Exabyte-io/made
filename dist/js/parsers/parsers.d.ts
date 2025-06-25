@@ -8,7 +8,7 @@ declare const _default: {
     };
     poscar: {
         isPoscar: (text: string) => boolean;
-        toPoscar: (materialOrConfig: import("../types").MaterialJSON, omitConstraints?: boolean) => string;
+        toPoscar: (materialOrConfig: import("../materialMixin").MaterialJSON, omitConstraints?: boolean) => string;
         fromPoscar: (fileContent: string) => object;
         atomicConstraintsCharFromBool: (bool: boolean) => string;
         atomsCount: typeof import("./poscar").atomsCount;

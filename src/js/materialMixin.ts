@@ -24,8 +24,8 @@ import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
-import { MaterialJSON } from "./types";
 
+export type MaterialJSON = MaterialSchema & AnyObject;
 export const defaultMaterialConfig: MaterialSchema = {
     name: "Silicon FCC",
     basis: {
@@ -69,10 +69,9 @@ export const defaultMaterialConfig: MaterialSchema = {
 
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
 
-type MaterialMixinProps = ReturnType<typeof materialMixin>;
+export type MaterialMixinProps = ReturnType<typeof materialMixin>;
 type MaterialMixinStaticProps = ReturnType<typeof materialMixinStaticProps>;
 
-export type MaterialMixin = MaterialMixinProps;
 export type MaterialMixinConstructor = Constructor<MaterialMixinProps> & MaterialMixinStaticProps;
 
 export type OptionallyConstrainedBasisConfig = BasisConfig &
