@@ -17,6 +17,7 @@
     },
     "main": "dist/js/made.js",
     "exports": {
+        ".": "./dist/js/made.js",
         "./types": "./dist/js/types.js"
     },
     "author": "Exabyte Inc.",
