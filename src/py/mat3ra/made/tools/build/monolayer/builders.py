@@ -1,18 +1,17 @@
 from mat3ra.made.material import Material
 from .configurations import MonolayerConfiguration
-from .. import BaseSingleBuilder
-from ..slab.helpers import create_slab
+from ..slab.builders import SlabBuilder
+from ..slab.configurations import SlabConfiguration
 from ...modify import translate_to_z_level, filter_by_box
 
 
-class MonolayerBuilder(BaseSingleBuilder):
+class MonolayerBuilder(SlabBuilder):
     """
     Builder for creating monolayer structures from crystal materials.
 
     The builder creates different monolayer structures based on the crystal type:
-    - HEX: Creates a slab with Miller indices (0,0,1), thickness=1, translates to bottom, then filters half
-    - FCC/CUB: Creates a slab with Miller indices (1,1,1), thickness=1 using primitive cell, then applies
-      specific filtering and positioning operations
+    - HEX: Creates a slab with Miller indices (0,0,1), thickness=1, then filters half
+    - FCC/CUB: Creates a slab with Miller indices (1,1,1), thickness=1 using primitive cell
     """
 
     _ConfigurationType = MonolayerConfiguration
@@ -24,26 +23,28 @@ class MonolayerBuilder(BaseSingleBuilder):
             crystal.lattice.type.value if hasattr(crystal.lattice.type, "value") else str(crystal.lattice.type)
         )
         vacuum = configuration.vacuum
+
         if lattice_type_str == "HEX":
-            monolayer = self._create_hex_monolayer(crystal, vacuum)
+            miller_indices = (0, 0, 1)
         elif lattice_type_str in ["FCC", "CUB"]:
-            monolayer = self._create_fcc_cub_monolayer(crystal, vacuum)
+            miller_indices = (1, 1, 1)
         else:
-            monolayer = self._create_generic_monolayer(crystal, vacuum)
-        monolayer = translate_to_z_level(monolayer, "bottom")
-        return monolayer
+            miller_indices = (1, 1, 1)
 
-    def _create_hex_monolayer(self, crystal: Material, vacuum: float = 0.0) -> Material:
-        miller_indices = (0, 0, 1)
-
-        slab = create_slab(
-            crystal=crystal,
+        slab_config = SlabConfiguration.from_parameters(
+            material_or_dict=crystal,
             miller_indices=miller_indices,
             number_of_layers=1,
             vacuum=vacuum,
-            use_conventional_cell=True,
         )
+        slab = super()._generate(slab_config)
 
+        if lattice_type_str == "HEX":
+            slab = self._apply_hex_filtering(slab)
+
+        return slab
+
+    def _apply_hex_filtering(self, slab: Material) -> Material:
         centered_slab = translate_to_z_level(slab, z_level="center")
 
         half_filtered_slab = filter_by_box(
@@ -52,21 +53,13 @@ class MonolayerBuilder(BaseSingleBuilder):
 
         return half_filtered_slab
 
-    def _create_fcc_cub_monolayer(self, crystal: Material, vacuum: float) -> Material:
-        miller_indices = (1, 1, 1)
+    # TODO: we need to move this to a common place for this and CLPBuilder
+    def _enforce_convention(self, material: Material) -> Material:
+        return translate_to_z_level(material, "bottom")
 
-        slab = create_slab(
-            crystal=crystal,
-            miller_indices=miller_indices,
-            number_of_layers=1,
-            vacuum=vacuum,
-            use_conventional_cell=False,
-        )
-
-        return slab
-
-    def _create_generic_monolayer(self, crystal: Material, vacuum: float) -> Material:
-        return self._create_fcc_cub_monolayer(crystal, vacuum)
+    def _post_process(self, item: Material, post_process_parameters=None) -> Material:
+        item = super()._post_process(item, post_process_parameters)
+        return self._enforce_convention(item)
 
     def _update_material_name(self, material: Material, configuration: MonolayerConfiguration) -> Material:
         crystal = configuration.crystal
@@ -76,7 +69,7 @@ class MonolayerBuilder(BaseSingleBuilder):
 
         if lattice_type_str == "HEX":
             miller_str = "001"
-        elif lattice_type_str in ["FCC", "CUB"] or self._is_cubic_like(crystal):
+        elif lattice_type_str in ["FCC", "CUB"]:
             miller_str = "111"
         else:
             miller_str = "111"
