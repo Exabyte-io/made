@@ -1,10 +1,8 @@
-from typing import Optional
-
 from mat3ra.made.material import Material
 from .configurations import MonolayerConfiguration
 from .. import BaseSingleBuilder
 from ..slab.helpers import create_slab
-from ...modify import translate_to_z_level, filter_by_box, add_vacuum
+from ...modify import translate_to_z_level, filter_by_box
 
 
 class MonolayerBuilder(BaseSingleBuilder):
@@ -12,9 +10,9 @@ class MonolayerBuilder(BaseSingleBuilder):
     Builder for creating monolayer structures from crystal materials.
 
     The builder creates different monolayer structures based on the crystal type:
-    - HEX: Creates a slab with Miller indices (0,0,1), thickness=1, translates to center, then filters half
+    - HEX: Creates a slab with Miller indices (0,0,1), thickness=1, translates to bottom, then filters half
     - FCC/CUB: Creates a slab with Miller indices (1,1,1), thickness=1 using primitive cell, then applies
-      specific filtering and centering operations
+      specific filtering and positioning operations
     """
 
     _ConfigurationType = MonolayerConfiguration
@@ -32,7 +30,7 @@ class MonolayerBuilder(BaseSingleBuilder):
             monolayer = self._create_fcc_cub_monolayer(crystal, vacuum)
         else:
             monolayer = self._create_generic_monolayer(crystal, vacuum)
-        monolayer = translate_to_z_level(monolayer, "center")
+        monolayer = translate_to_z_level(monolayer, "bottom")
         return monolayer
 
     def _create_hex_monolayer(self, crystal: Material, vacuum: float = 0.0) -> Material:
@@ -49,7 +47,7 @@ class MonolayerBuilder(BaseSingleBuilder):
         centered_slab = translate_to_z_level(slab, z_level="center")
 
         half_filtered_slab = filter_by_box(
-            centered_slab, min_coordinate=[0, 0, 0.5], max_coordinate=[1, 1, 1], use_cartesian_coordinates=False
+            centered_slab, min_coordinate=[0, 0, 0.0], max_coordinate=[1, 1, 0.5], use_cartesian_coordinates=False
         )
 
         return half_filtered_slab

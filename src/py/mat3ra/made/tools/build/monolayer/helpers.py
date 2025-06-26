@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from mat3ra.made.material import Material
 from .builders import MonolayerBuilder
 from .configurations import MonolayerConfiguration
