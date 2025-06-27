@@ -1,11 +1,17 @@
 import difflib
 import json
-from typing import Any, Dict
+from typing import Any, Dict, List
 
-from mat3ra.made.tools.utils import unwrap
+import numpy as np
 from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Structure
 from pymatgen.io.ase import AseAtomsAdaptor
+from pydantic import BaseModel, Field
+
+from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.material import MaterialWithCrystalSites
+from mat3ra.made.tools.analyze.other import get_atomic_coordinates_extremum
+from mat3ra.made.tools.utils import unwrap
 
 ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS: Dict = {1: "substrate", 2: "film"}
 INTERFACE_STRUCTURE_LABELS_TO_ATOMS_TAGS: Dict = {v: k for k, v in ATOMS_TAGS_TO_INTERFACE_STRUCTURE_LABELS.items()}
@@ -81,3 +87,283 @@ def assert_two_entities_deep_almost_equal(entity1, entity2, rtol=1e-5, atol=1e-9
     except AssertionError as e:
         show_difference(expected_data, actual_data)
         raise e
+
+
+class MaterialStructureComparator(BaseModel):
+    """
+    Compare structural equivalence of two materials using neighbor vector analysis.
+
+    This class leverages the existing Material infrastructure and analyzes the local
+    atomic environment by computing vectors to nearest neighbors, then compares these
+    vector patterns to determine if structures are equivalent under various transformations.
+
+    The class uses composition with MaterialWithCrystalSites rather than inheritance,
+    as it's a tool for analyzing materials rather than being a material itself.
+    """
+
+    neighbor_cutoff: float = Field(default=5.0, description="Maximum distance to consider for neighbors (Angstroms)")
+    max_neighbors: int = Field(default=12, description="Maximum number of neighbors to analyze per atom")
+    vector_tolerance: float = Field(default=0.1, description="Relative tolerance for comparing vector lengths")
+    angle_tolerance: float = Field(default=5.0, description="Tolerance for comparing angles between vectors (degrees)")
+    allow_c_axis_scaling: bool = Field(
+        default=True, description="Whether to allow different c-axis lengths with vacuum"
+    )
+    min_vacuum_for_c_flexibility: float = Field(default=10.0, description="Minimum vacuum to allow c-axis flexibility")
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def ensure_material(self, entity) -> Material:
+        """Convert entity to Material if needed."""
+        if isinstance(entity, Material):
+            return entity
+
+        # Handle dictionary/JSON entities
+        entity = unwrap(entity)
+        if isinstance(entity, dict):
+            return Material.create(entity)
+        elif hasattr(entity, "to_json"):
+            return Material.create(json.loads(entity.to_json()))
+        else:
+            raise ValueError(f"Cannot convert entity to Material: {type(entity)}")
+
+    def create_material_with_sites(self, material: Material) -> MaterialWithCrystalSites:
+        """Create MaterialWithCrystalSites from Material for neighbor analysis."""
+        return MaterialWithCrystalSites.from_material(material)
+
+    def get_neighbor_patterns(self, material: Material) -> List[Dict]:
+        """
+        Get neighbor vector patterns for all atoms using existing Material infrastructure.
+
+        Returns list of dicts with atom info and neighbor vector patterns.
+        """
+        # Create MaterialWithCrystalSites to use existing neighbor analysis
+        material_with_sites = self.create_material_with_sites(material)
+
+        # Get neighbor vectors for all sites
+        neighbor_vectors = material_with_sites.get_neighbors_vectors_for_all_sites(
+            cutoff=self.neighbor_cutoff, max_number_of_neighbors=self.max_neighbors
+        )
+
+        patterns = []
+        for i, site_vectors in enumerate(neighbor_vectors.values):
+            if len(site_vectors) < 2:
+                continue
+
+            # Get element for this site
+            element = material.basis.elements.get_element_value_by_index(i)
+
+            # Calculate distances and angles from vectors
+            distances = [np.linalg.norm(vec) for vec in site_vectors]
+
+            # Calculate angles between all pairs of vectors
+            angles = []
+            for j in range(len(site_vectors)):
+                for k in range(j + 1, len(site_vectors)):
+                    v1, v2 = site_vectors[j], site_vectors[k]
+                    cos_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+                    cos_angle = np.clip(cos_angle, -1, 1)  # Numerical stability
+                    angle = np.degrees(np.arccos(cos_angle))
+                    angles.append(angle)
+
+            # Get neighbor elements by finding which atoms correspond to the vectors
+            neighbor_elements = []
+            site_coord = material.basis.coordinates.get_element_value_by_index(i)
+
+            for vec in site_vectors:
+                neighbor_coord = np.array(site_coord) + vec
+                # Find closest atom to this neighbor coordinate
+                min_dist = float("inf")
+                closest_element = None
+
+                for j, coord in enumerate(material.basis.coordinates.values):
+                    dist = np.linalg.norm(np.array(coord) - neighbor_coord)
+                    if dist < min_dist:
+                        min_dist = dist
+                        closest_element = material.basis.elements.get_element_value_by_index(j)
+
+                if closest_element:
+                    neighbor_elements.append(closest_element)
+
+            # Create normalized pattern
+            pattern = {
+                "element": element,
+                "distances": sorted(distances),
+                "angles": sorted(angles),
+                "neighbor_elements": sorted(neighbor_elements),
+            }
+
+            patterns.append(pattern)
+
+        return patterns
+
+    def compare_patterns(self, patterns1: List[Dict], patterns2: List[Dict]) -> bool:
+        """
+        Compare normalized patterns between two structures.
+
+        Returns True if patterns are equivalent within tolerances.
+        """
+        if len(patterns1) != len(patterns2):
+            return False
+
+        # Sort patterns by element and distance signature for comparison
+        def pattern_key(p):
+            return (p["element"], tuple(p["distances"][:3]))  # Use first 3 distances as key
+
+        patterns1_sorted = sorted(patterns1, key=pattern_key)
+        patterns2_sorted = sorted(patterns2, key=pattern_key)
+
+        for p1, p2 in zip(patterns1_sorted, patterns2_sorted):
+            if not self.patterns_match(p1, p2):
+                return False
+
+        return True
+
+    def patterns_match(self, p1: Dict, p2: Dict) -> bool:
+        """Check if two individual atom patterns match."""
+        # Element must match
+        if p1["element"] != p2["element"]:
+            return False
+
+        # Neighbor elements must match
+        if p1["neighbor_elements"] != p2["neighbor_elements"]:
+            return False
+
+        # Compare distances with relative tolerance
+        distances1, distances2 = p1["distances"], p2["distances"]
+        if len(distances1) != len(distances2):
+            return False
+
+        for d1, d2 in zip(distances1, distances2):
+            if abs(d1 - d2) / max(d1, d2) > self.vector_tolerance:
+                return False
+
+        # Compare angles with absolute tolerance
+        angles1, angles2 = p1["angles"], p2["angles"]
+        if len(angles1) != len(angles2):
+            return False
+
+        for a1, a2 in zip(angles1, angles2):
+            if abs(a1 - a2) > self.angle_tolerance:
+                return False
+
+        return True
+
+    def has_sufficient_vacuum(self, material: Material) -> bool:
+        """Check if material has sufficient vacuum along c-axis using Material methods."""
+        # Use existing function to get extremum coordinates in Cartesian
+        min_z = get_atomic_coordinates_extremum(material, extremum="min", axis="z", use_cartesian_coordinates=True)
+        max_z = get_atomic_coordinates_extremum(material, extremum="max", axis="z", use_cartesian_coordinates=True)
+
+        # Calculate z-range (thickness)
+        z_range = max_z - min_z
+
+        # Compare with c-axis length
+        c_length = material.lattice.c
+        vacuum = c_length - z_range
+
+        return vacuum >= self.min_vacuum_for_c_flexibility
+
+    def compare(self, entity1, entity2) -> bool:
+        """
+        Compare two materials for structural equivalence using existing Material infrastructure.
+
+        Args:
+            entity1, entity2: Material objects or dictionaries to compare
+
+        Returns:
+            bool: True if structures are equivalent
+
+        Raises:
+            AssertionError: If structures are not equivalent (with detailed message)
+        """
+        try:
+            # Convert to Material objects
+            material1 = self.ensure_material(entity1)
+            material2 = self.ensure_material(entity2)
+
+            # Basic compatibility checks
+            if material1.basis.number_of_atoms != material2.basis.number_of_atoms:
+                raise AssertionError(
+                    f"Different number of atoms: {material1.basis.number_of_atoms} vs {material2.basis.number_of_atoms}"
+                )
+
+            elements1 = sorted(material1.basis.elements.values)
+            elements2 = sorted(material2.basis.elements.values)
+            if elements1 != elements2:
+                raise AssertionError(f"Different elements: {elements1} vs {elements2}")
+
+            # Handle c-axis scaling for structures with vacuum
+            if self.allow_c_axis_scaling:
+                has_vacuum1 = self.has_sufficient_vacuum(material1)
+                has_vacuum2 = self.has_sufficient_vacuum(material2)
+
+                if has_vacuum1 and has_vacuum2:
+                    # Scale coordinates to normalize c-axis
+                    c_ratio = material2.lattice.c / material1.lattice.c
+                    material1 = material1.clone()
+                    material1.to_cartesian()
+
+                    # Scale z-coordinates by directly modifying the values array
+                    new_coordinates = []
+                    for coord in material1.basis.coordinates.values:
+                        new_coord = [coord[0], coord[1], coord[2] * c_ratio]
+                        new_coordinates.append(new_coord)
+                    material1.basis.coordinates.values = new_coordinates
+
+            # Ensure both materials are in Cartesian coordinates for neighbor analysis
+            material1 = material1.clone()
+            material2 = material2.clone()
+            material1.to_cartesian()
+            material2.to_cartesian()
+
+            # Get neighbor vector patterns
+            patterns1 = self.get_neighbor_patterns(material1)
+            patterns2 = self.get_neighbor_patterns(material2)
+
+            # Compare patterns
+            if not self.compare_patterns(patterns1, patterns2):
+                raise AssertionError("Atomic neighbor patterns do not match - structures are not equivalent")
+
+            return True
+
+        except Exception as e:
+            if isinstance(e, AssertionError):
+                raise
+            else:
+                raise AssertionError(f"Error during structural comparison: {str(e)}")
+
+
+def assert_slab_structures_almost_equal(
+    entity1,
+    entity2,
+    angle_tolerance=25.0,
+    c_axis_flexible=True,
+    min_vacuum_for_c_flexibility=10.0,
+    neighbor_cutoff=5.0,
+    max_neighbors=12,
+    vector_tolerance=0.2,
+):
+    """
+    Compare slab-like structures using MaterialStructureComparator.
+
+    Args:
+        entity1, entity2: Materials or material configs to compare
+        rtol, atol: Standard numerical tolerances (for backward compatibility)
+        angle_tolerance: Absolute tolerance for lattice angles (degrees)
+        c_axis_flexible: Whether c-axis can differ if sufficient vacuum
+        min_vacuum_for_c_flexibility: Minimum vacuum size to allow c-axis flexibility
+        neighbor_cutoff: Maximum distance for neighbor search
+        max_neighbors: Maximum number of neighbors per atom
+        vector_tolerance: Relative tolerance for bond distances (20%)
+    """
+    comparator = MaterialStructureComparator(
+        neighbor_cutoff=neighbor_cutoff,
+        max_neighbors=max_neighbors,
+        vector_tolerance=vector_tolerance,
+        angle_tolerance=angle_tolerance,
+        allow_c_axis_scaling=c_axis_flexible,
+        min_vacuum_for_c_flexibility=min_vacuum_for_c_flexibility,
+    )
+
+    comparator.compare(entity1, entity2)
