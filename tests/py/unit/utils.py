@@ -233,16 +233,16 @@ class MaterialStructureComparator(BaseModel):
 
         return vacuum >= self.min_vacuum_for_c_flexibility
 
-    def _basic_compatibility_checks(self, material1: Material, material2: Material):
+    def _basic_compatibility_checks(self, material1: Material, material2: Material) -> bool:
         if material1.basis.number_of_atoms != material2.basis.number_of_atoms:
-            raise AssertionError(
-                f"Different number of atoms: {material1.basis.number_of_atoms} vs {material2.basis.number_of_atoms}"
-            )
+            return False
 
         elements1 = sorted(material1.basis.elements.values)
         elements2 = sorted(material2.basis.elements.values)
         if elements1 != elements2:
-            raise AssertionError(f"Different elements: {elements1} vs {elements2}")
+            return False
+
+        return True
 
     def _handle_c_axis_scaling(self, material1: Material, material2: Material) -> Material:
         if not self.allow_c_axis_scaling:
@@ -251,7 +251,7 @@ class MaterialStructureComparator(BaseModel):
         has_vacuum1 = self.has_sufficient_vacuum(material1)
         has_vacuum2 = self.has_sufficient_vacuum(material2)
 
-        if has_vacuum1 and has_vacuum2:
+        if has_vacuum1 or has_vacuum2:
             c_ratio = material2.lattice.c / material1.lattice.c
             material1_scaled = material1.clone()
             material1_scaled.to_cartesian()
@@ -283,12 +283,11 @@ class MaterialStructureComparator(BaseModel):
         material2_prepared.to_cartesian()
         return material1_prepared, material2_prepared
 
-    def _compare_neighbor_patterns(self, material1: Material, material2: Material):
+    def _compare_neighbor_patterns(self, material1: Material, material2: Material) -> bool:
         patterns1 = self.get_neighbor_patterns(material1)
         patterns2 = self.get_neighbor_patterns(material2)
 
-        if not self.compare_patterns(patterns1, patterns2):
-            raise AssertionError("Atomic neighbor patterns do not match - structures are not equivalent")
+        return self.compare_patterns(patterns1, patterns2)
 
     def compare(self, entity1, entity2) -> bool:
         """
@@ -298,24 +297,23 @@ class MaterialStructureComparator(BaseModel):
             entity1, entity2: Material objects or dictionaries to compare
 
         Returns:
-            bool: True if structures are equivalent
+            bool: True if structures are equivalent, False otherwise
         """
         try:
             material1 = self.ensure_material(entity1)
             material2 = self.ensure_material(entity2)
-            self._basic_compatibility_checks(material1, material2)
+
+            if not self._basic_compatibility_checks(material1, material2):
+                return False
+
             material1 = self._handle_c_axis_scaling(material1, material2)
             self._handle_gamma_equivalent_structures(material1, material2)
             material1, material2 = self._get_cartesian_materials(material1, material2)
-            self._compare_neighbor_patterns(material1, material2)
 
-            return True
+            return self._compare_neighbor_patterns(material1, material2)
 
-        except Exception as e:
-            if isinstance(e, AssertionError):
-                raise
-            else:
-                raise AssertionError(f"Error during structural comparison: {str(e)}")
+        except Exception:
+            return False
 
 
 def assert_slab_structures_almost_equal(
@@ -339,6 +337,9 @@ def assert_slab_structures_almost_equal(
         neighbor_cutoff: Maximum distance for neighbor search
         max_neighbors: Maximum number of neighbors per atom
         vector_tolerance: Relative tolerance for bond distances (5%)
+
+    Raises:
+        AssertionError: If structures are not equivalent
     """
     comparator = MaterialStructureComparator(
         neighbor_cutoff=neighbor_cutoff,
@@ -349,4 +350,6 @@ def assert_slab_structures_almost_equal(
         min_vacuum_for_c_flexibility=min_vacuum_for_c_flexibility,
     )
 
-    comparator.compare(entity1, entity2)
+    result = comparator.compare(entity1, entity2)
+    if not result:
+        raise AssertionError("Structures are not equivalent")
