@@ -1,154 +1,181 @@
-from typing import List, Optional, Any, Tuple
-
+from typing import List, Optional, Any, Type
 import numpy as np
+from mat3ra.made.tools.build.slab.utils import get_orthogonal_c_slab
 
-from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilder
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell
+from mat3ra.made.tools.build import BaseSingleBuilder
+from ..stack.builders import Stack2ComponentsBuilder
+from ...analyze.lattice_lines import CrystalLatticeLinesAnalyzer
+from ...operations.core.unary import supercell, translate
+from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_rectangle_projection
 
-from ...modify import translate_to_center, rotate
-from .configuration import NanoribbonConfiguration
-from .enums import EdgeTypes
+from .configuration import (
+    CrystalLatticeLinesConfiguration,
+    CrystalLatticeLinesUniqueRepeatedConfiguration,
+    NanoribbonConfiguration,
+)
 
 
-class NanoribbonBuilder(BaseBuilder):
+class CrystalLatticeLinesBuilder(BaseSingleBuilder):
     """
-    Builder class for creating a nanoribbon from a material.
-
-    The process creates a supercell with large enough dimensions to contain the nanoribbon and then
-    filters the supercell to only include the nanoribbon. The supercell is then centered and returned as the nanoribbon.
-    The nanoribbon can have either Armchair or Zigzag edge. The edge is defined along the vector 1 of the material cell,
-    which corresponds to [1,0,0] direction.
+    Builder for creating a single crystal lattice line with termination.
+    This is similar to CrystalLatticePlanesBuilder but for 1D lines.
     """
 
-    _ConfigurationType: type(NanoribbonConfiguration) = NanoribbonConfiguration  # type: ignore
-    _GeneratedItemType: Material = Material
     _PostProcessParametersType: Any = None
+    use_enforce_convention: bool = True
 
-    def create_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
-        material = config.material.clone()
-        (
-            length_cartesian,
-            width_cartesian,
-            height_cartesian,
-            vacuum_length_cartesian,
-            vacuum_width_cartesian,
-        ) = self._calculate_cartesian_dimensions(config, material)
-        new_lattice = self._get_new_lattice(
-            length_cartesian,
-            width_cartesian,
-            height_cartesian,
-            vacuum_length_cartesian,
-            vacuum_width_cartesian,
-            config.edge_type,
+    def _generate(self, configuration: CrystalLatticeLinesConfiguration) -> Material:
+        crystal_lattice_lines_analyzer = CrystalLatticeLinesAnalyzer(
+            material=configuration.crystal, miller_indices_uv=configuration.miller_indices_uv
         )
-        n_repetitions = max(config.length, config.width)
-        large_supercell_to_cut = create_supercell(material, np.diag([2 * n_repetitions, 2 * n_repetitions, 1]))
+        miller_supercell_matrix = crystal_lattice_lines_analyzer.miller_supercell_matrix
+        miller_supercell_material = supercell(configuration.crystal, miller_supercell_matrix)
+        # Lattice returned with vector B being treated as the direction to the surface, needs to be swaped with C
+        rotated_material = supercell(miller_supercell_material, [[1, 0, 0], [0, 0, 1], [0, 1, 0]])
+        orthogonal_material = get_orthogonal_c_slab(rotated_material)
+        return orthogonal_material
 
-        min_coordinate, max_coordinate = self._calculate_coordinates_of_cut(
-            length_cartesian, width_cartesian, height_cartesian, config.edge_type
+    def _enforce_convention(self, material: Material) -> Material:
+        if not self.use_enforce_convention:
+            return material
+        return translate_to_z_level(material, "bottom")
+
+    def _post_process(self, item: Material, post_process_parameters: Optional[_PostProcessParametersType]) -> Material:
+        item = super()._post_process(item, post_process_parameters)
+        return self._enforce_convention(item)
+
+
+class CrystalLatticeLinesRepeatedBuilder(CrystalLatticeLinesBuilder):
+    """
+    Builder for creating repeated crystal lattice lines with termination.
+    This is similar to AtomicLayersUniqueRepeatedBuilder but for 1D lines.
+    """
+
+    _ConfigurationType: Type[CrystalLatticeLinesUniqueRepeatedConfiguration] = (
+        CrystalLatticeLinesUniqueRepeatedConfiguration
+    )
+
+    def _generate(self, configuration: CrystalLatticeLinesUniqueRepeatedConfiguration) -> Material:
+        crystal_lattice_lines_material = super()._generate(configuration)
+
+        crystal_lattice_lines_analyzer = CrystalLatticeLinesAnalyzer(
+            material=configuration.crystal, miller_indices_uv=configuration.miller_indices_uv
         )
+        translation_vector = crystal_lattice_lines_analyzer.get_translation_vector_for_termination_without_vacuum(
+            configuration.termination_top
+        )
+        material_translated = translate(crystal_lattice_lines_material, translation_vector)
+        material_translated_wrapped = wrap_to_unit_cell(material_translated)
+
+        material_translated_wrapped_repeated = supercell(
+            material_translated_wrapped,
+            [
+                [1, 0, 0],
+                [0, 1, 0],
+                [0, 0, 1],
+            ],
+        )
+        return material_translated_wrapped_repeated
+
+
+class NanoribbonBuilder(Stack2ComponentsBuilder):
+    """
+    Builder for creating nanoribbons from monolayer materials.
+    Uses the new configuration structure with crystal lattice lines and vacuum stacking.
+    """
+
+    _ConfigurationType = NanoribbonConfiguration
+    _GeneratedItemType = Material
+
+    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
+        """Convert configuration objects to materials using dedicated builders."""
+        if isinstance(configuration_or_material, CrystalLatticeLinesUniqueRepeatedConfiguration):
+            builder = CrystalLatticeLinesRepeatedBuilder()
+            return builder.get_material(configuration_or_material)
+        # Fall back to parent method for other types (VacuumConfiguration, etc.)
+        return super()._configuration_to_material(configuration_or_material)
+
+    def _generate(self, configuration: NanoribbonConfiguration) -> Material:
+        # Generate the basic stacked material (lattice lines + vacuum)
+        stacked_material = super()._generate(configuration)
+
+        # Apply nanoribbon-specific transformations
+        nanoribbon = self._create_nanoribbon_from_stacked_material(stacked_material, configuration)
+
+        return nanoribbon
+
+    def _create_nanoribbon_from_stacked_material(
+        self, stacked_material: Material, configuration: NanoribbonConfiguration
+    ) -> Material:
+        """
+        Create the final nanoribbon by applying width/length repetitions and vacuum.
+        """
+        material = stacked_material.clone()
+
+        # Calculate dimensions for the nanoribbon
+        width_repetitions = configuration.width
+        length_repetitions = configuration.length
+        vacuum_width = configuration.vacuum_width
+        vacuum_length = configuration.vacuum_length
+
+        # Create repetitions in width and length directions
+        # This creates the nanoribbon with the specified dimensions
+        total_width_repetitions = width_repetitions + vacuum_width
+        total_length_repetitions = length_repetitions + vacuum_length
+
+        # Create a large supercell
+        supercell_matrix = [[total_length_repetitions, 0, 0], [0, total_width_repetitions, 0], [0, 0, 1]]
+        large_supercell = supercell(material, supercell_matrix)
+
+        # Calculate the actual nanoribbon dimensions in cartesian coordinates
+        lattice_vectors = large_supercell.lattice.vector_arrays
+        length_cartesian = length_repetitions * lattice_vectors[0][0] / total_length_repetitions
+        width_cartesian = width_repetitions * lattice_vectors[1][1] / total_width_repetitions
+        height_cartesian = lattice_vectors[2][2]
+
+        # Filter to keep only the nanoribbon region (excluding vacuum regions)
+        min_coordinate = [0.0, 0.0, 0.0]
+        max_coordinate = [length_cartesian, width_cartesian, height_cartesian]
+
         nanoribbon = filter_by_rectangle_projection(
-            large_supercell_to_cut,
+            large_supercell,
             min_coordinate=min_coordinate,
             max_coordinate=max_coordinate,
             use_cartesian_coordinates=True,
         )
+
+        # Update lattice to include vacuum regions
+        new_lattice_vectors = [
+            [length_cartesian + (vacuum_length * lattice_vectors[0][0] / total_length_repetitions), 0.0, 0.0],
+            [0.0, width_cartesian + (vacuum_width * lattice_vectors[1][1] / total_width_repetitions), 0.0],
+            [0.0, 0.0, height_cartesian],
+        ]
+
+        from mat3ra.made.lattice import Lattice
+
+        new_lattice = Lattice.from_vectors_array(vectors=new_lattice_vectors)
         nanoribbon.set_lattice(new_lattice)
-        return translate_to_center(nanoribbon)
 
-    @staticmethod
-    def _calculate_cartesian_dimensions(config: NanoribbonConfiguration, material: Material):
-        """
-        Calculate the dimensions of the nanoribbon in the cartesian coordinate system.
-        """
-        nanoribbon_width = config.width
-        nanoribbon_length = config.length
-        vacuum_width = config.vacuum_width
-        vacuum_length = config.vacuum_length
-        edge_type = config.edge_type
-
-        if edge_type == EdgeTypes.armchair:
-            nanoribbon_length, nanoribbon_width = nanoribbon_width, nanoribbon_length
-            vacuum_width, vacuum_length = vacuum_length, vacuum_width
-
-        lattice = material.lattice
-
-        length_cartesian = nanoribbon_length * lattice.vectors.a.x
-        width_cartesian = nanoribbon_width * lattice.vectors.b.y
-        height_cartesian = lattice.vectors.c.z
-        vacuum_length_cartesian = vacuum_length * lattice.vectors.a.x
-        vacuum_width_cartesian = vacuum_width * lattice.vectors.b.y
-
-        return length_cartesian, width_cartesian, height_cartesian, vacuum_length_cartesian, vacuum_width_cartesian
-
-    @staticmethod
-    def _get_new_lattice(
-        length: float, width: float, height: float, vacuum_length: float, vacuum_width: float, edge_type: EdgeTypes
-    ) -> Lattice:
-        """
-        Calculate the new lattice vectors for the nanoribbon.
-
-        Args:
-            length: Length of the nanoribbon.
-            width: Width of the nanoribbon.
-            height: Height of the nanoribbon.
-            vacuum_length: Length of the vacuum region.
-            vacuum_width: Width of the vacuum region.
-            edge_type: Type of the edge of the nanoribbon.
-
-        Returns:
-            Tuple of the new lattice vectors.
-        """
-        length_lattice_vector = [length + vacuum_length, 0.0, 0.0]
-        width_lattice_vector = [0.0, width + vacuum_width, 0.0]
-        height_lattice_vector = [0.0, 0.0, height]
-
-        if edge_type == EdgeTypes.armchair:
-            length_lattice_vector, width_lattice_vector = width_lattice_vector, length_lattice_vector
-
-        return Lattice.from_vectors_array(vectors=[length_lattice_vector, width_lattice_vector, height_lattice_vector])
-
-    @staticmethod
-    def _calculate_coordinates_of_cut(
-        length: float, width: float, height: float, edge_type: EdgeTypes
-    ) -> Tuple[List[float], List[float]]:
-        """
-        Calculate the coordinates of the rectangular nanoribbon cut from the supercell.
-
-        Args:
-            length: Length of the nanoribbon.
-            width: Width of the nanoribbon.
-            height: Height of the nanoribbon.
-            edge_type: Type of the edge of the nanoribbon.
-
-        Returns:
-            Tuple of the minimum and maximum coordinates of the cut.
-        """
-        edge_nudge_value = 0.01
-        conditional_nudge_value = edge_nudge_value * (
-            -1 * (edge_type == EdgeTypes.armchair) + 1 * (edge_type == EdgeTypes.zigzag)
-        )
-        min_coordinate = [-edge_nudge_value, conditional_nudge_value, 0]
-        max_coordinate = [length - edge_nudge_value, width + conditional_nudge_value, height]
-        return min_coordinate, max_coordinate
-
-    def _generate(self, configuration: NanoribbonConfiguration) -> List[_GeneratedItemType]:
-        nanoribbon = self.create_nanoribbon(configuration)
-        if configuration.edge_type == EdgeTypes.armchair:
-            nanoribbon = rotate(nanoribbon, [0, 0, 1], 90)
-        return [nanoribbon]
-
-    def _post_process(
-        self,
-        items: List[_GeneratedItemType],
-        post_process_parameters: Optional[_PostProcessParametersType],
-    ) -> List[Material]:
-        return [wrap_to_unit_cell(item) for item in items]
+        return nanoribbon
 
     def _update_material_name(self, material: Material, configuration: NanoribbonConfiguration) -> Material:
-        edge_type = configuration.edge_type.capitalize()
-        material.name = f"{material.name} ({edge_type} nanoribbon)"
+        """Update material name to reflect nanoribbon properties."""
+        lattice_lines = configuration.lattice_lines
+        miller_str = f"{configuration.miller_indices_uv[0]}{configuration.miller_indices_uv[1]}"
+
+        # Convert (u,v) to edge type for naming
+        if configuration.miller_indices_uv == (1, 1):
+            edge_type = "Zigzag"
+        elif configuration.miller_indices_uv == (0, 1):
+            edge_type = "Armchair"
+        else:
+            edge_type = f"({miller_str})"
+
+        material.name = f"{lattice_lines.crystal.name} - {edge_type} Nanoribbon ({miller_str})"
         return material
+
+    def _post_process(self, item: Material, post_process_parameters: Optional[Any] = None) -> Material:
+        """Post-process the nanoribbon material."""
+        item = super()._post_process(item, post_process_parameters)
+        return wrap_to_unit_cell(item)
