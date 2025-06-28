@@ -124,12 +124,8 @@ class NanoribbonBuilder(Stack2ComponentsBuilder):
         total_width_repetitions = width_repetitions + vacuum_width
         total_length_repetitions = length_repetitions + vacuum_length
 
-        # Create a large supercell
-        supercell_matrix = [[total_length_repetitions, 0, 0], [0, total_width_repetitions, 0], [0, 0, 1]]
-        large_supercell = supercell(material, supercell_matrix)
-
         # Calculate the actual nanoribbon dimensions in cartesian coordinates
-        lattice_vectors = large_supercell.lattice.vector_arrays
+        lattice_vectors = material.lattice.vector_arrays
         length_cartesian = length_repetitions * lattice_vectors[0][0] / total_length_repetitions
         width_cartesian = width_repetitions * lattice_vectors[1][1] / total_width_repetitions
         height_cartesian = lattice_vectors[2][2]
@@ -145,9 +141,9 @@ class NanoribbonBuilder(Stack2ComponentsBuilder):
         from mat3ra.made.lattice import Lattice
 
         new_lattice = Lattice.from_vectors_array(vectors=new_lattice_vectors)
-        large_supercell.set_lattice(new_lattice)
+        material.set_lattice(new_lattice)
 
-        return large_supercell
+        return material
 
     def _update_material_name(self, material: Material, configuration: NanoribbonConfiguration) -> Material:
         """Update material name to reflect nanoribbon properties."""

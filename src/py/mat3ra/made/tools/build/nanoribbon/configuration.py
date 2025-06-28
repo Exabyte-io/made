@@ -113,7 +113,8 @@ class NanoribbonConfiguration(StackConfiguration):
             crystal=monolayer,
             miller_indices_uv=miller_indices_uv,
             termination_top=termination,
-            number_of_repetitions=1,  # Single line for now
+            number_of_repetitions_width=width,
+            number_of_repetitions_length=length,
         )
 
         # Build the lattice lines material using the dedicated builder for vacuum configuration
