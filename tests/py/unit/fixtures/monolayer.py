@@ -18,4 +18,3 @@ GRAPHENE = {
     },
     "isNonPeriodic": False,
 }
-

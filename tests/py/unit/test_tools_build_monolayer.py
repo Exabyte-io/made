@@ -7,27 +7,6 @@ from .fixtures.generated.fixtures import BULK_GRAPHITE, SILICENE
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_slab_structures_almost_equal
 
-BULK_Si_PRIMITIVE_TEMP = {
-    "name": "Silicon FCC",
-    "basis": {
-        "constraints": [],
-        "coordinates": [{"id": 0, "value": [0.0, 0.0, 0.0]}, {"id": 1, "value": [0.55, 0.25, 0.25]}],
-        "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
-        "labels": [],
-        "units": "crystal",
-    },
-    "lattice": {
-        "a": 3.867,
-        "alpha": 60.0,
-        "b": 3.867,
-        "beta": 60.0,
-        "c": 3.867,
-        "gamma": 60.0,
-        "type": "FCC",
-        "units": {"angle": "degree", "length": "angstrom"},
-    },
-}
-
 
 @pytest.mark.parametrize(
     "material_config, vacuum, expected_material_config",
