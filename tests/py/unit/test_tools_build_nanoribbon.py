@@ -13,14 +13,14 @@ from .utils import assert_two_entities_deep_almost_equal
 
 
 @pytest.mark.parametrize(
-    "material_config, width, length, vacuum_width, miller_indices_uv, edge_type_name, expected_nanoribbon",
+    "material_config, width, length, vacuum_width, vacuum_length, miller_indices_uv, edge_type_name, expected_nanoribbon",
     [
-        (GRAPHENE, 2, 4, 3, (1, 1), "armchair", GRAPHENE_ZIGZAG_NANORIBBON),
-        (GRAPHENE, 2, 4, 3, (0, 1), "zigzag", GRAPHENE_ARMCHAIR_NANORIBBON),
+        (GRAPHENE, 2, 4, 10.0, 0.0, (1, 1), "zigzag", GRAPHENE_ZIGZAG_NANORIBBON),
+        (GRAPHENE, 2, 4, 10.0, 0.0, (0, 1), "armchair", GRAPHENE_ARMCHAIR_NANORIBBON),
     ],
 )
 def test_build_nanoribbon(
-    material_config, width, length, vacuum_width, miller_indices_uv, edge_type_name, expected_nanoribbon
+    material_config, width, length, vacuum_width, vacuum_length, miller_indices_uv, edge_type_name, expected_nanoribbon
 ):
     """Test nanoribbon creation using Miller indices."""
     material = Material.create(material_config)
@@ -32,8 +32,7 @@ def test_build_nanoribbon(
         width=width,
         length=length,
         vacuum_width=vacuum_width,
-        vacuum_length=0,
-        vacuum_z=10.0,
+        vacuum_length=vacuum_length,
     )
 
     assert_two_entities_deep_almost_equal(nanoribbon, expected_nanoribbon)
