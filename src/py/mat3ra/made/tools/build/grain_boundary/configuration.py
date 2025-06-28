@@ -1,62 +1,70 @@
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
-from .. import BaseConfiguration
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from .. import BaseConfiguration, BaseConfigurationPydantic
 from ..slab.configurations import SlabConfiguration
-from ..slab.entities import Termination
-from ..interface.configuration import TwistedInterfaceConfiguration
 
 
-class SlabGrainBoundaryConfiguration(BaseConfiguration):
+class GrainBoundaryConfiguration(BaseConfigurationPydantic):
     """
-    Configuration for a grain boundary between two phases with different surfaces facing each other.
+    Configuration for creating a grain boundary between two phases.
 
-    Attributes:
-        phase_1_configuration (SlabConfiguration): The configuration of the first phase.
-        phase_2_configuration (SlabConfiguration): The configuration of the second phase.
-        phase_1_termination (Termination): The termination of the first phase.
-        phase_2_termination (Termination): The termination of the second phase.
-        gap (float): The gap between the two phases, in Angstroms.
-        slab_configuration (SlabConfiguration): The configuration of the grain boundary slab.
-        slab_termination (Optional[Termination]): The termination of the grain boundary slab.
+    The grain boundary is created by stacking two phases in x/y direction
+    with a relative shift perpendicular to the interface.
     """
 
-    phase_1_configuration: SlabConfiguration
-    phase_2_configuration: SlabConfiguration
-    phase_1_termination: Termination
-    phase_2_termination: Termination
-    gap: float = 3.0
-    slab_configuration: SlabConfiguration
-    slab_termination: Optional[Termination] = None
+    phase_1_configuration: MatchedSubstrateFilmConfigurationHolder
+    phase_2_configuration: MatchedSubstrateFilmConfigurationHolder
+    translation_vector: List[float] = [0.0, 0.0, 0.0]  # Relative shift between phases
+    gap: float = 3.0  # Gap between phases in Angstroms
 
     @property
-    def _json(self):
-        return {
-            "type": self.__class__.__name__,
-            "phase_1_configuration": self.phase_1_configuration.to_json(),
-            "phase_2_configuration": self.phase_2_configuration.to_json(),
-            "phase_1_termination": str(self.phase_1_termination),
-            "phase_2_termination": str(self.phase_2_termination),
-            "gap": self.gap,
-            "slab_configuration": self.slab_configuration.to_json(),
-        }
+    def substrate_configuration(self) -> SlabConfiguration:
+        """Get the substrate configuration (phase 1)."""
+        return self.phase_1_configuration.substrate_configuration
+
+    @property
+    def film_configuration(self) -> SlabConfiguration:
+        """Get the film configuration (phase 2)."""
+        return self.phase_2_configuration.film_configuration
 
 
-class SurfaceGrainBoundaryConfiguration(TwistedInterfaceConfiguration):
+class GrainBoundaryWithVacuumConfiguration(BaseConfigurationPydantic):
     """
-    Configuration for creating a surface grain boundary.
+    Configuration for creating a grain boundary with vacuum (slab).
 
-    Args:
-        gap (float): The gap between the two phases.
-        xy_supercell_matrix (List[List[int]]): The supercell matrix to apply for both phases.
+    This configuration is used to create a grain boundary slab with vacuum
+    on both sides, similar to how SlabConfiguration works.
     """
 
-    gap: float = 0.0
+    grain_boundary_material: Material
+    miller_indices: Tuple[int, int, int]
+    number_of_layers: int = 1
+    vacuum: float = 10.0
+    termination_formula: Optional[str] = None
     xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
 
-    @property
-    def _json(self):
-        return {
-            "type": self.get_cls_name(),
-            "gap": self.gap,
-            "xy_supercell_matrix": self.xy_supercell_matrix,
-        }
+    @classmethod
+    def from_grain_boundary_material(
+        cls,
+        grain_boundary_material: Material,
+        miller_indices: Tuple[int, int, int],
+        number_of_layers: int = 1,
+        vacuum: float = 10.0,
+        termination_formula: Optional[str] = None,
+        xy_supercell_matrix: Optional[List[List[int]]] = None,
+    ) -> "GrainBoundaryWithVacuumConfiguration":
+        """Create configuration from a grain boundary material."""
+        if xy_supercell_matrix is None:
+            xy_supercell_matrix = [[1, 0], [0, 1]]
+
+        return cls(
+            grain_boundary_material=grain_boundary_material,
+            miller_indices=miller_indices,
+            number_of_layers=number_of_layers,
+            vacuum=vacuum,
+            termination_formula=termination_formula,
+            xy_supercell_matrix=xy_supercell_matrix,
+        )

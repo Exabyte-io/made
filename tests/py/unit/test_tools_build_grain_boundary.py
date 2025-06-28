@@ -1,93 +1,200 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.grain_boundary import (
-    SlabGrainBoundaryConfiguration,
-    SurfaceGrainBoundaryBuilder,
-    SurfaceGrainBoundaryBuilderParameters,
-    SurfaceGrainBoundaryConfiguration,
+from mat3ra.made.tools.build.grain_boundary.helpers import (
+    create_grain_boundary_planar,
+    create_grain_boundary_planar_with_vacuum,
     create_grain_boundary,
 )
-from mat3ra.made.tools.build.grain_boundary.builders import SlabGrainBoundaryBuilder, SlabGrainBoundaryBuilderParameters
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
+from mat3ra.made.tools.build.grain_boundary.builders import (
+    GrainBoundaryBuilder,
+    GrainBoundaryWithVacuumBuilder,
+)
+from mat3ra.made.tools.build.grain_boundary.configuration import (
+    GrainBoundaryConfiguration,
+    GrainBoundaryWithVacuumConfiguration,
+)
+from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryAnalyzer
+from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.utils import assertion as assertion_utils
 
 from .fixtures.bulk import BULK_Si_PRIMITIVE
-from .fixtures.monolayer import GRAPHENE
 
 
-@pytest.mark.skip(reason="Failing due to SlabConfiguration instantiation changes. To be fixed in epic-7623")
 @pytest.mark.parametrize(
-    "material_config, slab_params, gap, expected_elements_len, expected_coordinate_checks, expected_lattice_vectors",
+    "phase_1_material, phase_2_material, phase_1_miller, phase_2_miller, expected_elements_min",
     [
         (
             BULK_Si_PRIMITIVE,
-            {"vacuum": 0, "number_of_layers": 2, "miller_indices": (0, 0, 1)},
-            3.0,
-            32,
-            {15: [0.777190818, 0.5, 0.332064346]},
-            [[25.140673461, 0.0, 0.0], [0.0, 3.867, 0.0], [0.0, 0.0, 8.734]],
+            BULK_Si_PRIMITIVE,
+            (0, 0, 1),
+            (0, 0, 1),
+            8,  # Minimum expected elements
         ),
     ],
 )
-def test_slab_grain_boundary_builder(
-    material_config, slab_params, gap, expected_elements_len, expected_coordinate_checks, expected_lattice_vectors
+def test_grain_boundary_analyzer(
+    phase_1_material, phase_2_material, phase_1_miller, phase_2_miller, expected_elements_min
 ):
-    material = Material.create(material_config)
-    phase_1_configuration = SlabConfiguration(bulk=material, **slab_params)
-    phase_2_configuration = SlabConfiguration(bulk=material, **slab_params)
+    """Test the GrainBoundaryAnalyzer functionality."""
+    phase_1 = Material.create(phase_1_material)
+    phase_2 = Material.create(phase_2_material)
 
-    termination1 = phase_1_configuration.get_terminations()[0]
-    termination2 = phase_2_configuration.get_terminations()[0]
-
-    slab_config_params = slab_params.copy()
-    slab_config_params.update({"vacuum": 1, "xy_supercell_matrix": [[1, 0], [0, 1]]})
-    slab_config = SlabConfiguration(bulk=material, **slab_config_params)
-
-    config = SlabGrainBoundaryConfiguration(
-        phase_1_configuration=phase_1_configuration,
-        phase_2_configuration=phase_2_configuration,
-        phase_1_termination=termination1,
-        phase_2_termination=termination2,
-        gap=gap,
-        slab_configuration=slab_config,
+    analyzer = GrainBoundaryAnalyzer(
+        phase_1_material=phase_1,
+        phase_2_material=phase_2,
+        phase_1_miller_indices=phase_1_miller,
+        phase_2_miller_indices=phase_2_miller,
+        phase_1_thickness=1,
+        phase_2_thickness=1,
     )
 
-    builder_params = SlabGrainBoundaryBuilderParameters()
-    builder = SlabGrainBoundaryBuilder(build_parameters=builder_params)
-    gb = create_grain_boundary(config, builder)
+    # Test that we get match holders
+    match_holders = analyzer.grain_boundary_match_holders
+    assert len(match_holders) > 0
 
-    assert len(gb.basis.elements.values) == expected_elements_len
-    for index, expected_coordinate in expected_coordinate_checks.items():
-        assertion_utils.assert_deep_almost_equal(expected_coordinate, gb.basis.coordinates.values[index])
-    assertion_utils.assert_deep_almost_equal(expected_lattice_vectors, gb.lattice.vector_arrays)
+    # Test that we can get configurations
+    configs = analyzer.get_grain_boundary_configurations()
+    assert len(configs) > 0
+
+    # Test getting configuration by match ID
+    config = analyzer.get_grain_boundary_configuration_by_match_id(0)
+    assert isinstance(config, MatchedSubstrateFilmConfigurationHolder)
+    assert config.match_id == 0
 
 
 @pytest.mark.parametrize(
-    "config_params, builder_params_dict, expected_cell_vectors",
+    "phase_1_material, phase_2_material, phase_1_miller, phase_2_miller, gap, translation_vector",
     [
         (
-            {"film_config": GRAPHENE, "twist_angle": 13.0, "gap": 2.0},
-            {
-                "max_repetition_int": 5,
-                "angle_tolerance": 0.5,
-                "return_first_match": True,
-                "distance_tolerance": 1.0,
-            },
-            [
-                [23.509344266, 0.0, 0.0],
-                [5.377336066500001, 9.313819276550575, 0.0],
-                [0.0, 0.0, 20.0],
-            ],
+            BULK_Si_PRIMITIVE,
+            BULK_Si_PRIMITIVE,
+            (0, 0, 1),
+            (0, 0, 1),
+            3.0,
+            [0.0, 0.0, 0.0],
         ),
     ],
 )
-@pytest.mark.skip(reason="Takes too long. Optimize the test parameters before merging epic-7623")
-def test_create_surface_grain_boundary(config_params, builder_params_dict, expected_cell_vectors):
-    config_params["film"] = Material.create(config_params.pop("film_config"))
-    config = SurfaceGrainBoundaryConfiguration(**config_params)
-    builder_params = SurfaceGrainBoundaryBuilderParameters(**builder_params_dict)
-    builder = SurfaceGrainBoundaryBuilder(build_parameters=builder_params)
-    gb = builder.get_material(config)
+def test_create_grain_boundary_planar(
+    phase_1_material, phase_2_material, phase_1_miller, phase_2_miller, gap, translation_vector
+):
+    """Test creating a planar grain boundary."""
+    phase_1 = Material.create(phase_1_material)
+    phase_2 = Material.create(phase_2_material)
 
-    assert isinstance(gb, Material)
-    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, gb.basis.cell.vector_arrays)
+    grain_boundary = create_grain_boundary_planar(
+        phase_1_material=phase_1,
+        phase_2_material=phase_2,
+        phase_1_miller_indices=phase_1_miller,
+        phase_2_miller_indices=phase_2_miller,
+        phase_1_thickness=1,
+        phase_2_thickness=1,
+        translation_vector=translation_vector,
+        gap=gap,
+        match_id=0,
+    )
+
+    assert isinstance(grain_boundary, Material)
+    assert len(grain_boundary.basis.elements.values) > 0
+    assert "Grain Boundary" in grain_boundary.name
+
+
+@pytest.mark.parametrize(
+    "phase_1_material, phase_2_material, phase_1_miller, phase_2_miller, slab_miller, gap, vacuum",
+    [
+        (
+            BULK_Si_PRIMITIVE,
+            BULK_Si_PRIMITIVE,
+            (0, 0, 1),
+            (0, 0, 1),
+            (0, 0, 1),
+            3.0,
+            10.0,
+        ),
+    ],
+)
+def test_create_grain_boundary_planar_with_vacuum(
+    phase_1_material, phase_2_material, phase_1_miller, phase_2_miller, slab_miller, gap, vacuum
+):
+    """Test creating a grain boundary with vacuum."""
+    phase_1 = Material.create(phase_1_material)
+    phase_2 = Material.create(phase_2_material)
+
+    grain_boundary_slab = create_grain_boundary_planar_with_vacuum(
+        phase_1_material=phase_1,
+        phase_2_material=phase_2,
+        phase_1_miller_indices=phase_1_miller,
+        phase_2_miller_indices=phase_2_miller,
+        slab_miller_indices=slab_miller,
+        phase_1_thickness=1,
+        phase_2_thickness=1,
+        slab_thickness=1,
+        gap=gap,
+        vacuum=vacuum,
+        match_id=0,
+    )
+
+    assert isinstance(grain_boundary_slab, Material)
+    assert len(grain_boundary_slab.basis.elements.values) > 0
+    assert "Grain Boundary with Vacuum" in grain_boundary_slab.name
+
+
+def test_grain_boundary_builder():
+    """Test the GrainBoundaryBuilder directly."""
+    phase_1 = Material.create(BULK_Si_PRIMITIVE)
+    phase_2 = Material.create(BULK_Si_PRIMITIVE)
+
+    # Create analyzer and get configuration
+    analyzer = GrainBoundaryAnalyzer(
+        phase_1_material=phase_1,
+        phase_2_material=phase_2,
+        phase_1_miller_indices=(0, 0, 1),
+        phase_2_miller_indices=(0, 0, 1),
+    )
+
+    strained_config = analyzer.get_grain_boundary_configuration_by_match_id(0)
+
+    # Create configuration
+    config = GrainBoundaryConfiguration(
+        phase_1_configuration=strained_config,
+        phase_2_configuration=strained_config,
+        translation_vector=[0.0, 0.0, 0.0],
+        gap=3.0,
+    )
+
+    # Build grain boundary
+    builder = GrainBoundaryBuilder()
+    grain_boundary = builder.get_material(config)
+
+    assert isinstance(grain_boundary, Material)
+    assert len(grain_boundary.basis.elements.values) > 0
+
+
+def test_grain_boundary_with_vacuum_builder():
+    """Test the GrainBoundaryWithVacuumBuilder directly."""
+    # First create a grain boundary material
+    phase_1 = Material.create(BULK_Si_PRIMITIVE)
+    phase_2 = Material.create(BULK_Si_PRIMITIVE)
+
+    grain_boundary_material = create_grain_boundary_planar(
+        phase_1_material=phase_1,
+        phase_2_material=phase_2,
+        phase_1_miller_indices=(0, 0, 1),
+        phase_2_miller_indices=(0, 0, 1),
+        match_id=0,
+    )
+
+    # Create configuration for grain boundary with vacuum
+    config = GrainBoundaryWithVacuumConfiguration.from_grain_boundary_material(
+        grain_boundary_material=grain_boundary_material,
+        miller_indices=(0, 0, 1),
+        number_of_layers=1,
+        vacuum=10.0,
+    )
+
+    # Build grain boundary with vacuum
+    builder = GrainBoundaryWithVacuumBuilder()
+    grain_boundary_slab = builder.get_material(config)
+
+    assert isinstance(grain_boundary_slab, Material)
+    assert len(grain_boundary_slab.basis.elements.values) > 0
