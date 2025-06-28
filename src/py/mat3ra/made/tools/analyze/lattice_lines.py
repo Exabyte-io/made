@@ -21,25 +21,29 @@ def select_slab_with_termination_by_formula(slabs: List[PymatgenSlab], terminati
 class CrystalLatticeLinesAnalyzer(LatticeMaterialAnalyzer):
     """
     Analyzer for crystal lattice lines, used for nanoribbon creation.
-
+    
     This analyzer treats the (u,v) Miller indices as a surface with (u,v,1) for pymatgen,
     allowing us to get terminations and shifts for 1D line structures.
     """
-
+    
     # Pydantic model fields
     miller_indices_uv: Tuple[int, int]
     miller_indices: Tuple[int, int, int] = None
-
+    
     DEFAULT_THICKNESS_FOR_TERMINATIONS: int = 3
     DEFAULT_VACUUM_SIZE_FOR_TERMINATIONS: int = 1
     DEFAULT_THICKNESS_FOR_GENERATION: int = 1
     DEFAULT_VACUUM_SIZE_FOR_GENERATION: int = 0
     DEFAULT_SYMMETRIZE: bool = False
-
+    
     def __init__(self, material: Material, miller_indices_uv: Tuple[int, int]):
         # Convert (u,v) to (u,v,1) for pymatgen surface analysis
         miller_indices = (miller_indices_uv[0], miller_indices_uv[1], 1)
-        super().__init__(material=material, miller_indices_uv=miller_indices_uv, miller_indices=miller_indices)
+        super().__init__(
+            material=material,
+            miller_indices_uv=miller_indices_uv,
+            miller_indices=miller_indices
+        )
 
     def get_pymatgen_slab_generator(
         self,
@@ -67,7 +71,8 @@ class CrystalLatticeLinesAnalyzer(LatticeMaterialAnalyzer):
     @property
     def pymatgen_slab_generator_without_vacuum(self) -> PymatgenSlabGenerator:
         return self.get_pymatgen_slab_generator(
-            min_slab_size=self.DEFAULT_THICKNESS_FOR_GENERATION, min_vacuum_size=self.DEFAULT_VACUUM_SIZE_FOR_GENERATION
+            min_slab_size=self.DEFAULT_THICKNESS_FOR_GENERATION, 
+            min_vacuum_size=self.DEFAULT_VACUUM_SIZE_FOR_GENERATION
         )
 
     @property
@@ -151,4 +156,4 @@ class CrystalLatticeLinesAnalyzer(LatticeMaterialAnalyzer):
 
         crystal_shift = [0.0, 0.0, -holder.shift_without_vacuum]
         cartesian_shift = self.material_with_conventional_lattice.basis.cell.convert_point_to_cartesian(crystal_shift)
-        return cartesian_shift
+        return cartesian_shift 

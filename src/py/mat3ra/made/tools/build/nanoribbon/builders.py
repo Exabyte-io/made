@@ -1,9 +1,10 @@
 from typing import List, Optional, Any, Type
 import numpy as np
 from mat3ra.made.tools.build.slab.utils import get_orthogonal_c_slab
+from mat3ra.made.lattice import Lattice
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseSingleBuilder
+from .. import BaseSingleBuilder, BaseBuilderParameters
 from ..stack.builders import Stack2ComponentsBuilder
 from ...analyze.lattice_lines import CrystalLatticeLinesAnalyzer
 from ...operations.core.unary import supercell, translate
@@ -12,8 +13,12 @@ from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_rectang
 from .configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
+    NanoTapeConfiguration,
     NanoribbonConfiguration,
 )
+from mat3ra.made.tools.analyze.nanotape_analyzer import NanoTapeAnalyzer
+from mat3ra.made.tools.analyze.nanoribbon_analyzer import NanoribbonAnalyzer
+from pydantic import Field
 
 
 class CrystalLatticeLinesBuilder(BaseSingleBuilder):
@@ -79,89 +84,105 @@ class CrystalLatticeLinesRepeatedBuilder(CrystalLatticeLinesBuilder):
         return material_translated_wrapped_repeated
 
 
-class NanoribbonBuilder(Stack2ComponentsBuilder):
+class RectangularLatticeBuilderParameters(BaseBuilderParameters):
+    use_rectangular_lattice: bool = Field(
+        True, description="If True, set the XY lattice to be rectangular after stacking."
+    )
+
+
+class BaseRectangularLatticeBuilder(Stack2ComponentsBuilder):
+
+    _BuilderParametersType = RectangularLatticeBuilderParameters
+    _DefaultBuildParameters = RectangularLatticeBuilderParameters(use_rectangular_lattice=True)
+
+    def _make_rectangular_lattice(self, item: Material) -> Material:
+        lattice_vectors = item.lattice.vector_arrays
+        new_lattice_vectors = [
+            [lattice_vectors[0][0], 0.0, 0.0],
+            [0.0, lattice_vectors[1][1], 0.0],
+            [0.0, 0.0, lattice_vectors[2][2]],
+        ]
+        new_lattice = Lattice.from_vectors_array(vectors=new_lattice_vectors)
+        item.set_lattice(new_lattice)
+        return item
+
+    def _post_process(self, item: Material, post_process_parameters: Optional[Any] = None) -> Material:
+        item = super()._post_process(item, post_process_parameters)
+        # Use default parameters if build_parameters is None
+        params = self.build_parameters or self._DefaultBuildParameters
+        if params.use_rectangular_lattice:
+            item = self._make_rectangular_lattice(item)
+        return wrap_to_unit_cell(item)
+
+    def _get_edge_type_from_miller_indices(self, miller_indices_uv: tuple) -> str:
+        if miller_indices_uv == (1, 1):
+            return "Armchair"
+        elif miller_indices_uv == (0, 1):
+            return "Zigzag"
+        else:
+            miller_str = f"{miller_indices_uv[0]}{miller_indices_uv[1]}"
+            return f"({miller_str})"
+
+    def _update_material_name_with_edge_type(
+        self, material: Material, crystal_name: str, miller_indices_uv: tuple, structure_type: str
+    ) -> Material:
+        edge_type = self._get_edge_type_from_miller_indices(miller_indices_uv)
+        miller_str = f"{miller_indices_uv[0]}{miller_indices_uv[1]}"
+        material.name = f"{crystal_name} - {edge_type} {structure_type} ({miller_str})"
+        return material
+
+
+class NanoTapeBuilderParameters(RectangularLatticeBuilderParameters):
+    pass
+
+
+class NanoribbonBuilderParameters(RectangularLatticeBuilderParameters):
+    pass
+
+
+class NanoTapeBuilder(BaseRectangularLatticeBuilder):
     """
-    Builder for creating nanoribbons from monolayer materials.
-    Uses the new configuration structure with crystal lattice lines and vacuum stacking.
+    Builder for creating nanotapes from crystal lattice lines.
+    NanoTape = [CLLUR, vacuum] stacked on Y direction.
+    """
+
+    _ConfigurationType = NanoTapeConfiguration
+    _GeneratedItemType = Material
+    _BuilderParametersType = NanoTapeBuilderParameters
+
+    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
+        if isinstance(configuration_or_material, CrystalLatticeLinesUniqueRepeatedConfiguration):
+            builder = CrystalLatticeLinesRepeatedBuilder()
+            return builder.get_material(configuration_or_material)
+        return super()._configuration_to_material(configuration_or_material)
+
+    def _update_material_name(self, material: Material, configuration: NanoTapeConfiguration) -> Material:
+        lattice_lines = configuration.lattice_lines
+        material = self._update_material_name_with_edge_type(
+            material, lattice_lines.crystal.name, lattice_lines.miller_indices_uv, "Nanotape"
+        )
+        return material
+
+
+class NanoribbonBuilder(BaseRectangularLatticeBuilder):
+    """
+    Builder for creating nanoribbons from nanotapes.
+    Nanoribbon = [NanoTape, vacuum] stacked on X direction.
     """
 
     _ConfigurationType = NanoribbonConfiguration
     _GeneratedItemType = Material
+    _BuilderParametersType = NanoribbonBuilderParameters
 
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        """Convert configuration objects to materials using dedicated builders."""
-        if isinstance(configuration_or_material, CrystalLatticeLinesUniqueRepeatedConfiguration):
-            builder = CrystalLatticeLinesRepeatedBuilder()
+        if isinstance(configuration_or_material, NanoTapeConfiguration):
+            builder = NanoTapeBuilder()
             return builder.get_material(configuration_or_material)
-        # Fall back to parent method for other types (VacuumConfiguration, etc.)
         return super()._configuration_to_material(configuration_or_material)
 
-    def _generate(self, configuration: NanoribbonConfiguration) -> Material:
-        # Generate the basic stacked material (lattice lines + vacuum)
-        stacked_material = super()._generate(configuration)
-
-        # Apply nanoribbon-specific transformations
-        nanoribbon = self._create_nanoribbon_from_stacked_material(stacked_material, configuration)
-
-        return nanoribbon
-
-    def _create_nanoribbon_from_stacked_material(
-        self, stacked_material: Material, configuration: NanoribbonConfiguration
-    ) -> Material:
-        """
-        Create the final nanoribbon by applying width/length repetitions and vacuum.
-        """
-        material = stacked_material.clone()
-
-        # Calculate dimensions for the nanoribbon
-        width_repetitions = configuration.width
-        length_repetitions = configuration.length
-        vacuum_width = configuration.vacuum_width
-        vacuum_length = configuration.vacuum_length
-
-        # Create repetitions in width and length directions
-        # This creates the nanoribbon with the specified dimensions
-        total_width_repetitions = width_repetitions + vacuum_width
-        total_length_repetitions = length_repetitions + vacuum_length
-
-        # Calculate the actual nanoribbon dimensions in cartesian coordinates
-        lattice_vectors = material.lattice.vector_arrays
-        length_cartesian = length_repetitions * lattice_vectors[0][0] / total_length_repetitions
-        width_cartesian = width_repetitions * lattice_vectors[1][1] / total_width_repetitions
-        height_cartesian = lattice_vectors[2][2]
-
-        # TODO: do this via stacking vacuum on x and then on y
-        # Update lattice to include vacuum regions
-        new_lattice_vectors = [
-            [length_cartesian + (vacuum_length * lattice_vectors[0][0] / total_length_repetitions), 0.0, 0.0],
-            [0.0, width_cartesian + (vacuum_width * lattice_vectors[1][1] / total_width_repetitions), 0.0],
-            [0.0, 0.0, height_cartesian],
-        ]
-
-        from mat3ra.made.lattice import Lattice
-
-        new_lattice = Lattice.from_vectors_array(vectors=new_lattice_vectors)
-        material.set_lattice(new_lattice)
-
-        return material
-
     def _update_material_name(self, material: Material, configuration: NanoribbonConfiguration) -> Material:
-        """Update material name to reflect nanoribbon properties."""
-        lattice_lines = configuration.lattice_lines
-        miller_str = f"{configuration.miller_indices_uv[0]}{configuration.miller_indices_uv[1]}"
-
-        # Convert (u,v) to edge type for naming
-        if configuration.miller_indices_uv == (1, 1):
-            edge_type = "Armchair"
-        elif configuration.miller_indices_uv == (0, 1):
-            edge_type = "Zigzag"
-        else:
-            edge_type = f"({miller_str})"
-
-        material.name = f"{lattice_lines.crystal.name} - {edge_type} Nanoribbon ({miller_str})"
+        nanotape = configuration.nanotape
+        material = self._update_material_name_with_edge_type(
+            material, nanotape.lattice_lines.crystal.name, nanotape.lattice_lines.miller_indices_uv, "Nanoribbon"
+        )
         return material
-
-    def _post_process(self, item: Material, post_process_parameters: Optional[Any] = None) -> Material:
-        """Post-process the nanoribbon material."""
-        item = super()._post_process(item, post_process_parameters)
-        return wrap_to_unit_cell(item)

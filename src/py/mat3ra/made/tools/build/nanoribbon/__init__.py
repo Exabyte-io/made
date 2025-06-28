@@ -4,7 +4,6 @@ from .configuration import (
     CrystalLatticeLinesUniqueRepeatedConfiguration,
     NanoribbonConfiguration,
     get_miller_indices_from_edge_type,
-    create_nanoribbon_configuration_from_edge_type,
 )
 
 # Import only specific builders that don't conflict
@@ -39,7 +38,6 @@ __all__ = [
     "create_nanoribbon_from_edge_type",
     "get_nanoribbon_terminations",
     "get_miller_indices_from_edge_type",
-    "create_nanoribbon_configuration_from_edge_type",
     # Legacy
     "EdgeTypes",
 ]
