@@ -71,8 +71,8 @@ class CrystalLatticeLinesRepeatedBuilder(CrystalLatticeLinesBuilder):
         material_translated_wrapped_repeated = supercell(
             material_translated_wrapped,
             [
-                [1, 0, 0],
-                [0, 1, 0],
+                [configuration.number_of_repetitions_length, 0, 0],
+                [0, configuration.number_of_repetitions_width, 0],
                 [0, 0, 1],
             ],
         )
@@ -134,17 +134,7 @@ class NanoribbonBuilder(Stack2ComponentsBuilder):
         width_cartesian = width_repetitions * lattice_vectors[1][1] / total_width_repetitions
         height_cartesian = lattice_vectors[2][2]
 
-        # Filter to keep only the nanoribbon region (excluding vacuum regions)
-        min_coordinate = [0.0, 0.0, 0.0]
-        max_coordinate = [length_cartesian, width_cartesian, height_cartesian]
-
-        nanoribbon = filter_by_rectangle_projection(
-            large_supercell,
-            min_coordinate=min_coordinate,
-            max_coordinate=max_coordinate,
-            use_cartesian_coordinates=True,
-        )
-
+        # TODO: do this via stacking vacuum on x and then on y
         # Update lattice to include vacuum regions
         new_lattice_vectors = [
             [length_cartesian + (vacuum_length * lattice_vectors[0][0] / total_length_repetitions), 0.0, 0.0],
@@ -155,9 +145,9 @@ class NanoribbonBuilder(Stack2ComponentsBuilder):
         from mat3ra.made.lattice import Lattice
 
         new_lattice = Lattice.from_vectors_array(vectors=new_lattice_vectors)
-        nanoribbon.set_lattice(new_lattice)
+        large_supercell.set_lattice(new_lattice)
 
-        return nanoribbon
+        return large_supercell
 
     def _update_material_name(self, material: Material, configuration: NanoribbonConfiguration) -> Material:
         """Update material name to reflect nanoribbon properties."""
@@ -166,9 +156,9 @@ class NanoribbonBuilder(Stack2ComponentsBuilder):
 
         # Convert (u,v) to edge type for naming
         if configuration.miller_indices_uv == (1, 1):
-            edge_type = "Zigzag"
-        elif configuration.miller_indices_uv == (0, 1):
             edge_type = "Armchair"
+        elif configuration.miller_indices_uv == (0, 1):
+            edge_type = "Zigzag"
         else:
             edge_type = f"({miller_str})"
 
