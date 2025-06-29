@@ -7,9 +7,7 @@ from mat3ra.made.tools.build.slab.entities import Termination
 from mat3ra.made.tools.build import BaseBuilder, BaseBuilderParameters
 from . import EdgeTypes
 from .builders import NanoribbonBuilder, NanoTapeBuilder, NanoTapeBuilderParameters, NanoribbonBuilderParameters
-from .configuration import (
-    get_miller_indices_from_edge_type,
-)
+from .configuration import get_miller_indices_from_edge_type
 
 T = TypeVar("T", bound=BaseBuilder)
 P = TypeVar("P", bound=BaseBuilderParameters)

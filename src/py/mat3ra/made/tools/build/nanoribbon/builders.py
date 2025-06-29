@@ -6,12 +6,12 @@ from pydantic import Field
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.utils import get_orthogonal_c_slab
-from .configuration import (
+from .crystal_lattice_lines_configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
-    NanoTapeConfiguration,
-    NanoribbonConfiguration,
 )
+from .nano_tape_configuration import NanoTapeConfiguration
+from .nanoribbon_configuration import NanoribbonConfiguration
 from .. import BaseSingleBuilder, BaseBuilderParameters
 from ..stack.builders import Stack2ComponentsBuilder
 from ...analyze.lattice_lines import CrystalLatticeLinesAnalyzer

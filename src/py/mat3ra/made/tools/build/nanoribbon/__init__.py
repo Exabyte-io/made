@@ -2,13 +2,13 @@ from .builders import (
     CrystalLatticeLinesBuilder,
     CrystalLatticeLinesRepeatedBuilder,
 )
-from .configuration import (
+from .crystal_lattice_lines_configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
-    NanoTapeConfiguration,
-    NanoribbonConfiguration,
-    get_miller_indices_from_edge_type,
 )
+from .nano_tape_configuration import NanoTapeConfiguration
+from .nanoribbon_configuration import NanoribbonConfiguration
+from .configuration import get_miller_indices_from_edge_type
 from .enums import EdgeTypes
 from .helpers import (
     create_nanoribbon,

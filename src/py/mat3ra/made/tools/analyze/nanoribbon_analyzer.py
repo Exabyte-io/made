@@ -2,7 +2,8 @@ from typing import Optional
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.tools.analyze.base_stack_analyzer import BaseStackAnalyzer
-from mat3ra.made.tools.build.nanoribbon.configuration import NanoribbonConfiguration, NanoTapeConfiguration
+from mat3ra.made.tools.build.nanoribbon.nano_tape_configuration import NanoTapeConfiguration
+from mat3ra.made.tools.build.nanoribbon.nanoribbon_configuration import NanoribbonConfiguration
 from mat3ra.made.tools.build.slab.entities import Termination
 
 
