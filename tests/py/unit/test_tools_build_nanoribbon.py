@@ -1,22 +1,23 @@
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.nanoribbon import (
-    NanoribbonConfiguration,
     create_nanoribbon,
     CrystalLatticeLinesConfiguration,
 )
-from mat3ra.made.tools.build.nanoribbon.builders import NanoribbonBuilder, CrystalLatticeLinesBuilder
+from mat3ra.made.tools.build.nanoribbon.builders import CrystalLatticeLinesBuilder
 
 from .fixtures.monolayer import GRAPHENE
-from .fixtures.nanoribbon import GRAPHENE_ARMCHAIR_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON
+from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ARMCHAIR_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON
+from .fixtures.nanoribbon.armchair import GRAPHENE_NANORIBBON_ARMCHAIR
+from .fixtures.nanoribbon.zigzag import GRAPHENE_NANORIBBON_ZIGZAG
 from .utils import assert_two_entities_deep_almost_equal
 
 
 @pytest.mark.parametrize(
     "material_config, width, length, vacuum_width, vacuum_length, miller_indices_uv, edge_type_name, expected_nanoribbon",
     [
-        (GRAPHENE, 2, 4, 10.0, 0.0, (1, 1), "zigzag", GRAPHENE_ZIGZAG_NANORIBBON),
-        (GRAPHENE, 2, 4, 10.0, 0.0, (0, 1), "armchair", GRAPHENE_ARMCHAIR_NANORIBBON),
+        (GRAPHENE, 5, 4, 5.0, 5.0, (1, 1), "armchair", GRAPHENE_NANORIBBON_ARMCHAIR),
+        (GRAPHENE, 2, 4, 5.0, 5.0, (0, 1), "zigzag", GRAPHENE_NANORIBBON_ZIGZAG),
     ],
 )
 def test_build_nanoribbon(

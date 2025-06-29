@@ -3,6 +3,7 @@ from mat3ra.made.material import Material
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.tools.build import BaseConfigurationPydantic
+from .enums import EdgeTypes
 from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 from ..slab.entities import Termination
@@ -91,7 +92,7 @@ class NanoribbonConfiguration(StackConfiguration):
 
 
 # Helper functions for shorthand notation
-def get_miller_indices_from_edge_type(edge_type: str) -> Tuple[int, int]:
+def get_miller_indices_from_edge_type(edge_type: EdgeTypes) -> Tuple[int, int]:
     """
     Convert edge type shorthand to (u,v) Miller indices.
 
@@ -101,9 +102,9 @@ def get_miller_indices_from_edge_type(edge_type: str) -> Tuple[int, int]:
     Returns:
         Tuple of (u,v) Miller indices.
     """
-    if edge_type.lower() == "zigzag":
+    if edge_type.lower() == EdgeTypes.zigzag:
         return (1, 1)
-    elif edge_type.lower() == "armchair":
+    elif edge_type.lower() == EdgeTypes.armchair:
         return (0, 1)
     else:
         raise ValueError(f"Unknown edge type: {edge_type}. Use 'zigzag' or 'armchair'.")

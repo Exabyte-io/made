@@ -1,24 +1,22 @@
-from typing import List, Optional, Any, Type
-import numpy as np
-from mat3ra.made.tools.build.slab.utils import get_orthogonal_c_slab
+from typing import Optional, Any, Type
+
+from .enums import EdgeTypes
+from pydantic import Field
+
 from mat3ra.made.lattice import Lattice
-
 from mat3ra.made.material import Material
-from .. import BaseSingleBuilder, BaseBuilderParameters
-from ..stack.builders import Stack2ComponentsBuilder
-from ...analyze.lattice_lines import CrystalLatticeLinesAnalyzer
-from ...operations.core.unary import supercell, translate
-from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_rectangle_projection
-
+from mat3ra.made.tools.build.slab.utils import get_orthogonal_c_slab
 from .configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
     NanoTapeConfiguration,
     NanoribbonConfiguration,
 )
-from mat3ra.made.tools.analyze.nanotape_analyzer import NanoTapeAnalyzer
-from mat3ra.made.tools.analyze.nanoribbon_analyzer import NanoribbonAnalyzer
-from pydantic import Field
+from .. import BaseSingleBuilder, BaseBuilderParameters
+from ..stack.builders import Stack2ComponentsBuilder
+from ...analyze.lattice_lines import CrystalLatticeLinesAnalyzer
+from ...modify import wrap_to_unit_cell, translate_to_z_level
+from ...operations.core.unary import supercell, translate
 
 
 class CrystalLatticeLinesBuilder(BaseSingleBuilder):
@@ -57,9 +55,9 @@ class CrystalLatticeLinesRepeatedBuilder(CrystalLatticeLinesBuilder):
     This is similar to AtomicLayersUniqueRepeatedBuilder but for 1D lines.
     """
 
-    _ConfigurationType: Type[CrystalLatticeLinesUniqueRepeatedConfiguration] = (
+    _ConfigurationType: Type[
         CrystalLatticeLinesUniqueRepeatedConfiguration
-    )
+    ] = CrystalLatticeLinesUniqueRepeatedConfiguration
 
     def _generate(self, configuration: CrystalLatticeLinesUniqueRepeatedConfiguration) -> Material:
         crystal_lattice_lines_material = super()._generate(configuration)
@@ -91,7 +89,6 @@ class RectangularLatticeBuilderParameters(BaseBuilderParameters):
 
 
 class BaseRectangularLatticeBuilder(Stack2ComponentsBuilder):
-
     _BuilderParametersType = RectangularLatticeBuilderParameters
     _DefaultBuildParameters = RectangularLatticeBuilderParameters(use_rectangular_lattice=True)
 
@@ -116,9 +113,9 @@ class BaseRectangularLatticeBuilder(Stack2ComponentsBuilder):
 
     def _get_edge_type_from_miller_indices(self, miller_indices_uv: tuple) -> str:
         if miller_indices_uv == (1, 1):
-            return "Armchair"
+            return EdgeTypes.armchair.value.capitalize()
         elif miller_indices_uv == (0, 1):
-            return "Zigzag"
+            return EdgeTypes.zigzag.value.capitalize()
         else:
             miller_str = f"{miller_indices_uv[0]}{miller_indices_uv[1]}"
             return f"({miller_str})"
@@ -141,11 +138,6 @@ class NanoribbonBuilderParameters(RectangularLatticeBuilderParameters):
 
 
 class NanoTapeBuilder(BaseRectangularLatticeBuilder):
-    """
-    Builder for creating nanotapes from crystal lattice lines.
-    NanoTape = [CLLUR, vacuum] stacked on Y direction.
-    """
-
     _ConfigurationType = NanoTapeConfiguration
     _GeneratedItemType = Material
     _BuilderParametersType = NanoTapeBuilderParameters
@@ -165,11 +157,6 @@ class NanoTapeBuilder(BaseRectangularLatticeBuilder):
 
 
 class NanoribbonBuilder(BaseRectangularLatticeBuilder):
-    """
-    Builder for creating nanoribbons from nanotapes.
-    Nanoribbon = [NanoTape, vacuum] stacked on X direction.
-    """
-
     _ConfigurationType = NanoribbonConfiguration
     _GeneratedItemType = Material
     _BuilderParametersType = NanoribbonBuilderParameters
