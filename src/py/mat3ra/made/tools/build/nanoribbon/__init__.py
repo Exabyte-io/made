@@ -5,6 +5,7 @@ from .builders import (
 from .configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
+    NanoTapeConfiguration,
     NanoribbonConfiguration,
     get_miller_indices_from_edge_type,
 )
@@ -16,6 +17,7 @@ from .helpers import (
 __all__ = [
     "CrystalLatticeLinesConfiguration",
     "CrystalLatticeLinesUniqueRepeatedConfiguration",
+    "NanoTapeConfiguration",
     "NanoribbonConfiguration",
     "CrystalLatticeLinesBuilder",
     "CrystalLatticeLinesRepeatedBuilder",

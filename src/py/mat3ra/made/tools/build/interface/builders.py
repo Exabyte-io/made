@@ -193,13 +193,13 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
     ) = NanoRibbonTwistedInterfaceConfiguration  # type: ignore
 
     def _generate(self, configuration: _ConfigurationType) -> List[Material]:
-        bottom_nanoribbon_configuration = NanoribbonConfiguration(
+        bottom_nanoribbon_configuration = NanoribbonConfiguration.from_parameters(
             material=configuration.substrate,
             width=configuration.ribbon_width,
             length=configuration.ribbon_length,
         )
         bottom_ribbon = create_nanoribbon(bottom_nanoribbon_configuration)
-        top_ribbon_configuration = NanoribbonConfiguration(
+        top_ribbon_configuration = NanoribbonConfiguration.from_parameters(
             material=configuration.film,
             width=configuration.ribbon_width,
             length=configuration.ribbon_length,

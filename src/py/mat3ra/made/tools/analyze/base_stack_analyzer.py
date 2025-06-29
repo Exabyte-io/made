@@ -1,7 +1,6 @@
-from typing import Tuple, TypeVar, Generic
+from typing import Generic, Tuple, TypeVar
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.build import BaseConfigurationPydantic
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration

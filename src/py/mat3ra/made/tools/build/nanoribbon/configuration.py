@@ -64,6 +64,48 @@ class NanoTapeConfiguration(StackConfiguration):
         """Get the vacuum configuration component."""
         return self.stack_components[1]
 
+    @classmethod
+    def from_parameters(
+        cls,
+        material: Material,
+        miller_indices_uv: Optional[Tuple[int, int]] = None,
+        edge_type: Optional[EdgeTypes] = EdgeTypes.zigzag,
+        width: int = 2,
+        length: int = 2,
+        vacuum_width: float = 10.0,
+        termination: Optional[Termination] = None,
+    ) -> "NanoTapeConfiguration":
+        """
+        Create a NanoTapeConfiguration from parameters.
+
+        Args:
+            material: The monolayer material to create the nanotape from.
+            miller_indices_uv: The (u,v) Miller indices for the nanotape direction.
+            edge_type: Edge type string ("zigzag"/"armchair"). Optional if miller_indices_uv is provided.
+            width: The width of the nanotape in number of unit cells.
+            length: The length of the nanotape in number of unit cells.
+            vacuum_width: The width of the vacuum region in Angstroms (cartesian).
+            termination: The termination to use for the nanotape. If None, uses default termination.
+
+        Returns:
+            NanoTapeConfiguration: The created configuration.
+        """
+        from mat3ra.made.tools.analyze.nanotape_analyzer import NanoTapeAnalyzer
+
+        if miller_indices_uv is None and edge_type is None:
+            raise ValueError("Either miller_indices_uv or edge_type must be provided")
+
+        if miller_indices_uv is None and edge_type is not None:
+            miller_indices_uv = get_miller_indices_from_edge_type(edge_type)
+
+        analyzer = NanoTapeAnalyzer(material=material, miller_indices_uv=miller_indices_uv)
+        return analyzer.get_configuration(
+            width=width,
+            length=length,
+            vacuum_width=vacuum_width,
+            termination=termination,
+        )
+
 
 class NanoribbonConfiguration(StackConfiguration):
     """
@@ -89,6 +131,51 @@ class NanoribbonConfiguration(StackConfiguration):
     def vacuum_configuration(self) -> VacuumConfiguration:
         """Get the vacuum configuration component."""
         return self.stack_components[1]
+
+    @classmethod
+    def from_parameters(
+        cls,
+        material: Material,
+        miller_indices_uv: Optional[Tuple[int, int]] = None,
+        edge_type: Optional[EdgeTypes] = EdgeTypes.zigzag,
+        width: int = 2,
+        length: int = 2,
+        vacuum_width: float = 10.0,
+        vacuum_length: float = 10.0,
+        termination: Optional[Termination] = None,
+    ) -> "NanoribbonConfiguration":
+        """
+        Create a NanoribbonConfiguration from parameters.
+
+        Args:
+            material: The monolayer material to create the nanoribbon from.
+            miller_indices_uv: The (u,v) Miller indices for the nanoribbon direction.
+            edge_type: Edge type string ("zigzag"/"armchair"). Optional if miller_indices_uv is provided.
+            width: The width of the nanoribbon in number of unit cells.
+            length: The length of the nanoribbon in number of unit cells.
+            vacuum_width: The width of the vacuum region in Angstroms (cartesian).
+            vacuum_length: The length of the vacuum region in Angstroms (cartesian).
+            termination: The termination to use for the nanoribbon. If None, uses default termination.
+
+        Returns:
+            NanoribbonConfiguration: The created configuration.
+        """
+        from mat3ra.made.tools.analyze.nanoribbon_analyzer import NanoribbonAnalyzer
+
+        if miller_indices_uv is None and edge_type is None:
+            raise ValueError("Either miller_indices_uv or edge_type must be provided")
+
+        if miller_indices_uv is None and edge_type is not None:
+            miller_indices_uv = get_miller_indices_from_edge_type(edge_type)
+
+        analyzer = NanoribbonAnalyzer(material=material, miller_indices_uv=miller_indices_uv)
+        return analyzer.get_configuration(
+            width=width,
+            length=length,
+            vacuum_width=vacuum_width,
+            vacuum_length=vacuum_length,
+            termination=termination,
+        )
 
 
 # Helper functions for shorthand notation
