@@ -1,13 +1,9 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.nanoribbon import (
-    create_nanoribbon,
-    CrystalLatticeLinesConfiguration,
-)
+from mat3ra.made.tools.build.nanoribbon import CrystalLatticeLinesConfiguration, create_nanoribbon
 from mat3ra.made.tools.build.nanoribbon.builders import CrystalLatticeLinesBuilder
 
 from .fixtures.monolayer import GRAPHENE
-from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ARMCHAIR_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON
 from .fixtures.nanoribbon.armchair import GRAPHENE_NANORIBBON_ARMCHAIR
 from .fixtures.nanoribbon.zigzag import GRAPHENE_NANORIBBON_ZIGZAG
 from .utils import assert_two_entities_deep_almost_equal
