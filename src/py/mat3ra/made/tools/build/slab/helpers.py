@@ -90,20 +90,18 @@ def create_slab(
     if termination is not None:
         termination_formula = termination.formula
 
-    slab_configuration = SlabConfiguration.from_parameters(
+    slab_builder_parameters = SlabBuilderParameters(
+        xy_supercell_matrix=xy_supercell_matrix,
+        use_orthogonal_c=use_orthogonal_c,
+    )
+    builder = SlabBuilder(build_parameters=slab_builder_parameters)
+    return builder.build_from_parameters(
         material_or_dict=material_to_use,
         miller_indices=miller_indices,
         number_of_layers=number_of_layers,
         termination_formula=termination_formula,
         vacuum=vacuum,
     )
-
-    slab_builder_parameters = SlabBuilderParameters(
-        xy_supercell_matrix=xy_supercell_matrix,
-        use_orthogonal_c=use_orthogonal_c,
-    )
-    builder = SlabBuilder(build_parameters=slab_builder_parameters)
-    return builder.get_material(slab_configuration)
 
 
 def create_slab_if_not(material: Material, default_slab_configuration: SlabConfiguration) -> Material:
@@ -120,17 +118,6 @@ def get_slab_terminations(material: Material, miller_indices: Tuple[int, int, in
         material=material, miller_indices=miller_indices
     )
     return crystal_lattice_planes_analyzer.terminations
-
-
-def select_slab_termination(terminations: List[Termination], formula: Optional[str] = None) -> Termination:
-    if not terminations:
-        raise ValueError("No terminations available.")
-    if formula is None:
-        return terminations[0]
-    for termination in terminations:
-        if termination.formula == formula:
-            return termination
-    raise ValueError(f"Termination with formula {formula} not found in available terminations: {terminations}")
 
 
 def get_slab_material_in_standard_representation(slab_material: Material) -> Material:

@@ -2,12 +2,12 @@ from typing import List, Optional, Any, Type
 
 from mat3ra.made.material import Material
 from .configurations import (
-    SlabConfiguration,
+    CrystalLatticePlanesConfiguration,
     SlabStrainedSupercellConfiguration,
     SlabStrainedSupercellWithGapConfiguration,
-    AtomicLayersUniqueRepeatedConfiguration,
-    CrystalLatticePlanesConfiguration,
 )
+from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfiguration
+from .configurations.slab_configuration import SlabConfiguration
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
 from ..stack.builders import Stack2ComponentsBuilder
@@ -21,7 +21,7 @@ class CrystalLatticePlanesBuilder(BaseSingleBuilder):
     _PostProcessParametersType: Any = None
     use_enforce_convention: bool = True
 
-    def _generate(self, configuration: CrystalLatticePlanesConfiguration) -> Material:
+    def _generate(self, configuration: "CrystalLatticePlanesConfiguration") -> Material:
         crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
             material=configuration.crystal, miller_indices=configuration.miller_indices
         )
@@ -40,9 +40,9 @@ class CrystalLatticePlanesBuilder(BaseSingleBuilder):
 
 
 class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
-    _ConfigurationType: Type[AtomicLayersUniqueRepeatedConfiguration] = AtomicLayersUniqueRepeatedConfiguration
+    _ConfigurationType: Type["AtomicLayersUniqueRepeatedConfiguration"] = None  # Will be set after import
 
-    def _generate(self, configuration: AtomicLayersUniqueRepeatedConfiguration) -> Material:
+    def _generate(self, configuration: "AtomicLayersUniqueRepeatedConfiguration") -> Material:
         crystal_lattice_planes_material = super()._generate(configuration)
 
         crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
@@ -68,7 +68,13 @@ class SlabBuilder(Stack2ComponentsBuilder):
     _BuildParametersType = SlabBuilderParameters
     _DefaultBuildParameters: SlabBuilderParameters = SlabBuilderParameters()
 
-    def _generate(self, configuration: SlabConfiguration) -> Material:
+    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
+        if isinstance(configuration_or_material, AtomicLayersUniqueRepeatedConfiguration):
+            builder = AtomicLayersUniqueRepeatedBuilder()
+            return builder.get_material(configuration_or_material)
+        return super()._configuration_to_material(configuration_or_material)
+
+    def _generate(self, configuration: "SlabConfiguration") -> Material:
         stack_as_material = super()._generate(configuration)
         supercell_slab = supercell(stack_as_material, self.build_parameters.xy_supercell_matrix)
         if self.build_parameters.use_orthogonal_c:
@@ -76,7 +82,7 @@ class SlabBuilder(Stack2ComponentsBuilder):
 
         return supercell_slab
 
-    def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
+    def _update_material_name(self, material: Material, configuration: "SlabConfiguration") -> Material:
         atomic_layers = configuration.atomic_layers
 
         formula = get_chemical_formula(configuration.atomic_layers.crystal)
@@ -88,9 +94,29 @@ class SlabBuilder(Stack2ComponentsBuilder):
         material.name = new_name
         return material
 
+    def build_from_parameters(
+        self,
+        material_or_dict: Material,
+        miller_indices: tuple,
+        number_of_layers: int,
+        termination_formula: str = None,
+        vacuum: float = 10.0,
+    ) -> Material:
+        # Create the slab configuration
+        slab_config = SlabConfiguration.from_parameters(
+            material_or_dict=material_or_dict,
+            miller_indices=miller_indices,
+            number_of_layers=number_of_layers,
+            termination_formula=termination_formula,
+            vacuum=vacuum,
+        )
+
+        # The stack builder will automatically set the vacuum crystal to the atomic layers material
+        return self.get_material(slab_config)
+
 
 class SlabStrainedSupercellBuilder(SlabBuilder):
-    def _generate(self, configuration: SlabStrainedSupercellConfiguration) -> Material:
+    def _generate(self, configuration: "SlabStrainedSupercellConfiguration") -> Material:
         slab_material = super()._generate(configuration)
 
         if configuration.xy_supercell_matrix:
@@ -101,7 +127,7 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
 
 
 class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
-    def _generate(self, configuration: SlabStrainedSupercellWithGapConfiguration) -> Material:
+    def _generate(self, configuration: "SlabStrainedSupercellWithGapConfiguration") -> Material:
         strained_slab_material = super()._generate(configuration)
 
         if configuration.gap is not None:

@@ -8,6 +8,9 @@ from ...stack.configuration import StackConfiguration
 from ...vacuum.configuration import VacuumConfiguration
 from .base_configurations import AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration
 
+from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+from mat3ra.made.tools.build.slab.termination_utils import select_slab_termination
+
 
 class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     type: str = "SlabConfiguration"
@@ -35,11 +38,6 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
         termination_formula: Optional[str] = None,
         vacuum: float = 10.0,
     ) -> "SlabConfiguration":
-        # Lazy imports to avoid circular dependencies
-        from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-        from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder
-        from mat3ra.made.tools.build.slab.helpers import select_slab_termination
-
         if isinstance(material_or_dict, dict):
             material = Material.create(material_or_dict)
         else:
@@ -57,12 +55,9 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
             termination_top=termination,
             number_of_repetitions=number_of_layers,
         )
-        atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
-            atomic_layers_repeated_configuration
-        )
-        vacuum_configuration = VacuumConfiguration(
-            size=vacuum, crystal=atomic_layers_repeated_orthogonal_c, direction=AxisEnum.z
-        )
+
+        vacuum_configuration = VacuumConfiguration(size=vacuum, crystal=None, direction=AxisEnum.z)
+
         return cls(
             stack_components=[atomic_layers_repeated_configuration, vacuum_configuration],
             direction=AxisEnum.z,
