@@ -1,19 +1,18 @@
 from typing import List, Union, Optional, Tuple
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_lines import CrystalLatticeLinesAnalyzer
-from ..stack.configuration import StackConfiguration
-from ..vacuum.configuration import VacuumConfiguration
-from ..slab.entities import Termination
+from ..lattice_lines.builders import CrystalLatticeLinesRepeatedBuilder
 from ..lattice_lines.configuration import (
     CrystalLatticeLinesUniqueRepeatedConfiguration,
     get_miller_indices_from_edge_type,
     EdgeTypes,
 )
-from ..lattice_lines.builders import CrystalLatticeLinesRepeatedBuilder
-
-from enum import Enum
+from ..slab.entities import Termination
+from ..stack.configuration import StackConfiguration
+from ..vacuum.configuration import VacuumConfiguration
 
 
 class NanoTapeConfiguration(StackConfiguration):

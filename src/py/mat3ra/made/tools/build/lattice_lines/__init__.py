@@ -14,4 +14,4 @@ __all__ = [
     "CrystalLatticeLinesBuilder",
     "CrystalLatticeLinesRepeatedBuilder",
     "get_miller_indices_from_edge_type",
-] 
+]

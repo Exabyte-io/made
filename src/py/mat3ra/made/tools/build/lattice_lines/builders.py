@@ -1,13 +1,12 @@
 from typing import Optional, Any, Type
 
-from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.utils import get_orthogonal_c_slab
 from .configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
 )
-from .. import BaseSingleBuilder, BaseBuilderParameters
+from .. import BaseSingleBuilder
 from ...analyze.lattice_lines import CrystalLatticeLinesAnalyzer
 from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...operations.core.unary import supercell, translate
@@ -49,9 +48,9 @@ class CrystalLatticeLinesRepeatedBuilder(CrystalLatticeLinesBuilder):
     This is similar to AtomicLayersUniqueRepeatedBuilder but for 1D lines.
     """
 
-    _ConfigurationType: Type[CrystalLatticeLinesUniqueRepeatedConfiguration] = (
+    _ConfigurationType: Type[
         CrystalLatticeLinesUniqueRepeatedConfiguration
-    )
+    ] = CrystalLatticeLinesUniqueRepeatedConfiguration
 
     def _generate(self, configuration: CrystalLatticeLinesUniqueRepeatedConfiguration) -> Material:
         crystal_lattice_lines_material = super()._generate(configuration)

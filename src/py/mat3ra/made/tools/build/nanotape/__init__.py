@@ -3,6 +3,6 @@ from .builders import NanoTapeBuilder, NanoTapeBuilderParameters
 
 __all__ = [
     "NanoTapeConfiguration",
-    "NanoTapeBuilder", 
+    "NanoTapeBuilder",
     "NanoTapeBuilderParameters",
-] 
+]
