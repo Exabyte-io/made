@@ -2,12 +2,12 @@ from typing import List, Optional, Any, Type
 
 from mat3ra.made.material import Material
 from .configurations import (
-    SlabConfiguration,
-    AtomicLayersUniqueRepeatedConfiguration,
     CrystalLatticePlanesConfiguration,
     SlabStrainedSupercellConfiguration,
     SlabStrainedSupercellWithGapConfiguration,
 )
+from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfiguration
+from .configurations.slab_configuration import SlabConfiguration
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
 from ..stack.builders import Stack2ComponentsBuilder
@@ -68,6 +68,12 @@ class SlabBuilder(Stack2ComponentsBuilder):
     _BuildParametersType = SlabBuilderParameters
     _DefaultBuildParameters: SlabBuilderParameters = SlabBuilderParameters()
 
+    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
+        if isinstance(configuration_or_material, AtomicLayersUniqueRepeatedConfiguration):
+            builder = AtomicLayersUniqueRepeatedBuilder()
+            return builder.get_material(configuration_or_material)
+        return super()._configuration_to_material(configuration_or_material)
+
     def _generate(self, configuration: SlabConfiguration) -> Material:
         stack_as_material = super()._generate(configuration)
         supercell_slab = supercell(stack_as_material, self.build_parameters.xy_supercell_matrix)
@@ -90,7 +96,7 @@ class SlabBuilder(Stack2ComponentsBuilder):
 
 
 class SlabStrainedSupercellBuilder(SlabBuilder):
-    def _generate(self, configuration: SlabStrainedSupercellConfiguration) -> Material:
+    def _generate(self, configuration: "SlabStrainedSupercellConfiguration") -> Material:
         slab_material = super()._generate(configuration)
 
         if configuration.xy_supercell_matrix:
@@ -101,7 +107,7 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
 
 
 class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
-    def _generate(self, configuration: SlabStrainedSupercellWithGapConfiguration) -> Material:
+    def _generate(self, configuration: "SlabStrainedSupercellWithGapConfiguration") -> Material:
         strained_slab_material = super()._generate(configuration)
 
         if configuration.gap is not None:

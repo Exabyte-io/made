@@ -3,7 +3,6 @@ from mat3ra.standata.materials import Materials
 
 BULK_SrTiO3 = Materials.get_by_name_first_match("SrTiO3")
 BULK_GRAPHITE = Materials.get_by_name_first_match("Graphite")
-SILICENE = Materials.get_by_name_first_match("Silicene")
 
 # from mat3ra.made.tools.build.interface.termination_pair import TerminationPair
 # from mat3ra.made.tools.build.slab.configuration import SlabConfiguration
