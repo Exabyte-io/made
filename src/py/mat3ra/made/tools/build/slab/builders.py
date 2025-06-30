@@ -40,7 +40,7 @@ class CrystalLatticePlanesBuilder(BaseSingleBuilder):
 
 
 class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
-    _ConfigurationType: Type[AtomicLayersUniqueRepeatedConfiguration] = None  # Will be set after import
+    _ConfigurationType: Type[AtomicLayersUniqueRepeatedConfiguration] = AtomicLayersUniqueRepeatedConfiguration
 
     def _generate(self, configuration: AtomicLayersUniqueRepeatedConfiguration) -> Material:
         crystal_lattice_planes_material = super()._generate(configuration)
