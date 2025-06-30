@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.entities import Termination
@@ -94,14 +94,15 @@ def create_slab(
         xy_supercell_matrix=xy_supercell_matrix,
         use_orthogonal_c=use_orthogonal_c,
     )
-    builder = SlabBuilder(build_parameters=slab_builder_parameters)
-    return builder.build_from_parameters(
+    slab_configuration = SlabConfiguration.from_parameters(
         material_or_dict=material_to_use,
         miller_indices=miller_indices,
         number_of_layers=number_of_layers,
         termination_formula=termination_formula,
         vacuum=vacuum,
     )
+    builder = SlabBuilder(build_parameters=slab_builder_parameters)
+    return builder.get_material(slab_configuration)
 
 
 def create_slab_if_not(material: Material, default_slab_configuration: SlabConfiguration) -> Material:
