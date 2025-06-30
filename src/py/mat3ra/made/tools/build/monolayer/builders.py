@@ -20,12 +20,10 @@ class MonolayerBuilder(SlabBuilder):
     _GeneratedItemType = Material
 
     def _get_miller_indices_for_lattice_type(self, crystal) -> Tuple[int, int, int]:
-        lattice_type_str = crystal.lattice.type.value
+        lattice_type_str = str(crystal.lattice.type.value)
 
         if lattice_type_str == "HEX":
             return (0, 0, 1)
-        elif lattice_type_str in ["FCC", "CUB"]:
-            return (1, 1, 1)
         else:
             return (1, 1, 1)
 
