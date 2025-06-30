@@ -1,9 +1,8 @@
 from typing import Optional, List, Tuple
 
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from .. import BaseConfiguration, BaseConfigurationPydantic
+from .. import BaseConfigurationPydantic
 from ..slab.configurations import SlabConfiguration
 
 

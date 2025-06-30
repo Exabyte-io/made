@@ -2,8 +2,6 @@ from typing import Optional, Union, List, Tuple
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryAnalyzer
-from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-
 from .builders import GrainBoundaryBuilder, GrainBoundaryWithVacuumBuilder
 from .configuration import GrainBoundaryConfiguration, GrainBoundaryWithVacuumConfiguration
 
