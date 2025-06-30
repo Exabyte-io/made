@@ -11,6 +11,8 @@ class VacuumBuilder(BaseSingleBuilder):
 
     def get_material(self, configuration: VacuumConfiguration) -> Material:
         reference = configuration.crystal
+        if reference is None:
+            raise ValueError("VacuumConfiguration.crystal must be provided to build a vacuum material.")
         size = configuration.size
         direction: AxisEnum = configuration.direction
 
