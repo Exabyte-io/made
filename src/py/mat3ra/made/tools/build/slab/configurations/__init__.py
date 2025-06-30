@@ -1,7 +1,7 @@
 # Convenience imports for the configurations package
 from .base_configurations import (
     CrystalLatticePlanesConfiguration,
-    AtomicLayersUnique,
+    AtomicLayersUniqueConfiguration,
     AtomicLayersUniqueRepeatedConfiguration,
 )
 from .slab_configuration import SlabConfiguration
@@ -12,7 +12,7 @@ from .strained_configurations import (
 
 __all__ = [
     "CrystalLatticePlanesConfiguration",
-    "AtomicLayersUnique",
+    "AtomicLayersUniqueConfiguration",
     "AtomicLayersUniqueRepeatedConfiguration",
     "SlabConfiguration",
     "SlabStrainedSupercellConfiguration",

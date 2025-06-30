@@ -6,13 +6,18 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
 from mat3ra.made.material import Material
 from ...stack.configuration import StackConfiguration
 from ...vacuum.configuration import VacuumConfiguration
-from .base_configurations import AtomicLayersUnique, AtomicLayersUniqueRepeatedConfiguration
+from .base_configurations import AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration
+
+from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+from mat3ra.made.tools.build.slab.termination_utils import select_slab_termination
 
 
 class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     type: str = "SlabConfiguration"
     stack_components: List[
-        Union[AtomicLayersUnique, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]  # No Materials!
+        Union[
+            AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration
+        ]  # No Materials!
     ]
     direction: AxisEnum = AxisEnum.z
 
@@ -33,10 +38,18 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
         termination_formula: Optional[str] = None,
         vacuum: float = 10.0,
     ) -> "SlabConfiguration":
-        from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-        from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder
-        from mat3ra.made.tools.build.slab.helpers import select_slab_termination
+        """
+        Creates a SlabConfiguration from the given parameters.
+        Args:
+            material_or_dict (Union[Material, dict]): Material or dictionary representation of the material.
+            miller_indices (Tuple[int, int, int]): Miller indices for the slab surface.
+            number_of_layers (int): Number of atomic layers in the slab, in the number of unit cells.
+            termination_formula (Optional[str]): Formula of the termination to use for the slab (i.e. "SrTiO").
+            vacuum (float): Size of the vacuum layer in Angstroms.
 
+        Returns:
+            SlabConfiguration: The created slab configuration.
+        """
         if isinstance(material_or_dict, dict):
             material = Material.create(material_or_dict)
         else:
@@ -54,12 +67,9 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
             termination_top=termination,
             number_of_repetitions=number_of_layers,
         )
-        atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
-            atomic_layers_repeated_configuration
-        )
-        vacuum_configuration = VacuumConfiguration(
-            size=vacuum, crystal=atomic_layers_repeated_orthogonal_c, direction=AxisEnum.z
-        )
+
+        vacuum_configuration = VacuumConfiguration(size=vacuum, crystal=None, direction=AxisEnum.z)
+
         return cls(
             stack_components=[atomic_layers_repeated_configuration, vacuum_configuration],
             direction=AxisEnum.z,

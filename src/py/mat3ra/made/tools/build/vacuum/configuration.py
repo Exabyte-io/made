@@ -13,5 +13,5 @@ from mat3ra.made.tools.build import BaseConfigurationPydantic
 class VacuumConfiguration(VacuumConfigurationSchema, BaseConfigurationPydantic):
     type: str = "VacuumConfiguration"
     size: float = VacuumConfigurationSchema.model_fields["size"].default
-    crystal: Material
+    crystal: Optional[Material] = None
     direction: Optional[AxisEnum] = VacuumConfigurationSchema.model_fields["direction"].default

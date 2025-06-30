@@ -6,7 +6,8 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder, SlabBuilder, SlabBuilderParameters
 from mat3ra.made.tools.build.slab.configurations import AtomicLayersUniqueRepeatedConfiguration, SlabConfiguration
-from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations, select_slab_termination
+from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations
+from mat3ra.made.tools.build.slab.termination_utils import select_slab_termination
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.slab import (

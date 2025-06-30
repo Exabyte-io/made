@@ -18,11 +18,11 @@ class CrystalLatticePlanesConfiguration(CrystalLatticePlanesSchema, BaseConfigur
         return self.crystal.lattice.vector_arrays[:2, :2]
 
 
-class AtomicLayersUnique(CrystalLatticePlanesConfiguration):
+class AtomicLayersUniqueConfiguration(CrystalLatticePlanesConfiguration):
     pass
 
 
-class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUnique):
+class AtomicLayersUniqueRepeatedConfiguration(AtomicLayersUniqueConfiguration):
     termination_top: Termination
     termination_bottom: Optional[Termination] = None
     number_of_repetitions: int = 1
