@@ -22,6 +22,8 @@ def test_create_monolayer(material_config, vacuum, expected_material_config):
     assert isinstance(monolayer, Material)
     assert "Monolayer" in monolayer.name
 
+    print("Monolayer material:", monolayer.to_dict())
+
     # reset the name and lattice.type to ignore them in the comparison
     monolayer.name = expected_material_config["name"]
     monolayer.lattice.type = expected_material_config["lattice"]["type"]
