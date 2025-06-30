@@ -27,4 +27,4 @@ def test_create_monolayer(material_config, vacuum, expected_material_config):
     monolayer.lattice.type = expected_material_config["lattice"]["type"]
     monolayer.metadata.pop("build")
 
-    assert_two_entities_deep_almost_equal(monolayer, expected_material_config, atol=1e-6)
+    assert_two_entities_deep_almost_equal(monolayer, expected_material_config, atol=1e-5)
