@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from mat3ra.made.material import Material
 from .configurations import MonolayerConfiguration
 from ..slab.builders import SlabBuilder
@@ -17,19 +19,20 @@ class MonolayerBuilder(SlabBuilder):
     _ConfigurationType = MonolayerConfiguration
     _GeneratedItemType = Material
 
-    def _generate(self, configuration: MonolayerConfiguration) -> Material:
-        crystal = configuration.crystal
-        lattice_type_str = (
-            crystal.lattice.type.value if hasattr(crystal.lattice.type, "value") else str(crystal.lattice.type)
-        )
-        vacuum = configuration.vacuum
+    def _get_miller_indices_for_lattice_type(self, crystal) -> Tuple[int, int, int]:
+        lattice_type_str = crystal.lattice.type.value
 
         if lattice_type_str == "HEX":
-            miller_indices = (0, 0, 1)
+            return (0, 0, 1)
         elif lattice_type_str in ["FCC", "CUB"]:
-            miller_indices = (1, 1, 1)
+            return (1, 1, 1)
         else:
-            miller_indices = (1, 1, 1)
+            return (1, 1, 1)
+
+    def _generate(self, configuration: MonolayerConfiguration) -> Material:
+        crystal = configuration.crystal
+        miller_indices = self._get_miller_indices_for_lattice_type(crystal)
+        vacuum = configuration.vacuum
 
         slab_config = SlabConfiguration.from_parameters(
             material_or_dict=crystal,
@@ -39,6 +42,7 @@ class MonolayerBuilder(SlabBuilder):
         )
         slab = super()._generate(slab_config)
 
+        lattice_type_str = crystal.lattice.type.value
         if lattice_type_str == "HEX":
             slab = self._apply_hex_filtering(slab)
 
@@ -63,17 +67,7 @@ class MonolayerBuilder(SlabBuilder):
 
     def _update_material_name(self, material: Material, configuration: MonolayerConfiguration) -> Material:
         crystal = configuration.crystal
-        lattice_type_str = (
-            crystal.lattice.type.value if hasattr(crystal.lattice.type, "value") else str(crystal.lattice.type)
-        )
-
-        if lattice_type_str == "HEX":
-            miller_str = "001"
-        elif lattice_type_str in ["FCC", "CUB"]:
-            miller_str = "111"
-        else:
-            miller_str = "111"
 
         original_name = crystal.name or "Crystal"
-        material.name = f"{original_name} - Monolayer ({miller_str})"
+        material.name = f"{original_name} - Monolayer"
         return material
