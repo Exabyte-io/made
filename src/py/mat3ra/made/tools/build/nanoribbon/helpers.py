@@ -1,15 +1,13 @@
-from typing import Tuple, Optional, Union, Type, TypeVar
+from typing import Tuple, Optional, Type, TypeVar
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab.entities import Termination
 from mat3ra.made.tools.build import BaseBuilder, BaseBuilderParameters
-from . import EdgeTypes, NanoTapeConfiguration
-from .builders import NanoribbonBuilder, NanoTapeBuilder, NanoTapeBuilderParameters, NanoribbonBuilderParameters
-from .configuration import (
-    get_miller_indices_from_edge_type,
-    create_nanoribbon_configuration,
-    create_nanotape_configuration,
-)
+from mat3ra.made.tools.build.slab.entities import Termination
+from . import NanoribbonConfiguration
+from .builders import NanoribbonBuilder, NanoribbonBuilderParameters
+from ..lattice_lines.configuration import EdgeTypes, get_miller_indices_from_edge_type
+from ..nanotape import NanoTapeConfiguration
+from ..nanotape.builders import NanoTapeBuilder, NanoTapeBuilderParameters
 
 T = TypeVar("T", bound=BaseBuilder)
 P = TypeVar("P", bound=BaseBuilderParameters)
@@ -81,7 +79,7 @@ def create_nanoribbon(
     if is_tape:
         builder_cls = NanoTapeBuilder
         params_cls = NanoTapeBuilderParameters
-        config = create_nanotape_configuration(
+        config = NanoTapeConfiguration.from_parameters(
             material=material,
             miller_indices_uv=uv,
             width=width,
@@ -92,7 +90,7 @@ def create_nanoribbon(
     else:
         builder_cls = NanoribbonBuilder
         params_cls = NanoribbonBuilderParameters
-        config = create_nanoribbon_configuration(
+        config = NanoribbonConfiguration.from_parameters(
             material=material,
             miller_indices_uv=uv,
             width=width,
@@ -102,5 +100,5 @@ def create_nanoribbon(
             termination=termination,
         )
 
-    builder = builder_cls(build_parameters=params_cls(use_rectangular_lattice=use_rectangular_cell))
+    builder = builder_cls(build_parameters=params_cls(use_rectangular_cell=use_rectangular_cell))
     return builder.get_material(config)
