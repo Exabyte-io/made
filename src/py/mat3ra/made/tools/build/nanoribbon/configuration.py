@@ -1,23 +1,21 @@
-from typing import List, Union, Optional, Tuple
-from mat3ra.made.material import Material
+from typing import Optional, Tuple
+
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
+from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_lines import CrystalLatticeLinesAnalyzer
-from mat3ra.made.tools.analyze.nanotape_analyzer import NanoTapeAnalyzer
 from mat3ra.made.tools.build.nanoribbon.builders import (
     CrystalLatticeLinesRepeatedBuilder,
     NanoTapeBuilder,
 )
-from mat3ra.made.tools.build import BaseConfigurationPydantic
-from .enums import EdgeTypes
-from ..stack.configuration import StackConfiguration
-from ..vacuum.configuration import VacuumConfiguration
-from ..slab.entities import Termination
 from .crystal_lattice_lines_configuration import (
-    CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
 )
+from .enums import EdgeTypes
 from .nano_tape_configuration import NanoTapeConfiguration
 from .nanoribbon_configuration import NanoribbonConfiguration
+from ..slab.entities import Termination
+from ..vacuum.configuration import VacuumConfiguration
 
 
 # Helper functions for shorthand notation
@@ -40,7 +38,7 @@ def get_miller_indices_from_edge_type(edge_type: EdgeTypes) -> Tuple[int, int]:
 
 
 # Factory methods for configurations
-def create_nano_tape_configuration(
+def create_nanotape_configuration(
     material: Material,
     miller_indices_uv: Optional[Tuple[int, int]] = None,
     edge_type: Optional[EdgeTypes] = EdgeTypes.zigzag,
@@ -93,8 +91,9 @@ def create_nanoribbon_configuration(
     if miller_indices_uv is None and edge_type is not None:
         miller_indices_uv = get_miller_indices_from_edge_type(edge_type)
 
-    nanotape_analyzer = NanoTapeAnalyzer(material=material, miller_indices_uv=miller_indices_uv)
-    nanotape_config = nanotape_analyzer.get_configuration(
+    nanotape_config = create_nanotape_configuration(
+        material=material,
+        miller_indices_uv=miller_indices_uv,
         width=width,
         length=length,
         termination=termination,
@@ -110,4 +109,4 @@ def create_nanoribbon_configuration(
     return NanoribbonConfiguration(
         stack_components=[nanotape_config, vacuum_config],
         direction=AxisEnum.x,
-    ) 
+    )

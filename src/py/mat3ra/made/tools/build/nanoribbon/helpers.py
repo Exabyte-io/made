@@ -1,13 +1,15 @@
 from typing import Tuple, Optional, Union, Type, TypeVar
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.nanoribbon_analyzer import NanoribbonAnalyzer
-from mat3ra.made.tools.analyze.nanotape_analyzer import NanoTapeAnalyzer
 from mat3ra.made.tools.build.slab.entities import Termination
 from mat3ra.made.tools.build import BaseBuilder, BaseBuilderParameters
-from . import EdgeTypes
+from . import EdgeTypes, NanoTapeConfiguration
 from .builders import NanoribbonBuilder, NanoTapeBuilder, NanoTapeBuilderParameters, NanoribbonBuilderParameters
-from .configuration import get_miller_indices_from_edge_type
+from .configuration import (
+    get_miller_indices_from_edge_type,
+    create_nanoribbon_configuration,
+    create_nanotape_configuration,
+)
 
 T = TypeVar("T", bound=BaseBuilder)
 P = TypeVar("P", bound=BaseBuilderParameters)
@@ -77,28 +79,28 @@ def create_nanoribbon(
 
     is_tape = vacuum_length is None
     if is_tape:
-        analyzer_cls = NanoTapeAnalyzer
         builder_cls = NanoTapeBuilder
         params_cls = NanoTapeBuilderParameters
-        cfg_kwargs = dict(
+        config = create_nanotape_configuration(
+            material=material,
+            miller_indices_uv=uv,
             width=width,
             length=length,
             vacuum_width=vacuum_width,
+            termination=termination,
         )
     else:
-        analyzer_cls = NanoribbonAnalyzer
         builder_cls = NanoribbonBuilder
         params_cls = NanoribbonBuilderParameters
-        cfg_kwargs = dict(
+        config = create_nanoribbon_configuration(
+            material=material,
+            miller_indices_uv=uv,
             width=width,
             length=length,
             vacuum_width=vacuum_width,
             vacuum_length=vacuum_length,
             termination=termination,
         )
-
-    analyzer = analyzer_cls(material=material, miller_indices_uv=uv)
-    config = analyzer.get_configuration(**cfg_kwargs)
 
     builder = builder_cls(build_parameters=params_cls(use_rectangular_lattice=use_rectangular_cell))
     return builder.get_material(config)
