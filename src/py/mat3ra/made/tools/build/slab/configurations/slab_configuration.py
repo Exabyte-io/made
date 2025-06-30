@@ -38,6 +38,18 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
         termination_formula: Optional[str] = None,
         vacuum: float = 10.0,
     ) -> "SlabConfiguration":
+        """
+        Creates a SlabConfiguration from the given parameters.
+        Args:
+            material_or_dict (Union[Material, dict]): Material or dictionary representation of the material.
+            miller_indices (Tuple[int, int, int]): Miller indices for the slab surface.
+            number_of_layers (int): Number of atomic layers in the slab, in the number of unit cells.
+            termination_formula (Optional[str]): Formula of the termination to use for the slab (i.e. "SrTiO").
+            vacuum (float): Size of the vacuum layer in Angstroms.
+
+        Returns:
+            SlabConfiguration: The created slab configuration.
+        """
         if isinstance(material_or_dict, dict):
             material = Material.create(material_or_dict)
         else:
