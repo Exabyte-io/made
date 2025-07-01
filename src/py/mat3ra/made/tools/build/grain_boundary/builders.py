@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 
 from mat3ra.made.material import Material
 from .configuration import GrainBoundaryLinearConfiguration, SlabGrainBoundaryConfiguration
@@ -8,7 +8,9 @@ from ..interface.builders import (
     CommensurateLatticeInterfaceBuilderParameters,
 )
 from ..slab.builders import SlabBuilder, SlabBuilderParameters
+from ..slab.builders import SlabWithGapBuilder
 from ..slab.configurations import SlabConfiguration
+from ..slab.configurations.strained_configurations import SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import Stack2ComponentsBuilder
 from ..supercell import create_supercell
 from ...analyze.other import get_chemical_formula
@@ -95,6 +97,13 @@ class GrainBoundaryLinearBuilder(Stack2ComponentsBuilder):
 
     _ConfigurationType = GrainBoundaryLinearConfiguration
     _BuildParametersType = GrainBoundaryLinearBuilderParameters
+    _DefaultBuildParameters = GrainBoundaryLinearBuilderParameters()
+
+    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
+        if isinstance(configuration_or_material, SlabStrainedSupercellWithGapConfiguration):
+            builder = SlabWithGapBuilder()
+            return builder.get_material(configuration_or_material)
+        return super()._configuration_to_material(configuration_or_material)
 
     def _update_material_name(self, material: Material, configuration: GrainBoundaryLinearConfiguration) -> Material:
         new_name = f"Grain Boundary Linear ({configuration.direction.value})"

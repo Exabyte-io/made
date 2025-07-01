@@ -5,7 +5,6 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from .. import BaseConfiguration
 from ..slab.configurations import SlabConfiguration
 from ..slab.entities import Termination
-from ..interface.configuration import TwistedInterfaceConfiguration
 from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 

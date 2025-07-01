@@ -1,12 +1,12 @@
 from typing import Optional, List, Tuple
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
-from .configuration import GrainBoundaryLinearConfiguration, SlabGrainBoundaryConfiguration
 from .builders import GrainBoundaryLinearBuilder, SlabGrainBoundaryBuilder, SlabGrainBoundaryBuilderParameters
+from .configuration import GrainBoundaryLinearConfiguration, SlabGrainBoundaryConfiguration
 from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
-from ..slab.entities import Termination
 
 
 def create_grain_boundary_planar(

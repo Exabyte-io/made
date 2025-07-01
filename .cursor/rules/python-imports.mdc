@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Never do local or conditional imports. All imports must be present at the top of the file.
