@@ -1,18 +1,15 @@
-from typing import List, Optional, Tuple, Union
-
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from typing import List, Tuple
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.entities import Termination
 from .builders import (
     SlabBuilder,
-    AtomicLayersUniqueRepeatedBuilder,
     SlabBuilderParameters,
+    AtomicLayersUniqueRepeatedBuilder,
 )
-from .configuration import (
+from .configurations import (
     SlabConfiguration,
     AtomicLayersUniqueRepeatedConfiguration,
-    VacuumConfiguration,
 )
 from ..metadata import MaterialMetadata
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
@@ -55,45 +52,6 @@ def create_atomic_layers(
     return atomic_layers_material
 
 
-def create_slab_configuration(
-    material_or_dict: Union[Material, dict],
-    miller_indices: Tuple[int, int, int],
-    number_of_layers: int,
-    termination_formula: Optional[str] = None,
-    vacuum: float = 10.0,
-) -> SlabConfiguration:
-    """
-    Creates a slab configuration from a material or a dictionary with specified Miller indices and other parameters.
-    """
-    if isinstance(material_or_dict, dict):
-        material = Material.create(material_or_dict)
-    else:
-        material = material_or_dict
-
-    crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-        material=material, miller_indices=miller_indices
-    )
-    terminations = crystal_lattice_planes_analyzer.terminations
-    termination = select_slab_termination(terminations, termination_formula)
-
-    atomic_layers_repeated_configuration = AtomicLayersUniqueRepeatedConfiguration(
-        crystal=material,
-        miller_indices=miller_indices,
-        termination_top=termination,
-        number_of_repetitions=number_of_layers,
-    )
-    atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
-        atomic_layers_repeated_configuration
-    )
-    vacuum_configuration = VacuumConfiguration(
-        size=vacuum, crystal=atomic_layers_repeated_orthogonal_c, direction=AxisEnum.z
-    )
-    return SlabConfiguration(
-        stack_components=[atomic_layers_repeated_configuration, vacuum_configuration],
-        direction=AxisEnum.z,
-    )
-
-
 def create_slab(
     crystal: Material,
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
@@ -132,17 +90,16 @@ def create_slab(
     if termination is not None:
         termination_formula = termination.formula
 
-    slab_configuration = create_slab_configuration(
+    slab_builder_parameters = SlabBuilderParameters(
+        xy_supercell_matrix=xy_supercell_matrix,
+        use_orthogonal_c=use_orthogonal_c,
+    )
+    slab_configuration = SlabConfiguration.from_parameters(
         material_or_dict=material_to_use,
         miller_indices=miller_indices,
         number_of_layers=number_of_layers,
         termination_formula=termination_formula,
         vacuum=vacuum,
-    )
-
-    slab_builder_parameters = SlabBuilderParameters(
-        xy_supercell_matrix=xy_supercell_matrix,
-        use_orthogonal_c=use_orthogonal_c,
     )
     builder = SlabBuilder(build_parameters=slab_builder_parameters)
     return builder.get_material(slab_configuration)
@@ -162,17 +119,6 @@ def get_slab_terminations(material: Material, miller_indices: Tuple[int, int, in
         material=material, miller_indices=miller_indices
     )
     return crystal_lattice_planes_analyzer.terminations
-
-
-def select_slab_termination(terminations: List[Termination], formula: Optional[str] = None) -> Termination:
-    if not terminations:
-        raise ValueError("No terminations available.")
-    if formula is None:
-        return terminations[0]
-    for termination in terminations:
-        if termination.formula == formula:
-            return termination
-    raise ValueError(f"Termination with formula {formula} not found in available terminations: {terminations}")
 
 
 def get_slab_material_in_standard_representation(slab_material: Material) -> Material:

@@ -14,7 +14,7 @@ from .configuration import (
 )
 from .factories import DefectBuilderFactory
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
-from ..slab.configuration import SlabConfiguration
+from ..slab.configurations import SlabConfiguration
 from ..slab.helpers import create_slab
 from ..supercell import create_supercell
 from ..utils import merge_materials

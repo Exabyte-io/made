@@ -3,15 +3,16 @@ from typing import List
 import numpy as np
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
 from ..interface.builders import (
     ZSLStrainMatchingInterfaceBuilder,
-    CommensurateLatticeTwistedInterfaceBuilder,
-    CommensurateLatticeTwistedInterfaceBuilderParameters,
+    InterfaceBuilder,
+    CommensurateLatticeInterfaceBuilderParameters,
 )
-from ..slab.configuration import SlabConfiguration
-from ..slab.helpers import create_slab
+from ..slab.configurations import SlabConfiguration
+from ..slab.builders import SlabBuilder, SlabBuilderParameters
 from ..supercell import create_supercell
 from ..utils import stack_two_materials_xy
 from ...analyze.other import get_chemical_formula
@@ -58,18 +59,18 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         ]
         final_slabs: List[Material] = []
         for interface in rotated_interfaces:
-            supercell_matrix = np.zeros((3, 3))
-            supercell_matrix[:2, :2] = configuration.slab_configuration.xy_supercell_matrix
-            supercell_matrix[2, 2] = configuration.slab_configuration.thickness
             final_slab_config = SlabConfiguration.from_parameters(
-                bulk=interface,
-                vacuum=configuration.slab_configuration.vacuum,
+                material_or_dict=interface,
                 miller_indices=configuration.slab_configuration.miller_indices,
                 number_of_layers=configuration.slab_configuration.number_of_layers,
-                use_conventional_cell=False,  # Keep false to prevent Pymatgen from simplifying the interface
-                use_orthogonal_z=True,
+                vacuum=configuration.slab_configuration.vacuum,
             )
-            final_slab = create_slab(final_slab_config)
+            slab_builder_parameters = SlabBuilderParameters(
+                xy_supercell_matrix=configuration.slab_configuration.xy_supercell_matrix,
+                use_orthogonal_c=True,
+            )
+            builder = SlabBuilder(build_parameters=slab_builder_parameters)
+            final_slab = builder.get_material(final_slab_config)
             final_slabs.append(final_slab)
 
         return super()._finalize(final_slabs, configuration)
@@ -86,7 +87,7 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         return material
 
 
-class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceBuilderParameters):
+class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeInterfaceBuilderParameters):
     """
     Parameters for creating a grain boundary between two surface phases.
 
@@ -99,29 +100,44 @@ class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeTwistedInterfaceB
     distance_tolerance: float = 1.0
 
 
-class SurfaceGrainBoundaryBuilder(CommensurateLatticeTwistedInterfaceBuilder):
+class SurfaceGrainBoundaryBuilder(InterfaceBuilder):
     _ConfigurationType: type(SurfaceGrainBoundaryConfiguration) = SurfaceGrainBoundaryConfiguration  # type: ignore
     _BuildParametersType = SurfaceGrainBoundaryBuilderParameters
     _DefaultBuildParameters = SurfaceGrainBoundaryBuilderParameters()
 
-    def _post_process(self, items: List[Material], post_process_parameters=None) -> List[Material]:
-        grain_boundaries = []
-        for item in items:
-            matrix1 = np.dot(np.array(item.configuration.xy_supercell_matrix), item.matrix1)
-            matrix2 = np.dot(np.array(item.configuration.xy_supercell_matrix), item.matrix2)
-            phase_1_material_initial = create_supercell(item.configuration.film, matrix1.tolist())
-            phase_2_material_initial = create_supercell(item.configuration.film, matrix2.tolist())
+    def _generate(self, configuration: SurfaceGrainBoundaryConfiguration) -> Material:
+        # Create slab configuration from the material
+        slab_config = SlabConfiguration.from_parameters(
+            configuration.film, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0
+        )
 
-            interface = stack_two_materials_xy(
-                phase_1_material_initial,
-                phase_2_material_initial,
-                gap=item.configuration.gap,
-                edge_inclusion_tolerance=self.build_parameters.edge_inclusion_tolerance,
-                distance_tolerance=self.build_parameters.distance_tolerance,
-            )
-            grain_boundaries.append(interface)
+        analyzer = CommensurateLatticeInterfaceAnalyzer(
+            substrate_slab_configuration=slab_config,
+            target_angle=configuration.twist_angle,
+            angle_tolerance=self.build_parameters.angle_tolerance,
+        )
 
-        return grain_boundaries
+        match_holder = analyzer.commensurate_lattice_match_holders[0]
+        matrix1 = np.array(match_holder.xy_supercell_matrix_substrate)
+        matrix2 = np.array(match_holder.xy_supercell_matrix_film)
+
+        if configuration.xy_supercell_matrix != [[1, 0], [0, 1]]:
+            base_matrix = np.array(configuration.xy_supercell_matrix)
+            matrix1 = np.dot(base_matrix, matrix1)
+            matrix2 = np.dot(base_matrix, matrix2)
+
+        phase_1_material = create_supercell(configuration.film, matrix1.tolist())
+        phase_2_material = create_supercell(configuration.film, matrix2.tolist())
+
+        grain_boundary = stack_two_materials_xy(
+            phase_1_material,
+            phase_2_material,
+            gap=configuration.gap,
+            edge_inclusion_tolerance=self.build_parameters.edge_inclusion_tolerance,
+            distance_tolerance=self.build_parameters.distance_tolerance,
+        )
+
+        return grain_boundary
 
     def _update_material_name(self, material: Material, configuration: SurfaceGrainBoundaryConfiguration) -> Material:
         new_name = f"{configuration.film.name}, Grain Boundary ({configuration.twist_angle:.2f}°)"
