@@ -1,26 +1,27 @@
 from typing import List
 
-import numpy as np
-
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
-from .configuration import SurfaceGrainBoundaryConfiguration, SlabGrainBoundaryConfiguration
+from .configuration import GrainBoundaryLinearConfiguration, SlabGrainBoundaryConfiguration
 from ..interface import ZSLStrainMatchingInterfaceBuilderParameters, InterfaceConfiguration
 from ..interface.builders import (
     ZSLStrainMatchingInterfaceBuilder,
-    InterfaceBuilder,
     CommensurateLatticeInterfaceBuilderParameters,
 )
-from ..slab.configurations import SlabConfiguration
 from ..slab.builders import SlabBuilder, SlabBuilderParameters
+from ..slab.configurations import SlabConfiguration
+from ..stack.builders import Stack2ComponentsBuilder
 from ..supercell import create_supercell
-from ..utils import stack_two_materials_xy
 from ...analyze.other import get_chemical_formula
 from ...third_party import PymatgenInterface
 
 
 class SlabGrainBoundaryBuilderParameters(ZSLStrainMatchingInterfaceBuilderParameters):
     default_index: int = 0
+
+
+class GrainBoundaryLinearBuilderParameters(CommensurateLatticeInterfaceBuilderParameters):
+    edge_inclusion_tolerance: float = 1.0
+    distance_tolerance: float = 1.0
 
 
 class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
@@ -87,59 +88,15 @@ class SlabGrainBoundaryBuilder(ZSLStrainMatchingInterfaceBuilder):
         return material
 
 
-class SurfaceGrainBoundaryBuilderParameters(CommensurateLatticeInterfaceBuilderParameters):
+class GrainBoundaryLinearBuilder(Stack2ComponentsBuilder):
     """
-    Parameters for creating a grain boundary between two surface phases.
-
-    Args:
-        edge_inclusion_tolerance (float): The tolerance to include atoms on the edge of each phase, in angstroms.
-        distance_tolerance (float): The distance tolerance to remove atoms that are too close, in angstroms.
+    Creates a linear grain boundary by stacking two materials along x or y direction.
     """
 
-    edge_inclusion_tolerance: float = 1.0
-    distance_tolerance: float = 1.0
+    _ConfigurationType = GrainBoundaryLinearConfiguration
+    _BuildParametersType = GrainBoundaryLinearBuilderParameters
 
-
-class SurfaceGrainBoundaryBuilder(InterfaceBuilder):
-    _ConfigurationType: type(SurfaceGrainBoundaryConfiguration) = SurfaceGrainBoundaryConfiguration  # type: ignore
-    _BuildParametersType = SurfaceGrainBoundaryBuilderParameters
-    _DefaultBuildParameters = SurfaceGrainBoundaryBuilderParameters()
-
-    def _generate(self, configuration: SurfaceGrainBoundaryConfiguration) -> Material:
-        # Create slab configuration from the material
-        slab_config = SlabConfiguration.from_parameters(
-            configuration.film, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0
-        )
-
-        analyzer = CommensurateLatticeInterfaceAnalyzer(
-            substrate_slab_configuration=slab_config,
-            target_angle=configuration.twist_angle,
-            angle_tolerance=self.build_parameters.angle_tolerance,
-        )
-
-        match_holder = analyzer.commensurate_lattice_match_holders[0]
-        matrix1 = np.array(match_holder.xy_supercell_matrix_substrate)
-        matrix2 = np.array(match_holder.xy_supercell_matrix_film)
-
-        if configuration.xy_supercell_matrix != [[1, 0], [0, 1]]:
-            base_matrix = np.array(configuration.xy_supercell_matrix)
-            matrix1 = np.dot(base_matrix, matrix1)
-            matrix2 = np.dot(base_matrix, matrix2)
-
-        phase_1_material = create_supercell(configuration.film, matrix1.tolist())
-        phase_2_material = create_supercell(configuration.film, matrix2.tolist())
-
-        grain_boundary = stack_two_materials_xy(
-            phase_1_material,
-            phase_2_material,
-            gap=configuration.gap,
-            edge_inclusion_tolerance=self.build_parameters.edge_inclusion_tolerance,
-            distance_tolerance=self.build_parameters.distance_tolerance,
-        )
-
-        return grain_boundary
-
-    def _update_material_name(self, material: Material, configuration: SurfaceGrainBoundaryConfiguration) -> Material:
-        new_name = f"{configuration.film.name}, Grain Boundary ({configuration.twist_angle:.2f}°)"
+    def _update_material_name(self, material: Material, configuration: GrainBoundaryLinearConfiguration) -> Material:
+        new_name = f"Grain Boundary Linear ({configuration.direction.value})"
         material.name = new_name
         return material

@@ -1,9 +1,13 @@
-from typing import Optional, List
+from typing import Optional, List, Union
+
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from .. import BaseConfiguration
 from ..slab.configurations import SlabConfiguration
 from ..slab.entities import Termination
 from ..interface.configuration import TwistedInterfaceConfiguration
+from ..stack.configuration import StackConfiguration
+from ..vacuum.configuration import VacuumConfiguration
 
 
 class SlabGrainBoundaryConfiguration(BaseConfiguration):
@@ -41,22 +45,26 @@ class SlabGrainBoundaryConfiguration(BaseConfiguration):
         }
 
 
-class SurfaceGrainBoundaryConfiguration(TwistedInterfaceConfiguration):
+class GrainBoundaryLinearConfiguration(StackConfiguration):
     """
-    Configuration for creating a surface grain boundary.
+    Configuration for creating a linear grain boundary.
 
     Args:
+        stack_components (List): List of configuration objects for grain boundary components.
+        direction (AxisEnum): Direction along which to stack components (x or y).
         gap (float): The gap between the two phases.
-        xy_supercell_matrix (List[List[int]]): The supercell matrix to apply for both phases.
     """
 
+    type: str = "GrainBoundaryLinearConfiguration"
+    stack_components: List[Union[SlabConfiguration, VacuumConfiguration]]
+    direction: AxisEnum = AxisEnum.x
     gap: float = 0.0
-    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
 
     @property
     def _json(self):
         return {
             "type": self.get_cls_name(),
+            "stack_components": [comp.to_json() for comp in self.stack_components],
+            "direction": self.direction.value,
             "gap": self.gap,
-            "xy_supercell_matrix": self.xy_supercell_matrix,
         }

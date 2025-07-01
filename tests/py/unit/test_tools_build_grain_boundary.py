@@ -1,13 +1,15 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.grain_boundary import (
-    SlabGrainBoundaryConfiguration,
-    SurfaceGrainBoundaryBuilder,
-    SurfaceGrainBoundaryBuilderParameters,
-    SurfaceGrainBoundaryConfiguration,
-    create_grain_boundary,
+from mat3ra.made.tools.build.grain_boundary.builders import (
+    SlabGrainBoundaryBuilder,
+    SlabGrainBoundaryBuilderParameters,
+    GrainBoundaryLinearBuilder,
 )
-from mat3ra.made.tools.build.grain_boundary.builders import SlabGrainBoundaryBuilder, SlabGrainBoundaryBuilderParameters
+from mat3ra.made.tools.build.grain_boundary.configuration import (
+    SlabGrainBoundaryConfiguration,
+    GrainBoundaryLinearConfiguration,
+)
+from mat3ra.made.tools.build.grain_boundary.helpers import create_grain_boundary_planar, create_grain_boundary_linear
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.utils import assertion as assertion_utils
 
@@ -54,7 +56,7 @@ def test_slab_grain_boundary_builder(
 
     builder_params = SlabGrainBoundaryBuilderParameters()
     builder = SlabGrainBoundaryBuilder(build_parameters=builder_params)
-    gb = create_grain_boundary(config, builder)
+    gb = builder.get_material(config)
 
     assert len(gb.basis.elements.values) == expected_elements_len
     for index, expected_coordinate in expected_coordinate_checks.items():
@@ -71,7 +73,6 @@ def test_slab_grain_boundary_builder(
                 "max_repetition_int": 5,
                 "angle_tolerance": 0.5,
                 "return_first_match": True,
-                "distance_tolerance": 1.0,
             },
             [
                 [23.509344266, 0.0, 0.0],
@@ -81,13 +82,15 @@ def test_slab_grain_boundary_builder(
         ),
     ],
 )
-@pytest.mark.skip(reason="Takes too long. Optimize the test parameters before merging epic-7623")
-def test_create_surface_grain_boundary(config_params, builder_params_dict, expected_cell_vectors):
+# @pytest.mark.skip(reason="Takes too long. Optimize the test parameters before merging epic-7623")
+def test_create_grain_boundary_linear(config_params, builder_params_dict, expected_cell_vectors):
     config_params["film"] = Material.create(config_params.pop("film_config"))
-    config = SurfaceGrainBoundaryConfiguration(**config_params)
-    builder_params = SurfaceGrainBoundaryBuilderParameters(**builder_params_dict)
-    builder = SurfaceGrainBoundaryBuilder(build_parameters=builder_params)
-    gb = builder.get_material(config)
+    gb = create_grain_boundary_linear(
+        material=config_params["film"],
+        target_angle=config_params["twist_angle"],
+        gap=config_params["gap"],
+        **builder_params_dict,
+    )
 
     assert isinstance(gb, Material)
     assertion_utils.assert_deep_almost_equal(expected_cell_vectors, gb.basis.cell.vector_arrays)
