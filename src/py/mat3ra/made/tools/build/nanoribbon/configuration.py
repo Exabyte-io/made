@@ -24,7 +24,6 @@ class NanoribbonConfiguration(StackConfiguration):
     type: str = "NanoribbonConfiguration"
     stack_components: List[Union[NanoTapeConfiguration, VacuumConfiguration]]
     direction: AxisEnum = AxisEnum.x
-    use_rectangular_lattice: bool = True
 
     @property
     def nanotape(self):
@@ -40,7 +39,7 @@ class NanoribbonConfiguration(StackConfiguration):
     def from_parameters(
         cls,
         material: Material,
-        miller_indices_uv: Optional[Tuple[int, int]] = None,
+        miller_indices_2d: Optional[Tuple[int, int]] = None,
         edge_type: Optional[EdgeTypes] = EdgeTypes.zigzag,
         width: int = 2,
         length: int = 2,
@@ -53,8 +52,8 @@ class NanoribbonConfiguration(StackConfiguration):
 
         Args:
             material: The monolayer material to create the nanoribbon from.
-            miller_indices_uv: The (u,v) Miller indices for the nanoribbon direction.
-            edge_type: Edge type string ("zigzag"/"armchair"). Optional if miller_indices_uv is provided.
+            miller_indices_2d: The (u,v) Miller indices for the nanoribbon direction.
+            edge_type: Edge type string ("zigzag"/"armchair"). Optional if miller_indices_2d is provided.
             width: The width of the nanoribbon in number of unit cells.
             length: The length of the nanoribbon in number of unit cells.
             vacuum_width: The width of the vacuum region in Angstroms (cartesian).
@@ -64,14 +63,14 @@ class NanoribbonConfiguration(StackConfiguration):
         Returns:
             NanoribbonConfiguration: The nanoribbon configuration.
         """
-        if miller_indices_uv is None and edge_type is None:
-            raise ValueError("Either miller_indices_uv or edge_type must be provided")
-        if miller_indices_uv is None and edge_type is not None:
-            miller_indices_uv = get_miller_indices_from_edge_type(edge_type)
+        if miller_indices_2d is None and edge_type is None:
+            raise ValueError("Either miller_indices_2d or edge_type must be provided")
+        if miller_indices_2d is None and edge_type is not None:
+            miller_indices_2d = get_miller_indices_from_edge_type(edge_type)
 
         nanotape_config = NanoTapeConfiguration.from_parameters(
             material=material,
-            miller_indices_uv=miller_indices_uv,
+            miller_indices_2d=miller_indices_2d,
             width=width,
             length=length,
             termination=termination,

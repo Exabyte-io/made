@@ -38,11 +38,11 @@ class CrystalLatticeLinesConfiguration(BaseConfigurationPydantic):
 
     Args:
         crystal: The monolayer material to create the lattice lines from.
-        miller_indices_uv: The (u,v) Miller indices for the line direction.
+        miller_indices_2d: The (u,v) Miller indices for the line direction.
     """
 
     crystal: Material
-    miller_indices_uv: Tuple[int, int]
+    miller_indices_2d: Tuple[int, int]
 
 
 class CrystalLatticeLinesUniqueRepeatedConfiguration(CrystalLatticeLinesConfiguration):
@@ -51,7 +51,7 @@ class CrystalLatticeLinesUniqueRepeatedConfiguration(CrystalLatticeLinesConfigur
 
     Args:
         crystal: The monolayer material to create the lattice lines from.
-        miller_indices_uv: The (u,v) Miller indices for the line direction.
+        miller_indices_2d: The (u,v) Miller indices for the line direction.
         termination_top: The termination to use for the lattice lines.
     """
 

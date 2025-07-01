@@ -4,7 +4,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 
 
-class CrystalLatticeLinesAnalyzer(CrystalLatticePlanesMaterialAnalyzer):
+class CrystalLatticeLinesMaterialAnalyzer(CrystalLatticePlanesMaterialAnalyzer):
     """
     Analyzer for crystal lattice lines, used for nanoribbon creation.
 
@@ -12,12 +12,12 @@ class CrystalLatticeLinesAnalyzer(CrystalLatticePlanesMaterialAnalyzer):
     allowing us to get terminations and shifts for 1D line structures.
     """
 
-    miller_indices_uv: Tuple[int, int]
+    miller_indices_2d: Tuple[int, int]
 
-    def __init__(self, material: Material, miller_indices_uv: Tuple[int, int], **kwargs):
-        miller_indices = (miller_indices_uv[0], miller_indices_uv[1], 1)
+    def __init__(self, material: Material, miller_indices_2d: Tuple[int, int], **kwargs):
+        miller_indices = (miller_indices_2d[0], miller_indices_2d[1], 1)
         super().__init__(
-            material=material, miller_indices=miller_indices, miller_indices_uv=miller_indices_uv, **kwargs
+            material=material, miller_indices=miller_indices, miller_indices_2d=miller_indices_2d, **kwargs
         )
 
     @property

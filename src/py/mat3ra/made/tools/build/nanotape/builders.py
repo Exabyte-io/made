@@ -44,20 +44,20 @@ class NanoTapeBuilder(Stack2ComponentsBuilder):
         item.set_lattice(new_lattice)
         return item
 
-    def _get_edge_type_from_miller_indices(self, miller_indices_uv: tuple) -> str:
-        if miller_indices_uv == (1, 1):
+    def _get_edge_type_from_miller_indices(self, miller_indices_2d: tuple) -> str:
+        if miller_indices_2d == (1, 1):
             return EdgeTypes.armchair.value.capitalize()
-        elif miller_indices_uv == (0, 1):
+        elif miller_indices_2d == (0, 1):
             return EdgeTypes.zigzag.value.capitalize()
         else:
-            miller_str = f"{miller_indices_uv[0]}{miller_indices_uv[1]}"
+            miller_str = f"{miller_indices_2d[0]}{miller_indices_2d[1]}"
             return f"({miller_str})"
 
     def _update_material_name_with_edge_type(
-        self, material: Material, crystal_name: str, miller_indices_uv: tuple, structure_type: str
+        self, material: Material, crystal_name: str, miller_indices_2d: tuple, structure_type: str
     ) -> Material:
-        edge_type = self._get_edge_type_from_miller_indices(miller_indices_uv)
-        miller_str = f"{miller_indices_uv[0]}{miller_indices_uv[1]}"
+        edge_type = self._get_edge_type_from_miller_indices(miller_indices_2d)
+        miller_str = f"{miller_indices_2d[0]}{miller_indices_2d[1]}"
         material.name = f"{crystal_name} - {edge_type} {structure_type} ({miller_str})"
         return material
 
@@ -65,7 +65,7 @@ class NanoTapeBuilder(Stack2ComponentsBuilder):
         if isinstance(configuration, NanoTapeConfiguration):
             lattice_lines = configuration.lattice_lines
             material = self._update_material_name_with_edge_type(
-                material, lattice_lines.crystal.name, lattice_lines.miller_indices_uv, "Nanotape"
+                material, lattice_lines.crystal.name, lattice_lines.miller_indices_2d, "Nanotape"
             )
             return material
         return super()._update_material_name(material, configuration)

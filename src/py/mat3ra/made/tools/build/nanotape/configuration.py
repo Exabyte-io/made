@@ -3,7 +3,7 @@ from typing import List, Union, Optional, Tuple
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.lattice_lines import CrystalLatticeLinesAnalyzer
+from mat3ra.made.tools.analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 from ..lattice_lines.builders import CrystalLatticeLinesRepeatedBuilder
 from ..lattice_lines.configuration import (
     CrystalLatticeLinesUniqueRepeatedConfiguration,
@@ -28,7 +28,6 @@ class NanoTapeConfiguration(StackConfiguration):
     type: str = "NanoTapeConfiguration"
     stack_components: List[Union["CrystalLatticeLinesUniqueRepeatedConfiguration", VacuumConfiguration]]
     direction: AxisEnum = AxisEnum.y
-    use_rectangular_lattice: bool = True
 
     @property
     def lattice_lines(self):
@@ -44,7 +43,7 @@ class NanoTapeConfiguration(StackConfiguration):
     def from_parameters(
         cls,
         material: Material,
-        miller_indices_uv: Optional[Tuple[int, int]] = None,
+        miller_indices_2d: Optional[Tuple[int, int]] = None,
         edge_type: Optional[EdgeTypes] = EdgeTypes.zigzag,
         width: int = 2,
         length: int = 2,
@@ -56,8 +55,8 @@ class NanoTapeConfiguration(StackConfiguration):
 
         Args:
             material: The monolayer material to create the nanotape from.
-            miller_indices_uv: The (u,v) Miller indices for the nanotape direction.
-            edge_type: Edge type string ("zigzag"/"armchair"). Optional if miller_indices_uv is provided.
+            miller_indices_2d: The (u,v) Miller indices for the nanotape direction.
+            edge_type: Edge type string ("zigzag"/"armchair"). Optional if miller_indices_2d is provided.
             width: The width of the nanotape in number of unit cells.
             length: The length of the nanotape in number of unit cells.
             vacuum_width: The width of the vacuum region in Angstroms (cartesian).
@@ -66,18 +65,20 @@ class NanoTapeConfiguration(StackConfiguration):
         Returns:
             NanoTapeConfiguration: The nanotape configuration.
         """
-        if miller_indices_uv is None and edge_type is None:
-            raise ValueError("Either miller_indices_uv or edge_type must be provided")
-        if miller_indices_uv is None and edge_type is not None:
-            miller_indices_uv = get_miller_indices_from_edge_type(edge_type)
+        if miller_indices_2d is None and edge_type is None:
+            raise ValueError("Either miller_indices_2d or edge_type must be provided")
+        if miller_indices_2d is None and edge_type is not None:
+            miller_indices_2d = get_miller_indices_from_edge_type(edge_type)
 
-        lattice_lines_analyzer = CrystalLatticeLinesAnalyzer(material=material, miller_indices_uv=miller_indices_uv)
+        lattice_lines_analyzer = CrystalLatticeLinesMaterialAnalyzer(
+            material=material, miller_indices_2d=miller_indices_2d
+        )
         if termination is None:
             termination = lattice_lines_analyzer.default_termination
 
         lattice_lines_config = CrystalLatticeLinesUniqueRepeatedConfiguration(
             crystal=material,
-            miller_indices_uv=miller_indices_uv,
+            miller_indices_2d=miller_indices_2d,
             termination_top=termination,
             number_of_repetitions_width=width,
             number_of_repetitions_length=length,

@@ -7,7 +7,7 @@ from .configuration import (
     CrystalLatticeLinesUniqueRepeatedConfiguration,
 )
 from .. import BaseSingleBuilder
-from ...analyze.lattice_lines import CrystalLatticeLinesAnalyzer
+from ...analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...operations.core.unary import supercell, translate
 
@@ -22,8 +22,8 @@ class CrystalLatticeLinesBuilder(BaseSingleBuilder):
     use_enforce_convention: bool = True
 
     def _generate(self, configuration: CrystalLatticeLinesConfiguration) -> Material:
-        crystal_lattice_lines_analyzer = CrystalLatticeLinesAnalyzer(
-            material=configuration.crystal, miller_indices_uv=configuration.miller_indices_uv
+        crystal_lattice_lines_analyzer = CrystalLatticeLinesMaterialAnalyzer(
+            material=configuration.crystal, miller_indices_2d=configuration.miller_indices_2d
         )
         miller_supercell_matrix = crystal_lattice_lines_analyzer.miller_supercell_matrix
         miller_supercell_material = supercell(configuration.crystal, miller_supercell_matrix)
@@ -55,8 +55,8 @@ class CrystalLatticeLinesRepeatedBuilder(CrystalLatticeLinesBuilder):
     def _generate(self, configuration: CrystalLatticeLinesUniqueRepeatedConfiguration) -> Material:
         crystal_lattice_lines_material = super()._generate(configuration)
 
-        crystal_lattice_lines_analyzer = CrystalLatticeLinesAnalyzer(
-            material=configuration.crystal, miller_indices_uv=configuration.miller_indices_uv
+        crystal_lattice_lines_analyzer = CrystalLatticeLinesMaterialAnalyzer(
+            material=configuration.crystal, miller_indices_2d=configuration.miller_indices_2d
         )
         translation_vector = crystal_lattice_lines_analyzer.get_translation_vector_for_termination_without_vacuum(
             configuration.termination_top
