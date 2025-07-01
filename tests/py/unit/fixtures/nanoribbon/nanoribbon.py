@@ -1,7 +1,7 @@
 from functools import reduce
 from typing import Any, Dict
 
-from .monolayer import GRAPHENE
+from ..monolayer import GRAPHENE
 
 GRAPHENE_ZIGZAG_NANORIBBON: Dict[str, Any] = {
     "name": "Graphene (Zigzag nanoribbon)",

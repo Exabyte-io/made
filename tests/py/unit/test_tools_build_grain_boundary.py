@@ -1,10 +1,10 @@
 import pytest
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryAnalyzer
 from mat3ra.made.tools.build.grain_boundary.builders import GrainBoundaryBuilder
 from mat3ra.made.tools.build.grain_boundary.configuration import GrainBoundaryConfiguration
 from mat3ra.made.tools.build.grain_boundary.helpers import create_grain_boundary_planar
+
 from .fixtures.bulk import BULK_Si_CONVENTIONAL
 from .fixtures.grain_boundary import GRAIN_BOUNDARY_SI_001_011
 from .utils import assert_two_entities_deep_almost_equal

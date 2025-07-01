@@ -8,7 +8,7 @@ from .configuration import (
     InterfaceConfiguration,
     NanoRibbonTwistedInterfaceConfiguration,
 )
-from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
+from ..nanoribbon import create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.builders import SlabWithGapBuilder
 from ..slab.configurations import SlabStrainedSupercellConfiguration
@@ -98,18 +98,16 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
     ) = NanoRibbonTwistedInterfaceConfiguration  # type: ignore
 
     def _generate(self, configuration: _ConfigurationType) -> List[Material]:
-        bottom_nanoribbon_configuration = NanoribbonConfiguration(
+        bottom_ribbon = create_nanoribbon(
             material=configuration.substrate,
             width=configuration.ribbon_width,
             length=configuration.ribbon_length,
         )
-        bottom_ribbon = create_nanoribbon(bottom_nanoribbon_configuration)
-        top_ribbon_configuration = NanoribbonConfiguration(
+        top_ribbon = create_nanoribbon(
             material=configuration.film,
             width=configuration.ribbon_width,
             length=configuration.ribbon_length,
         )
-        top_ribbon = create_nanoribbon(top_ribbon_configuration)
         top_ribbon = rotate(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
 
         translation_vector = [0, 0, configuration.distance_z]
