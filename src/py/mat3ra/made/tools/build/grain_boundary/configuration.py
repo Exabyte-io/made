@@ -2,47 +2,65 @@ from typing import Optional, List, Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from .. import BaseConfiguration
 from ..slab.configurations import SlabConfiguration
 from ..slab.entities import Termination
 from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 
+from ..interface.configuration import InterfaceConfiguration
+from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
+from ..vacuum.configuration import VacuumConfiguration
 
-class SlabGrainBoundaryConfiguration(BaseConfiguration):
+
+class GrainBoundaryConfiguration(InterfaceConfiguration):
     """
-    Configuration for a grain boundary between two phases with different surfaces facing each other.
-
-    Attributes:
-        phase_1_configuration (SlabConfiguration): The configuration of the first phase.
-        phase_2_configuration (SlabConfiguration): The configuration of the second phase.
-        phase_1_termination (Termination): The termination of the first phase.
-        phase_2_termination (Termination): The termination of the second phase.
-        gap (float): The gap between the two phases, in Angstroms.
-        slab_configuration (SlabConfiguration): The configuration of the grain boundary slab.
-        slab_termination (Optional[Termination]): The termination of the grain boundary slab.
+    Configuration for creating a grain boundary between two phases.
     """
 
-    phase_1_configuration: SlabConfiguration
-    phase_2_configuration: SlabConfiguration
-    phase_1_termination: Termination
-    phase_2_termination: Termination
-    gap: float = 3.0
-    slab_configuration: SlabConfiguration
-    slab_termination: Optional[Termination] = None
+    direction: AxisEnum = AxisEnum.z
 
     @property
-    def _json(self):
-        return {
-            "type": self.__class__.__name__,
-            "phase_1_configuration": self.phase_1_configuration.to_json(),
-            "phase_2_configuration": self.phase_2_configuration.to_json(),
-            "phase_1_termination": str(self.phase_1_termination),
-            "phase_2_termination": str(self.phase_2_termination),
-            "gap": self.gap,
-            "slab_configuration": self.slab_configuration.to_json(),
-        }
+    def phase_1_configuration(self) -> SlabConfiguration:
+        return self.stack_components[0]
 
+    @property
+    def phase_2_configuration(self) -> SlabConfiguration:
+        return self.stack_components[1]
+
+    # @property
+    # def translation_vector(self) -> List[float]:
+    #     return [0.0, self.xy_shift[0], self.xy_shift[1]]
+
+    @property
+    def vacuum_configuration(self) -> VacuumConfiguration:
+        if len(self.stack_components) > 2:
+            return self.stack_components[2]
+        return VacuumConfiguration(
+            size=0.0, crystal=self.film_configuration.atomic_layers.crystal, direction=self.direction
+        )
+
+    @classmethod
+    def from_parameters(
+        cls,
+        phase_1_configuration: SlabConfiguration,
+        phase_2_configuration: SlabConfiguration,
+        xy_shift: Optional[List[float]] = None,
+        gap: Optional[float] = None,
+    ) -> "GrainBoundaryConfiguration":
+        if xy_shift is None:
+            xy_shift = [0.0, 0.0]
+
+        if gap and gap > 0:
+            phase_1_config = SlabStrainedSupercellWithGapConfiguration(**phase_1_configuration.to_dict(), gap=gap)
+            phase_2_config = SlabStrainedSupercellWithGapConfiguration(**phase_2_configuration.to_dict(), gap=gap)
+        else:
+            phase_1_config = phase_1_configuration
+            phase_2_config = phase_2_configuration
+
+        stack_components = [phase_1_config, phase_2_config]
+        return cls(stack_components=stack_components, direction=AxisEnum.z, xy_shift=xy_shift)
 
 class GrainBoundaryLinearConfiguration(StackConfiguration):
     """

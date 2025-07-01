@@ -4,8 +4,11 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
-from .builders import GrainBoundaryLinearBuilder, SlabGrainBoundaryBuilder, SlabGrainBoundaryBuilderParameters
-from .configuration import GrainBoundaryLinearConfiguration, SlabGrainBoundaryConfiguration
+from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryAnalyzer
+from .builders import GrainBoundaryBuilder
+from .builders import GrainBoundaryLinearBuilder
+from .configuration import GrainBoundaryConfiguration
+from .configuration import GrainBoundaryLinearConfiguration
 from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
 
 
@@ -16,78 +19,59 @@ def create_grain_boundary_planar(
     phase_2_miller_indices: Tuple[int, int, int] = (0, 0, 1),
     phase_1_thickness: int = 1,
     phase_2_thickness: int = 1,
+    translation_vector: List[float] = [0.0, 0.0],
     gap: float = 3.0,
-    slab_vacuum: float = 1.0,
-    slab_xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]],
+    max_area: float = 50.0,
+    match_id: int = 0,
+    max_area_ratio_tol: float = 0.09,
+    max_length_tol: float = 0.03,
+    max_angle_tol: float = 0.01,
 ) -> Material:
     """
     Create a planar grain boundary between two materials with different orientations.
 
-    This function creates a grain boundary by:
-    1. Creating slab configurations for both phases
-    2. Creating an interface between the phases
-    3. Rotating the interface by 90 degrees to create a planar grain boundary
-
     Args:
-        phase_1_material (Material): First phase material.
-        phase_2_material (Optional[Material]): Second phase material. If None, uses phase_1_material.
-        phase_1_miller_indices (Tuple[int, int, int]): Miller indices for phase 1.
-        phase_2_miller_indices (Tuple[int, int, int]): Miller indices for phase 2.
-        phase_1_thickness (int): Number of layers for phase 1.
-        phase_2_thickness (int): Number of layers for phase 2.
-        gap (float): Gap between phases in Angstroms.
-        slab_vacuum (float): Vacuum for the final slab in Angstroms.
-        slab_xy_supercell_matrix (List[List[int]]): Supercell matrix for the final slab.
+        phase_1_material: First phase material
+        phase_2_material: Second phase material
+        phase_1_miller_indices: Miller indices for phase 1
+        phase_2_miller_indices: Miller indices for phase 2
+        phase_1_thickness: Number of layers for phase 1
+        phase_2_thickness: Number of layers for phase 2
+        translation_vector: Relative shift between phases [x, y, z]
+        gap: Gap between phases in Angstroms
+        match_id: ZSL match ID to use (0 for first match)
+        max_area: Maximum area for ZSL matching
+        max_area_ratio_tol: Area ratio tolerance for ZSL matching
+        max_length_tol: Length tolerance for ZSL matching
+        max_angle_tol: Angle tolerance for ZSL matching
 
     Returns:
-        Material: The planar grain boundary material.
+        Material: The grain boundary material
     """
-    if phase_2_material is None:
-        phase_2_material = phase_1_material
-
-    # Create slab configurations for both phases
-    phase_1_configuration = SlabConfiguration.from_parameters(
-        material_or_dict=phase_1_material,
-        miller_indices=phase_1_miller_indices,
-        number_of_layers=phase_1_thickness,
-        vacuum=0.0,
-    )
-    phase_2_configuration = SlabConfiguration.from_parameters(
-        material_or_dict=phase_2_material,
-        miller_indices=phase_2_miller_indices,
-        number_of_layers=phase_2_thickness,
-        vacuum=0.0,
+    analyzer = GrainBoundaryAnalyzer(
+        phase_1_material=phase_1_material,
+        phase_2_material=phase_2_material if phase_2_material else phase_1_material,
+        phase_1_miller_indices=phase_1_miller_indices,
+        phase_2_miller_indices=phase_2_miller_indices,
+        phase_1_thickness=phase_1_thickness,
+        phase_2_thickness=phase_2_thickness,
+        max_area=max_area,
+        max_area_ratio_tol=max_area_ratio_tol,
+        max_length_tol=max_length_tol,
+        max_angle_tol=max_angle_tol,
     )
 
-    # Get terminations
-    termination1 = phase_1_configuration.get_terminations()[0]
-    termination2 = phase_2_configuration.get_terminations()[0]
+    strained_config = analyzer.get_grain_boundary_configuration_by_match_id(match_id)
 
-    # Create slab configuration for the final grain boundary
-    slab_config = SlabConfiguration.from_parameters(
-        material_or_dict=phase_1_material,
-        miller_indices=phase_1_miller_indices,
-        number_of_layers=phase_1_thickness,
-        vacuum=slab_vacuum,
-        xy_supercell_matrix=slab_xy_supercell_matrix,
-    )
-
-    # Create grain boundary configuration
-    config = SlabGrainBoundaryConfiguration(
-        phase_1_configuration=phase_1_configuration,
-        phase_2_configuration=phase_2_configuration,
-        phase_1_termination=termination1,
-        phase_2_termination=termination2,
+    gb_config = GrainBoundaryConfiguration.from_parameters(
+        phase_1_configuration=strained_config.substrate_configuration,
+        phase_2_configuration=strained_config.film_configuration,
+        xy_shift=translation_vector,
         gap=gap,
-        slab_configuration=slab_config,
     )
 
-    # Build the grain boundary
-    builder_params = SlabGrainBoundaryBuilderParameters()
-    builder = SlabGrainBoundaryBuilder(build_parameters=builder_params)
-    grain_boundary = builder.get_material(config)
-
-    return grain_boundary
+    builder = GrainBoundaryBuilder()
+    return builder.get_material(gb_config)
 
 
 def create_grain_boundary_linear(
@@ -131,7 +115,6 @@ def create_grain_boundary_linear(
     Raises:
         ValueError: If no commensurate lattice matches are found.
     """
-    # Create slab configuration from the material
     slab_config = SlabConfiguration.from_parameters(
         material_or_dict=material,
         miller_indices=miller_indices,
@@ -139,7 +122,6 @@ def create_grain_boundary_linear(
         vacuum=vacuum,
     )
 
-    # Find commensurate lattice matches using the analyzer
     analyzer = CommensurateLatticeInterfaceAnalyzer(
         substrate_slab_configuration=slab_config,
         target_angle=target_angle,
@@ -153,10 +135,8 @@ def create_grain_boundary_linear(
     if not match_holders:
         raise ValueError(f"No commensurate lattice matches found for angle {target_angle}°")
 
-    # Get the first match
     selected_config = analyzer.get_strained_configuration_by_match_id(0)
 
-    # Create strained configurations with gap
     substrate_config_with_gap = SlabStrainedSupercellWithGapConfiguration(
         **selected_config.substrate_configuration.to_dict(), gap=gap
     )
@@ -164,14 +144,12 @@ def create_grain_boundary_linear(
         **selected_config.film_configuration.to_dict(), gap=gap
     )
 
-    # Create grain boundary configuration
     grain_boundary_config = GrainBoundaryLinearConfiguration(
         stack_components=[substrate_config_with_gap, film_config_with_gap],
         direction=direction,
         gap=gap,
     )
 
-    # Build the grain boundary using default parameters
     builder = GrainBoundaryLinearBuilder()
     grain_boundary = builder.get_material(grain_boundary_config)
 
