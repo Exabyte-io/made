@@ -1,13 +1,11 @@
 from typing import Type
 
 from mat3ra.made.material import Material
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from ..interface.builders import InterfaceBuilder, InterfaceBuilderParameters
-from ...convert.utils import InterfacePartsEnum
 from .configuration import GrainBoundaryConfiguration
+from ..interface.builders import InterfaceBuilder, InterfaceBuilderParameters
 from ...analyze.other import get_chemical_formula
-from ...operations.core.unary import supercell
 from ...modify import wrap_to_unit_cell
+from ...operations.core.unary import supercell
 
 
 class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):

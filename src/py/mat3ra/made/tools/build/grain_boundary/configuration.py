@@ -22,9 +22,9 @@ class GrainBoundaryConfiguration(InterfaceConfiguration):
     def phase_2_configuration(self) -> SlabConfiguration:
         return self.stack_components[1]
 
-    @property
-    def translation_vector(self) -> List[float]:
-        return [0.0, self.xy_shift[0], self.xy_shift[1]]
+    # @property
+    # def translation_vector(self) -> List[float]:
+    #     return [0.0, self.xy_shift[0], self.xy_shift[1]]
 
     @property
     def vacuum_configuration(self) -> VacuumConfiguration:

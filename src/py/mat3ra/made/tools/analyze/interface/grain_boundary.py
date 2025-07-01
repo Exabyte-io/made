@@ -13,8 +13,6 @@ from pydantic import model_validator
 
 
 class GrainBoundaryMatchHolder(InMemoryEntityPydantic):
-    """Holder for grain boundary match information."""
-
     match_id: int
     substrate_transformation_matrix: SupercellMatrix2DSchema
     film_transformation_matrix: SupercellMatrix2DSchema
@@ -27,7 +25,7 @@ class GrainBoundaryAnalyzer(ZSLInterfaceAnalyzer):
     """
     Analyzer for creating grain boundaries between two orientations of the same material.
 
-    Inherits from ZSLInterfaceAnalyzer to find matching supercells between two phases with different
+    Uses ZSL to find matching supercells between two phases with different
     orientations, then stacks them in x/y direction to create a grain boundary configuration.
     """
 
