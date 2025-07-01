@@ -1,44 +1,31 @@
 from typing import Any, List, Optional, Type
 
-import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
 from pydantic import BaseModel
-from pymatgen.analysis.interfaces.coherent_interfaces import (
-    CoherentInterfaceBuilder,
-    ZSLGenerator,
-)
 
 from mat3ra.made.material import Material
-
 from .configuration import (
     InterfaceConfiguration,
     NanoRibbonTwistedInterfaceConfiguration,
 )
-from .enums import StrainModes
-from .termination_pair import TerminationPair, safely_select_termination_pair
-from .utils import interface_patch_with_mean_abs_strain, remove_duplicate_interfaces
-from ..mixins import (
-    ConvertGeneratedItemsPymatgenStructureMixin,
-)
 from ..nanoribbon import NanoribbonConfiguration, create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
-from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..slab.builders import SlabWithGapBuilder
+from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ..utils import merge_materials
 from ...analyze.other import get_chemical_formula
-from ...build import BaseBuilder, BaseBuilderParameters
-from ...convert import to_pymatgen, PymatgenInterface
+from ...build import BaseBuilder
 from ...convert.utils import InterfacePartsEnum
 from ...modify import (
-    translate_to_z_level,
     rotate,
     translate_by_vector,
     add_vacuum_sides,
     wrap_to_unit_cell,
 )
+from ...utils import AXIS_TO_INDEX_MAP
 
 
 class InterfaceBuilderParameters(InMemoryEntityPydantic):
@@ -70,7 +57,13 @@ class InterfaceBuilder(StackNComponentsBuilder):
         film_material.set_labels_from_value(InterfacePartsEnum.FILM)
         substrate_material.set_labels_from_value(InterfacePartsEnum.SUBSTRATE)
 
-        film_material = translate_by_vector(film_material, configuration.xy_shift + [0], use_cartesian_coordinates=True)
+        stacking_axis = AXIS_TO_INDEX_MAP[configuration.direction.value]
+        other_axes = [i for i in range(3) if i != stacking_axis]
+        translation_vector = [0.0, 0.0, 0.0]
+        translation_vector[other_axes[0]] = configuration.xy_shift[0]
+        translation_vector[other_axes[1]] = configuration.xy_shift[1]
+
+        film_material = translate_by_vector(film_material, translation_vector, use_cartesian_coordinates=True)
         stack_configuration = StackConfiguration(
             stack_components=[substrate_material, film_material, configuration.vacuum_configuration],
             direction=configuration.direction,
@@ -91,94 +84,6 @@ class InterfaceBuilder(StackNComponentsBuilder):
         name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
         material.name = name
         return material
-
-
-########################################################################################
-#                       Strain Matching Interface Builders                             #
-########################################################################################
-class StrainMatchingInterfaceBuilderParameters(BaseBuilderParameters):
-    strain_matching_parameters: Optional[Any] = None
-
-
-class StrainMatchingInterfaceBuilder(InterfaceBuilder):
-    _BuildParametersType = StrainMatchingInterfaceBuilderParameters  # type: ignore
-
-    def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        updated_material = super()._update_material_name(material, configuration)
-        if StrainModes.mean_abs_strain in material.metadata:
-            strain = material.metadata[StrainModes.mean_abs_strain]
-            new_name = f"{updated_material.name}, Strain {strain*100:.3f}pct"
-            updated_material.name = new_name
-        return updated_material
-
-
-class ZSLStrainMatchingParameters(BaseModel):
-    max_area: float = 50.0
-    max_area_ratio_tol: float = 0.09
-    max_length_tol: float = 0.03
-    max_angle_tol: float = 0.01
-
-
-class ZSLStrainMatchingInterfaceBuilderParameters(StrainMatchingInterfaceBuilderParameters):
-    strain_matching_parameters: ZSLStrainMatchingParameters = ZSLStrainMatchingParameters()
-
-
-class ZSLStrainMatchingInterfaceBuilder(ConvertGeneratedItemsPymatgenStructureMixin, StrainMatchingInterfaceBuilder):
-    """
-    Creates matching interface between substrate and film using the ZSL algorithm.
-    """
-
-    _BuildParametersType: type(  # type: ignore
-        ZSLStrainMatchingInterfaceBuilderParameters
-    ) = ZSLStrainMatchingInterfaceBuilderParameters  # type: ignore
-    _GeneratedItemType: PymatgenInterface = PymatgenInterface  # type: ignore
-
-    def _generate(self, configuration: InterfaceConfiguration) -> List[PymatgenInterface]:
-        generator = ZSLGenerator(**self.build_parameters.strain_matching_parameters.model_dump())
-        substrate_with_atoms_translated_to_bottom = translate_to_z_level(
-            configuration.substrate_configuration.bulk, "bottom"
-        )
-        film_with_atoms_translated_to_bottom = translate_to_z_level(configuration.film_configuration.bulk, "bottom")
-        builder = CoherentInterfaceBuilder(
-            substrate_structure=to_pymatgen(substrate_with_atoms_translated_to_bottom),
-            film_structure=to_pymatgen(film_with_atoms_translated_to_bottom),
-            substrate_miller=configuration.substrate_configuration.miller_indices,
-            film_miller=configuration.film_configuration.miller_indices,
-            zslgen=generator,
-        )
-
-        generated_termination_pairs = [
-            TerminationPair.from_pymatgen(pymatgen_termination) for pymatgen_termination in builder.terminations
-        ]
-        termination_pair = safely_select_termination_pair(configuration.termination_pair, generated_termination_pairs)
-        interfaces = builder.get_interfaces(
-            termination=termination_pair.to_pymatgen(),
-            gap=configuration.distance_z,
-            vacuum_over_film=configuration.vacuum,
-            film_thickness=configuration.film_configuration.number_of_layers,
-            substrate_thickness=configuration.substrate_configuration.number_of_layers,
-            in_layers=True,
-        )
-
-        return list([interface_patch_with_mean_abs_strain(interface) for interface in interfaces])
-
-    def _sort(self, items: List[_GeneratedItemType]):
-        sorted_by_num_sites = sorted(items, key=lambda x: x.num_sites)
-        sorted_by_num_sites_and_strain = sorted(
-            sorted_by_num_sites, key=lambda x: np.mean(x.interface_properties[StrainModes.mean_abs_strain])
-        )
-        unique_sorted_interfaces = remove_duplicate_interfaces(
-            sorted_by_num_sites_and_strain, strain_mode=StrainModes.mean_abs_strain
-        )
-        return unique_sorted_interfaces
-
-    def _post_process(self, items: List[_GeneratedItemType], post_process_parameters=None) -> List[Material]:
-        materials = super()._post_process(items, post_process_parameters)
-        strains = [interface.interface_properties[StrainModes.mean_abs_strain] for interface in items]
-
-        for material, strain in zip(materials, strains):
-            material.metadata["mean_abs_strain"] = strain
-        return materials
 
 
 ########################################################################################

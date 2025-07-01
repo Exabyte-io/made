@@ -1,61 +1,40 @@
 from typing import List, Type
 
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder, BaseBuilderParameters
+from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceBuilderParameters
+from mat3ra.made.tools.build.slab.builders import SlabStrainedSupercellBuilder
+from mat3ra.made.tools.build.stack.builders import Stack2ComponentsBuilder
+from mat3ra.made.tools.build.stack.configuration import StackConfiguration
 from mat3ra.made.tools.build.utils import stack_two_materials_xy
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.modify import translate_by_vector
 from .configuration import GrainBoundaryConfiguration, GrainBoundaryWithVacuumConfiguration
+from ..interface import InterfaceConfiguration
 from ...analyze.other import get_chemical_formula
 
 
-class GrainBoundaryBuilderParameters(BaseBuilderParameters):
-    """Parameters for grain boundary builder."""
-
+class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):
     pass
 
 
-class GrainBoundaryBuilder(BaseBuilder):
+class GrainBoundaryBuilder(InterfaceBuilder):
     """
     Builder for creating grain boundaries.
 
-    Creates a grain boundary by stacking two phases in x/y direction
-    with a relative shift perpendicular to the interface.
+    Inherits from InterfaceBuilder but stacks materials in x direction instead of z,
+    with shift applied in y,z directions and gap in x direction.
     """
 
     _BuildParametersType: Type[GrainBoundaryBuilderParameters] = GrainBoundaryBuilderParameters
     _DefaultBuildParameters = GrainBoundaryBuilderParameters()
-    _ConfigurationType: Type[GrainBoundaryConfiguration] = GrainBoundaryConfiguration
-    _GeneratedItemType: Material = Material
 
-    def _generate(self, configuration: GrainBoundaryConfiguration) -> List[Material]:
-        # Get the strained configurations from the analyzer
-        phase_1_config = configuration.phase_1_configuration
-        phase_2_config = configuration.phase_2_configuration
+    def _generate(self, configuration: GrainBoundaryConfiguration) -> Material:
+        interface_config = InterfaceConfiguration(...)
 
-        # Create materials from the strained configurations
-        from mat3ra.made.tools.build.slab.builders import SlabStrainedSupercellBuilder
-
-        phase_1_builder = SlabStrainedSupercellBuilder()
-        phase_1_material = phase_1_builder.get_material(phase_1_config.substrate_configuration)
-
-        phase_2_builder = SlabStrainedSupercellBuilder()
-        phase_2_material = phase_2_builder.get_material(phase_2_config.film_configuration)
-
-        # Apply translation to phase 2 if specified
-        if any(v != 0.0 for v in configuration.translation_vector):
-            phase_2_material = translate_by_vector(phase_2_material, configuration.translation_vector)
-
-        # Stack the materials in x/y direction with gap
-        grain_boundary = stack_two_materials_xy(
-            phase_1_material,
-            phase_2_material,
-            gap=configuration.gap,
-            edge_inclusion_tolerance=1.0,
-            distance_tolerance=1.0,
-        )
-
-        return [grain_boundary]
+        return super()._generate(interface_config)
 
     def _update_material_name(self, material: Material, configuration: GrainBoundaryConfiguration) -> Material:
         phase_1_formula = get_chemical_formula(
@@ -94,11 +73,6 @@ class GrainBoundaryWithVacuumBuilder(BaseBuilder):
     _GeneratedItemType: Material = Material
 
     def _generate(self, configuration: GrainBoundaryWithVacuumConfiguration) -> List[Material]:
-        # Add vacuum directly to the grain boundary material
-        from mat3ra.made.tools.build.stack.configuration import StackConfiguration
-        from mat3ra.made.tools.build.stack.builders import Stack2ComponentsBuilder
-        from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
         # Create vacuum configuration
         vacuum_config = VacuumConfiguration(
             size=configuration.vacuum,

@@ -31,42 +31,6 @@ class GrainBoundaryAnalyzer(ZSLInterfaceAnalyzer):
     orientations, then stacks them in x/y direction to create a grain boundary configuration.
     """
 
-    phase_1_material: Material
-    phase_2_material: Material
-    phase_1_miller_indices: Tuple[int, int, int]
-    phase_2_miller_indices: Tuple[int, int, int]
-    phase_1_thickness: int = 1
-    phase_2_thickness: int = 1
-
-    @model_validator(mode="before")
-    @classmethod
-    def _setup_slab_configurations(cls, values):
-        phase_1_material = values.get("phase_1_material")
-        phase_2_material = values.get("phase_2_material")
-        phase_1_miller_indices = values.get("phase_1_miller_indices")
-        phase_2_miller_indices = values.get("phase_2_miller_indices")
-        phase_1_thickness = values.get("phase_1_thickness", 1)
-        phase_2_thickness = values.get("phase_2_thickness", 1)
-
-        if all([phase_1_material, phase_2_material, phase_1_miller_indices, phase_2_miller_indices]):
-            substrate_slab_config = SlabConfiguration.from_parameters(
-                material_or_dict=phase_1_material,
-                miller_indices=phase_1_miller_indices,
-                number_of_layers=phase_1_thickness,
-                vacuum=0.0,
-            )
-            film_slab_config = SlabConfiguration.from_parameters(
-                material_or_dict=phase_2_material,
-                miller_indices=phase_2_miller_indices,
-                number_of_layers=phase_2_thickness,
-                vacuum=0.0,
-            )
-
-            values["substrate_slab_configuration"] = substrate_slab_config
-            values["film_slab_configuration"] = film_slab_config
-
-        return values
-
     @property
     def grain_boundary_match_holders(self) -> List[GrainBoundaryMatchHolder]:
         zsl_matches = self.zsl_match_holders
