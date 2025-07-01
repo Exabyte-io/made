@@ -4,6 +4,7 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from ..interface.configuration import InterfaceConfiguration
 from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
+from ..vacuum.configuration import VacuumConfiguration
 
 
 class GrainBoundaryConfiguration(InterfaceConfiguration):
@@ -11,7 +12,7 @@ class GrainBoundaryConfiguration(InterfaceConfiguration):
     Configuration for creating a grain boundary between two phases.
     """
 
-    direction: AxisEnum = AxisEnum.x
+    direction: AxisEnum = AxisEnum.z
 
     @property
     def phase_1_configuration(self) -> SlabConfiguration:
@@ -24,6 +25,14 @@ class GrainBoundaryConfiguration(InterfaceConfiguration):
     @property
     def translation_vector(self) -> List[float]:
         return [0.0, self.xy_shift[0], self.xy_shift[1]]
+
+    @property
+    def vacuum_configuration(self) -> VacuumConfiguration:
+        if len(self.stack_components) > 2:
+            return self.stack_components[2]
+        return VacuumConfiguration(
+            size=0.0, crystal=self.film_configuration.atomic_layers.crystal, direction=self.direction
+        )
 
     @classmethod
     def from_parameters(
@@ -44,4 +53,4 @@ class GrainBoundaryConfiguration(InterfaceConfiguration):
             phase_2_config = phase_2_configuration
 
         stack_components = [phase_1_config, phase_2_config]
-        return cls(stack_components=stack_components, direction=AxisEnum.x, xy_shift=xy_shift)
+        return cls(stack_components=stack_components, direction=AxisEnum.z, xy_shift=xy_shift)
