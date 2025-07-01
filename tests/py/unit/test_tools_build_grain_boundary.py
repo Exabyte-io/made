@@ -44,18 +44,32 @@ def test_create_grain_boundary_planar(
     assert_two_entities_deep_almost_equal(grain_boundary, expected_material_config)
 
 
-def test_grain_boundary_builder():
-    """Test the GrainBoundaryBuilder directly."""
-    max_area = 150
-    phase_1_material = Material.create(BULK_Si_CONVENTIONAL)
-    phase_2_material = Material.create(BULK_Si_CONVENTIONAL)
+@pytest.mark.parametrize(
+    "material_config, phase_1_miller, phase_2_miller, gap, translation_vector, max_area, expected_material_config",
+    [
+        (
+            BULK_Si_CONVENTIONAL,
+            (0, 0, 1),
+            (0, 1, 1),
+            2.0,
+            [2.0, 1.0],
+            150,
+            GRAIN_BOUNDARY_SI_001_011,
+        ),
+    ],
+)
+def test_grain_boundary_builder(
+    material_config, phase_1_miller, phase_2_miller, gap, translation_vector, max_area, expected_material_config
+):
+    phase_1_material = Material.create(material_config)
+    phase_2_material = Material.create(material_config)
 
     # Create analyzer and get configuration
     analyzer = GrainBoundaryAnalyzer(
         phase_1_material=phase_1_material,
         phase_2_material=phase_2_material,
-        phase_1_miller_indices=(0, 0, 1),
-        phase_2_miller_indices=(1, 1, 1),
+        phase_1_miller_indices=phase_1_miller,
+        phase_2_miller_indices=phase_2_miller,
         phase_1_thickness=1,
         phase_2_thickness=1,
         max_area=max_area,
@@ -67,13 +81,12 @@ def test_grain_boundary_builder():
     config = GrainBoundaryConfiguration.from_parameters(
         phase_1_configuration=strained_config.substrate_configuration,
         phase_2_configuration=strained_config.film_configuration,
-        xy_shift=[0.0, 0.0],
-        gap=3.0,
+        xy_shift=translation_vector,
+        gap=gap,
     )
 
     # Build grain boundary
     builder = GrainBoundaryBuilder()
     grain_boundary = builder.get_material(config)
 
-    assert isinstance(grain_boundary, Material)
-    assert len(grain_boundary.basis.elements.values) > 0
+    assert_two_entities_deep_almost_equal(grain_boundary, expected_material_config)
