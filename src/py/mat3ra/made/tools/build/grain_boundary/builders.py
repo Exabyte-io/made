@@ -1,7 +1,7 @@
 from typing import Type
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceBuilderParameters
+from ..interface.builders import InterfaceBuilder, InterfaceBuilderParameters
 from .configuration import GrainBoundaryConfiguration
 from ...analyze.other import get_chemical_formula
 
@@ -13,17 +13,12 @@ class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):
 class GrainBoundaryBuilder(InterfaceBuilder):
     """
     Builder for creating grain boundaries.
-
-    Inherits from InterfaceBuilder but stacks materials in x direction instead of z,
-    with shift applied in y,z directions and gap in x direction.
     """
 
     _BuildParametersType: Type[GrainBoundaryBuilderParameters] = GrainBoundaryBuilderParameters
     _DefaultBuildParameters = GrainBoundaryBuilderParameters()
 
     def _generate(self, configuration: GrainBoundaryConfiguration) -> Material:
-        # Since GrainBoundaryConfiguration now inherits from InterfaceConfiguration,
-        # we can use the parent's _generate method directly
         return super()._generate(configuration)
 
     def _update_material_name(self, material: Material, configuration: GrainBoundaryConfiguration) -> Material:
