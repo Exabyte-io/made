@@ -1,4 +1,4 @@
-from typing import Optional, Union, List, Tuple
+from typing import Optional, List, Tuple
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
@@ -8,7 +8,8 @@ from .configuration import GrainBoundaryPlanarConfiguration
 
 
 def create_grain_boundary_planar(
-    material: Material,
+    phase_1_material: Material,
+    phase_2_material: Optional[Material] = None,
     phase_1_miller_indices: Tuple[int, int, int] = (0, 0, 1),
     phase_2_miller_indices: Tuple[int, int, int] = (0, 0, 1),
     phase_1_thickness: int = 1,
@@ -25,7 +26,7 @@ def create_grain_boundary_planar(
     Create a planar grain boundary between two materials with different orientations.
 
     Args:
-        material: The material to use for each phase of the grain boundary
+        phase_1_material: The material to use for each phase of the grain boundary
         phase_1_miller_indices: Miller indices for phase 1
         phase_2_miller_indices: Miller indices for phase 2
         phase_1_thickness: Number of layers for phase 1
@@ -41,11 +42,9 @@ def create_grain_boundary_planar(
     Returns:
         Material: The grain boundary material
     """
-    phase_1_material = material
-    phase_2_material = material
     analyzer = GrainBoundaryPlanarAnalyzer(
         phase_1_material=phase_1_material,
-        phase_2_material=phase_2_material,
+        phase_2_material=phase_2_material or phase_1_material,
         phase_1_miller_indices=phase_1_miller_indices,
         phase_2_miller_indices=phase_2_miller_indices,
         phase_1_thickness=phase_1_thickness,

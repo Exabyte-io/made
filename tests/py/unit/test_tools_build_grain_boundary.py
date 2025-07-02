@@ -30,7 +30,7 @@ def test_create_grain_boundary_planar(
     material = Material.create(material_config)
 
     grain_boundary = create_grain_boundary_planar(
-        material=material,
+        phase_1_material=material,
         phase_1_miller_indices=phase_1_miller,
         phase_2_miller_indices=phase_2_miller,
         phase_1_thickness=1,
