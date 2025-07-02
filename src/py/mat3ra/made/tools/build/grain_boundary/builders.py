@@ -12,7 +12,7 @@ class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):
     pass
 
 
-class GrainBoundaryBuilder(InterfaceBuilder):
+class GrainBoundaryPlanarBuilder(InterfaceBuilder):
     """
     Builder for creating grain boundaries.
 
