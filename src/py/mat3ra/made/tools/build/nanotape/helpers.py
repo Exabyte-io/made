@@ -1,10 +1,13 @@
 from typing import Tuple, Optional
 
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.entities import Termination
 from . import NanoTapeConfiguration
 from .builders import NanoTapeBuilder, NanoTapeBuilderParameters
-from ..lattice_lines.configuration import EdgeTypes, get_miller_indices_from_edge_type
+from ..lattice_lines.configuration import EdgeTypes
+from ..lattice_lines_utils import create_lattice_lines_config_and_material, create_vacuum_config
 
 
 def create_nanotape(
@@ -33,18 +36,23 @@ def create_nanotape(
     Returns:
         Material: The generated nanotape material.
     """
-    if miller_indices_2d is None:
-        miller_indices_2d = get_miller_indices_from_edge_type(edge_type)
-
-    config = NanoTapeConfiguration.from_parameters(
+    lattice_lines_config, lattice_lines_material = create_lattice_lines_config_and_material(
         material=material,
         miller_indices_2d=miller_indices_2d,
+        edge_type=edge_type,
         width=width,
         length=length,
-        vacuum_width=vacuum_width,
         termination=termination,
     )
-
+    vacuum_config = create_vacuum_config(
+        size=vacuum_width,
+        crystal=lattice_lines_material,
+        direction=AxisEnum.y,
+    )
+    config = NanoTapeConfiguration(
+        stack_components=[lattice_lines_config, vacuum_config],
+        direction=AxisEnum.y,
+    )
     builder = NanoTapeBuilder(
         build_parameters=NanoTapeBuilderParameters(use_rectangular_lattice=use_rectangular_lattice)
     )
