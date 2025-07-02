@@ -3,11 +3,11 @@ from typing import Tuple, Optional
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab.entities import Termination
 from . import NanoTapeConfiguration
 from .builders import NanoTapeBuilder, NanoTapeBuilderParameters
 from ..lattice_lines.configuration import EdgeTypes
-from ..lattice_lines_utils import create_lattice_lines_config_and_material, create_vacuum_config
+from ..lattice_lines import create_lattice_lines_config_and_material
+from ..vacuum.configuration import VacuumConfiguration
 
 
 def create_nanotape(
@@ -18,7 +18,7 @@ def create_nanotape(
     length: int = 2,
     vacuum_width: float = 10.0,
     use_rectangular_lattice: bool = True,
-    termination: Optional[Termination] = None,
+    termination_formula: Optional[str] = None,
 ) -> Material:
     """
     Creates a nanotape material from a monolayer material.
@@ -31,7 +31,7 @@ def create_nanotape(
         length: The length of the nanotape in number of unit cells.
         vacuum_width: The width of the vacuum region in Angstroms (cartesian).
         use_rectangular_lattice: Whether the nanotape is rectangular.
-        termination: The termination to use for the nanotape. If None, uses default termination.
+        termination_formula: The termination formula to use for the nanotape (e.g., "Si").
 
     Returns:
         Material: The generated nanotape material.
@@ -42,9 +42,9 @@ def create_nanotape(
         edge_type=edge_type,
         width=width,
         length=length,
-        termination=termination,
+        termination_formula=termination_formula,
     )
-    vacuum_config = create_vacuum_config(
+    vacuum_config = VacuumConfiguration(
         size=vacuum_width,
         crystal=lattice_lines_material,
         direction=AxisEnum.y,

@@ -2,7 +2,6 @@ from ..lattice_lines.configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
     EdgeTypes,
-    get_miller_indices_from_edge_type,
 )
 from ..lattice_lines.builders import (
     CrystalLatticeLinesBuilder,
@@ -21,5 +20,4 @@ __all__ = [
     "CrystalLatticeLinesRepeatedBuilder",
     "create_nanoribbon",
     "EdgeTypes",
-    "get_miller_indices_from_edge_type",
 ]

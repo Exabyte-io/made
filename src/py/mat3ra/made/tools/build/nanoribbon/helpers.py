@@ -4,13 +4,13 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder, BaseBuilderParameters
-from mat3ra.made.tools.build.slab.entities import Termination
 from . import NanoribbonConfiguration
 from .builders import NanoribbonBuilder, NanoribbonBuilderParameters
 from ..lattice_lines.configuration import EdgeTypes
-from ..lattice_lines_utils import create_lattice_lines_config_and_material, create_vacuum_config
+from ..lattice_lines import create_lattice_lines_config_and_material
 from ..nanotape.builders import NanoTapeBuilder
 from ..nanotape.configuration import NanoTapeConfiguration
+from ..vacuum.configuration import VacuumConfiguration
 
 T = TypeVar("T", bound=BaseBuilder)
 P = TypeVar("P", bound=BaseBuilderParameters)
@@ -25,7 +25,7 @@ def create_nanoribbon(
     vacuum_width: float = 10.0,
     vacuum_length: float = 10.0,
     use_rectangular_lattice: bool = True,
-    termination: Optional[Termination] = None,
+    termination_formula: Optional[str] = None,
 ) -> Material:
     """
     Creates a nanoribbon material from a monolayer material.
@@ -39,7 +39,7 @@ def create_nanoribbon(
         vacuum_width: The width of the vacuum region in Angstroms (cartesian).
         vacuum_length: The length of the vacuum region in Angstroms (cartesian).
         use_rectangular_lattice: Whether the nanoribbon is rectangular.
-        termination: The termination to use for the nanoribbon. If None, uses default termination.
+        termination_formula: The termination formula to use for the nanoribbon (e.g., "Si").
 
     Returns:
         Material: The generated nanoribbon material.
@@ -50,9 +50,9 @@ def create_nanoribbon(
         edge_type=edge_type,
         width=width,
         length=length,
-        termination=termination,
+        termination_formula=termination_formula,
     )
-    nanotape_vacuum_config = create_vacuum_config(
+    nanotape_vacuum_config = VacuumConfiguration(
         size=vacuum_width,
         crystal=lattice_lines_material,
         direction=AxisEnum.y,
@@ -63,7 +63,7 @@ def create_nanoribbon(
     )
     nanotape_builder = NanoTapeBuilder()
     nanotape_material = nanotape_builder.get_material(nanotape_config)
-    vacuum_config = create_vacuum_config(
+    vacuum_config = VacuumConfiguration(
         size=vacuum_length,
         crystal=nanotape_material,
         direction=AxisEnum.x,
