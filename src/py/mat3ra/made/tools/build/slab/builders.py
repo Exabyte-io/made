@@ -18,6 +18,7 @@ from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extrem
 from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...operations.core.unary import supercell, translate, strain, edit_cell
 from ...utils import AXIS_TO_INDEX_MAP
+import numpy as np
 
 
 class CrystalLatticePlanesBuilder(BaseSingleBuilder):
@@ -123,17 +124,25 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
     def _adjust_lattice_for_gap(self, material: Material, gap: float, direction: AxisEnum) -> Material:
         """
         Adjust the lattice so that the distance from the maximum atomic coordinate in the stacking direction
-        to the end of the cell is exactly the requested gap.
+        to the end of the cell is exactly the requested gap, using fractional coordinates for generality.
         """
         direction_str = direction.value
         axis_index = AXIS_TO_INDEX_MAP[direction_str]
-        topmost = get_atomic_coordinates_extremum(material, "max", direction_str, use_cartesian_coordinates=True)
-        new_length = topmost + gap
 
+        max_frac = get_atomic_coordinates_extremum(
+            material, "max", direction_str, use_cartesian_coordinates=False
+        )
         current_vectors = material.lattice.vector_arrays
-        new_lattice_vectors = list(current_vectors)
-        new_lattice_vectors[axis_index] = [0.0, 0.0, 0.0]
-        new_lattice_vectors[axis_index][axis_index] = new_length
+        current_vector = np.array(current_vectors[axis_index])
+        current_length = np.linalg.norm(current_vector)
 
+        new_length = (max_frac * current_length) + gap
+
+        if current_length > 0:
+            new_vector = (current_vector / current_length) * new_length
+        else:
+            new_vector = current_vector
+        new_lattice_vectors = list(current_vectors)
+        new_lattice_vectors[axis_index] = new_vector.tolist()
         new_material = edit_cell(material, new_lattice_vectors)
         return new_material
