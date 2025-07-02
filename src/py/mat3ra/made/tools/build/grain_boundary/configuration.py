@@ -1,17 +1,16 @@
 from typing import Optional, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.grain_boundary_planar.configuration import (
+    GrainBoundaryPlanarConfigurationSchema,
+)
 
 from ..interface.configuration import InterfaceConfiguration
 from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 
 
-class GrainBoundaryPlanarConfiguration(InterfaceConfiguration):
-    """
-    Configuration for creating a grain boundary between two phases.
-    """
-
+class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundaryPlanarConfigurationSchema):
     direction: AxisEnum = AxisEnum.z
 
     @property
