@@ -5,12 +5,11 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from pydantic import model_validator
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
+from pydantic import model_validator
 
 
 class GrainBoundaryPlanarMatchHolder(InMemoryEntityPydantic):
@@ -40,30 +39,19 @@ class GrainBoundaryPlanarAnalyzer(ZSLInterfaceAnalyzer):
     @model_validator(mode="before")
     @classmethod
     def _setup_slab_configurations(cls, values):
-        phase_1_material = values.get("phase_1_material")
-        phase_2_material = values.get("phase_2_material")
-        phase_1_miller_indices = values.get("phase_1_miller_indices")
-        phase_2_miller_indices = values.get("phase_2_miller_indices")
-        phase_1_thickness = values.get("phase_1_thickness", 1)
-        phase_2_thickness = values.get("phase_2_thickness", 1)
-
-        if all([phase_1_material, phase_2_material, phase_1_miller_indices, phase_2_miller_indices]):
-            substrate_slab_config = SlabConfiguration.from_parameters(
-                material_or_dict=phase_1_material,
-                miller_indices=phase_1_miller_indices,
-                number_of_layers=phase_1_thickness,
-                vacuum=0.0,
-            )
-            film_slab_config = SlabConfiguration.from_parameters(
-                material_or_dict=phase_2_material,
-                miller_indices=phase_2_miller_indices,
-                number_of_layers=phase_2_thickness,
-                vacuum=0.0,
-            )
-
-            values["substrate_slab_configuration"] = substrate_slab_config
-            values["film_slab_configuration"] = film_slab_config
-
+        # we need to create slab configurations for both phases for InterfaceAnalyzer to use
+        values["substrate_slab_configuration"] = SlabConfiguration.from_parameters(
+            material_or_dict=values["phase_1_material"],
+            miller_indices=values["phase_1_miller_indices"],
+            number_of_layers=values.get("phase_1_thickness", 1),
+            vacuum=0.0,
+        )
+        values["film_slab_configuration"] = SlabConfiguration.from_parameters(
+            material_or_dict=values["phase_2_material"],
+            miller_indices=values["phase_2_miller_indices"],
+            number_of_layers=values.get("phase_2_thickness", 1),
+            vacuum=0.0,
+        )
         return values
 
     @property

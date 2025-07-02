@@ -1,11 +1,9 @@
 from typing import Optional, List, Tuple
 
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
-from .builders import GrainBoundaryBuilder
+
+from .builders import GrainBoundaryPlanarBuilder
 from .configuration import GrainBoundaryPlanarConfiguration
 from .builders import GrainBoundaryLinearBuilder
 from .configuration import GrainBoundaryLinearConfiguration
@@ -34,8 +32,7 @@ def create_grain_boundary_planar(
     Create a planar grain boundary between two materials with different orientations.
 
     Args:
-        phase_1_material: First phase material
-        phase_2_material: Second phase material
+        phase_1_material: The material to use for each phase of the grain boundary
         phase_1_miller_indices: Miller indices for phase 1
         phase_2_miller_indices: Miller indices for phase 2
         phase_1_thickness: Number of layers for phase 1
@@ -53,7 +50,7 @@ def create_grain_boundary_planar(
     """
     analyzer = GrainBoundaryPlanarAnalyzer(
         phase_1_material=phase_1_material,
-        phase_2_material=phase_2_material if phase_2_material else phase_1_material,
+        phase_2_material=phase_2_material or phase_1_material,
         phase_1_miller_indices=phase_1_miller_indices,
         phase_2_miller_indices=phase_2_miller_indices,
         phase_1_thickness=phase_1_thickness,
@@ -73,7 +70,7 @@ def create_grain_boundary_planar(
         gap=gap,
     )
 
-    builder = GrainBoundaryBuilder()
+    builder = GrainBoundaryPlanarBuilder()
     return builder.get_material(gb_config)
 
 

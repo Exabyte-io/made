@@ -3,8 +3,8 @@ from mat3ra.made.tools.analyze.interface.commensurate import (
     CommensurateLatticeMatchHolder,
 )
 from mat3ra.made.tools.analyze.interface.grain_boundary import (
-    GrainBoundaryPlanarMatchHolder,
     GrainBoundaryPlanarAnalyzer,
+    GrainBoundaryPlanarMatchHolder,
 )
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder

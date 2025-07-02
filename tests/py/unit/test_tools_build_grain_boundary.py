@@ -1,7 +1,7 @@
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
-from mat3ra.made.tools.build.grain_boundary.builders import GrainBoundaryBuilder
+from mat3ra.made.tools.build.grain_boundary.builders import GrainBoundaryPlanarBuilder
 from mat3ra.made.tools.build.grain_boundary.configuration import GrainBoundaryPlanarConfiguration
 from mat3ra.made.tools.build.grain_boundary.helpers import create_grain_boundary_linear, create_grain_boundary_planar
 
@@ -28,11 +28,10 @@ from .utils import assert_two_entities_deep_almost_equal
 def test_create_grain_boundary_planar(
     material_config, phase_1_miller, phase_2_miller, gap, translation_vector, max_area, expected_material_config
 ):
-    """Test creating a planar grain boundary."""
-    phase_1 = Material.create(material_config)
+    material = Material.create(material_config)
 
     grain_boundary = create_grain_boundary_planar(
-        phase_1_material=phase_1,
+        phase_1_material=material,
         phase_1_miller_indices=phase_1_miller,
         phase_2_miller_indices=phase_2_miller,
         phase_1_thickness=1,
@@ -84,7 +83,7 @@ def test_grain_boundary_builder(
         gap=gap,
     )
 
-    builder = GrainBoundaryBuilder()
+    builder = GrainBoundaryPlanarBuilder()
     grain_boundary = builder.get_material(config)
 
     assert_two_entities_deep_almost_equal(grain_boundary, expected_material_config)

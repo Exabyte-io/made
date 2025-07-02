@@ -21,7 +21,7 @@ class GrainBoundaryLinearBuilderParameters(CommensurateLatticeInterfaceBuilderPa
     distance_tolerance: float = 1.0
 
 
-class GrainBoundaryBuilder(InterfaceBuilder):
+class GrainBoundaryPlanarBuilder(InterfaceBuilder):
     """
     Builder for creating grain boundaries.
 
