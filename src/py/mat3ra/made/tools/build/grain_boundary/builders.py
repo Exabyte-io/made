@@ -1,23 +1,15 @@
-from typing import List, Any
 from typing import Type
 
 from mat3ra.made.material import Material
+from .configuration import GrainBoundaryConfiguration
 from .configuration import GrainBoundaryLinearConfiguration
 from ..interface.builders import (
     CommensurateLatticeInterfaceBuilderParameters,
 )
-from ..slab.builders import SlabBuilder, SlabBuilderParameters
-from ..slab.builders import SlabWithGapBuilder
-from ..slab.configurations import SlabConfiguration
-from ..slab.configurations.strained_configurations import SlabStrainedSupercellWithGapConfiguration
-from ..stack.builders import Stack2ComponentsBuilder
-from ..supercell import create_supercell
-from .configuration import GrainBoundaryConfiguration
 from ..interface.builders import InterfaceBuilder, InterfaceBuilderParameters
 from ...analyze.other import get_chemical_formula
 from ...modify import wrap_to_unit_cell
-from ...operations.core.unary import supercell, edit_cell
-from ...utils import AXIS_TO_INDEX_MAP
+from ...operations.core.unary import supercell
 
 
 class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):
@@ -56,7 +48,7 @@ class GrainBoundaryBuilder(InterfaceBuilder):
         return material
 
 
-class GrainBoundaryLinearBuilder(Stack2ComponentsBuilder):
+class GrainBoundaryLinearBuilder(InterfaceBuilder):
     """
     Creates a linear grain boundary by stacking two materials along x or y direction.
     """
@@ -65,20 +57,10 @@ class GrainBoundaryLinearBuilder(Stack2ComponentsBuilder):
     _BuildParametersType = GrainBoundaryLinearBuilderParameters
     _DefaultBuildParameters = GrainBoundaryLinearBuilderParameters()
 
-    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, SlabStrainedSupercellWithGapConfiguration):
-            builder = SlabWithGapBuilder()
-            return builder.get_material(configuration_or_material)
-        return super()._configuration_to_material(configuration_or_material)
-
     def _update_material_name(self, material: Material, configuration: GrainBoundaryLinearConfiguration) -> Material:
-        new_name = f"Grain Boundary Linear ({configuration.direction.value})"
+        phase_1_formula = get_chemical_formula(configuration.phase_1_configuration.atomic_layers.crystal)
+        phase_2_formula = get_chemical_formula(configuration.phase_2_configuration.atomic_layers.crystal)
+        angle_str = f", {configuration.actual_angle:.2f} degrees" if configuration.actual_angle is not None else ""
+        new_name = f"{phase_1_formula}-{phase_2_formula}, Linear Grain Boundary {angle_str}"
         material.name = new_name
         return material
-
-    def _generate(self, configuration: GrainBoundaryLinearConfiguration) -> Material:
-        stacked_material = super()._generate(configuration)
-        return stacked_material
-
-    def _get_axis_index(self, direction_str):
-        return AXIS_TO_INDEX_MAP[direction_str]

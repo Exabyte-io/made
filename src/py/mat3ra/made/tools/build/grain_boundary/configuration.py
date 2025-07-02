@@ -2,13 +2,10 @@ from typing import Optional, List, Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
-from .. import BaseConfiguration
+from ..interface.configuration import InterfaceConfiguration
 from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
-from ..slab.entities import Termination
 from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
-
-from ..interface.configuration import InterfaceConfiguration
 
 
 class GrainBoundaryConfiguration(InterfaceConfiguration):
@@ -55,6 +52,7 @@ class GrainBoundaryConfiguration(InterfaceConfiguration):
         stack_components = [phase_1_config, phase_2_config]
         return cls(stack_components=stack_components, direction=AxisEnum.z, xy_shift=xy_shift)
 
+
 class GrainBoundaryLinearConfiguration(StackConfiguration):
     """
     Configuration for creating a linear grain boundary.
@@ -69,3 +67,21 @@ class GrainBoundaryLinearConfiguration(StackConfiguration):
     stack_components: List[Union[SlabConfiguration, VacuumConfiguration]]
     direction: AxisEnum = AxisEnum.x
     gap: float = 3.0
+    actual_angle: Optional[float] = None
+    xy_shift: List[float] = [0.0, 0.0]
+
+    @property
+    def phase_1_configuration(self) -> SlabConfiguration:
+        return self.stack_components[0]
+
+    @property
+    def phase_2_configuration(self) -> SlabConfiguration:
+        return self.stack_components[1]
+
+    @property
+    def substrate_configuration(self) -> SlabConfiguration:
+        return self.phase_1_configuration
+
+    @property
+    def film_configuration(self) -> SlabConfiguration:
+        return self.phase_2_configuration

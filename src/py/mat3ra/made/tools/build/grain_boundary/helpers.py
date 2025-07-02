@@ -151,10 +151,12 @@ def create_grain_boundary_linear(
         gap_direction=direction,
     )
 
+    actual_angle = getattr(match_holders[0], "angle", target_angle)
     grain_boundary_config = GrainBoundaryLinearConfiguration(
         stack_components=[substrate_config, film_config],
         direction=direction,
         gap=gap,
+        actual_angle=actual_angle,
     )
 
     builder = GrainBoundaryLinearBuilder()
