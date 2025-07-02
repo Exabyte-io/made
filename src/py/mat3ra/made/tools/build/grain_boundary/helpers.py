@@ -1,9 +1,9 @@
 from typing import Optional, Union, List, Tuple
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryAnalyzer
+from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
 from .builders import GrainBoundaryBuilder
-from .configuration import GrainBoundaryConfiguration
+from .configuration import GrainBoundaryPlanarConfiguration
 
 
 def create_grain_boundary_planar(
@@ -42,7 +42,7 @@ def create_grain_boundary_planar(
     Returns:
         Material: The grain boundary material
     """
-    analyzer = GrainBoundaryAnalyzer(
+    analyzer = GrainBoundaryPlanarAnalyzer(
         phase_1_material=phase_1_material,
         phase_2_material=phase_2_material if phase_2_material else phase_1_material,
         phase_1_miller_indices=phase_1_miller_indices,
@@ -57,7 +57,7 @@ def create_grain_boundary_planar(
 
     strained_config = analyzer.get_grain_boundary_configuration_by_match_id(match_id)
 
-    gb_config = GrainBoundaryConfiguration.from_parameters(
+    gb_config = GrainBoundaryPlanarConfiguration.from_parameters(
         phase_1_configuration=strained_config.substrate_configuration,
         phase_2_configuration=strained_config.film_configuration,
         xy_shift=translation_vector,
@@ -69,7 +69,7 @@ def create_grain_boundary_planar(
 
 
 def create_grain_boundary(
-    configuration: Union[GrainBoundaryConfiguration],
+    configuration: Union[GrainBoundaryPlanarConfiguration],
     builder: Optional[Union[GrainBoundaryBuilder]] = None,
 ) -> Material:
     """

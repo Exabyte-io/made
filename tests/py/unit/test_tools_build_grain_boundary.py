@@ -1,8 +1,8 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryAnalyzer
+from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
 from mat3ra.made.tools.build.grain_boundary.builders import GrainBoundaryBuilder
-from mat3ra.made.tools.build.grain_boundary.configuration import GrainBoundaryConfiguration
+from mat3ra.made.tools.build.grain_boundary.configuration import GrainBoundaryPlanarConfiguration
 from mat3ra.made.tools.build.grain_boundary.helpers import create_grain_boundary_planar
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL
@@ -65,7 +65,7 @@ def test_grain_boundary_builder(
     phase_2_material = Material.create(material_config)
 
     # Create analyzer and get configuration
-    analyzer = GrainBoundaryAnalyzer(
+    analyzer = GrainBoundaryPlanarAnalyzer(
         phase_1_material=phase_1_material,
         phase_2_material=phase_2_material,
         phase_1_miller_indices=phase_1_miller,
@@ -78,7 +78,7 @@ def test_grain_boundary_builder(
     strained_config = analyzer.get_grain_boundary_configuration_by_match_id(0)
 
     # Use from_parameters to ensure gap logic is applied
-    config = GrainBoundaryConfiguration.from_parameters(
+    config = GrainBoundaryPlanarConfiguration.from_parameters(
         phase_1_configuration=strained_config.substrate_configuration,
         phase_2_configuration=strained_config.film_configuration,
         xy_shift=translation_vector,

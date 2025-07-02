@@ -7,7 +7,7 @@ from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGa
 from ..vacuum.configuration import VacuumConfiguration
 
 
-class GrainBoundaryConfiguration(InterfaceConfiguration):
+class GrainBoundaryPlanarConfiguration(InterfaceConfiguration):
     """
     Configuration for creating a grain boundary between two phases.
     """
@@ -21,10 +21,6 @@ class GrainBoundaryConfiguration(InterfaceConfiguration):
     @property
     def phase_2_configuration(self) -> SlabConfiguration:
         return self.stack_components[1]
-
-    # @property
-    # def translation_vector(self) -> List[float]:
-    #     return [0.0, self.xy_shift[0], self.xy_shift[1]]
 
     @property
     def vacuum_configuration(self) -> VacuumConfiguration:
@@ -41,7 +37,7 @@ class GrainBoundaryConfiguration(InterfaceConfiguration):
         phase_2_configuration: SlabConfiguration,
         xy_shift: Optional[List[float]] = None,
         gap: Optional[float] = None,
-    ) -> "GrainBoundaryConfiguration":
+    ) -> "GrainBoundaryPlanarConfiguration":
         if xy_shift is None:
             xy_shift = [0.0, 0.0]
 
