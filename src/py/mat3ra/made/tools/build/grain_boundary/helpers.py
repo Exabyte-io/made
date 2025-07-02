@@ -3,11 +3,11 @@ from typing import Optional, List, Tuple
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryAnalyzer
 from .builders import GrainBoundaryBuilder
+from .configuration import GrainBoundaryPlanarConfiguration
 from .builders import GrainBoundaryLinearBuilder
-from .configuration import GrainBoundaryConfiguration
 from .configuration import GrainBoundaryLinearConfiguration
 from ..slab.configurations import (
     SlabConfiguration,
@@ -51,7 +51,7 @@ def create_grain_boundary_planar(
     Returns:
         Material: The grain boundary material
     """
-    analyzer = GrainBoundaryAnalyzer(
+    analyzer = GrainBoundaryPlanarAnalyzer(
         phase_1_material=phase_1_material,
         phase_2_material=phase_2_material if phase_2_material else phase_1_material,
         phase_1_miller_indices=phase_1_miller_indices,
@@ -66,7 +66,7 @@ def create_grain_boundary_planar(
 
     strained_config = analyzer.get_grain_boundary_configuration_by_match_id(match_id)
 
-    gb_config = GrainBoundaryConfiguration.from_parameters(
+    gb_config = GrainBoundaryPlanarConfiguration.from_parameters(
         phase_1_configuration=strained_config.substrate_configuration,
         phase_2_configuration=strained_config.film_configuration,
         xy_shift=translation_vector,

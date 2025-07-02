@@ -8,7 +8,7 @@ from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 
 
-class GrainBoundaryConfiguration(InterfaceConfiguration):
+class GrainBoundaryPlanarConfiguration(InterfaceConfiguration):
     """
     Configuration for creating a grain boundary between two phases.
     """
@@ -38,7 +38,7 @@ class GrainBoundaryConfiguration(InterfaceConfiguration):
         phase_2_configuration: SlabConfiguration,
         xy_shift: Optional[List[float]] = None,
         gap: Optional[float] = None,
-    ) -> "GrainBoundaryConfiguration":
+    ) -> "GrainBoundaryPlanarConfiguration":
         if xy_shift is None:
             xy_shift = [0.0, 0.0]
 

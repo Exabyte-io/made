@@ -5,14 +5,15 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
+from pydantic import model_validator
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
-from pydantic import model_validator
 
 
-class GrainBoundaryMatchHolder(InMemoryEntityPydantic):
+class GrainBoundaryPlanarMatchHolder(InMemoryEntityPydantic):
     match_id: int
     substrate_transformation_matrix: SupercellMatrix2DSchema
     film_transformation_matrix: SupercellMatrix2DSchema
@@ -21,7 +22,7 @@ class GrainBoundaryMatchHolder(InMemoryEntityPydantic):
     total_strain_percentage: float
 
 
-class GrainBoundaryAnalyzer(ZSLInterfaceAnalyzer):
+class GrainBoundaryPlanarAnalyzer(ZSLInterfaceAnalyzer):
     """
     Analyzer for creating grain boundaries between two orientations of the same material.
 
@@ -66,12 +67,12 @@ class GrainBoundaryAnalyzer(ZSLInterfaceAnalyzer):
         return values
 
     @property
-    def grain_boundary_match_holders(self) -> List[GrainBoundaryMatchHolder]:
+    def grain_boundary_match_holders(self) -> List[GrainBoundaryPlanarMatchHolder]:
         zsl_matches = self.zsl_match_holders
         match_holders = []
 
         for idx, zsl_match in enumerate(zsl_matches):
-            match_holder = GrainBoundaryMatchHolder(
+            match_holder = GrainBoundaryPlanarMatchHolder(
                 match_id=idx,
                 substrate_transformation_matrix=zsl_match.substrate_transformation_matrix,
                 film_transformation_matrix=zsl_match.film_transformation_matrix,
