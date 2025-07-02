@@ -16,7 +16,8 @@ from .configuration import GrainBoundaryConfiguration
 from ..interface.builders import InterfaceBuilder, InterfaceBuilderParameters
 from ...analyze.other import get_chemical_formula
 from ...modify import wrap_to_unit_cell
-from ...operations.core.unary import supercell
+from ...operations.core.unary import supercell, edit_cell
+from ...utils import AXIS_TO_INDEX_MAP
 
 
 class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):
@@ -50,9 +51,7 @@ class GrainBoundaryBuilder(InterfaceBuilder):
         phase_2_formula = get_chemical_formula(configuration.phase_2_configuration.atomic_layers.crystal)
         phase_1_miller = "".join([str(i) for i in configuration.phase_1_configuration.atomic_layers.miller_indices])
         phase_2_miller = "".join([str(i) for i in configuration.phase_2_configuration.atomic_layers.miller_indices])
-        new_name = (
-            f"{phase_1_formula}({phase_1_miller})-{phase_2_formula}({phase_2_miller}), Grain Boundary"
-        )
+        new_name = f"{phase_1_formula}({phase_1_miller})-{phase_2_formula}({phase_2_miller}), Grain Boundary"
         material.name = new_name
         return material
 
@@ -76,3 +75,10 @@ class GrainBoundaryLinearBuilder(Stack2ComponentsBuilder):
         new_name = f"Grain Boundary Linear ({configuration.direction.value})"
         material.name = new_name
         return material
+
+    def _generate(self, configuration: GrainBoundaryLinearConfiguration) -> Material:
+        stacked_material = super()._generate(configuration)
+        return stacked_material
+
+    def _get_axis_index(self, direction_str):
+        return AXIS_TO_INDEX_MAP[direction_str]

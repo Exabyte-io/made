@@ -96,16 +96,16 @@ def test_grain_boundary_builder(
     "config_params, builder_params_dict, expected_cell_vectors",
     [
         (
-            {"film_config": GRAPHENE, "twist_angle": 13.0, "gap": 2.0},
+            {"film_config": GRAPHENE, "twist_angle": 13.0, "gap": 1.0},
             {
                 "max_repetition_int": 5,
                 "angle_tolerance": 0.5,
                 "return_first_match": True,
             },
             [
-                [23.509344266, 0.0, 0.0],
+                [35.509344266, 0.0, 0.0],
                 [5.377336066500001, 9.313819276550575, 0.0],
-                [0.0, 0.0, 20.0],
+                [0.0, 0.0, 8.0],
             ],
         ),
     ],

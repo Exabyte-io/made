@@ -1,6 +1,7 @@
 from typing import Optional
 
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab_strained_supercell import (
     SlabStrainedSupercellConfigurationSchema,
 )
@@ -21,3 +22,4 @@ class SlabStrainedSupercellWithGapConfiguration(
 ):
     type: str = "SlabStrainedSupercellWithGapConfiguration"
     gap: Optional[float] = None  # If provided, the film is shifted to have it as smallest distance to the top.
+    gap_direction: AxisEnum = AxisEnum.z

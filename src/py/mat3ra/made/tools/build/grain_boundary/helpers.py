@@ -9,7 +9,10 @@ from .builders import GrainBoundaryBuilder
 from .builders import GrainBoundaryLinearBuilder
 from .configuration import GrainBoundaryConfiguration
 from .configuration import GrainBoundaryLinearConfiguration
-from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
+from ..slab.configurations import (
+    SlabConfiguration,
+    SlabStrainedSupercellWithGapConfiguration,
+)
 
 
 def create_grain_boundary_planar(
@@ -93,7 +96,7 @@ def create_grain_boundary_linear(
     This function creates a grain boundary by:
     1. Creating a slab configuration from the material
     2. Finding commensurate lattice matches at the target angle using CommensurateLatticeInterfaceAnalyzer
-    3. Creating strained configurations for both phases
+    3. Creating strained configurations with directional gaps for both phases
     4. Stacking them along the specified direction
 
     Args:
@@ -137,15 +140,19 @@ def create_grain_boundary_linear(
 
     selected_config = analyzer.get_strained_configuration_by_match_id(0)
 
-    substrate_config_with_gap = SlabStrainedSupercellWithGapConfiguration(
-        **selected_config.substrate_configuration.to_dict(), gap=gap
+    substrate_config = SlabStrainedSupercellWithGapConfiguration(
+        **selected_config.substrate_configuration.to_dict(),
+        gap=gap,
+        gap_direction=direction,
     )
-    film_config_with_gap = SlabStrainedSupercellWithGapConfiguration(
-        **selected_config.film_configuration.to_dict(), gap=gap
+    film_config = SlabStrainedSupercellWithGapConfiguration(
+        **selected_config.film_configuration.to_dict(),
+        gap=gap,
+        gap_direction=direction,
     )
 
     grain_boundary_config = GrainBoundaryLinearConfiguration(
-        stack_components=[substrate_config_with_gap, film_config_with_gap],
+        stack_components=[substrate_config, film_config],
         direction=direction,
         gap=gap,
     )
