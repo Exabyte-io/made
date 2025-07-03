@@ -6,9 +6,8 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilder, BaseBuilderParameters
 from . import NanoribbonConfiguration
 from .builders import NanoribbonBuilder, NanoribbonBuilderParameters
-from ..lattice_lines.configuration import EdgeTypes
 from ..lattice_lines import create_lattice_lines_config_and_material
-from ..nanotape.builders import NanoTapeBuilder
+from ..lattice_lines.configuration import EdgeTypes
 from ..nanotape.configuration import NanoTapeConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 
@@ -44,7 +43,7 @@ def create_nanoribbon(
     Returns:
         Material: The generated nanoribbon material.
     """
-    lattice_lines_config, lattice_lines_material = create_lattice_lines_config_and_material(
+    lattice_lines_config = create_lattice_lines_config_and_material(
         material=material,
         miller_indices_2d=miller_indices_2d,
         edge_type=edge_type,
@@ -54,18 +53,14 @@ def create_nanoribbon(
     )
     nanotape_vacuum_config = VacuumConfiguration(
         size=vacuum_width,
-        crystal=lattice_lines_material,
         direction=AxisEnum.y,
     )
     nanotape_config = NanoTapeConfiguration(
         stack_components=[lattice_lines_config, nanotape_vacuum_config],
         direction=AxisEnum.y,
     )
-    nanotape_builder = NanoTapeBuilder()
-    nanotape_material = nanotape_builder.get_material(nanotape_config)
     vacuum_config = VacuumConfiguration(
         size=vacuum_length,
-        crystal=nanotape_material,
         direction=AxisEnum.x,
     )
     config = NanoribbonConfiguration(
