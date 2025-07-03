@@ -1,8 +1,13 @@
 import pytest
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+from mat3ra.utils import assertion as assertion_utils
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseConfigurationPydantic
+from mat3ra.made.tools.build.merge.builders import MergeBuilder, MergeBuilderParameters
+from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.operations.core.binary import merge_materials
-from mat3ra.utils import assertion as assertion_utils
+from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 from unit.fixtures.cuts import (
     CAVITY_MATERIAL_BASIS,
     FULL_MATERIAL,
@@ -11,6 +16,8 @@ from unit.fixtures.cuts import (
     SECTION_MATERIAL_BASIS,
     SECTION_MATERIAL_BASIS_EXTRA_ATOM,
 )
+from unit.fixtures.merge import MERGED_BULK_Si_Ge
+from unit.utils import assert_two_entities_deep_almost_equal
 
 section = Material.create({**FULL_MATERIAL, **SECTION_MATERIAL_BASIS})
 cavity = Material.create({**FULL_MATERIAL, **CAVITY_MATERIAL_BASIS})
@@ -61,3 +68,32 @@ def test_configuration():
     assert isinstance(configuration_from_dict.component, MockConfiguration)
     assert configuration_from_dict.component.value_1 == "component_value"
     assert configuration_from_dict.component.value_2 == 42
+
+
+MERGE_TEST_PARAMS = [
+    (
+        BULK_Si_CONVENTIONAL,
+        BULK_Ge_CONVENTIONAL,
+        MergeMethodsEnum.replace,
+        {"material_name": "Si-Ge Merged", "distance_tolerance": 0.1, "merge_dangerously": True},
+        MERGED_BULK_Si_Ge,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "material1_config, material2_config, merge_method, builder_params, expected_material_config", MERGE_TEST_PARAMS
+)
+def test_merge_builder(material1_config, material2_config, merge_method, builder_params, expected_material_config):
+
+    material1 = Material.create(material1_config)
+    material2 = Material.create(material2_config)
+
+    merge_config = MergeConfiguration(merge_components=[material1, material2], merge_method=merge_method)
+
+    builder_parameters = MergeBuilderParameters(**builder_params)
+    builder = MergeBuilder(build_parameters=builder_parameters)
+
+    merged_material = builder.get_material(merge_config)
+
+    assert_two_entities_deep_almost_equal(merged_material, expected_material_config)
