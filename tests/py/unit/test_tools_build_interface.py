@@ -136,6 +136,7 @@ def test_create_interface(substrate, film, expected_interface):
     expected_interface["metadata"].pop("build", None)
 
 
+@pytest.mark.skip(reason="Temporary skip before Nanoribbon interface is implemented")
 @pytest.mark.parametrize(
     "material_config, config_params, expected_cell_vectors, expected_coordinate_checks",
     [

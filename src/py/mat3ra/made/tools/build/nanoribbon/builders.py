@@ -1,154 +1,34 @@
-from typing import List, Optional, Any, Tuple
+from typing import Any
 
-import numpy as np
-
-from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilder
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.modify import filter_by_rectangle_projection, wrap_to_unit_cell
-
-from ...modify import translate_to_center, rotate
-from .configuration import NanoribbonConfiguration
-from .enums import EdgeTypes
+from . import NanoribbonConfiguration
+from ..nanotape.builders import NanoTapeBuilder, NanoTapeBuilderParameters
 
 
-class NanoribbonBuilder(BaseBuilder):
-    """
-    Builder class for creating a nanoribbon from a material.
+class NanoribbonBuilderParameters(NanoTapeBuilderParameters):
+    pass
 
-    The process creates a supercell with large enough dimensions to contain the nanoribbon and then
-    filters the supercell to only include the nanoribbon. The supercell is then centered and returned as the nanoribbon.
-    The nanoribbon can have either Armchair or Zigzag edge. The edge is defined along the vector 1 of the material cell,
-    which corresponds to [1,0,0] direction.
-    """
 
-    _ConfigurationType: type(NanoribbonConfiguration) = NanoribbonConfiguration  # type: ignore
-    _GeneratedItemType: Material = Material
-    _PostProcessParametersType: Any = None
+class NanoribbonBuilder(NanoTapeBuilder):
+    _ConfigurationType = "NanoribbonConfiguration"  # String type annotation to avoid circular import
+    _BuilderParametersType = NanoribbonBuilderParameters
+    _DefaultBuildParameters = NanoribbonBuilderParameters(
+        use_rectangular_lattice=True,
+    )
 
-    def create_nanoribbon(self, config: NanoribbonConfiguration) -> Material:
-        material = config.material.clone()
-        (
-            length_cartesian,
-            width_cartesian,
-            height_cartesian,
-            vacuum_length_cartesian,
-            vacuum_width_cartesian,
-        ) = self._calculate_cartesian_dimensions(config, material)
-        new_lattice = self._get_new_lattice(
-            length_cartesian,
-            width_cartesian,
-            height_cartesian,
-            vacuum_length_cartesian,
-            vacuum_width_cartesian,
-            config.edge_type,
-        )
-        n_repetitions = max(config.length, config.width)
-        large_supercell_to_cut = create_supercell(material, np.diag([2 * n_repetitions, 2 * n_repetitions, 1]))
+    def _update_material_name(self, material: Material, configuration: Any) -> Material:
+        if isinstance(configuration, NanoribbonConfiguration):
+            nanotape = configuration.nanotape
+            material = self._update_material_name_with_edge_type(
+                material, nanotape.lattice_lines.crystal.name, nanotape.lattice_lines.miller_indices_2d, "Nanoribbon"
+            )
+            return material
+        return super()._update_material_name(material, configuration)
 
-        min_coordinate, max_coordinate = self._calculate_coordinates_of_cut(
-            length_cartesian, width_cartesian, height_cartesian, config.edge_type
-        )
-        nanoribbon = filter_by_rectangle_projection(
-            large_supercell_to_cut,
-            min_coordinate=min_coordinate,
-            max_coordinate=max_coordinate,
-            use_cartesian_coordinates=True,
-        )
-        nanoribbon.set_lattice(new_lattice)
-        return translate_to_center(nanoribbon)
-
-    @staticmethod
-    def _calculate_cartesian_dimensions(config: NanoribbonConfiguration, material: Material):
-        """
-        Calculate the dimensions of the nanoribbon in the cartesian coordinate system.
-        """
-        nanoribbon_width = config.width
-        nanoribbon_length = config.length
-        vacuum_width = config.vacuum_width
-        vacuum_length = config.vacuum_length
-        edge_type = config.edge_type
-
-        if edge_type == EdgeTypes.armchair:
-            nanoribbon_length, nanoribbon_width = nanoribbon_width, nanoribbon_length
-            vacuum_width, vacuum_length = vacuum_length, vacuum_width
-
-        lattice = material.lattice
-
-        length_cartesian = nanoribbon_length * lattice.vectors.a.x
-        width_cartesian = nanoribbon_width * lattice.vectors.b.y
-        height_cartesian = lattice.vectors.c.z
-        vacuum_length_cartesian = vacuum_length * lattice.vectors.a.x
-        vacuum_width_cartesian = vacuum_width * lattice.vectors.b.y
-
-        return length_cartesian, width_cartesian, height_cartesian, vacuum_length_cartesian, vacuum_width_cartesian
-
-    @staticmethod
-    def _get_new_lattice(
-        length: float, width: float, height: float, vacuum_length: float, vacuum_width: float, edge_type: EdgeTypes
-    ) -> Lattice:
-        """
-        Calculate the new lattice vectors for the nanoribbon.
-
-        Args:
-            length: Length of the nanoribbon.
-            width: Width of the nanoribbon.
-            height: Height of the nanoribbon.
-            vacuum_length: Length of the vacuum region.
-            vacuum_width: Width of the vacuum region.
-            edge_type: Type of the edge of the nanoribbon.
-
-        Returns:
-            Tuple of the new lattice vectors.
-        """
-        length_lattice_vector = [length + vacuum_length, 0.0, 0.0]
-        width_lattice_vector = [0.0, width + vacuum_width, 0.0]
-        height_lattice_vector = [0.0, 0.0, height]
-
-        if edge_type == EdgeTypes.armchair:
-            length_lattice_vector, width_lattice_vector = width_lattice_vector, length_lattice_vector
-
-        return Lattice.from_vectors_array(vectors=[length_lattice_vector, width_lattice_vector, height_lattice_vector])
-
-    @staticmethod
-    def _calculate_coordinates_of_cut(
-        length: float, width: float, height: float, edge_type: EdgeTypes
-    ) -> Tuple[List[float], List[float]]:
-        """
-        Calculate the coordinates of the rectangular nanoribbon cut from the supercell.
-
-        Args:
-            length: Length of the nanoribbon.
-            width: Width of the nanoribbon.
-            height: Height of the nanoribbon.
-            edge_type: Type of the edge of the nanoribbon.
-
-        Returns:
-            Tuple of the minimum and maximum coordinates of the cut.
-        """
-        edge_nudge_value = 0.01
-        conditional_nudge_value = edge_nudge_value * (
-            -1 * (edge_type == EdgeTypes.armchair) + 1 * (edge_type == EdgeTypes.zigzag)
-        )
-        min_coordinate = [-edge_nudge_value, conditional_nudge_value, 0]
-        max_coordinate = [length - edge_nudge_value, width + conditional_nudge_value, height]
-        return min_coordinate, max_coordinate
-
-    def _generate(self, configuration: NanoribbonConfiguration) -> List[_GeneratedItemType]:
-        nanoribbon = self.create_nanoribbon(configuration)
-        if configuration.edge_type == EdgeTypes.armchair:
-            nanoribbon = rotate(nanoribbon, [0, 0, 1], 90)
-        return [nanoribbon]
-
-    def _post_process(
-        self,
-        items: List[_GeneratedItemType],
-        post_process_parameters: Optional[_PostProcessParametersType],
-    ) -> List[Material]:
-        return [wrap_to_unit_cell(item) for item in items]
-
-    def _update_material_name(self, material: Material, configuration: NanoribbonConfiguration) -> Material:
-        edge_type = configuration.edge_type.capitalize()
-        material.name = f"{material.name} ({edge_type} nanoribbon)"
+    def _update_material_name_with_edge_type(
+        self, material: Material, crystal_name: str, miller_indices_2d: tuple, structure_type: str
+    ) -> Material:
+        edge_type = self._get_edge_type_from_miller_indices(miller_indices_2d)
+        miller_str = f"{miller_indices_2d[0]}{miller_indices_2d[1]}"
+        material.name = f"{crystal_name} - {edge_type} {structure_type} ({miller_str})"
         return material

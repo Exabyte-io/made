@@ -9,7 +9,7 @@ from mat3ra.made.tools.build.passivation.builders import (
 )
 from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
 
-from .fixtures.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED
+from .fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED
 from .fixtures.slab import SI_SLAB_001_2_ATOMS, SI_SLAB_PASSIVATED
 from .utils import assert_two_entities_deep_almost_equal
 
