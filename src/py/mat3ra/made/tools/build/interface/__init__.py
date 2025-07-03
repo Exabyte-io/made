@@ -4,8 +4,6 @@ import numpy as np
 
 from mat3ra.made.material import Material
 from .builders import (
-    ZSLStrainMatchingInterfaceBuilder,
-    ZSLStrainMatchingInterfaceBuilderParameters,
     InterfaceBuilder,
     InterfaceBuilderParameters,
 )
