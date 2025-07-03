@@ -1,17 +1,21 @@
-from typing import Optional, List, Union
+from typing import Optional, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category.defective_structures.one_dimensional.grain_boundary_linear.configuration import (
+    GrainBoundaryLinearConfigurationSchema,
+)
 # fmt: off
-from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.\
+from mat3ra.esse.models.materials_category.defective_structures.two_dimensional. \
     grain_boundary_planar.configuration import (
     GrainBoundaryPlanarConfigurationSchema as GrainBoundarySchema,
 )
-# fmt: on
 
 from ..interface.configuration import InterfaceConfiguration
 from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
-from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
+
+
+# fmt: on
 
 
 class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundarySchema):
@@ -55,22 +59,18 @@ class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundarySche
         return cls(stack_components=stack_components, direction=AxisEnum.z, xy_shift=xy_shift)
 
 
-class GrainBoundaryLinearConfiguration(StackConfiguration):
+class GrainBoundaryLinearConfiguration(InterfaceConfiguration, GrainBoundaryLinearConfigurationSchema):
     """
     Configuration for creating a linear grain boundary.
 
     Args:
         stack_components (List): List of configuration objects for grain boundary components.
-        direction (AxisEnum): Direction along which to stack components (x or y).
-        gap (float): The gap between the two phases.
+        direction (AxisEnum): Direction along which to pypstack components (x or y).
     """
 
     type: str = "GrainBoundaryLinearConfiguration"
-    stack_components: List[Union[SlabConfiguration, VacuumConfiguration]]
     direction: AxisEnum = AxisEnum.x
-    gap: float = 3.0
     actual_angle: Optional[float] = None
-    xy_shift: List[float] = [0.0, 0.0]
 
     @property
     def phase_1_configuration(self) -> SlabConfiguration:
