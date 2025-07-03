@@ -123,8 +123,8 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
 
     def _adjust_lattice_for_gap(self, material: Material, gap: float, direction: AxisEnum) -> Material:
         """
-        Adjust the lattice so that the distance from the maximum atomic coordinate in the stacking direction
-        to the end of the cell is exactly the requested gap, using fractional coordinates for generality.
+        Adjust the cell along the stacking direction to make the distance from the cell end to its closest atom
+        to be equal to the gap, in Angstroms.
         """
         direction_str = direction.value
         axis_index = AXIS_TO_INDEX_MAP[direction_str]

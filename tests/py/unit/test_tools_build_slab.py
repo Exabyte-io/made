@@ -27,6 +27,7 @@ from unit.fixtures.slab import (
 )
 
 from .fixtures.generated.fixtures import BULK_SrTiO3
+from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA = SI_CONVENTIONAL_SLAB_001.copy()
@@ -271,6 +272,7 @@ def test_create_slab(
     "material_config, direction, gap, expected_length",
     [
         (SLAB_SI_CONVENTIONAL_001_NO_VACUUM, AxisEnum.z, 5.0, 14.5703),  # Adjusted length for z direction
+        (GRAPHENE, AxisEnum.y, 5.0, 6.6448),  # Adjusted length for y direction (lattice vector b)
     ],
 )
 def test_adjust_lattice_for_gap(material_config, direction, gap, expected_length):
