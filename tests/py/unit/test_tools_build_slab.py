@@ -17,7 +17,6 @@ from mat3ra.made.tools.build.slab.termination_utils import select_slab_terminati
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.utils import AXIS_TO_INDEX_MAP
 from mat3ra.utils import assertion
-
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
@@ -26,6 +25,7 @@ from unit.fixtures.slab import (
     SLAB_SrTiO3_011_TERMINATION_O2,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
 )
+
 from .fixtures.generated.fixtures import BULK_SrTiO3
 from .utils import assert_two_entities_deep_almost_equal
 

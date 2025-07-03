@@ -1,13 +1,15 @@
 from typing import Optional, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from mat3ra.esse.models.materials_category.defective_structures.one_dimensional.grain_boundary_linear.configuration import (
+# fmt: off
+from mat3ra.esse.models.materials_category.defective_structures.one_dimensional. \
+    grain_boundary_linear.configuration import (
     GrainBoundaryLinearConfigurationSchema,
 )
-# fmt: off
+
 from mat3ra.esse.models.materials_category.defective_structures.two_dimensional. \
     grain_boundary_planar.configuration import (
-    GrainBoundaryPlanarConfigurationSchema as GrainBoundarySchema,
+    GrainBoundaryPlanarConfigurationSchema,
 )
 
 from ..interface.configuration import InterfaceConfiguration
@@ -18,7 +20,7 @@ from ..vacuum.configuration import VacuumConfiguration
 # fmt: on
 
 
-class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundarySchema):
+class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundaryPlanarConfigurationSchema):
     direction: AxisEnum = AxisEnum.z
 
     @property
@@ -65,7 +67,7 @@ class GrainBoundaryLinearConfiguration(InterfaceConfiguration, GrainBoundaryLine
 
     Args:
         stack_components (List): List of configuration objects for grain boundary components.
-        direction (AxisEnum): Direction along which to pypstack components (x or y).
+        direction (AxisEnum): Direction along which to stack components (x or y).
     """
 
     type: str = "GrainBoundaryLinearConfiguration"
