@@ -2,17 +2,13 @@ from typing import Optional, List, Tuple
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
+from mat3ra.made.tools.build.interface import get_commensurate_strained_configs
 
-from .builders import GrainBoundaryPlanarBuilder
-from .configuration import GrainBoundaryPlanarConfiguration
 from .builders import GrainBoundaryLinearBuilder
+from .builders import GrainBoundaryPlanarBuilder
 from .configuration import GrainBoundaryLinearConfiguration
-from ..slab.configurations import (
-    SlabConfiguration,
-    SlabStrainedSupercellWithGapConfiguration,
-)
+from .configuration import GrainBoundaryPlanarConfiguration
 
 
 def create_grain_boundary_planar(
@@ -117,42 +113,22 @@ def create_grain_boundary_linear(
     Raises:
         ValueError: If no commensurate lattice matches are found.
     """
-    slab_config = SlabConfiguration.from_parameters(
-        material_or_dict=material,
+    strained_configs, actual_angle = get_commensurate_strained_configs(
+        material=material,
+        target_angle=target_angle,
+        angle_tolerance=angle_tolerance,
+        max_repetition_int=max_repetition_int,
+        limit_max_int=limit_max_int,
+        return_first_match=return_first_match,
         miller_indices=miller_indices,
         number_of_layers=number_of_layers,
         vacuum=vacuum,
-    )
-
-    analyzer = CommensurateLatticeInterfaceAnalyzer(
-        substrate_slab_configuration=slab_config,
-        target_angle=target_angle,
-        angle_tolerance=angle_tolerance,
-        max_supercell_matrix_int=max_repetition_int,
-        limit_max_int=limit_max_int,
-        return_first_match=return_first_match,
-    )
-
-    match_holders = analyzer.commensurate_lattice_match_holders
-    if not match_holders:
-        raise ValueError(f"No commensurate lattice matches found for angle {target_angle}°")
-
-    selected_config = analyzer.get_strained_configuration_by_match_id(0)
-
-    substrate_config = SlabStrainedSupercellWithGapConfiguration(
-        **selected_config.substrate_configuration.to_dict(),
+        direction=direction,
         gap=gap,
-        gap_direction=direction,
-    )
-    film_config = SlabStrainedSupercellWithGapConfiguration(
-        **selected_config.film_configuration.to_dict(),
-        gap=gap,
-        gap_direction=direction,
     )
 
-    actual_angle = match_holders[0].actual_angle
     grain_boundary_config = GrainBoundaryLinearConfiguration(
-        stack_components=[substrate_config, film_config],
+        stack_components=strained_configs,
         direction=direction,
         gap=gap,
         actual_angle=actual_angle,
