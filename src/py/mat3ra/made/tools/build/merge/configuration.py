@@ -1,6 +1,9 @@
-from typing import Optional
+from typing import List, Any
 
-from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeSchema
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import (
+    MergeSchema,
+    MergeMethodsEnum,
+)
 
 from mat3ra.made.tools.build import BaseConfigurationPydantic
 
@@ -14,5 +17,5 @@ class MergeConfiguration(MergeSchema, BaseConfigurationPydantic):
         merge_method: Method to use for merging
     """
 
-    merge_components: list
-    merge_method: Optional[str] = None  # should be used from Esse for MergeMethodEnum
+    merge_components: List[Any]
+    merge_method: MergeMethodsEnum

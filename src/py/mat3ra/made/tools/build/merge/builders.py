@@ -1,13 +1,13 @@
 from typing import Any, TypeVar
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseSingleBuilder
-from mat3ra.made.tools.build.merge.configuration import MergeBuilderParameters, MergeConfiguration
+from mat3ra.made.tools.build import BaseSingleBuilder, BaseBuilderParameters
+from mat3ra.made.tools.build.merge.configuration import MergeConfiguration, PointDefectConfiguration
+from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import merge_materials
 
 from typing import List, Any, Optional
-
-from mat3ra.made.tools.build import BaseBuilderParameters
 
 
 class MergeBuilderParameters(BaseBuilderParameters):
@@ -37,6 +37,10 @@ class MergeBuilder(BaseSingleBuilder):
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
         if isinstance(configuration_or_material, Material):
             return configuration_or_material
+
+        if isinstance(configuration_or_material, VacuumConfiguration):
+            builder = VacuumBuilder()
+            return builder.get_material(configuration_or_material)
         raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
 
     def _generate(self, configuration: MergeConfiguration) -> Material:
