@@ -1,70 +1,91 @@
-from typing import List, Optional
+from typing import List
 
 from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
+from mat3ra.made.tools.analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
 from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate
-from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum, PointDefectTypeEnum
-from mat3ra.made.tools.build.defect.point.configuration import (
-    InterstitialDefectConfiguration,
-    PointDefectConfiguration,
-    SubstitutionalDefectConfiguration,
-    VacancyDefectConfiguration,
-)
+from mat3ra.made.tools.build.supercell import create_supercell
+from mat3ra.made.tools.convert import to_pymatgen
+from mat3ra.made.tools.third_party import PymatgenVoronoiInterstitialGenerator
+from mat3ra.made.tools.utils import get_distance_between_coordinates, transform_coordinate_to_supercell
+from mat3ra.made.utils import get_center_of_coordinates
 
 
-class PointDefectAnalyzer(BaseMaterialAnalyzer):
-    resolution_method: AtomPlacementMethodEnum = AtomPlacementMethodEnum.COORDINATE
+class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
+    coordinate: List[float]
 
-    def _resolve_coordinate(self, coordinate: List[float], element: Optional[str] = None) -> List[float]:
-        if self.resolution_method == AtomPlacementMethodEnum.COORDINATE:
-            return coordinate
-        elif self.resolution_method == AtomPlacementMethodEnum.CLOSEST_SITE:
-            return self._resolve_to_crystal_site(coordinate, element)
-        elif self.resolution_method == AtomPlacementMethodEnum.NEW_CRYSTAL_SITE:
-            return self._resolve_to_new_crystal_site(coordinate, element)
-        elif self.resolution_method == AtomPlacementMethodEnum.EQUIDISTANT:
-            return self._resolve_to_equidistant_site(coordinate)
-        elif self.resolution_method == AtomPlacementMethodEnum.VORONOI_SITE:
-            return self._resolve_to_voronoi_site(coordinate)
-        else:
-            raise ValueError(f"Unknown atom placement method: {self.resolution_method}")
+    @property
+    def coordinate_resolution(self) -> List[float]:
+        return self.coordinate
 
-    def _resolve_to_crystal_site(self, coordinate: List[float], element: Optional[str] = None) -> List[float]:
-        site_id = get_closest_site_id_from_coordinate(self.material, coordinate)
+    @property
+    def closest_site_resolution(self) -> List[float]:
+        site_id = get_closest_site_id_from_coordinate(self.material, self.coordinate)
         return self.material.coordinates_array[site_id]
 
-    def _resolve_to_new_crystal_site(self, coordinate: List[float], element: Optional[str] = None) -> List[float]:
-        return coordinate
+    @property
+    def new_crystal_site_resolution(self) -> List[float]:
+        return self.coordinate
 
-    def _resolve_to_equidistant_site(self, coordinate: List[float]) -> List[float]:
-        return coordinate
+    @property
+    def equidistant_resolution(self) -> List[float]:
+        scaling_factor = [3, 3, 1]
+        translation_vector = [1 / 3, 1 / 3, 0]
+        supercell_material = create_supercell(self.material, scaling_factor=scaling_factor)
 
-    def _resolve_to_voronoi_site(self, coordinate: List[float]) -> List[float]:
-        return coordinate
+        coordinate_in_supercell = transform_coordinate_to_supercell(
+            coordinate=self.coordinate, scaling_factor=scaling_factor, translation_vector=translation_vector
+        )
 
-    def get_configuration(
-        self,
-        defect_type: PointDefectTypeEnum,
-        coordinate: Optional[List[float]] = None,
-        element: Optional[str] = None,
-    ) -> PointDefectConfiguration:
-        if coordinate is None:
-            coordinate = [0.0, 0.0, 0.0]
+        neighboring_atoms_ids_in_supercell = get_voronoi_nearest_neighbors_atom_indices(
+            material=supercell_material, coordinate=coordinate_in_supercell
+        )
 
-        resolved_coordinate = self._resolve_coordinate(coordinate, element)
+        if neighboring_atoms_ids_in_supercell is None:
+            raise ValueError("No neighboring atoms found for equidistant calculation.")
 
-        if defect_type == PointDefectTypeEnum.VACANCY:
-            return VacancyDefectConfiguration.from_parameters(crystal=self.material, coordinate=resolved_coordinate)
-        elif defect_type == PointDefectTypeEnum.SUBSTITUTION:
-            if element is None:
-                raise ValueError("Element must be specified for substitution defects")
-            return SubstitutionalDefectConfiguration.from_parameters(
-                crystal=self.material, coordinate=resolved_coordinate, element=element
-            )
-        elif defect_type == PointDefectTypeEnum.INTERSTITIAL:
-            if element is None:
-                raise ValueError("Element must be specified for interstitial defects")
-            return InterstitialDefectConfiguration.from_parameters(
-                crystal=self.material, coordinate=resolved_coordinate, element=element
-            )
-        else:
-            raise ValueError(f"Unknown defect type: {defect_type}")
+        isolated_neighboring_atoms_basis = supercell_material.basis.model_copy()
+        isolated_neighboring_atoms_basis.coordinates.filter_by_ids(neighboring_atoms_ids_in_supercell)
+        equidistant_coordinate_in_supercell = get_center_of_coordinates(
+            isolated_neighboring_atoms_basis.coordinates.values
+        )
+        equidistant_coordinate_in_supercell[2] = self.coordinate[2]
+
+        return transform_coordinate_to_supercell(
+            equidistant_coordinate_in_supercell, scaling_factor, translation_vector, reverse=True
+        )
+
+
+class VoronoiCrystalSiteAnalyzer(CrystalSiteAnalyzer):
+    clustering_tol: float = 0.5
+    min_dist: float = 0.9
+    ltol: float = 0.2
+    stol: float = 0.3
+    angle_tol: float = 5
+
+    @property
+    def voronoi_site_resolution(self) -> List[float]:
+        """Voronoi site resolution using configured parameters."""
+        return self._get_voronoi_site_resolution()
+
+    def _get_voronoi_site_resolution(self) -> List[float]:
+        pymatgen_structure = to_pymatgen(self.material)
+
+        voronoi_gen = PymatgenVoronoiInterstitialGenerator(
+            clustering_tol=self.clustering_tol,
+            min_dist=self.min_dist,
+            ltol=self.ltol,
+            stol=self.stol,
+            angle_tol=self.angle_tol,
+        )
+
+        interstitials = list(voronoi_gen.generate(structure=pymatgen_structure, insert_species=["Si"]))
+
+        if not interstitials:
+            raise ValueError("No Voronoi interstitial sites found.")
+
+        closest_interstitial = min(
+            interstitials,
+            key=lambda interstitial: get_distance_between_coordinates(interstitial.site.frac_coords, self.coordinate),
+        )
+
+        return closest_interstitial.site.frac_coords.tolist()
