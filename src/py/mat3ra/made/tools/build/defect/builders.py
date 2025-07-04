@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from mat3ra.made.material import Material
 from mat3ra.made.utils import get_center_of_coordinates
 from .configuration import (
-    PointDefectConfiguration,
+    PointDefectConfigurationLegacy,
     AdatomSlabPointDefectConfiguration,
     IslandSlabDefectConfiguration,
     TerraceSlabDefectConfiguration,
@@ -55,7 +55,7 @@ class PointDefectBuilderParameters(BaseModel):
 
 
 class DefectBuilder(BaseBuilder):
-    def create_isolated_defect(self, defect_configuration: PointDefectConfiguration) -> Material:
+    def create_isolated_defect(self, defect_configuration: PointDefectConfigurationLegacy) -> Material:
         raise NotImplementedError
 
 
@@ -67,7 +67,7 @@ class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuil
     _BuildParametersType = PointDefectBuilderParameters
     _DefaultBuildParameters = PointDefectBuilderParameters()
     _GeneratedItemType: type(PymatgenStructure) = PymatgenStructure  # type: ignore
-    _ConfigurationType = PointDefectConfiguration
+    _ConfigurationType = PointDefectConfigurationLegacy
     _generator: Callable
 
     def _get_species(self, configuration: BaseBuilder._ConfigurationType):
@@ -480,8 +480,8 @@ class CrystalSiteAdatomSlabDefectBuilder(AdatomSlabDefectBuilder):
 class DefectPairBuilder(DefectBuilder):
     def create_defect_pair(
         self,
-        primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
-        secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
+        primary_defect_configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration],
+        secondary_defect_configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration],
     ) -> Material:
         """
         Create a pair of point defects in the material.
@@ -508,7 +508,7 @@ class PointDefectPairBuilder(PointDefectBuilder, DefectPairBuilder):
     _ConfigurationType: type(PointDefectPairConfiguration) = PointDefectPairConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
-    def create_isolated_defect(self, defect_configuration: PointDefectConfiguration) -> Material:
+    def create_isolated_defect(self, defect_configuration: PointDefectConfigurationLegacy) -> Material:
         key = defect_configuration.defect_type.value
         if hasattr(defect_configuration, "placement_method") and defect_configuration.placement_method is not None:
             key += f":{defect_configuration.placement_method.name}".lower()

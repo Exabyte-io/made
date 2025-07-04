@@ -36,7 +36,7 @@ class BaseDefectConfiguration(BaseModel):
         }
 
 
-class PointDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
+class PointDefectConfigurationLegacy(BaseDefectConfiguration, InMemoryEntity):
     """
     Configuration for a point defect.
 
@@ -133,7 +133,7 @@ class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         }
 
 
-class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfiguration):
+class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfigurationLegacy):
     """
     Configuration for a slab point defect.
 
@@ -329,8 +329,8 @@ class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
     """
 
     defect_type: ComplexDefectTypeEnum = ComplexDefectTypeEnum.PAIR
-    primary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
-    secondary_defect_configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration]
+    primary_defect_configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration]
+    secondary_defect_configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration]
 
     @property
     def _json(self):
