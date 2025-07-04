@@ -1,8 +1,5 @@
 from typing import Any, Optional, List
-from typing import TypeVar
 
-import numpy as np
-from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from mat3ra.made.material import Material
@@ -11,8 +8,6 @@ from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import merge
-from mat3ra.made.tools.operations.reusable.unary import strain_to_match_lattice
-from mat3ra.made.tools.operations.core.utils import merge_two_bases
 
 
 class MergeBuilderParameters(BaseBuilderParameters):
@@ -49,7 +44,6 @@ class MergeBuilder(BaseSingleBuilder):
         raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
 
     def _merge_add(self, materials: List[Material], parameters: MergeBuilderParameters) -> Material:
-        """Merge materials by adding all atoms from both materials."""
         return merge(
             materials=materials,
             merge_method=MergeMethodsEnum.add,
@@ -59,7 +53,6 @@ class MergeBuilder(BaseSingleBuilder):
         )
 
     def _merge_replace(self, materials: List[Material], parameters: MergeBuilderParameters) -> Material:
-        """Merge materials by replacing overlapping atoms from material1 with material2."""
         return merge(
             materials=materials,
             merge_method=MergeMethodsEnum.replace,
@@ -69,7 +62,6 @@ class MergeBuilder(BaseSingleBuilder):
         )
 
     def _merge_yield(self, materials: List[Material], parameters: MergeBuilderParameters) -> Material:
-        """Merge materials by removing overlapping atoms from material2, then adding material1 (material2 yields to material1)."""
         return merge(
             materials=materials,
             merge_method=MergeMethodsEnum.yield_,

@@ -1,7 +1,6 @@
 from types import SimpleNamespace
 
 import pytest
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
     PointDefectBuilderParameters,
@@ -11,15 +10,15 @@ from mat3ra.made.tools.build.defect import (
     create_defects,
 )
 from mat3ra.made.tools.build.defect.point.helpers import (
-    create_vacancy_defect,
-    create_substitution_defect,
     create_interstitial_defect,
+    create_substitution_defect,
+    create_vacancy_defect,
 )
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 from unit.fixtures.point_defects import (
-    VACANCY_DEFECT_BULK_PRIMITIVE_Si,
-    SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
+    SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
+    VACANCY_DEFECT_BULK_PRIMITIVE_Si,
 )
 from unit.utils import assert_two_entities_deep_almost_equal
 

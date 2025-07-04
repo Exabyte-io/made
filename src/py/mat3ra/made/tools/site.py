@@ -5,9 +5,8 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.crystal_site import (
     CrystalSiteSchema,
 )
-from pydantic import BaseModel
-
 from mat3ra.made.material import Material
+from pydantic import BaseModel
 
 
 class CrystalSite(CrystalSiteSchema, BaseModel):

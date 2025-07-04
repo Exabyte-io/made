@@ -1,6 +1,7 @@
 from typing import List, Callable, Optional, Union
 
 import numpy as np
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material
@@ -13,6 +14,7 @@ from .configuration import (
     PointDefectPairConfiguration,
 )
 from .factories import DefectBuilderFactory
+from ..metadata import MaterialMetadata
 from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from ..slab.configurations import SlabConfiguration
 from ..slab.helpers import create_slab
@@ -47,7 +49,6 @@ from ...utils import (
     coordinate as CoordinateCondition,
     get_distance_between_coordinates,
 )
-from ..metadata import MaterialMetadata
 
 
 class PointDefectBuilderParameters(BaseModel):

@@ -1,14 +1,14 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate
-from mat3ra.made.tools.build.defect.point.configuration import (
-    PointDefectConfiguration,
-    VacancyDefectConfiguration,
-    SubstitutionalDefectConfiguration,
-    InterstitialDefectConfiguration,
-)
 from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum, PointDefectTypeEnum
+from mat3ra.made.tools.build.defect.point.configuration import (
+    InterstitialDefectConfiguration,
+    PointDefectConfiguration,
+    SubstitutionalDefectConfiguration,
+    VacancyDefectConfiguration,
+)
 
 
 class PointDefectAnalyzer(BaseMaterialAnalyzer):

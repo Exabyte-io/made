@@ -1,6 +1,7 @@
 from typing import Any, List, Optional, Type
 
 from mat3ra.code.entity import InMemoryEntityPydantic
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material

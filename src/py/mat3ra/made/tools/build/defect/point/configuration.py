@@ -1,24 +1,20 @@
 from typing import List, Union
 
-from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.base_configuration import (
-    PointDefectBaseConfigurationSchema,
-)
-from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.interstitial import (
-    InterstitialPointDefectSchema,
-)
-from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.substitutional import (
-    SubstitutionalPointDefectSchema,
-)
-from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.vacancy import (
-    VacancyPointDefectSchema,
-    ChemicalElement,
-)
-from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.point_defect_site import (
-    PointDefectSiteSchema,
-    AtomSchema,
-)
-from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.vacancy import VacancySchema
+# fmt: off
+from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.\
+    point_defect.base_configuration import PointDefectBaseConfigurationSchema
+from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional. \
+    point_defect.interstitial import InterstitialPointDefectSchema
+from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional. \
+    point_defect.substitutional import SubstitutionalPointDefectSchema
+from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional. \
+    point_defect.vacancy import VacancyPointDefectSchema, ChemicalElement
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional. \
+    point_defect_site import PointDefectSiteSchema, AtomSchema
+from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional. \
+    vacancy import VacancySchema
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+# fmt: on
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration

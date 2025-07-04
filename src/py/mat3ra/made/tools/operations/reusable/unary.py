@@ -25,4 +25,4 @@ def strain_to_match_lattice(material_to_strain: Material, target_material: Mater
     strain_matrix_np = np.linalg.inv(source_lattice_vectors) @ target_lattice_vectors
     strain_matrix = Matrix3x3Schema(root=strain_matrix_np.tolist())
     strained_material = strain(material_to_strain, strain_matrix)
-    return strained_material 
+    return strained_material

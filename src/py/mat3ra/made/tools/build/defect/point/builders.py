@@ -1,11 +1,7 @@
-from typing import Any
-
-from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.vacancy import VacancySchema
+from typing import Any, Type
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder
-from mat3ra.made.tools.build.merge.builders import MergeBuilder
-from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.defect.point.configuration import (
     PointDefectConfiguration,
     PointDefectSite,
@@ -13,6 +9,8 @@ from mat3ra.made.tools.build.defect.point.configuration import (
     SubstitutionalDefectConfiguration,
     InterstitialDefectConfiguration,
 )
+from mat3ra.made.tools.build.merge.builders import MergeBuilder
+from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 
 
 class PointDefectSiteBuilder(BaseSingleBuilder):
@@ -39,24 +37,24 @@ class PointDefectBuilder(MergeBuilder):
     Based on MergeBuilder, similar to how SlabBuilder is based on Stack2ComponentsBuilder.
     """
 
-    _ConfigurationType = PointDefectConfiguration
+    _ConfigurationType: Type[PointDefectConfiguration] = PointDefectConfiguration
 
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
         if isinstance(configuration_or_material, PointDefectSite):
             return PointDefectSiteBuilder().get_material(configuration_or_material)
         return super()._configuration_to_material(configuration_or_material)
 
-    def _post_process(self, material: Material, configuration: _ConfigurationType) -> Material:
+    def _post_process(self, material: Material, configuration: MergeBuilder._ConfigurationType) -> Material:
         if isinstance(configuration, VacancyDefectConfiguration):
             material.basis.remove_atoms_by_elements("Vac")
         return material
 
-    def get_material(self, configuration: _ConfigurationType) -> Material:
+    def get_material(self, configuration: MergeBuilder._ConfigurationType) -> Material:
         merged_material = super().get_material(configuration)
         processed_material = self._post_process(merged_material, configuration)
         return self._update_material_name(processed_material, configuration)
 
-    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
+    def _update_material_name(self, material: Material, configuration: MergeBuilder._ConfigurationType) -> Material:
         host_material = None
         for component in configuration.merge_components:
             if isinstance(component, Material):
@@ -69,7 +67,7 @@ class PointDefectBuilder(MergeBuilder):
 
         return material
 
-    def _generate(self, config: PointDefectConfiguration) -> Material:
+    def _generate(self, config: MergeBuilder._ConfigurationType) -> Material:
         materials = []
         site_builder = PointDefectSiteBuilder()
         for component in config.merge_components:

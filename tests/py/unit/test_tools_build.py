@@ -1,12 +1,11 @@
 import pytest
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseConfigurationPydantic
 from mat3ra.made.tools.build.merge.builders import MergeBuilder, MergeBuilderParameters
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.operations.core.binary import merge
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.cuts import (
     CAVITY_MATERIAL_BASIS,
@@ -17,16 +16,12 @@ from unit.fixtures.cuts import (
     SECTION_MATERIAL_BASIS_EXTRA_ATOM,
 )
 from unit.fixtures.merge import MERGED_BULK_Si_Ge
-from unit.utils import assert_two_entities_deep_almost_equal
 from unit.fixtures.point_defects import (
-    VACANCY_DEFECT_BULK_PRIMITIVE_Si,
-    SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
+    SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
+    VACANCY_DEFECT_BULK_PRIMITIVE_Si,
 )
-from types import SimpleNamespace
-from mat3ra.made.material import Material
-from mat3ra.made.tools.build.merge.builders import MergeBuilder, MergeBuilderParameters
-from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
+from unit.utils import assert_two_entities_deep_almost_equal
 
 section = Material.create({**FULL_MATERIAL, **SECTION_MATERIAL_BASIS})
 cavity = Material.create({**FULL_MATERIAL, **CAVITY_MATERIAL_BASIS})
@@ -94,7 +89,6 @@ MERGE_TEST_PARAMS = [
     "material1_config, material2_config, merge_method, builder_params, expected_material_config", MERGE_TEST_PARAMS
 )
 def test_merge_builder(material1_config, material2_config, merge_method, builder_params, expected_material_config):
-
     material1 = Material.create(material1_config)
     material2 = Material.create(material2_config)
 
@@ -111,14 +105,12 @@ def test_merge_builder(material1_config, material2_config, merge_method, builder
 @pytest.mark.parametrize(
     "material1_config, material2_config, merge_method, expected_material_config",
     [
-        # Add: should combine both, so interstitial is a good test
         (
             VACANCY_DEFECT_BULK_PRIMITIVE_Si,
             INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
             "add",
             INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
         ),
-        # Replace: should replace overlapping atoms, so substitution is a good test
         (
             VACANCY_DEFECT_BULK_PRIMITIVE_Si,
             SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
@@ -129,7 +121,6 @@ def test_merge_builder(material1_config, material2_config, merge_method, builder
     ],
 )
 def test_merge_methods(material1_config, material2_config, merge_method, expected_material_config):
-
     material1 = Material.create(material1_config)
     material2 = Material.create(material2_config)
     merge_config = MergeConfiguration(merge_components=[material1, material2], merge_method=merge_method)
