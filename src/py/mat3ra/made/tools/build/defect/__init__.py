@@ -10,7 +10,11 @@ from .builders import (
     IslandSlabDefectBuilder,
     TerraceSlabDefectBuilder,
 )
-from .configuration import PointDefectConfiguration, AdatomSlabPointDefectConfiguration, IslandSlabDefectConfiguration
+from .configuration import (
+    PointDefectConfigurationLegacy,
+    AdatomSlabPointDefectConfiguration,
+    IslandSlabDefectConfiguration,
+)
 from .enums import PointDefectTypeEnum
 from .factories import DefectBuilderFactory
 
@@ -35,7 +39,7 @@ def get_material_with_defect(configuration, builder_parameters):
 
 
 def create_defect(
-    configuration: Union[PointDefectConfiguration, AdatomSlabPointDefectConfiguration],
+    configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration],
     builder_parameters: Union[PointDefectBuilderParameters, SlabDefectBuilderParameters, None] = None,
 ) -> Material:
     """
@@ -52,7 +56,7 @@ def create_defect(
 
 
 def create_defects(
-    configurations: Union[List[PointDefectConfiguration], List[AdatomSlabPointDefectConfiguration]],
+    configurations: Union[List[PointDefectConfigurationLegacy], List[AdatomSlabPointDefectConfiguration]],
     builder_parameters: Union[PointDefectBuilderParameters, SlabDefectBuilderParameters, None] = None,
 ) -> Material:
     """
