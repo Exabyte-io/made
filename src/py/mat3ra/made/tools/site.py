@@ -7,10 +7,13 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_di
 )
 from pydantic import BaseModel
 
+from mat3ra.made.material import Material
+
 
 class CrystalSite(CrystalSiteSchema, BaseModel):
+    crystal: Material = None
     # element: str
-    # coordinate: List[float]
+    coordinate: List[float]
     nearest_neighbor_vectors: List[np.ndarray] = []
     # coordination_number: int = 0
     # see https://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list for an example
