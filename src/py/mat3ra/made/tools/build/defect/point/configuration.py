@@ -53,6 +53,7 @@ class VacancyDefectConfiguration(VacancyPointDefectSchema, PointDefectConfigurat
     def from_parameters(cls, host_material: Material, coordinate: List[float], **kwargs):
 
         point_defect_site = PointDefectSite(
+            crystal=host_material,
             element=VacancySchema(chemical_element=VacancySchema.chemical_element.Vac),
             coordinate=coordinate,
         )
@@ -74,7 +75,11 @@ class SubstitutionalDefectConfiguration(SubstitutionalPointDefectSchema, PointDe
 
     @classmethod
     def from_parameters(cls, host_material: Material, coordinate: List[float], element: str, **kwargs):
-        substitution_site = PointDefectSite(element=element, coordinate=coordinate)
+        substitution_site = PointDefectSite(
+            crystal=host_material,
+            element=ElementSchema(chemical_element=element),
+            coordinate=coordinate,
+        )
 
         return cls(merge_components=[host_material, substitution_site], merge_method=MergeMethodsEnum.replace, **kwargs)
 
@@ -94,9 +99,9 @@ class InterstitialDefectConfiguration(PointDefectConfiguration):
     @classmethod
     def from_parameters(cls, host_material: Material, coordinate: List[float], element: str, **kwargs):
 
-        # TODO: convert str to correct ElementSchema
         interstitial_site = PointDefectSite(
-            element=element,
+            crystal=host_material,
+            element=ElementSchema(chemical_element=element),
             coordinate=coordinate,
         )
 
