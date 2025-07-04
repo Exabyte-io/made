@@ -1,7 +1,9 @@
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
 
@@ -41,32 +43,40 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
 def merge_two_materials(
     material1: Material,
     material2: Material,
+    merge_method: Optional[MergeMethodsEnum] = MergeMethodsEnum.add,
     material_name: Optional[str] = None,
     distance_tolerance: float = 0.1,
-    merge_dangerously=False,
+    merge_dangerously: bool = False,
 ) -> Material:
     """
-    Merges two Material objects into a new Material object, resolving overlapping coordinates in their bases.
-    The function requires that both materials have the same lattice vectors unless `merge_dangerously` is set to True.
+    Merge two materials using a specific merge method.
 
     Args:
-        material1 (Material): The first Material object to merge.
-        material2 (Material): The second Material object to merge.
-        material_name (Optional[str]): Optional name for the new merged material.
-        distance_tolerance (float): Tolerance for resolving overlapping coordinates in the basis.
-        merge_dangerously (bool): If True, allows merging even if lattices are different; uses the lattice of material1.
+        material1 (Material): The first material to merge.
+        material2 (Material): The second material to merge.
+        merge_method (MergeMethodsEnum): The merge method to use.
+        material_name (Optional[str]): Name of the merged material.
+        distance_tolerance (float): The tolerance for resolving overlapping coordinates.
+        merge_dangerously (bool): If True, allows merging even if lattices are different.
 
     Returns:
-        Material: A new Material object containing merged lattice and basis.
+        Material: The merged material.
     """
     if not np.allclose(material1.lattice.vector_arrays, material2.lattice.vector_arrays) and not merge_dangerously:
         raise ValueError("Lattices of the two materials must be the same.")
-    merged_lattice = material1.lattice
-    resolved_basis = merge_two_bases(material1.basis, material2.basis, distance_tolerance)
+
+    if merge_method == MergeMethodsEnum.add:
+        merged_basis = merge_bases_add(material1.basis, material2.basis, distance_tolerance)
+    elif merge_method == MergeMethodsEnum.replace:
+        merged_basis = merge_bases_replace(material1.basis, material2.basis, distance_tolerance)
+    elif merge_method == MergeMethodsEnum.yield_:
+        merged_basis = merge_bases_yield(material1.basis, material2.basis, distance_tolerance)
+    else:
+        raise ValueError(f"Unknown merge method: {merge_method}")
 
     name = material_name or "Merged Material"
     new_material = Material.create(
-        {"name": name, "lattice": merged_lattice.to_dict(), "basis": resolved_basis.to_dict()}
+        {"name": name, "lattice": material1.lattice.to_dict(), "basis": merged_basis.to_dict()}
     )
     return new_material
 
@@ -111,3 +121,17 @@ def should_skip_stacking(
         raise ValueError(f"In-plane lattice vectors of the two materials must be the same for stacking.\n{difference}")
 
     return False
+
+
+def merge_bases_add(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
+    return merge_two_bases(basis1, basis2, distance_tolerance)
+
+
+def merge_bases_replace(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
+    base1 = basis1.clone()
+    return merge_two_bases(base1, basis2, distance_tolerance)
+
+
+def merge_bases_yield(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
+    base2 = basis2.clone()
+    return merge_two_bases(base2, basis1, distance_tolerance)

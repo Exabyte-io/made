@@ -1,10 +1,11 @@
 from typing import List, Optional
 
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector
 from .supercell import create_supercell
 from ..modify import filter_by_box
-from ..operations.core.binary import merge_materials
+from ..operations.core.binary import merge
 
 
 def double_and_filter_material(material: Material, start: List[float], end: List[float]) -> Material:
@@ -77,7 +78,10 @@ def stack_two_materials_xy(
     phase_2_material = expand_lattice_vectors(phase_2_material, gap)
 
     phase_2_material = translate_by_vector(phase_2_material, [gap / 2, 0, 0], use_cartesian_coordinates=True)
-    interface = merge_materials(
-        [phase_1_material, phase_2_material], distance_tolerance=distance_tolerance, merge_dangerously=True
+    interface = merge(
+        [phase_1_material, phase_2_material], 
+        merge_method=MergeMethodsEnum.add,
+        distance_tolerance=distance_tolerance, 
+        merge_dangerously=True
     )
     return interface

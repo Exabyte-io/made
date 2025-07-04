@@ -2,6 +2,7 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector
 from mat3ra.made.tools.utils import AXIS_TO_INDEX_MAP
@@ -9,32 +10,31 @@ from mat3ra.made.tools.utils import AXIS_TO_INDEX_MAP
 from .utils import merge_two_materials, should_skip_stacking
 
 
-def merge_materials(
+def merge(
     materials: List[Material],
+    merge_method: Optional[MergeMethodsEnum] = MergeMethodsEnum.add,
     material_name: Optional[str] = None,
     distance_tolerance: float = 0.1,
-    merge_dangerously=False,
+    merge_dangerously: bool = False,
 ) -> Material:
     """
-    Merge multiple materials into a single material.
-
-    If some of the atoms are considered too close within a tolerance, only the last atom is kept.
+    Merge multiple materials using a specific merge method.
 
     Args:
         materials (List[Material]): List of materials to merge.
+        merge_method (MergeMethodsEnum): The merge method to use.
         material_name (Optional[str]): Name of the merged material.
-        distance_tolerance (float): The tolerance to replace atoms that are considered too close with respect
-            to the coordinates in the last material in the list, in angstroms.
-        merge_dangerously (bool): If True, the lattices are merged "as is" with no sanity checks.
+        distance_tolerance (float): The tolerance for resolving overlapping coordinates.
+        merge_dangerously (bool): If True, allows merging even if lattices are different.
+
     Returns:
         Material: The merged material.
     """
     merged_material = materials[0]
     for material in materials[1:]:
         merged_material = merge_two_materials(
-            merged_material, material, material_name, distance_tolerance, merge_dangerously
+            merged_material, material, merge_method, material_name, distance_tolerance, merge_dangerously
         )
-
     return merged_material
 
 

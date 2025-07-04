@@ -18,6 +18,15 @@ from unit.fixtures.cuts import (
 )
 from unit.fixtures.merge import MERGED_BULK_Si_Ge
 from unit.utils import assert_two_entities_deep_almost_equal
+from unit.fixtures.point_defects import (
+    VACANCY_DEFECT_BULK_PRIMITIVE_Si,
+    SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
+    INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
+)
+from types import SimpleNamespace
+from mat3ra.made.material import Material
+from mat3ra.made.tools.build.merge.builders import MergeBuilder, MergeBuilderParameters
+from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 
 section = Material.create({**FULL_MATERIAL, **SECTION_MATERIAL_BASIS})
 cavity = Material.create({**FULL_MATERIAL, **CAVITY_MATERIAL_BASIS})
@@ -97,3 +106,55 @@ def test_merge_builder(material1_config, material2_config, merge_method, builder
     merged_material = builder.get_material(merge_config)
 
     assert_two_entities_deep_almost_equal(merged_material, expected_material_config)
+
+
+@pytest.mark.parametrize(
+    "material1_config, material2_config, merge_method, expected_material_config",
+    [
+        # Add: should combine both, so interstitial is a good test
+        (
+            VACANCY_DEFECT_BULK_PRIMITIVE_Si,
+            INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
+            "add",
+            INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
+        ),
+        # Replace: should replace overlapping atoms, so substitution is a good test
+        (
+            VACANCY_DEFECT_BULK_PRIMITIVE_Si,
+            SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
+            "replace",
+            SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
+        ),
+        # Yield: should remove atoms from first that overlap with second
+        (BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL, "yield", BULK_Si_CONVENTIONAL),
+    ],
+)
+def test_merge_methods(material1_config, material2_config, merge_method, expected_material_config):
+
+    material1 = Material.create(material1_config)
+    material2 = Material.create(material2_config)
+    merge_config = MergeConfiguration(merge_components=[material1, material2], merge_method=merge_method)
+    builder = MergeBuilder(build_parameters=MergeBuilderParameters(merge_dangerously=True))
+    merged_material = builder.get_material(merge_config)
+
+    # Custom comparison that ignores atom IDs, metadata, and name
+    def compare_materials_ignoring_ids(actual, expected):
+        actual_dict = actual.to_dict()
+        expected_dict = expected.to_dict()
+
+        # Remove IDs from coordinates and elements
+        for material_dict in [actual_dict, expected_dict]:
+            for coord in material_dict["basis"]["coordinates"]:
+                coord.pop("id", None)
+            for elem in material_dict["basis"]["elements"]:
+                elem.pop("id", None)
+            # Remove metadata and name differences
+            material_dict.pop("metadata", None)
+            material_dict.pop("name", None)
+            material_dict["lattice"].pop("type", None)
+
+        # Compare only essential structure
+        assert_two_entities_deep_almost_equal(actual_dict, expected_dict)
+
+    expected_material = Material.create(expected_material_config)
+    compare_materials_ignoring_ids(merged_material, expected_material)

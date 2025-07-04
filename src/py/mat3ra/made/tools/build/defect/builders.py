@@ -17,7 +17,7 @@ from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from ..slab.configurations import SlabConfiguration
 from ..slab.helpers import create_slab
 from ..supercell import create_supercell
-from ..utils import merge_materials
+from ..utils import merge
 from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
 from ...analyze.other import (
     get_atomic_coordinates_extremum,
@@ -271,8 +271,9 @@ class SlabDefectBuilder(DefectBuilder):
         new_vacuum = isolated_defect.lattice.c - material.lattice.c
         new_material = add_vacuum(material, new_vacuum)
         new_material.to_cartesian()
-        new_material = merge_materials(
+        new_material = merge(
             materials=[isolated_defect, new_material],
+            merge_method=MergeMethodsEnum.add,
             material_name=material.name,
             merge_dangerously=True,
         )

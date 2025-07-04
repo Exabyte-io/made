@@ -201,3 +201,5 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.filter_atoms_by_ids(list(ids_to_remove), invert=True)
         if original_is_in_crystal:
             self.to_crystal()
+
+
