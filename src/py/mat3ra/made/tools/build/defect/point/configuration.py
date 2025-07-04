@@ -11,6 +11,7 @@ from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional
 )
 from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.vacancy import (
     VacancyPointDefectSchema,
+    ChemicalElement,
 )
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.point_defect_site import (
     PointDefectSiteSchema,
@@ -48,7 +49,7 @@ class VacancyDefectConfiguration(PointDefectConfiguration, VacancyPointDefectSch
     def from_parameters(cls, crystal: Material, coordinate: List[float], **kwargs):
         point_defect_site = PointDefectSite(
             crystal=crystal,
-            element=VacancySchema(chemical_element=VacancySchema.chemical_element.Vac),
+            element=VacancySchema(chemical_element=ChemicalElement.Vac.value),
             coordinate=coordinate,
         )
         return cls(merge_components=[crystal, point_defect_site], merge_method=MergeMethodsEnum.replace, **kwargs)
