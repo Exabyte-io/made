@@ -144,6 +144,13 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.coordinates.remove_item(id)
         self.labels.remove_item(id)
 
+    def remove_atoms_by_values(self, values: Union[List[str], str]) -> "Basis":
+        if isinstance(values, str):
+            values = [values]
+        ids_to_remove = self.elements.get_ids_by_values(values)
+        self.filter_atoms_by_ids(ids_to_remove, invert=True)
+        return self
+
     def filter_atoms_by_ids(self, ids: Union[List[int], int], invert: bool = False) -> "Basis":
         self.elements.filter_by_ids(ids, invert)
         self.coordinates.filter_by_ids(ids, invert)
