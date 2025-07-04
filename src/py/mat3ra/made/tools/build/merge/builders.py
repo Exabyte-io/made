@@ -1,13 +1,12 @@
-from typing import Any, TypeVar
+from typing import Any, Optional
+from typing import TypeVar
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder, BaseBuilderParameters
-from mat3ra.made.tools.build.merge.configuration import MergeConfiguration, PointDefectConfiguration
+from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import merge_materials
-
-from typing import List, Any, Optional
 
 
 class MergeBuilderParameters(BaseBuilderParameters):
