@@ -25,7 +25,7 @@ class PointDefectSite(CrystalSite, PointDefectSiteSchema):
     element: Union[VacancySchema, ElementSchema]
 
 
-class PointDefectConfiguration(MergeConfiguration, PointDefectBaseConfigurationSchema):
+class PointDefectConfiguration(MergeConfiguration):
     """
     Configuration for building a point defect by merging materials.
 
@@ -38,40 +38,21 @@ class PointDefectConfiguration(MergeConfiguration, PointDefectBaseConfigurationS
     merge_components: List[Union[Material, PointDefectSite]]
 
 
-class VacancyDefectConfiguration(VacancyPointDefectSchema, PointDefectConfiguration):
-    """
-    Configuration for building a vacancy defect by merging materials.
-
-    Args:
-        merge_components: List of materials or configurations to merge.
-        merge_method: Method to use for merging.
-    """
-
+class VacancyDefectConfiguration(PointDefectConfiguration):
     type: str = "VacancyDefectConfiguration"
 
     @classmethod
     def from_parameters(cls, host_material: Material, coordinate: List[float], **kwargs):
-
         point_defect_site = PointDefectSite(
             crystal=host_material,
-            element=VacancySchema(chemical_element=VacancySchema.chemical_element.Vac),
+            element=VacancySchema(chemical_element="Vac"),
             coordinate=coordinate,
         )
-
         return cls(merge_components=[host_material, point_defect_site], merge_method=MergeMethodsEnum.replace, **kwargs)
 
 
-class SubstitutionalDefectConfiguration(SubstitutionalPointDefectSchema, PointDefectConfiguration):
-    """
-    Configuration for building a substitutional defect by merging materials.
-
-    Args:
-        merge_components: List of materials or configurations to merge.
-        merge_method: Method to use for merging.
-    """
-
+class SubstitutionalDefectConfiguration(PointDefectConfiguration):
     type: str = "SubstitutionalDefectConfiguration"
-    merge_components: List[Union[Material, PointDefectSite]]
 
     @classmethod
     def from_parameters(cls, host_material: Material, coordinate: List[float], element: str, **kwargs):
@@ -80,29 +61,17 @@ class SubstitutionalDefectConfiguration(SubstitutionalPointDefectSchema, PointDe
             element=ElementSchema(chemical_element=element),
             coordinate=coordinate,
         )
-
         return cls(merge_components=[host_material, substitution_site], merge_method=MergeMethodsEnum.replace, **kwargs)
 
 
 class InterstitialDefectConfiguration(PointDefectConfiguration):
-    """
-    Configuration for building an interstitial defect by merging materials.
-
-    Args:
-        merge_components: List of materials or configurations to merge.
-        merge_method: Method to use for merging.
-    """
-
     type: str = "InterstitialDefectConfiguration"
-    merge_components: List[Union[Material, PointDefectSite]]
 
     @classmethod
     def from_parameters(cls, host_material: Material, coordinate: List[float], element: str, **kwargs):
-
         interstitial_site = PointDefectSite(
             crystal=host_material,
             element=ElementSchema(chemical_element=element),
             coordinate=coordinate,
         )
-
         return cls(merge_components=[host_material, interstitial_site], merge_method=MergeMethodsEnum.add, **kwargs)
