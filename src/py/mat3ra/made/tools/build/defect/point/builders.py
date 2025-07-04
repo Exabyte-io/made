@@ -1,5 +1,7 @@
 from typing import Any
 
+from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.vacancy import VacancySchema
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder
 from mat3ra.made.tools.build.merge.builders import MergeBuilder
@@ -21,9 +23,9 @@ class PointDefectSiteBuilder(BaseSingleBuilder):
     _ConfigurationType = PointDefectSite
 
     def _generate(self, configuration: PointDefectSite) -> Material:
-        new_material = configuration.crystal
+        new_material = configuration.crystal.clone()
         elements = configuration.crystal.basis.elements.values
-        new_material.basis.remove_atoms_by_values(elements)
+        new_material.basis.remove_atoms_by_elements(elements)
         new_material.basis.add_atom(
             element=configuration.element.chemical_element.value,
             coordinate=configuration.coordinate,
@@ -46,7 +48,7 @@ class PointDefectBuilder(MergeBuilder):
 
     def _post_process(self, material: Material, configuration: _ConfigurationType) -> Material:
         if isinstance(configuration, VacancyDefectConfiguration):
-            material.basis.remove_atoms_by_values("Vac")
+            material.basis.remove_atoms_by_elements("Vac")
         return material
 
     def get_material(self, configuration: _ConfigurationType) -> Material:

@@ -1,4 +1,3 @@
-from copy import deepcopy
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -6,11 +5,12 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material import BasisSchema, BasisUnitsEnum
+from pydantic import Field
+from scipy.spatial import cKDTree
+
 from mat3ra.made.basis.coordinates import Coordinates
 from mat3ra.made.cell import Cell
 from mat3ra.made.utils import get_overlapping_coordinates
-from pydantic import Field
-from scipy.spatial import cKDTree
 
 
 class Basis(BasisSchema, InMemoryEntityPydantic):
@@ -144,11 +144,11 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.coordinates.remove_item(id)
         self.labels.remove_item(id)
 
-    def remove_atoms_by_values(self, values: Union[List[str], str]) -> "Basis":
+    def remove_atoms_by_elements(self, values: Union[List[str], str]) -> "Basis":
         if isinstance(values, str):
             values = [values]
         ids_to_remove = [
-            self.elements.get_element_id_by_value(value) for value in values if value in self.elements.values
+            id_ for value in values for id_, v in zip(self.elements.ids, self.elements.values) if v == value
         ]
         self.filter_atoms_by_ids(ids_to_remove, invert=True)
         return self

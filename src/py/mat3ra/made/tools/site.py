@@ -11,9 +11,9 @@ from mat3ra.made.material import Material
 
 
 class CrystalSite(CrystalSiteSchema, BaseModel):
-    crystal: Material = None
+    crystal: Optional[Material] = None
     # element: str
-    coordinate: List[float]
+    coordinate: Optional[List[float]] = None
     nearest_neighbor_vectors: List[np.ndarray] = []
     # coordination_number: int = 0
     # see https://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list for an example
