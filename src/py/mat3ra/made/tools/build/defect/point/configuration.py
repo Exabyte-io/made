@@ -4,6 +4,9 @@ from mat3ra.esse.models.element import ElementSchema
 from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.base_configuration import (
     PointDefectBaseConfigurationSchema,
 )
+from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.interstitial import (
+    InterstitialPointDefectSchema,
+)
 from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.substitutional import (
     SubstitutionalPointDefectSchema,
 )
@@ -25,7 +28,7 @@ class PointDefectSite(CrystalSite, PointDefectSiteSchema):
     element: Union[VacancySchema, ElementSchema]
 
 
-class PointDefectConfiguration(MergeConfiguration):
+class PointDefectConfiguration(PointDefectBaseConfigurationSchema, MergeConfiguration):
     """
     Configuration for building a point defect by merging materials.
 
@@ -38,40 +41,40 @@ class PointDefectConfiguration(MergeConfiguration):
     merge_components: List[Union[Material, PointDefectSite]]
 
 
-class VacancyDefectConfiguration(PointDefectConfiguration):
+class VacancyDefectConfiguration(PointDefectConfiguration, VacancyPointDefectSchema):
     type: str = "VacancyDefectConfiguration"
 
     @classmethod
-    def from_parameters(cls, host_material: Material, coordinate: List[float], **kwargs):
+    def from_parameters(cls, crystal: Material, coordinate: List[float], **kwargs):
         point_defect_site = PointDefectSite(
-            crystal=host_material,
-            element=VacancySchema(chemical_element="Vac"),
+            crystal=crystal,
+            element=VacancySchema(chemical_element=VacancySchema.chemical_element.Vac),
             coordinate=coordinate,
         )
-        return cls(merge_components=[host_material, point_defect_site], merge_method=MergeMethodsEnum.replace, **kwargs)
+        return cls(merge_components=[crystal, point_defect_site], merge_method=MergeMethodsEnum.replace, **kwargs)
 
 
-class SubstitutionalDefectConfiguration(PointDefectConfiguration):
+class SubstitutionalDefectConfiguration(PointDefectConfiguration, SubstitutionalPointDefectSchema):
     type: str = "SubstitutionalDefectConfiguration"
 
     @classmethod
-    def from_parameters(cls, host_material: Material, coordinate: List[float], element: str, **kwargs):
+    def from_parameters(cls, crystal: Material, coordinate: List[float], element: str, **kwargs):
         substitution_site = PointDefectSite(
-            crystal=host_material,
+            crystal=crystal,
             element=ElementSchema(chemical_element=element),
             coordinate=coordinate,
         )
-        return cls(merge_components=[host_material, substitution_site], merge_method=MergeMethodsEnum.replace, **kwargs)
+        return cls(merge_components=[crystal, substitution_site], merge_method=MergeMethodsEnum.replace, **kwargs)
 
 
-class InterstitialDefectConfiguration(PointDefectConfiguration):
+class InterstitialDefectConfiguration(PointDefectConfiguration, InterstitialPointDefectSchema):
     type: str = "InterstitialDefectConfiguration"
 
     @classmethod
-    def from_parameters(cls, host_material: Material, coordinate: List[float], element: str, **kwargs):
+    def from_parameters(cls, crystal: Material, coordinate: List[float], element: str, **kwargs):
         interstitial_site = PointDefectSite(
-            crystal=host_material,
+            crystal=crystal,
             element=ElementSchema(chemical_element=element),
             coordinate=coordinate,
         )
-        return cls(merge_components=[host_material, interstitial_site], merge_method=MergeMethodsEnum.add, **kwargs)
+        return cls(merge_components=[crystal, interstitial_site], merge_method=MergeMethodsEnum.add, **kwargs)
