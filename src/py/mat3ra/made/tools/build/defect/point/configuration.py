@@ -28,7 +28,7 @@ class PointDefectSite(CrystalSite, PointDefectSiteSchema):
     element: Union[VacancySchema, ElementSchema]
 
 
-class PointDefectConfiguration(PointDefectBaseConfigurationSchema, MergeConfiguration):
+class PointDefectConfiguration(MergeConfiguration, PointDefectBaseConfigurationSchema):
     """
     Configuration for building a point defect by merging materials.
 

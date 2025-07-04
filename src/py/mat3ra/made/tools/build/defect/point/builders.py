@@ -21,13 +21,14 @@ class PointDefectSiteBuilder(BaseSingleBuilder):
     _ConfigurationType = PointDefectSite
 
     def _generate(self, configuration: PointDefectSite) -> Material:
-        """Creates a single-atom material from scratch using the reference lattice."""
-        lattice = configuration.crystal.lattice
-        basis = {
-            "elements": [{"id": 1, "value": configuration.element.chemical_element}],
-            "coordinates": [{"id": 1, "value": configuration.coordinate}],
-        }
-        return Material.create({"lattice": lattice.to_dict(), "basis": basis, "name": "Defect Site"})
+        new_material = configuration.crystal
+        elements = configuration.crystal.basis.elements.values
+        new_material.basis.remove_atoms_by_values(elements)
+        new_material.basis.add_atom(
+            element=configuration.element.chemical_element.value,
+            coordinate=configuration.coordinate,
+        )
+        return new_material
 
 
 class PointDefectBuilder(MergeBuilder):
@@ -49,7 +50,6 @@ class PointDefectBuilder(MergeBuilder):
         return material
 
     def get_material(self, configuration: _ConfigurationType) -> Material:
-        self.last_configuration = configuration
         merged_material = super().get_material(configuration)
         processed_material = self._post_process(merged_material, configuration)
         return self._update_material_name(processed_material, configuration)
@@ -66,6 +66,22 @@ class PointDefectBuilder(MergeBuilder):
             material.name = f"{host_material.name} with {defect_type} defect"
 
         return material
+
+    def _generate(self, config: PointDefectConfiguration) -> Material:
+        materials = []
+        site_builder = PointDefectSiteBuilder()
+        for component in config.merge_components:
+            if isinstance(component, PointDefectSite):
+                materials.append(site_builder.get_material(component))
+            elif isinstance(component, Material):
+                materials.append(component)
+
+        merge_config = MergeConfiguration(
+            merge_components=materials,
+            merge_method=config.merge_method.value,
+        )
+        merge_builder = MergeBuilder()
+        return merge_builder.get_material(merge_config)
 
 
 class VacancyDefectBuilder(PointDefectBuilder):

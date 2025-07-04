@@ -147,7 +147,9 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
     def remove_atoms_by_values(self, values: Union[List[str], str]) -> "Basis":
         if isinstance(values, str):
             values = [values]
-        ids_to_remove = self.elements.get_ids_by_values(values)
+        ids_to_remove = [
+            self.elements.get_element_id_by_value(value) for value in values if value in self.elements.values
+        ]
         self.filter_atoms_by_ids(ids_to_remove, invert=True)
         return self
 
