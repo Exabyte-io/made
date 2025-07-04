@@ -6,8 +6,8 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseConfigurationPydantic
 from mat3ra.made.tools.build.merge.builders import MergeBuilder, MergeBuilderParameters
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
-from mat3ra.made.tools.operations.core.binary import merge_materials
-from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+from mat3ra.made.tools.operations.core.binary import merge
+from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.cuts import (
     CAVITY_MATERIAL_BASIS,
     FULL_MATERIAL,
@@ -49,8 +49,8 @@ section_with_extra_atom = Material.create({**FULL_MATERIAL, **SECTION_MATERIAL_B
     ],
 )
 def test_merge_materials(materials_to_merge, expected_basis, expected_basis_reverse):
-    merged_material = merge_materials(materials_to_merge)
-    merged_material_reverse = merge_materials(materials_to_merge[::-1])
+    merged_material = merge(materials_to_merge)
+    merged_material_reverse = merge(materials_to_merge[::-1])
     assertion_utils.assert_deep_almost_equal(merged_material.basis, expected_basis)
     assertion_utils.assert_deep_almost_equal(merged_material_reverse.basis, expected_basis_reverse)
 
@@ -125,8 +125,7 @@ def test_merge_builder(material1_config, material2_config, merge_method, builder
             "replace",
             SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
         ),
-        # Yield: should remove atoms from first that overlap with second
-        (BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL, "yield", BULK_Si_CONVENTIONAL),
+        (SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si, BULK_Si_PRIMITIVE, "yield", SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si),
     ],
 )
 def test_merge_methods(material1_config, material2_config, merge_method, expected_material_config):

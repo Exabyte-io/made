@@ -1,4 +1,7 @@
+from types import SimpleNamespace
+
 import pytest
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect import (
     PointDefectBuilderParameters,
@@ -19,7 +22,6 @@ from unit.fixtures.point_defects import (
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
 )
 from unit.utils import assert_two_entities_deep_almost_equal
-from types import SimpleNamespace
 
 
 @pytest.mark.parametrize(
@@ -204,13 +206,6 @@ def test_create_defects(crystal_config, defect_configs_params, builder_params, e
     ],
 )
 def test_point_defect_helpers(material_config, defect_params, expected_material_config):
-    from mat3ra.made.tools.build.defect.point.helpers import (
-        create_vacancy_defect,
-        create_substitution_defect,
-        create_interstitial_defect,
-    )
-    from mat3ra.made.material import Material
-
     crystal = Material.create(material_config)
     if defect_params.type == "vacancy":
         defect = create_vacancy_defect(crystal, defect_params.coordinate)
