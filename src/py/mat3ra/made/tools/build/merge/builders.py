@@ -1,12 +1,16 @@
 from typing import Any, Optional
 from typing import TypeVar
 
+import numpy as np
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder, BaseBuilderParameters
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import merge_materials
+from mat3ra.made.tools.operations.reusable.unary import strain_to_match_lattice
 
 
 class MergeBuilderParameters(BaseBuilderParameters):
@@ -52,6 +56,15 @@ class MergeBuilder(BaseSingleBuilder):
             return materials[0]
 
         parameters = self.build_parameters or self._DefaultBuildParameters
+
+        if parameters.merge_dangerously and len(materials) > 1:
+            strained_materials = [materials[0]]
+            for material_to_strain in materials[1:]:
+                strained_material = strain_to_match_lattice(material_to_strain, materials[0])
+                strained_materials.append(strained_material)
+
+            materials = strained_materials
+
         merged_material = merge_materials(
             materials=materials,
             material_name=parameters.material_name,
@@ -60,5 +73,3 @@ class MergeBuilder(BaseSingleBuilder):
         )
         return merged_material
 
-
-MergeBuilderParametersType = TypeVar("MergeBuilderParametersType", bound=MergeBuilderParameters)
