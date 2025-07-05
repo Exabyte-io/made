@@ -15,7 +15,11 @@ from .configuration import (
     IslandSlabDefectConfiguration,
 )
 from .enums import PointDefectTypeEnum, AtomPlacementMethodEnum
-from .point.helpers import create_vacancy_defect, create_substitution_defect, create_interstitial_defect
+from .point.helpers import (
+    create_point_defect_vacancy,
+    create_point_defect_substitution,
+    create_point_defect_interstitial,
+)
 
 from .factories import DefectBuilderFactory
 

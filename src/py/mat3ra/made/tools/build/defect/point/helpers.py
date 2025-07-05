@@ -19,7 +19,7 @@ from mat3ra.made.tools.build.defect.point.configuration import (
 )
 
 
-def create_vacancy_defect(
+def create_point_defect_vacancy(
     material: Material,
     coordinate: List[float],
     placement_method: VacancyPlacementMethodEnum = VacancyPlacementMethodEnum.CLOSEST_SITE,
@@ -45,7 +45,7 @@ def create_vacancy_defect(
     return builder.get_material(config)
 
 
-def create_substitution_defect(
+def create_point_defect_substitution(
     material: Material,
     coordinate: List[float],
     element: str,
@@ -75,7 +75,7 @@ def create_substitution_defect(
     return builder.get_material(config)
 
 
-def create_interstitial_defect(
+def create_point_defect_interstitial(
     material: Material,
     coordinate: List[float],
     element: str,

@@ -83,13 +83,12 @@ def test_lattice_material_analyzer(primitive_material_config, expected_conventio
     assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)
 
 
-def test_crystal_site_analyzer_resolution_methods():
+def test_crystal_site_analyzer():
     crystal = Material.create(BULK_Si_PRIMITIVE)
     coordinate = [0.25, 0.25, 0.5]
-
     analyzer = CrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
 
-    resolution_methods = [
+    atom_placement_methods = [
         AtomPlacementMethodEnum.COORDINATE,
         AtomPlacementMethodEnum.CLOSEST_SITE,
         AtomPlacementMethodEnum.NEW_CRYSTAL_SITE,
@@ -97,20 +96,19 @@ def test_crystal_site_analyzer_resolution_methods():
         AtomPlacementMethodEnum.VORONOI_SITE,
     ]
 
-    for method in resolution_methods:
+    for method in atom_placement_methods:
         if method == AtomPlacementMethodEnum.COORDINATE:
-            resolved = analyzer.coordinate
+            final_coordinate = analyzer.coordinate
         elif method == AtomPlacementMethodEnum.CLOSEST_SITE:
-            resolved = analyzer.closest_site_coordinate
+            final_coordinate = analyzer.closest_site_coordinate
         elif method == AtomPlacementMethodEnum.NEW_CRYSTAL_SITE:
-            resolved = analyzer.new_crystal_site_coordinate
+            final_coordinate = analyzer.new_crystal_site_coordinate
         elif method == AtomPlacementMethodEnum.EQUIDISTANT:
-            resolved = analyzer.equidistant_coordinate
+            final_coordinate = analyzer.equidistant_coordinate
         elif method == AtomPlacementMethodEnum.VORONOI_SITE:
             analyzer = VoronoiCrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
-            resolved = analyzer.voronoi_site_coordinate
+            final_coordinate = analyzer.voronoi_site_coordinate
         else:
             raise ValueError(f"Unknown method: {method}")
 
-        assert len(resolved) == 3
-        assert all(isinstance(x, (int, float)) for x in resolved)
+        assert np.allclose(final_coordinate, expected_coordinate)

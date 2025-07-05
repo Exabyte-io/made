@@ -1,13 +1,13 @@
 from typing import List
 
-from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
-from mat3ra.made.tools.analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
-from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.convert import to_pymatgen
-from mat3ra.made.tools.third_party import PymatgenVoronoiInterstitialGenerator
-from mat3ra.made.tools.utils import get_distance_between_coordinates, transform_coordinate_to_supercell
-from mat3ra.made.utils import get_center_of_coordinates
+from ..analyze import BaseMaterialAnalyzer
+from ..analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
+from ..analyze.other import get_closest_site_id_from_coordinate
+from ..build.supercell import create_supercell
+from ..convert import to_pymatgen
+from ..third_party import PymatgenVoronoiInterstitialGenerator
+from ..utils import get_distance_between_coordinates, transform_coordinate_to_supercell
+from ...utils import get_center_of_coordinates
 
 
 class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
@@ -52,6 +52,15 @@ class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
 
 
 class VoronoiCrystalSiteAnalyzer(CrystalSiteAnalyzer):
+    """
+    Attributes:
+       clustering_tol: Tolerance for clustering the Voronoi nodes.
+       min_dist: Minimum distance between an interstitial and the nearest atom.
+       ltol: Tolerance for lattice matching.
+       stol: Tolerance for structure matching.
+       angle_tol: Angle tolerance for structure matching.
+    """
+
     clustering_tol: float = 0.5
     min_dist: float = 0.9
     ltol: float = 0.2

@@ -17,19 +17,6 @@ class ComplexDefectTypeEnum(str, Enum):
     PAIR = "pair"
 
 
-class VacancyPlacementMethodEnum(str, Enum):
-    CLOSEST_SITE = "closest_site"
-
-
-class SubstitutionPlacementMethodEnum(str, Enum):
-    CLOSEST_SITE = "closest_site"
-
-
-class InterstitialPlacementMethodEnum(str, Enum):
-    COORDINATE = "coordinate"
-    VORONOI_SITE = "voronoi_site"
-
-
 class AtomPlacementMethodEnum(str, Enum):
     # Places the atom at the exact given coordinate.
     COORDINATE = "coordinate"
@@ -41,6 +28,19 @@ class AtomPlacementMethodEnum(str, Enum):
     NEW_CRYSTAL_SITE = "new_crystal_site"
     # Places the atom at Voronoi site closest to the given coordinate.
     VORONOI_SITE = "voronoi_site"
+
+
+class VacancyPlacementMethodEnum(str, Enum):
+    CLOSEST_SITE = AtomPlacementMethodEnum.CLOSEST_SITE
+
+
+class SubstitutionPlacementMethodEnum(str, Enum):
+    CLOSEST_SITE = AtomPlacementMethodEnum.CLOSEST_SITE
+
+
+class InterstitialPlacementMethodEnum(str, Enum):
+    COORDINATE = AtomPlacementMethodEnum.COORDINATE
+    VORONOI_SITE = AtomPlacementMethodEnum.VORONOI_SITE
 
 
 class CoordinatesShapeEnum(str, Enum):
