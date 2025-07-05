@@ -1,5 +1,6 @@
 from typing import List
 
+from ...utils import get_center_of_coordinates
 from ..analyze import BaseMaterialAnalyzer
 from ..analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
 from ..analyze.other import get_closest_site_id_from_coordinate
@@ -7,7 +8,6 @@ from ..build.supercell import create_supercell
 from ..convert import to_pymatgen
 from ..third_party import PymatgenVoronoiInterstitialGenerator
 from ..utils import get_distance_between_coordinates, transform_coordinate_to_supercell
-from ...utils import get_center_of_coordinates
 
 
 class CrystalSiteAnalyzer(BaseMaterialAnalyzer):

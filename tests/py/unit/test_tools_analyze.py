@@ -83,32 +83,34 @@ def test_lattice_material_analyzer(primitive_material_config, expected_conventio
     assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)
 
 
-def test_crystal_site_analyzer():
+@pytest.mark.parametrize(
+    "placement_method, expected_coordinate",
+    [
+        (AtomPlacementMethodEnum.COORDINATE, [0.25, 0.25, 0.5]),
+        (AtomPlacementMethodEnum.CLOSEST_SITE, [0.25, 0.25, 0.25]),
+        (AtomPlacementMethodEnum.NEW_CRYSTAL_SITE, [0.25, 0.25, 0.5]),
+        (AtomPlacementMethodEnum.EQUIDISTANT, [0.45833, 0.45833, 0.5]),
+        (AtomPlacementMethodEnum.VORONOI_SITE, [0.625, 0.625, 0.125]),
+    ],
+)
+def test_crystal_site_analyzer(placement_method, expected_coordinate):
     crystal = Material.create(BULK_Si_PRIMITIVE)
     coordinate = [0.25, 0.25, 0.5]
-    analyzer = CrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
 
-    atom_placement_methods = [
-        AtomPlacementMethodEnum.COORDINATE,
-        AtomPlacementMethodEnum.CLOSEST_SITE,
-        AtomPlacementMethodEnum.NEW_CRYSTAL_SITE,
-        AtomPlacementMethodEnum.EQUIDISTANT,
-        AtomPlacementMethodEnum.VORONOI_SITE,
-    ]
-
-    for method in atom_placement_methods:
-        if method == AtomPlacementMethodEnum.COORDINATE:
+    if placement_method == AtomPlacementMethodEnum.VORONOI_SITE:
+        analyzer = VoronoiCrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
+        final_coordinate = analyzer.voronoi_site_coordinate
+    else:
+        analyzer = CrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
+        if placement_method == AtomPlacementMethodEnum.COORDINATE:
             final_coordinate = analyzer.coordinate
-        elif method == AtomPlacementMethodEnum.CLOSEST_SITE:
+        elif placement_method == AtomPlacementMethodEnum.CLOSEST_SITE:
             final_coordinate = analyzer.closest_site_coordinate
-        elif method == AtomPlacementMethodEnum.NEW_CRYSTAL_SITE:
+        elif placement_method == AtomPlacementMethodEnum.NEW_CRYSTAL_SITE:
             final_coordinate = analyzer.new_crystal_site_coordinate
-        elif method == AtomPlacementMethodEnum.EQUIDISTANT:
+        elif placement_method == AtomPlacementMethodEnum.EQUIDISTANT:
             final_coordinate = analyzer.equidistant_coordinate
-        elif method == AtomPlacementMethodEnum.VORONOI_SITE:
-            analyzer = VoronoiCrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
-            final_coordinate = analyzer.voronoi_site_coordinate
         else:
-            raise ValueError(f"Unknown method: {method}")
+            raise ValueError(f"Unknown method: {placement_method}")
 
-        assert np.allclose(final_coordinate, expected_coordinate)
+    assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
