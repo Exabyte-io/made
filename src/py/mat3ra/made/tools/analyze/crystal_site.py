@@ -24,6 +24,19 @@ class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
 
     @property
     def equidistant_coordinate(self) -> List[float]:
+        """
+        Compute a coordinate that is equidistant from the nearest atoms to the target coordinate. Useful for adatom.
+
+        This method works by:
+        1. Creating a 3x3x1 supercell of the original material to include atoms in PBC.
+        2. Transforming the target coordinate into the supercell's coordinate system.
+        3. Using Voronoi tessellation to find the indices of the nearest atoms in the supercell.
+        4. Taking the geometric center (average) of these neighboring atoms' coordinates as the equidistant point.
+        5. Setting the z-coordinate to the original value (useful for 2D/slab systems).
+        6. Transforming the equidistant coordinate back to the original cell's coordinate system.
+
+        The [3, 3, 1] supercell ensures robust neighbor search in x and y, but not in z (for 2D/slab systems).
+        """
         scaling_factor = [3, 3, 1]
         translation_vector = [1 / 3, 1 / 3, 0]
         supercell_material = create_supercell(self.material, scaling_factor=scaling_factor)
