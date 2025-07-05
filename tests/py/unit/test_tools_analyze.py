@@ -86,7 +86,7 @@ def test_lattice_material_analyzer(primitive_material_config, expected_conventio
 @pytest.mark.parametrize(
     "placement_method, expected_coordinate",
     [
-        (AtomPlacementMethodEnum.COORDINATE, [0.25, 0.25, 0.5]),
+        (AtomPlacementMethodEnum.EXACT_COORDINATE, [0.25, 0.25, 0.5]),
         (AtomPlacementMethodEnum.CLOSEST_SITE, [0.25, 0.25, 0.25]),
         (AtomPlacementMethodEnum.NEW_CRYSTAL_SITE, [0.25, 0.25, 0.5]),
         (AtomPlacementMethodEnum.EQUIDISTANT, [0.45833, 0.45833, 0.5]),
@@ -96,14 +96,14 @@ def test_lattice_material_analyzer(primitive_material_config, expected_conventio
 def test_crystal_site_analyzer(placement_method, expected_coordinate):
     crystal = Material.create(BULK_Si_PRIMITIVE)
     coordinate = [0.25, 0.25, 0.5]
-
+    
     if placement_method == AtomPlacementMethodEnum.VORONOI_SITE:
         analyzer = VoronoiCrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
         final_coordinate = analyzer.voronoi_site_coordinate
     else:
         analyzer = CrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
-        if placement_method == AtomPlacementMethodEnum.COORDINATE:
-            final_coordinate = analyzer.coordinate
+        if placement_method == AtomPlacementMethodEnum.EXACT_COORDINATE:
+            final_coordinate = analyzer.exact_coordinate
         elif placement_method == AtomPlacementMethodEnum.CLOSEST_SITE:
             final_coordinate = analyzer.closest_site_coordinate
         elif placement_method == AtomPlacementMethodEnum.NEW_CRYSTAL_SITE:

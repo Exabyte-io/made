@@ -186,7 +186,7 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
     """
 
     defect_type: PointDefectTypeEnum = PointDefectTypeEnum.ADATOM
-    placement_method: AtomPlacementMethodEnum = AtomPlacementMethodEnum.COORDINATE
+    placement_method: AtomPlacementMethodEnum = AtomPlacementMethodEnum.EXACT_COORDINATE
 
     @property
     def _json(self):

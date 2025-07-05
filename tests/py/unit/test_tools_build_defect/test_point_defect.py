@@ -48,7 +48,7 @@ from unit.utils import assert_two_entities_deep_almost_equal
                 type="interstitial",
                 coordinate=[0.5, 0.5, 0.5],
                 element="C",
-                placement_method=InterstitialPlacementMethodEnum.COORDINATE,
+                placement_method=InterstitialPlacementMethodEnum.EXACT_COORDINATE,
             ),
             INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
         ),

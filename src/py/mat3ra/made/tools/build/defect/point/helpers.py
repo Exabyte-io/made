@@ -79,7 +79,7 @@ def create_point_defect_interstitial(
     material: Material,
     coordinate: List[float],
     element: str,
-    placement_method: InterstitialPlacementMethodEnum = InterstitialPlacementMethodEnum.COORDINATE,
+    placement_method: InterstitialPlacementMethodEnum = InterstitialPlacementMethodEnum.EXACT_COORDINATE,
 ) -> Material:
     """
     Create an interstitial defect in the given material.
@@ -93,13 +93,13 @@ def create_point_defect_interstitial(
     Returns:
         Material: A new material with the interstitial defect.
     """
-    if placement_method == InterstitialPlacementMethodEnum.COORDINATE:
-        resolved_coordinate = coordinate
-    elif placement_method == InterstitialPlacementMethodEnum.VORONOI_SITE:
+    if placement_method == InterstitialPlacementMethodEnum.VORONOI_SITE:
         analyzer = VoronoiCrystalSiteAnalyzer(material=material, coordinate=coordinate)
         resolved_coordinate = analyzer.voronoi_site_coordinate
     else:
-        raise NotImplementedError(f"Interstitial placement method '{placement_method}' is not implemented.")
+        analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
+        resolved_coordinate = analyzer.exact_coordinate
+
     config = InterstitialDefectConfiguration.from_parameters(
         crystal=material, coordinate=resolved_coordinate, element=element
     )
