@@ -3,7 +3,9 @@ import pytest
 from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
+from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
+from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
@@ -79,3 +81,36 @@ def test_lattice_material_analyzer(primitive_material_config, expected_conventio
     conventional_cell = lattice_material_analyzer.material_with_conventional_lattice
 
     assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)
+
+
+def test_crystal_site_analyzer_resolution_methods():
+    crystal = Material.create(BULK_Si_PRIMITIVE)
+    coordinate = [0.25, 0.25, 0.5]
+
+    analyzer = CrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
+
+    resolution_methods = [
+        AtomPlacementMethodEnum.COORDINATE,
+        AtomPlacementMethodEnum.CLOSEST_SITE,
+        AtomPlacementMethodEnum.NEW_CRYSTAL_SITE,
+        AtomPlacementMethodEnum.EQUIDISTANT,
+        AtomPlacementMethodEnum.VORONOI_SITE,
+    ]
+
+    for method in resolution_methods:
+        if method == AtomPlacementMethodEnum.COORDINATE:
+            resolved = analyzer.coordinate_resolution
+        elif method == AtomPlacementMethodEnum.CLOSEST_SITE:
+            resolved = analyzer.closest_site_resolution
+        elif method == AtomPlacementMethodEnum.NEW_CRYSTAL_SITE:
+            resolved = analyzer.new_crystal_site_resolution
+        elif method == AtomPlacementMethodEnum.EQUIDISTANT:
+            resolved = analyzer.equidistant_resolution
+        elif method == AtomPlacementMethodEnum.VORONOI_SITE:
+            analyzer = VoronoiCrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
+            resolved = analyzer.voronoi_site_resolution
+        else:
+            raise ValueError(f"Unknown method: {method}")
+
+        assert len(resolved) == 3
+        assert all(isinstance(x, (int, float)) for x in resolved)

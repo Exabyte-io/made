@@ -14,8 +14,8 @@ from .configuration import (
     PointDefectPairConfiguration,
 )
 from .factories import DefectBuilderFactory
+from .point.builders import PointDefectBuilder
 from ..metadata import MaterialMetadata
-from ..mixins import ConvertGeneratedItemsPymatgenStructureMixin
 from ..slab.configurations import SlabConfiguration
 from ..slab.helpers import create_slab
 from ..supercell import create_supercell
@@ -27,7 +27,6 @@ from ...analyze.other import (
     get_closest_site_id_from_coordinate_and_element,
 )
 from ...build import BaseBuilder
-from ...convert import to_pymatgen
 from ...modify import (
     add_vacuum,
     filter_by_ids,
@@ -36,117 +35,15 @@ from ...modify import (
     translate_to_z_level,
     rotate,
 )
-from ...third_party import (
-    PymatgenStructure,
-    PymatgenPeriodicSite,
-    PymatgenVacancy,
-    PymatgenSubstitution,
-    PymatgenInterstitial,
-    PymatgenVoronoiInterstitialGenerator,
-)
 from ...utils import (
     transform_coordinate_to_supercell,
     coordinate as CoordinateCondition,
-    get_distance_between_coordinates,
 )
-
-
-class PointDefectBuilderParameters(BaseModel):
-    center_defect: bool = False
 
 
 class DefectBuilder(BaseBuilder):
     def create_isolated_defect(self, defect_configuration: PointDefectConfigurationLegacy) -> Material:
         raise NotImplementedError
-
-
-class PointDefectBuilder(ConvertGeneratedItemsPymatgenStructureMixin, DefectBuilder):
-    """
-    Builder class for generating point defects.
-    """
-
-    _BuildParametersType = PointDefectBuilderParameters
-    _DefaultBuildParameters = PointDefectBuilderParameters()
-    _GeneratedItemType: type(PymatgenStructure) = PymatgenStructure  # type: ignore
-    _ConfigurationType = PointDefectConfigurationLegacy
-    _generator: Callable
-
-    def _get_species(self, configuration: BaseBuilder._ConfigurationType):
-        crystal_elements = configuration.crystal.basis.elements.values
-        placeholder_specie = crystal_elements[0]
-        return configuration.chemical_element or placeholder_specie
-
-    def _generate(self, configuration: BaseBuilder._ConfigurationType) -> List[_GeneratedItemType]:
-        pymatgen_structure = to_pymatgen(configuration.crystal)
-        pymatgen_periodic_site = PymatgenPeriodicSite(
-            species=self._get_species(configuration),
-            coords=configuration.coordinate,
-            coords_are_cartesian=configuration.use_cartesian_coordinates,
-            lattice=pymatgen_structure.lattice,
-        )
-        # oxi_state set to 0 to allow for 2D materials, otherwise oxi_state search takes infinite loop in pymatgen
-        defect = self._generator(pymatgen_structure, pymatgen_periodic_site, oxi_state=0)
-        defect_structure = defect.defect_structure.copy()
-        defect_structure.remove_oxidation_states()
-        return [defect_structure]
-
-    def _update_material_name(self, material: Material, configuration: BaseBuilder._ConfigurationType) -> Material:
-        updated_material = super()._update_material_name(material, configuration)
-        capitalized_defect_type = configuration.defect_type.name.capitalize()
-        chemical_element = configuration.chemical_element if configuration.chemical_element else ""
-        new_name = f"{updated_material.name}, {capitalized_defect_type} {chemical_element} Defect"
-        updated_material.name = new_name
-        return updated_material
-
-
-class VacancyPointDefectBuilder(PointDefectBuilder):
-    _generator: PymatgenVacancy = PymatgenVacancy
-
-
-class SubstitutionPointDefectBuilder(PointDefectBuilder):
-    _generator: PymatgenSubstitution = PymatgenSubstitution
-
-
-class InterstitialPointDefectBuilder(PointDefectBuilder):
-    _generator: PymatgenInterstitial = PymatgenInterstitial
-
-
-class VoronoiInterstitialPointDefectBuilderParameters(BaseModel):
-    # According to pymatgen:
-    # https://github.com/materialsproject/pymatgen-analysis-defects/blob/e2cb285de8be07b38912ae1782285ef1f463a9a9/pymatgen/analysis/defects/generators.py#L343
-    clustering_tol: float = 0.5  # Clustering tolerance for merging interstitial sites
-    min_dist: float = 0.9  # Minimum distance between interstitial and nearest atom
-    ltol: float = 0.2  # Tolerance for lattice matching.
-    stol: float = 0.3  # Tolerance for structure matching.
-    angle_tol: float = 5  # Angle tolerance for structure matching.
-
-
-class VoronoiInterstitialPointDefectBuilder(PointDefectBuilder):
-    _BuildParametersType: type(  # type: ignore
-        VoronoiInterstitialPointDefectBuilderParameters
-    ) = VoronoiInterstitialPointDefectBuilderParameters  # type: ignore
-    _DefaultBuildParameters = VoronoiInterstitialPointDefectBuilderParameters()  # type: ignore
-
-    def _generate(
-        self, configuration: BaseBuilder._ConfigurationType
-    ) -> List[type(PointDefectBuilder._GeneratedItemType)]:  # type: ignore
-        pymatgen_structure = to_pymatgen(configuration.crystal)
-        voronoi_gen = PymatgenVoronoiInterstitialGenerator(
-            **self.build_parameters.model_dump(),
-        )
-        interstitials = list(
-            voronoi_gen.generate(structure=pymatgen_structure, insert_species=[configuration.chemical_element])
-        )
-        approximate_coordinate = configuration.coordinate
-        closest_interstitial = min(
-            interstitials,
-            key=lambda interstitial: get_distance_between_coordinates(
-                interstitial.site.frac_coords, approximate_coordinate
-            ),
-        )
-        pymatgen_structure.append(closest_interstitial.site.species, closest_interstitial.site.frac_coords)
-        pymatgen_structure.remove_oxidation_states()
-        return [pymatgen_structure]
 
 
 class SlabDefectBuilderParameters(BaseModel):

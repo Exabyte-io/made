@@ -2,7 +2,6 @@ from typing import Optional, Union, List
 
 from mat3ra.made.material import Material
 from .builders import (
-    PointDefectBuilderParameters,
     SlabDefectBuilderParameters,
     AdatomSlabDefectBuilder,
     EquidistantAdatomSlabDefectBuilder,
@@ -15,7 +14,9 @@ from .configuration import (
     AdatomSlabPointDefectConfiguration,
     IslandSlabDefectConfiguration,
 )
-from .enums import PointDefectTypeEnum
+from .enums import PointDefectTypeEnum, AtomPlacementMethodEnum
+from .point.helpers import create_vacancy_defect, create_substitution_defect, create_interstitial_defect
+
 from .factories import DefectBuilderFactory
 
 
@@ -30,17 +31,19 @@ def get_material_with_defect(configuration, builder_parameters):
     Returns:
         The material with the defect added.
     """
+    # For slab defects, use the existing factory approach
     defect_builder_key = configuration.defect_type.lower()
     if configuration.placement_method is not None:
         defect_builder_key = f"{defect_builder_key}:{configuration.placement_method.lower()}"
+
     BuilderClass = DefectBuilderFactory.get_class_by_name(defect_builder_key)
     builder = BuilderClass(builder_parameters)
     return builder.get_material(configuration) if builder else configuration.crystal
 
 
 def create_defect(
-    configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration],
-    builder_parameters: Union[PointDefectBuilderParameters, SlabDefectBuilderParameters, None] = None,
+    configuration: Union[AdatomSlabPointDefectConfiguration],
+    builder_parameters: Union[SlabDefectBuilderParameters, None] = None,
 ) -> Material:
     """
     Return a material with a selected defect added.
@@ -56,8 +59,8 @@ def create_defect(
 
 
 def create_defects(
-    configurations: Union[List[PointDefectConfigurationLegacy], List[AdatomSlabPointDefectConfiguration]],
-    builder_parameters: Union[PointDefectBuilderParameters, SlabDefectBuilderParameters, None] = None,
+    configurations: List[AdatomSlabPointDefectConfiguration],
+    builder_parameters: Union[SlabDefectBuilderParameters, None] = None,
 ) -> Material:
     """
     Return a material with accumulated defects added.
@@ -74,7 +77,7 @@ def create_defects(
     for configuration in configurations:
         if material_with_defect:
             configuration.crystal = material_with_defect
-        material_with_defect = get_material_with_defect(configuration, builder_parameters)
+        material_with_defect = create_defect(configuration, builder_parameters)
 
     return material_with_defect
 

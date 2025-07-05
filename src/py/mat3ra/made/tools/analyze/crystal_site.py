@@ -64,10 +64,6 @@ class VoronoiCrystalSiteAnalyzer(CrystalSiteAnalyzer):
 
     @property
     def voronoi_site_resolution(self) -> List[float]:
-        """Voronoi site resolution using configured parameters."""
-        return self._get_voronoi_site_resolution()
-
-    def _get_voronoi_site_resolution(self) -> List[float]:
         pymatgen_structure = to_pymatgen(self.material)
 
         voronoi_gen = PymatgenVoronoiInterstitialGenerator(

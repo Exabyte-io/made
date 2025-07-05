@@ -1,8 +1,8 @@
 from typing import List
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.point_defect import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
-from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum, PointDefectTypeEnum
+from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
+from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum
 from mat3ra.made.tools.build.defect.point.builders import (
     VacancyDefectBuilder,
     SubstitutionalDefectBuilder,
@@ -35,7 +35,7 @@ def create_vacancy_defect(
         analyzer = VoronoiCrystalSiteAnalyzer(material=material, coordinate=coordinate)
     else:
         analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
-    
+
     resolved_coordinate = _get_resolved_crystal_site_coordinate(analyzer, placement_method)
     config = VacancyDefectConfiguration.from_parameters(crystal=material, coordinate=resolved_coordinate)
     builder = VacancyDefectBuilder()
@@ -64,7 +64,7 @@ def create_substitution_defect(
         analyzer = VoronoiCrystalSiteAnalyzer(material=material, coordinate=coordinate)
     else:
         analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
-    
+
     resolved_coordinate = _get_resolved_crystal_site_coordinate(analyzer, placement_method)
     config = SubstitutionalDefectConfiguration.from_parameters(
         crystal=material, coordinate=resolved_coordinate, element=element
@@ -95,7 +95,7 @@ def create_interstitial_defect(
         analyzer = VoronoiCrystalSiteAnalyzer(material=material, coordinate=coordinate)
     else:
         analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
-    
+
     resolved_coordinate = _get_resolved_crystal_site_coordinate(analyzer, placement_method)
     config = InterstitialDefectConfiguration.from_parameters(
         crystal=material, coordinate=resolved_coordinate, element=element
@@ -106,6 +106,10 @@ def create_interstitial_defect(
 
 def _get_resolved_crystal_site_coordinate(analyzer, placement_method: AtomPlacementMethodEnum) -> List[float]:
     """Get the resolved coordinate based on the placement method."""
+    # Default to COORDINATE if placement_method is None
+    if placement_method is None:
+        placement_method = AtomPlacementMethodEnum.COORDINATE
+
     if placement_method == AtomPlacementMethodEnum.COORDINATE:
         return analyzer.coordinate_resolution
     elif placement_method == AtomPlacementMethodEnum.CLOSEST_SITE:
