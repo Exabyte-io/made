@@ -17,6 +17,19 @@ class ComplexDefectTypeEnum(str, Enum):
     PAIR = "pair"
 
 
+class VacancyPlacementMethodEnum(str, Enum):
+    CLOSEST_SITE = "closest_site"
+
+
+class SubstitutionPlacementMethodEnum(str, Enum):
+    CLOSEST_SITE = "closest_site"
+
+
+class InterstitialPlacementMethodEnum(str, Enum):
+    COORDINATE = "coordinate"
+    VORONOI_SITE = "voronoi_site"
+
+
 class AtomPlacementMethodEnum(str, Enum):
     # Places the atom at the exact given coordinate.
     COORDINATE = "coordinate"

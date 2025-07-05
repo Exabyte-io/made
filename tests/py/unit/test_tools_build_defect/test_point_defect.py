@@ -1,20 +1,23 @@
 from types import SimpleNamespace
 
 import pytest
-
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.defect.enums import (
+    InterstitialPlacementMethodEnum,
+    SubstitutionPlacementMethodEnum,
+    VacancyPlacementMethodEnum,
+)
 from mat3ra.made.tools.build.defect.point.helpers import (
     create_interstitial_defect,
     create_substitution_defect,
     create_vacancy_defect,
 )
-from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 from unit.fixtures.point_defects import (
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
+    INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si,
     SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
     VACANCY_DEFECT_BULK_PRIMITIVE_Si,
-    INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si,
 )
 from unit.utils import assert_two_entities_deep_almost_equal
 
@@ -43,7 +46,7 @@ from unit.utils import assert_two_entities_deep_almost_equal
                 type="interstitial",
                 coordinate=[0.25, 0.25, 0.5],
                 element="Ge",
-                placement_method=AtomPlacementMethodEnum.VORONOI_SITE,
+                placement_method=InterstitialPlacementMethodEnum.VORONOI_SITE,
             ),
             INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si,
         ),
@@ -53,13 +56,13 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
     crystal = Material.create(material_config)
 
     if defect_params.type == "vacancy":
-        placement_method = getattr(defect_params, "placement_method", AtomPlacementMethodEnum.COORDINATE)
+        placement_method = getattr(defect_params, "placement_method", VacancyPlacementMethodEnum.CLOSEST_SITE)
         defect = create_vacancy_defect(crystal, defect_params.coordinate, placement_method)
     elif defect_params.type == "substitution":
-        placement_method = getattr(defect_params, "placement_method", AtomPlacementMethodEnum.COORDINATE)
+        placement_method = getattr(defect_params, "placement_method", SubstitutionPlacementMethodEnum.CLOSEST_SITE)
         defect = create_substitution_defect(crystal, defect_params.coordinate, defect_params.element, placement_method)
     elif defect_params.type == "interstitial":
-        placement_method = getattr(defect_params, "placement_method", AtomPlacementMethodEnum.COORDINATE)
+        placement_method = getattr(defect_params, "placement_method", InterstitialPlacementMethodEnum.COORDINATE)
         defect = create_interstitial_defect(crystal, defect_params.coordinate, defect_params.element, placement_method)
     else:
         raise ValueError(f"Unknown defect_type: {defect_params.type}")

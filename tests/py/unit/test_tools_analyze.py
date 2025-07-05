@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 from mat3ra.made.material import Material, defaultMaterialConfig
+from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
-from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
@@ -99,16 +99,16 @@ def test_crystal_site_analyzer_resolution_methods():
 
     for method in resolution_methods:
         if method == AtomPlacementMethodEnum.COORDINATE:
-            resolved = analyzer.coordinate_resolution
+            resolved = analyzer.coordinate
         elif method == AtomPlacementMethodEnum.CLOSEST_SITE:
-            resolved = analyzer.closest_site_resolution
+            resolved = analyzer.closest_site_coordinate
         elif method == AtomPlacementMethodEnum.NEW_CRYSTAL_SITE:
-            resolved = analyzer.new_crystal_site_resolution
+            resolved = analyzer.new_crystal_site_coordinate
         elif method == AtomPlacementMethodEnum.EQUIDISTANT:
-            resolved = analyzer.equidistant_resolution
+            resolved = analyzer.equidistant_coordinate
         elif method == AtomPlacementMethodEnum.VORONOI_SITE:
             analyzer = VoronoiCrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
-            resolved = analyzer.voronoi_site_resolution
+            resolved = analyzer.voronoi_site_coordinate
         else:
             raise ValueError(f"Unknown method: {method}")
 

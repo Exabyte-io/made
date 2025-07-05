@@ -14,20 +14,16 @@ class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
     coordinate: List[float]
 
     @property
-    def coordinate_resolution(self) -> List[float]:
-        return self.coordinate
-
-    @property
-    def closest_site_resolution(self) -> List[float]:
+    def closest_site_coordinate(self) -> List[float]:
         site_id = get_closest_site_id_from_coordinate(self.material, self.coordinate)
         return self.material.coordinates_array[site_id]
 
     @property
-    def new_crystal_site_resolution(self) -> List[float]:
+    def new_crystal_site_coordinate(self) -> List[float]:
         return self.coordinate
 
     @property
-    def equidistant_resolution(self) -> List[float]:
+    def equidistant_coordinate(self) -> List[float]:
         scaling_factor = [3, 3, 1]
         translation_vector = [1 / 3, 1 / 3, 0]
         supercell_material = create_supercell(self.material, scaling_factor=scaling_factor)
@@ -63,7 +59,7 @@ class VoronoiCrystalSiteAnalyzer(CrystalSiteAnalyzer):
     angle_tol: float = 5
 
     @property
-    def voronoi_site_resolution(self) -> List[float]:
+    def voronoi_site_coordinate(self) -> List[float]:
         pymatgen_structure = to_pymatgen(self.material)
 
         voronoi_gen = PymatgenVoronoiInterstitialGenerator(
