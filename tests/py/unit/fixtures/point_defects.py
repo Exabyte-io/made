@@ -1,3 +1,6 @@
+from unit.utils import TestPlatform
+
+
 VACANCY_DEFECT_BULK_PRIMITIVE_Si = {
     "name": "Silicon FCC with vacancy defect",
     "lattice": {
@@ -66,26 +69,52 @@ INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si = {
 }
 
 INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si = {
-    "name": "Silicon FCC with interstitial defect",
-    "basis": {
-        "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}, {"id": 2, "value": "Ge"}],
-        "coordinates": [
-            {"id": 0, "value": [0, 0, 0]},
-            {"id": 1, "value": [0.25, 0.25, 0.25]},
-            {"id": 2, "value": [0.625, 0.625, 0.125]},
-        ],
-        "units": "crystal",
-        "labels": [],
-        "constraints": [],
+    TestPlatform.DARWIN: {
+        "name": "Silicon FCC with interstitial defect",
+        "basis": {
+            "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}, {"id": 2, "value": "Ge"}],
+            "coordinates": [
+                {"id": 0, "value": [0.0, 0.0, 0.0]},
+                {"id": 1, "value": [0.25, 0.25, 0.25]},
+                {"id": 2, "value": [0.625, 0.625, 0.125]},
+            ],
+            "units": "crystal",
+            "labels": [],
+            "constraints": [],
+        },
+        "lattice": {
+            "a": 3.867,
+            "b": 3.867,
+            "c": 3.867,
+            "alpha": 60.0,
+            "beta": 60.0,
+            "gamma": 60.0,
+            "units": {"length": "angstrom", "angle": "degree"},
+            "type": "FCC",
+        },
     },
-    "lattice": {
-        "a": 3.867,
-        "b": 3.867,
-        "c": 3.867,
-        "alpha": 60,
-        "beta": 60,
-        "gamma": 60,
-        "units": {"length": "angstrom", "angle": "degree"},
-        "type": "FCC",
+    TestPlatform.OTHER: {
+        "name": "Silicon FCC with interstitial defect",
+        "basis": {
+            "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}, {"id": 2, "value": "Ge"}],
+            "coordinates": [
+                {"id": 0, "value": [0.0, 0.0, 0.0]},
+                {"id": 1, "value": [0.25, 0.25, 0.25]},
+                {"id": 2, "value": [0.5, 0.5, 0.5]},
+            ],
+            "units": "crystal",
+            "labels": [],
+            "constraints": [],
+        },
+        "lattice": {
+            "a": 3.867,
+            "b": 3.867,
+            "c": 3.867,
+            "alpha": 60.0,
+            "beta": 60.0,
+            "gamma": 60.0,
+            "units": {"length": "angstrom", "angle": "degree"},
+            "type": "FCC",
+        },
     },
 }

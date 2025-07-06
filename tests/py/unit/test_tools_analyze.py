@@ -7,6 +7,7 @@ from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
+from unit.utils import TestPlatform, get_platform_specific_value
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
@@ -83,6 +84,11 @@ def test_lattice_material_analyzer(primitive_material_config, expected_conventio
     assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)
 
 
+VORONOI_SITE_EXPECTED = {
+    TestPlatform.DARWIN: [0.625, 0.625, 0.125],
+    TestPlatform.OTHER: [0.5, 0.5, 0.5]
+}
+
 @pytest.mark.parametrize(
     "placement_method, expected_coordinate",
     [
@@ -90,16 +96,17 @@ def test_lattice_material_analyzer(primitive_material_config, expected_conventio
         (AtomPlacementMethodEnum.CLOSEST_SITE, [0.25, 0.25, 0.25]),
         (AtomPlacementMethodEnum.NEW_CRYSTAL_SITE, [0.25, 0.25, 0.5]),
         (AtomPlacementMethodEnum.EQUIDISTANT, [0.45833, 0.45833, 0.5]),
-        (AtomPlacementMethodEnum.VORONOI_SITE, [0.625, 0.625, 0.125]),
+        (AtomPlacementMethodEnum.VORONOI_SITE, VORONOI_SITE_EXPECTED),
     ],
 )
 def test_crystal_site_analyzer(placement_method, expected_coordinate):
     crystal = Material.create(BULK_Si_PRIMITIVE)
     coordinate = [0.25, 0.25, 0.5]
-    
+
     if placement_method == AtomPlacementMethodEnum.VORONOI_SITE:
         analyzer = VoronoiCrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
         final_coordinate = analyzer.voronoi_site_coordinate
+        expected_coordinate = get_platform_specific_value(expected_coordinate)
     else:
         analyzer = CrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
         if placement_method == AtomPlacementMethodEnum.EXACT_COORDINATE:

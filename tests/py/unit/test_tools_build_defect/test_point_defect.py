@@ -19,7 +19,7 @@ from unit.fixtures.point_defects import (
     SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
     VACANCY_DEFECT_BULK_PRIMITIVE_Si,
 )
-from unit.utils import assert_two_entities_deep_almost_equal
+from unit.utils import assert_two_entities_deep_almost_equal, get_platform_specific_value
 
 
 @pytest.mark.parametrize(
@@ -79,5 +79,7 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
         )
     else:
         raise ValueError(f"Unknown defect_type: {defect_params.type}")
+
+    expected_material_config = get_platform_specific_value(expected_material_config)
 
     assert_two_entities_deep_almost_equal(defect, expected_material_config)
