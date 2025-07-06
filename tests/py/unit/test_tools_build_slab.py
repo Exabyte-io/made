@@ -1,14 +1,22 @@
 from typing import Final, Tuple
 
+import numpy as np
 import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder, SlabBuilder, SlabBuilderParameters
+from mat3ra.made.tools.build.slab.builders import (
+    AtomicLayersUniqueRepeatedBuilder,
+    SlabBuilder,
+    SlabBuilderParameters,
+    SlabWithGapBuilder,
+)
 from mat3ra.made.tools.build.slab.configurations import AtomicLayersUniqueRepeatedConfiguration, SlabConfiguration
 from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations
 from mat3ra.made.tools.build.slab.termination_utils import select_slab_termination
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.utils import AXIS_TO_INDEX_MAP
+from mat3ra.utils import assertion
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
@@ -19,6 +27,7 @@ from unit.fixtures.slab import (
 )
 
 from .fixtures.generated.fixtures import BULK_SrTiO3
+from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA = SI_CONVENTIONAL_SLAB_001.copy()
@@ -257,3 +266,20 @@ def test_create_slab(
     )
     slab.metadata.pop("build")  # Remove build metadata for comparison
     assert_two_entities_deep_almost_equal(slab, expected_slab_config)
+
+
+@pytest.mark.parametrize(
+    "material_config, direction, gap, expected_length",
+    [
+        (SLAB_SI_CONVENTIONAL_001_NO_VACUUM, AxisEnum.z, 5.0, 14.5703),  # Adjusted length for z direction
+        (GRAPHENE, AxisEnum.y, 5.0, 6.6448),  # Adjusted length for y direction (lattice vector b)
+    ],
+)
+def test_adjust_lattice_for_gap(material_config, direction, gap, expected_length):
+    material = Material.create(material_config)
+    builder = SlabWithGapBuilder()
+    adjusted_material = builder._adjust_lattice_for_gap(material, gap, direction)
+
+    axis_index = AXIS_TO_INDEX_MAP[direction.value]
+    actual_length = np.linalg.norm(adjusted_material.lattice.vector_arrays[axis_index])
+    assertion.assert_almost_equal_numbers(actual_length.tolist(), expected_length)

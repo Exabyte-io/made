@@ -3,10 +3,11 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
 from mat3ra.made.tools.build.grain_boundary.builders import GrainBoundaryPlanarBuilder
 from mat3ra.made.tools.build.grain_boundary.configuration import GrainBoundaryPlanarConfiguration
-from mat3ra.made.tools.build.grain_boundary.helpers import create_grain_boundary_planar
+from mat3ra.made.tools.build.grain_boundary.helpers import create_grain_boundary_linear, create_grain_boundary_planar
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL
-from .fixtures.grain_boundary import GRAIN_BOUNDARY_SI_001_011
+from .fixtures.grain_boundary import GRAIN_BOUNDARY_LINEAR_SI, GRAIN_BOUNDARY_SI_001_011
+from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
 
@@ -86,3 +87,29 @@ def test_grain_boundary_builder(
     grain_boundary = builder.get_material(config)
 
     assert_two_entities_deep_almost_equal(grain_boundary, expected_material_config)
+
+
+@pytest.mark.parametrize(
+    "config_params, builder_params_dict, expected_material_config",
+    [
+        (
+            {"film_config": GRAPHENE, "twist_angle": 13.0, "gap": 1.0},
+            {
+                "max_repetition_int": 5,
+                "angle_tolerance": 0.5,
+                "return_first_match": True,
+            },
+            GRAIN_BOUNDARY_LINEAR_SI,
+        ),
+    ],
+)
+def test_create_grain_boundary_linear(config_params, builder_params_dict, expected_material_config):
+    config_params["film"] = Material.create(config_params.pop("film_config"))
+    gb = create_grain_boundary_linear(
+        material=config_params["film"],
+        target_angle=config_params["twist_angle"],
+        gap=config_params["gap"],
+        **builder_params_dict,
+    )
+
+    assert_two_entities_deep_almost_equal(gb, expected_material_config)

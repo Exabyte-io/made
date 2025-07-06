@@ -1,5 +1,7 @@
 from typing import List, Optional, Any, Type
 
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from .configurations import (
     CrystalLatticePlanesConfiguration,
@@ -15,6 +17,8 @@ from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
 from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...operations.core.unary import supercell, translate, strain, edit_cell
+from ...utils import AXIS_TO_INDEX_MAP
+import numpy as np
 
 
 class CrystalLatticePlanesBuilder(BaseSingleBuilder):
@@ -111,27 +115,32 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
         strained_slab_material = super()._generate(configuration)
 
         if configuration.gap is not None:
-            strained_slab_material = self._adjust_lattice_for_gap(strained_slab_material, configuration.gap)
+            strained_slab_material = self._adjust_lattice_for_gap(
+                strained_slab_material, configuration.gap, configuration.gap_direction
+            )
 
         return strained_slab_material
 
-    def _adjust_lattice_for_gap(self, material: Material, gap: float) -> Material:
+    def _adjust_lattice_for_gap(self, material: Material, gap: float, direction: AxisEnum) -> Material:
         """
-        Create a gap in Angstroms in the z-direction of the slab by adjusting the c lattice vector.
-
-        Args:
-            material (Material): The slab material to adjust.
-            gap (float): The gap size in Angstroms to create in the z-direction.
-        Returns:
-            Material: The modified slab material with the adjusted c lattice vector.
+        Adjust the cell along the stacking direction to make the distance from the cell end to its closest atom
+        to be equal to the gap, in Angstroms.
         """
-        topmost_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=True)
-        new_c_length = topmost_z + gap
+        direction_str = direction.value
+        axis_index = AXIS_TO_INDEX_MAP[direction_str]
 
+        max_frac = get_atomic_coordinates_extremum(material, "max", direction_str, use_cartesian_coordinates=False)
         current_vectors = material.lattice.vector_arrays
-        new_c_vector = [0.0, 0.0, new_c_length]
-        new_lattice_vectors = [current_vectors[0], current_vectors[1], new_c_vector]
+        current_vector = np.array(current_vectors[axis_index])
+        current_length = np.linalg.norm(current_vector)
 
+        new_length = (max_frac * current_length) + gap
+
+        if current_length > 0:
+            new_vector = (current_vector / current_length) * new_length
+        else:
+            new_vector = current_vector
+        new_lattice_vectors = list(current_vectors)
+        new_lattice_vectors[axis_index] = new_vector.tolist()
         new_material = edit_cell(material, new_lattice_vectors)
-
         return new_material

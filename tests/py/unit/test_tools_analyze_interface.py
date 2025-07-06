@@ -100,6 +100,8 @@ def test_commensurate_analyzer_functionality(
 
     for match in match_holders:
         assert expected_angle_range[0] <= match.angle <= expected_angle_range[1]
+        assert expected_angle_range[0] <= match.actual_angle <= expected_angle_range[1]
+        assert match.angle == match.actual_angle
         assert isinstance(match.xy_supercell_matrix_film, list)
         assert isinstance(match.xy_supercell_matrix_substrate, list)
         assert len(match.xy_supercell_matrix_film) == 2

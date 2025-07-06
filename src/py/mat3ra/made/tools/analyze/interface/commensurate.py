@@ -18,6 +18,7 @@ from pydantic import model_validator
 class CommensurateLatticeMatchHolder(InMemoryEntityPydantic):
     match_id: int
     angle: float
+    actual_angle: float
     xy_supercell_matrix_film: List[List[int]]
     xy_supercell_matrix_substrate: List[List[int]]
 
@@ -96,6 +97,7 @@ class CommensurateLatticeInterfaceAnalyzer(InterfaceAnalyzer):
                         CommensurateLatticeMatchHolder(
                             match_id=match_id,
                             angle=angle,
+                            actual_angle=angle,
                             xy_supercell_matrix_substrate=matrix1.tolist(),
                             xy_supercell_matrix_film=matrix2.tolist(),
                         )
