@@ -49,18 +49,14 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
         return Matrix3x3Schema(root=np.eye(3).tolist())
 
     def _create_primitive_slab_from_nanoribbon(self, nanoribbon: Material) -> SlabConfiguration:
-        """Create a primitive slab configuration from a nanoribbon material."""
-        # Create a simple slab configuration with the nanoribbon as the atomic layers
-        # This is a simplified approach - in practice you might need more sophisticated conversion
         return SlabConfiguration.from_parameters(
             material_or_dict=nanoribbon,
-            miller_indices=(0, 0, 1),  # Default miller indices
+            miller_indices=(0, 0, 1),
             number_of_layers=1,
             vacuum=0.0,
         )
 
     def _center_material(self, material: Material) -> Material:
-        """Center the material by translating it to the center of its lattice."""
         coordinates = material.basis.coordinates.values
         center_of_mass = get_center_of_coordinates(coordinates)
         lattice_center = np.array([0.5, 0.5, 0.5])
@@ -68,7 +64,6 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
         return translate_by_vector(material, translation_vector, use_cartesian_coordinates=False)
 
     def _match_lattice_vectors(self, material1: Material, material2: Material) -> Tuple[Material, Material]:
-        """Match lattice vectors of two materials by using the larger lattice."""
         lattice1 = material1.lattice.vector_arrays
         lattice2 = material2.lattice.vector_arrays
 
@@ -128,10 +123,8 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
 
     @property
     def substrate_nanoribbon_configuration(self):
-        """Processed (centered, vacuumed) configuration for the bottom nanoribbon."""
         return self.get_strained_configurations()[0].substrate_configuration
 
     @property
     def film_nanoribbon_configuration(self):
-        """Processed (centered, vacuumed, rotated) configuration for the top nanoribbon."""
         return self.get_strained_configurations()[0].film_configuration
