@@ -25,33 +25,56 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
         if slab_build_configuration_dict.get("type") != "SlabConfiguration":
             raise ValueError("Material is not a slab.")
 
+        slab_configuration = SlabConfiguration(**slab_build_configuration_dict)
+
+        atomic_layers = slab_configuration.atomic_layers
+        original_layers = atomic_layers.number_of_repetitions
+        miller_indices = atomic_layers.miller_indices
+        termination_top = atomic_layers.termination_top
+        crystal = atomic_layers.crystal
+
+        if isinstance(termination_top, dict):
+            termination_formula = termination_top.get("chemical_elements")
+        else:
+            termination_formula = termination_top.formula
+
         adjusted_vacuum = self._calculate_required_vacuum(additional_layers, vacuum_thickness)
 
-        stack_components = slab_build_configuration_dict.get("stack_components", [])
-        if not stack_components or len(stack_components) < 2:
-            raise ValueError("Invalid slab configuration: missing stack components")
+        configuration_with_added_layers = SlabWithAdditionalLayersConfiguration.from_parameters(
+            material_or_dict=crystal,
+            miller_indices=miller_indices,
+            number_of_layers=original_layers,
+            number_of_additional_layers=additional_layers,
+            termination_formula=termination_formula,
+            vacuum=adjusted_vacuum,
+        )
 
-        atomic_layers_config = stack_components[0]
-        original_layers = atomic_layers_config.get("number_of_repetitions", 1)
-        miller_indices = atomic_layers_config.get("miller_indices", [0, 0, 1])
-        termination_formula = atomic_layers_config.get("termination_top", "Si")
-        crystal = atomic_layers_config.get("crystal", self.material)
+        from mat3ra.made.tools.build.slab.builders import SlabBuilder
+
+        builder = SlabBuilder()
+        material_with_additional_layers = builder.get_material(configuration_with_added_layers)
+        target_c_vector = material_with_additional_layers.lattice.c
+
+        original_material = builder.get_material(
+            SlabConfiguration.from_parameters(
+                material_or_dict=crystal,
+                miller_indices=miller_indices,
+                number_of_layers=original_layers,
+                termination_formula=termination_formula,
+                vacuum=0.0,
+            )
+        )
+
+        current_c = original_material.lattice.c
+        additional_vacuum_needed = target_c_vector - current_c
+        final_vacuum = max(additional_vacuum_needed, vacuum_thickness)
 
         configuration_original_with_adjusted_vacuum = SlabConfiguration.from_parameters(
             material_or_dict=crystal,
             miller_indices=miller_indices,
             number_of_layers=original_layers,
             termination_formula=termination_formula,
-            vacuum=adjusted_vacuum,
-        )
-
-        configuration_with_added_layers = SlabWithAdditionalLayersConfiguration.from_parameters(
-            material_or_dict=crystal,
-            miller_indices=miller_indices,
-            number_of_layers=original_layers,
-            additional_layers=additional_layers,
-            termination_formula=termination_formula,
-            vacuum=adjusted_vacuum,
+            vacuum=final_vacuum,
         )
 
         return (configuration_with_added_layers, configuration_original_with_adjusted_vacuum)
