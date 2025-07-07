@@ -9,7 +9,6 @@ from mat3ra.made.tools.analyze.interface.twisted_nanoribbons import TwistedNanor
 from .builders import (
     InterfaceBuilder,
     InterfaceBuilderParameters,
-    TwistedNanoribbonsInterfaceBuilder,
 )
 from .configuration import (
     InterfaceConfiguration,

@@ -44,22 +44,13 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
         )
 
 
-class TwistedNanoribbonsInterfaceConfiguration(BaseConfiguration):
+class TwistedNanoribbonsInterfaceConfiguration(InterfaceConfiguration):
     """
     Configuration for creating a twisted interface between two nanoribbons with specified twist angle.
 
     Args:
-        stack_components (List[Material]): List of two nanoribbon materials.
+        stack_components (List[SlabConfiguration]): List of two nanoribbons as slab configurations.
         angle (float): Twist angle in degrees for provenance.
     """
 
-    stack_components: List[Material]
     angle: float = 0.0
-
-    @property
-    def nanoribbon1(self) -> Material:
-        return self.stack_components[0]
-
-    @property
-    def nanoribbon2(self) -> Material:
-        return self.stack_components[1]
