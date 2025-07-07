@@ -12,7 +12,7 @@ from .utils import merge_two_materials, should_skip_stacking
 
 def merge(
     materials: List[Material],
-    merge_method: Optional[MergeMethodsEnum] = MergeMethodsEnum.add,
+    merge_method: Optional[MergeMethodsEnum] = MergeMethodsEnum.ADD,
     material_name: Optional[str] = None,
     distance_tolerance: float = 0.1,
     merge_dangerously: bool = False,
