@@ -24,36 +24,6 @@ class SlabWithAdditionalLayersConfiguration(SlabConfigurationSchema, StackConfig
         return self.stack_components[1]
 
     @classmethod
-    def from_slab_configuration(
-        cls,
-        slab_configuration: SlabConfiguration,
-        additional_layers: Union[int, float] = 1,
-    ) -> "SlabWithAdditionalLayersConfiguration":
-        """
-        Creates a SlabWithAdditionalLayersConfiguration from an existing SlabConfiguration.
-
-        Args:
-            slab_configuration: The base slab configuration.
-            additional_layers: The number of additional layers to add.
-
-        Returns:
-            SlabWithAdditionalLayersConfiguration: The new configuration with additional layers.
-        """
-        new_parameters = slab_configuration.parameters
-        new_parameters.update(
-            number_of_layers=new_parameters["number_of_layers"] + int(additional_layers),
-            vacuum=slab_configuration.vacuum_configuration.size,
-        )
-
-        new_slab_configuration = SlabConfiguration.from_parameters(**new_parameters)
-
-        return cls(
-            stack_components=new_slab_configuration.stack_components,
-            direction=new_slab_configuration.direction,
-            number_of_additional_layers=additional_layers,
-        )
-
-    @classmethod
     def from_parameters(
         cls,
         material_or_dict: Union[Material, dict],
@@ -63,12 +33,17 @@ class SlabWithAdditionalLayersConfiguration(SlabConfigurationSchema, StackConfig
         termination_formula: str = None,
         vacuum: float = 10.0,
     ) -> "SlabWithAdditionalLayersConfiguration":
+        # Create the base slab configuration
         base_slab_configuration = SlabConfiguration.from_parameters(
             material_or_dict=material_or_dict,
             miller_indices=miller_indices,
-            number_of_layers=number_of_layers,
+            number_of_layers=number_of_layers + int(number_of_additional_layers),
             termination_formula=termination_formula,
             vacuum=vacuum,
         )
-
-        return cls.from_slab_configuration(base_slab_configuration, number_of_additional_layers)
+        # Return the new configuration with additional layers
+        return cls(
+            stack_components=base_slab_configuration.stack_components,
+            direction=base_slab_configuration.direction,
+            number_of_additional_layers=number_of_additional_layers,
+        )
