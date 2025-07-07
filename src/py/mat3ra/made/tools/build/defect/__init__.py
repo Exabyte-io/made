@@ -2,7 +2,6 @@ from typing import Optional, Union, List
 
 from mat3ra.made.material import Material
 from .builders import (
-    SlabDefectBuilderParameters,
     AdatomSlabDefectBuilder,
     EquidistantAdatomSlabDefectBuilder,
     CrystalSiteAdatomSlabDefectBuilder,
@@ -47,31 +46,27 @@ def get_material_with_defect(configuration, builder_parameters):
 
 def create_defect(
     configuration: Union[AdatomSlabPointDefectConfiguration],
-    builder_parameters: Union[SlabDefectBuilderParameters, None] = None,
 ) -> Material:
     """
     Return a material with a selected defect added.
 
     Args:
         configuration: The configuration of the defect to be added.
-        builder_parameters: The parameters to be used by the defect builder.
 
     Returns:
         The material with the defect added.
     """
-    return get_material_with_defect(configuration, builder_parameters)
+    return get_material_with_defect(configuration)
 
 
 def create_defects(
     configurations: List[AdatomSlabPointDefectConfiguration],
-    builder_parameters: Union[SlabDefectBuilderParameters, None] = None,
 ) -> Material:
     """
     Return a material with accumulated defects added.
 
     Args:
         configurations: The list of configurations of the defect to be added. The defects will be added in that order.
-        builder_parameters: The parameters to be used by the defect builder.
 
     Returns:
         The material with the defects added.
@@ -81,7 +76,7 @@ def create_defects(
     for configuration in configurations:
         if material_with_defect:
             configuration.crystal = material_with_defect
-        material_with_defect = create_defect(configuration, builder_parameters)
+        material_with_defect = create_defect(configuration)
 
     return material_with_defect
 
@@ -116,6 +111,6 @@ def create_slab_defect(
             builder_key = configuration.defect_type.lower()
 
         BuilderClass = DefectBuilderFactory.get_class_by_name(builder_key)
-        builder = BuilderClass(build_parameters=SlabDefectBuilderParameters())
+        builder = BuilderClass()
 
     return builder.get_material(configuration)
