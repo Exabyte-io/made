@@ -1,4 +1,4 @@
-from typing import List, Optional, Any, Type
+from typing import List, Optional, Any, Type, Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
@@ -7,6 +7,7 @@ from .configurations import (
     CrystalLatticePlanesConfiguration,
     SlabStrainedSupercellConfiguration,
     SlabStrainedSupercellWithGapConfiguration,
+    SlabWithAdditionalLayersConfiguration,
 )
 from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfiguration
 from .configurations.slab_configuration import SlabConfiguration
@@ -144,3 +145,79 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
         new_lattice_vectors[axis_index] = new_vector.tolist()
         new_material = edit_cell(material, new_lattice_vectors)
         return new_material
+
+
+class SlabWithAdditionalLayersBuilder(BaseSingleBuilder):
+    _BuildParametersType = SlabBuilderParameters
+    _DefaultBuildParameters = SlabBuilderParameters()
+    _ConfigurationType = SlabWithAdditionalLayersConfiguration
+
+    def __init__(self, build_parameters=None):
+        super().__init__(build_parameters=build_parameters)
+        self.analyzer = SlabMaterialAnalyzer(vacuum_thickness=getattr(self.build_parameters, "vacuum_thickness", 5.0))
+
+    def create_material_with_additional_layers(
+        self, material: Material, added_thickness: Union[int, float] = 1
+    ) -> Material:
+        """
+        Adds a number of layers to the material using the analyzer.
+
+        Args:
+            material: The original material.
+            added_thickness: The thickness to add.
+
+        Returns:
+            A new Material instance with the added layers.
+        """
+        # Use the analyzer to determine the configuration
+        configuration = self.analyzer.analyze_slab_for_additional_layers(material, added_thickness)
+
+        # Generate the material using the configuration
+        return self._generate_from_configuration(material, configuration)
+
+    def _generate_from_configuration(
+        self, material: Material, configuration: SlabWithAdditionalLayersConfiguration
+    ) -> Material:
+        """
+        Generate material from the configuration.
+
+        Args:
+            material: The original material.
+            configuration: The configuration with additional layers.
+
+        Returns:
+            Material: The material with additional layers.
+        """
+        from .helpers import create_slab
+
+        # Create the slab with the configuration
+        material_with_additional_layers = create_slab(configuration)
+
+        # Handle fractional layers if needed
+        if isinstance(configuration.additional_layers, float):
+            whole_layers = int(configuration.additional_layers)
+            fractional_part = configuration.additional_layers - whole_layers
+
+            if fractional_part > 0.0:
+                material_with_additional_layers = self.add_fractional_layer(
+                    material, material_with_additional_layers, whole_layers, fractional_part
+                )
+
+        return material_with_additional_layers
+
+    def _generate(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
+        """
+        Generate a material with additional layers based on the configuration.
+
+        Args:
+            configuration: The configuration specifying the additional layers.
+
+        Returns:
+            Material: The material with additional layers.
+        """
+        # For now, we need a material to work with - this method should be called
+        # with a material that has the crystal property set
+        if hasattr(configuration, "crystal") and configuration.crystal is not None:
+            return self.create_material_with_additional_layers(configuration.crystal, configuration.additional_layers)
+        else:
+            raise ValueError("Configuration must have a crystal material to generate from.")
