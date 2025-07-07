@@ -81,7 +81,7 @@ MERGED_BULK_Si_Ge = {
                         },
                     },
                 ],
-                "merge_method": "replace",
+                "merge_method": "REPLACE",
             },
             "build_parameters": {"material_name": "Si-Ge Merged", "distance_tolerance": 0.1, "merge_dangerously": True},
         }

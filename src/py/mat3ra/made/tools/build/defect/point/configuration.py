@@ -48,7 +48,7 @@ class VacancyDefectConfiguration(PointDefectConfiguration, VacancyPointDefectSch
             element=VacancySchema(chemical_element=ChemicalElement.Vac.value),
             coordinate=coordinate,
         )
-        return cls(merge_components=[crystal, point_defect_site], merge_method=MergeMethodsEnum.replace, **kwargs)
+        return cls(merge_components=[crystal, point_defect_site], merge_method=MergeMethodsEnum.REPLACE, **kwargs)
 
 
 class SubstitutionalDefectConfiguration(PointDefectConfiguration, SubstitutionalPointDefectSchema):
@@ -61,7 +61,7 @@ class SubstitutionalDefectConfiguration(PointDefectConfiguration, Substitutional
             element=AtomSchema(chemical_element=element),
             coordinate=coordinate,
         )
-        return cls(merge_components=[crystal, substitution_site], merge_method=MergeMethodsEnum.replace, **kwargs)
+        return cls(merge_components=[crystal, substitution_site], merge_method=MergeMethodsEnum.REPLACE, **kwargs)
 
 
 class InterstitialDefectConfiguration(PointDefectConfiguration, InterstitialPointDefectSchema):
@@ -74,4 +74,4 @@ class InterstitialDefectConfiguration(PointDefectConfiguration, InterstitialPoin
             element=AtomSchema(chemical_element=element),
             coordinate=coordinate,
         )
-        return cls(merge_components=[crystal, interstitial_site], merge_method=MergeMethodsEnum.add, **kwargs)
+        return cls(merge_components=[crystal, interstitial_site], merge_method=MergeMethodsEnum.ADD, **kwargs)

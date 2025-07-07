@@ -42,7 +42,7 @@ def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> 
 def merge_two_materials(
     material1: Material,
     material2: Material,
-    merge_method: Optional[MergeMethodsEnum] = MergeMethodsEnum.add,
+    merge_method: Optional[MergeMethodsEnum] = MergeMethodsEnum.ADD,
     material_name: Optional[str] = None,
     distance_tolerance: float = 0.1,
     merge_dangerously: bool = False,
@@ -64,11 +64,11 @@ def merge_two_materials(
     if not np.allclose(material1.lattice.vector_arrays, material2.lattice.vector_arrays) and not merge_dangerously:
         raise ValueError("Lattices of the two materials must be the same.")
 
-    if merge_method == MergeMethodsEnum.add:
+    if merge_method == MergeMethodsEnum.ADD:
         merged_basis = merge_bases_add(material1.basis, material2.basis, distance_tolerance)
-    elif merge_method == MergeMethodsEnum.replace:
+    elif merge_method == MergeMethodsEnum.REPLACE:
         merged_basis = merge_bases_replace(material1.basis, material2.basis, distance_tolerance)
-    elif merge_method == MergeMethodsEnum.yield_:
+    elif merge_method == MergeMethodsEnum.YIELD:
         merged_basis = merge_bases_yield(material1.basis, material2.basis, distance_tolerance)
     else:
         raise ValueError(f"Unknown merge method: {merge_method}")

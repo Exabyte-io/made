@@ -171,7 +171,7 @@ class SlabDefectBuilder(DefectBuilder):
         new_material.to_cartesian()
         new_material = merge(
             materials=[isolated_defect, new_material],
-            merge_method=MergeMethodsEnum.add,
+            merge_method=MergeMethodsEnum.ADD,
             material_name=material.name,
             merge_dangerously=True,
         )

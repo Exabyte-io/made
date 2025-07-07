@@ -80,7 +80,7 @@ def stack_two_materials_xy(
     phase_2_material = translate_by_vector(phase_2_material, [gap / 2, 0, 0], use_cartesian_coordinates=True)
     interface = merge(
         [phase_1_material, phase_2_material],
-        merge_method=MergeMethodsEnum.add,
+        merge_method=MergeMethodsEnum.ADD,
         distance_tolerance=distance_tolerance,
         merge_dangerously=True,
     )
