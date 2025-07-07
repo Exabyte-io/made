@@ -84,10 +84,8 @@ def test_lattice_material_analyzer(primitive_material_config, expected_conventio
     assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)
 
 
-VORONOI_SITE_EXPECTED = {
-    TestPlatform.DARWIN: [0.625, 0.625, 0.125],
-    TestPlatform.OTHER: [0.5, 0.5, 0.5]
-}
+VORONOI_SITE_EXPECTED = {TestPlatform.DARWIN: [0.625, 0.625, 0.125], TestPlatform.OTHER: [0.5, 0.5, 0.5]}
+
 
 @pytest.mark.parametrize(
     "placement_method, expected_coordinate",

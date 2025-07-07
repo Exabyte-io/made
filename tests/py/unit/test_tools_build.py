@@ -117,7 +117,12 @@ def test_merge_builder(material1_config, material2_config, merge_method, builder
             MergeMethodsEnum.REPLACE,
             SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
         ),
-        (SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si, BULK_Si_PRIMITIVE, MergeMethodsEnum.YIELD, SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si),
+        (
+            SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
+            BULK_Si_PRIMITIVE,
+            MergeMethodsEnum.YIELD,
+            SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
+        ),
     ],
 )
 def test_merge_methods(material1_config, material2_config, merge_method, expected_material_config):
