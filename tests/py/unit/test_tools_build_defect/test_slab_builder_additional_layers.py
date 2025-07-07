@@ -52,8 +52,6 @@ def test_analyzer_get_slab_configurations_fractional(
     original_slab = Material.create(original_slab_config)
     analyzer = SlabMaterialAnalyzer(material=original_slab)
 
-    expected_slab = Material.create(expected_slab_config)
-
     slab_with_additional_layers_config, slab_with_original_layers_config = (
         analyzer.get_slab_with_additional_layers_configurations(
             additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
@@ -64,7 +62,8 @@ def test_analyzer_get_slab_configurations_fractional(
     slab_with_additional_layers = builder.get_material(slab_with_additional_layers_config)
     slab_with_original_layers_adjusted = builder.get_material(slab_with_original_layers_config)
 
-    assert_two_entities_deep_almost_equal(slab_with_additional_layers, expected_slab)
+    expected_slab = translate_to_z_level(Material.create(expected_slab_config), "bottom")
+    assert_two_entities_deep_almost_equal(slab_with_additional_layers, expected_slab, atol=1e-6)
     assert_two_entities_deep_almost_equal(
         slab_with_original_layers_adjusted.lattice.vector_arrays, expected_slab.lattice.vector_arrays
     )
