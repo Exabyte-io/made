@@ -13,14 +13,10 @@ class SlabDefectConfiguration(MergeConfiguration):
     Args:
         merge_components: List containing [slab, isolated_defect].
         merge_method: Method to use for merging (default: add).
-        auto_add_vacuum: Whether to automatically add vacuum if needed.
-        vacuum_thickness: Thickness of vacuum to add if auto_add_vacuum is True.
     """
 
     type: str = "SlabDefectConfiguration"
-    auto_add_vacuum: bool = True
-    vacuum_thickness: float = 5.0
-    merge_method = MergeMethodsEnum.ADD
+    merge_method: MergeMethodsEnum = MergeMethodsEnum.ADD
 
     @property
     def slab(self) -> Material:
@@ -35,9 +31,7 @@ class SlabDefectConfiguration(MergeConfiguration):
         cls,
         slab: Material,
         isolated_defect: Material,
-        merge_method: MergeMethodsEnum = MergeMethodsEnum.add,
-        auto_add_vacuum: bool = True,
-        vacuum_thickness: float = 5.0,
+        merge_method: MergeMethodsEnum = MergeMethodsEnum.ADD,
     ) -> "SlabDefectConfiguration":
         """
         Creates a SlabDefectConfiguration from materials.
@@ -46,8 +40,6 @@ class SlabDefectConfiguration(MergeConfiguration):
             slab: The slab material with additional layers.
             isolated_defect: The isolated defect material.
             merge_method: Method to use for merging.
-            auto_add_vacuum: Whether to automatically add vacuum if needed.
-            vacuum_thickness: Thickness of vacuum to add if auto_add_vacuum is True.
 
         Returns:
             SlabDefectConfiguration: The merge configuration.
@@ -55,6 +47,4 @@ class SlabDefectConfiguration(MergeConfiguration):
         return cls(
             merge_components=[slab, isolated_defect],
             merge_method=merge_method,
-            auto_add_vacuum=auto_add_vacuum,
-            vacuum_thickness=vacuum_thickness,
         )
