@@ -113,7 +113,7 @@ class PointDefectConfigurationLegacy(BaseDefectConfiguration, InMemoryEntity):
         }
 
 
-class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
+class SlabDefectConfigurationLegacy(BaseDefectConfiguration, InMemoryEntity):
     """
     Configuration for a slab defect.
 
@@ -133,7 +133,7 @@ class SlabDefectConfiguration(BaseDefectConfiguration, InMemoryEntity):
         }
 
 
-class SlabPointDefectConfiguration(SlabDefectConfiguration, PointDefectConfigurationLegacy):
+class SlabPointDefectConfiguration(SlabDefectConfigurationLegacy, PointDefectConfigurationLegacy):
     """
     Configuration for a slab point defect.
 
@@ -201,7 +201,7 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
 CoordinateConditionType = TypeVar("CoordinateConditionType", bound=CoordinateCondition)
 
 
-class IslandSlabDefectConfiguration(SlabDefectConfiguration, Generic[CoordinateConditionType]):
+class IslandSlabDefectConfiguration(SlabDefectConfigurationLegacy, Generic[CoordinateConditionType]):
     """
     Configuration for an island slab defect.
 
@@ -284,7 +284,7 @@ class IslandSlabDefectConfiguration(SlabDefectConfiguration, Generic[CoordinateC
         }
 
 
-class TerraceSlabDefectConfiguration(SlabDefectConfiguration):
+class TerraceSlabDefectConfiguration(SlabDefectConfigurationLegacy):
     """
     Configuration for a terrace slab defect.
 

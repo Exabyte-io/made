@@ -1,8 +1,6 @@
 from typing import List, Callable, Optional, Union
 
 import numpy as np
-from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
-from pydantic import BaseModel
 
 from mat3ra.made.material import Material
 from mat3ra.made.utils import get_center_of_coordinates
@@ -15,11 +13,8 @@ from .configuration import (
 )
 from .factories import DefectBuilderFactory
 from .point.builders import PointDefectBuilder
-from ..metadata import MaterialMetadata
-from ..slab.configurations import SlabConfiguration
-from ..slab.helpers import create_slab
+from .slab.builders import SlabDefectBuilder
 from ..supercell import create_supercell
-from ..utils import merge
 from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
 from ...analyze.other import (
     get_atomic_coordinates_extremum,
@@ -44,141 +39,6 @@ from ...utils import (
 class DefectBuilder(BaseBuilder):
     def create_isolated_defect(self, defect_configuration: PointDefectConfigurationLegacy) -> Material:
         raise NotImplementedError
-
-
-class SlabDefectBuilderParameters(BaseModel):
-    auto_add_vacuum: bool = True
-    vacuum_thickness: float = 5.0
-
-
-class SlabDefectBuilder(DefectBuilder):
-    _BuildParametersType = SlabDefectBuilderParameters
-    _DefaultBuildParameters = SlabDefectBuilderParameters()
-
-    def create_material_with_additional_layers(
-        self, material: Material, added_thickness: Union[int, float] = 1
-    ) -> Material:
-        """
-        Adds a number of layers to the material.
-
-        Args:
-            material: The original material.
-            added_thickness: The thickness to add.
-
-        Returns:
-            A new Material instance with the added layers.
-        """
-        if isinstance(added_thickness, int):
-            return self.create_material_with_additional_layers_int(material, added_thickness)
-        elif isinstance(added_thickness, float):
-            return self.create_material_with_additional_layers_float(material, added_thickness)
-        else:
-            raise TypeError("added_thickness must be an integer or float for this method.")
-
-    def create_material_with_additional_layers_int(self, material: Material, added_thickness: int = 1) -> Material:
-        """
-        Adds an integer number of layers to the material.
-
-        Args:
-            material: The original material.
-            added_thickness: The number of whole layers to add.
-
-        Returns:
-            A new Material instance with the added layers.
-        """
-        metadata = MaterialMetadata(**material.metadata)
-        slab_build_configuration_dict = metadata.build.configuration
-        if slab_build_configuration_dict.get("type") != "SlabConfiguration":
-            raise ValueError("Material is not a slab.")
-        slab_build_configuration = SlabConfiguration(**slab_build_configuration_dict)
-
-        new_parameters = slab_build_configuration.parameters
-        new_parameters.update(
-            number_of_layers=new_parameters["number_of_layers"] + added_thickness,
-            vacuum=self.build_parameters.vacuum_thickness,
-        )
-
-        new_slab_configuration = SlabConfiguration.from_parameters(
-            **new_parameters,
-        )
-
-        material_with_additional_layers = create_slab(new_slab_configuration)
-        return material_with_additional_layers
-
-    def create_material_with_additional_layers_float(
-        self, material: Material, added_thickness: float = 1.0
-    ) -> Material:
-        """
-        Adds a fractional number of layers to the material.
-
-        Args:
-            material: The original material.
-            added_thickness: The fractional thickness to add.
-
-        Returns:
-            A new Material instance with the fractional layer added.
-        """
-        whole_layers = int(added_thickness)
-        fractional_part = added_thickness - whole_layers
-
-        if whole_layers > 0:
-            material_with_additional_layers = self.create_material_with_additional_layers_int(material, whole_layers)
-        else:
-            material_with_additional_layers = material.clone()
-
-        if fractional_part > 0.0:
-            material_with_additional_layers = self.add_fractional_layer(
-                material_with_additional_layers, whole_layers, fractional_part
-            )
-
-        return material_with_additional_layers
-
-    def add_fractional_layer(
-        self,
-        material: Material,
-        whole_layers: int,
-        fractional_thickness: float,
-    ) -> Material:
-        """
-        Adds a fractional layer to the material.
-
-        Args:
-            material: The original material.
-            fractional_thickness: The fractional thickness to add.
-
-        Returns:
-            A new Material instance with the fractional layer added.
-        """
-        material_with_additional_layers = self.create_material_with_additional_layers_int(material, 1)
-        new_c = material_with_additional_layers.lattice.c
-        layer_height = (new_c - material.lattice.c) / (whole_layers + 1)
-        original_max_z = get_atomic_coordinates_extremum(material, "max", "z", use_cartesian_coordinates=True)
-        added_layers_max_z = original_max_z + (whole_layers + fractional_thickness) * layer_height
-        added_layers_max_z_crystal = material_with_additional_layers.basis.cell.convert_point_to_crystal(
-            [0, 0, added_layers_max_z]
-        )[2]
-
-        material_with_additional_layers = filter_by_box(
-            material=material_with_additional_layers,
-            max_coordinate=[1, 1, added_layers_max_z_crystal],
-        )
-
-        return material_with_additional_layers
-
-    def merge_slab_and_defect(self, material: Material, isolated_defect: Material) -> Material:
-        new_vacuum = isolated_defect.lattice.c - material.lattice.c
-        new_material = add_vacuum(material, new_vacuum)
-        new_material.to_cartesian()
-        new_material = merge(
-            materials=[isolated_defect, new_material],
-            merge_method=MergeMethodsEnum.add,
-            material_name=material.name,
-            merge_dangerously=True,
-        )
-        new_material.to_crystal()
-        if self.build_parameters.auto_add_vacuum and get_atomic_coordinates_extremum(new_material, "max", "z") > 1:
-            new_material = add_vacuum(new_material, self.build_parameters.vacuum_thickness)
-        return new_material
 
 
 class AdatomSlabDefectBuilder(SlabDefectBuilder):
