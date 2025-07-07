@@ -1,6 +1,6 @@
 import platform
 from types import SimpleNamespace
-from typing import Final
+from typing import Final, List, Tuple, Optional
 
 import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
@@ -24,6 +24,7 @@ from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTE
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
+from .fixtures.interface.twisted_nanoribbons import TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60
 
 PARAMETERS_SLAB_Si_001: Final = SimpleNamespace(
     bulk_config=BULK_Si_CONVENTIONAL,
@@ -140,7 +141,7 @@ def test_create_interface(substrate, film, expected_interface):
 
 
 @pytest.mark.parametrize(
-    "material_config, config_params, expected_cell_vectors, expected_coordinate_checks",
+    "material_config, config_params, expected_interface",
     [
         (
             GRAPHENE,
@@ -152,18 +153,17 @@ def test_create_interface(substrate, film, expected_interface):
                 "vacuum_x": 2.0,
                 "vacuum_y": 2.0,
             },
-            [[15.102811, 0.0, 0.0], [0.0, 16.108175208, 0.0], [0.0, 0.0, 20.0]],
-            {42: [0.704207885, 0.522108183, 0.65]},
+            TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60,
         ),
     ],
 )
-def test_create_twisted_interface(material_config, config_params, expected_cell_vectors, expected_coordinate_checks):
+def test_create_twisted_interface(material_config, config_params, expected_interface):
     material = Material.create(material_config)
 
     nanoribbon1 = create_nanoribbon(
         material=material,
         width=3,
-        length=5,
+        length=3,
         vacuum_width=15.0,
         vacuum_length=15.0,
     )
@@ -171,7 +171,7 @@ def test_create_twisted_interface(material_config, config_params, expected_cell_
     nanoribbon2 = create_nanoribbon(
         material=material,
         width=3,
-        length=5,
+        length=3,
         vacuum_width=15.0,
         vacuum_length=15.0,
     )
@@ -185,7 +185,7 @@ def test_create_twisted_interface(material_config, config_params, expected_cell_
         gap=config_params["distance_z"],
     )
 
-    assert_two_entities_deep_almost_equal(interface.lattice.vector_arrays, expected_cell_vectors)
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
 @pytest.mark.parametrize(
