@@ -1,4 +1,5 @@
 from typing import List, Optional, Any, Type, Union
+import math
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
@@ -152,39 +153,17 @@ class SlabWithAdditionalLayersBuilder(BaseSingleBuilder):
     _DefaultBuildParameters = SlabBuilderParameters()
     _ConfigurationType = SlabWithAdditionalLayersConfiguration
 
-    def create_material_with_additional_layers(
-        self, material: Material, added_thickness: Union[int, float] = 1
-    ) -> Material:
-        """
-        Adds a number of layers to the material using the analyzer.
-
-        Args:
-            material: The original material.
-            added_thickness: The thickness to add.
-
-        Returns:
-            A new Material instance with the added layers.
-        """
-        # Use the analyzer to determine the configuration
-        configuration = self.analyzer.analyze_slab_for_additional_layers(material, added_thickness)
-
-        # Generate the material using the configuration
-        return self._generate_from_configuration(material, configuration)
-
-    def _generate_from_configuration(
-        self, material: Material, configuration: SlabWithAdditionalLayersConfiguration
-    ) -> Material:
+    def _generate_from_configuration(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
         """
         Generate material from the configuration.
 
         Args:
-            material: The original material.
             configuration: The configuration with additional layers.
 
         Returns:
             Material: The material with additional layers.
         """
-
+        original_material = SlabBuilder().get_material(configuration)
         material_with_additional_layers = SlabBuilder().get_material(configuration)
 
         if isinstance(configuration.number_of_additional_layers, float):
@@ -193,25 +172,13 @@ class SlabWithAdditionalLayersBuilder(BaseSingleBuilder):
 
             if fractional_part > 0.0:
                 material_with_additional_layers = self.add_fractional_layer(
-                    material, material_with_additional_layers, whole_layers, fractional_part
+                    original_material, material_with_additional_layers, whole_layers, fractional_part
                 )
 
         return material_with_additional_layers
 
     def _generate(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
-        """
-        Generate a material with additional layers based on the configuration.
-
-        Args:
-            configuration: The configuration specifying the additional layers.
-
-        Returns:
-            Material: The material with additional layers.
-        """
-
-        return self.create_material_with_additional_layers(
-            configuration.crystal, configuration.number_of_additional_layers
-        )
+        return self._generate_from_configuration(configuration)
 
     def add_fractional_layer(
         self,
