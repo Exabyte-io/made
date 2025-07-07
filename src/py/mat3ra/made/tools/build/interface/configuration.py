@@ -44,62 +44,22 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
         )
 
 
-class TwistedInterfaceConfiguration(BaseConfiguration):
+class TwistedNanoribbonsInterfaceConfiguration(BaseConfiguration):
     """
-    Configuration for creating a twisted interface between two slabs with specified twist angle.
+    Configuration for creating a twisted interface between two nanoribbons with specified twist angle.
 
     Args:
-        film (Material): The film material.
-        substrate (Material): The substrate material.
-        twist_angle (float): Twist angle in degrees.
-        distance_z (float): Vertical distance between layers in Angstroms.
-        vacuum (float): Vacuum thickness, in Angstroms.
+        stack_components (List[Material]): List of two nanoribbon materials.
+        angle (float): Twist angle in degrees for provenance.
     """
 
-    film: Material
-    substrate: Optional[Material] = None
-    twist_angle: float = 0.0
-    distance_z: float = 3.0
-    vacuum: float = 0.0
+    stack_components: List[Material]
+    angle: float = 0.0
 
     @property
-    def _json(self):
-        return {
-            "type": self.get_cls_name(),
-            "film": self.film.to_json(),
-            "substrate": self.substrate.to_json() if self.substrate else None,
-            "twist_angle": self.twist_angle,
-            "distance_z": self.distance_z,
-        }
-
-
-class NanoRibbonTwistedInterfaceConfiguration(TwistedInterfaceConfiguration):
-    """
-    Configuration for creating a twisted interface between two nano ribbons with specified twist angle.
-
-    Args:
-        film (Material): The film material.
-        substrate (Material): The substrate material.
-        twist_angle (float): Twist angle in degrees.
-        ribbon_width (int): Width of the nanoribbon in unit cells.
-        ribbon_length (int): Length of the nanoribbon in unit cells.
-        distance_z (float): Vertical distance between layers in Angstroms.
-        vacuum_x (float): Vacuum along x on both sides, in Angstroms.
-        vacuum_y (float): Vacuum along y on both sides, in Angstroms.
-    """
-
-    ribbon_width: int = 1
-    ribbon_length: int = 1
-    vacuum_x: float = 5.0
-    vacuum_y: float = 5.0
+    def nanoribbon1(self) -> Material:
+        return self.stack_components[0]
 
     @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "ribbon_width": self.ribbon_width,
-            "ribbon_length": self.ribbon_length,
-            "vacuum_x": self.vacuum_x,
-            "vacuum_y": self.vacuum_y,
-        }
+    def nanoribbon2(self) -> Material:
+        return self.stack_components[1]

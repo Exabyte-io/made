@@ -1,16 +1,19 @@
 from typing import List, Tuple, Optional
 
 import numpy as np
-
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import CommensurateLatticeInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.twisted_nanoribbons import TwistedNanoribbonsInterfaceAnalyzer
 from .builders import (
     InterfaceBuilder,
     InterfaceBuilderParameters,
+    TwistedNanoribbonsInterfaceBuilder,
 )
 from .configuration import (
     InterfaceConfiguration,
+    TwistedNanoribbonsInterfaceConfiguration,
 )
 from ..slab.configurations import (
     SlabConfiguration,
@@ -19,6 +22,52 @@ from ..slab.configurations import (
 from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import interface_displace_part
 from ...optimize import evaluate_calculator_on_xy_grid
+
+
+def create_twisted_interface(
+    material1: Material,
+    material2: Material,
+    angle: float = 0.0,
+    vacuum_x: float = 5.0,
+    vacuum_y: float = 5.0,
+    gap: float = 3.0,
+) -> Material:
+    slab1 = SlabConfiguration.from_parameters(
+        material_or_dict=material1,
+        miller_indices=(0, 0, 1),
+        number_of_layers=1,
+        vacuum=0.0,
+    )
+    slab2 = SlabConfiguration.from_parameters(
+        material_or_dict=material2,
+        miller_indices=(0, 0, 1),
+        number_of_layers=1,
+        vacuum=0.0,
+    )
+    analyzer = TwistedNanoribbonsInterfaceAnalyzer(
+        substrate_slab_configuration=slab1,
+        film_slab_configuration=slab2,
+        angle=angle,
+        vacuum_x=vacuum_x,
+        vacuum_y=vacuum_y,
+        gap=gap,
+    )
+    processed_slab1 = analyzer.substrate_nanoribbon_configuration
+    processed_slab2 = analyzer.film_nanoribbon_configuration
+    slab1_gap = SlabStrainedSupercellWithGapConfiguration(
+        **processed_slab1.to_dict(),
+        gap=gap,
+    )
+    slab2_gap = SlabStrainedSupercellWithGapConfiguration(
+        **processed_slab2.to_dict(),
+        gap=gap,
+    )
+    configuration = InterfaceConfiguration(
+        stack_components=[slab1_gap, slab2_gap],
+        direction="z",
+    )
+    builder = InterfaceBuilder()
+    return builder.get_material(configuration)
 
 
 def get_commensurate_strained_configs(

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from mat3ra.made.material import Material
 from .configuration import (
     InterfaceConfiguration,
-    NanoRibbonTwistedInterfaceConfiguration,
+    TwistedNanoribbonsInterfaceConfiguration,
 )
 from ..nanoribbon import create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
@@ -27,6 +27,7 @@ from ...modify import (
     wrap_to_unit_cell,
 )
 from ...utils import AXIS_TO_INDEX_MAP
+from ...analyze.interface.twisted_nanoribbons import TwistedNanoribbonsInterfaceAnalyzer
 
 
 class InterfaceBuilderParameters(InMemoryEntityPydantic):
@@ -92,39 +93,80 @@ class InterfaceBuilder(StackNComponentsBuilder):
 ########################################################################################
 
 
-class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
+class TwistedNanoribbonsInterfaceBuilder(BaseBuilder):
+    """
+    Builder for creating twisted interfaces between two nanoribbons.
+
+    Uses TwistedNanoribbonsInterfaceAnalyzer to process the nanoribbons and create the interface.
+    """
+
     _GeneratedItemType = Material
-    _ConfigurationType: type(  # type: ignore
-        NanoRibbonTwistedInterfaceConfiguration
-    ) = NanoRibbonTwistedInterfaceConfiguration  # type: ignore
+    _ConfigurationType = TwistedNanoribbonsInterfaceConfiguration
 
-    def _generate(self, configuration: _ConfigurationType) -> List[Material]:
-        bottom_ribbon = create_nanoribbon(
-            material=configuration.substrate,
-            width=configuration.ribbon_width,
-            length=configuration.ribbon_length,
+    def get_material(
+        self,
+        configuration: TwistedNanoribbonsInterfaceConfiguration,
+        vacuum_x: float = 5.0,
+        vacuum_y: float = 5.0,
+        gap: float = 3.0,
+    ) -> Material:
+        analyzer = TwistedNanoribbonsInterfaceAnalyzer(
+            substrate_slab_configuration=configuration.nanoribbon1,
+            film_slab_configuration=configuration.nanoribbon2,
+            angle=configuration.angle,
+            vacuum_x=vacuum_x,
+            vacuum_y=vacuum_y,
+            gap=gap,
         )
-        top_ribbon = create_nanoribbon(
-            material=configuration.film,
-            width=configuration.ribbon_width,
-            length=configuration.ribbon_length,
-        )
-        top_ribbon = rotate(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
+        interface = analyzer.get_interface_with_vacuum()
+        interface = self._update_material_name(interface, configuration)
+        return interface
 
-        translation_vector = [0, 0, configuration.distance_z]
-        top_ribbon = translate_by_vector(top_ribbon, translation_vector, use_cartesian_coordinates=True)
-
-        merged_material = merge([bottom_ribbon, top_ribbon], merge_method=MergeMethodsEnum.add)
-        merged_material_vacuum_x = add_vacuum_sides(merged_material, configuration.vacuum_x, on_x=True)
-        merged_material_vacuum_xy = add_vacuum_sides(merged_material_vacuum_x, configuration.vacuum_y, on_y=True)
-
-        return [merged_material_vacuum_xy]
+    def _generate(self, configuration: TwistedNanoribbonsInterfaceConfiguration) -> List[Material]:
+        # For compatibility with the build system, use defaults
+        return [self.get_material(configuration)]
 
     def _update_material_name(
-        self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
+        self, material: Material, configuration: TwistedNanoribbonsInterfaceConfiguration
     ) -> Material:
-        material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f} degrees)"
+        material.name = f"Twisted Nanoribbons Interface ({configuration.angle:.2f} degrees)"
         return material
+
+
+#
+# class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
+#     _GeneratedItemType = Material
+#     _ConfigurationType: type(  # type: ignore
+#         NanoRibbonTwistedInterfaceConfiguration
+#     ) = NanoRibbonTwistedInterfaceConfiguration  # type: ignore
+#
+#     def _generate(self, configuration: _ConfigurationType) -> List[Material]:
+#         bottom_ribbon = create_nanoribbon(
+#             material=configuration.substrate,
+#             width=configuration.ribbon_width,
+#             length=configuration.ribbon_length,
+#         )
+#         top_ribbon = create_nanoribbon(
+#             material=configuration.film,
+#             width=configuration.ribbon_width,
+#             length=configuration.ribbon_length,
+#         )
+#         top_ribbon = rotate(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
+#
+#         translation_vector = [0, 0, configuration.distance_z]
+#         top_ribbon = translate_by_vector(top_ribbon, translation_vector, use_cartesian_coordinates=True)
+#
+#         merged_material = merge([bottom_ribbon, top_ribbon], merge_method=MergeMethodsEnum.add)
+#         merged_material_vacuum_x = add_vacuum_sides(merged_material, configuration.vacuum_x, on_x=True)
+#         merged_material_vacuum_xy = add_vacuum_sides(merged_material_vacuum_x, configuration.vacuum_y, on_y=True)
+#
+#         return [merged_material_vacuum_xy]
+#
+#     def _update_material_name(
+#         self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
+#     ) -> Material:
+#         material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f} degrees)"
+#         return material
 
 
 class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
