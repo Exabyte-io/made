@@ -1,55 +1,70 @@
 import pytest
+
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.builders import SlabDefectBuilder, SlabDefectBuilderParameters
-from mat3ra.utils import assertion as assertion_utils
+from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
+from mat3ra.made.tools.modify import translate_to_z_level
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER
+from unit.utils import assert_two_entities_deep_almost_equal
 
 
-@pytest.mark.skip(reason="Slab with additional layers should be adjusted")
 @pytest.mark.parametrize(
-    "original_slab_config, layers_to_add, builder_params_dict, expected_slab_config",
-    [(SI_CONVENTIONAL_SLAB_001, 1, {"auto_add_vacuum": True, "vacuum_thickness": 5.0}, SI_SLAB_001_ADDED_LAYER)],
+    "original_slab_config, layers_to_add, analyzer_params_dict, expected_slab_config",
+    [(SI_CONVENTIONAL_SLAB_001, 1, {"vacuum_thickness": 5.0}, SI_SLAB_001_ADDED_LAYER)],
 )
-def test_create_material_with_additional_layers(
-    original_slab_config, layers_to_add, builder_params_dict, expected_slab_config
+def test_analyzer_get_slab_configurations(
+    original_slab_config, layers_to_add, analyzer_params_dict, expected_slab_config
 ):
-    """Test adding layers to a slab material"""
-    # Create the builder
-    builder_params = SlabDefectBuilderParameters(**builder_params_dict)
-    builder = SlabDefectBuilder(build_parameters=builder_params)
-
-    # Test adding 1 layer to SI_SLAB_001
     original_slab = Material.create(original_slab_config)
-    expected_slab = Material.create(expected_slab_config)
-    slab_with_additional_layer = builder.create_material_with_additional_layers(original_slab, layers_to_add)
+    analyzer = SlabMaterialAnalyzer(material=original_slab)
+    expected_slab = translate_to_z_level(Material.create(expected_slab_config), "bottom")
 
-    assertion_utils.assert_deep_almost_equal(slab_with_additional_layer, expected_slab)
+    slab_with_additional_layers_config, slab_with_original_layers_config = (
+        analyzer.get_slab_with_additional_layers_configurations(
+            additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
+        )
+    )
+
+    builder = SlabBuilder()
+    slab_with_additional_layers = builder.get_material(slab_with_additional_layers_config)
+    slab_with_original_layers_adjusted = builder.get_material(slab_with_original_layers_config)
+
+    assert_two_entities_deep_almost_equal(slab_with_additional_layers, expected_slab, atol=1e-6)
+    assert_two_entities_deep_almost_equal(
+        slab_with_original_layers_adjusted.lattice.vector_arrays, expected_slab.lattice.vector_arrays
+    )
 
 
-@pytest.mark.skip(reason="Slab with additional layers should be adjusted")
 @pytest.mark.parametrize(
-    "original_slab_config, layers_to_add, builder_params_dict, expected_slab_config",
+    "original_slab_config, layers_to_add, analyzer_params_dict, expected_slab_config",
     [
         (
             SI_CONVENTIONAL_SLAB_001,
             1.5,
-            {"auto_add_vacuum": True, "vacuum_thickness": 5.0},
+            {"vacuum_thickness": 5.0},
             SI_SLAB_001_ADDED_FRACTIONAL_LAYER,
         )
     ],
 )
-def test_create_material_with_additional_fractional_layers(
-    original_slab_config, layers_to_add, builder_params_dict, expected_slab_config
+def test_analyzer_get_slab_configurations_fractional(
+    original_slab_config, layers_to_add, analyzer_params_dict, expected_slab_config
 ):
-    """Test adding fractional layers to a slab material"""
-    # Create the builder
-    builder_params = SlabDefectBuilderParameters(**builder_params_dict)
-    builder = SlabDefectBuilder(build_parameters=builder_params)
-
-    # Test adding 1.5 layers to SI_SLAB_001
     original_slab = Material.create(original_slab_config)
-    expected_slab = Material.create(expected_slab_config)
-    slab_with_fractional_layer = builder.create_material_with_additional_layers(original_slab, layers_to_add)
+    analyzer = SlabMaterialAnalyzer(material=original_slab)
 
-    # Compare with expected fixture
-    assertion_utils.assert_deep_almost_equal(slab_with_fractional_layer, expected_slab)
+    expected_slab = Material.create(expected_slab_config)
+
+    slab_with_additional_layers_config, slab_with_original_layers_config = (
+        analyzer.get_slab_with_additional_layers_configurations(
+            additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
+        )
+    )
+
+    builder = SlabBuilder()
+    slab_with_additional_layers = builder.get_material(slab_with_additional_layers_config)
+    slab_with_original_layers_adjusted = builder.get_material(slab_with_original_layers_config)
+
+    assert_two_entities_deep_almost_equal(slab_with_additional_layers, expected_slab)
+    assert_two_entities_deep_almost_equal(
+        slab_with_original_layers_adjusted.lattice.vector_arrays, expected_slab.lattice.vector_arrays
+    )

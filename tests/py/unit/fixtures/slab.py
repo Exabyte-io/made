@@ -363,74 +363,7 @@ SI_SLAB_DEFAULT_PARAMETERS = {
 }
 
 SI_SLAB_001_ADDED_LAYER = {
-    "metadata": {
-        "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-                "stack_components": [
-                    {
-                        "crystal": {
-                            "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-                            "name": "Si8",
-                            "basis": {
-                                "elements": [
-                                    {"id": 0, "value": "Si"},
-                                    {"id": 1, "value": "Si"},
-                                    {"id": 2, "value": "Si"},
-                                    {"id": 3, "value": "Si"},
-                                    {"id": 4, "value": "Si"},
-                                    {"id": 5, "value": "Si"},
-                                    {"id": 6, "value": "Si"},
-                                    {"id": 7, "value": "Si"},
-                                ],
-                                "coordinates": [
-                                    {"id": 0, "value": [0.5, 0, 0]},
-                                    {"id": 1, "value": [0.25, 0.25, 0.75]},
-                                    {"id": 2, "value": [0.5, 0.5, 0.5]},
-                                    {"id": 3, "value": [0.25, 0.75, 0.25]},
-                                    {"id": 4, "value": [0, 0, 0.5]},
-                                    {"id": 5, "value": [0.75, 0.25, 0.25]},
-                                    {"id": 6, "value": [0, 0.5, 0]},
-                                    {"id": 7, "value": [0.75, 0.75, 0.75]},
-                                ],
-                                "units": "crystal",
-                                "labels": [],
-                                "constraints": [],
-                            },
-                            "lattice": {
-                                "a": 5.468763846,
-                                "b": 5.468763846,
-                                "c": 5.468763846,
-                                "alpha": 90,
-                                "beta": 90,
-                                "gamma": 90,
-                                "units": {"length": "angstrom", "angle": "degree"},
-                                "type": "TRI",
-                            },
-                        },
-                        "miller_indices": [0, 0, 1],
-                        "use_conventional_cell": True,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "number_of_repetitions": 3,
-                    },
-                    {"direction": "z", "size": 5, "type": "VacuumConfiguration"},
-                ],
-                "direction": "z",
-            },
-            "build_parameters": {
-                "min_vacuum_size": 0,
-                "in_unit_planes": True,
-                "reorient_lattice": True,
-                "symmetrize": True,
-                "make_primitive": False,
-                "use_orthogonal_c": True,
-            },
-        },
-    },
     "name": "Si8(001), termination Si_P4/mmm_2, Slab",
-    "isDefault": False,
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -497,13 +430,6 @@ SI_SLAB_001_ADDED_LAYER = {
         "gamma": 90,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [5.468763846, 0, 0],
-            "b": [0, 5.468763846, 0],
-            "c": [0, 0, 21.406291538],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
 }
 
