@@ -10,7 +10,7 @@ from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.made.tools.build.slab.configurations import (
     SlabStrainedSupercellConfiguration,
 )
-from mat3ra.made.tools.modify import rotate, translate_by_vector
+from mat3ra.made.tools.modify import rotate, translate_by_vector, translate_to_center
 from mat3ra.made.utils import get_center_of_coordinates
 
 
@@ -43,11 +43,6 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
     def nanoribbon2(self):
         return self.film_slab_configuration.atomic_layers.crystal
 
-    @property
-    def _no_strain_matrix(self) -> Matrix3x3Schema:
-        """Return identity matrix for no strain."""
-        return Matrix3x3Schema(root=np.eye(3).tolist())
-
     def _create_primitive_slab_from_nanoribbon(self, nanoribbon: Material) -> SlabConfiguration:
         return SlabConfiguration.from_parameters(
             material_or_dict=nanoribbon,
@@ -55,13 +50,6 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
             number_of_layers=1,
             vacuum=0.0,
         )
-
-    def _center_material(self, material: Material) -> Material:
-        coordinates = material.basis.coordinates.values
-        center_of_mass = get_center_of_coordinates(coordinates)
-        lattice_center = np.array([0.5, 0.5, 0.5])
-        translation_vector = lattice_center - np.array(center_of_mass)
-        return translate_by_vector(material, translation_vector, use_cartesian_coordinates=False)
 
     def _match_lattice_vectors(self, material1: Material, material2: Material) -> Tuple[Material, Material]:
         lattice1 = material1.lattice.vector_arrays
@@ -89,8 +77,8 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
         Returns:
             List[MatchedSubstrateFilmConfigurationHolder]: List of strained configurations
         """
-        centered_nanoribbon1 = self._center_material(self.nanoribbon1)
-        centered_nanoribbon2 = self._center_material(self.nanoribbon2)
+        centered_nanoribbon1 = translate_to_center(self.nanoribbon1, axes=["x", "y"])
+        centered_nanoribbon2 = translate_to_center(self.nanoribbon2, axes=["x", "y"])
 
         matched_nanoribbon1, matched_nanoribbon2 = self._match_lattice_vectors(
             centered_nanoribbon1, centered_nanoribbon2
