@@ -78,7 +78,7 @@ MERGE_TEST_PARAMS = [
     (
         BULK_Si_CONVENTIONAL,
         BULK_Ge_CONVENTIONAL,
-        MergeMethodsEnum.replace,
+        MergeMethodsEnum.REPLACE,
         {"material_name": "Si-Ge Merged", "distance_tolerance": 0.1, "merge_dangerously": True},
         MERGED_BULK_Si_Ge,
     ),
@@ -108,16 +108,16 @@ def test_merge_builder(material1_config, material2_config, merge_method, builder
         (
             VACANCY_DEFECT_BULK_PRIMITIVE_Si,
             INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
-            "add",
+            MergeMethodsEnum.ADD,
             INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
         ),
         (
             VACANCY_DEFECT_BULK_PRIMITIVE_Si,
             SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
-            "replace",
+            MergeMethodsEnum.REPLACE,
             SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
         ),
-        (SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si, BULK_Si_PRIMITIVE, "yield", SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si),
+        (SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si, BULK_Si_PRIMITIVE, MergeMethodsEnum.YIELD, SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si),
     ],
 )
 def test_merge_methods(material1_config, material2_config, merge_method, expected_material_config):

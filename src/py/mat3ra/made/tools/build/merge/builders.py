@@ -46,7 +46,7 @@ class MergeBuilder(BaseSingleBuilder):
     def _merge_add(self, materials: List[Material], parameters: MergeBuilderParameters) -> Material:
         return merge(
             materials=materials,
-            merge_method=MergeMethodsEnum.add,
+            merge_method=MergeMethodsEnum.ADD,
             material_name=parameters.material_name or materials[0].name,
             distance_tolerance=parameters.distance_tolerance,
             merge_dangerously=parameters.merge_dangerously,
@@ -55,7 +55,7 @@ class MergeBuilder(BaseSingleBuilder):
     def _merge_replace(self, materials: List[Material], parameters: MergeBuilderParameters) -> Material:
         return merge(
             materials=materials,
-            merge_method=MergeMethodsEnum.replace,
+            merge_method=MergeMethodsEnum.REPLACE,
             material_name=parameters.material_name or materials[0].name,
             distance_tolerance=parameters.distance_tolerance,
             merge_dangerously=parameters.merge_dangerously,
@@ -64,7 +64,7 @@ class MergeBuilder(BaseSingleBuilder):
     def _merge_yield(self, materials: List[Material], parameters: MergeBuilderParameters) -> Material:
         return merge(
             materials=materials,
-            merge_method=MergeMethodsEnum.yield_,
+            merge_method=MergeMethodsEnum.YIELD,
             material_name=parameters.material_name or materials[0].name,
             distance_tolerance=parameters.distance_tolerance,
             merge_dangerously=parameters.merge_dangerously,
@@ -82,11 +82,11 @@ class MergeBuilder(BaseSingleBuilder):
         parameters = self.build_parameters or self._DefaultBuildParameters
         merge_method = getattr(configuration, "merge_method", None)
         if merge_method is not None:
-            if merge_method == MergeMethodsEnum.add:
+            if merge_method == MergeMethodsEnum.ADD:
                 return self._merge_add(materials, parameters)
-            elif merge_method == MergeMethodsEnum.replace:
+            elif merge_method == MergeMethodsEnum.REPLACE:
                 return self._merge_replace(materials, parameters)
-            elif merge_method == MergeMethodsEnum.yield_:
+            elif merge_method == MergeMethodsEnum.YIELD:
                 return self._merge_yield(materials, parameters)
             else:
                 raise ValueError(f"Unknown merge method: {merge_method}")
