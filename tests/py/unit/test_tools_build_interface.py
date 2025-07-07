@@ -9,12 +9,12 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.interface import (
+from mat3ra.made.tools.build.interface.helpers import create_interface, create_twisted_interface
+from mat3ra.made.tools.build.interface.builders import (
     InterfaceBuilder,
     InterfaceConfiguration,
-    create_interface,
-    create_twisted_interface,
 )
+
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
