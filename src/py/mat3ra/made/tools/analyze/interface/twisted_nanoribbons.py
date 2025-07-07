@@ -1,17 +1,10 @@
 from typing import List, Tuple
 
-import numpy as np
-from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
-from mat3ra.made.tools.build.slab.configurations import (
-    SlabStrainedSupercellConfiguration,
-)
-from mat3ra.made.tools.modify import rotate, translate_by_vector, translate_to_center
-from mat3ra.made.utils import get_center_of_coordinates
+from mat3ra.made.tools.modify import rotate, translate_to_center
 
 
 class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
@@ -70,7 +63,7 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
 
         return material1_matched, material2_matched
 
-    def get_strained_configurations(self) -> List[MatchedSubstrateFilmConfigurationHolder]:
+    def get_strained_configuration(self) -> MatchedSubstrateFilmConfigurationHolder:
         """
         Get strained configurations for the twisted nanoribbon interface.
 
@@ -89,30 +82,12 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
         substrate_slab_config = self._create_primitive_slab_from_nanoribbon(matched_nanoribbon1)
         film_slab_config = self._create_primitive_slab_from_nanoribbon(rotated_nanoribbon2)
 
-        substrate_config = SlabStrainedSupercellConfiguration(
-            stack_components=substrate_slab_config.stack_components,
-            direction=substrate_slab_config.direction,
-            strain_matrix=self._no_strain_matrix,
-        )
-
-        film_config = SlabStrainedSupercellConfiguration(
-            stack_components=film_slab_config.stack_components,
-            direction=film_slab_config.direction,
-            strain_matrix=self._no_strain_matrix,
-        )
-
-        return [
-            MatchedSubstrateFilmConfigurationHolder(
-                match_id=0,
-                substrate_configuration=substrate_config,
-                film_configuration=film_config,
-            )
-        ]
+        return self.create_matched_configuration_holder(substrate_slab_config, film_slab_config, match_id=0)
 
     @property
     def substrate_nanoribbon_configuration(self):
-        return self.get_strained_configurations()[0].substrate_configuration
+        return self.get_strained_configuration().substrate_configuration
 
     @property
     def film_nanoribbon_configuration(self):
-        return self.get_strained_configurations()[0].film_configuration
+        return self.get_strained_configuration().film_configuration

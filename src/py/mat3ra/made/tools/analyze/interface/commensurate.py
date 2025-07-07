@@ -6,13 +6,14 @@ from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
+from pydantic import model_validator
+
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.enums import angle_to_supercell_matrix_values_for_hex
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
-from pydantic import model_validator
 
 
 class CommensurateLatticeMatchHolder(InMemoryEntityPydantic):
@@ -137,18 +138,12 @@ class CommensurateLatticeInterfaceAnalyzer(InterfaceAnalyzer):
         substrate_matrix_schema = SupercellMatrix2DSchema(root=match_holder.xy_supercell_matrix_substrate)
         film_matrix_schema = SupercellMatrix2DSchema(root=match_holder.xy_supercell_matrix_film)
 
-        substrate_config = self.get_component_strained_configuration(
-            self.substrate_slab_configuration, self._no_strain_matrix, xy_supercell_matrix=substrate_matrix_schema
-        )
-
-        film_config = self.get_component_strained_configuration(
-            self.film_slab_configuration, self._no_strain_matrix, xy_supercell_matrix=film_matrix_schema
-        )
-
-        return MatchedSubstrateFilmConfigurationHolder(
+        return self.create_matched_configuration_holder(
+            self.substrate_slab_configuration,
+            self.film_slab_configuration,
             match_id=match_holder.match_id,
-            substrate_configuration=substrate_config,
-            film_configuration=film_config,
+            substrate_xy_supercell_matrix=substrate_matrix_schema,
+            film_xy_supercell_matrix=film_matrix_schema,
         )
 
     def get_strained_configurations(self) -> List[MatchedSubstrateFilmConfigurationHolder]:
