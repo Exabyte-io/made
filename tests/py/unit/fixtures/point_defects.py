@@ -1,6 +1,5 @@
 from unit.utils import TestPlatform
 
-
 VACANCY_DEFECT_BULK_PRIMITIVE_Si = {
     "name": "Silicon FCC with vacancy defect",
     "lattice": {

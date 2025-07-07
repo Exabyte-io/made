@@ -1,8 +1,9 @@
-from typing import List, Tuple
+from typing import Tuple
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from mat3ra.made.tools.analyze.other import get_surface_area
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.made.tools.modify import rotate, translate_to_center
 
@@ -45,18 +46,14 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
         )
 
     def _match_lattice_vectors(self, material1: Material, material2: Material) -> Tuple[Material, Material]:
-        lattice1 = material1.lattice.vector_arrays
-        lattice2 = material2.lattice.vector_arrays
+        area1 = get_surface_area(material1)
+        area2 = get_surface_area(material2)
 
-        n_atoms_1 = len(material1.basis.elements.values)
-        n_atoms_2 = len(material2.basis.elements.values)
-        if n_atoms_1 >= n_atoms_2:
-            target_lattice = lattice1
+        if area1 >= area2:
             material1_matched = material1
             material2_matched = material2.clone()
             material2_matched.set_lattice(material1.lattice)
         else:
-            target_lattice = lattice2
             material1_matched = material1.clone()
             material1_matched.set_lattice(material2.lattice)
             material2_matched = material2
@@ -64,12 +61,6 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
         return material1_matched, material2_matched
 
     def get_strained_configuration(self) -> MatchedSubstrateFilmConfigurationHolder:
-        """
-        Get strained configurations for the twisted nanoribbon interface.
-
-        Returns:
-            List[MatchedSubstrateFilmConfigurationHolder]: List of strained configurations
-        """
         centered_nanoribbon1 = translate_to_center(self.nanoribbon1, axes=["x", "y"])
         centered_nanoribbon2 = translate_to_center(self.nanoribbon2, axes=["x", "y"])
 

@@ -1,20 +1,15 @@
 import platform
 from types import SimpleNamespace
-from typing import Final, List, Tuple, Optional
+from typing import Final
 
 import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
+from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceConfiguration
 from mat3ra.made.tools.build.interface.helpers import create_interface, create_twisted_interface
-from mat3ra.made.tools.build.interface.builders import (
-    InterfaceBuilder,
-    InterfaceConfiguration,
-)
-
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
@@ -22,9 +17,9 @@ from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 # Test the analyzer directly
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
+from .fixtures.interface.twisted_nanoribbons import TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
-from .fixtures.interface.twisted_nanoribbons import TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60
 
 PARAMETERS_SLAB_Si_001: Final = SimpleNamespace(
     bulk_config=BULK_Si_CONVENTIONAL,

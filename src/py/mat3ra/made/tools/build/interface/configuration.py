@@ -1,13 +1,12 @@
-from typing import Optional, Union, List
+from typing import Union, List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interface.configuration import (  # noqa: E501
     InterfaceConfigurationSchema,
 )
 
-from mat3ra.made.material import Material
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
-from .. import BaseConfiguration, BaseConfigurationPydantic
+from .. import BaseConfigurationPydantic
 from ..slab.configurations import (
     SlabConfiguration,
     SlabStrainedSupercellConfiguration,

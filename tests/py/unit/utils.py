@@ -12,6 +12,7 @@ from pymatgen.core.structure import Structure
 
 class TestPlatform(Enum):
     """Platform enum for architecture-specific test handling."""
+
     DARWIN = "darwin"
     OTHER = "other"
 

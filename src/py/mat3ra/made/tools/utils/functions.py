@@ -1,6 +1,6 @@
 from typing import List
-import numpy as np
 
+import numpy as np
 from pydantic import BaseModel
 
 
@@ -29,6 +29,7 @@ class FunctionHolder(BaseModel):
         """
         raise NotImplementedError
 
+
 def calculate_required_vacuum_for_rotation(material, angle_deg, vacuum_x, vacuum_y):
     """
     Calculate the minimum cell size in x and y so that, after rotation by angle_deg,
@@ -41,11 +42,13 @@ def calculate_required_vacuum_for_rotation(material, angle_deg, vacuum_x, vacuum
     cart_coords = np.dot(coords, lattice)
     # Rotation matrix (about z)
     theta = np.radians(angle_deg)
-    rot_matrix = np.array([
-        [np.cos(theta), -np.sin(theta), 0],
-        [np.sin(theta),  np.cos(theta), 0],
-        [0, 0, 1],
-    ])
+    rot_matrix = np.array(
+        [
+            [np.cos(theta), -np.sin(theta), 0],
+            [np.sin(theta), np.cos(theta), 0],
+            [0, 0, 1],
+        ]
+    )
     rotated = np.dot(cart_coords, rot_matrix.T)
     min_x, max_x = np.min(rotated[:, 0]), np.max(rotated[:, 0])
     min_y, max_y = np.min(rotated[:, 1]), np.max(rotated[:, 1])

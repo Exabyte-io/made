@@ -1,12 +1,10 @@
-from typing import Any, List, Optional, Type
+from typing import Any, Type
 
 from mat3ra.code.entity import InMemoryEntityPydantic
-from pydantic import BaseModel
 
 from mat3ra.made.material import Material
 from .configuration import (
     InterfaceConfiguration,
-    TwistedNanoribbonsInterfaceConfiguration,
 )
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.builders import SlabWithGapBuilder
@@ -14,9 +12,7 @@ from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
-from ...analyze.interface.twisted_nanoribbons import TwistedNanoribbonsInterfaceAnalyzer
 from ...analyze.other import get_chemical_formula
-from ...build import BaseBuilder
 from ...convert.utils import InterfacePartsEnum
 from ...modify import (
     translate_by_vector,
