@@ -2,12 +2,17 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.crystal_site import (
+    CrystalSiteSchema,
+)
+from mat3ra.made.material import Material
 from pydantic import BaseModel
 
 
-class CrystalSite(BaseModel):
+class CrystalSite(CrystalSiteSchema, BaseModel):
+    crystal: Optional[Material] = None
     # element: str
-    # coordinate: List[float]
+    coordinate: Optional[List[float]] = None
     nearest_neighbor_vectors: List[np.ndarray] = []
     # coordination_number: int = 0
     # see https://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list for an example

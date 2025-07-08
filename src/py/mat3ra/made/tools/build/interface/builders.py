@@ -1,6 +1,7 @@
 from typing import Any, List, Optional, Type
 
 from mat3ra.code.entity import InMemoryEntityPydantic
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from pydantic import BaseModel
 
 from mat3ra.made.material import Material
@@ -15,7 +16,7 @@ from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
-from ..utils import merge_materials
+from ..utils import merge
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...convert.utils import InterfacePartsEnum
@@ -113,7 +114,7 @@ class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
         translation_vector = [0, 0, configuration.distance_z]
         top_ribbon = translate_by_vector(top_ribbon, translation_vector, use_cartesian_coordinates=True)
 
-        merged_material = merge_materials([bottom_ribbon, top_ribbon])
+        merged_material = merge([bottom_ribbon, top_ribbon], merge_method=MergeMethodsEnum.ADD)
         merged_material_vacuum_x = add_vacuum_sides(merged_material, configuration.vacuum_x, on_x=True)
         merged_material_vacuum_xy = add_vacuum_sides(merged_material_vacuum_x, configuration.vacuum_y, on_y=True)
 

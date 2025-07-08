@@ -1,4 +1,3 @@
-from copy import deepcopy
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -143,6 +142,15 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.elements.remove_item(id)
         self.coordinates.remove_item(id)
         self.labels.remove_item(id)
+
+    def remove_atoms_by_elements(self, values: Union[List[str], str]) -> "Basis":
+        if isinstance(values, str):
+            values = [values]
+        ids_to_remove = [
+            id_ for value in values for id_, v in zip(self.elements.ids, self.elements.values) if v == value
+        ]
+        self.filter_atoms_by_ids(ids_to_remove, invert=True)
+        return self
 
     def filter_atoms_by_ids(self, ids: Union[List[int], int], invert: bool = False) -> "Basis":
         self.elements.filter_by_ids(ids, invert)
