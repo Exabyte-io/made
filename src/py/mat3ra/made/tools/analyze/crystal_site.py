@@ -1,5 +1,10 @@
 from typing import List
 
+from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
+from .other import get_atomic_coordinates_extremum
+from ..build.slab.builders import SlabWithAdditionalLayersBuilder
+from ...material import Material
+
 from ...utils import get_center_of_coordinates
 from ..analyze import BaseMaterialAnalyzer
 from ..analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
@@ -105,12 +110,30 @@ class VoronoiCrystalSiteAnalyzer(CrystalSiteAnalyzer):
         return closest_interstitial.site.frac_coords.tolist()
 
 
-class NewCrystalSiteAnalyzer(CrystalSiteAnalyzer):
+class AdatomCrystalSiteAnalyzer(CrystalSiteAnalyzer):
     """
     This analyzer is used to find a new crystal site closest to the given coordinate.
-    It is useful for adatom placement in materials where a new site needs to be created.
+    By creating the slab with additional layers and finding the closest site in the new slab.
     """
 
     @property
+    def slab_analyzer(self) -> SlabMaterialAnalyzer:
+        return SlabMaterialAnalyzer(material=self.material)
+
+    @property
     def new_crystal_site_coordinate(self) -> List[float]:
-        pass
+        new_slab = self.get_slab_with_additional_layer()
+        analyzer = CrystalSiteAnalyzer(material=new_slab, coordinate=self.coordinate)
+        return analyzer.closest_site_coordinate
+
+    def get_slab_with_additional_layer(self) -> Material:
+        """
+        Create a slab with an additional layer to find the closest crystal site.
+        This method assumes that the material is a slab and adds one additional layer.
+        """
+        slabs_holder = self.slab_analyzer.get_slab_with_additional_layers_configuration_holder(
+            additional_layers=1, vacuum_thickness=5.0
+        )
+        config = slabs_holder.slab_with_additional_layers
+        slab_with_additional_layer = SlabWithAdditionalLayersBuilder().get_material(config)
+        return slab_with_additional_layer
