@@ -1,11 +1,10 @@
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_atomic_coordinates_extremum
 from mat3ra.made.tools.build.metadata import MaterialMetadata
 from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabWithAdditionalLayersBuilder
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
-from mat3ra.made.tools.build.slab.configurations import SlabWithAdditionalLayersConfiguration
+from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabWithAdditionalLayersConfiguration
 
 
 class SlabMaterialAnalyzer(BaseMaterialAnalyzer):

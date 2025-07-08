@@ -1,9 +1,7 @@
-from typing import List, Union
-
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
-from mat3ra.made.tools.build import BaseConfigurationPydantic
 
 
 class SlabDefectConfiguration(MergeConfiguration):

@@ -1,10 +1,9 @@
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
-from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabWithAdditionalLayersBuilder
-
 from mat3ra.made.tools.build.defect.configuration import SlabDefectConfigurationLegacy
 from mat3ra.made.tools.build.defect.slab.builders import SlabDefectBuilder
 from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
 
 
 def create_slab_defect(slab: Material, isolated_defect: Material, additional_layers: int = 1) -> Material:
@@ -18,13 +17,14 @@ def create_slab_defect(slab: Material, isolated_defect: Material, additional_lay
         Material: The new slab material with additional layers and vacuum if needed.
     """
     analyzer = SlabMaterialAnalyzer(material=slab)
-    slab_with_additional_layers_config, slab_with_original_layers_config = (
-        analyzer.get_slab_with_additional_layers_configurations(
-            additional_layers=additional_layers, vacuum_thickness=5.0
-        )
+    (
+        slab_with_additional_layers_config,
+        slab_with_original_layers_config,
+    ) = analyzer.get_slab_with_additional_layers_configurations(
+        additional_layers=additional_layers, vacuum_thickness=5.0
     )
 
-    slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(slab_with_additional_layers_config)
+    # slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(slab_with_additional_layers_config)
     slab_with_original_layers = SlabBuilder().get_material(slab_with_original_layers_config)
 
     # defect is build with slab_with_additional_layers

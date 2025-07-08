@@ -14,13 +14,12 @@ from .configuration import (
     IslandSlabDefectConfiguration,
 )
 from .enums import PointDefectTypeEnum, AtomPlacementMethodEnum
+from .factories import DefectBuilderFactory
 from .point.helpers import (
     create_point_defect_vacancy,
     create_point_defect_substitution,
     create_point_defect_interstitial,
 )
-
-from .factories import DefectBuilderFactory
 
 
 def get_material_with_defect(configuration, builder_parameters):
@@ -46,6 +45,7 @@ def get_material_with_defect(configuration, builder_parameters):
 
 def create_defect(
     configuration: Union[AdatomSlabPointDefectConfiguration],
+    builder_parameters: Optional[dict] = None,
 ) -> Material:
     """
     Return a material with a selected defect added.
@@ -56,7 +56,7 @@ def create_defect(
     Returns:
         The material with the defect added.
     """
-    return get_material_with_defect(configuration)
+    return get_material_with_defect(configuration, builder_parameters)
 
 
 def create_defects(

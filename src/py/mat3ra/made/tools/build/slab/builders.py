@@ -1,6 +1,6 @@
-from typing import List, Optional, Any, Type, Union
-import math
+from typing import List, Optional, Any, Type
 
+import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
@@ -20,7 +20,6 @@ from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extrem
 from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_box
 from ...operations.core.unary import supercell, translate, strain, edit_cell
 from ...utils import AXIS_TO_INDEX_MAP
-import numpy as np
 
 
 class CrystalLatticePlanesBuilder(BaseSingleBuilder):
@@ -192,7 +191,6 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
         configuration_with_whole_additional_layers: SlabConfiguration,
         fractional_thickness: float,
     ) -> Material:
-
         configuration_with_additional_layers_plus_one = SlabConfiguration.from_parameters(
             material_or_dict=configuration_with_whole_additional_layers.atomic_layers.crystal,
             miller_indices=configuration_with_whole_additional_layers.atomic_layers.miller_indices,

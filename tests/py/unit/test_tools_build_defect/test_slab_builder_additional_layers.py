@@ -1,5 +1,4 @@
 import pytest
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabWithAdditionalLayersBuilder
@@ -19,10 +18,11 @@ def test_analyzer_get_slab_configurations(
     analyzer = SlabMaterialAnalyzer(material=original_slab)
     expected_slab = translate_to_z_level(Material.create(expected_slab_config), "bottom")
 
-    slab_with_additional_layers_config, slab_with_original_layers_config = (
-        analyzer.get_slab_with_additional_layers_configurations(
-            additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
-        )
+    (
+        slab_with_additional_layers_config,
+        slab_with_original_layers_config,
+    ) = analyzer.get_slab_with_additional_layers_configurations(
+        additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
     )
 
     builder_additional = SlabWithAdditionalLayersBuilder()
@@ -53,10 +53,11 @@ def test_analyzer_get_slab_configurations_fractional(
     original_slab = Material.create(original_slab_config)
     analyzer = SlabMaterialAnalyzer(material=original_slab)
 
-    slab_with_additional_layers_config, slab_with_original_layers_config = (
-        analyzer.get_slab_with_additional_layers_configurations(
-            additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
-        )
+    (
+        slab_with_additional_layers_config,
+        slab_with_original_layers_config,
+    ) = analyzer.get_slab_with_additional_layers_configurations(
+        additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
     )
 
     slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(slab_with_additional_layers_config)
