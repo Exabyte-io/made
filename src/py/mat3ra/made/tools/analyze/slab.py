@@ -1,7 +1,6 @@
 from typing import Union
 
 from mat3ra.code.entity import InMemoryEntityPydantic
-
 from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
 from mat3ra.made.tools.build.metadata import MaterialMetadata
 from mat3ra.made.tools.build.slab.builders import SlabWithAdditionalLayersBuilder
@@ -19,7 +18,6 @@ class MatchedCellsSlabConfigurationHolder(InMemoryEntityPydantic):
 
 
 class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
-
     def get_slab_configuration(self) -> SlabConfiguration:
         metadata = MaterialMetadata(**self.material.metadata)
         slab_build_configuration_dict = metadata.build.configuration
@@ -43,7 +41,7 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
         )
 
         slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(configuration_with_added_layers)
-        # Calculate the vacuum thickness needed for the original slab to match the height of the slab with additional layers
+        # Calculate the vacuum needed for the original slab to match the height of the slab with additional layers
         delta_c = slab_with_additional_layers.lattice.c - self.material.lattice.c
 
         vacuum_to_match_height = (

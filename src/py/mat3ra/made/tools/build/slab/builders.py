@@ -1,8 +1,10 @@
 from typing import List, Optional, Any, Type
 
 import numpy as np
+from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
+from mat3ra.made.basis.coordinates import Coordinates
 from mat3ra.made.material import Material
 from .configurations import (
     CrystalLatticePlanesConfiguration,
@@ -16,16 +18,12 @@ from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
 from ..stack.builders import Stack2ComponentsBuilder
 from ..vacuum.builders import VacuumBuilder
-from ..vacuum.configuration import VacuumConfiguration
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
 from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_box
 from ...operations.core.binary import stack
 from ...operations.core.unary import supercell, translate, strain, edit_cell
 from ...utils import AXIS_TO_INDEX_MAP
-
-from mat3ra.code.array_with_ids import ArrayWithIds
-from mat3ra.made.basis.coordinates import Coordinates
 
 
 class CrystalLatticePlanesBuilder(BaseSingleBuilder):
@@ -136,7 +134,7 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
         direction_str = direction.value
         axis_index = AXIS_TO_INDEX_MAP[direction_str]
 
-        max_frac = get_atomic_coordinates_extremum(material, "max", direction_str, use_cartesian_coordinates=False)
+        max_frac = get_atomic_coordinates_extremum(material, "max", direction_str, False)
         current_vectors = material.lattice.vector_arrays
         current_vector = np.array(current_vectors[axis_index])
         current_length = np.linalg.norm(current_vector)

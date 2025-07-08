@@ -389,7 +389,7 @@ SI_SLAB_001_ADDED_LAYER = {
             {"id": 20, "value": "Si"},
             {"id": 21, "value": "Si"},
             {"id": 22, "value": "Si"},
-            {"id": 23, "value": "Si"}
+            {"id": 23, "value": "Si"},
         ],
         "coordinates": [
             {"id": 0, "value": [0.5, 0.0, 0.191606953]},
@@ -415,11 +415,11 @@ SI_SLAB_001_ADDED_LAYER = {
             {"id": 20, "value": [0.0, 0.0, 0.574818859]},
             {"id": 21, "value": [0.75, 0.25, 0.510950207]},
             {"id": 22, "value": [0.0, 0.5, 0.70255616]},
-            {"id": 23, "value": [0.75, 0.75, 0.638687509]}
+            {"id": 23, "value": [0.75, 0.75, 0.638687509]},
         ],
         "units": "crystal",
         "labels": [],
-        "constraints": []
+        "constraints": [],
     },
     "lattice": {
         "a": 5.468763846,
@@ -429,8 +429,8 @@ SI_SLAB_001_ADDED_LAYER = {
         "beta": 90.0,
         "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
-        "type": "TRI"
-    }
+        "type": "TRI",
+    },
 }
 
 SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
@@ -464,7 +464,7 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
             {"id": 24, "value": "Si"},
             {"id": 25, "value": "Si"},
             {"id": 26, "value": "Si"},
-            {"id": 27, "value": "Si"}
+            {"id": 27, "value": "Si"},
         ],
         "coordinates": [
             {"id": 0, "value": [0.5, 0.0, 0.187501]},
@@ -494,11 +494,11 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
             {"id": 24, "value": [0.5, 0.5, 0.8125005]},
             {"id": 25, "value": [0.25, 0.75, 0.7500005]},
             {"id": 26, "value": [0.0, 0.0, 0.8125005]},
-            {"id": 27, "value": [0.75, 0.25, 0.7500005]}
+            {"id": 27, "value": [0.75, 0.25, 0.7500005]},
         ],
         "units": "crystal",
         "labels": [],
-        "constraints": []
+        "constraints": [],
     },
     "lattice": {
         "a": 5.468763846,
@@ -508,8 +508,8 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
         "beta": 90.0,
         "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
-        "type": "TRI"
-    }
+        "type": "TRI",
+    },
 }
 
 SLAB_SrTiO3_011_TERMINATION_O2 = {
