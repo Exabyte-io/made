@@ -1,3 +1,4 @@
+import copy
 from typing import Final, Tuple
 
 import numpy as np
@@ -30,7 +31,7 @@ from .fixtures.generated.fixtures import BULK_SrTiO3
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
-SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA = SI_CONVENTIONAL_SLAB_001.copy()
+SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA = copy.deepcopy(SI_CONVENTIONAL_SLAB_001)
 SI_CONVENTIONAL_SLAB_001_NO_BUILD_METADATA["metadata"].pop("build", None)
 
 PARAMS_SI_PRIMITIVE_SLAB_001: Final = (
