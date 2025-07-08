@@ -21,6 +21,9 @@ from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_box
 from ...operations.core.unary import supercell, translate, strain, edit_cell
 from ...utils import AXIS_TO_INDEX_MAP
 
+from mat3ra.code.array_with_ids import ArrayWithIds
+from mat3ra.made.basis.coordinates import Coordinates
+
 
 class CrystalLatticePlanesBuilder(BaseSingleBuilder):
     _PostProcessParametersType: Any = None
@@ -222,3 +225,13 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
         )
 
         return material_with_fractional_layer
+
+    def _post_process(self, item: Material, post_process_parameters: None) -> Material:
+        item = super()._post_process(item, post_process_parameters)
+        item = translate_to_z_level(item, "bottom")
+
+        # reset ids to be consecutive
+        item.basis.elements = ArrayWithIds.from_values(values=item.basis.elements.values)
+        item.basis.coordinates = Coordinates.from_values(values=item.basis.coordinates.values)
+
+        return item
