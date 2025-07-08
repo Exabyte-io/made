@@ -153,71 +153,73 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
     _DefaultBuildParameters = SlabBuilderParameters()
     _ConfigurationType = SlabWithAdditionalLayersConfiguration
 
-    def _generate_from_configuration(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
-        """
-        Generate material from the configuration.
-
-        Args:
-            configuration: The configuration with additional layers.
-
-        Returns:
-            Material: The material with additional layers.
-        """
-        original_material = SlabBuilder().get_material(configuration)
-        configuration_with_additional_layers = SlabConfiguration.from_parameters(
-            material_or_dict=configuration.atomic_layers.crystal,
-            miller_indices=configuration.atomic_layers.miller_indices,
-            number_of_layers=configuration.atomic_layers.number_of_repetitions
-            + configuration.number_of_additional_layers,
-            termination_formula=configuration.atomic_layers.termination_top.formula,
-            vacuum=configuration.vacuum_configuration.size,
-        )
-        material_with_additional_layers = SlabBuilder().get_material(configuration_with_additional_layers)
-
-        if isinstance(configuration.number_of_additional_layers, float):
-            whole_layers = int(configuration.number_of_additional_layers)
-            fractional_part = configuration.number_of_additional_layers - whole_layers
-
-            if fractional_part > 0.0:
-                material_with_additional_layers = self.add_fractional_layer(
-                    original_material, material_with_additional_layers, whole_layers, fractional_part
-                )
-
-        return material_with_additional_layers
-
     def _generate(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
         return self._generate_from_configuration(configuration)
 
+    def _generate_from_configuration(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
+        whole_number_of_additional_layers = int(configuration.number_of_additional_layers)
+        whole_number_of_new_layers = (
+            configuration.atomic_layers.number_of_repetitions + whole_number_of_additional_layers
+        )
+        fractional_number_of_additional_layers = (
+            (configuration.number_of_additional_layers - whole_number_of_additional_layers)
+            if isinstance(configuration.number_of_additional_layers, float)
+            else 0
+        )
+
+        configuration_with_whole_additional_layers = SlabConfiguration.from_parameters(
+            material_or_dict=configuration.atomic_layers.crystal,
+            miller_indices=configuration.atomic_layers.miller_indices,
+            number_of_layers=whole_number_of_new_layers,
+            termination_formula=configuration.atomic_layers.termination_top.formula,
+            vacuum=configuration.vacuum_configuration.size,
+        )
+        material_with_whole_additional_layers = SlabBuilder().get_material(configuration_with_whole_additional_layers)
+
+        if fractional_number_of_additional_layers > 0:
+            material_with_additional_layers = self.add_fractional_layer(
+                material_with_whole_additional_layers,
+                configuration_with_whole_additional_layers,
+                fractional_number_of_additional_layers,
+            )
+            return material_with_additional_layers
+
+        return material_with_whole_additional_layers
+
     def add_fractional_layer(
         self,
-        original_material: Material,
-        material_with_layers: Material,
-        whole_layers: int,
+        material_with_whole_additional_layers: Material,
+        configuration_with_whole_additional_layers: SlabConfiguration,
         fractional_thickness: float,
     ) -> Material:
-        """
-        Adds a fractional layer to the material.
 
-        Args:
-            original_material: The original material.
-            material_with_layers: The material with whole layers added.
-            whole_layers: The number of whole layers already added.
-            fractional_thickness: The fractional thickness to add.
+        configuration_with_additional_layers_plus_one = SlabConfiguration.from_parameters(
+            material_or_dict=configuration_with_whole_additional_layers.atomic_layers.crystal,
+            miller_indices=configuration_with_whole_additional_layers.atomic_layers.miller_indices,
+            number_of_layers=configuration_with_whole_additional_layers.atomic_layers.number_of_repetitions + 1,
+            termination_formula=configuration_with_whole_additional_layers.atomic_layers.termination_top.formula,
+            vacuum=configuration_with_whole_additional_layers.vacuum_configuration.size,
+        )
+        material_with_additional_layers_plus_one = SlabBuilder().get_material(
+            configuration_with_additional_layers_plus_one
+        )
 
-        Returns:
-            A new Material instance with the fractional layer added.
-        """
+        original_max_z = get_atomic_coordinates_extremum(
+            material_with_whole_additional_layers, "max", "z", use_cartesian_coordinates=True
+        )
+        new_max_z = get_atomic_coordinates_extremum(
+            material_with_additional_layers_plus_one, "max", "z", use_cartesian_coordinates=True
+        )
 
-        new_c = material_with_layers.lattice.c
-        layer_height = (new_c - original_material.lattice.c) / (whole_layers + 1)
-        original_max_z = get_atomic_coordinates_extremum(original_material, "max", "z", use_cartesian_coordinates=True)
-        added_layers_max_z = original_max_z + (whole_layers + fractional_thickness) * layer_height
-        added_layers_max_z_crystal = material_with_layers.basis.cell.convert_point_to_crystal(
+        layer_height = new_max_z - original_max_z
+        delta = 0.05  # to allow for atoms at the edge of the cut to be included in the layer
+        added_layers_max_z = original_max_z + fractional_thickness * layer_height + delta
+        added_layers_max_z_crystal = material_with_additional_layers_plus_one.basis.cell.convert_point_to_crystal(
             [0, 0, added_layers_max_z]
         )[2]
 
         material_with_fractional_layer = filter_by_box(
-            material=material_with_layers,
+            material=material_with_additional_layers_plus_one,
             max_coordinate=[1, 1, added_layers_max_z_crystal],
         )
 

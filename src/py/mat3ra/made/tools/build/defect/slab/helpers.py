@@ -1,5 +1,3 @@
-from mat3ra.made.tools.build.slab.configurations import SlabWithAdditionalLayersConfiguration
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabWithAdditionalLayersBuilder
