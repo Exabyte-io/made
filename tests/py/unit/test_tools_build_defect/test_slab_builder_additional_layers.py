@@ -33,13 +33,10 @@ def test_analyzer_get_slab_configurations(
         additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
     )
 
-    builder_additional = SlabWithAdditionalLayersBuilder()
-    builder_original = SlabBuilder()
-    slab_with_additional_layers = builder_additional.get_material(slab_with_additional_layers_config)
-    slab_with_original_layers_adjusted = builder_original.get_material(slab_with_original_layers_config)
+    slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(slab_with_additional_layers_config)
+    slab_with_original_layers_adjusted = SlabBuilder().get_material(slab_with_original_layers_config)
 
     assert_two_entities_deep_almost_equal(slab_with_additional_layers, expected_slab, atol=1e-6)
     assert_two_entities_deep_almost_equal(
         slab_with_original_layers_adjusted.lattice.vector_arrays, expected_slab.lattice.vector_arrays
     )
-
