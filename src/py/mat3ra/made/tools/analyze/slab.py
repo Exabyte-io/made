@@ -3,6 +3,7 @@ from typing import Union, Tuple
 from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_atomic_coordinates_extremum
 from mat3ra.made.tools.build.metadata import MaterialMetadata
+from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabWithAdditionalLayersBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.made.tools.build.slab.configurations import SlabWithAdditionalLayersConfiguration
 
@@ -48,22 +49,19 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
             termination_formula=termination_formula,
             vacuum=adjusted_vacuum,
         )
-
-        from mat3ra.made.tools.build.slab.builders import SlabBuilder
-
-        builder = SlabBuilder()
-        material_with_additional_layers = builder.get_material(configuration_with_added_layers)
-        target_c_vector = material_with_additional_layers.lattice.c
-
-        original_material = builder.get_material(
-            SlabConfiguration.from_parameters(
-                material_or_dict=crystal,
-                miller_indices=miller_indices,
-                number_of_layers=original_layers,
-                termination_formula=termination_formula,
-                vacuum=0.0,
-            )
+        configuration_original = SlabConfiguration.from_parameters(
+            material_or_dict=crystal,
+            miller_indices=miller_indices,
+            number_of_layers=original_layers,
+            termination_formula=termination_formula,
+            vacuum=0.0,
         )
+
+        material_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(
+            configuration_with_added_layers
+        )
+        target_c_vector = material_with_additional_layers.lattice.c
+        original_material = SlabBuilder().get_material(configuration_original)
 
         current_c = original_material.lattice.c
         additional_vacuum_needed = target_c_vector - current_c

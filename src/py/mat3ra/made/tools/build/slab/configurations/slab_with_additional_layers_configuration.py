@@ -33,15 +33,13 @@ class SlabWithAdditionalLayersConfiguration(SlabConfigurationSchema, StackConfig
         termination_formula: str = None,
         vacuum: float = 10.0,
     ) -> "SlabWithAdditionalLayersConfiguration":
-        # Create the base slab configuration
         base_slab_configuration = SlabConfiguration.from_parameters(
             material_or_dict=material_or_dict,
             miller_indices=miller_indices,
-            number_of_layers=number_of_layers + int(number_of_additional_layers),
+            number_of_layers=number_of_layers,
             termination_formula=termination_formula,
             vacuum=vacuum,
         )
-        # Return the new configuration with additional layers
         return cls(
             stack_components=base_slab_configuration.stack_components,
             direction=base_slab_configuration.direction,

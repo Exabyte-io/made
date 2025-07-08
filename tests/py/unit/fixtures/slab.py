@@ -510,35 +510,6 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
     },
-    "isNonPeriodic": False,
-    "metadata": {
-        "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-                "stack_components": [
-                    {
-                        "crystal": BULK_Si_CONVENTIONAL,
-                        "miller_indices": [0, 0, 1],
-                        "use_conventional_cell": True,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "number_of_repetitions": 4,
-                    },
-                    {"direction": "z", "size": 5.0, "type": "VacuumConfiguration"},
-                ],
-                "direction": "z",
-            },
-            "build_parameters": {
-                "min_vacuum_size": 0,
-                "in_unit_planes": True,
-                "reorient_lattice": True,
-                "symmetrize": True,
-                "make_primitive": False,
-                "use_orthogonal_c": True,
-            },
-        },
-    },
 }
 
 SLAB_SrTiO3_011_TERMINATION_O2 = {

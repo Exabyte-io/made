@@ -148,7 +148,7 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
         return new_material
 
 
-class SlabWithAdditionalLayersBuilder(BaseSingleBuilder):
+class SlabWithAdditionalLayersBuilder(SlabBuilder):
     _BuildParametersType = SlabBuilderParameters
     _DefaultBuildParameters = SlabBuilderParameters()
     _ConfigurationType = SlabWithAdditionalLayersConfiguration
@@ -164,7 +164,15 @@ class SlabWithAdditionalLayersBuilder(BaseSingleBuilder):
             Material: The material with additional layers.
         """
         original_material = SlabBuilder().get_material(configuration)
-        material_with_additional_layers = SlabBuilder().get_material(configuration)
+        configuration_with_additional_layers = SlabConfiguration.from_parameters(
+            material_or_dict=configuration.atomic_layers.crystal,
+            miller_indices=configuration.atomic_layers.miller_indices,
+            number_of_layers=configuration.atomic_layers.number_of_repetitions
+            + configuration.number_of_additional_layers,
+            termination_formula=configuration.atomic_layers.termination_top.formula,
+            vacuum=configuration.vacuum_configuration.size,
+        )
+        material_with_additional_layers = SlabBuilder().get_material(configuration_with_additional_layers)
 
         if isinstance(configuration.number_of_additional_layers, float):
             whole_layers = int(configuration.number_of_additional_layers)
