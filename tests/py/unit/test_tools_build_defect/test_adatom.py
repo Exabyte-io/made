@@ -7,10 +7,11 @@ from mat3ra.made.tools.build.defect import EquidistantAdatomSlabDefectBuilder, c
 from mat3ra.made.tools.build.defect.builders import CrystalSiteAdatomSlabDefectBuilder
 from mat3ra.made.tools.build.defect.configuration import AdatomSlabPointDefectConfiguration
 from mat3ra.utils import assertion as assertion_utils
+
+from mat3ra.made.tools.build.defect.slab.helpers import create_adatom_defect
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
 
-@pytest.mark.skip(reason="we'll fix before epic-7623 is merged")
 @pytest.mark.parametrize(
     "crystal_config, position_on_surface, distance_z, chemical_element, expected_last_element, expected_last_coord",
     [
@@ -28,14 +29,9 @@ def test_create_adatom(
     crystal_config, position_on_surface, distance_z, chemical_element, expected_last_element, expected_last_coord
 ):
     # Adatom of Si at 0.5, 0.5 position
-    crystal = Material.create(crystal_config)
-    configuration = AdatomSlabPointDefectConfiguration(
-        crystal=crystal,
-        position_on_surface=position_on_surface,
-        distance_z=distance_z,
-        chemical_element=chemical_element,
-    )
-    defect = create_slab_defect(configuration=configuration, builder=None)
+    slab = Material.create(crystal_config)
+
+    defect = create_adatom_defect(slab, position_on_surface, "new_crystal_site", chemical_element, distance_z)
 
     assert defect.basis.elements.values[-1] == expected_last_element
     assertion_utils.assert_deep_almost_equal(expected_last_coord, defect.basis.coordinates.values[-1])
