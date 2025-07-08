@@ -22,7 +22,7 @@ def create_slab_defect(
     (
         slab_with_additional_layers_config,
         slab_with_original_layers_config,
-    ) = analyzer.get_slab_with_additional_layers_configurations(
+    ) = analyzer.get_slab_with_additional_layers_configuration_holder(
         additional_layers=additional_layers, vacuum_thickness=vacuum_thickness
     )
 

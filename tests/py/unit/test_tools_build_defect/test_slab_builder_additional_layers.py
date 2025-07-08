@@ -26,15 +26,14 @@ def test_analyzer_get_slab_configurations(
     analyzer = SlabMaterialAnalyzer(material=original_slab)
     expected_slab = translate_to_z_level(Material.create(expected_slab_config), "bottom")
 
-    (
-        slab_with_additional_layers_config,
-        slab_with_original_layers_config,
-    ) = analyzer.get_slab_with_additional_layers_configurations(
+    slabs_holder = analyzer.get_slab_with_additional_layers_configuration_holder(
         additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
     )
 
-    slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(slab_with_additional_layers_config)
-    slab_with_original_layers_adjusted = SlabBuilder().get_material(slab_with_original_layers_config)
+    slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(
+        slabs_holder.slab_with_additional_layers
+    )
+    slab_with_original_layers_adjusted = SlabBuilder().get_material(slabs_holder.slab_with_adjusted_vacuum)
 
     assert_two_entities_deep_almost_equal(slab_with_additional_layers, expected_slab, atol=1e-6)
     assert_two_entities_deep_almost_equal(
