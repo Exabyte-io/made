@@ -45,3 +45,8 @@ class SlabWithAdditionalLayersConfiguration(SlabConfigurationSchema, StackConfig
             direction=base_slab_configuration.direction,
             number_of_additional_layers=number_of_additional_layers,
         )
+
+    def to_parameters(self) -> dict:
+        base = super().to_parameters() if hasattr(super(), "to_parameters") else {}
+        base["number_of_additional_layers"] = getattr(self, "number_of_additional_layers", 1)
+        return base

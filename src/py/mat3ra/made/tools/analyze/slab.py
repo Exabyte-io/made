@@ -35,24 +35,13 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
     ) -> MatchedCellsSlabConfigurationHolder:
 
         slab_configuration = self.get_slab_configuration()
-        atomic_layers = slab_configuration.atomic_layers
-        original_layers = atomic_layers.number_of_repetitions
-        crystal = atomic_layers.crystal
-        miller_indices = atomic_layers.miller_indices
-        termination_top = atomic_layers.termination_top
-
-        if isinstance(termination_top, dict):
-            termination_formula = termination_top.get("chemical_elements")
-        else:
-            termination_formula = termination_top.formula
 
         configuration_with_added_layers = SlabWithAdditionalLayersConfiguration.from_parameters(
-            material_or_dict=crystal,
-            miller_indices=miller_indices,
-            number_of_layers=original_layers,
-            number_of_additional_layers=additional_layers,
-            termination_formula=termination_formula,
-            vacuum=vacuum_thickness,
+            **{
+                **slab_configuration.to_parameters(),
+                "number_of_additional_layers": additional_layers,
+                "vacuum": vacuum_thickness,
+            }
         )
 
         slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(configuration_with_added_layers)
@@ -67,11 +56,10 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
         )
 
         configuration_original_with_adjusted_vacuum = SlabConfiguration.from_parameters(
-            material_or_dict=crystal,
-            miller_indices=miller_indices,
-            number_of_layers=original_layers,
-            termination_formula=termination_formula,
-            vacuum=vacuum_to_match_height,
+            **{
+                **slab_configuration.to_parameters(),
+                "vacuum": vacuum_to_match_height,
+            }
         )
         return MatchedCellsSlabConfigurationHolder(
             slab_with_additional_layers=configuration_with_added_layers,

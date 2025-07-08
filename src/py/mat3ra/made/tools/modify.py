@@ -128,7 +128,7 @@ def wrap_to_unit_cell(material: Material) -> Material:
     return Material.create(from_ase(atoms))
 
 
-def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> Material:
+def filter_by_ids(material: Material, ids: List[int], invert: bool = False, reset_ids: bool = False) -> Material:
     """
     Filter out only atoms corresponding to the ids.
 
@@ -136,6 +136,7 @@ def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> M
         material (Material): The material object to filter.
         ids (List[int]): The ids to filter by.
         invert (bool): Whether to invert the selection.
+        reset_ids (bool): Whether to reset the ids of the filtered atoms (to start from 0).
 
     Returns:
         Material: The filtered material object.
