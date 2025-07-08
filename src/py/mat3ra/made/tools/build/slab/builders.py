@@ -173,16 +173,25 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
         )
 
         material_with_whole_additional_layers = SlabBuilder().get_material(configuration_with_whole_additional_layers)
-        fractional_additional_layer_material = self.get_fractional_layer_slab(configuration)
 
-        vacuum_configuration = configuration.vacuum_configuration
-        vacuum_configuration.crystal = material_with_whole_additional_layers
+        stack_components = [material_with_whole_additional_layers]
 
-        vacuum = VacuumBuilder().get_material(vacuum_configuration)
+        fraction_layer = configuration.number_of_additional_layers - int(configuration.number_of_additional_layers)
 
-        material = stack(
-            [material_with_whole_additional_layers, fractional_additional_layer_material, vacuum], AxisEnum.z
-        )
+        if fraction_layer > 0:
+            fractional_additional_layer_material = self.get_fractional_layer_slab(configuration)
+            stack_components.append(fractional_additional_layer_material)
+
+        if configuration.vacuum_configuration.size > 0:
+            vacuum_configuration = configuration.vacuum_configuration
+            vacuum_configuration.crystal = material_with_whole_additional_layers
+            vacuum = VacuumBuilder().get_material(vacuum_configuration)
+            stack_components.append(vacuum)
+
+        if len(stack_components) == 1:
+            material = stack_components[0]
+        else:
+            material = stack(stack_components, AxisEnum.z)
         return material
 
     def get_fractional_layer_slab(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
