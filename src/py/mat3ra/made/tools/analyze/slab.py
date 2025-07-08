@@ -29,17 +29,7 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
         Returns:
             (SlabWithAdditionalLayersConfiguration, SlabConfiguration)
         """
-        slab_configuration = self.get_slab_configuration()
-        atomic_layers = slab_configuration.atomic_layers
-        original_layers = atomic_layers.number_of_repetitions
-        miller_indices = atomic_layers.miller_indices
-        termination_top = atomic_layers.termination_top
-        crystal = atomic_layers.crystal
-
-        if isinstance(termination_top, dict):
-            termination_formula = termination_top.get("chemical_elements")
-        else:
-            termination_formula = termination_top.formula
+        crystal, miller_indices, original_layers, termination_formula = self._get_slab_parameters()
 
         # Calculate the vacuum thickness needed for the original slab to match the height of the slab with additional layers
         vacuum_to_match_height = self._vacuum_thickness_for_original_slab(
@@ -65,20 +55,54 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
 
         return (configuration_with_added_layers, configuration_original_with_adjusted_vacuum)
 
+    def _get_slab_parameters(self):
+        """
+        Extract common slab parameters from the current slab configuration.
+        Returns:
+            Tuple of (crystal, miller_indices, original_layers, termination_formula)
+        """
+        slab_configuration = self.get_slab_configuration()
+        atomic_layers = slab_configuration.atomic_layers
+        original_layers = atomic_layers.number_of_repetitions
+        crystal = atomic_layers.crystal
+        miller_indices = atomic_layers.miller_indices
+        termination_top = atomic_layers.termination_top
+
+        if isinstance(termination_top, dict):
+            termination_formula = termination_top.get("chemical_elements")
+        else:
+            termination_formula = termination_top.formula
+
+        return crystal, miller_indices, original_layers, termination_formula
+
     def _vacuum_thickness_for_original_slab(
         self, additional_layers: Union[int, float] = 1, vacuum_thickness: float = 5.0
     ) -> float:
         """
         Calculate the vacuum thickness needed for the original slab to match the height of the slab with additional layers.
-
-        The approach is to calculate the height that will be added by additional layers.
-        Each additional layer adds exactly the lattice parameter 'a' to the c vector.
+        This is done by building both slabs and matching their c lattice parameter.
         """
-        slab_configuration = self.get_slab_configuration()
+        crystal, miller_indices, original_layers, termination_formula = self._get_slab_parameters()
 
-        slab = SlabBuilder().get_material(slab_configuration)
-        lattice_parameter_a = slab.lattice.vector_arrays[0][0]
+        original_slab_config = SlabConfiguration.from_parameters(
+            material_or_dict=crystal,
+            miller_indices=miller_indices,
+            number_of_layers=original_layers,
+            termination_formula=termination_formula,
+            vacuum=0,
+        )
+        original_slab = SlabBuilder().get_material(original_slab_config)
+        c_original = original_slab.lattice.vector_arrays[2][2]
 
-        additional_height = lattice_parameter_a * additional_layers
+        slab_with_additional_layers_config = SlabWithAdditionalLayersConfiguration.from_parameters(
+            material_or_dict=crystal,
+            miller_indices=miller_indices,
+            number_of_layers=original_layers,
+            number_of_additional_layers=additional_layers,
+            termination_formula=termination_formula,
+            vacuum=vacuum_thickness,
+        )
+        slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(slab_with_additional_layers_config)
+        c_with_additional = slab_with_additional_layers.lattice.vector_arrays[2][2]
 
-        return additional_height + vacuum_thickness
+        return c_with_additional - c_original
