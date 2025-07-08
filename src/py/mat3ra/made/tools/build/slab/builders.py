@@ -161,7 +161,29 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
         whole_number_of_total_layers = (
             configuration.atomic_layers.number_of_repetitions + whole_number_of_additional_layers
         )
+        fractional_number_of_layers = configuration.number_of_additional_layers - whole_number_of_additional_layers
 
+        material_with_whole_additional_layers = self._get_material_with_whole_additional_layers(
+            configuration, whole_number_of_total_layers
+        )
+
+        if fractional_number_of_layers > 0:
+            fractional_additional_layer_material = self.get_fractional_slab_material(configuration)
+            material = stack([material_with_whole_additional_layers, fractional_additional_layer_material], AxisEnum.z)
+        else:
+            material = material_with_whole_additional_layers
+
+        if configuration.vacuum_configuration.size > 0:
+            vacuum_configuration = configuration.vacuum_configuration
+            vacuum_configuration.crystal = material
+            vacuum = VacuumBuilder().get_material(vacuum_configuration)
+            material = stack([material, vacuum], AxisEnum.z)
+
+        return material
+
+    def _get_material_with_whole_additional_layers(
+        self, configuration: SlabWithAdditionalLayersConfiguration, whole_number_of_total_layers
+    ) -> Material:
         configuration_with_whole_additional_layers = SlabConfiguration.from_parameters(
             material_or_dict=configuration.atomic_layers.crystal,
             miller_indices=configuration.atomic_layers.miller_indices,
@@ -169,30 +191,10 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
             termination_formula=configuration.atomic_layers.termination_top.formula,
             vacuum=0,
         )
-
         material_with_whole_additional_layers = SlabBuilder().get_material(configuration_with_whole_additional_layers)
+        return material_with_whole_additional_layers
 
-        stack_components = [material_with_whole_additional_layers]
-
-        fraction_layer = configuration.number_of_additional_layers - int(configuration.number_of_additional_layers)
-
-        if fraction_layer > 0:
-            fractional_additional_layer_material = self.get_fractional_layer_slab(configuration)
-            stack_components.append(fractional_additional_layer_material)
-
-        if configuration.vacuum_configuration.size > 0:
-            vacuum_configuration = configuration.vacuum_configuration
-            vacuum_configuration.crystal = material_with_whole_additional_layers
-            vacuum = VacuumBuilder().get_material(vacuum_configuration)
-            stack_components.append(vacuum)
-
-        if len(stack_components) == 1:
-            material = stack_components[0]
-        else:
-            material = stack(stack_components, AxisEnum.z)
-        return material
-
-    def get_fractional_layer_slab(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
+    def get_fractional_slab_material(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
         one_layer_slab_configuration = SlabConfiguration.from_parameters(
             material_or_dict=configuration.atomic_layers.crystal,
             miller_indices=configuration.atomic_layers.miller_indices,
@@ -206,13 +208,3 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
         fraction_of_slab = filter_by_box(one_layer_slab, max_coordinate=[1, 1, fraction_layer], reset_ids=True)
 
         return fraction_of_slab
-
-    def _post_process(self, item: Material, post_process_parameters: None) -> Material:
-        item = super()._post_process(item, post_process_parameters)
-        item = translate_to_z_level(item, "bottom")
-
-        # reset ids to be consecutive
-        item.basis.elements = ArrayWithIds.from_values(values=item.basis.elements.values)
-        item.basis.coordinates = Coordinates.from_values(values=item.basis.coordinates.values)
-
-        return item
