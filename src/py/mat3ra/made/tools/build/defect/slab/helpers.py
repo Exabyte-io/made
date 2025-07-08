@@ -15,7 +15,7 @@ from mat3ra.made.tools.build.defect.point.builders import PointDefectBuilder, Po
 from mat3ra.made.tools.build.defect.point.configuration import PointDefectSite, PointDefectConfiguration
 from mat3ra.made.tools.build.defect.slab.builders import SlabDefectBuilder
 from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
+from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabWithAdditionalLayersBuilder
 
 
 def create_slab_defect(
@@ -59,17 +59,19 @@ def create_adatom_defect(
     element: Optional[str] = None,
     added_vacuum: float = 5.0,
 ) -> Material:
-    max_z = get_atomic_coordinates_extremum(slab, "max", "z", use_cartesian_coordinates=True)
-    coordinate = [*position_on_surface, max_z + distance_z]
+    max_z = get_atomic_coordinates_extremum(slab, "max", "z")
+    distance_z_crystal = slab.basis.cell.convert_point_to_crystal([0, 0, distance_z])[2]
+    coordinate = [*position_on_surface, max_z + distance_z_crystal]
     if placement_method == AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE:
         analyzer = AdatomCrystalSiteAnalyzer(material=slab, coordinate=coordinate)
         resolved_coordinate = analyzer.new_crystal_site_coordinate
-        slab_config = (
-            SlabMaterialAnalyzer(material=slab)
-            .get_slab_with_additional_layers_configuration_holder(additional_layers=1, vacuum_thickness=added_vacuum)
-            .slab_with_adjusted_vacuum
+        slabs_config_holder = SlabMaterialAnalyzer(material=slab).get_slab_with_additional_layers_configuration_holder(
+            additional_layers=1, vacuum_thickness=added_vacuum
         )
-        slab = SlabBuilder().get_material(slab_config)
+        slab = SlabBuilder().get_material(slabs_config_holder.slab_with_adjusted_vacuum)
+        slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(
+            slabs_config_holder.slab_with_additional_layers
+        )
 
     elif placement_method == AdatomPlacementMethodEnum.EQUIDISTANT:
         crystal_site_analyzer = CrystalSiteAnalyzer(material=slab, coordinate=coordinate)
