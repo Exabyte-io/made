@@ -15,9 +15,12 @@ from .configurations.slab_configuration import SlabConfiguration
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
 from ..stack.builders import Stack2ComponentsBuilder
+from ..vacuum.builders import VacuumBuilder
+from ..vacuum.configuration import VacuumConfiguration
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
 from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_box
+from ...operations.core.binary import stack
 from ...operations.core.unary import supercell, translate, strain, edit_cell
 from ...utils import AXIS_TO_INDEX_MAP
 
@@ -156,75 +159,46 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
     _ConfigurationType = SlabWithAdditionalLayersConfiguration
 
     def _generate(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
-        return self._generate_from_configuration(configuration)
-
-    def _generate_from_configuration(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
         whole_number_of_additional_layers = int(configuration.number_of_additional_layers)
-        whole_number_of_new_layers = (
+        whole_number_of_total_layers = (
             configuration.atomic_layers.number_of_repetitions + whole_number_of_additional_layers
-        )
-        fractional_number_of_additional_layers = (
-            (configuration.number_of_additional_layers - whole_number_of_additional_layers)
-            if isinstance(configuration.number_of_additional_layers, float)
-            else 0
         )
 
         configuration_with_whole_additional_layers = SlabConfiguration.from_parameters(
             material_or_dict=configuration.atomic_layers.crystal,
             miller_indices=configuration.atomic_layers.miller_indices,
-            number_of_layers=whole_number_of_new_layers,
+            number_of_layers=whole_number_of_total_layers,
             termination_formula=configuration.atomic_layers.termination_top.formula,
-            vacuum=configuration.vacuum_configuration.size,
+            vacuum=0,
         )
+
         material_with_whole_additional_layers = SlabBuilder().get_material(configuration_with_whole_additional_layers)
+        fractional_additional_layer_material = self.get_fractional_layer_slab(configuration)
 
-        if fractional_number_of_additional_layers > 0:
-            material_with_additional_layers = self.add_fractional_layer(
-                material_with_whole_additional_layers,
-                configuration_with_whole_additional_layers,
-                fractional_number_of_additional_layers,
-            )
-            return material_with_additional_layers
+        vacuum_configuration = configuration.vacuum_configuration
+        vacuum_configuration.crystal = material_with_whole_additional_layers
 
-        return material_with_whole_additional_layers
+        vacuum = VacuumBuilder().get_material(vacuum_configuration)
 
-    def add_fractional_layer(
-        self,
-        material_with_whole_additional_layers: Material,
-        configuration_with_whole_additional_layers: SlabConfiguration,
-        fractional_thickness: float,
-    ) -> Material:
-        configuration_with_additional_layers_plus_one = SlabConfiguration.from_parameters(
-            material_or_dict=configuration_with_whole_additional_layers.atomic_layers.crystal,
-            miller_indices=configuration_with_whole_additional_layers.atomic_layers.miller_indices,
-            number_of_layers=configuration_with_whole_additional_layers.atomic_layers.number_of_repetitions + 1,
-            termination_formula=configuration_with_whole_additional_layers.atomic_layers.termination_top.formula,
-            vacuum=configuration_with_whole_additional_layers.vacuum_configuration.size,
+        material = stack(
+            [material_with_whole_additional_layers, fractional_additional_layer_material, vacuum], AxisEnum.z
         )
-        material_with_additional_layers_plus_one = SlabBuilder().get_material(
-            configuration_with_additional_layers_plus_one
+        return material
+
+    def get_fractional_layer_slab(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
+        one_layer_slab_configuration = SlabConfiguration.from_parameters(
+            material_or_dict=configuration.atomic_layers.crystal,
+            miller_indices=configuration.atomic_layers.miller_indices,
+            number_of_layers=1,
+            termination_formula=configuration.atomic_layers.termination_top.formula,
+            vacuum=0,
         )
 
-        original_max_z = get_atomic_coordinates_extremum(
-            material_with_whole_additional_layers, "max", "z", use_cartesian_coordinates=True
-        )
-        new_max_z = get_atomic_coordinates_extremum(
-            material_with_additional_layers_plus_one, "max", "z", use_cartesian_coordinates=True
-        )
+        one_layer_slab = SlabBuilder().get_material(one_layer_slab_configuration)
+        fraction_layer = configuration.number_of_additional_layers - int(configuration.number_of_additional_layers)
+        fraction_of_slab = filter_by_box(one_layer_slab, max_coordinate=[1, 1, fraction_layer])
 
-        layer_height = new_max_z - original_max_z
-        delta = 0.05  # to allow for atoms at the edge of the cut to be included in the layer
-        added_layers_max_z = original_max_z + fractional_thickness * layer_height + delta
-        added_layers_max_z_crystal = material_with_additional_layers_plus_one.basis.cell.convert_point_to_crystal(
-            [0, 0, added_layers_max_z]
-        )[2]
-
-        material_with_fractional_layer = filter_by_box(
-            material=material_with_additional_layers_plus_one,
-            max_coordinate=[1, 1, added_layers_max_z_crystal],
-        )
-
-        return material_with_fractional_layer
+        return fraction_of_slab
 
     def _post_process(self, item: Material, post_process_parameters: None) -> Material:
         item = super()._post_process(item, post_process_parameters)
