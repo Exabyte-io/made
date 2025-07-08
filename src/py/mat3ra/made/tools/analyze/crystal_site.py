@@ -23,10 +23,6 @@ class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
         return self.material.coordinates_array[site_id]
 
     @property
-    def new_crystal_site_coordinate(self) -> List[float]:
-        return self.coordinate
-
-    @property
     def equidistant_coordinate(self) -> List[float]:
         """
         Compute a coordinate that is equidistant from the nearest atoms to the target coordinate. Useful for adatom.
@@ -107,3 +103,14 @@ class VoronoiCrystalSiteAnalyzer(CrystalSiteAnalyzer):
         )
 
         return closest_interstitial.site.frac_coords.tolist()
+
+
+class NewCrystalSiteAnalyzer(CrystalSiteAnalyzer):
+    """
+    This analyzer is used to find a new crystal site closest to the given coordinate.
+    It is useful for adatom placement in materials where a new site needs to be created.
+    """
+
+    @property
+    def new_crystal_site_coordinate(self) -> List[float]:
+        pass
