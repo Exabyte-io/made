@@ -6,6 +6,7 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
+from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
 
@@ -94,6 +95,35 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
             direction=configuration.direction,
             strain_matrix=strain_matrix,
             xy_supercell_matrix=matrix_list,
+        )
+
+    def create_matched_configuration_holder(
+        self,
+        substrate_slab_config: SlabConfiguration,
+        film_slab_config: SlabConfiguration,
+        match_id: int = 0,
+        substrate_xy_supercell_matrix: SupercellMatrix2DSchema = None,
+        film_xy_supercell_matrix: SupercellMatrix2DSchema = None,
+        substrate_strain_matrix: Matrix3x3Schema = None,
+        film_strain_matrix: Matrix3x3Schema = None,
+    ) -> MatchedSubstrateFilmConfigurationHolder:
+        if substrate_strain_matrix is None:
+            substrate_strain_matrix = self._no_strain_matrix
+        if film_strain_matrix is None:
+            film_strain_matrix = self._no_strain_matrix
+
+        substrate_config = self.get_component_strained_configuration(
+            substrate_slab_config, substrate_strain_matrix, xy_supercell_matrix=substrate_xy_supercell_matrix
+        )
+
+        film_config = self.get_component_strained_configuration(
+            film_slab_config, film_strain_matrix, xy_supercell_matrix=film_xy_supercell_matrix
+        )
+
+        return MatchedSubstrateFilmConfigurationHolder(
+            match_id=match_id,
+            substrate_configuration=substrate_config,
+            film_configuration=film_config,
         )
 
     @property

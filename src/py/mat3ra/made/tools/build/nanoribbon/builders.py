@@ -1,6 +1,7 @@
-from typing import Any
+from typing import Any, Optional
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.modify import translate_to_center
 from . import NanoribbonConfiguration
 from ..nanotape.builders import NanoTapeBuilder, NanoTapeBuilderParameters
 
@@ -15,6 +16,11 @@ class NanoribbonBuilder(NanoTapeBuilder):
     _DefaultBuildParameters = NanoribbonBuilderParameters(
         use_rectangular_lattice=True,
     )
+
+    def _post_process(self, item: Material, post_process_parameters: Optional[Any] = None) -> Material:
+        item = super()._post_process(item, post_process_parameters)
+        item = translate_to_center(item, axes=["x", "y"])
+        return item
 
     def _update_material_name(self, material: Material, configuration: Any) -> Material:
         if isinstance(configuration, NanoribbonConfiguration):

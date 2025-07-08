@@ -1,29 +1,21 @@
-from typing import Any, List, Optional, Type
+from typing import Any, Type
 
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
-from pydantic import BaseModel
 
 from mat3ra.made.material import Material
 from .configuration import (
     InterfaceConfiguration,
-    NanoRibbonTwistedInterfaceConfiguration,
 )
-from ..nanoribbon import create_nanoribbon
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.builders import SlabWithGapBuilder
 from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
-from ..utils import merge
 from ...analyze.other import get_chemical_formula
-from ...build import BaseBuilder
 from ...convert.utils import InterfacePartsEnum
 from ...modify import (
-    rotate,
     translate_by_vector,
-    add_vacuum_sides,
     wrap_to_unit_cell,
 )
 from ...utils import AXIS_TO_INDEX_MAP
@@ -85,62 +77,3 @@ class InterfaceBuilder(StackNComponentsBuilder):
         name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
         material.name = name
         return material
-
-
-########################################################################################
-#                       Twisted Interface Builders                                     #
-########################################################################################
-
-
-class NanoRibbonTwistedInterfaceBuilder(BaseBuilder):
-    _GeneratedItemType = Material
-    _ConfigurationType: type(  # type: ignore
-        NanoRibbonTwistedInterfaceConfiguration
-    ) = NanoRibbonTwistedInterfaceConfiguration  # type: ignore
-
-    def _generate(self, configuration: _ConfigurationType) -> List[Material]:
-        bottom_ribbon = create_nanoribbon(
-            material=configuration.substrate,
-            width=configuration.ribbon_width,
-            length=configuration.ribbon_length,
-        )
-        top_ribbon = create_nanoribbon(
-            material=configuration.film,
-            width=configuration.ribbon_width,
-            length=configuration.ribbon_length,
-        )
-        top_ribbon = rotate(top_ribbon, [0, 0, 1], configuration.twist_angle, wrap=False)
-
-        translation_vector = [0, 0, configuration.distance_z]
-        top_ribbon = translate_by_vector(top_ribbon, translation_vector, use_cartesian_coordinates=True)
-
-        merged_material = merge([bottom_ribbon, top_ribbon], merge_method=MergeMethodsEnum.ADD)
-        merged_material_vacuum_x = add_vacuum_sides(merged_material, configuration.vacuum_x, on_x=True)
-        merged_material_vacuum_xy = add_vacuum_sides(merged_material_vacuum_x, configuration.vacuum_y, on_y=True)
-
-        return [merged_material_vacuum_xy]
-
-    def _update_material_name(
-        self, material: Material, configuration: NanoRibbonTwistedInterfaceConfiguration
-    ) -> Material:
-        material.name = f"Twisted Nanoribbon Interface ({configuration.twist_angle:.2f} degrees)"
-        return material
-
-
-class CommensurateLatticeInterfaceBuilderParameters(BaseModel):
-    """
-    Parameters for the commensurate lattice interface builder.
-
-    Args:
-        max_supercell_matrix_int (Optional[int]): The maximum integer for the transformation matrices.
-            If not provided, it will be determined based on the target angle and the lattice vectors automatically.
-        limit_max_int (Optional[int]): The limit for the maximum integer for the transformation matrices when searching
-        angle_tolerance (float): The tolerance for the angle between the commensurate lattices
-            and the target angle, in degrees.
-        return_first_match (bool): Whether to return the first match or all matches.
-    """
-
-    max_supercell_matrix_int: Optional[int] = None
-    limit_max_int: Optional[int] = 42
-    angle_tolerance: float = 0.1
-    return_first_match: bool = False

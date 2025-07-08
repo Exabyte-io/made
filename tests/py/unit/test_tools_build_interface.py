@@ -8,17 +8,16 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.interface import InterfaceBuilder, InterfaceConfiguration, create_interface
-from mat3ra.made.tools.build.interface.builders import (
-    NanoRibbonTwistedInterfaceBuilder,
-    NanoRibbonTwistedInterfaceConfiguration,
-)
+from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceConfiguration
+from mat3ra.made.tools.build.interface.helpers import create_interface, create_twisted_interface
+from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
-from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
+# Test the analyzer directly
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
+from .fixtures.interface.twisted_nanoribbons import TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
@@ -136,9 +135,8 @@ def test_create_interface(substrate, film, expected_interface):
     expected_interface["metadata"].pop("build", None)
 
 
-@pytest.mark.skip(reason="Temporary skip before Nanoribbon interface is implemented")
 @pytest.mark.parametrize(
-    "material_config, config_params, expected_cell_vectors, expected_coordinate_checks",
+    "material_config, config_params, expected_interface",
     [
         (
             GRAPHENE,
@@ -150,23 +148,39 @@ def test_create_interface(substrate, film, expected_interface):
                 "vacuum_x": 2.0,
                 "vacuum_y": 2.0,
             },
-            [[15.102811, 0.0, 0.0], [0.0, 16.108175208, 0.0], [0.0, 0.0, 20.0]],
-            {42: [0.704207885, 0.522108183, 0.65]},
+            TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60,
         ),
     ],
 )
-def test_create_twisted_nanoribbon_interface(
-    material_config, config_params, expected_cell_vectors, expected_coordinate_checks
-):
-    film = Material.create(material_config)
-    configuration = NanoRibbonTwistedInterfaceConfiguration(film=film, substrate=film, **config_params)
+def test_create_twisted_interface(material_config, config_params, expected_interface):
+    material = Material.create(material_config)
 
-    builder = NanoRibbonTwistedInterfaceBuilder()
-    interface = builder.get_material(configuration)
+    nanoribbon1 = create_nanoribbon(
+        material=material,
+        width=3,
+        length=3,
+        vacuum_width=15.0,
+        vacuum_length=15.0,
+    )
 
-    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, interface.lattice.vector_arrays)
-    for index, expected_coordinate in expected_coordinate_checks.items():
-        assertion_utils.assert_deep_almost_equal(expected_coordinate, interface.basis.coordinates.values[index])
+    nanoribbon2 = create_nanoribbon(
+        material=material,
+        width=3,
+        length=3,
+        vacuum_width=15.0,
+        vacuum_length=15.0,
+    )
+
+    interface = create_twisted_interface(
+        material1=nanoribbon1,
+        material2=nanoribbon2,
+        angle=config_params["twist_angle"],
+        vacuum_x=config_params["vacuum_x"],
+        vacuum_y=config_params["vacuum_y"],
+        gap=config_params["distance_z"],
+    )
+
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
 @pytest.mark.parametrize(
