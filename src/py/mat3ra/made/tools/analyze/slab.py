@@ -33,9 +33,7 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
         additional_layers: Union[int, float] = 1,
         vacuum_thickness: float = 5.0,
     ) -> MatchedCellsSlabConfigurationHolder:
-
         slab_configuration = self.get_slab_configuration()
-
         configuration_with_added_layers = SlabWithAdditionalLayersConfiguration.from_parameters(
             **{
                 **slab_configuration.to_parameters(),

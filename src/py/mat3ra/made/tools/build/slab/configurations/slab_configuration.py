@@ -78,9 +78,9 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     def to_parameters(self) -> dict:
         atomic_layers = self.atomic_layers
         return {
-            "material_or_dict": getattr(atomic_layers, "crystal", None),
-            "miller_indices": getattr(atomic_layers, "miller_indices", None),
-            "number_of_layers": getattr(atomic_layers, "number_of_repetitions", None),
-            "termination_formula": getattr(getattr(atomic_layers, "termination_top", None), "formula", None),
-            "vacuum": getattr(self.vacuum_configuration, "size", None),
+            "material_or_dict": atomic_layers.crystal,
+            "miller_indices": atomic_layers.miller_indices,
+            "number_of_layers": atomic_layers.number_of_repetitions,
+            "termination_formula": atomic_layers.termination_top.formula if atomic_layers.termination_top else None,
+            "vacuum": self.vacuum_configuration.size,
         }
