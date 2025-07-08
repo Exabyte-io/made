@@ -1,10 +1,8 @@
 from typing import List, Optional, Any, Type
 
 import numpy as np
-from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
-from mat3ra.made.basis.coordinates import Coordinates
 from mat3ra.made.material import Material
 from .configurations import (
     CrystalLatticePlanesConfiguration,
@@ -16,11 +14,8 @@ from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfig
 from .configurations.slab_configuration import SlabConfiguration
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
-from ..merge import MergeBuilder
-from ..merge.configuration import MergeConfiguration
 from ..stack.builders import Stack2ComponentsBuilder
 from ..stack.configuration import StackConfiguration
-from ..vacuum.builders import VacuumBuilder
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
 from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_box
