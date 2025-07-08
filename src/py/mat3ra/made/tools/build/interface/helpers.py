@@ -81,7 +81,7 @@ def create_twisted_interface(
     return builder.get_material(configuration)
 
 
-def get_commensurate_strained_configs(
+def get_commensurate_strained_configurations(
     material: Material,
     target_angle: float,
     angle_tolerance: float,
@@ -218,7 +218,7 @@ def create_commensurate_interface(
     Raises:
         ValueError: If no commensurate lattice matches are found.
     """
-    strained_configs, _ = get_commensurate_strained_configs(
+    strained_configs, _ = get_commensurate_strained_configurations(
         material=material,
         target_angle=target_angle,
         angle_tolerance=angle_tolerance,

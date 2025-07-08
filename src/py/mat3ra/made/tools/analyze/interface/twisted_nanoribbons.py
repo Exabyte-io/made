@@ -46,6 +46,10 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
         )
 
     def _match_lattice_vectors(self, material1: Material, material2: Material) -> Tuple[Material, Material]:
+        """
+        Matches the lattice vectors of two nanoribbons with vacuum on the sides to assume the size of the larger one.
+        Before stacking, two materials must have the same lattice vectors.
+        """
         area1 = get_surface_area(material1)
         area2 = get_surface_area(material2)
 
