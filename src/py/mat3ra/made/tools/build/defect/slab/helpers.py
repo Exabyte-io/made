@@ -14,7 +14,9 @@ from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfigur
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 
 
-def create_slab_defect(slab: Material, isolated_defect: Material, additional_layers: int = 1) -> Material:
+def create_slab_defect(
+    slab: Material, isolated_defect: Material, additional_layers: int = 1, vacuum_thickness: float = 0.0
+) -> Material:
     """
     Create a slab defect by merging an isolated defect with a slab material.
     Args:
@@ -28,8 +30,8 @@ def create_slab_defect(slab: Material, isolated_defect: Material, additional_lay
     (
         slab_with_additional_layers_config,
         slab_with_original_layers_config,
-    ) = analyzer.get_slab_with_additional_layers_configurations(
-        additional_layers=additional_layers, vacuum_thickness=5.0
+    ) = analyzer.get_slab_with_additional_layers_configuration_holder(
+        additional_layers=additional_layers, vacuum_thickness=vacuum_thickness
     )
 
     # slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(slab_with_additional_layers_config)

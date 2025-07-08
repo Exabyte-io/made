@@ -128,7 +128,7 @@ def wrap_to_unit_cell(material: Material) -> Material:
     return Material.create(from_ase(atoms))
 
 
-def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> Material:
+def filter_by_ids(material: Material, ids: List[int], invert: bool = False, reset_ids: bool = False) -> Material:
     """
     Filter out only atoms corresponding to the ids.
 
@@ -136,12 +136,13 @@ def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> M
         material (Material): The material object to filter.
         ids (List[int]): The ids to filter by.
         invert (bool): Whether to invert the selection.
+        reset_ids (bool): Whether to reset the ids of the filtered atoms (to start from 0).
 
     Returns:
         Material: The filtered material object.
     """
     new_material = material.clone()
-    new_material.basis.filter_atoms_by_ids(ids, invert)
+    new_material.basis.filter_atoms_by_ids(ids, invert, reset_ids=reset_ids)
     return new_material
 
 
@@ -150,6 +151,7 @@ def filter_by_condition_on_coordinates(
     condition: Callable[[List[float]], bool],
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
+    reset_ids: bool = False,
 ) -> Material:
     """
     Filter atoms based on a condition on their coordinates.
@@ -170,7 +172,7 @@ def filter_by_condition_on_coordinates(
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
 
-    new_material = filter_by_ids(new_material, ids, invert=invert_selection)
+    new_material = filter_by_ids(new_material, ids, invert=invert_selection, reset_ids=reset_ids)
     return new_material
 
 
@@ -383,6 +385,7 @@ def filter_by_box(
     tolerance: float = 0.0,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
+    reset_ids: bool = False,
 ) -> Material:
     """
     Get material with atoms that are within or outside an XYZ box.
@@ -410,7 +413,11 @@ def filter_by_box(
         return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
 
     return filter_by_condition_on_coordinates(
-        material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
+        material,
+        condition,
+        use_cartesian_coordinates=use_cartesian_coordinates,
+        invert_selection=invert_selection,
+        reset_ids=reset_ids,
     )
 
 

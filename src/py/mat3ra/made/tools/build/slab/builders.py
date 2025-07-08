@@ -15,14 +15,13 @@ from .configurations.slab_configuration import SlabConfiguration
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
 from ..stack.builders import Stack2ComponentsBuilder
+from ..stack.configuration import StackConfiguration
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
 from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_box
+from ...operations.core.binary import stack
 from ...operations.core.unary import supercell, translate, strain, edit_cell
 from ...utils import AXIS_TO_INDEX_MAP
-
-from mat3ra.code.array_with_ids import ArrayWithIds
-from mat3ra.made.basis.coordinates import Coordinates
 
 
 class CrystalLatticePlanesBuilder(BaseSingleBuilder):
@@ -133,7 +132,7 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
         direction_str = direction.value
         axis_index = AXIS_TO_INDEX_MAP[direction_str]
 
-        max_frac = get_atomic_coordinates_extremum(material, "max", direction_str, use_cartesian_coordinates=False)
+        max_frac = get_atomic_coordinates_extremum(material, "max", direction_str, False)
         current_vectors = material.lattice.vector_arrays
         current_vector = np.array(current_vectors[axis_index])
         current_length = np.linalg.norm(current_vector)
@@ -156,82 +155,51 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
     _ConfigurationType = SlabWithAdditionalLayersConfiguration
 
     def _generate(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
-        return self._generate_from_configuration(configuration)
-
-    def _generate_from_configuration(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
         whole_number_of_additional_layers = int(configuration.number_of_additional_layers)
-        whole_number_of_new_layers = (
-            configuration.atomic_layers.number_of_repetitions + whole_number_of_additional_layers
-        )
-        fractional_number_of_additional_layers = (
-            (configuration.number_of_additional_layers - whole_number_of_additional_layers)
-            if isinstance(configuration.number_of_additional_layers, float)
-            else 0
+        whole_number_of_layers = configuration.atomic_layers.number_of_repetitions + whole_number_of_additional_layers
+        fractional_number_of_layers = configuration.number_of_additional_layers - whole_number_of_additional_layers
+
+        material_with_whole_additional_layers = self._get_material_with_whole_additional_layers(
+            configuration, whole_number_of_layers
         )
 
+        if fractional_number_of_layers > 0:
+            fractional_layer_material = self.get_fractional_slab_material(configuration)
+            material = stack([material_with_whole_additional_layers, fractional_layer_material], AxisEnum.z)
+        else:
+            material = material_with_whole_additional_layers
+
+        stack_configuration = StackConfiguration(
+            stack_components=[material, configuration.vacuum_configuration],
+        )
+        material = Stack2ComponentsBuilder().get_material(stack_configuration)
+
+        return material
+
+    def _get_material_with_whole_additional_layers(
+        self, configuration: SlabWithAdditionalLayersConfiguration, whole_number_of_layers
+    ) -> Material:
         configuration_with_whole_additional_layers = SlabConfiguration.from_parameters(
             material_or_dict=configuration.atomic_layers.crystal,
             miller_indices=configuration.atomic_layers.miller_indices,
-            number_of_layers=whole_number_of_new_layers,
+            number_of_layers=whole_number_of_layers,
             termination_formula=configuration.atomic_layers.termination_top.formula,
-            vacuum=configuration.vacuum_configuration.size,
+            vacuum=0,
         )
         material_with_whole_additional_layers = SlabBuilder().get_material(configuration_with_whole_additional_layers)
-
-        if fractional_number_of_additional_layers > 0:
-            material_with_additional_layers = self.add_fractional_layer(
-                material_with_whole_additional_layers,
-                configuration_with_whole_additional_layers,
-                fractional_number_of_additional_layers,
-            )
-            return material_with_additional_layers
-
         return material_with_whole_additional_layers
 
-    def add_fractional_layer(
-        self,
-        material_with_whole_additional_layers: Material,
-        configuration_with_whole_additional_layers: SlabConfiguration,
-        fractional_thickness: float,
-    ) -> Material:
-        configuration_with_additional_layers_plus_one = SlabConfiguration.from_parameters(
-            material_or_dict=configuration_with_whole_additional_layers.atomic_layers.crystal,
-            miller_indices=configuration_with_whole_additional_layers.atomic_layers.miller_indices,
-            number_of_layers=configuration_with_whole_additional_layers.atomic_layers.number_of_repetitions + 1,
-            termination_formula=configuration_with_whole_additional_layers.atomic_layers.termination_top.formula,
-            vacuum=configuration_with_whole_additional_layers.vacuum_configuration.size,
-        )
-        material_with_additional_layers_plus_one = SlabBuilder().get_material(
-            configuration_with_additional_layers_plus_one
+    def get_fractional_slab_material(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
+        one_layer_slab_configuration = SlabConfiguration.from_parameters(
+            material_or_dict=configuration.atomic_layers.crystal,
+            miller_indices=configuration.atomic_layers.miller_indices,
+            number_of_layers=1,
+            termination_formula=configuration.atomic_layers.termination_top.formula,
+            vacuum=0,
         )
 
-        original_max_z = get_atomic_coordinates_extremum(
-            material_with_whole_additional_layers, "max", "z", use_cartesian_coordinates=True
-        )
-        new_max_z = get_atomic_coordinates_extremum(
-            material_with_additional_layers_plus_one, "max", "z", use_cartesian_coordinates=True
-        )
+        one_layer_slab = SlabBuilder().get_material(one_layer_slab_configuration)
+        fraction_layer = configuration.number_of_additional_layers - int(configuration.number_of_additional_layers)
+        fraction_of_slab = filter_by_box(one_layer_slab, max_coordinate=[1, 1, fraction_layer], reset_ids=True)
 
-        layer_height = new_max_z - original_max_z
-        delta = 0.05  # to allow for atoms at the edge of the cut to be included in the layer
-        added_layers_max_z = original_max_z + fractional_thickness * layer_height + delta
-        added_layers_max_z_crystal = material_with_additional_layers_plus_one.basis.cell.convert_point_to_crystal(
-            [0, 0, added_layers_max_z]
-        )[2]
-
-        material_with_fractional_layer = filter_by_box(
-            material=material_with_additional_layers_plus_one,
-            max_coordinate=[1, 1, added_layers_max_z_crystal],
-        )
-
-        return material_with_fractional_layer
-
-    def _post_process(self, item: Material, post_process_parameters: None) -> Material:
-        item = super()._post_process(item, post_process_parameters)
-        item = translate_to_z_level(item, "bottom")
-
-        # reset ids to be consecutive
-        item.basis.elements = ArrayWithIds.from_values(values=item.basis.elements.values)
-        item.basis.coordinates = Coordinates.from_values(values=item.basis.coordinates.values)
-
-        return item
+        return fraction_of_slab

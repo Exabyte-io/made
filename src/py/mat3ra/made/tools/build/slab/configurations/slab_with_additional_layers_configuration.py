@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional, Tuple
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import SlabConfigurationSchema
@@ -27,10 +27,10 @@ class SlabWithAdditionalLayersConfiguration(SlabConfigurationSchema, StackConfig
     def from_parameters(
         cls,
         material_or_dict: Union[Material, dict],
-        miller_indices: tuple,
+        miller_indices: Tuple[int, int, int],
         number_of_layers: int,
         number_of_additional_layers: Union[int, float] = 1,
-        termination_formula: str = None,
+        termination_formula: Optional[str] = None,
         vacuum: float = 10.0,
     ) -> "SlabWithAdditionalLayersConfiguration":
         base_slab_configuration = SlabConfiguration.from_parameters(
@@ -45,3 +45,8 @@ class SlabWithAdditionalLayersConfiguration(SlabConfigurationSchema, StackConfig
             direction=base_slab_configuration.direction,
             number_of_additional_layers=number_of_additional_layers,
         )
+
+    def to_parameters(self) -> dict:
+        base = super().to_parameters() if hasattr(super(), "to_parameters") else {}
+        base["number_of_additional_layers"] = getattr(self, "number_of_additional_layers", 1)
+        return base
