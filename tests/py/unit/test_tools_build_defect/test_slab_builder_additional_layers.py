@@ -1,8 +1,8 @@
 import pytest
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabWithAdditionalLayersBuilder
-from mat3ra.made.tools.modify import translate_to_z_level
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER
 from unit.utils import assert_two_entities_deep_almost_equal
 
@@ -24,7 +24,7 @@ def test_analyzer_get_slab_configurations(
 ):
     original_slab = Material.create(original_slab_config)
     analyzer = SlabMaterialAnalyzer(material=original_slab)
-    expected_slab = translate_to_z_level(Material.create(expected_slab_config), "bottom")
+    expected_slab = Material.create(expected_slab_config)
 
     slabs_holder = analyzer.get_slab_with_additional_layers_configuration_holder(
         additional_layers=layers_to_add, vacuum_thickness=analyzer_params_dict["vacuum_thickness"]
@@ -35,7 +35,7 @@ def test_analyzer_get_slab_configurations(
     )
     slab_with_original_layers_adjusted = SlabBuilder().get_material(slabs_holder.slab_with_adjusted_vacuum)
 
-    assert_two_entities_deep_almost_equal(slab_with_additional_layers, expected_slab, atol=1e-6)
+    assert_two_entities_deep_almost_equal(slab_with_additional_layers, expected_slab_config, atol=1e-6)
     assert_two_entities_deep_almost_equal(
         slab_with_original_layers_adjusted.lattice.vector_arrays, expected_slab.lattice.vector_arrays
     )
