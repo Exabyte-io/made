@@ -23,26 +23,3 @@ class SlabDefectConfiguration(MergeConfiguration):
     @property
     def isolated_defect(self) -> Material:
         return self.merge_components[1]
-
-    @classmethod
-    def from_materials(
-        cls,
-        slab: Material,
-        isolated_defect: Material,
-        merge_method: MergeMethodsEnum = MergeMethodsEnum.ADD,
-    ) -> "SlabDefectConfiguration":
-        """
-        Creates a SlabDefectConfiguration from materials.
-
-        Args:
-            slab: The slab material with additional layers.
-            isolated_defect: The isolated defect material.
-            merge_method: Method to use for merging.
-
-        Returns:
-            SlabDefectConfiguration: The merge configuration.
-        """
-        return cls(
-            merge_components=[slab, isolated_defect],
-            merge_method=merge_method,
-        )
