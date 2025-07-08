@@ -61,13 +61,3 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
             slab_with_additional_layers=configuration_with_added_layers,
             slab_with_adjusted_vacuum=configuration_original_with_adjusted_vacuum,
         )
-
-    def get_layer_thickness(self) -> float:
-        """
-        Returns the thickness of a single layer in the slab.
-        Calculated by dividing lattice c less vacuum thickness by the number of layers.
-        """
-        slab_configuration = self.get_slab_configuration()
-        return (
-            self.material.lattice.c - slab_configuration.vacuum_configuration.size
-        ) / slab_configuration.atomic_layers.number_of_repetitions

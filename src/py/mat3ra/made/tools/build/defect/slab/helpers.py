@@ -65,13 +65,7 @@ def create_adatom_defect(
     if placement_method == AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE:
         analyzer = AdatomCrystalSiteAnalyzer(material=slab, coordinate=coordinate)
         resolved_coordinate = analyzer.new_crystal_site_coordinate
-        slabs_config_holder = SlabMaterialAnalyzer(material=slab).get_slab_with_additional_layers_configuration_holder(
-            additional_layers=1, vacuum_thickness=added_vacuum
-        )
-        slab = SlabBuilder().get_material(slabs_config_holder.slab_with_adjusted_vacuum)
-        slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(
-            slabs_config_holder.slab_with_additional_layers
-        )
+        slab = analyzer.get_slab_with_adjusted_vacuum()
 
     elif placement_method == AdatomPlacementMethodEnum.EQUIDISTANT:
         crystal_site_analyzer = CrystalSiteAnalyzer(material=slab, coordinate=coordinate)

@@ -2,7 +2,7 @@ from typing import List
 
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from .other import get_atomic_coordinates_extremum
-from ..build.slab.builders import SlabWithAdditionalLayersBuilder
+from ..build.slab.builders import SlabWithAdditionalLayersBuilder, SlabBuilder
 from ...material import Material
 
 from ...utils import get_center_of_coordinates
@@ -110,7 +110,7 @@ class VoronoiCrystalSiteAnalyzer(CrystalSiteAnalyzer):
         return closest_interstitial.site.frac_coords.tolist()
 
 
-class AdatomCrystalSiteAnalyzer(CrystalSiteAnalyzer):
+class AdatomCrystalSiteAnalyzer(CrystalSiteAnalyzer, SlabMaterialAnalyzer):
     """
     This analyzer is used to find a new crystal site closest to the given coordinate.
     By creating the slab with additional layers and finding the closest site in the new slab.
@@ -127,13 +127,13 @@ class AdatomCrystalSiteAnalyzer(CrystalSiteAnalyzer):
         return analyzer.closest_site_coordinate
 
     def get_slab_with_additional_layer(self) -> Material:
-        """
-        Create a slab with an additional layer to find the closest crystal site.
-        This method assumes that the material is a slab and adds one additional layer.
-        """
-        slabs_holder = self.slab_analyzer.get_slab_with_additional_layers_configuration_holder(
-            additional_layers=1, vacuum_thickness=5.0
-        )
-        config = slabs_holder.slab_with_additional_layers
-        slab_with_additional_layer = SlabWithAdditionalLayersBuilder().get_material(config)
-        return slab_with_additional_layer
+        slab_with_new_layer_config = self.get_slab_with_additional_layers_configuration_holder(
+            additional_layers=1
+        ).slab_with_additional_layers
+        return SlabWithAdditionalLayersBuilder().get_material(slab_with_new_layer_config)
+
+    def get_slab_with_adjusted_vacuum(self) -> Material:
+        slab_with_adjusted_vacuum_config = self.get_slab_with_additional_layers_configuration_holder(
+            additional_layers=1
+        ).slab_with_adjusted_vacuum
+        return SlabBuilder().get_material(slab_with_adjusted_vacuum_config)
