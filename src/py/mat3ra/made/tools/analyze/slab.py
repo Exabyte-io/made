@@ -41,6 +41,7 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
         else:
             termination_formula = termination_top.formula
 
+        # Calculate the vacuum thickness needed for the original slab to match the height of the slab with additional layers
         vacuum_to_match_height = self._vacuum_thickness_for_original_slab(
             additional_layers=additional_layers,
             vacuum_thickness=vacuum_thickness,
@@ -64,15 +65,20 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
 
         return (configuration_with_added_layers, configuration_original_with_adjusted_vacuum)
 
-    # TODO: adjust to make the difference exact
     def _vacuum_thickness_for_original_slab(
         self, additional_layers: Union[int, float] = 1, vacuum_thickness: float = 5.0
     ) -> float:
+        """
+        Calculate the vacuum thickness needed for the original slab to match the height of the slab with additional layers.
+
+        The approach is to calculate the height that will be added by additional layers.
+        Each additional layer adds exactly the lattice parameter 'a' to the c vector.
+        """
         slab_configuration = self.get_slab_configuration()
-        atomic_layers = slab_configuration.atomic_layers
-        original_layers = atomic_layers.number_of_repetitions
+
         slab = SlabBuilder().get_material(slab_configuration)
-        max_z = get_atomic_coordinates_extremum(slab, "max", "z")
-        min_z = get_atomic_coordinates_extremum(slab, "min", "z")
-        height_per_layer = (max_z - min_z) / original_layers
-        return height_per_layer * additional_layers + vacuum_thickness
+        lattice_parameter_a = slab.lattice.vector_arrays[0][0]
+
+        additional_height = lattice_parameter_a * additional_layers
+
+        return additional_height + vacuum_thickness
