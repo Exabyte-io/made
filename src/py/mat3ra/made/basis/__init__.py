@@ -152,10 +152,10 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.filter_atoms_by_ids(ids_to_remove, invert=True)
         return self
 
-    def filter_atoms_by_ids(self, ids: Union[List[int], int], invert: bool = False) -> "Basis":
-        self.elements.filter_by_ids(ids, invert)
-        self.coordinates.filter_by_ids(ids, invert)
-        self.labels.filter_by_ids(ids, invert)
+    def filter_atoms_by_ids(self, ids: Union[List[int], int], invert: bool = False, reset_ids=False) -> "Basis":
+        self.elements.filter_by_ids(ids, invert, reset_ids=reset_ids)
+        self.coordinates.filter_by_ids(ids, invert, reset_ids=reset_ids)
+        self.labels.filter_by_ids(ids, invert, reset_ids=reset_ids)
         return self
 
     def filter_atoms_by_labels(self, labels: Union[List[str], str]) -> "Basis":

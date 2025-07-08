@@ -205,7 +205,7 @@ class SlabWithAdditionalLayersBuilder(SlabBuilder):
 
         one_layer_slab = SlabBuilder().get_material(one_layer_slab_configuration)
         fraction_layer = configuration.number_of_additional_layers - int(configuration.number_of_additional_layers)
-        fraction_of_slab = filter_by_box(one_layer_slab, max_coordinate=[1, 1, fraction_layer])
+        fraction_of_slab = filter_by_box(one_layer_slab, max_coordinate=[1, 1, fraction_layer], reset_ids=True)
 
         return fraction_of_slab
 

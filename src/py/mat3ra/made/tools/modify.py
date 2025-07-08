@@ -142,7 +142,7 @@ def filter_by_ids(material: Material, ids: List[int], invert: bool = False, rese
         Material: The filtered material object.
     """
     new_material = material.clone()
-    new_material.basis.filter_atoms_by_ids(ids, invert)
+    new_material.basis.filter_atoms_by_ids(ids, invert, reset_ids=reset_ids)
     return new_material
 
 
@@ -151,6 +151,7 @@ def filter_by_condition_on_coordinates(
     condition: Callable[[List[float]], bool],
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
+    reset_ids: bool = False,
 ) -> Material:
     """
     Filter atoms based on a condition on their coordinates.
@@ -171,7 +172,7 @@ def filter_by_condition_on_coordinates(
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
 
-    new_material = filter_by_ids(new_material, ids, invert=invert_selection)
+    new_material = filter_by_ids(new_material, ids, invert=invert_selection, reset_ids=reset_ids)
     return new_material
 
 
@@ -384,6 +385,7 @@ def filter_by_box(
     tolerance: float = 0.0,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
+    reset_ids: bool = False,
 ) -> Material:
     """
     Get material with atoms that are within or outside an XYZ box.
@@ -411,7 +413,11 @@ def filter_by_box(
         return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
 
     return filter_by_condition_on_coordinates(
-        material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
+        material,
+        condition,
+        use_cartesian_coordinates=use_cartesian_coordinates,
+        invert_selection=invert_selection,
+        reset_ids=reset_ids,
     )
 
 
