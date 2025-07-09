@@ -1,10 +1,8 @@
-from pydantic import BaseModel
-
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration, AdatomDefectConfiguration
-from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
-from mat3ra.made.tools.build.merge import MergeBuilder
 from mat3ra.made.tools.build.defect.point.builders import PointDefectBuilder
+from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration, AdatomDefectConfiguration
+from mat3ra.made.tools.build.merge import MergeBuilder
+from pydantic import BaseModel
 
 
 class SlabDefectBuilderParameters(BaseModel):
