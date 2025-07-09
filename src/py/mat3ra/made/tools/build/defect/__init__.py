@@ -2,7 +2,6 @@ from typing import Optional, Union, List
 
 from mat3ra.made.material import Material
 from .builders import (
-    IslandSlabDefectBuilder,
     TerraceSlabDefectBuilder,
 )
 from .configuration import (
@@ -82,7 +81,6 @@ def create_slab_defect(
     configuration: Union[AdatomSlabPointDefectConfiguration, IslandSlabDefectConfiguration, TerraceSlabDefectBuilder],
     builder: Optional[
         Union[
-            IslandSlabDefectBuilder,
             TerraceSlabDefectBuilder,
         ]
     ] = None,

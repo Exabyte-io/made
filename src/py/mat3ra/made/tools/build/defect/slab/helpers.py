@@ -13,9 +13,10 @@ from mat3ra.made.tools.build.defect.configuration import SlabDefectConfiguration
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
 from mat3ra.made.tools.build.defect.point.builders import PointDefectSiteBuilder
 from mat3ra.made.tools.build.defect.point.configuration import PointDefectSite
-from mat3ra.made.tools.build.defect.slab.builders import SlabDefectBuilder, AdatomDefectBuilder
-from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration, AdatomDefectConfiguration
+from mat3ra.made.tools.build.defect.slab.builders import SlabDefectBuilder, AdatomDefectBuilder, IslandDefectBuilder
+from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration, AdatomDefectConfiguration, IslandDefectConfiguration, VoidSite
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
+from mat3ra.made.tools.utils.coordinate import CoordinateCondition
 
 
 def create_slab_defect(
@@ -100,4 +101,45 @@ def create_adatom_defect(
     )
 
     builder = AdatomDefectBuilder()
+    return builder.get_material(configuration)
+
+
+def create_island_defect(
+    slab: Material,
+    condition: CoordinateCondition,
+    number_of_added_layers: int = 1,
+) -> Material:
+    """
+    Create an island defect using the new IslandDefectConfiguration and IslandDefectBuilder.
+    
+    Args:
+        slab: The slab material.
+        condition: The coordinate condition that defines the island shape.
+        number_of_added_layers: Number of additional layers to add to the slab.
+        
+    Returns:
+        Material: The slab with island defect.
+    """
+    # Create a slab with additional layers
+    analyzer = SlabMaterialAnalyzer(material=slab)
+    slab_with_additional_layers_config = analyzer.get_slab_with_additional_layers_configuration_holder(
+        additional_layers=number_of_added_layers
+    ).slab_with_additional_layers
+    
+    slab_with_additional_layers = SlabBuilder().get_material(slab_with_additional_layers_config)
+    
+    # Create a void site with the condition
+    void_site = VoidSite(
+        crystal=slab_with_additional_layers,
+        condition=condition,
+    )
+    
+    # Create the island configuration
+    configuration = IslandDefectConfiguration(
+        merge_components=[slab, void_site],
+        merge_method=MergeMethodsEnum.REPLACE,
+    )
+    
+    # Build the island defect
+    builder = IslandDefectBuilder()
     return builder.get_material(configuration)
