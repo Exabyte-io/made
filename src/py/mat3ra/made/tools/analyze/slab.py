@@ -1,20 +1,11 @@
 from typing import Union
 
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
-from mat3ra.made.tools.build.metadata import MaterialMetadata
-from mat3ra.made.tools.build.slab.builders import SlabWithAdditionalLayersBuilder
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabWithAdditionalLayersConfiguration
 
-
-class MatchedCellsSlabConfigurationHolder(InMemoryEntityPydantic):
-    """
-    Holds the original slab configuration and the slab configuration with additional layers.
-    Used to match the c lattice parameter of the original slab with the slab with additional layers.
-    """
-
-    slab_with_additional_layers: SlabWithAdditionalLayersConfiguration
-    slab_with_adjusted_vacuum: SlabConfiguration
+from ..analyze import BaseMaterialAnalyzer
+from ..build.metadata import MaterialMetadata
+from ..build.slab.builders import SlabWithAdditionalLayersBuilder
+from ..build.slab.configurations import SlabConfiguration, SlabWithAdditionalLayersConfiguration
 
 
 class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -26,38 +17,17 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
 
         return SlabConfiguration(**slab_build_configuration_dict)
 
-    def get_slab_with_additional_layers_configuration_holder(
-        self,
-        additional_layers: Union[int, float] = 1,
-        vacuum_thickness: float = 5.0,
-    ) -> MatchedCellsSlabConfigurationHolder:
+    @property
+    def number_of_layers(self) -> int:
         slab_configuration = self.get_slab_configuration()
-        configuration_with_added_layers = SlabWithAdditionalLayersConfiguration.from_parameters(
-            **{
-                **slab_configuration.to_parameters(),
-                "number_of_additional_layers": additional_layers,
-                "vacuum": vacuum_thickness,
-            }
-        )
+        return slab_configuration.number_of_layers
 
-        slab_with_additional_layers = SlabWithAdditionalLayersBuilder().get_material(configuration_with_added_layers)
-        # Calculate the vacuum needed for the original slab to match the height of the slab with additional layers
-        delta_c = slab_with_additional_layers.lattice.c - self.material.lattice.c
+    @property
+    def vacuum_ratio(self) -> float:
+        slab_configuration = self.get_slab_configuration()
+        return slab_configuration.vacuum / self.material.lattice.c
 
-        vacuum_to_match_height = (
-            SlabConfiguration(
-                **MaterialMetadata(**self.material.metadata).build.configuration
-            ).vacuum_configuration.size
-            + delta_c
-        )
-
-        configuration_original_with_adjusted_vacuum = SlabConfiguration.from_parameters(
-            **{
-                **slab_configuration.to_parameters(),
-                "vacuum": vacuum_to_match_height,
-            }
-        )
-        return MatchedCellsSlabConfigurationHolder(
-            slab_with_additional_layers=configuration_with_added_layers,
-            slab_with_adjusted_vacuum=configuration_original_with_adjusted_vacuum,
-        )
+    @property
+    def vacuum_thickness_in_layers(self) -> float:
+        slab_configuration = self.get_slab_configuration()
+        return self.vacuum_ratio / (1 - self.vacuum_ratio) * self.number_of_layers
