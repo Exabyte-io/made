@@ -1,16 +1,21 @@
 import numpy as np
 import pytest
+
 from mat3ra.made.material import Material, defaultMaterialConfig
-from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
+from mat3ra.made.tools.analyze.crystal_site import (
+    CrystalSiteAnalyzer,
+    VoronoiCrystalSiteAnalyzer,
+    AdatomCrystalSiteAnalyzer,
+)
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from unit.utils import TestPlatform, get_platform_specific_value
-
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
+from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 from .utils import assert_two_entities_deep_almost_equal
 
 
@@ -92,7 +97,6 @@ VORONOI_SITE_EXPECTED = {TestPlatform.DARWIN: [0.625, 0.625, 0.125], TestPlatfor
     [
         (AtomPlacementMethodEnum.EXACT_COORDINATE, [0.25, 0.25, 0.5]),
         (AtomPlacementMethodEnum.CLOSEST_SITE, [0.25, 0.25, 0.25]),
-        (AtomPlacementMethodEnum.NEW_CRYSTAL_SITE, [0.25, 0.25, 0.5]),
         (AtomPlacementMethodEnum.EQUIDISTANT, [0.45833, 0.45833, 0.5]),
         (AtomPlacementMethodEnum.VORONOI_SITE, VORONOI_SITE_EXPECTED),
     ],
@@ -111,11 +115,23 @@ def test_crystal_site_analyzer(placement_method, expected_coordinate):
             final_coordinate = analyzer.exact_coordinate
         elif placement_method == AtomPlacementMethodEnum.CLOSEST_SITE:
             final_coordinate = analyzer.closest_site_coordinate
-        elif placement_method == AtomPlacementMethodEnum.NEW_CRYSTAL_SITE:
-            final_coordinate = analyzer.new_crystal_site_coordinate
         elif placement_method == AtomPlacementMethodEnum.EQUIDISTANT:
             final_coordinate = analyzer.equidistant_coordinate
         else:
             raise ValueError(f"Unknown method: {placement_method}")
+
+    assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
+
+
+@pytest.mark.parametrize(
+    "slab_config, coordinate, expected_coordinate",
+    [
+        (SI_CONVENTIONAL_SLAB_001, [0.5, 0.5, 0.5], [0.5, 0.5, 0.57482]),
+    ],
+)
+def test_adatom_crystal_site_analyzer(slab_config, coordinate, expected_coordinate):
+    slab = Material.create(slab_config)
+    analyzer = AdatomCrystalSiteAnalyzer(material=slab, coordinate=coordinate)
+    final_coordinate = analyzer.new_crystal_site_coordinate
 
     assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
