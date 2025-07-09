@@ -22,6 +22,14 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     direction: AxisEnum = AxisEnum.z
 
     @property
+    def number_of_layers(self):
+        return self.atomic_layers.number_of_repetitions
+
+    @property
+    def vacuum(self):
+        return self.vacuum_configuration.size
+
+    @property
     def atomic_layers(self):
         return self.stack_components[0]
 
