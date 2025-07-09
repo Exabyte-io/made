@@ -16,6 +16,7 @@ from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
 from ..stack.builders import Stack2ComponentsBuilder
 from ..stack.configuration import StackConfiguration
+from ..vacuum.builders import VacuumBuilder
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
 from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_box
@@ -103,7 +104,9 @@ class SlabBuilder(Stack2ComponentsBuilder):
 
 
 class SlabStrainedSupercellBuilder(SlabBuilder):
-    def _generate(self, configuration: "SlabStrainedSupercellConfiguration") -> Material:
+    _ConfigurationType: Type[SlabStrainedSupercellConfiguration] = SlabStrainedSupercellConfiguration
+
+    def _generate(self, configuration: _ConfigurationType) -> Material:
         slab_material = super()._generate(configuration)
 
         if configuration.xy_supercell_matrix:
@@ -114,7 +117,9 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
 
 
 class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
-    def _generate(self, configuration: "SlabStrainedSupercellWithGapConfiguration") -> Material:
+    _ConfigurationType: Type[SlabStrainedSupercellWithGapConfiguration] = SlabStrainedSupercellWithGapConfiguration
+
+    def _generate(self, configuration: _ConfigurationType) -> Material:
         strained_slab_material = super()._generate(configuration)
 
         if configuration.gap is not None:
@@ -149,57 +154,42 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
         return new_material
 
 
-class SlabWithAdditionalLayersBuilder(SlabBuilder):
-    _BuildParametersType = SlabBuilderParameters
-    _DefaultBuildParameters = SlabBuilderParameters()
+class SlabWithAdditionalLayersBuilder(SlabWithGapBuilder):
     _ConfigurationType = SlabWithAdditionalLayersConfiguration
 
     def _generate(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
-        whole_number_of_additional_layers = int(configuration.number_of_additional_layers)
-        whole_number_of_layers = configuration.atomic_layers.number_of_repetitions + whole_number_of_additional_layers
-        fractional_number_of_layers = configuration.number_of_additional_layers - whole_number_of_additional_layers
-
-        material_with_whole_additional_layers = self._get_material_with_whole_additional_layers(
-            configuration, whole_number_of_layers
-        )
-
-        if fractional_number_of_layers > 0:
-            fractional_layer_material = self.get_fractional_slab_material(configuration)
-            material = stack([material_with_whole_additional_layers, fractional_layer_material], AxisEnum.z)
+        if configuration.number_of_additional_layers.is_integer():
+            slab_config = SlabStrainedSupercellWithGapConfiguration(**{**configuration.to_dict(), "vacuum": 0})
+            slab_config.atomic_layers.number_of_repetitions = slab_config.atomic_layers.number_of_repetitions + int(
+                configuration.number_of_additional_layers
+            )
+            resulting_material = super()._generate(slab_config)
         else:
-            material = material_with_whole_additional_layers
+            slab_config = SlabStrainedSupercellWithGapConfiguration(**{**configuration.to_dict(), "vacuum": 0})
+            original_number_of_layers = slab_config.atomic_layers.number_of_repetitions
+            slab_config.atomic_layers.number_of_repetitions = (
+                slab_config.atomic_layers.number_of_repetitions + int(configuration.number_of_additional_layers) + 1
+            )
+            material_with_additional_layers = super()._generate(slab_config)
 
-        stack_configuration = StackConfiguration(
-            stack_components=[material, configuration.vacuum_configuration],
-        )
-        material = Stack2ComponentsBuilder().get_material(stack_configuration)
+            # we need to cut the (1 - fraction) layer, so we filter the material
+            fractional_number_of_layers = configuration.number_of_additional_layers - int(
+                configuration.number_of_additional_layers
+            )
 
-        return material
+            max_z = get_atomic_coordinates_extremum(material_with_additional_layers, "max", "z")
+            layer_height_crystal = max_z / slab_config.atomic_layers.number_of_repetitions
+            new_max_z = layer_height_crystal * (original_number_of_layers + fractional_number_of_layers) + 0.1
 
-    def _get_material_with_whole_additional_layers(
-        self, configuration: SlabWithAdditionalLayersConfiguration, whole_number_of_layers
-    ) -> Material:
-        configuration_with_whole_additional_layers = SlabConfiguration.from_parameters(
-            material_or_dict=configuration.atomic_layers.crystal,
-            miller_indices=configuration.atomic_layers.miller_indices,
-            number_of_layers=whole_number_of_layers,
-            termination_formula=configuration.atomic_layers.termination_top.formula,
-            vacuum=0,
-        )
-        material_with_whole_additional_layers = SlabBuilder().get_material(configuration_with_whole_additional_layers)
-        return material_with_whole_additional_layers
+            resulting_material = filter_by_box(
+                material_with_additional_layers, max_coordinate=[1, 1, new_max_z], reset_ids=True
+            )
 
-    def get_fractional_slab_material(self, configuration: SlabWithAdditionalLayersConfiguration) -> Material:
-        one_layer_slab_configuration = SlabConfiguration.from_parameters(
-            material_or_dict=configuration.atomic_layers.crystal,
-            miller_indices=configuration.atomic_layers.miller_indices,
-            number_of_layers=1,
-            termination_formula=configuration.atomic_layers.termination_top.formula,
-            vacuum=0,
-        )
+        # Add vacuum layer
+        vacuum_config = configuration.vacuum_configuration
+        vacuum_config.crystal = resulting_material
+        vacuum = VacuumBuilder().get_material(vacuum_config)
 
-        one_layer_slab = SlabBuilder().get_material(one_layer_slab_configuration)
-        fraction_layer = configuration.number_of_additional_layers - int(configuration.number_of_additional_layers)
-        fraction_of_slab = filter_by_box(one_layer_slab, max_coordinate=[1, 1, fraction_layer], reset_ids=True)
+        slab_with_vacuum = stack([resulting_material, vacuum], AxisEnum.z)
 
-        return fraction_of_slab
+        return slab_with_vacuum
