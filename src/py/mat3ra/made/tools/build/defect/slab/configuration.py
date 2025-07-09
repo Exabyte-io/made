@@ -1,6 +1,9 @@
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.defect.point.configuration import PointDefectConfiguration
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 
 
@@ -23,3 +26,14 @@ class SlabDefectConfiguration(MergeConfiguration):
     @property
     def isolated_defect(self) -> Material:
         return self.merge_components[1]
+
+
+class AdatomDefectConfiguration(PointDefectConfiguration):
+    """
+    Configuration for creating an adatom defect on a slab surface.
+
+    Args:
+        merge_components: List containing [slab, isolated_defect].
+    """
+
+    type: str = "AdatomDefectConfiguration"

@@ -13,8 +13,8 @@ from mat3ra.made.tools.build.defect.configuration import SlabDefectConfiguration
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
 from mat3ra.made.tools.build.defect.point.builders import PointDefectSiteBuilder
 from mat3ra.made.tools.build.defect.point.configuration import PointDefectSite
-from mat3ra.made.tools.build.defect.slab.builders import SlabDefectBuilder
-from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration
+from mat3ra.made.tools.build.defect.slab.builders import SlabDefectBuilder, AdatomDefectBuilder
+from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration, AdatomDefectConfiguration
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 
 
@@ -59,14 +59,28 @@ def create_adatom_defect(
     element: Optional[str] = None,
     added_vacuum: float = 5.0,
 ) -> Material:
+    """
+    Create an adatom defect using the new AdatomDefectConfiguration and AdatomDefectBuilder.
+
+    Args:
+        slab: The slab material.
+        position_on_surface: Position on the surface [x, y].
+        element: Chemical element for the adatom.
+        distance_z: Distance above the surface in Angstroms.
+        placement_method: Method for placing the adatom.
+        added_vacuum: Additional vacuum thickness.
+
+    Returns:
+        Material: The slab with adatom defect.
+    """
     max_z = get_atomic_coordinates_extremum(slab, "max", "z")
     distance_z_crystal = slab.basis.cell.convert_point_to_crystal([0, 0, distance_z])[2]
     coordinate = [*position_on_surface, max_z + distance_z_crystal]
+
     if placement_method == AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE:
         analyzer = AdatomCrystalSiteAnalyzer(material=slab, coordinate=coordinate)
         resolved_coordinate = analyzer.new_crystal_site_coordinate
         slab = analyzer.get_slab_with_adjusted_vacuum()
-
     elif placement_method == AdatomPlacementMethodEnum.EQUIDISTANT:
         crystal_site_analyzer = CrystalSiteAnalyzer(material=slab, coordinate=coordinate)
         resolved_coordinate = crystal_site_analyzer.equidistant_coordinate
@@ -80,11 +94,10 @@ def create_adatom_defect(
     )
     isolated_defect = PointDefectSiteBuilder().get_material(adatom_point_defect_config)
 
-    configuration = SlabDefectConfiguration(
+    configuration = AdatomDefectConfiguration(
         merge_components=[slab, isolated_defect],
         merge_method=MergeMethodsEnum.ADD,
     )
 
-    builder = SlabDefectBuilder()
-    slab_with_adatom_defect = builder.get_material(configuration)
-    return slab_with_adatom_defect
+    builder = AdatomDefectBuilder()
+    return builder.get_material(configuration)
