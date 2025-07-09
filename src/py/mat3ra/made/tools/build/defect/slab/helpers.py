@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.point_defect_site import (
     AtomSchema,
@@ -11,11 +11,11 @@ from mat3ra.made.tools.analyze.other import get_atomic_coordinates_extremum
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.build.defect.configuration import SlabDefectConfigurationLegacy
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
-from mat3ra.made.tools.build.defect.point.builders import PointDefectBuilder, PointDefectSiteBuilder
-from mat3ra.made.tools.build.defect.point.configuration import PointDefectSite, PointDefectConfiguration
+from mat3ra.made.tools.build.defect.point.builders import PointDefectSiteBuilder
+from mat3ra.made.tools.build.defect.point.configuration import PointDefectSite
 from mat3ra.made.tools.build.defect.slab.builders import SlabDefectBuilder
 from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration
-from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabWithAdditionalLayersBuilder
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
 
 
 def create_slab_defect(
@@ -53,7 +53,7 @@ def create_slab_defect(
 
 def create_adatom_defect(
     slab: Material,
-    position_on_surface: list[float],
+    position_on_surface: List[float],
     distance_z: float = 1.0,
     placement_method: AdatomPlacementMethodEnum = AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE,
     element: Optional[str] = None,

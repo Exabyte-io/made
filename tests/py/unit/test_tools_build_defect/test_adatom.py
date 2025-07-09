@@ -1,15 +1,9 @@
-import sys
-
 import pytest
-from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect import EquidistantAdatomSlabDefectBuilder, create_slab_defect
-from mat3ra.made.tools.build.defect.builders import CrystalSiteAdatomSlabDefectBuilder
-from mat3ra.made.tools.build.defect.configuration import AdatomSlabPointDefectConfiguration
-from mat3ra.utils import assertion as assertion_utils
-
+from mat3ra.made.tools.build.defect import EquidistantAdatomSlabDefectBuilder
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
 from mat3ra.made.tools.build.defect.slab.helpers import create_adatom_defect
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
 

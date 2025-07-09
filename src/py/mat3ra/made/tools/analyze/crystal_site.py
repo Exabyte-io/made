@@ -1,18 +1,16 @@
 from typing import List
 
-import numpy as np
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
-from .other import get_atomic_coordinates_extremum
-from ..build.slab.builders import SlabWithAdditionalLayersBuilder, SlabBuilder
-from ..modify import filter_by_condition_on_coordinates
-from ...material import Material
 
+from ...material import Material
 from ...utils import get_center_of_coordinates
 from ..analyze import BaseMaterialAnalyzer
 from ..analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
 from ..analyze.other import get_closest_site_id_from_coordinate
+from ..build.slab.builders import SlabBuilder, SlabWithAdditionalLayersBuilder
 from ..build.supercell import create_supercell
 from ..convert import to_pymatgen
+from ..modify import filter_by_condition_on_coordinates
 from ..third_party import PymatgenVoronoiInterstitialGenerator
 from ..utils import get_distance_between_coordinates, transform_coordinate_to_supercell
 
