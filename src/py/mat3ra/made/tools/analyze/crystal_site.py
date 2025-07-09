@@ -1,8 +1,10 @@
 from typing import List
 
+import numpy as np
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from .other import get_atomic_coordinates_extremum
 from ..build.slab.builders import SlabWithAdditionalLayersBuilder, SlabBuilder
+from ..modify import filter_by_condition_on_coordinates
 from ...material import Material
 
 from ...utils import get_center_of_coordinates
@@ -57,6 +59,8 @@ class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
         if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found for equidistant calculation.")
 
+        # Filter out atoms that are too close to the z boundaries of the supercell
+        supercell_material = filter_by_condition_on_coordinates(supercell_material, lambda c: 1e-2 < c[2] < 1 - 1e-2)
         isolated_neighboring_atoms_basis = supercell_material.basis.model_copy()
         isolated_neighboring_atoms_basis.coordinates.filter_by_ids(neighboring_atoms_ids_in_supercell)
         equidistant_coordinate_in_supercell = get_center_of_coordinates(

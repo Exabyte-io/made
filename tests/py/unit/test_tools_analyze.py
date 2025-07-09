@@ -93,17 +93,16 @@ VORONOI_SITE_EXPECTED = {TestPlatform.DARWIN: [0.625, 0.625, 0.125], TestPlatfor
 
 
 @pytest.mark.parametrize(
-    "placement_method, expected_coordinate",
+    "placement_method, coordinate, expected_coordinate",
     [
-        (AtomPlacementMethodEnum.EXACT_COORDINATE, [0.25, 0.25, 0.5]),
-        (AtomPlacementMethodEnum.CLOSEST_SITE, [0.25, 0.25, 0.25]),
-        (AtomPlacementMethodEnum.EQUIDISTANT, [0.45833, 0.45833, 0.5]),
-        (AtomPlacementMethodEnum.VORONOI_SITE, VORONOI_SITE_EXPECTED),
+        (AtomPlacementMethodEnum.EXACT_COORDINATE, [0.25, 0.25, 0.5], [0.25, 0.25, 0.5]),
+        (AtomPlacementMethodEnum.CLOSEST_SITE, [0.25, 0.25, 0.5], [0.25, 0.25, 0.25]),
+        (AtomPlacementMethodEnum.EQUIDISTANT, [0.5432, 0.5123, 0.5], [0.58333, 0.58333, 0.5]),
+        (AtomPlacementMethodEnum.VORONOI_SITE, [0.25, 0.25, 0.5], VORONOI_SITE_EXPECTED),
     ],
 )
-def test_crystal_site_analyzer(placement_method, expected_coordinate):
+def test_crystal_site_analyzer(placement_method, coordinate, expected_coordinate):
     crystal = Material.create(BULK_Si_PRIMITIVE)
-    coordinate = [0.25, 0.25, 0.5]
 
     if placement_method == AtomPlacementMethodEnum.VORONOI_SITE:
         analyzer = VoronoiCrystalSiteAnalyzer(material=crystal, coordinate=coordinate)
