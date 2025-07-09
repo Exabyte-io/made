@@ -1,18 +1,34 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect import create_slab_defect
-from mat3ra.made.tools.build.defect.builders import IslandSlabDefectBuilder
-from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration
+from mat3ra.made.tools.build.defect.slab.configuration import VoidSite
+from mat3ra.made.tools.build.defect.slab.helpers import create_island_defect
+from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.utils import coordinate as CoordinateCondition
+
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
 
-@pytest.mark.skip(reason="we'll fix before epic-7623 is merged")
+def test_create_island_defect_new_pattern():
+    slab = Material.create(SI_CONVENTIONAL_SLAB_001)
+    crystal = create_supercell(slab, scaling_factor=[3, 3, 1])
+    condition = CoordinateCondition.CylinderCoordinateCondition(
+        center_position=[0.5, 0.5], radius=0.15, min_z=0, max_z=1
+    )
+
+    defect = create_island_defect(
+        slab=crystal,
+        condition=condition,
+        number_of_added_layers=1,
+    )
+
+    assert defect is not None
+
+
 @pytest.mark.parametrize(
-    "crystal_config, condition_params, defect_type, num_added_layers, num_atoms_in_island, expected_last_element",
+    "condition_class, condition_params",
     [
         (
-            SI_CONVENTIONAL_SLAB_001,
+            CoordinateCondition.CylinderCoordinateCondition,
             {"center_position": [0.5, 0.5], "radius": 0.15, "min_z": 0, "max_z": 1},
             "island",
             1,
