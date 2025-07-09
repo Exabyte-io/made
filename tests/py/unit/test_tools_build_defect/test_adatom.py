@@ -1,6 +1,5 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect import EquidistantAdatomSlabDefectBuilder
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
 from mat3ra.made.tools.build.defect.slab.helpers import create_adatom_defect
 from mat3ra.utils import assertion as assertion_utils
@@ -41,19 +40,3 @@ def test_create_adatom(
         slab, position_on_surface, distance_z, adatom_placement_method, chemical_element, distance_z
     )
     assertion_utils.assert_deep_almost_equal(expected_last_coord, defect.basis.coordinates.values[-1])
-
-
-@pytest.mark.parametrize(
-    "slab_material_config, position_on_surface, distance_z, expected_center",
-    [(SI_CONVENTIONAL_SLAB_001, [0.5432, 0.5123], 2.5, [0.5, 0.5, 0.75735])],
-)
-def test_get_equidistant_position(slab_material_config, position_on_surface, distance_z, expected_center):
-    builder = EquidistantAdatomSlabDefectBuilder()
-
-    slab_material = Material.create(slab_material_config)
-
-    equidistant_position = builder.get_equidistant_position(
-        material=slab_material, position_on_surface=position_on_surface, distance_z=distance_z
-    )
-
-    assertion_utils.assert_deep_almost_equal(equidistant_position, expected_center)
