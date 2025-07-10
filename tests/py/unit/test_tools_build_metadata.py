@@ -26,16 +26,16 @@ class MockParameters(InMemoryEntityPydantic):
 
 
 def test_metadata_initialization_with_data():
-    initial_data = {"existing_key": "existing_value", "build": {"configuration": {"initial": "config"}}}
+    initial_data = {"existing_key": "existing_value", "build": [{"configuration": {"initial": "config"}}]}
     metadata = MaterialMetadata(**initial_data)
 
     assert metadata.existing_key == "existing_value"
-    assert metadata.build.configuration["initial"] == "config"
+    assert metadata.build[-1].configuration["initial"] == "config"
 
 
 def test_metadata_empty_initialization():
     metadata = MaterialMetadata()
-    assert metadata.model_dump(exclude_none=True) == {"build": {"configuration": {}, "build_parameters": {}}}
+    assert metadata.model_dump(exclude_none=True) == {"build": [{"configuration": {}, "build_parameters": {}}]}
 
 
 @pytest.mark.parametrize(
@@ -63,20 +63,20 @@ def test_full_lifecycle_and_serialization():
 
     # Update with a 'to_dict' config
     config = ConfigWithToDict(value="config_value")
-    metadata.build.update(configuration=config)
+    metadata.build[-1].update(configuration=config)
 
     params = MockParameters(param="param_value")
-    metadata.build.update(build_parameters=params)
+    metadata.build[-1].update(build_parameters=params)
 
     # Check the final state before serialization
     assert metadata.existing_key == "previous_material_metadata_value"
-    assert metadata.build.configuration["value"] == "config_value"
-    assert metadata.build.build_parameters["param"] == "param_value"
+    assert metadata.build[-1].configuration["value"] == "config_value"
+    assert metadata.build[-1].build_parameters["param"] == "param_value"
 
     # Check the final serialized dict
     final_dict = metadata.model_dump()
     expected_dict = {
         "existing_key": "previous_material_metadata_value",
-        "build": {"configuration": {"value": "config_value"}, "build_parameters": {"param": "param_value"}},
+        "build": [{"configuration": {"value": "config_value"}, "build_parameters": {"param": "param_value"}}],
     }
     assert final_dict == expected_dict
