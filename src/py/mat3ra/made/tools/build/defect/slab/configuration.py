@@ -1,14 +1,13 @@
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
-# fmt: off
-from mat3ra.esse.models.materials_category.defective_structures.two_dimensional. \
-    adatom.configuration import AdatomPointDefectSchema
-
-# fmt: on
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.stack.configuration import StackConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+
+
+# fmt: off
+# fmt: on
 
 
 class SlabDefectConfiguration(MergeConfiguration):
@@ -54,14 +53,3 @@ class SlabStackConfiguration(StackConfiguration):
     @property
     def vacuum_configuration(self) -> VacuumConfiguration:
         return self.stack_components[2]
-
-
-class AdatomDefectConfiguration(MergeConfiguration, AdatomPointDefectSchema):
-    """
-    Configuration for creating an adatom defect on a slab surface.S
-
-    Args:
-        merge_components: List containing [slab, isolated_defect].
-    """
-
-    type: str = "AdatomDefectConfiguration"

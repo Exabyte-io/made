@@ -5,9 +5,12 @@ from pydantic import BaseModel
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
-from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration, SlabStackConfiguration
-from mat3ra.made.tools.build.defect.point.builders import PointDefectBuilder
-from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration, AdatomDefectConfiguration
+from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration
+from mat3ra.made.tools.build.defect.slab.configuration import (
+    SlabStackConfiguration,
+)
+
+# Import here to avoid circular import
 from mat3ra.made.tools.build.merge import MergeBuilder
 from mat3ra.made.tools.build.metadata import get_slab_build_configuration
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
@@ -15,7 +18,6 @@ from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.made.tools.build.slab.helpers import create_slab
 from mat3ra.made.tools.build.stack.builders import StackNComponentsBuilder
 from mat3ra.made.tools.modify import filter_by_box
-from pydantic import BaseModel
 
 
 class SlabDefectBuilderParameters(BaseModel):
@@ -89,7 +91,3 @@ class SlabStackBuilder(StackNComponentsBuilder):
 
     def _generate(self, configuration: SlabStackConfiguration) -> Material:
         return super()._generate(configuration)
-
-# TODO: only exact cooridante and equidistant use this, for Crystal site we need SlabStackBuilder
-class AdatomDefectBuilder(PointDefectBuilder):
-    _ConfigurationType = AdatomDefectConfiguration
