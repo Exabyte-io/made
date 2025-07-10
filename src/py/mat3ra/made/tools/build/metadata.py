@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import Field
 
 from mat3ra.made.metadata import BaseMetadata
@@ -10,4 +12,4 @@ class BuildMetadata(BaseMetadata):
 
 class MaterialMetadata(BaseMetadata):
     # Other metadata fields can be added as needed
-    build: BuildMetadata = Field(default_factory=BuildMetadata)
+    build: List[BuildMetadata] = Field(default_factory=BuildMetadata)
