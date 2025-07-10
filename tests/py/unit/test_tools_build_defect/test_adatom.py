@@ -1,7 +1,7 @@
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
-from mat3ra.made.tools.build.defect.slab.helpers import create_adatom_defect
+from mat3ra.made.tools.build.defect.adatom.helpers import create_adatom_defect
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
