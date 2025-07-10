@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 from mat3ra.made.material import Material, defaultMaterialConfig
-from mat3ra.made.tools.analyze.crystal_site import (
-    # AdatomCrystalSiteAnalyzer,
+from mat3ra.made.tools.analyze.crystal_site import (  # AdatomCrystalSiteAnalyzer,
+    AdatomCrystalSiteAnalyzer,
     CrystalSiteAnalyzer,
     VoronoiCrystalSiteAnalyzer,
 )
@@ -122,15 +122,15 @@ def test_crystal_site_analyzer(placement_method, coordinate, expected_coordinate
     assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
 
 
-# @pytest.mark.parametrize(
-#     "slab_config, coordinate, expected_coordinate",
-#     [
-#         (SI_CONVENTIONAL_SLAB_001, [0.5, 0.5, 0.5], [0.5, 0.5, 0.57482]),
-#     ],
-# )
-# def test_adatom_crystal_site_analyzer(slab_config, coordinate, expected_coordinate):
-#     slab = Material.create(slab_config)
-#     analyzer = AdatomCrystalSiteAnalyzer(material=slab, coordinate=coordinate)
-#     final_coordinate = analyzer.new_crystal_site_coordinate
-#
-#     assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
+@pytest.mark.parametrize(
+    "slab_config, coordinate, expected_coordinate",
+    [
+        (SI_CONVENTIONAL_SLAB_001, [0.5, 0.5, 0.5], [0.5, 0.5, 0.57482]),
+    ],
+)
+def test_adatom_crystal_site_analyzer(slab_config, coordinate, expected_coordinate):
+    slab = Material.create(slab_config)
+    analyzer = AdatomCrystalSiteAnalyzer(material=slab, coordinate=coordinate)
+    final_coordinate = analyzer.new_crystal_site_coordinate
+
+    assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)

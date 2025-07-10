@@ -28,7 +28,6 @@ class CrystalSiteAdatomSlabDefectBuilder(SlabStackBuilder):
     _ConfigurationType = CrystalSiteAdatomConfiguration
 
     def _generate(self, configuration: CrystalSiteAdatomConfiguration) -> Material:
-
         # Get the original slab material from the first stack component
         original_slab_material = self._configuration_to_material(configuration.stack_components[0])
 
