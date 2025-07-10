@@ -647,7 +647,7 @@ def interface_get_part(
     part: InterfacePartsEnum = InterfacePartsEnum.FILM,
 ) -> Material:
     metadata = MaterialMetadata(**interface.metadata)
-    if metadata.build.configuration.get("type") != "InterfaceConfiguration":
+    if metadata.build[-1].configuration.get("type") != "InterfaceConfiguration":
         raise ValueError("The material is not an interface.")
     interface_part_material = interface.clone()
     film_atoms_basis = interface_part_material.basis.filter_atoms_by_labels([int(part)])
