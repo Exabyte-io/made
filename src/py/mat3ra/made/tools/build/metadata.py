@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from mat3ra.made.metadata import BaseMetadata
 
@@ -12,4 +12,4 @@ class BuildMetadata(BaseMetadata):
 
 class MaterialMetadata(BaseMetadata):
     # Other metadata fields can be added as needed
-    build: List[BuildMetadata] = Field(default_factory=BuildMetadata)
+    build: List[BuildMetadata] = Field(default_factory=lambda: [BuildMetadata()])

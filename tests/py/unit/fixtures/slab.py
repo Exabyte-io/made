@@ -57,10 +57,12 @@ SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL,
-            "build_parameters": SI_SLAB_001_BUILD_PARAMETERS,
-        },
+        "build": [
+            {
+                "configuration": CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL,
+                "build_parameters": SI_SLAB_001_BUILD_PARAMETERS,
+            }
+        ],
     },
 }
 
@@ -119,22 +121,24 @@ SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "stack_components": [
-                    {
-                        "crystal": BULK_Si_CONVENTIONAL,
-                        "miller_indices": [0, 0, 1],
-                        "number_of_repetitions": 2,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "use_conventional_cell": True,
-                    },
-                    {"type": "VacuumConfiguration", "direction": "z", "size": 5.0, "crystal": BULK_Si_CONVENTIONAL},
-                ],
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-            },
-        },
+        "build": [
+            {
+                "configuration": {
+                    "type": "SlabConfiguration",
+                    "stack_components": [
+                        {
+                            "crystal": BULK_Si_CONVENTIONAL,
+                            "miller_indices": [0, 0, 1],
+                            "number_of_repetitions": 2,
+                            "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                            "use_conventional_cell": True,
+                        },
+                        {"type": "VacuumConfiguration", "direction": "z", "size": 5.0, "crystal": BULK_Si_CONVENTIONAL},
+                    ],
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                },
+            }
+        ],
     },
 }
 
@@ -228,23 +232,25 @@ SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
     },
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "stack_components": [
-                    {
-                        "crystal": BULK_Si_PRIMITIVE,
-                        "miller_indices": [0, 0, 1],
-                        "number_of_repetitions": 2,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "use_conventional_cell": False,
-                    },
-                    {"type": "VacuumConfiguration", "direction": "z", "size": 5.0},
-                ],
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-            },
-            "build_parameters": {"use_orthogonal_c": True, "xy_supercell_matrix": [[1, 0], [0, 1]]},
-        },
+        "build": [
+            {
+                "configuration": {
+                    "type": "SlabConfiguration",
+                    "stack_components": [
+                        {
+                            "crystal": BULK_Si_PRIMITIVE,
+                            "miller_indices": [0, 0, 1],
+                            "number_of_repetitions": 2,
+                            "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                            "use_conventional_cell": False,
+                        },
+                        {"type": "VacuumConfiguration", "direction": "z", "size": 5.0},
+                    ],
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                },
+                "build_parameters": {"use_orthogonal_c": True, "xy_supercell_matrix": [[1, 0], [0, 1]]},
+            }
+        ],
     },
 }
 
@@ -280,16 +286,18 @@ SI_SLAB_PASSIVATED = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "PassivationConfiguration",
-                # TODO: `basis` retains "cell" leading to a mismatch in the test
-                "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], SI_SLAB_001_2_ATOMS).pop("cell", None),
-                "passivant": "H",
-                "bond_length": 1.48,
-                "surface": "both",
-            },
-        },
+        "build": [
+            {
+                "configuration": {
+                    "type": "PassivationConfiguration",
+                    # TODO: `basis` retains "cell" leading to a mismatch in the test
+                    "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], SI_SLAB_001_2_ATOMS).pop("cell", None),
+                    "passivant": "H",
+                    "bond_length": 1.48,
+                    "surface": "both",
+                },
+            }
+        ],
     },
 }
 
@@ -342,22 +350,24 @@ SI_SLAB_DEFAULT_PARAMETERS = {
     },
     "metadata": {
         "boundaryConditions": {"offset": 0, "type": "pbc"},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "stack_components": [
-                    {
-                        "crystal": BULK_Si_CONVENTIONAL,
-                        "miller_indices": [0, 0, 1],
-                        "number_of_repetitions": 1,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "use_conventional_cell": True,
-                    },
-                    {"type": "VacuumConfiguration", "direction": "z", "size": 10.0},
-                ],
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-            },
-        },
+        "build": [
+            {
+                "configuration": {
+                    "type": "SlabConfiguration",
+                    "stack_components": [
+                        {
+                            "crystal": BULK_Si_CONVENTIONAL,
+                            "miller_indices": [0, 0, 1],
+                            "number_of_repetitions": 1,
+                            "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                            "use_conventional_cell": True,
+                        },
+                        {"type": "VacuumConfiguration", "direction": "z", "size": 10.0},
+                    ],
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                },
+            }
+        ],
     },
     "name": "Si8(001), termination Si_P4/mmm_2, Slab",
 }
@@ -398,7 +408,7 @@ SI_SLAB_001_ADDED_LAYER = {
             {"id": 3, "value": [0.25, 0.75, 1e-06]},
             {"id": 4, "value": [0.0, 0.0, 0.063869651]},
             {"id": 5, "value": [0.75, 0.25, 1e-06]},
-            {"id": 6, "value": [0.0, 0.5, 0.191606953]},
+            {"id": 6, "value": [0, 0.5, 0.191606953]},
             {"id": 7, "value": [0.75, 0.75, 0.127738302]},
             {"id": 8, "value": [0.5, 0.0, 0.447081557]},
             {"id": 9, "value": [0.25, 0.25, 0.383212906]},
