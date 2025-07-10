@@ -2,6 +2,7 @@ import json
 from typing import Any
 
 from mat3ra.code.entity import InMemoryEntityPydantic
+from pydantic import model_validator
 
 
 def to_dict(obj: Any) -> dict:
@@ -20,6 +21,16 @@ def to_dict(obj: Any) -> dict:
 
 class BaseMetadata(InMemoryEntityPydantic):
     model_config = {"arbitrary_types_allowed": True, "extra": "allow"}
+
+    @model_validator(mode="before")
+    def convert_fields_to_dict(cls, values):
+        for key, value in values.items():
+            field = cls.model_fields.get(key)
+            if field and field.annotation is dict and value is None:
+                values[key] = {}
+            elif isinstance(value, InMemoryEntityPydantic):
+                values[key] = to_dict(value)
+        return values
 
     def update(self, **kwargs: Any):
         for key, value in kwargs.items():

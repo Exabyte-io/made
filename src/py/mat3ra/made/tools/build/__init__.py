@@ -102,11 +102,15 @@ class BaseSingleBuilder(BaseModel):
 
     def _update_material_metadata(self, material, configuration) -> Material:
         metadata = MaterialMetadata(**material.metadata or {})
-        metadata.build[-1].update(configuration=configuration, build_parameters=self.build_parameters)
+        if metadata.build:
+            metadata.build[-1].update(configuration=configuration, build_parameters=self.build_parameters)
+        else:
+            metadata.build.append(BuildMetadata(configuration=configuration, build_parameters=self.build_parameters))
         material.metadata = metadata.to_dict()
         return material
 
 
+# TODO: Remove BaseBuilder and BaseSingleBuilder in favor of BaseBuilder after refactoring is complete.
 class BaseBuilder(BaseModel):
     """
     Base class for material builders.

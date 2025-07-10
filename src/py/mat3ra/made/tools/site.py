@@ -2,14 +2,15 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
+from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.crystal_site import (
     CrystalSiteSchema,
 )
+
 from mat3ra.made.material import Material
-from pydantic import BaseModel
 
 
-class CrystalSite(CrystalSiteSchema, BaseModel):
+class CrystalSite(CrystalSiteSchema, InMemoryEntityPydantic):
     crystal: Optional[Material] = None
     # element: str
     coordinate: Optional[List[float]] = None
