@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import Any, TypeVar, Optional
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
@@ -27,7 +27,9 @@ class Stack2ComponentsBuilder(BaseSingleBuilder):
             else:
                 previous_material = self._configuration_to_material(entity_config)
 
-    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
+    def _configuration_to_material(self, configuration_or_material: Any) -> Optional[Material]:
+        if configuration_or_material is None:
+            return None  # Return None for None input - caller should handle appropriately
         if isinstance(configuration_or_material, Material):
             return configuration_or_material
         if isinstance(configuration_or_material, VacuumConfiguration):
@@ -56,6 +58,7 @@ class StackNComponentsBuilder(Stack2ComponentsBuilder):
         materials = []
         for entity_config in configuration.stack_components:
             material = self._configuration_to_material(entity_config)
-            materials.append(material)
+            if material is not None:
+                materials.append(material)
         stacked_material = stack(materials, configuration.direction or AxisEnum.z)
         return stacked_material

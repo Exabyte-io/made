@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Optional
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interface.configuration import (  # noqa: E501
@@ -35,12 +35,10 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
         return self.stack_components[1]
 
     @property
-    def vacuum_configuration(self) -> VacuumConfiguration:
+    def vacuum_configuration(self) -> Optional[VacuumConfiguration]:
         if len(self.stack_components) > 2:
             return self.stack_components[2]
-        return VacuumConfiguration(
-            size=0.0, crystal=self.film_configuration.atomic_layers.crystal, direction=self.direction
-        )
+        return None
 
 
 class TwistedNanoribbonsInterfaceConfiguration(InterfaceConfiguration):
