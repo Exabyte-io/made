@@ -1,20 +1,22 @@
 from typing import List, Optional
 
-from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.adatom.configuration import AtomSchema
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.point_defect_site import (
+    AtomSchema,
+)
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
-from mat3ra.made.tools.build.defect.adatom.builders import AdatomDefectBuilder, CrystalSiteAdatomSlabDefectBuilder
-from mat3ra.made.tools.build.defect.adatom.configuration import (
+from .builders import AdatomDefectBuilder, CrystalSiteAdatomSlabDefectBuilder
+from .configuration import (
     AdatomDefectConfiguration,
     CrystalSiteAdatomConfiguration,
 )
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer
-from mat3ra.made.tools.analyze.other import get_atomic_coordinates_extremum
-from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
-from mat3ra.made.tools.build.defect.point.builders import PointDefectSiteBuilder
-from mat3ra.made.tools.build.defect.point.configuration import PointDefectSite
+from ....analyze.crystal_site import CrystalSiteAnalyzer
+from ....analyze.other import get_atomic_coordinates_extremum
+from ...defect.enums import AdatomPlacementMethodEnum
+from ..point.builders import PointDefectSiteBuilder
+from ..point.configuration import PointDefectSite
 
 
 def create_adatom_defect(
