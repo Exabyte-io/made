@@ -1,5 +1,3 @@
-from mat3ra.code.entity import InMemoryEntityPydantic
-
 from ..analyze import BaseMaterialAnalyzer
 from ..build.metadata import MaterialMetadata
 from ..build.slab.configurations import SlabConfiguration
@@ -27,7 +25,6 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
 
     @property
     def vacuum_thickness_in_layers(self) -> float:
-        slab_configuration = self.get_slab_configuration()
         return self.vacuum_ratio / (1 - self.vacuum_ratio) * self.number_of_layers
 
     def get_slab_configuration_with_no_vacuum(self) -> SlabConfiguration:

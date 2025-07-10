@@ -8,19 +8,15 @@ from .configurations import (
     CrystalLatticePlanesConfiguration,
     SlabStrainedSupercellConfiguration,
     SlabStrainedSupercellWithGapConfiguration,
-    SlabWithAdditionalLayersConfiguration,
 )
 from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfiguration
 from .configurations.slab_configuration import SlabConfiguration
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder
 from ..stack.builders import Stack2ComponentsBuilder
-from ..stack.configuration import StackConfiguration
-from ..vacuum.builders import VacuumBuilder
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
-from ...modify import wrap_to_unit_cell, translate_to_z_level, filter_by_box
-from ...operations.core.binary import stack
+from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...operations.core.unary import supercell, translate, strain, edit_cell
 from ...utils import AXIS_TO_INDEX_MAP
 

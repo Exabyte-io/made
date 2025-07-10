@@ -16,7 +16,6 @@ from mat3ra.made.tools.modify import filter_by_box
 
 
 def get_slab_build_configuration(metadata: dict) -> SlabConfiguration:
-
     material_metadata = MaterialMetadata(**metadata)
     slab_build_configuration_dict = material_metadata.current_build.configuration
 

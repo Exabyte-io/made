@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import Field, model_validator
+from pydantic import Field
 
 from mat3ra.made.metadata import BaseMetadata
 
