@@ -40,8 +40,8 @@ def merge(
 
 def stack(materials: List[Material], direction: AxisEnum) -> Material:
     result = materials[0]
-    for m in materials[1:]:
-        result = stack_two_materials(material_1=result, material_2=m, direction=direction)
+    for material in materials[1:]:
+        result = stack_two_materials(material_1=result, material_2=material, direction=direction)
     return result
 
 

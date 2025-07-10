@@ -1,17 +1,12 @@
 from ..analyze import BaseMaterialAnalyzer
-from ..build.metadata import MaterialMetadata
+from ..build.metadata import get_slab_build_configuration
 from ..build.slab.configurations import SlabConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
 
 
 class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
     def get_slab_configuration(self) -> SlabConfiguration:
-        metadata = MaterialMetadata(**self.material.metadata)
-        slab_build_configuration_dict = metadata.build[-1].configuration
-        if slab_build_configuration_dict.get("type") != "SlabConfiguration":
-            raise ValueError("Material is not a slab.")
-
-        return SlabConfiguration(**slab_build_configuration_dict)
+        return get_slab_build_configuration(self.material.metadata)
 
     @property
     def number_of_layers(self) -> int:

@@ -7,22 +7,12 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.build.defect.slab.configuration import SlabDefectConfiguration, SlabStackConfiguration
 from mat3ra.made.tools.build.merge import MergeBuilder
-from mat3ra.made.tools.build.metadata import MaterialMetadata
+from mat3ra.made.tools.build.metadata import get_slab_build_configuration
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.made.tools.build.slab.helpers import create_slab
 from mat3ra.made.tools.build.stack.builders import StackNComponentsBuilder
 from mat3ra.made.tools.modify import filter_by_box
-
-
-def get_slab_build_configuration(metadata: dict) -> SlabConfiguration:
-    material_metadata = MaterialMetadata(**metadata)
-    slab_build_configuration_dict = material_metadata.current_build.configuration
-
-    if slab_build_configuration_dict.get("type") != "SlabConfiguration":
-        raise ValueError("Material is not a slab.")
-
-    return SlabConfiguration(**slab_build_configuration_dict)
 
 
 class SlabDefectBuilderParameters(BaseModel):
@@ -45,7 +35,6 @@ class SlabDefectBuilder(MergeBuilder):
         Returns:
             Material: The new slab material with additional layers and vacuum if needed.
         """
-        # get_slab_build_configuration handles the supercell creation, etc.
         slab_configuration = get_slab_build_configuration(slab.metadata)
         total_number_of_layers = slab_configuration.number_of_layers + number_of_additional_layers
         return create_slab(

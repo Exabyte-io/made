@@ -133,12 +133,12 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
         direction_str = direction.value
         axis_index = AXIS_TO_INDEX_MAP[direction_str]
 
-        max_frac = get_atomic_coordinates_extremum(material, "max", direction_str, False)
+        max_fractional = get_atomic_coordinates_extremum(material, "max", direction_str, False)
         current_vectors = material.lattice.vector_arrays
         current_vector = np.array(current_vectors[axis_index])
         current_length = np.linalg.norm(current_vector)
 
-        new_length = (max_frac * current_length) + gap
+        new_length = (max_fractional * current_length) + gap
 
         if current_length > 0:
             new_vector = (current_vector / current_length) * new_length
