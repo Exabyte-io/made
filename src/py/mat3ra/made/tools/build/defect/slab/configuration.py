@@ -2,6 +2,8 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
+from mat3ra.made.tools.build.stack.configuration import StackConfiguration
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 
 
 class SlabDefectConfiguration(MergeConfiguration):
@@ -23,3 +25,27 @@ class SlabDefectConfiguration(MergeConfiguration):
     @property
     def isolated_defect(self) -> Material:
         return self.merge_components[1]
+
+
+class SlabStackConfiguration(StackConfiguration):
+    """
+    Configuration for stacking a slab, an isolated defect and a vacuum layer.
+
+    Args:
+        stack_components: List containing [slab, slab_component, vacuum].
+        direction: Direction of stacking (default: z).
+    """
+
+    type: str = "SlabStackConfiguration"
+
+    @property
+    def slab(self) -> Material:
+        return self.stack_components[0]
+
+    @property
+    def added_component(self) -> Material:
+        return self.stack_components[1]
+
+    @property
+    def vacuum_configuration(self) -> VacuumConfiguration:
+        return self.stack_components[2]
