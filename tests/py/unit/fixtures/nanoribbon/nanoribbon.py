@@ -59,16 +59,18 @@ GRAPHENE_ZIGZAG_NANORIBBON: Dict[str, Any] = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "material": GRAPHENE,
-                "width": 2,
-                "length": 4,
-                "vacuum_width": 3,
-                "vacuum_length": 0,
-                "edge_type": "zigzag",
+        "build": [
+            {
+                "configuration": {
+                    "material": GRAPHENE,
+                    "width": 2,
+                    "length": 4,
+                    "vacuum_width": 3,
+                    "vacuum_length": 0,
+                    "edge_type": "zigzag",
+                }
             }
-        },
+        ],
     },
 }
 
@@ -128,16 +130,18 @@ GRAPHENE_ARMCHAIR_NANORIBBON = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "material": GRAPHENE,
-                "width": 2,
-                "length": 4,
-                "vacuum_width": 3,
-                "vacuum_length": 0,
-                "edge_type": "armchair",
+        "build": [
+            {
+                "configuration": {
+                    "material": GRAPHENE,
+                    "width": 2,
+                    "length": 4,
+                    "vacuum_width": 3,
+                    "vacuum_length": 0,
+                    "edge_type": "armchair",
+                }
             }
-        },
+        ],
     },
 }
 
@@ -212,15 +216,19 @@ GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "PassivationConfiguration",
-                # TODO: `basis` retains "cell" leading to a mismatch in the test (as above)
-                "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], GRAPHENE_ZIGZAG_NANORIBBON).pop("cell", None),
-                "passivant": "H",
-                "bond_length": 1.48,
-                "surface": "both",
+        "build": [
+            {
+                "configuration": {
+                    "type": "PassivationConfiguration",
+                    # TODO: `basis` retains "cell" leading to a mismatch in the test (as above)
+                    "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], GRAPHENE_ZIGZAG_NANORIBBON).pop(
+                        "cell", None
+                    ),
+                    "passivant": "H",
+                    "bond_length": 1.48,
+                    "surface": "both",
+                }
             }
-        },
+        ],
     },
 }

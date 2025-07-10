@@ -108,7 +108,7 @@ def create_slab(
 def create_slab_if_not(material: Material, default_slab_configuration: SlabConfiguration) -> Material:
     slab = material
     metadata = MaterialMetadata(**slab.metadata or {})
-    if not metadata.build.configuration or metadata.build.configuration.get("type") != "SlabConfiguration":
+    if not metadata.build[-1].configuration or metadata.build[-1].configuration.get("type") != "SlabConfiguration":
         print("The material is not a slab. Creating a new slab...")
         slab = create_slab(**default_slab_configuration.to_dict())
     return slab
