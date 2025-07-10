@@ -37,6 +37,11 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     def vacuum_configuration(self) -> VacuumConfiguration:
         return self.stack_components[1]
 
+    def set_vacuum(self, vacuum: float) -> None:
+        vacuum_configuration = self.vacuum_configuration
+        vacuum_configuration.size = vacuum
+        self.stack_components[1] = vacuum_configuration
+
     @classmethod
     def from_parameters(
         cls,
