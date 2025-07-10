@@ -102,10 +102,8 @@ class BaseSingleBuilder(BaseModel):
 
     def _update_material_metadata(self, material, configuration) -> Material:
         metadata = MaterialMetadata(**material.metadata or {})
-        if metadata.build:
-            metadata.build[-1].update(configuration=configuration, build_parameters=self.build_parameters)
-        else:
-            metadata.build.append(BuildMetadata(configuration=configuration, build_parameters=self.build_parameters))
+        build_metadata = BuildMetadata(configuration=configuration, build_parameters=self.build_parameters)
+        metadata.build.append(build_metadata)
         material.metadata = metadata.to_dict()
         return material
 

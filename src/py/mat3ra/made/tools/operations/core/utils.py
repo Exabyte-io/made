@@ -3,6 +3,7 @@ from typing import Optional
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
 
@@ -77,6 +78,7 @@ def merge_two_materials(
     new_material = Material.create(
         {"name": name, "lattice": material1.lattice.to_dict(), "basis": merged_basis.to_dict()}
     )
+
     return new_material
 
 

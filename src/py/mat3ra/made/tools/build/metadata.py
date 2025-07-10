@@ -12,7 +12,7 @@ class BuildMetadata(BaseMetadata):
 
 class MaterialMetadata(BaseMetadata):
     # Other metadata fields can be added as needed
-    build: List[BuildMetadata] = Field(default_factory=lambda: [BuildMetadata()])
+    build: List[BuildMetadata] = Field([])
 
 
 def get_slab_build_configuration(metadata: dict):
