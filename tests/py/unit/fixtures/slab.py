@@ -287,7 +287,9 @@ SI_SLAB_PASSIVATED = {
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": [
+            SI_SLAB_001_2_ATOMS["metadata"]["build"][0],
             {
+                "build_parameters": {},
                 "configuration": {
                     "type": "PassivationConfiguration",
                     # TODO: `basis` retains "cell" leading to a mismatch in the test
@@ -296,7 +298,7 @@ SI_SLAB_PASSIVATED = {
                     "bond_length": 1.48,
                     "surface": "both",
                 },
-            }
+            },
         ],
     },
 }

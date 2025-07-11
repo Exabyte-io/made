@@ -35,7 +35,7 @@ def test_metadata_initialization_with_data():
 
 def test_metadata_empty_initialization():
     metadata = MaterialMetadata()
-    assert metadata.model_dump(exclude_none=True) == {"build": [{"configuration": {}, "build_parameters": {}}]}
+    assert metadata.model_dump(exclude_none=True) == {"build": []}
 
 
 @pytest.mark.parametrize(
@@ -63,10 +63,8 @@ def test_full_lifecycle_and_serialization():
 
     # Update with a 'to_dict' config
     config = ConfigWithToDict(value="config_value")
-    metadata.build[-1].update(configuration=config)
-
     params = MockParameters(param="param_value")
-    metadata.build[-1].update(build_parameters=params)
+    metadata.build.append(BuildMetadata(configuration=config, build_parameters=params))
 
     # Check the final state before serialization
     assert metadata.existing_key == "previous_material_metadata_value"

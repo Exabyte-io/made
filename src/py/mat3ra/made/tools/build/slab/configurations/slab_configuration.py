@@ -87,13 +87,3 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
             stack_components=[atomic_layers_repeated_configuration, vacuum_configuration],
             direction=AxisEnum.z,
         )
-
-    def to_parameters(self) -> dict:
-        atomic_layers = self.atomic_layers
-        return {
-            "material_or_dict": atomic_layers.crystal,
-            "miller_indices": atomic_layers.miller_indices,
-            "number_of_layers": atomic_layers.number_of_repetitions,
-            "termination_formula": atomic_layers.termination_top.formula if atomic_layers.termination_top else None,
-            "vacuum": self.vacuum_configuration.size,
-        }

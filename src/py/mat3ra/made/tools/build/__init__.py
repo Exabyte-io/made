@@ -1,10 +1,10 @@
-from typing import List, Optional, Any, Type, TypeVar
+from typing import List, Optional, Any, TypeVar
 
 from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
 from pydantic import BaseModel
 
-from ...material import Material
 from .metadata import MaterialMetadata, BuildMetadata
+from ...material import Material
 
 BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound="BaseConfigurationPydantic")
 
@@ -102,11 +102,13 @@ class BaseSingleBuilder(BaseModel):
 
     def _update_material_metadata(self, material, configuration) -> Material:
         metadata = MaterialMetadata(**material.metadata or {})
-        metadata.build[-1].update(configuration=configuration, build_parameters=self.build_parameters)
+        build_metadata = BuildMetadata(configuration=configuration, build_parameters=self.build_parameters)
+        metadata.build.append(build_metadata)
         material.metadata = metadata.to_dict()
         return material
 
 
+# TODO: Remove BaseBuilder and BaseSingleBuilder in favor of BaseBuilder after refactoring is complete.
 class BaseBuilder(BaseModel):
     """
     Base class for material builders.
@@ -213,6 +215,6 @@ class BaseBuilder(BaseModel):
 
     def _update_material_metadata(self, material, configuration) -> Material:
         metadata = MaterialMetadata(**material.metadata or {})
-        metadata.build[-1].update(configuration=configuration, build_parameters=self.build_parameters)
+        metadata.build.append(BuildMetadata(configuration=configuration, build_parameters=self.build_parameters))
         material.metadata = metadata.to_dict()
         return material

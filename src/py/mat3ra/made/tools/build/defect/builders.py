@@ -12,7 +12,6 @@ from .configuration import (
 )
 from .factories import DefectBuilderFactory
 from .point.builders import PointDefectBuilder
-from .slab.builders import SlabDefectBuilder
 from ...analyze.other import (
     get_atomic_coordinates_extremum,
 )
@@ -89,7 +88,7 @@ class PointDefectPairBuilder(PointDefectBuilder, DefectPairBuilder):
         return updated_material
 
 
-class IslandSlabDefectBuilder(SlabDefectBuilder):
+class IslandSlabDefectBuilder(DefectBuilder):
     _ConfigurationType: type(IslandSlabDefectConfiguration) = IslandSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
@@ -151,7 +150,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         ]
 
 
-class TerraceSlabDefectBuilder(SlabDefectBuilder):
+class TerraceSlabDefectBuilder(DefectBuilder):
     _ConfigurationType: type(TerraceSlabDefectConfiguration) = TerraceSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
