@@ -60,7 +60,7 @@ def create_adatom_defect(
         resolved_coordinate_in_slab_cartesian = slab.basis.cell.convert_point_to_cartesian(resolved_coordinate_in_slab)
         resolved_coordinate = added_slab.basis.cell.convert_point_to_crystal(resolved_coordinate_in_slab_cartesian)
         slab_without_vacuum_configuration = SlabStrainedSupercellWithGapConfiguration(
-            **slab_without_vacuum_configuration.to_dict(), gap=0.001
+            **slab_without_vacuum_configuration.to_dict(), gap=0.0
         )
     else:
         resolved_coordinate = coordinate
