@@ -36,4 +36,3 @@ class IslandDefectConfiguration(SlabStackConfiguration):
     """
 
     type: str = "IslandDefectConfiguration"
-

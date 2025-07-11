@@ -5,9 +5,6 @@ from sympy import ceiling
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
-from mat3ra.made.tools.build.defect.slab.builders import IslandDefectBuilder
-from mat3ra.made.tools.build.defect.slab.configuration import IslandDefectConfiguration
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.utils.coordinate import CoordinateCondition
 from .builders import SlabStackBuilder
 from .configuration import SlabStackConfiguration
@@ -68,9 +65,6 @@ def recreate_slab_with_fractional_layers(slab: Material, number_of_layers: float
         max_coordinate=[1, 1, max_z_crystal_coordinate],
         reset_ids=True,
     )
-
-    builder = AdatomDefectBuilder()
-    return builder.get_material(configuration)
 
 
 def create_island_defect(

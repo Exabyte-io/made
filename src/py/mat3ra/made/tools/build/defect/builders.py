@@ -1,4 +1,4 @@
-from typing import List, Callable, Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 
@@ -6,7 +6,6 @@ from mat3ra.made.material import Material
 from .configuration import (
     PointDefectConfigurationLegacy,
     AdatomSlabPointDefectConfiguration,
-    IslandSlabDefectConfiguration,
     TerraceSlabDefectConfiguration,
     PointDefectPairConfiguration,
 )
@@ -17,7 +16,6 @@ from ...analyze.other import (
 )
 from ...build import BaseBuilder
 from ...modify import (
-    filter_by_box,
     filter_by_condition_on_coordinates,
     translate_to_z_level,
     rotate,
