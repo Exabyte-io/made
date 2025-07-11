@@ -77,6 +77,7 @@ def merge_two_materials(
     new_material = Material.create(
         {"name": name, "lattice": material1.lattice.to_dict(), "basis": merged_basis.to_dict()}
     )
+
     return new_material
 
 

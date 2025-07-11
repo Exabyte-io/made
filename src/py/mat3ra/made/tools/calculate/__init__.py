@@ -114,7 +114,7 @@ def calculate_interfacial_energy(
     film_slab = get_slab(interface, part="film") if film_slab is None else film_slab
 
     metadata = MaterialMetadata(**interface.metadata)
-    build_configuration = metadata.build.configuration
+    build_configuration = metadata.build[-1].configuration if metadata.build else {}
     try:
         substrate_bulk = (
             Material.create(build_configuration.get("substrate_configuration", {}).get("bulk"))

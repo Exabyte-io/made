@@ -22,12 +22,25 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     direction: AxisEnum = AxisEnum.z
 
     @property
+    def number_of_layers(self):
+        return self.atomic_layers.number_of_repetitions
+
+    @property
+    def vacuum(self):
+        return self.vacuum_configuration.size
+
+    @property
     def atomic_layers(self):
         return self.stack_components[0]
 
     @property
     def vacuum_configuration(self) -> VacuumConfiguration:
         return self.stack_components[1]
+
+    def set_vacuum(self, vacuum: float) -> None:
+        vacuum_configuration = self.vacuum_configuration
+        vacuum_configuration.size = vacuum
+        self.stack_components[1] = vacuum_configuration
 
     @classmethod
     def from_parameters(
@@ -74,13 +87,3 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
             stack_components=[atomic_layers_repeated_configuration, vacuum_configuration],
             direction=AxisEnum.z,
         )
-
-    def to_parameters(self) -> dict:
-        atomic_layers = self.atomic_layers
-        return {
-            "material_or_dict": atomic_layers.crystal,
-            "miller_indices": atomic_layers.miller_indices,
-            "number_of_layers": atomic_layers.number_of_repetitions,
-            "termination_formula": atomic_layers.termination_top.formula if atomic_layers.termination_top else None,
-            "vacuum": self.vacuum_configuration.size,
-        }
