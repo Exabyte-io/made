@@ -43,7 +43,7 @@ def create_adatom_defect(
 
     slab_analyzer = SlabMaterialAnalyzer(material=slab)
 
-    slab_without_vacuum = slab_analyzer.get_slab_configuration_with_no_vacuum()
+    slab_without_vacuum_configuration = slab_analyzer.get_slab_configuration_with_no_vacuum()
     added_slab = recreate_slab_with_fractional_layers(slab, 1)
 
     if placement_method == AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE:
@@ -53,7 +53,10 @@ def create_adatom_defect(
         max_z = get_atomic_coordinates_extremum(slab, "max", "z")
         coordinate[2] = max_z + distance_z_crystal
         crystal_site_analyzer = CrystalSiteAnalyzer(material=slab, coordinate=coordinate)
-        resolved_coordinate = crystal_site_analyzer.equidistant_coordinate
+        resolved_coordinate_in_slab = crystal_site_analyzer.equidistant_coordinate
+        resolved_coordinate_in_slab[2] = resolved_coordinate_in_slab[2] - max_z
+        resolved_coordinate_in_slab_cartesian = slab.basis.cell.convert_point_to_cartesian(resolved_coordinate_in_slab)
+        resolved_coordinate = added_slab.basis.cell.convert_point_to_crystal(resolved_coordinate_in_slab_cartesian)
     else:
         resolved_coordinate = coordinate
 
@@ -67,7 +70,7 @@ def create_adatom_defect(
     vacuum = slab_analyzer.get_slab_vacuum_configuration()
 
     configuration = AdatomDefectConfiguration(
-        stack_components=[slab_without_vacuum, isolated_defect, vacuum],
+        stack_components=[slab_without_vacuum_configuration, isolated_defect, vacuum],
     )
 
     builder = AdatomDefectBuilder()

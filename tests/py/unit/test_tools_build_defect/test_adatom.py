@@ -23,7 +23,7 @@ from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
             2.0,
             "Si",
             AdatomPlacementMethodEnum.EQUIDISTANT,
-            [0.5, 0.5, 0.72598],
+            [0.5, 0.5, 0.60438],
         ),
     ],
 )
