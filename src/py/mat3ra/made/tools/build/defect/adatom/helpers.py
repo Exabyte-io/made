@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+import numpy as np
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.point_defect_site import (
     AtomSchema,
 )
@@ -14,6 +15,7 @@ from ..point.builders import PointDefectSiteBuilder
 from ..point.configuration import PointDefectSite
 from ..slab.helpers import recreate_slab_with_fractional_layers
 from ...defect.enums import AdatomPlacementMethodEnum
+from ...slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ....analyze.crystal_site import CrystalSiteAnalyzer
 from ....analyze.other import get_atomic_coordinates_extremum
 
@@ -57,6 +59,9 @@ def create_adatom_defect(
         resolved_coordinate_in_slab[2] = resolved_coordinate_in_slab[2] - max_z
         resolved_coordinate_in_slab_cartesian = slab.basis.cell.convert_point_to_cartesian(resolved_coordinate_in_slab)
         resolved_coordinate = added_slab.basis.cell.convert_point_to_crystal(resolved_coordinate_in_slab_cartesian)
+        slab_without_vacuum_configuration = SlabStrainedSupercellWithGapConfiguration(
+            **slab_without_vacuum_configuration.to_dict(), gap=0.001
+        )
     else:
         resolved_coordinate = coordinate
 
