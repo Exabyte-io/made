@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-import numpy as np
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.point_defect_site import (
     AtomSchema,
 )
