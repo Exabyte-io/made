@@ -217,7 +217,9 @@ GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
         "build": [
+            GRAPHENE_ZIGZAG_NANORIBBON["metadata"]["build"][0],
             {
+                "build_parameters": {},
                 "configuration": {
                     "type": "PassivationConfiguration",
                     # TODO: `basis` retains "cell" leading to a mismatch in the test (as above)
@@ -227,8 +229,8 @@ GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
                     "passivant": "H",
                     "bond_length": 1.48,
                     "surface": "both",
-                }
-            }
+                },
+            },
         ],
     },
 }

@@ -28,17 +28,15 @@ class BaseMetadata(InMemoryEntityPydantic):
             field = cls.model_fields.get(key)
             if field and field.annotation is dict and value is None:
                 values[key] = {}
+            elif field and field.annotation is dict and value is not None and not isinstance(value, dict):
+                values[key] = to_dict(value)
             elif isinstance(value, InMemoryEntityPydantic):
                 values[key] = to_dict(value)
             elif hasattr(value, "to_dict") and callable(value.to_dict):
-                values[key] = value.to_dict()
+                values[key] = to_dict(value)
             # TODO: remove when Pydantic configurations are fully implemented
             elif hasattr(value, "to_json") and callable(value.to_json):
-                data = value.to_json()
-                if isinstance(data, str):
-                    values[key] = json.loads(data)
-                else:
-                    values[key] = data
+                values[key] = to_dict(value)
         return values
 
     def update(self, **kwargs: Any):
