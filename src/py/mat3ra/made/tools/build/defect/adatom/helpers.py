@@ -15,6 +15,7 @@ from ..point.configuration import PointDefectSite
 from ..slab.helpers import recreate_slab_with_fractional_layers
 from ...defect.enums import AdatomPlacementMethodEnum
 from ....analyze.crystal_site import CrystalSiteAnalyzer
+from ....analyze.other import get_atomic_coordinates_extremum
 
 
 def create_adatom_defect(
@@ -23,7 +24,6 @@ def create_adatom_defect(
     distance_z: float = 1.0,
     placement_method: AdatomPlacementMethodEnum = AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE,
     element: Optional[str] = None,
-    added_vacuum: float = 5.0,
 ) -> Material:
     """
     Create an adatom defect using the new AdatomDefectConfiguration and AdatomDefectBuilder.
@@ -34,7 +34,6 @@ def create_adatom_defect(
         element: Chemical element for the adatom.
         distance_z: Distance above the surface in Angstroms.
         placement_method: Method for placing the adatom.
-        added_vacuum: Additional vacuum thickness.
 
     Returns:
         Material: The slab with adatom defect.
@@ -51,7 +50,9 @@ def create_adatom_defect(
         crystal_site_analyzer = CrystalSiteAnalyzer(material=added_slab, coordinate=coordinate)
         resolved_coordinate = crystal_site_analyzer.closest_site_coordinate
     elif placement_method == AdatomPlacementMethodEnum.EQUIDISTANT:
-        crystal_site_analyzer = CrystalSiteAnalyzer(material=added_slab, coordinate=coordinate)
+        max_z = get_atomic_coordinates_extremum(slab, "max", "z")
+        coordinate[2] = max_z + distance_z_crystal
+        crystal_site_analyzer = CrystalSiteAnalyzer(material=slab, coordinate=coordinate)
         resolved_coordinate = crystal_site_analyzer.equidistant_coordinate
     else:
         resolved_coordinate = coordinate
@@ -71,39 +72,3 @@ def create_adatom_defect(
 
     builder = AdatomDefectBuilder()
     return builder.get_material(configuration)
-
-
-#
-#
-# def create_crystal_site_adatom_defect(
-#     slab: Material,
-#     position_on_surface: List[float],
-#     distance_z: float = 1.0,
-#     element: Optional[str] = None,
-# ) -> Material:
-#     """
-#     Create an adatom defect using crystal site placement with the new SlabStackBuilder approach.
-#
-#     This function uses the new approach where:
-#     1. Original slab (without vacuum)
-#     2. Added component (single atom in lattice from recreate_slab_with_fractional_layers)
-#     3. Vacuum layer
-#
-#     Args:
-#         slab: The slab material.
-#         position_on_surface: Position on the surface [x, y].
-#         distance_z: Distance above the surface in Angstroms.
-#         element: Chemical element for the adatom.
-#
-#     Returns:
-#         Material: The slab with adatom defect using crystal site approach.
-#     """
-#     distance_z_crystal = slab.basis.cell.convert_point_to_crystal([0, 0, distance_z])[2]
-#     coordinate = [*position_on_surface, distance_z_crystal]
-#     analyzer = AdatomCrystalSiteAnalyzer(material=slab, coordinate=coordinate)
-#     coordinate = analyzer.new_crystal_site_coordinate
-#
-#     configuration = AdatomDefectConfiguration.from_parameters(slab=slab, coordinate=coordinate, element=element)
-#
-#     builder = AdatomDefectBuilder()
-#     return builder.get_material(configuration)

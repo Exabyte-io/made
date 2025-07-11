@@ -36,7 +36,5 @@ def test_create_adatom(
     expected_last_coord,
 ):
     slab = Material.create(crystal_config)
-    defect = create_adatom_defect(
-        slab, position_on_surface, distance_z, adatom_placement_method, chemical_element, distance_z
-    )
+    defect = create_adatom_defect(slab, position_on_surface, distance_z, adatom_placement_method, chemical_element)
     assertion_utils.assert_deep_almost_equal(expected_last_coord, defect.basis.coordinates.values[-1])
