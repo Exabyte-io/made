@@ -1,9 +1,10 @@
-from typing import List, Optional, Any, Type
+from typing import Optional, Any, Type
 
 import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
+from .build_parameters import SlabBuilderParameters
 from .configurations import (
     CrystalLatticePlanesConfiguration,
     SlabStrainedSupercellConfiguration,
@@ -12,7 +13,7 @@ from .configurations import (
 from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfiguration
 from .configurations.slab_configuration import SlabConfiguration
 from .utils import get_orthogonal_c_slab
-from .. import BaseBuilderParameters, BaseSingleBuilder
+from .. import BaseSingleBuilder
 from ..stack.builders import Stack2ComponentsBuilder
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
@@ -61,11 +62,6 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
             material_translated_wrapped, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
         )
         return material_translated_wrapped_layered
-
-
-class SlabBuilderParameters(BaseBuilderParameters):
-    use_orthogonal_c: bool = True
-    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
 
 
 class SlabBuilder(Stack2ComponentsBuilder):

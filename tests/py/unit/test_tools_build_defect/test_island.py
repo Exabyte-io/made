@@ -1,5 +1,4 @@
 import pytest
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration
 from mat3ra.made.tools.build.defect.slab.builders import IslandDefectBuilder
@@ -13,12 +12,13 @@ def test_create_island_defect_new_pattern():
     slab = Material.create(SI_CONVENTIONAL_SLAB_001)
     crystal = create_supercell(slab, scaling_factor=[3, 3, 1])
     condition = CoordinateCondition.CylinderCoordinateCondition(
-        center_position=[0.5, 0.5], radius=0.15, min_z=0, max_z=1
+        center_position=[0.5, 0.5], radius=0.25, min_z=0, max_z=1
     )
 
     defect = create_island_defect(
         slab=crystal,
         condition=condition,
+        use_cartesian_coordinates=False,
         number_of_added_layers=1,
     )
 
@@ -31,7 +31,7 @@ def test_create_island_defect_new_pattern():
         (
             SI_CONVENTIONAL_SLAB_001,
             CoordinateCondition.CylinderCoordinateCondition,
-            {"center_position": [0.5, 0.5], "radius": 0.15, "min_z": 0, "max_z": 1},
+            {"center_position": [0.5, 0.5], "radius": 0.55, "min_z": 0, "max_z": 1},
             1,
             1,
             "Si",

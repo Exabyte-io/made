@@ -101,10 +101,7 @@ class BaseSingleBuilder(BaseModel):
         return material
 
     def _update_material_metadata(self, material, configuration) -> Material:
-        metadata = MaterialMetadata(**material.metadata or {})
-        build_metadata = BuildMetadata(configuration=configuration, build_parameters=self.build_parameters)
-        metadata.build.append(build_metadata)
-        material.metadata = metadata.to_dict()
+        BuildMetadata.set_build_metadata(material, configuration, self.build_parameters)
         return material
 
 
@@ -214,7 +211,5 @@ class BaseBuilder(BaseModel):
         return material
 
     def _update_material_metadata(self, material, configuration) -> Material:
-        metadata = MaterialMetadata(**material.metadata or {})
-        metadata.build.append(BuildMetadata(configuration=configuration, build_parameters=self.build_parameters))
-        material.metadata = metadata.to_dict()
+        BuildMetadata.set_build_metadata(material, configuration, self.build_parameters)
         return material

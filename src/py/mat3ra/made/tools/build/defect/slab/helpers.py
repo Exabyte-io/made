@@ -8,7 +8,9 @@ from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.utils.coordinate import CoordinateCondition
 from .builders import SlabStackBuilder
 from .configuration import SlabStackConfiguration
+from ...slab.builders import SlabWithGapBuilder, SlabBuilder
 from ...slab.helpers import create_slab
+from ...vacuum.configuration import VacuumConfiguration
 from ....modify import filter_by_box, filter_by_condition_on_coordinates
 
 
@@ -24,12 +26,18 @@ def create_slab_stack(slab: Material, added_component: Material) -> Material:
     """
     analyzer = SlabMaterialAnalyzer(material=slab)
 
-    slab_without_vacuum = analyzer.get_slab_configuration_with_no_vacuum()
+    slab_without_vacuum_configuration = analyzer.get_slab_configuration_with_no_vacuum()
+    slab_build_parameters = analyzer.get_build_parameters()
 
-    vacuum_config = analyzer.get_slab_vacuum_configuration()
+    new_slab = SlabBuilder(build_parameters=slab_build_parameters).get_material(slab_without_vacuum_configuration)
+
+    original_vacuum_config = analyzer.get_slab_vacuum_configuration()
+    vacuum_config = VacuumConfiguration(
+        size=original_vacuum_config.size, crystal=new_slab, direction=original_vacuum_config.direction
+    )
 
     slab_stack_config = SlabStackConfiguration(
-        stack_components=[slab_without_vacuum, added_component, vacuum_config], direction=AxisEnum.z
+        stack_components=[new_slab, added_component, vacuum_config], direction=AxisEnum.z
     )
 
     slab_stack_builder = SlabStackBuilder()
@@ -48,7 +56,7 @@ def recreate_slab_with_fractional_layers(slab: Material, number_of_layers: float
     """
     analyzer = SlabMaterialAnalyzer(material=slab)
     slab_without_vacuum = analyzer.get_slab_configuration_with_no_vacuum()
-    # vacuum_config = analyzer.get_slab_vacuum_configuration()
+    build_parameters = analyzer.get_build_parameters()
 
     ceiling_number_of_layers = int(ceiling(number_of_layers))
     slab_with_int_layers_without_vacuum = create_slab(
@@ -57,6 +65,7 @@ def recreate_slab_with_fractional_layers(slab: Material, number_of_layers: float
         termination=slab_without_vacuum.atomic_layers.termination_top,
         number_of_layers=ceiling_number_of_layers,
         vacuum=0,
+        xy_supercell_matrix=build_parameters.xy_supercell_matrix,
     )
 
     max_z_crystal_coordinate = number_of_layers / ceiling_number_of_layers
