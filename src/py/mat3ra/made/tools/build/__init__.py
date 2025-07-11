@@ -1,10 +1,10 @@
-from typing import List, Optional, Any, Type, TypeVar
+from typing import List, Optional, Any, TypeVar
 
 from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
 from pydantic import BaseModel
 
-from ...material import Material
 from .metadata import MaterialMetadata, BuildMetadata
+from ...material import Material
 
 BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound="BaseConfigurationPydantic")
 

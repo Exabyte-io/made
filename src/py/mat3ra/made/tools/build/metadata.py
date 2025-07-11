@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import Field
 
-from mat3ra.made.metadata import BaseMetadata, to_dict
+from mat3ra.made.metadata import BaseMetadata
 
 
 class BuildMetadata(BaseMetadata):
