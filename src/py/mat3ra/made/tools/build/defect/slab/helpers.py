@@ -8,7 +8,7 @@ from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.utils.coordinate import CoordinateCondition
 from .builders import SlabStackBuilder
 from .configuration import SlabStackConfiguration
-from ...slab.builders import SlabWithGapBuilder, SlabBuilder
+from ...slab.builders import SlabBuilder
 from ...slab.helpers import create_slab
 from ...vacuum.configuration import VacuumConfiguration
 from ....modify import filter_by_box, filter_by_condition_on_coordinates

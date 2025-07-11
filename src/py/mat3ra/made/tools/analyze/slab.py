@@ -1,6 +1,6 @@
 from ..analyze import BaseMaterialAnalyzer
-from ..build.slab.configurations import SlabConfiguration
 from ..build.slab.build_parameters import SlabBuilderParameters
+from ..build.slab.configurations import SlabConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
 
 
@@ -8,7 +8,7 @@ class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
     def _traverse_build_history_for_slab(self):
         """
         Traverse build history from the end to find slab configuration and parameters.
-        
+
         Returns:
             tuple: (slab_configuration_dict, build_parameters_dict, supercell_matrix)
         """
