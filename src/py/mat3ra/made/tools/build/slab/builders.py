@@ -134,7 +134,9 @@ class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
         current_vector = np.array(current_vectors[axis_index])
         current_length = np.linalg.norm(current_vector)
 
-        new_length = (max_fractional * current_length) + gap
+        # Add a small nudge when gap=0 to prevent atoms at fractional coordinate 1.0 from being wrapped
+        nudge = 0.0001 if gap == 0 else 0
+        new_length = (max_fractional * current_length) + gap + nudge
 
         if current_length > 0:
             new_vector = (current_vector / current_length) * new_length
