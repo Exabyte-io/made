@@ -1,6 +1,6 @@
 from ..analyze import BaseMaterialAnalyzer
-from ..build.metadata import get_slab_build_configuration
 from ..build.slab.configurations import SlabConfiguration
+from ..build.slab.utils import get_slab_build_configuration
 from ..build.vacuum.configuration import VacuumConfiguration
 
 

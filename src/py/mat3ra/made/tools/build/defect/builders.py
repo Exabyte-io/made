@@ -13,7 +13,6 @@ from .configuration import (
 )
 from .factories import DefectBuilderFactory
 from .point.builders import PointDefectBuilder
-from .slab.builders import SlabDefectBuilder
 from ..supercell import create_supercell
 from ...analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
 from ...analyze.other import (
@@ -41,7 +40,7 @@ class DefectBuilder(BaseBuilder):
         raise NotImplementedError
 
 
-class AdatomSlabDefectBuilder(SlabDefectBuilder):
+class AdatomSlabDefectBuilder(DefectBuilder):
     _ConfigurationType: type(AdatomSlabPointDefectConfiguration) = AdatomSlabPointDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
@@ -292,7 +291,7 @@ class PointDefectPairBuilder(PointDefectBuilder, DefectPairBuilder):
         return updated_material
 
 
-class IslandSlabDefectBuilder(SlabDefectBuilder):
+class IslandSlabDefectBuilder(DefectBuilder):
     _ConfigurationType: type(IslandSlabDefectConfiguration) = IslandSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
@@ -354,7 +353,7 @@ class IslandSlabDefectBuilder(SlabDefectBuilder):
         ]
 
 
-class TerraceSlabDefectBuilder(SlabDefectBuilder):
+class TerraceSlabDefectBuilder(DefectBuilder):
     _ConfigurationType: type(TerraceSlabDefectConfiguration) = TerraceSlabDefectConfiguration  # type: ignore
     _GeneratedItemType: Material = Material
 
