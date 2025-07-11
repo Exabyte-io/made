@@ -1,16 +1,18 @@
+from typing import Union
+
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from sympy import ceiling
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
-from mat3ra.made.tools.build.defect.slab.builders import  IslandDefectBuilder
+from mat3ra.made.tools.build.defect.slab.builders import IslandDefectBuilder
 from mat3ra.made.tools.build.defect.slab.configuration import IslandDefectConfiguration
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.utils.coordinate import CoordinateCondition
 from .builders import SlabStackBuilder
 from .configuration import SlabStackConfiguration
 from ...slab.helpers import create_slab
-from ....modify import filter_by_box
+from ....modify import filter_by_box, filter_by_condition_on_coordinates
 
 
 def create_slab_stack(slab: Material, added_component: Material) -> Material:
@@ -74,7 +76,8 @@ def recreate_slab_with_fractional_layers(slab: Material, number_of_layers: float
 def create_island_defect(
     slab: Material,
     condition: CoordinateCondition,
-    number_of_added_layers: int = 1,
+    use_cartesian_coordinates: bool = True,
+    number_of_added_layers: Union[int, float] = 1,
 ) -> Material:
     """
     Create an island defect using the new IslandDefectConfiguration and IslandDefectBuilder.
@@ -87,22 +90,14 @@ def create_island_defect(
     Returns:
         Material: The slab with island defect.
     """
-    # Create a slab with additional layers
-    analyzer = SlabMaterialAnalyzer(material=slab)
-    slab_with_additional_layers_config = analyzer.get_slab_with_additional_layers_configuration_holder(
-        additional_layers=number_of_added_layers
-    ).slab_with_additional_layers
 
-    slab_with_additional_layers = SlabBuilder().get_material(slab_with_additional_layers_config)
+    material_with_additional_layers = recreate_slab_with_fractional_layers(slab, number_of_added_layers)
 
-    isolated_island = ...
-
-    # Create the island configuration
-    configuration = IslandDefectConfiguration(
-        merge_components=[slab, isolated_island],
-        merge_method=MergeMethodsEnum.REPLACE,
+    isolated_island = filter_by_condition_on_coordinates(
+        material=material_with_additional_layers,
+        condition=condition.condition,
+        use_cartesian_coordinates=use_cartesian_coordinates,
     )
 
-    # Build the island defect
-    builder = IslandDefectBuilder()
-    return builder.get_material(configuration)
+    result = create_slab_stack(slab, isolated_island)
+    return result
