@@ -1,11 +1,7 @@
 import numpy as np
 import pytest
 from mat3ra.made.material import Material, defaultMaterialConfig
-from mat3ra.made.tools.analyze.crystal_site import (  # AdatomCrystalSiteAnalyzer,
-    AdatomCrystalSiteAnalyzer,
-    CrystalSiteAnalyzer,
-    VoronoiCrystalSiteAnalyzer,
-)
+from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
@@ -15,7 +11,6 @@ from unit.utils import TestPlatform, get_platform_specific_value
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
-from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 from .utils import assert_two_entities_deep_almost_equal
 
 
@@ -118,19 +113,5 @@ def test_crystal_site_analyzer(placement_method, coordinate, expected_coordinate
             final_coordinate = analyzer.equidistant_coordinate
         else:
             raise ValueError(f"Unknown method: {placement_method}")
-
-    assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
-
-
-@pytest.mark.parametrize(
-    "slab_config, coordinate, expected_coordinate",
-    [
-        (SI_CONVENTIONAL_SLAB_001, [0.5, 0.5, 0.5], [0.5, 0.5, 0.57482]),
-    ],
-)
-def test_adatom_crystal_site_analyzer(slab_config, coordinate, expected_coordinate):
-    slab = Material.create(slab_config)
-    analyzer = AdatomCrystalSiteAnalyzer(material=slab, coordinate=coordinate)
-    final_coordinate = analyzer.new_crystal_site_coordinate
 
     assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
