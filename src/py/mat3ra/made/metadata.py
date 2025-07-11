@@ -30,6 +30,15 @@ class BaseMetadata(InMemoryEntityPydantic):
                 values[key] = {}
             elif isinstance(value, InMemoryEntityPydantic):
                 values[key] = to_dict(value)
+            elif hasattr(value, "to_dict") and callable(value.to_dict):
+                values[key] = value.to_dict()
+            # TODO: remove when Pydantic configurations are fully implemented
+            elif hasattr(value, "to_json") and callable(value.to_json):
+                data = value.to_json()
+                if isinstance(data, str):
+                    values[key] = json.loads(data)
+                else:
+                    values[key] = data
         return values
 
     def update(self, **kwargs: Any):
