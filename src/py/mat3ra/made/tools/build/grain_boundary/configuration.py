@@ -1,5 +1,6 @@
 from typing import Optional, List
 
+from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 # fmt: off
 from mat3ra.esse.models.materials_category.defective_structures.one_dimensional. \
@@ -45,13 +46,18 @@ class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundaryPlan
         phase_1_configuration: SlabStrainedSupercellConfiguration,
         phase_2_configuration: SlabStrainedSupercellConfiguration,
         xy_shift: Optional[List[float]] = None,
-        gap: Optional[float] = None,
+        gaps: Optional[List[float]] = None,
     ) -> "GrainBoundaryPlanarConfiguration":
         if xy_shift is None:
             xy_shift = [0.0, 0.0]
 
         stack_components = [phase_1_configuration, phase_2_configuration]
-        return cls(stack_components=stack_components, direction=AxisEnum.z, xy_shift=xy_shift)
+        return cls(
+            stack_components=stack_components,
+            direction=AxisEnum.z,
+            xy_shift=xy_shift,
+            gaps=ArrayWithIds.from_values(gaps),
+        )
 
 
 class GrainBoundaryLinearConfiguration(InterfaceConfiguration, GrainBoundaryLinearConfigurationSchema):
