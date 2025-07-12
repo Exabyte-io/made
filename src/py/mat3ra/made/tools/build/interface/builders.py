@@ -52,11 +52,11 @@ class InterfaceBuilder(StackNComponentsBuilder):
         film_material = translate_by_vector(film_material, translation_vector, use_cartesian_coordinates=True)
         stack_configuration = StackConfiguration(
             stack_components=[substrate_material, film_material, configuration.vacuum_configuration],
+            gaps=configuration.gaps,
             direction=configuration.direction,
         )
 
         interface = super()._generate(stack_configuration)
-
         wrapped_interface = wrap_to_unit_cell(interface)
         return wrapped_interface
 

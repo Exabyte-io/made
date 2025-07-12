@@ -43,9 +43,11 @@ class StackNComponentsBuilder(BaseSingleBuilder):
         materials = []
         for index, entity_config in enumerate(configuration.stack_components):
             material = self._configuration_to_material(entity_config)
+            if material is None:
+                break
             gap = configuration.get_gap_by_id(index)
             if gap is not None:
-                material = adjust_material_cell_to_set_gap_along_direction(material, gap)
+                material = adjust_material_cell_to_set_gap_along_direction(material, gap, configuration.direction)
             materials.append(material)
         stacked_material = stack(materials, configuration.direction or AxisEnum.z)
         return stacked_material

@@ -495,7 +495,7 @@ INTERFACE_GRAPHENE_GRAPHENE_X = {
     "lattice": {
         "a": 21.509344266,
         "b": 10.754672133,
-        "c": 3.00002,
+        "c": 20.0,
         "alpha": 90,
         "beta": 90,
         "gamma": 60,

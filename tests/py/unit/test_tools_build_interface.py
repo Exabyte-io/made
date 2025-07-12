@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from typing import Final
 
 import pytest
+from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
@@ -184,25 +185,25 @@ def test_create_twisted_interface(material_config, config_params, expected_inter
 
 
 @pytest.mark.parametrize(
-    "material_config, analyzer_params, direction, gap, expected_interface",
+    "material_config, analyzer_params, direction, gaps, expected_interface",
     [
         (
             GRAPHENE,
             {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
             AxisEnum.z,
-            3.0,
+            [3.0, 3.0],
             INTERFACE_GRAPHENE_GRAPHENE_Z,
         ),
         (
             GRAPHENE,
             {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
             AxisEnum.x,
-            3.0,
+            [],  # testing no gaps
             INTERFACE_GRAPHENE_GRAPHENE_X,
         ),
     ],
 )
-def test_commensurate_interface_creation(material_config, analyzer_params, direction, gap, expected_interface):
+def test_commensurate_interface_creation(material_config, analyzer_params, direction, gaps, expected_interface):
     slab_config = SlabConfiguration.from_parameters(
         material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0
     )
@@ -213,15 +214,9 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
 
     if len(match_holders) > 0:
         selected_config = analyzer.get_strained_configuration_by_match_id(0)
-
-        substrate_config_with_gap = SlabStrainedSupercellConfiguration(
-            **selected_config.substrate_configuration.to_dict()
-        )
-        film_config_with_gap = SlabStrainedSupercellConfiguration(
-            **selected_config.film_configuration.to_dict()
-        )
         interface_config = InterfaceConfiguration(
-            stack_components=[substrate_config_with_gap, film_config_with_gap],
+            stack_components=[selected_config.substrate_configuration, selected_config.film_configuration],
+            gaps=ArrayWithIds.from_values(values=gaps),
             direction=direction,
         )
 
