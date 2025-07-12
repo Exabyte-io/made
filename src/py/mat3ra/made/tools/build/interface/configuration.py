@@ -1,20 +1,19 @@
 from typing import Union, List, Optional
 
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interface.configuration import (  # noqa: E501
     InterfaceConfigurationSchema,
 )
 
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
-from .. import BaseConfigurationPydantic
 from ..slab.configurations import (
     SlabConfiguration,
     SlabStrainedSupercellConfiguration,
     SlabStrainedSupercellWithGapConfiguration,
 )
+from ..stack.configuration import StackConfiguration
 
 
-class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPydantic):
+class InterfaceConfiguration(InterfaceConfigurationSchema, StackConfiguration):
     # components and their modifiers added in the order they are stacked, from bottom to top
     stack_components: List[
         Union[
@@ -23,7 +22,6 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
             VacuumConfiguration,
         ]
     ]
-    direction: AxisEnum = AxisEnum.z
     xy_shift: List[float] = InterfaceConfigurationSchema.model_fields["xy_shift"].default  # in Angstroms
 
     @property

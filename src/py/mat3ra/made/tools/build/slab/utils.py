@@ -2,7 +2,7 @@ import numpy as np
 
 from ....lattice import Lattice
 from ....material import Material
-from ...build import MaterialMetadata
+from ...build import MaterialBuildMetadata
 from ...build.slab.configurations import SlabConfiguration
 from ...modify import wrap_to_unit_cell
 from ...operations.core.unary import edit_cell
@@ -62,7 +62,7 @@ def get_slab_build_configuration(metadata: dict):
         ValueError: If the material is not a slab
     """
 
-    material_metadata = MaterialMetadata(**metadata)
+    material_metadata = MaterialBuildMetadata(**metadata)
     slab_build_configuration_dict = material_metadata.build[-1].configuration
 
     if slab_build_configuration_dict.get("type") != "SlabConfiguration":

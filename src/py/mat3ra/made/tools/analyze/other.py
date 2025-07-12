@@ -281,31 +281,6 @@ def get_atom_indices_with_condition_on_coordinates(
     return selected_indices
 
 
-def get_atomic_coordinates_extremum(
-    material: Material,
-    extremum: Literal["max", "min"] = "max",
-    axis: Literal["x", "y", "z"] = "z",
-    use_cartesian_coordinates: bool = False,
-) -> float:
-    """
-    Return minimum or maximum of coordinates along the specified axis.
-
-    Args:
-        material (Material): Material object.
-        extremum (str): "min" or "max".
-        axis (str):  "x", "y", or "z".
-        use_cartesian_coordinates (bool): Whether to use Cartesian coordinates.
-    Returns:
-        float: Minimum or maximum of coordinates along the specified axis.
-    """
-    new_material = material.clone()
-    if use_cartesian_coordinates:
-        new_material.to_cartesian()
-    else:
-        new_material.to_crystal()
-    return new_material.basis.coordinates.get_extremum_value_along_axis(extremum, axis)
-
-
 def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: SurfaceTypes) -> bool:
     """
     Check if the height of an atom is within the specified limits.

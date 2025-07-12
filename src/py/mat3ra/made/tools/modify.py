@@ -6,9 +6,9 @@ from mat3ra.made.material import Material
 from .analyze.other import (
     get_atom_indices_with_condition_on_coordinates,
     get_atom_indices_within_radius_pbc,
-    get_atomic_coordinates_extremum,
 )
-from .build.metadata import MaterialMetadata
+from mat3ra.made.utils import get_atomic_coordinates_extremum
+from .build.metadata import MaterialBuildMetadata, MaterialWithBuildMetadata
 from .convert import from_ase, to_ase
 from .convert.utils import InterfacePartsEnum
 from .third_party import ase_add_vacuum
@@ -86,7 +86,7 @@ def translate_by_vector(
     atoms = to_ase(material)
     # ASE accepts cartesian coordinates for translation
     atoms.translate(tuple(vector))
-    return Material.create(from_ase(atoms))
+    return MaterialWithBuildMetadata.create(from_ase(atoms))
 
 
 def translate_to_center(material: Material, axes: Optional[List[str]] = None) -> Material:
@@ -125,7 +125,7 @@ def wrap_to_unit_cell(material: Material) -> Material:
     """
     atoms = to_ase(material)
     atoms.wrap()
-    return Material.create(from_ase(atoms))
+    return MaterialWithBuildMetadata.create(from_ase(atoms))
 
 
 def filter_by_ids(material: Material, ids: List[int], invert: bool = False, reset_ids: bool = False) -> Material:
@@ -501,7 +501,7 @@ def add_vacuum(material: Material, vacuum: float = 5.0, on_top=True, to_bottom=F
     new_material_atoms = to_ase(material)
     vacuum_amount = vacuum * 2 if on_top and to_bottom else vacuum
     ase_add_vacuum(new_material_atoms, vacuum_amount)
-    new_material = Material.create(from_ase(new_material_atoms))
+    new_material = MaterialWithBuildMetadata.create(from_ase(new_material_atoms))
     if to_bottom and not on_top:
         new_material = translate_to_z_level(new_material, z_level="top")
     elif on_top and to_bottom:
@@ -600,7 +600,7 @@ def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True,
     atoms.rotate(v=axis, a=angle, center="COU", rotate_cell=rotate_cell)
     if wrap:
         atoms.wrap()
-    new_material = Material.create(from_ase(atoms))
+    new_material = MaterialWithBuildMetadata.create(from_ase(atoms))
     if original_is_in_cartesian_units:
         new_material.to_cartesian()
     return new_material
@@ -646,7 +646,7 @@ def interface_get_part(
     interface: Material,
     part: InterfacePartsEnum = InterfacePartsEnum.FILM,
 ) -> Material:
-    metadata = MaterialMetadata(**interface.metadata)
+    metadata = MaterialBuildMetadata(**interface.metadata)
     if metadata.build[-1].configuration.get("type") != "InterfaceConfiguration":
         raise ValueError("The material is not an interface.")
     interface_part_material = interface.clone()

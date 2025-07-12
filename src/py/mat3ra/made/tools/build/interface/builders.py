@@ -7,7 +7,6 @@ from .configuration import (
     InterfaceConfiguration,
 )
 from ..slab.builders import SlabStrainedSupercellBuilder
-from ..slab.builders import SlabWithGapBuilder
 from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import StackNComponentsBuilder
@@ -18,7 +17,7 @@ from ...modify import (
     translate_by_vector,
     wrap_to_unit_cell,
 )
-from ...utils import AXIS_TO_INDEX_MAP
+from ....utils import AXIS_TO_INDEX_MAP, adjust_material_cell_to_set_gap_along_direction
 
 
 class InterfaceBuilderParameters(InMemoryEntityPydantic):
@@ -35,10 +34,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
     _GeneratedItemType: Type[Material] = Material
 
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, SlabStrainedSupercellWithGapConfiguration):
-            builder = SlabWithGapBuilder()
-            return builder.get_material(configuration_or_material)
-        elif isinstance(configuration_or_material, SlabStrainedSupercellConfiguration):
+        if isinstance(configuration_or_material, SlabStrainedSupercellConfiguration):
             builder = SlabStrainedSupercellBuilder()
             return builder.get_material(configuration_or_material)
         return super()._configuration_to_material(configuration_or_material)

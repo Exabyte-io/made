@@ -1,6 +1,6 @@
 import pytest
 from mat3ra.code.entity import InMemoryEntity, InMemoryEntityPydantic
-from mat3ra.made.tools.build.metadata import BuildMetadata, MaterialMetadata
+from mat3ra.made.tools.build.metadata import BuildMetadata, MaterialBuildMetadata
 from pydantic import BaseModel
 
 
@@ -27,14 +27,14 @@ class MockParameters(InMemoryEntityPydantic):
 
 def test_metadata_initialization_with_data():
     initial_data = {"existing_key": "existing_value", "build": [{"configuration": {"initial": "config"}}]}
-    metadata = MaterialMetadata(**initial_data)
+    metadata = MaterialBuildMetadata(**initial_data)
 
     assert metadata.existing_key == "existing_value"
     assert metadata.build[-1].configuration["initial"] == "config"
 
 
 def test_metadata_empty_initialization():
-    metadata = MaterialMetadata()
+    metadata = MaterialBuildMetadata()
     assert metadata.model_dump(exclude_none=True) == {"build": []}
 
 
@@ -59,7 +59,7 @@ def test_build_metadata_update(config_object, expected_dict):
 
 def test_full_lifecycle_and_serialization():
     # Initialize with some existing data
-    metadata = MaterialMetadata(existing_key="previous_material_metadata_value")
+    metadata = MaterialBuildMetadata(existing_key="previous_material_metadata_value")
 
     # Update with a 'to_dict' config
     config = ConfigWithToDict(value="config_value")

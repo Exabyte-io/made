@@ -11,6 +11,7 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
 )
 
 from .slab_configuration import SlabConfiguration
+from ...supercell import SupercellConfiguration
 
 
 class SlabStrainedSupercellConfiguration(SlabConfiguration, SlabStrainedSupercellConfigurationSchema):

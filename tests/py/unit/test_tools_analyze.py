@@ -115,3 +115,49 @@ def test_crystal_site_analyzer(placement_method, coordinate, expected_coordinate
             raise ValueError(f"Unknown method: {placement_method}")
 
     assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
+
+
+def test_adatom_material_analyzer():
+    """Test the AdatomMaterialAnalyzer class."""
+    from mat3ra.made.tools.analyze.adatom import AdatomMaterialAnalyzer
+    from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
+
+    crystal = Material.create(BULK_Si_PRIMITIVE)
+
+    # Test NEW_CRYSTAL_SITE method
+    analyzer = AdatomMaterialAnalyzer(
+        material=crystal,
+        coordinate=[0.25, 0.25, 0.5],
+        placement_method=AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE,
+        distance_z=1.0,
+        original_slab=crystal,
+    )
+    resolved_coord = analyzer.coordinate_in_added_component
+    assert len(resolved_coord) == 3
+    assert all(isinstance(x, (int, float)) for x in resolved_coord)
+
+    # Test EQUIDISTANT method
+    analyzer = AdatomMaterialAnalyzer(
+        material=crystal,
+        coordinate=[0.25, 0.25, 0.5],
+        placement_method=AdatomPlacementMethodEnum.EQUIDISTANT,
+        distance_z=1.0,
+        original_slab=crystal,
+    )
+    resolved_coord = analyzer.coordinate_in_added_component
+    assert len(resolved_coord) == 3
+    assert all(isinstance(x, (int, float)) for x in resolved_coord)
+
+    # Test slab_without_vacuum_configuration property with a proper slab material
+    from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
+
+    slab = Material.create(SI_CONVENTIONAL_SLAB_001)
+    analyzer = AdatomMaterialAnalyzer(
+        material=slab,
+        coordinate=[0.25, 0.25, 0.5],
+        placement_method=AdatomPlacementMethodEnum.EQUIDISTANT,
+        distance_z=1.0,
+        original_slab=slab,
+    )
+    config = analyzer.slab_without_vacuum_configuration
+    assert config is not None

@@ -1,34 +1,72 @@
-from ..analyze import BaseMaterialAnalyzer
-from ..build.slab.configurations import SlabConfiguration
-from ..build.slab.utils import get_slab_build_configuration
+from typing import Union
+
+from sympy.strategies.core import switch
+
+from .crystal_site import CrystalSiteAnalyzer
+from mat3ra.made.utils import get_atomic_coordinates_extremum
+from ..build.slab.configurations import (
+    SlabConfiguration,
+    SlabStrainedSupercellWithGapConfiguration,
+    SlabStrainedSupercellConfiguration,
+)
+from ..build.supercell import SupercellConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
 
 
-class SlabMaterialAnalyzer(BaseMaterialAnalyzer):
-    def get_slab_configuration(self) -> SlabConfiguration:
-        return get_slab_build_configuration(self.material.metadata)
+class SlabMaterialAnalyzer(CrystalSiteAnalyzer):
+
+    @property
+    def slab_configuration(self) -> SlabConfiguration:
+        build_metadata = self.material.metadata.get_build_metadata_of_type(SlabConfiguration.__name__)
+        return SlabConfiguration(**build_metadata.configuration.to_dict())
 
     @property
     def number_of_layers(self) -> int:
-        slab_configuration = self.get_slab_configuration()
-        return slab_configuration.number_of_layers
+        return self.slab_configuration.number_of_layers
 
     @property
     def vacuum_ratio(self) -> float:
-        slab_configuration = self.get_slab_configuration()
-        return slab_configuration.vacuum / self.material.lattice.c
+        return self.slab_configuration.vacuum / self.material.lattice.c
 
     @property
     def vacuum_thickness_in_layers(self) -> float:
         return self.vacuum_ratio / (1 - self.vacuum_ratio) * self.number_of_layers
 
-    def get_slab_configuration_with_no_vacuum(self) -> SlabConfiguration:
-        slab_configuration = self.get_slab_configuration()
-        slab_configuration_with_no_vacuum = slab_configuration.clone()
+    @property
+    def slab_configuration_with_no_vacuum(self) -> SlabConfiguration:
+        slab_configuration_with_no_vacuum = self.slab_configuration.clone()
         slab_configuration_with_no_vacuum.set_vacuum(0.0)
+        return slab_configuration_with_no_vacuum
 
+    @property
+    def slab_configuration_strained_supercell_with_no_gap(self) -> SlabConfiguration:
+        slab_configuration_with_no_vacuum = self.slab_configuration.clone()
+        slab_configuration_with_no_vacuum.set_vacuum(0.0)
         return slab_configuration_with_no_vacuum
 
     def get_slab_vacuum_configuration(self) -> VacuumConfiguration:
-        slab_configuration = self.get_slab_configuration()
-        return slab_configuration.vacuum_configuration
+        return self.slab_configuration.vacuum_configuration
+
+    @property
+    def max_z_crystal(self) -> float:
+        return get_atomic_coordinates_extremum(self.material, "max", "z")
+
+    @property
+    def min_z_crystal(self) -> float:
+        return get_atomic_coordinates_extremum(self.material, "min", "z")
+
+    def get_gap_from_top(self, use_cartesian=False) -> float:
+        gap_top_in_crystal = 1.0 - self.max_z_crystal
+        if use_cartesian:
+            gap_top_in_cartesian = self.material.basis.cell.convert_point_to_cartesian([0, 0, gap_top_in_crystal])[2]
+            return gap_top_in_cartesian
+        return gap_top_in_crystal
+
+    def get_gap_from_bottom(self, use_cartesian=False) -> float:
+        gap_bottom_in_crystal = self.min_z_crystal
+        if use_cartesian:
+            gap_bottom_in_cartesian = self.material.basis.cell.convert_point_to_cartesian(
+                [0, 0, gap_bottom_in_crystal]
+            )[2]
+            return gap_bottom_in_cartesian
+        return gap_bottom_in_crystal

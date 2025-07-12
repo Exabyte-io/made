@@ -12,9 +12,7 @@ from .configuration import (
 )
 from .factories import DefectBuilderFactory
 from .point.builders import PointDefectBuilder
-from ...analyze.other import (
-    get_atomic_coordinates_extremum,
-)
+from mat3ra.made.utils import get_atomic_coordinates_extremum
 from ...build import BaseBuilder
 from ...modify import (
     filter_by_box,

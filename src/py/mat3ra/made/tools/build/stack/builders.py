@@ -8,9 +8,10 @@ from mat3ra.made.tools.build.stack.configuration import StackConfiguration
 from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import stack
+from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction
 
 
-class Stack2ComponentsBuilder(BaseSingleBuilder):
+class StackNComponentsBuilder(BaseSingleBuilder):
     _ConfigurationType = StackConfiguration
 
     def _set_vacuum_crystal(self, stack_components):
@@ -39,26 +40,12 @@ class Stack2ComponentsBuilder(BaseSingleBuilder):
 
     def _generate(self, configuration: StackConfiguration) -> Material:
         self._set_vacuum_crystal(configuration.stack_components)
-        first_entity_config = configuration.stack_components[0]
-        first_material = self._configuration_to_material(first_entity_config)
-        second_entity_config = configuration.stack_components[1]
-        second_material = self._configuration_to_material(second_entity_config)
-        stacked_material = stack([first_material, second_material], configuration.direction or AxisEnum.z)
-        return stacked_material
-
-
-StackConfigurationType = TypeVar("StackConfigurationType", bound=StackConfiguration)
-
-
-class StackNComponentsBuilder(Stack2ComponentsBuilder):
-    _ConfigurationType = StackConfiguration
-
-    def _generate(self, configuration: StackConfigurationType) -> Material:
-        self._set_vacuum_crystal(configuration.stack_components)
         materials = []
-        for entity_config in configuration.stack_components:
+        for index, entity_config in enumerate(configuration.stack_components):
             material = self._configuration_to_material(entity_config)
-            if material is not None:
-                materials.append(material)
+            gap = configuration.get_gap_by_id(index)
+            if gap is not None:
+                material = adjust_material_cell_to_set_gap_along_direction(material, gap)
+            materials.append(material)
         stacked_material = stack(materials, configuration.direction or AxisEnum.z)
         return stacked_material

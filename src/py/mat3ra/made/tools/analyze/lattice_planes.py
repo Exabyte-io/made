@@ -4,6 +4,7 @@ from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.entities import Termination, TerminationHolder
+from ..build import MaterialWithBuildMetadata
 
 from ..build.slab.entities import MillerIndices
 from ..convert import from_pymatgen, to_pymatgen
@@ -138,7 +139,7 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         slab = self.all_planes_as_pymatgen_slabs_without_vacuum[
             self.terminations_without_vacuum.index(holder.termination_without_vacuum)
         ]
-        return Material.create(from_pymatgen(slab))
+        return MaterialWithBuildMetadata.create(from_pymatgen(slab))
 
     def get_translation_vector_for_termination_without_vacuum(self, termination: Termination) -> Vector3D:
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)

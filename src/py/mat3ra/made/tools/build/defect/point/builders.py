@@ -1,5 +1,8 @@
 from typing import Any, Type
 
+from ase.spacegroup import crystal
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder
 from mat3ra.made.tools.build.defect.point.configuration import (
@@ -11,19 +14,20 @@ from mat3ra.made.tools.build.defect.point.configuration import (
 )
 from mat3ra.made.tools.build.merge.builders import MergeBuilder
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
+from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 
 
-class PointDefectSiteBuilder(BaseSingleBuilder):
-    """
-    Builder class for creating a material from a PointDefectSite configuration.
-    """
-
+class AtomAtCoordinateBuilder(VacuumBuilder):
     _ConfigurationType = PointDefectSite
 
     def _generate(self, configuration: PointDefectSite) -> Material:
-        new_material = configuration.crystal.clone()
-        elements = configuration.crystal.basis.elements.values
-        new_material.basis.remove_atoms_by_elements(elements)
+        vacuum_configuration = VacuumConfiguration(
+            crystal=configuration.crystal,
+            size=configuration.crystal.lattice.c,
+            direction=AxisEnum.z,
+        )
+        new_material = super().get_material(vacuum_configuration)
         new_material.basis.add_atom(
             element=configuration.element.chemical_element.value,
             coordinate=configuration.coordinate,
@@ -34,14 +38,14 @@ class PointDefectSiteBuilder(BaseSingleBuilder):
 class PointDefectBuilder(MergeBuilder):
     """
     Builder class for creating point defects by merging materials.
-    Based on MergeBuilder, similar to how SlabBuilder is based on Stack2ComponentsBuilder.
+    Based on MergeBuilder, similar to how SlabBuilder is based on StackNComponentsBuilder.
     """
 
     _ConfigurationType: Type[PointDefectConfiguration] = PointDefectConfiguration
 
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
         if isinstance(configuration_or_material, PointDefectSite):
-            return PointDefectSiteBuilder().get_material(configuration_or_material)
+            return AtomAtCoordinateBuilder().get_material(configuration_or_material)
         return super()._configuration_to_material(configuration_or_material)
 
     def _post_process(self, material: Material, configuration: MergeBuilder._ConfigurationType) -> Material:
@@ -69,7 +73,7 @@ class PointDefectBuilder(MergeBuilder):
 
     def _generate(self, config: MergeBuilder._ConfigurationType) -> Material:
         materials = []
-        site_builder = PointDefectSiteBuilder()
+        site_builder = AtomAtCoordinateBuilder()
         for component in config.merge_components:
             if isinstance(component, PointDefectSite):
                 materials.append(site_builder.get_material(component))
