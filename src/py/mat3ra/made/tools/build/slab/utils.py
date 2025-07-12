@@ -46,26 +46,3 @@ def get_orthogonal_c_slab(material: Material) -> Material:
     new_material.basis = new_basis
     new_material = wrap_to_unit_cell(new_material)
     return new_material
-
-
-def get_slab_build_configuration(metadata: dict):
-    """
-    Extract slab build configuration from material metadata.
-
-    Args:
-        metadata: Material metadata dictionary
-
-    Returns:
-        SlabConfiguration: The slab configuration from the material's metadata
-
-    Raises:
-        ValueError: If the material is not a slab
-    """
-
-    material_metadata = MaterialBuildMetadata(**metadata)
-    slab_build_configuration_dict = material_metadata.build[-1].configuration
-
-    if slab_build_configuration_dict.get("type") != "SlabConfiguration":
-        raise ValueError("Material is not a slab.")
-
-    return SlabConfiguration(**slab_build_configuration_dict)

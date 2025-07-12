@@ -216,8 +216,8 @@ class BaseBuilder(BaseModel):
         # Do nothing by default
         return material
 
-    def _update_material_metadata(self, material, configuration) -> Material:
-        metadata = MaterialBuildMetadata(**material.metadata or {})
-        metadata.build.append(BuildMetadata(configuration=configuration, build_parameters=self.build_parameters))
-        material.metadata = metadata.to_dict()
+    def _update_material_metadata(
+        self, material: MaterialWithBuildMetadata, configuration
+    ) -> MaterialWithBuildMetadata:
+        material.metadata.add_build_metadata_step(configuration=configuration, build_parameters=self.build_parameters)
         return material

@@ -190,7 +190,7 @@ def test_build_slab_conventional(
         vacuum,
         xy_supercell_matrix,
     )
-    slab.metadata.pop("build")
+    slab.metadata.build = []
     assert_two_entities_deep_almost_equal(slab, expected_slab_config)
 
 
@@ -230,7 +230,7 @@ def test_build_slab_conventional_with_multiple_terminations(
         xy_supercell_matrix,
     )
 
-    slab.metadata.pop("build")  # Remove build metadata for comparison
+    slab.metadata.build = []  # Remove build metadata for comparison
     expected_slab_config.get("metadata", {}).pop("build", None)
     assert_two_entities_deep_almost_equal(slab, expected_slab_config)
 
@@ -267,7 +267,7 @@ def test_create_slab(
         vacuum=vacuum,
         xy_supercell_matrix=xy_supercell,
     )
-    slab.metadata.pop("build")  # Remove build metadata for comparison
+    slab.metadata.build = []  # Remove build metadata for comparison
     assert_two_entities_deep_almost_equal(slab, expected_slab_config)
 
 

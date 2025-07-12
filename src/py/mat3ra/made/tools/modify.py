@@ -643,10 +643,10 @@ def interface_displace_part(
 
 
 def interface_get_part(
-    interface: Material,
+    interface: MaterialWithBuildMetadata,
     part: InterfacePartsEnum = InterfacePartsEnum.FILM,
 ) -> Material:
-    metadata = MaterialBuildMetadata(**interface.metadata)
+    metadata = interface.metadata
     if metadata.build[-1].configuration.get("type") != "InterfaceConfiguration":
         raise ValueError("The material is not an interface.")
     interface_part_material = interface.clone()

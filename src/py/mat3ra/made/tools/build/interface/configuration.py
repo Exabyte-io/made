@@ -13,7 +13,7 @@ from ..slab.configurations import (
 from ..stack.configuration import StackConfiguration
 
 
-class InterfaceConfiguration(InterfaceConfigurationSchema, StackConfiguration):
+class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):
     # components and their modifiers added in the order they are stacked, from bottom to top
     stack_components: List[
         Union[
