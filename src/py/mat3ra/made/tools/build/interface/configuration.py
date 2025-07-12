@@ -4,11 +4,10 @@ from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dime
     InterfaceConfigurationSchema,
 )
 
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from ..vacuum.configuration import VacuumConfiguration
 from ..slab.configurations import (
     SlabConfiguration,
     SlabStrainedSupercellConfiguration,
-    SlabStrainedSupercellWithGapConfiguration,
 )
 from ..stack.configuration import StackConfiguration
 
@@ -18,7 +17,6 @@ class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):
     stack_components: List[
         Union[
             SlabStrainedSupercellConfiguration,
-            SlabStrainedSupercellWithGapConfiguration,
             VacuumConfiguration,
         ]
     ]

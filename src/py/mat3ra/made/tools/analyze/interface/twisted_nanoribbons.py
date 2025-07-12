@@ -16,7 +16,7 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
     - Same lattice vectors
     - One rotated by the specified angle
     - Nanoribbons centered
-    - Gap applied using SlabStrainedSupercellWithGapConfiguration
+    - Gap handled separately through vacuum configuration
 
     Args:
 

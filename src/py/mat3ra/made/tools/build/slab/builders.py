@@ -1,13 +1,9 @@
 from typing import List, Optional, Any, Type
 
-import numpy as np
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 from .configurations import (
     CrystalLatticePlanesConfiguration,
     SlabStrainedSupercellConfiguration,
-    SlabStrainedSupercellWithGapConfiguration,
 )
 from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfiguration
 from .configurations.slab_configuration import SlabConfiguration
@@ -17,7 +13,7 @@ from ..stack.builders import StackNComponentsBuilder
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...analyze.other import get_chemical_formula
 from ...modify import wrap_to_unit_cell, translate_to_z_level
-from ...operations.core.unary import supercell, translate, strain, edit_cell
+from ...operations.core.unary import supercell, translate, strain
 
 
 class CrystalLatticePlanesBuilder(BaseSingleBuilder):

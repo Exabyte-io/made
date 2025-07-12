@@ -3,12 +3,9 @@ from typing import Any, Type
 from mat3ra.code.entity import InMemoryEntityPydantic
 
 from mat3ra.made.material import Material
-from .configuration import (
-    InterfaceConfiguration,
-)
+from .configuration import InterfaceConfiguration
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configurations import SlabStrainedSupercellConfiguration
-from ..slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ...analyze.other import get_chemical_formula
@@ -17,7 +14,7 @@ from ...modify import (
     translate_by_vector,
     wrap_to_unit_cell,
 )
-from ....utils import AXIS_TO_INDEX_MAP, adjust_material_cell_to_set_gap_along_direction
+from ....utils import AXIS_TO_INDEX_MAP
 
 
 class InterfaceBuilderParameters(InMemoryEntityPydantic):

@@ -7,7 +7,6 @@ from mat3ra.made.utils import get_atomic_coordinates_extremum
 from ..build import MaterialBuildMetadata
 from ..build.slab.configurations import (
     SlabConfiguration,
-    SlabStrainedSupercellWithGapConfiguration,
     SlabStrainedSupercellConfiguration,
 )
 from ..build.supercell import SupercellConfiguration

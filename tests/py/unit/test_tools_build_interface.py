@@ -11,7 +11,7 @@ from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceConfiguration
 from mat3ra.made.tools.build.interface.helpers import create_interface, create_twisted_interface
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
+from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 # Test the analyzer directly
@@ -214,11 +214,11 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
     if len(match_holders) > 0:
         selected_config = analyzer.get_strained_configuration_by_match_id(0)
 
-        substrate_config_with_gap = SlabStrainedSupercellWithGapConfiguration(
-            **selected_config.substrate_configuration.to_dict(), gap=gap
+        substrate_config_with_gap = SlabStrainedSupercellConfiguration(
+            **selected_config.substrate_configuration.to_dict()
         )
-        film_config_with_gap = SlabStrainedSupercellWithGapConfiguration(
-            **selected_config.film_configuration.to_dict(), gap=gap
+        film_config_with_gap = SlabStrainedSupercellConfiguration(
+            **selected_config.film_configuration.to_dict()
         )
         interface_config = InterfaceConfiguration(
             stack_components=[substrate_config_with_gap, film_config_with_gap],

@@ -3,7 +3,7 @@ from typing import Any
 from mat3ra.made.material import Material
 from ..slab.configuration import SlabStackConfiguration
 from ...slab.builders import SlabBuilder
-from ...slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
+from ...slab.configurations import SlabConfiguration
 from ...stack.builders import StackNComponentsBuilder
 
 

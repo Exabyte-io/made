@@ -9,19 +9,20 @@ from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer
 from mat3ra.made.utils import get_atomic_coordinates_extremum
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
-from mat3ra.made.tools.build.slab.configurations import SlabStrainedSupercellWithGapConfiguration
+from mat3ra.made.tools.build.slab.configurations import SlabStrainedSupercellConfiguration
 
 
-class SlabStackAnalyzer(SlabMaterialAnalyzer):
-    @property
-    def coordinate_in_added_component(self) -> List[float]:
-        """
-        Get the coordinate in the added component based on the slab configuration.
-        This method is overridden to provide a specific implementation for slab stacks.
-        """
-        # The coordinate in the added component is the same as in the slab
-        xy_coordinate = self.coordinate[:2]
-        z_coordinate = distance_z
+# class SlabStackAnalyzer(SlabMaterialAnalyzer):
+#     @property
+#     def coordinate_in_added_component(self) -> List[float]:
+#         """
+#         Get the coordinate in the added component based on the slab configuration.
+#         This method is overridden to provide a specific implementation for slab stacks.
+#         """
+#         # The coordinate in the added component is the same as in the slab
+#         xy_coordinate = self.coordinate[:2]
+#         z_coordinate = distance_z
+#         return z_coordinate
 
 
 class AdatomMaterialAnalyzer(SlabMaterialAnalyzer):
