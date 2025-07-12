@@ -102,7 +102,7 @@ def test_zsl_interface_builder(substrate, film, expected_interface):
     interface = builder.get_material(interface_config)
 
     # remove metadata
-    interface.metadata.pop("build", None)
+    interface.metadata.build = []
     expected_interface["metadata"].pop("build", None)
 
     assert_two_entities_deep_almost_equal(interface, expected_interface)
@@ -131,7 +131,7 @@ def test_create_interface(substrate, film, expected_interface):
     )
 
     interface = create_interface(configuration)
-    interface.metadata.pop("build", None)
+    interface.metadata.build = []
     expected_interface["metadata"].pop("build", None)
 
 
@@ -227,6 +227,6 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
 
         builder = InterfaceBuilder()
         interface = builder.get_material(interface_config)
-        interface.metadata.pop("build", None)
+        interface.metadata.build = []
 
         assert_two_entities_deep_almost_equal(interface, expected_interface, atol=1e-5)
