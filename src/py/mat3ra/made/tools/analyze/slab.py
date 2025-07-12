@@ -4,6 +4,7 @@ from sympy.strategies.core import switch
 
 from .crystal_site import CrystalSiteAnalyzer
 from mat3ra.made.utils import get_atomic_coordinates_extremum
+from ..build import MaterialBuildMetadata
 from ..build.slab.configurations import (
     SlabConfiguration,
     SlabStrainedSupercellWithGapConfiguration,
@@ -17,7 +18,9 @@ class SlabMaterialAnalyzer(CrystalSiteAnalyzer):
 
     @property
     def slab_configuration(self) -> SlabConfiguration:
-        build_metadata = self.material.metadata.get_build_metadata_of_type(SlabConfiguration.__name__)
+        build_metadata = MaterialBuildMetadata(**self.material.metadata).get_build_metadata_of_type(
+            SlabConfiguration.__name__
+        )
         return SlabConfiguration(**build_metadata.configuration.to_dict())
 
     @property

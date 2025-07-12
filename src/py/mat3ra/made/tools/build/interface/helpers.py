@@ -14,7 +14,7 @@ from .configuration import (
 )
 from ..slab.configurations import (
     SlabConfiguration,
-    SlabStrainedSupercellWithGapConfiguration,
+    SlabStrainedSupercellConfiguration,
 )
 from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import interface_displace_part
@@ -65,16 +65,10 @@ def create_twisted_interface(
     )
     processed_slab1 = analyzer.substrate_nanoribbon_configuration
     processed_slab2 = analyzer.film_nanoribbon_configuration
-    slab1_gap = SlabStrainedSupercellWithGapConfiguration(
-        **processed_slab1.to_dict(),
-        gap=gap,
-    )
-    slab2_gap = SlabStrainedSupercellWithGapConfiguration(
-        **processed_slab2.to_dict(),
-        gap=gap,
-    )
+
+    # TODO: add gaps to the interface configuration
     configuration = InterfaceConfiguration(
-        stack_components=[slab1_gap, slab2_gap],
+        stack_components=[processed_slab1, processed_slab2],
         direction="z",
     )
     builder = InterfaceBuilder()
@@ -94,7 +88,7 @@ def get_commensurate_strained_configs(
     match_id: int = 0,
     direction: AxisEnum = AxisEnum.z,
     gap: float = 3.0,
-) -> Tuple[List[SlabStrainedSupercellWithGapConfiguration], float]:
+) -> Tuple[List[SlabStrainedSupercellConfiguration], float]:
     """
     Get strained configurations for commensurate lattice matching.
 
@@ -116,7 +110,7 @@ def get_commensurate_strained_configs(
         gap (float): The gap between the two phases in Angstroms.
 
     Returns:
-        Tuple[List[SlabStrainedSupercellWithGapConfiguration], float]:
+        Tuple[List[SlabStrainedSupercellConfiguration], float]:
             List of strained configurations [substrate, film] and the actual angle.
 
     Raises:
@@ -143,20 +137,9 @@ def get_commensurate_strained_configs(
         raise ValueError(f"No commensurate lattice matches found for angle {target_angle}°")
 
     selected_config = analyzer.get_strained_configuration_by_match_id(match_id)
-
-    substrate_config = SlabStrainedSupercellWithGapConfiguration(
-        **selected_config.substrate_configuration.to_dict(),
-        gap=gap,
-        gap_direction=direction,
-    )
-    film_config = SlabStrainedSupercellWithGapConfiguration(
-        **selected_config.film_configuration.to_dict(),
-        gap=gap,
-        gap_direction=direction,
-    )
-
+    # TODO: add gaps to the interface configuration
     actual_angle = match_holders[match_id].actual_angle
-    return [substrate_config, film_config], actual_angle
+    return [selected_config.substrate_configuration, selected_config.film_configuration], actual_angle
 
 
 def create_interface(
@@ -233,6 +216,7 @@ def create_commensurate_interface(
         gap=gap,
     )
 
+    # TODO: add gaps to the interface configuration
     interface_config = InterfaceConfiguration(
         stack_components=strained_configs,
         direction=direction,

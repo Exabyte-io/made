@@ -39,7 +39,7 @@ def create_adatom_defect(
     """
     coordinate = [*position_on_surface, 0]
 
-    slab_analyzer = SlabMaterialAnalyzer(material=slab)
+    slab_analyzer = SlabMaterialAnalyzer(material=slab, coordinate=coordinate)
     added_slab = recreate_slab_with_fractional_layers(slab, 1)
 
     adatom_analyzer = AdatomMaterialAnalyzer(

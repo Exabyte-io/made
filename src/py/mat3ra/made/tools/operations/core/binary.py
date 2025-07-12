@@ -4,6 +4,7 @@ import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.modify import translate_by_vector
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
@@ -16,7 +17,7 @@ def merge(
     material_name: Optional[str] = None,
     distance_tolerance: float = 0.1,
     merge_dangerously: bool = False,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Merge multiple materials using a specific merge method.
 
@@ -28,7 +29,7 @@ def merge(
         merge_dangerously (bool): If True, allows merging even if lattices are different.
 
     Returns:
-        Material: The merged material.
+        MaterialWithBuildMetadata: The merged material.
     """
     merged_material = materials[0]
     for material in materials[1:]:
@@ -38,7 +39,7 @@ def merge(
     return merged_material
 
 
-def stack(materials: List[Material], direction: AxisEnum) -> Material:
+def stack(materials: List[Material], direction: AxisEnum) -> MaterialWithBuildMetadata:
     result = materials[0]
     for material in materials[1:]:
         result = stack_two_materials(material_1=result, material_2=material, direction=direction)
@@ -49,7 +50,7 @@ def stack_two_materials(
     material_1: Material,
     material_2: Material,
     direction: AxisEnum = AxisEnum.z,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Stack two materials along a specified direction by expanding lattices and merging.
 
@@ -59,7 +60,7 @@ def stack_two_materials(
         direction: Direction along which to stack (x, y, or z axis).
 
     Returns:
-        Material: Stacked material with combined lattice and atoms.
+        MaterialWithBuildMetadata: Stacked material with combined lattice and atoms.
     """
     lattice_vector_index = AXIS_TO_INDEX_MAP[direction.value]
 
