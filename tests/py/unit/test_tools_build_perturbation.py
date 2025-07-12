@@ -1,5 +1,6 @@
 import pytest
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.perturbation import create_perturbation
 from mat3ra.made.tools.build.perturbation.builders import SlabPerturbationBuilder
 from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
@@ -64,7 +65,7 @@ def test_distance_preserved_sine_perturbation(
     coordinates_to_check,
     expected_cell,
 ):
-    material = Material.create(material_config)
+    material = MaterialWithBuildMetadata.create(material_config)
     slab = create_supercell(material, supercell_matrix)
 
     perturbation_config = PerturbationConfiguration(

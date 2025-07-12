@@ -32,8 +32,7 @@ def create_supercell(
     if scaling_factor is not None:
         supercell_matrix = np.multiply(scaling_factor, np.eye(3)).tolist()
     new_material = supercell(material, supercell_matrix)
-    BuildMetadata.set_build_metadata(
-        new_material,
-        configuration=SupercellConfiguration(supercell_matrix=supercell_matrix),
+    new_material.metadata.add_build_metadata_step(
+        BuildMetadata(configuration=SupercellConfiguration(supercell_matrix=supercell_matrix))
     )
     return new_material

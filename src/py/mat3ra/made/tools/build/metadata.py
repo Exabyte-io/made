@@ -30,7 +30,7 @@ class MaterialBuildMetadata(BaseMetadata):
                 )
         return None
 
-    def add_build_metadata_step(self, configuration: dict, build_parameters: dict) -> None:
+    def add_build_metadata_step(self, configuration: dict, build_parameters: Optional[dict] = None) -> None:
         build_metadata = BuildMetadata(configuration=configuration, build_parameters=build_parameters)
         self.build.append(build_metadata)
 
