@@ -124,8 +124,6 @@ def create_grain_boundary_linear(
         miller_indices=miller_indices,
         number_of_layers=number_of_layers,
         vacuum=vacuum,
-        direction=direction,
-        gap=gap,
     )
 
     grain_boundary_config = GrainBoundaryLinearConfiguration(
