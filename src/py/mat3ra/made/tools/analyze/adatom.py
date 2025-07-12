@@ -27,6 +27,7 @@ class SlabStackAnalyzer(SlabMaterialAnalyzer):
 class AdatomMaterialAnalyzer(SlabMaterialAnalyzer):
     distance_z: float
     placement_method: AdatomPlacementMethodEnum
+    coordinate: List[float]  # Add coordinate property
 
     @property
     def distance_z_crystal(self) -> float:
@@ -34,11 +35,11 @@ class AdatomMaterialAnalyzer(SlabMaterialAnalyzer):
 
     @property
     def added_component_one_layer(self) -> Material:
-        return recreate_slab_with_fractional_layers(self.slab, 1)
+        return recreate_slab_with_fractional_layers(self.material, 1)
 
     @property
     def coordinate_in_added_component_from_crystal_site(self) -> List[float]:
-        crystal_site_analyzer = self.__init__(material=self.added_component_one_layer, coordinate=self.coordinate)
+        crystal_site_analyzer = CrystalSiteAnalyzer(material=self.added_component_one_layer, coordinate=self.coordinate)
         return crystal_site_analyzer.closest_site_coordinate
 
     @property

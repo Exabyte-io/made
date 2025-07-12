@@ -4,7 +4,6 @@ from sympy import ceiling
 from mat3ra.made.material import Material
 from .builders import SlabStackBuilder
 from .configuration import SlabStackConfiguration
-from ...slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ...slab.helpers import create_slab
 from ....analyze.slab import SlabMaterialAnalyzer
 from ....modify import filter_by_box
@@ -22,7 +21,7 @@ def create_slab_stack(slab: Material, added_component: Material) -> Material:
     """
     analyzer = SlabMaterialAnalyzer(material=slab)
 
-    slab_without_vacuum = analyzer.slab_configuration_with_no_vacuum()
+    slab_without_vacuum = analyzer.slab_configuration_with_no_vacuum
 
     vacuum_config = analyzer.get_slab_vacuum_configuration()
 
