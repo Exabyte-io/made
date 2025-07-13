@@ -1,12 +1,15 @@
 from typing import Optional, List
 
+import numpy as np
+
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
 from mat3ra.made.tools.build.defect.terrace.analyzer import TerraceMaterialAnalyzer
 from mat3ra.made.tools.build.defect.terrace.builders import TerraceDefectBuilder
 from mat3ra.made.tools.build.defect.terrace.configuration import TerraceDefectConfiguration
 from mat3ra.made.tools.build.defect.terrace.parameters import TerraceBuildParameters
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
+from mat3ra.made.tools.modify import filter_by_condition_on_coordinates, rotate
+from mat3ra.made.tools.operations.core.unary import edit_cell
 from mat3ra.made.tools.utils.coordinate import PlaneCoordinateCondition
 
 
@@ -14,7 +17,7 @@ def create_terrace(
     slab: MaterialWithBuildMetadata,
     cut_direction: Optional[List[int]] = None,
     pivot_coordinate: Optional[List[float]] = None,
-    number_of_added_layers: int = 1,
+    number_of_added_layers: float = 1.0,
     use_cartesian_coordinates: bool = False,
     rotate_to_match_pbc: bool = True,
 ) -> MaterialWithBuildMetadata:
@@ -57,6 +60,14 @@ def create_terrace(
 
     terrace_configuration = TerraceDefectConfiguration(stack_components=[slab_in_stack, isolated_defect, vacuum])
     parameters = TerraceBuildParameters(rotate_to_match_pbc=rotate_to_match_pbc)
-    material = TerraceDefectBuilder(build_parameters=parameters).get_material(terrace_configuration)
+    terrace = TerraceDefectBuilder(build_parameters=parameters).get_material(terrace_configuration)
 
-    return material
+    rotation_parameters = terrace_analyzer.calculate_rotation_parameters(terrace, cut_direction)
+    lattice_vectors_np = np.array(terrace.lattice.vector_arrays)
+    terrace = edit_cell(
+        terrace,
+        lattice_vectors=[lattice_vectors_np[0], lattice_vectors_np[1] * 1.2, lattice_vectors_np[2]],
+    )
+    terrace = rotate(terrace, [1, 0, 0], rotation_parameters.angle)
+
+    return terrace

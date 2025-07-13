@@ -3,6 +3,8 @@ from typing import List
 import numpy as np
 
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
+from mat3ra.made.utils import get_atomic_coordinates_extremum
 
 
 class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
@@ -45,47 +47,47 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         new_lattice = new_material.lattice.get_scaled_by_matrix(scaling_matrix.tolist())
         return new_lattice.vector_arrays.tolist()
 
-    # def calculate_height_cartesian(self, new_material: MaterialWithBuildMetadata):
-    #     """
-    #     Calculate the height of the added layers in Cartesian coordinates.
+    def calculate_height_cartesian(self, new_material: MaterialWithBuildMetadata):
+        """
+        Calculate the height of the added layers in Cartesian coordinates.
+
+        Args:
+            new_material: The material with the added layers.
+
+        Returns:
+            The height of the added layers in Cartesian coordinates.
+        """
+        original_max_z = get_atomic_coordinates_extremum(self.material, use_cartesian_coordinates=True)
+        added_layers_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
+        height_cartesian = added_layers_max_z - original_max_z
+        return height_cartesian
+
     #
-    #     Args:
-    #         material: The original material.
-    #         new_material: The material with the added layers.
-    #
-    #     Returns:
-    #         The height of the added layers in Cartesian coordinates.
-    #     """
-    #     original_max_z = get_atomic_coordinates_extremum(material, use_cartesian_coordinates=True)
-    #     added_layers_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
-    #     height_cartesian = added_layers_max_z - original_max_z
-    #     return height_cartesian
-    #
-    # def _calculate_rotation_parameters(
-    #     self,
-    #     original_material: MaterialWithBuildMetadata,
-    #     new_material: MaterialWithBuildMetadata,
-    #     normalized_direction_vector: List[float],
-    # ):
-    #     """
-    #     Calculate the necessary rotation angle and axis.
-    #
-    #     Args:
-    #         original_material: The original material.
-    #         new_material: The material with the added layers.
-    #         normalized_direction_vector: The normalized cut direction vector in Cartesian coordinates.
-    #
-    #     Returns:
-    #         The rotation angle, normalized rotation axis, and delta length.
-    #     """
-    #     height_cartesian = self._calculate_height_cartesian(original_material, new_material)
-    #     cut_direction_xy_proj_cart = np.linalg.norm(
-    #         np.dot(np.array(new_material.lattice.vector_arrays), normalized_direction_vector)
-    #     )
-    #     # Slope of the terrace along the cut direction
-    #     hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])
-    #     angle = np.arctan(height_cartesian / cut_direction_xy_proj_cart) * 180 / np.pi
-    #     normalized_rotation_axis = np.cross(normalized_direction_vector, [0, 0, 1]).tolist()
-    #     delta_length = hypotenuse - cut_direction_xy_proj_cart
-    #     return angle, normalized_rotation_axis, delta_length
+    def calculate_rotation_parameters(
+        self,
+        new_material: MaterialWithBuildMetadata,
+        direction_vector: List[float],
+    ):
+        """
+        Calculate the necessary rotation angle and axis.
+
+        Args:
+            new_material: The material with the added layers.
+            direction_vector: The normalized cut direction vector in Cartesian coordinates.
+
+        Returns:
+            The rotation angle, normalized rotation axis, and delta length.
+        """
+        height_cartesian = self._calculate_height_cartesian(self.material, new_material)
+        normalized_direction_vector = self.calculate_cut_direction_vector(direction_vector)
+        cut_direction_xy_proj_cart = np.linalg.norm(
+            np.dot(np.array(new_material.lattice.vector_arrays), normalized_direction_vector)
+        )
+        # Slope of the terrace along the cut direction
+        hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])
+        angle = np.arctan(height_cartesian / cut_direction_xy_proj_cart) * 180 / np.pi
+        normalized_rotation_axis = np.cross(normalized_direction_vector, [0, 0, 1]).tolist()
+        delta_length = hypotenuse - cut_direction_xy_proj_cart
+        return angle, normalized_rotation_axis, delta_length
+
     #
