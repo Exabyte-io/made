@@ -1,16 +1,19 @@
 import numpy as np
 import pytest
 from mat3ra.made.material import Material, defaultMaterialConfig
+from mat3ra.made.tools.analyze.adatom import AdatomCrystalSiteMaterialAnalyzer, AdatomMaterialAnalyzer
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
-from mat3ra.made.tools.build.defect.enums import AtomPlacementMethodEnum
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
+from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum, AtomPlacementMethodEnum
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from unit.utils import TestPlatform, get_platform_specific_value
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
+from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 from .utils import assert_two_entities_deep_almost_equal
 
 
@@ -92,7 +95,7 @@ VORONOI_SITE_EXPECTED = {TestPlatform.DARWIN: [0.625, 0.625, 0.125], TestPlatfor
     [
         (AtomPlacementMethodEnum.EXACT_COORDINATE, [0.25, 0.25, 0.5], [0.25, 0.25, 0.5]),
         (AtomPlacementMethodEnum.CLOSEST_SITE, [0.25, 0.25, 0.5], [0.25, 0.25, 0.25]),
-        (AtomPlacementMethodEnum.EQUIDISTANT, [0.5432, 0.5123, 0.5], [0.58333, 0.58333, 0.5]),
+        (AtomPlacementMethodEnum.EQUIDISTANT, [0.5432, 0.5123, 0.5], [0.58333, 0.58333, 0.25]),
         (AtomPlacementMethodEnum.VORONOI_SITE, [0.25, 0.25, 0.5], VORONOI_SITE_EXPECTED),
     ],
 )
@@ -110,8 +113,64 @@ def test_crystal_site_analyzer(placement_method, coordinate, expected_coordinate
         elif placement_method == AtomPlacementMethodEnum.CLOSEST_SITE:
             final_coordinate = analyzer.closest_site_coordinate
         elif placement_method == AtomPlacementMethodEnum.EQUIDISTANT:
-            final_coordinate = analyzer.equidistant_coordinate
+            final_coordinate = analyzer.get_equidistant_coordinate()
         else:
             raise ValueError(f"Unknown method: {placement_method}")
 
     assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
+
+
+@pytest.mark.parametrize(
+    "material_config, coordinate, placement_method, distance_z, element, expected_coordinate",
+    [
+        (
+            SI_CONVENTIONAL_SLAB_001,
+            [0.25, 0.25],
+            AdatomPlacementMethodEnum.EXACT_COORDINATE,
+            1.0,
+            "Si",
+            [0.25, 0.25, 0.5],
+        ),
+    ],
+)
+def test_adatom_material_analyzer(
+    material_config, coordinate, placement_method, distance_z, element, expected_coordinate
+):
+    crystal = MaterialWithBuildMetadata.create(material_config)
+
+    analyzer = AdatomMaterialAnalyzer(
+        material=crystal, coordinate_2d=coordinate, distance_z=distance_z, element=element
+    )
+    resolved_coord = analyzer.coordinate_in_added_component
+
+    assert np.allclose(resolved_coord, expected_coordinate, atol=1e-6)
+
+
+@pytest.mark.parametrize(
+    "material_config, coordinate, placement_method, distance_z, element,expected_coordinate",
+    [
+        (
+            SI_CONVENTIONAL_SLAB_001,
+            [0.25, 0.25],
+            AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE,
+            1.0,
+            "Si",
+            [0.25, 0.25, 0.5],
+        ),
+    ],
+)
+def test_adatom_crystal_site_material_analyzer(
+    material_config, coordinate, placement_method, distance_z, element, expected_coordinate
+):
+    crystal = MaterialWithBuildMetadata.create(material_config)
+
+    # Test NEW_CRYSTAL_SITE method
+    analyzer = AdatomCrystalSiteMaterialAnalyzer(
+        material=crystal,
+        coordinate_2d=coordinate,
+        distance_z=distance_z,
+        element=element,
+    )
+    resolved_coord = analyzer.coordinate_in_added_component
+
+    assert np.allclose(resolved_coord, expected_coordinate, atol=1e-6)

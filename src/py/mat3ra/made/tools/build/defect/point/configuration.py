@@ -21,7 +21,7 @@ from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.site import CrystalSite
 
 
-class PointDefectSite(CrystalSite, PointDefectSiteSchema):
+class PointDefectSiteConfiguration(CrystalSite, PointDefectSiteSchema):
     element: Union[VacancySchema, AtomSchema]
 
 
@@ -35,7 +35,7 @@ class PointDefectConfiguration(MergeConfiguration, PointDefectBaseConfigurationS
     """
 
     type: str = "PointDefectConfiguration"
-    merge_components: List[Union[Material, PointDefectSite]]
+    merge_components: List[Union[Material, PointDefectSiteConfiguration]]
 
 
 class VacancyDefectConfiguration(PointDefectConfiguration, VacancyPointDefectSchema):
@@ -43,7 +43,7 @@ class VacancyDefectConfiguration(PointDefectConfiguration, VacancyPointDefectSch
 
     @classmethod
     def from_parameters(cls, crystal: Material, coordinate: List[float], **kwargs):
-        point_defect_site = PointDefectSite(
+        point_defect_site = PointDefectSiteConfiguration(
             crystal=crystal,
             element=VacancySchema(chemical_element=ChemicalElement.Vac.value),
             coordinate=coordinate,
@@ -56,7 +56,7 @@ class SubstitutionalDefectConfiguration(PointDefectConfiguration, Substitutional
 
     @classmethod
     def from_parameters(cls, crystal: Material, coordinate: List[float], element: str, **kwargs):
-        substitution_site = PointDefectSite(
+        substitution_site = PointDefectSiteConfiguration(
             crystal=crystal,
             element=AtomSchema(chemical_element=element),
             coordinate=coordinate,
@@ -69,7 +69,7 @@ class InterstitialDefectConfiguration(PointDefectConfiguration, InterstitialPoin
 
     @classmethod
     def from_parameters(cls, crystal: Material, coordinate: List[float], element: str, **kwargs):
-        interstitial_site = PointDefectSite(
+        interstitial_site = PointDefectSiteConfiguration(
             crystal=crystal,
             element=AtomSchema(chemical_element=element),
             coordinate=coordinate,

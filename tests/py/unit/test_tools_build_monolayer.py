@@ -29,6 +29,6 @@ def test_create_monolayer(material_config, vacuum, expected_material_config, ski
     # reset the name and lattice.type to ignore them in the comparison
     monolayer.name = expected_material_config["name"]
     monolayer.lattice.type = expected_material_config["lattice"]["type"]
-    monolayer.metadata.pop("build")
+    monolayer.metadata.build = []
 
     assert_two_entities_deep_almost_equal(monolayer, expected_material_config, atol=1e-6)

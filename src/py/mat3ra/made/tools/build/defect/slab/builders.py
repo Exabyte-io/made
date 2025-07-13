@@ -3,16 +3,12 @@ from typing import Any
 from mat3ra.made.material import Material
 from ..slab.configuration import SlabStackConfiguration, IslandDefectConfiguration
 from ...slab.builders import SlabBuilder
-from ...slab.builders import SlabWithGapBuilder
 from ...slab.configurations import SlabConfiguration
-from ...slab.configurations import SlabStrainedSupercellWithGapConfiguration
 from ...stack.builders import StackNComponentsBuilder
 
 
 class SlabStackBuilder(StackNComponentsBuilder):
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, SlabStrainedSupercellWithGapConfiguration):
-            return SlabWithGapBuilder().get_material(configuration_or_material)
         if isinstance(configuration_or_material, SlabConfiguration):
             return SlabBuilder().get_material(configuration_or_material)
         else:

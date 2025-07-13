@@ -1,32 +1,26 @@
-from typing import Optional, Any, Type
-
-import numpy as np
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from typing import List, Optional, Any, Type
 
 from mat3ra.made.material import Material
-from .build_parameters import SlabBuilderParameters
 from .configurations import (
     CrystalLatticePlanesConfiguration,
     SlabStrainedSupercellConfiguration,
-    SlabStrainedSupercellWithGapConfiguration,
 )
 from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfiguration
 from .configurations.slab_configuration import SlabConfiguration
 from .utils import get_orthogonal_c_slab
-from .. import BaseSingleBuilder
-from ..stack.builders import Stack2ComponentsBuilder
+from .. import BaseBuilderParameters, BaseSingleBuilder, MaterialWithBuildMetadata
+from ..stack.builders import StackNComponentsBuilder
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from ...analyze.other import get_chemical_formula, get_atomic_coordinates_extremum
+from ...analyze.other import get_chemical_formula
 from ...modify import wrap_to_unit_cell, translate_to_z_level
-from ...operations.core.unary import supercell, translate, strain, edit_cell
-from ...utils import AXIS_TO_INDEX_MAP
+from ...operations.core.unary import supercell, translate, strain
 
 
 class CrystalLatticePlanesBuilder(BaseSingleBuilder):
     _PostProcessParametersType: Any = None
     use_enforce_convention: bool = True
 
-    def _generate(self, configuration: CrystalLatticePlanesConfiguration) -> Material:
+    def _generate(self, configuration: CrystalLatticePlanesConfiguration) -> MaterialWithBuildMetadata:
         crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
             material=configuration.crystal, miller_indices=configuration.miller_indices
         )
@@ -34,12 +28,14 @@ class CrystalLatticePlanesBuilder(BaseSingleBuilder):
         miller_supercell_material = supercell(configuration.crystal, miller_supercell_matrix)
         return miller_supercell_material
 
-    def _enforce_convention(self, material: Material) -> Material:
+    def _enforce_convention(self, material: MaterialWithBuildMetadata) -> MaterialWithBuildMetadata:
         if not self.use_enforce_convention:
             return material
         return translate_to_z_level(material, "bottom")
 
-    def _post_process(self, item: Material, post_process_parameters: Optional[_PostProcessParametersType]) -> Material:
+    def _post_process(
+        self, item: Material, post_process_parameters: Optional[_PostProcessParametersType]
+    ) -> MaterialWithBuildMetadata:
         item = super()._post_process(item, post_process_parameters)
         return self._enforce_convention(item)
 
@@ -47,7 +43,7 @@ class CrystalLatticePlanesBuilder(BaseSingleBuilder):
 class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
     _ConfigurationType: Type[AtomicLayersUniqueRepeatedConfiguration] = AtomicLayersUniqueRepeatedConfiguration
 
-    def _generate(self, configuration: AtomicLayersUniqueRepeatedConfiguration) -> Material:
+    def _generate(self, configuration: AtomicLayersUniqueRepeatedConfiguration) -> MaterialWithBuildMetadata:
         crystal_lattice_planes_material = super()._generate(configuration)
 
         crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
@@ -64,7 +60,12 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
         return material_translated_wrapped_layered
 
 
-class SlabBuilder(Stack2ComponentsBuilder):
+class SlabBuilderParameters(BaseBuilderParameters):
+    use_orthogonal_c: bool = True
+    xy_supercell_matrix: List[List[int]] = [[1, 0], [0, 1]]
+
+
+class SlabBuilder(StackNComponentsBuilder):
     _BuildParametersType = SlabBuilderParameters
     _DefaultBuildParameters: SlabBuilderParameters = SlabBuilderParameters()
 
@@ -106,43 +107,3 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
         strained_slab_material = strain(slab_material, configuration.strain_matrix)
 
         return strained_slab_material
-
-
-class SlabWithGapBuilder(SlabStrainedSupercellBuilder):
-    _ConfigurationType: Type[SlabStrainedSupercellWithGapConfiguration] = SlabStrainedSupercellWithGapConfiguration
-
-    def _generate(self, configuration: _ConfigurationType) -> Material:
-        strained_slab_material = super()._generate(configuration)
-
-        if configuration.gap is not None:
-            strained_slab_material = self._adjust_lattice_for_gap(
-                strained_slab_material, configuration.gap, configuration.gap_direction
-            )
-
-        return strained_slab_material
-
-    def _adjust_lattice_for_gap(self, material: Material, gap: float, direction: AxisEnum) -> Material:
-        """
-        Adjust the cell along the stacking direction to make the distance from the cell end to its closest atom
-        to be equal to the gap, in Angstroms.
-        """
-        direction_str = direction.value
-        axis_index = AXIS_TO_INDEX_MAP[direction_str]
-
-        max_fractional = get_atomic_coordinates_extremum(material, "max", direction_str, False)
-        current_vectors = material.lattice.vector_arrays
-        current_vector = np.array(current_vectors[axis_index])
-        current_length = np.linalg.norm(current_vector)
-
-        # Add a small nudge when gap=0 to prevent atoms at fractional coordinate 1.0 from being wrapped
-        nudge = 0.0001 if gap == 0 else 0
-        new_length = (max_fractional * current_length) + gap + nudge
-
-        if current_length > 0:
-            new_vector = (current_vector / current_length) * new_length
-        else:
-            new_vector = current_vector
-        new_lattice_vectors = list(current_vectors)
-        new_lattice_vectors[axis_index] = new_vector.tolist()
-        new_material = edit_cell(material, new_lattice_vectors)
-        return new_material

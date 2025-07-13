@@ -1,7 +1,7 @@
 import pytest
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseConfigurationPydantic
+from mat3ra.made.tools.build import BaseConfigurationPydantic, MaterialWithBuildMetadata
 from mat3ra.made.tools.build.merge.builders import MergeBuilder, MergeBuilderParameters
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.operations.core.binary import merge
@@ -89,8 +89,8 @@ MERGE_TEST_PARAMS = [
     "material1_config, material2_config, merge_method, builder_params, expected_material_config", MERGE_TEST_PARAMS
 )
 def test_merge_builder(material1_config, material2_config, merge_method, builder_params, expected_material_config):
-    material1 = Material.create(material1_config)
-    material2 = Material.create(material2_config)
+    material1 = MaterialWithBuildMetadata.create(material1_config)
+    material2 = MaterialWithBuildMetadata.create(material2_config)
 
     merge_config = MergeConfiguration(merge_components=[material1, material2], merge_method=merge_method)
 
@@ -126,8 +126,8 @@ def test_merge_builder(material1_config, material2_config, merge_method, builder
     ],
 )
 def test_merge_methods(material1_config, material2_config, merge_method, expected_material_config):
-    material1 = Material.create(material1_config)
-    material2 = Material.create(material2_config)
+    material1 = MaterialWithBuildMetadata.create(material1_config)
+    material2 = MaterialWithBuildMetadata.create(material2_config)
     merge_config = MergeConfiguration(merge_components=[material1, material2], merge_method=merge_method)
     builder = MergeBuilder(build_parameters=MergeBuilderParameters(merge_dangerously=True))
     merged_material = builder.get_material(merge_config)

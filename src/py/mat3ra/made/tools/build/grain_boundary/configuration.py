@@ -1,5 +1,6 @@
 from typing import Optional, List
 
+from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 # fmt: off
 from mat3ra.esse.models.materials_category.defective_structures.one_dimensional. \
@@ -13,7 +14,7 @@ from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.
 )
 
 from ..interface.configuration import InterfaceConfiguration
-from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellWithGapConfiguration
+from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 
 
@@ -42,23 +43,21 @@ class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundaryPlan
     @classmethod
     def from_parameters(
         cls,
-        phase_1_configuration: SlabConfiguration,
-        phase_2_configuration: SlabConfiguration,
+        phase_1_configuration: SlabStrainedSupercellConfiguration,
+        phase_2_configuration: SlabStrainedSupercellConfiguration,
         xy_shift: Optional[List[float]] = None,
-        gap: Optional[float] = None,
+        gaps: Optional[List[float]] = None,
     ) -> "GrainBoundaryPlanarConfiguration":
         if xy_shift is None:
             xy_shift = [0.0, 0.0]
 
-        if gap and gap > 0:
-            phase_1_config = SlabStrainedSupercellWithGapConfiguration(**phase_1_configuration.to_dict(), gap=gap)
-            phase_2_config = SlabStrainedSupercellWithGapConfiguration(**phase_2_configuration.to_dict(), gap=gap)
-        else:
-            phase_1_config = phase_1_configuration
-            phase_2_config = phase_2_configuration
-
-        stack_components = [phase_1_config, phase_2_config]
-        return cls(stack_components=stack_components, direction=AxisEnum.z, xy_shift=xy_shift)
+        stack_components = [phase_1_configuration, phase_2_configuration]
+        return cls(
+            stack_components=stack_components,
+            direction=AxisEnum.z,
+            xy_shift=xy_shift,
+            gaps=ArrayWithIds.from_values(gaps),
+        )
 
 
 class GrainBoundaryLinearConfiguration(InterfaceConfiguration, GrainBoundaryLinearConfigurationSchema):

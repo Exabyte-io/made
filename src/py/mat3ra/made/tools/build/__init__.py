@@ -3,7 +3,7 @@ from typing import List, Optional, Any, TypeVar
 from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
 from pydantic import BaseModel
 
-from .metadata import MaterialMetadata, BuildMetadata
+from .metadata import MaterialBuildMetadata, BuildMetadata, MaterialWithBuildMetadata
 from ...material import Material
 
 BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound="BaseConfigurationPydantic")
@@ -77,13 +77,17 @@ class BaseSingleBuilder(BaseModel):
         super().__init__(build_parameters=build_parameters)
         self.build_parameters = build_parameters if build_parameters is not None else self._DefaultBuildParameters
 
-    def _generate(self, configuration: _ConfigurationType) -> Material:
+    def _generate(self, configuration: _ConfigurationType) -> MaterialWithBuildMetadata:
         raise NotImplementedError
 
-    def _post_process(self, item: Material, post_process_parameters: Optional[_PostProcessParametersType]) -> Material:
+    def _post_process(
+        self, item: MaterialWithBuildMetadata, post_process_parameters: Optional[_PostProcessParametersType]
+    ) -> MaterialWithBuildMetadata:
         return item
 
-    def _finalize(self, material: Material, configuration: _ConfigurationType) -> Material:
+    def _finalize(
+        self, material: MaterialWithBuildMetadata, configuration: _ConfigurationType
+    ) -> MaterialWithBuildMetadata:
         material_with_metadata = self._update_material_metadata(material, configuration)
         return self._update_material_name(material_with_metadata, configuration)
 
@@ -91,17 +95,19 @@ class BaseSingleBuilder(BaseModel):
         self,
         configuration: _ConfigurationType,
         post_process_parameters: Optional[_PostProcessParametersType] = None,
-    ) -> Material:
+    ) -> MaterialWithBuildMetadata:
         generated_item = self._generate(configuration)
-        materials = self._post_process(generated_item, post_process_parameters)
-        finalized_material = self._finalize(materials, configuration)
+        material = self._post_process(generated_item, post_process_parameters)
+        finalized_material = self._finalize(material, configuration)
         return finalized_material
 
-    def _update_material_name(self, material, configuration) -> Material:
+    def _update_material_name(self, material, configuration) -> MaterialWithBuildMetadata:
         return material
 
-    def _update_material_metadata(self, material, configuration) -> Material:
-        BuildMetadata.set_build_metadata(material, configuration, self.build_parameters)
+    def _update_material_metadata(
+        self, material: MaterialWithBuildMetadata, configuration
+    ) -> MaterialWithBuildMetadata:
+        material.metadata.add_build_metadata_step(configuration=configuration, build_parameters=self.build_parameters)
         return material
 
 
@@ -172,7 +178,7 @@ class BaseBuilder(BaseModel):
     ) -> List[Material]:
         if self._GeneratedItemType == Material:
             return items
-        return [Material.create(self._convert_generated_item(item)) for item in items]
+        return [MaterialWithBuildMetadata.create(self._convert_generated_item(item)) for item in items]
 
     @staticmethod
     def _convert_generated_item(item: _GeneratedItemType):
@@ -210,6 +216,8 @@ class BaseBuilder(BaseModel):
         # Do nothing by default
         return material
 
-    def _update_material_metadata(self, material, configuration) -> Material:
-        BuildMetadata.set_build_metadata(material, configuration, self.build_parameters)
+    def _update_material_metadata(
+        self, material: MaterialWithBuildMetadata, configuration
+    ) -> MaterialWithBuildMetadata:
+        material.metadata.add_build_metadata_step(configuration=configuration, build_parameters=self.build_parameters)
         return material
