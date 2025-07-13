@@ -5,7 +5,6 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder, BaseBuilderParameters, MaterialWithBuildMetadata
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
-from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import merge
 
@@ -52,7 +51,7 @@ class MergeBuilder(BaseSingleBuilder):
         parameters: MergeBuilderParameters,
         method: MergeMethodsEnum = MergeMethodsEnum.ADD,
     ) -> MaterialWithBuildMetadata:
-        if not method in MergeMethodsEnum:
+        if method not in MergeMethodsEnum:
             raise ValueError(f"Unknown merge method: {method}")
         return merge(
             materials=materials,

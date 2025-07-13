@@ -5,7 +5,6 @@ from ...stack.builders import StackNComponentsBuilder
 
 
 class SlabStackBuilder(StackNComponentsBuilder):
-
     @property
     def stack_component_types_conversion_map(self):
         return {

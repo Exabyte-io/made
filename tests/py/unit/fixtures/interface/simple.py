@@ -1,5 +1,5 @@
 # type: ignore
-
+# ruff: noqa
 INTERFACE_Si_001_Ge_001 = {
     "basis": {
         "constraints": [],

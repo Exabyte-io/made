@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Type
 
 from mat3ra.code.entity import InMemoryEntityPydantic
 

@@ -15,7 +15,6 @@ from mat3ra.made.tools.build.defect.point.configuration import (
     InterstitialDefectConfiguration,
 )
 from mat3ra.made.tools.build.merge.builders import MergeBuilder
-from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 
