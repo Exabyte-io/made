@@ -1,9 +1,5 @@
 from typing import List, Optional
 
-from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import (
-    AtomSchema,
-)
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.adatom import AdatomCrystalSiteMaterialAnalyzer, AdatomMaterialAnalyzer
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction

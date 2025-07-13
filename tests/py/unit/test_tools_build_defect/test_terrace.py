@@ -1,11 +1,10 @@
 import sys
 
 import pytest
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.terrace.helpers import create_terrace
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
 

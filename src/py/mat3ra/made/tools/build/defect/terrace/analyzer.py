@@ -6,7 +6,6 @@ from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 
 
 class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
-
     def calculate_cut_direction_vector(self, cut_direction: List[int]):
         np_cut_direction = np.array(cut_direction)
         direction_vector = np.dot(np.array(self.material.basis.cell.vector_arrays), np_cut_direction)
@@ -46,7 +45,7 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         new_lattice = new_material.lattice.get_scaled_by_matrix(scaling_matrix.tolist())
         return new_lattice.vector_arrays.tolist()
 
-    # def _calculate_height_cartesian(self, material: MaterialWithBuildMetadata, new_material: MaterialWithBuildMetadata):
+    # def calculate_height_cartesian(self, new_material: MaterialWithBuildMetadata):
     #     """
     #     Calculate the height of the added layers in Cartesian coordinates.
     #

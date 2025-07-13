@@ -1,7 +1,6 @@
 from typing import List
 
 from mat3ra.made.tools.build import BaseBuilderParameters
-from mat3ra.made.tools.build.slab.entities import MillerIndices
 
 
 class TerraceBuildParameters(BaseBuilderParameters):

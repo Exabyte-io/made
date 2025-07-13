@@ -6,7 +6,6 @@ from .configuration import (
     PointDefectConfigurationLegacy,
     AdatomSlabPointDefectConfiguration,
     IslandSlabDefectConfiguration,
-    TerraceSlabDefectConfiguration,
     PointDefectPairConfiguration,
 )
 from .factories import DefectBuilderFactory

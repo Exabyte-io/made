@@ -22,7 +22,6 @@ class TerraceDefectBuilder(SlabStackBuilder):
     def _update_material_name(
         self, material: MaterialWithBuildMetadata, configuration: SlabStackConfiguration
     ) -> MaterialWithBuildMetadata:
-
         new_material = super()._update_material_name(material, configuration)
         new_name = f"{new_material.name}, Terrace {configuration.cut_direction}"
         new_material.name = new_name
