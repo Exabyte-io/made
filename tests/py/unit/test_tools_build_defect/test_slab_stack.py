@@ -1,5 +1,4 @@
 import pytest
-
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.slab.helpers import create_slab_stack, recreate_slab_with_fractional_layers
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER

@@ -1,12 +1,13 @@
 from typing import Type
 
 from mat3ra.made.utils import get_atomic_coordinates_extremum
-from . import BaseMaterialAnalyzer
-from .crystal_site import CrystalSiteAnalyzer
+
 from ..build import BuildMetadata, MaterialWithBuildMetadata
 from ..build.slab.builders import SlabBuilderParameters
 from ..build.slab.configurations import SlabConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
+from . import BaseMaterialAnalyzer
+from .crystal_site import CrystalSiteAnalyzer
 
 
 class BuildMetadataAnalyzer(BaseMaterialAnalyzer):

@@ -1,5 +1,6 @@
 import pytest
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration
 from mat3ra.made.tools.build.defect.slab.builders import IslandDefectBuilder
 from mat3ra.made.tools.build.defect.slab.helpers import create_island_defect
@@ -42,7 +43,7 @@ def test_create_island(
     crystal_config, condition_class, condition_params, num_added_layers, num_atoms_in_island, expected_last_element
 ):
     # TODO: use TiN
-    crystal = Material.create(crystal_config)
+    crystal = MaterialWithBuildMetadata.create(crystal_config)
     condition = CoordinateCondition.CylinderCoordinateCondition(**condition_params)
     island_config = IslandSlabDefectConfiguration(
         crystal=crystal,
