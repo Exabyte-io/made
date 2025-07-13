@@ -1,17 +1,12 @@
-from typing import Union, Type
+from typing import Type
 
-from sympy.strategies.core import switch
+from mat3ra.made.utils import get_atomic_coordinates_extremum
 
+from ..build import BuildMetadata, MaterialWithBuildMetadata
+from ..build.slab.configurations import SlabConfiguration
+from ..build.vacuum.configuration import VacuumConfiguration
 from . import BaseMaterialAnalyzer
 from .crystal_site import CrystalSiteAnalyzer
-from mat3ra.made.utils import get_atomic_coordinates_extremum
-from ..build import MaterialBuildMetadata, MaterialWithBuildMetadata, BuildMetadata
-from ..build.slab.configurations import (
-    SlabConfiguration,
-    SlabStrainedSupercellConfiguration,
-)
-from ..build.supercell import SupercellConfiguration
-from ..build.vacuum.configuration import VacuumConfiguration
 
 
 class BuildMetadataAnalyzer(BaseMaterialAnalyzer):
@@ -32,7 +27,6 @@ class BuildMetadataAnalyzer(BaseMaterialAnalyzer):
 
 
 class SlabMaterialAnalyzer(BuildMetadataAnalyzer, CrystalSiteAnalyzer):
-
     configuration_cls: Type[SlabConfiguration] = SlabConfiguration
 
     @property
@@ -54,7 +48,7 @@ class SlabMaterialAnalyzer(BuildMetadataAnalyzer, CrystalSiteAnalyzer):
         return slab_configuration_with_no_vacuum
 
     def get_slab_vacuum_configuration(self) -> VacuumConfiguration:
-        return self.slab_configuration.vacuum_configuration
+        return self.build_configuration.vacuum_configuration
 
     @property
     def max_z_crystal(self) -> float:

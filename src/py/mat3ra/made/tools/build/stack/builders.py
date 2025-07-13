@@ -1,4 +1,4 @@
-from typing import Any, TypeVar, Optional
+from typing import Any, Optional
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 

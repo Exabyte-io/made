@@ -1,10 +1,9 @@
 import numpy as np
-from pydantic import BaseModel
-from scipy.spatial.distance import pdist
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.utils import decorator_perform_operation_in_cartesian_coordinates
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
+from pydantic import BaseModel
+from scipy.spatial.distance import pdist
 
 
 class BaseMaterialAnalyzer(BaseModel):

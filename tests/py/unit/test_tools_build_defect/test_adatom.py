@@ -1,5 +1,5 @@
 import pytest
-from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.adatom.helpers import create_adatom_defect
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
 from mat3ra.utils import assertion as assertion_utils
@@ -22,8 +22,8 @@ from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
             [0.55, 0.51],
             2.0,
             "Si",
-            AdatomPlacementMethodEnum.EQUIDISTANT,
-            [0.5, 0.5, 0.5774],
+            AdatomPlacementMethodEnum.EXACT_COORDINATE,
+            [0.55, 0.51, 0.6231],
         ),
     ],
 )
@@ -35,6 +35,7 @@ def test_create_adatom(
     adatom_placement_method,
     expected_last_coord,
 ):
-    slab = Material.create(crystal_config)
+    slab = MaterialWithBuildMetadata.create(crystal_config)
     defect = create_adatom_defect(slab, position_on_surface, distance_z, adatom_placement_method, chemical_element)
+
     assertion_utils.assert_deep_almost_equal(expected_last_coord, defect.basis.coordinates.values[-1], atol=1e-4)

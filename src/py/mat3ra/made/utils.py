@@ -1,8 +1,7 @@
-from typing import Any, Dict, List, Union, Literal
+from typing import Any, Dict, List, Literal, Union
 
 import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.material import Material
 
 # TODO: move to mat3ra-code
@@ -90,7 +89,9 @@ def get_angle_from_rotation_matrix_2d(
     return angle_deg
 
 
-def adjust_material_cell_to_set_gap_along_direction(material: Material, gap: float, direction: AxisEnum) -> Material:
+def adjust_material_cell_to_set_gap_along_direction(
+    material: Material, gap: float, direction: AxisEnum = AxisEnum.z
+) -> Material:
     """
     Adjust the cell along the stacking direction to make the distance from the cell end to its closest atom
     to be equal to the gap, in Angstroms.

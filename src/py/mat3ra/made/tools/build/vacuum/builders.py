@@ -1,6 +1,5 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
-from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder, MaterialWithBuildMetadata
 from .configuration import VacuumConfiguration
 from ....utils import AXIS_TO_INDEX_MAP

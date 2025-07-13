@@ -11,7 +11,7 @@ from .configurations import (
     SlabConfiguration,
     AtomicLayersUniqueRepeatedConfiguration,
 )
-from ..metadata import MaterialBuildMetadata, MaterialWithBuildMetadata
+from ..metadata import MaterialWithBuildMetadata
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 
 DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])

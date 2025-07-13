@@ -1,11 +1,9 @@
 import numpy as np
 
-from ....lattice import Lattice
-from ....material import Material
-from ...build import MaterialBuildMetadata
-from ...build.slab.configurations import SlabConfiguration
 from ...modify import wrap_to_unit_cell
 from ...operations.core.unary import edit_cell
+from ....lattice import Lattice
+from ....material import Material
 
 
 def get_orthogonal_c_slab(material: Material) -> Material:

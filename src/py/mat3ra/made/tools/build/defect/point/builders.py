@@ -1,8 +1,7 @@
 from typing import Any, Type
 
-from ase.spacegroup import crystal
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.point_defect_site import (
+from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import (
     AtomSchema,
 )
 
@@ -34,7 +33,7 @@ class AtomAtCoordinateBuilder(VacuumBuilder):
             size=configuration.crystal.lattice.c,
             direction=AxisEnum.z,
         )
-        new_material = super().get_material(vacuum_configuration)
+        new_material = super()._generate(vacuum_configuration)
         new_material.basis.add_atom(
             element=configuration.element.chemical_element.value,
             coordinate=configuration.coordinate,

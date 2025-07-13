@@ -50,7 +50,9 @@ class MergeBuilder(BaseSingleBuilder):
             return material
         raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
 
-    def _merge_add(self, materials: List[MaterialWithBuildMetadata], parameters: MergeBuilderParameters) -> MaterialWithBuildMetadata:
+    def _merge_add(
+        self, materials: List[MaterialWithBuildMetadata], parameters: MergeBuilderParameters
+    ) -> MaterialWithBuildMetadata:
         return merge(
             materials=materials,
             merge_method=MergeMethodsEnum.ADD,
@@ -59,7 +61,9 @@ class MergeBuilder(BaseSingleBuilder):
             merge_dangerously=parameters.merge_dangerously,
         )
 
-    def _merge_replace(self, materials: List[MaterialWithBuildMetadata], parameters: MergeBuilderParameters) -> MaterialWithBuildMetadata:
+    def _merge_replace(
+        self, materials: List[MaterialWithBuildMetadata], parameters: MergeBuilderParameters
+    ) -> MaterialWithBuildMetadata:
         return merge(
             materials=materials,
             merge_method=MergeMethodsEnum.REPLACE,
@@ -68,7 +72,9 @@ class MergeBuilder(BaseSingleBuilder):
             merge_dangerously=parameters.merge_dangerously,
         )
 
-    def _merge_yield(self, materials: List[MaterialWithBuildMetadata], parameters: MergeBuilderParameters) -> MaterialWithBuildMetadata:
+    def _merge_yield(
+        self, materials: List[MaterialWithBuildMetadata], parameters: MergeBuilderParameters
+    ) -> MaterialWithBuildMetadata:
         return merge(
             materials=materials,
             merge_method=MergeMethodsEnum.YIELD,
