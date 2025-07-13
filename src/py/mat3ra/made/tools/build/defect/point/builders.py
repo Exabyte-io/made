@@ -115,7 +115,7 @@ class PointDefectBuilder(MergeBuilder):
             merge_method=config.merge_method.value,
         )
 
-        return super().get_material(merge_config)
+        return super()._generate(merge_config)
 
 
 class VacancyDefectBuilder(PointDefectBuilder):

@@ -64,10 +64,7 @@ def create_adatom_defect_at_exact_coordinate(
     """
 
     adatom_analyzer = AdatomMaterialAnalyzer(
-        material=slab,
-        coordinate_2d=position_on_surface,
-        distance_z=distance_z,
-        element=AtomSchema(chemical_element=element),
+        material=slab, coordinate_2d=position_on_surface, distance_z=distance_z, element=element
     )
 
     slab_in_stack = adjust_material_cell_to_set_gap_along_direction(slab, 0)
@@ -102,10 +99,7 @@ def create_adatom_defect_at_crystal_site(
     """
 
     adatom_analyzer = AdatomCrystalSiteMaterialAnalyzer(
-        material=slab,
-        coordinate_2d=position_on_surface,
-        distance_z=distance_z,
-        element=AtomSchema(chemical_element=element),
+        material=slab, coordinate_2d=position_on_surface, distance_z=distance_z, element=element
     )
 
     slab_in_stack = adatom_analyzer.slab_configuration_with_no_vacuum

@@ -121,26 +121,25 @@ def test_crystal_site_analyzer(placement_method, coordinate, expected_coordinate
 
 
 @pytest.mark.parametrize(
-    "material_config, coordinate, placement_method, distance_z, expected_coordinate",
+    "material_config, coordinate, placement_method, distance_z, element, expected_coordinate",
     [
         (
             SI_CONVENTIONAL_SLAB_001,
             [0.25, 0.25],
             AdatomPlacementMethodEnum.EXACT_COORDINATE,
             1.0,
+            "Si",
             [0.25, 0.25, 0.5],
         ),
     ],
 )
-def test_adatom_material_analyzer(material_config, coordinate, placement_method, distance_z, expected_coordinate):
+def test_adatom_material_analyzer(
+    material_config, coordinate, placement_method, distance_z, element, expected_coordinate
+):
     crystal = MaterialWithBuildMetadata.create(material_config)
 
-    # Test NEW_CRYSTAL_SITE method
     analyzer = AdatomMaterialAnalyzer(
-        material=crystal,
-        coordinate_2d=coordinate,
-        placement_method=placement_method,
-        distance_z=distance_z,
+        material=crystal, coordinate_2d=coordinate, distance_z=distance_z, element=element
     )
     resolved_coord = analyzer.coordinate_in_added_component
 
@@ -148,19 +147,20 @@ def test_adatom_material_analyzer(material_config, coordinate, placement_method,
 
 
 @pytest.mark.parametrize(
-    "material_config, coordinate, placement_method, distance_z, expected_coordinate",
+    "material_config, coordinate, placement_method, distance_z, element,expected_coordinate",
     [
         (
             SI_CONVENTIONAL_SLAB_001,
             [0.25, 0.25],
             AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE,
             1.0,
+            "Si",
             [0.25, 0.25, 0.5],
         ),
     ],
 )
 def test_adatom_crystal_site_material_analyzer(
-    material_config, coordinate, placement_method, distance_z, expected_coordinate
+    material_config, coordinate, placement_method, distance_z, element, expected_coordinate
 ):
     crystal = MaterialWithBuildMetadata.create(material_config)
 
@@ -168,8 +168,8 @@ def test_adatom_crystal_site_material_analyzer(
     analyzer = AdatomCrystalSiteMaterialAnalyzer(
         material=crystal,
         coordinate_2d=coordinate,
-        placement_method=placement_method,
         distance_z=distance_z,
+        element=element,
     )
     resolved_coord = analyzer.coordinate_in_added_component
 

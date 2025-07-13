@@ -35,18 +35,12 @@ class MergeBuilder(BaseSingleBuilder):
     _DefaultBuildParameters = MergeBuilderParameters()
 
     def _configuration_to_material(self, configuration_or_material: Any) -> MaterialWithBuildMetadata:
+        # TODO: consider moving this method to a common base class
         if isinstance(configuration_or_material, Material):
-            # Convert to MaterialWithBuildMetadata if it's a regular Material
-            if not isinstance(configuration_or_material, MaterialWithBuildMetadata):
-                return MaterialWithBuildMetadata.create(configuration_or_material.to_dict())
             return configuration_or_material
-
         if isinstance(configuration_or_material, VacuumConfiguration):
             builder = VacuumBuilder()
             material = builder.get_material(configuration_or_material)
-            # Ensure it's MaterialWithBuildMetadata
-            if not isinstance(material, MaterialWithBuildMetadata):
-                return MaterialWithBuildMetadata.create(material.to_dict())
             return material
         raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
 

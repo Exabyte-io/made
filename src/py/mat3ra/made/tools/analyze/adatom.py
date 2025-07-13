@@ -14,7 +14,7 @@ from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 class AdatomMaterialAnalyzer(SlabMaterialAnalyzer):
     distance_z: float
     coordinate_2d: List[float]  # Add coordinate property
-    element: AtomSchema
+    element: str
 
     @property
     def added_component_height(self) -> float:
@@ -40,7 +40,7 @@ class AdatomMaterialAnalyzer(SlabMaterialAnalyzer):
     def added_component(self) -> MaterialWithBuildMetadata:
         atom_configuration = AtomAtCoordinateConfiguration(
             crystal=self.added_component_prototype,
-            element=self.element,
+            element=AtomSchema(chemical_element=self.element),
             coordinate=self.coordinate_in_added_component,
         )
         return AtomAtCoordinateBuilder().get_material(atom_configuration)
