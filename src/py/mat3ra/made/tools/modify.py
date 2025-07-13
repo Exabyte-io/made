@@ -149,7 +149,7 @@ def filter_by_condition_on_coordinates(
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
     reset_ids: bool = False,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Filter atoms based on a condition on their coordinates.
 
@@ -383,7 +383,7 @@ def filter_by_box(
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
     reset_ids: bool = False,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Get material with atoms that are within or outside an XYZ box.
 

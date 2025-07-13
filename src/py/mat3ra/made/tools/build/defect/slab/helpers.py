@@ -1,3 +1,5 @@
+from typing import Union
+
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from sympy import ceiling
 
@@ -6,13 +8,16 @@ from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.utils.coordinate import CoordinateCondition
 from .builders import SlabStackBuilder
 from .configuration import SlabStackConfiguration
+from ... import MaterialWithBuildMetadata
 from ...slab.builders import SlabBuilder
 from ...slab.helpers import create_slab
 from ...vacuum.configuration import VacuumConfiguration
 from ....modify import filter_by_box, filter_by_condition_on_coordinates
 
 
-def create_slab_stack(slab: Material, added_component: Material) -> Material:
+def create_slab_stack(
+    slab: MaterialWithBuildMetadata, added_component: MaterialWithBuildMetadata
+) -> MaterialWithBuildMetadata:
     """
     Create a slab stack by stacking a slab, a slab component, and a vacuum layer.
 
@@ -42,7 +47,9 @@ def create_slab_stack(slab: Material, added_component: Material) -> Material:
     return slab_stack_builder.get_material(slab_stack_config)
 
 
-def recreate_slab_with_fractional_layers(slab: Material, number_of_layers: float) -> Material:
+def recreate_slab_with_fractional_layers(
+    slab: MaterialWithBuildMetadata, number_of_layers: float
+) -> MaterialWithBuildMetadata:
     """
     Create a slab with a specified number of fractional layers.
 
