@@ -12,7 +12,7 @@ from .other import get_closest_site_id_from_coordinate
 
 
 class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
-    coordinate: List[float]
+    coordinate: List[float] = [0.0, 0.0, 0.0]
 
     @property
     def exact_coordinate(self) -> List[float]:

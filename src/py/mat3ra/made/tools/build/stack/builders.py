@@ -3,7 +3,7 @@ from typing import Any, TypeVar, Optional
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseSingleBuilder
+from mat3ra.made.tools.build import BaseSingleBuilder, MaterialWithBuildMetadata
 from mat3ra.made.tools.build.stack.configuration import StackConfiguration
 from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
@@ -23,15 +23,15 @@ class StackNComponentsBuilder(BaseSingleBuilder):
                         "VacuumConfiguration.crystal is None and no previous material to use as reference."
                     )
                 entity_config.crystal = previous_material
-            if isinstance(entity_config, Material):
+            if isinstance(entity_config, MaterialWithBuildMetadata):
                 previous_material = entity_config
             else:
                 previous_material = self._configuration_to_material(entity_config)
 
-    def _configuration_to_material(self, configuration_or_material: Any) -> Optional[Material]:
+    def _configuration_to_material(self, configuration_or_material: Any) -> Optional[MaterialWithBuildMetadata]:
         if configuration_or_material is None:
             return None  # Return None for None input - caller should handle appropriately
-        if isinstance(configuration_or_material, Material):
+        if isinstance(configuration_or_material, MaterialWithBuildMetadata):
             return configuration_or_material
         if isinstance(configuration_or_material, VacuumConfiguration):
             builder = VacuumBuilder()

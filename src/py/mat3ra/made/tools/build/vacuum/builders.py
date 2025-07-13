@@ -9,7 +9,7 @@ from ....utils import AXIS_TO_INDEX_MAP
 class VacuumBuilder(BaseSingleBuilder):
     _ConfigurationType = VacuumConfiguration
 
-    def _generate(self, configuration: VacuumConfiguration) -> Material:
+    def _generate(self, configuration: VacuumConfiguration) -> MaterialWithBuildMetadata:
         reference = configuration.crystal
         if reference is None:
             raise ValueError("VacuumConfiguration.crystal must be provided to build a vacuum material.")

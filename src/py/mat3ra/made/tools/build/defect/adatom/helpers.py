@@ -5,14 +5,14 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_di
 )
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.adatom import AdatomMaterialAnalyzer
+from mat3ra.made.tools.analyze.adatom import AdatomCrystalSiteMaterialAnalyzer
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from .builders import AdatomDefectBuilder
 from .configuration import (
     AdatomDefectConfiguration,
 )
 from ..point.builders import AtomAtCoordinateBuilder
-from ..point.configuration import PointDefectSite
+from ..point.configuration import PointDefectSiteConfiguration
 from ..slab.helpers import recreate_slab_with_fractional_layers
 from ...defect.enums import AdatomPlacementMethodEnum
 
@@ -42,9 +42,9 @@ def create_adatom_defect(
     slab_analyzer = SlabMaterialAnalyzer(material=slab, coordinate=coordinate)
     added_slab = recreate_slab_with_fractional_layers(slab, 1)
 
-    adatom_analyzer = AdatomMaterialAnalyzer(
+    adatom_analyzer = AdatomCrystalSiteMaterialAnalyzer(
         material=slab,
-        coordinate=coordinate,
+        coordinate_2d=coordinate,
         placement_method=placement_method,
         distance_z=distance_z,
     )
@@ -52,7 +52,7 @@ def create_adatom_defect(
     resolved_coordinate = adatom_analyzer.coordinate_in_added_component
     slab_without_vacuum_configuration = adatom_analyzer.slab_without_vacuum_configuration
 
-    adatom_point_defect_config = PointDefectSite(
+    adatom_point_defect_config = PointDefectSiteConfiguration(
         crystal=added_slab,
         element=AtomSchema(chemical_element=element),
         coordinate=resolved_coordinate,

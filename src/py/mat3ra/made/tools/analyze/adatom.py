@@ -1,51 +1,65 @@
 from typing import List
 
-from ase.geometry import distance
-
-from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
-
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer
-from mat3ra.made.utils import get_atomic_coordinates_extremum
+from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
-from mat3ra.made.tools.build.slab.configurations import SlabStrainedSupercellConfiguration
-
-
-# class SlabStackAnalyzer(SlabMaterialAnalyzer):
-#     @property
-#     def coordinate_in_added_component(self) -> List[float]:
-#         """
-#         Get the coordinate in the added component based on the slab configuration.
-#         This method is overridden to provide a specific implementation for slab stacks.
-#         """
-#         # The coordinate in the added component is the same as in the slab
-#         xy_coordinate = self.coordinate[:2]
-#         z_coordinate = distance_z
-#         return z_coordinate
+from mat3ra.made.tools.build.defect.point.builders import AtomAtCoordinateBuilder, AtomAtCoordinateConfiguration
+from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
+from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 
 
 class AdatomMaterialAnalyzer(SlabMaterialAnalyzer):
     distance_z: float
-    placement_method: AdatomPlacementMethodEnum
-    coordinate: List[float]  # Add coordinate property
+    placement_method: AdatomPlacementMethodEnum = AdatomPlacementMethodEnum.EXACT_COORDINATE
+    coordinate_2d: List[float]  # Add coordinate property
 
     @property
-    def distance_z_crystal(self) -> float:
-        return self.material.basis.cell.convert_point_to_crystal([0, 0, self.distance_z])[2]
+    def added_component_height(self) -> float:
+        return self.distance_z * 2
 
     @property
-    def added_component_one_layer(self) -> Material:
-        return recreate_slab_with_fractional_layers(self.material, 1)
-
-    @property
-    def coordinate_in_added_component_from_crystal_site(self) -> List[float]:
-        crystal_site_analyzer = CrystalSiteAnalyzer(material=self.added_component_one_layer, coordinate=self.coordinate)
-        return crystal_site_analyzer.closest_site_coordinate
+    def added_component_prototype(self) -> MaterialWithBuildMetadata:
+        vacuum_configuration = VacuumConfiguration(crystal=self.material, size=self.added_component_height)
+        vacuum_material = VacuumBuilder().get_material(vacuum_configuration)
+        return vacuum_material
 
     @property
     def coordinate_in_added_component(self) -> List[float]:
-        if self.placement_method == AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE:
-            return self.coordinate_in_added_component_from_crystal_site
-        else:
-            return self.coordinate
+        coordinate_3d = self.coordinate_2d + [0]
+        coordinate_3d_cartesian = self.material.basis.cell.convert_point_to_cartesian(coordinate_3d)
+        coordinate_3d_cartesian[2] = self.distance_z
+        coordinate_3d_crystal = self.added_component_prototype.basis.cell.convert_point_to_crystal(
+            coordinate_3d_cartesian
+        )
+        return coordinate_3d_crystal
+
+    @property
+    def added_component(self) -> MaterialWithBuildMetadata:
+        atom_configuration = AtomAtCoordinateConfiguration(
+            crystal=self.added_component_prototype,
+            element=self.material.basis.get_atom_by_coordinate(self.coordinate_2d).element,
+            coordinate=self.coordinate_in_added_component,
+        )
+        return AtomAtCoordinateBuilder().get_material(atom_configuration)
+
+
+class AdatomCrystalSiteMaterialAnalyzer(AdatomMaterialAnalyzer):
+
+    DEFAULT_NUMBER_OF_LAYERS: float = 1
+
+    @property
+    def added_component_prototype(self) -> Material:
+        # Recreate the slab with a single layer to ensure the adatom is placed correctly
+        return recreate_slab_with_fractional_layers(self.material, self.DEFAULT_NUMBER_OF_LAYERS)
+
+    @property
+    def coordinate_in_added_component(self) -> List[float]:
+        approximate_coordinate_3d = super().coordinate_in_added_component
+        crystal_site_analyzer = CrystalSiteAnalyzer(
+            material=self.added_component_prototype,
+            coordinate=approximate_coordinate_3d,
+        )
+        return crystal_site_analyzer.closest_site_coordinate

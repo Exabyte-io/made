@@ -2,12 +2,15 @@ from typing import Any, Type
 
 from ase.spacegroup import crystal
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.point_defect_site import (
+    AtomSchema,
+)
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseSingleBuilder
+from mat3ra.made.tools.build import BaseSingleBuilder, MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.point.configuration import (
     PointDefectConfiguration,
-    PointDefectSite,
+    PointDefectSiteConfiguration,
     VacancyDefectConfiguration,
     SubstitutionalDefectConfiguration,
     InterstitialDefectConfiguration,
@@ -18,16 +21,44 @@ from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 
 
-class AtomAtCoordinateBuilder(VacuumBuilder):
-    _ConfigurationType = PointDefectSite
+class AtomAtCoordinateConfiguration(VacuumConfiguration, PointDefectSiteConfiguration):
+    element: AtomSchema
 
-    def _generate(self, configuration: PointDefectSite) -> Material:
+
+class AtomAtCoordinateBuilder(VacuumBuilder):
+    _ConfigurationType = AtomAtCoordinateConfiguration
+
+    def _generate(self, configuration: AtomAtCoordinateConfiguration) -> MaterialWithBuildMetadata:
         vacuum_configuration = VacuumConfiguration(
             crystal=configuration.crystal,
             size=configuration.crystal.lattice.c,
             direction=AxisEnum.z,
         )
         new_material = super().get_material(vacuum_configuration)
+        new_material.basis.add_atom(
+            element=configuration.element.chemical_element.value,
+            coordinate=configuration.coordinate,
+        )
+        return new_material
+
+
+class PointDefectSiteBuilder(BaseSingleBuilder):
+    """
+    Builder class for creating a material from a PointDefectSite configuration.
+    """
+
+    _ConfigurationType = PointDefectSiteConfiguration
+
+    def _generate(self, configuration: PointDefectSiteConfiguration) -> MaterialWithBuildMetadata:
+        new_material = MaterialWithBuildMetadata.create(
+            {
+                "name": configuration.crystal.name,
+                "lattice": configuration.crystal.lattice.to_dict(),
+                "basis": configuration.crystal.basis.to_dict(),
+            }
+        )
+        elements = configuration.crystal.basis.elements.values
+        new_material.basis.remove_atoms_by_elements(elements)
         new_material.basis.add_atom(
             element=configuration.element.chemical_element.value,
             coordinate=configuration.coordinate,
@@ -44,8 +75,8 @@ class PointDefectBuilder(MergeBuilder):
     _ConfigurationType: Type[PointDefectConfiguration] = PointDefectConfiguration
 
     def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, PointDefectSite):
-            return AtomAtCoordinateBuilder().get_material(configuration_or_material)
+        if isinstance(configuration_or_material, PointDefectSiteConfiguration):
+            return PointDefectSiteBuilder().get_material(configuration_or_material)
         return super()._configuration_to_material(configuration_or_material)
 
     def _post_process(self, material: Material, configuration: MergeBuilder._ConfigurationType) -> Material:
@@ -71,11 +102,11 @@ class PointDefectBuilder(MergeBuilder):
 
         return material
 
-    def _generate(self, config: MergeBuilder._ConfigurationType) -> Material:
+    def _generate(self, config: MergeBuilder._ConfigurationType) -> MaterialWithBuildMetadata:
         materials = []
-        site_builder = AtomAtCoordinateBuilder()
+        site_builder = PointDefectSiteBuilder()
         for component in config.merge_components:
-            if isinstance(component, PointDefectSite):
+            if isinstance(component, PointDefectSiteConfiguration):
                 materials.append(site_builder.get_material(component))
             elif isinstance(component, Material):
                 materials.append(component)
@@ -84,8 +115,8 @@ class PointDefectBuilder(MergeBuilder):
             merge_components=materials,
             merge_method=config.merge_method.value,
         )
-        merge_builder = MergeBuilder()
-        return merge_builder.get_material(merge_config)
+
+        return super().get_material(merge_config)
 
 
 class VacancyDefectBuilder(PointDefectBuilder):

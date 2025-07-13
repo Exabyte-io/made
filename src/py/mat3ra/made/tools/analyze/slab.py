@@ -1,10 +1,11 @@
-from typing import Union
+from typing import Union, Type
 
 from sympy.strategies.core import switch
 
+from . import BaseMaterialAnalyzer
 from .crystal_site import CrystalSiteAnalyzer
 from mat3ra.made.utils import get_atomic_coordinates_extremum
-from ..build import MaterialBuildMetadata
+from ..build import MaterialBuildMetadata, MaterialWithBuildMetadata, BuildMetadata
 from ..build.slab.configurations import (
     SlabConfiguration,
     SlabStrainedSupercellConfiguration,
@@ -13,14 +14,26 @@ from ..build.supercell import SupercellConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
 
 
-class SlabMaterialAnalyzer(CrystalSiteAnalyzer):
+class BuildMetadataAnalyzer(BaseMaterialAnalyzer):
+    material: MaterialWithBuildMetadata
+    configuration_cls: None
 
     @property
-    def slab_configuration(self) -> SlabConfiguration:
-        build_metadata = MaterialBuildMetadata(**self.material.metadata).get_build_metadata_of_type(
-            SlabConfiguration.__name__
-        )
-        return SlabConfiguration(**build_metadata.configuration.to_dict())
+    def build_metadata(self) -> BuildMetadata:
+        return self.material.metadata.get_build_metadata_of_type(self.configuration_cls.__name__)
+
+    @property
+    def build_configuration(self) -> "configuration_cls":
+        return self.configuration_cls(**self.build_metadata.configuration)
+
+    @property
+    def build_parameters(self) -> "configuration_cls":
+        return self.configuration_cls(**self.build_metadata.build_parameters)
+
+
+class SlabMaterialAnalyzer(BuildMetadataAnalyzer, CrystalSiteAnalyzer):
+
+    configuration_cls: Type[SlabConfiguration] = SlabConfiguration
 
     @property
     def number_of_layers(self) -> int:
@@ -36,13 +49,7 @@ class SlabMaterialAnalyzer(CrystalSiteAnalyzer):
 
     @property
     def slab_configuration_with_no_vacuum(self) -> SlabConfiguration:
-        slab_configuration_with_no_vacuum = self.slab_configuration.clone()
-        slab_configuration_with_no_vacuum.set_vacuum(0.0)
-        return slab_configuration_with_no_vacuum
-
-    @property
-    def slab_configuration_strained_supercell_with_no_gap(self) -> SlabConfiguration:
-        slab_configuration_with_no_vacuum = self.slab_configuration.clone()
+        slab_configuration_with_no_vacuum = self.build_configuration.clone()
         slab_configuration_with_no_vacuum.set_vacuum(0.0)
         return slab_configuration_with_no_vacuum
 
