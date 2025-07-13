@@ -285,41 +285,6 @@ class IslandSlabDefectConfiguration(SlabDefectConfigurationLegacy, Generic[Coord
         }
 
 
-class TerraceSlabDefectConfiguration(SlabDefectConfigurationLegacy):
-    """
-    Configuration for a terrace slab defect.
-
-    Args:
-        crystal (Material): The Material object (must be a created slab).
-        defect_type (SlabDefectTypeEnum): The type of the defect.
-        cut_direction (List[int]): The direction of the cut as lattice vector, can be thought as a normal to the plane
-            that cuts the slab with added number of layers.
-        pivot_coordinate (List[float]): The pivot coordinate: the point in the unit cell
-            where the normal of the cut plane passes through.
-        number_of_added_layers (int): The number of added layers to the slab which will form the terrace.
-        use_cartesian_coordinates (bool): The flag to use cartesian coordinates for coordinates and vectors.
-        rotate_to_match_pbc (bool): The flag to rotate the slab with a terrace to match periodic boundary conditions.
-    """
-
-    defect_type: SlabDefectTypeEnum = SlabDefectTypeEnum.TERRACE
-    cut_direction: List[int] = [1, 0, 0]
-    pivot_coordinate: List[float] = [0.5, 0.5, 0.5]
-    use_cartesian_coordinates: bool = False
-    rotate_to_match_pbc: bool = True
-
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "defect_type": self.defect_type.name,
-            "cut_direction": self.cut_direction,
-            "pivot_coordinate": self.pivot_coordinate,
-            "use_cartesian_coordinates": self.use_cartesian_coordinates,
-            "rotate_to_match_pbc": self.rotate_to_match_pbc,
-        }
-
-
 class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
     """
     Configuration for a pair of point defects.
