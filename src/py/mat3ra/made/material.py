@@ -63,6 +63,12 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
             self.name: str = self.formula
         self.basis.cell = self.lattice.vectors
 
+    @classmethod
+    def create_from_config_or_class_instance(cls, config_or_instance: Union[dict, "Material"]) -> "Material":
+        if isinstance(config_or_instance, cls):
+            return config_or_instance
+        return cls.create(config_or_instance)
+
     @property
     def coordinates_array(self) -> List[List[float]]:
         return self.basis.coordinates.values

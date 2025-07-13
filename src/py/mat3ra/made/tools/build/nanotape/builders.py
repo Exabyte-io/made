@@ -25,13 +25,12 @@ class NanoTapeBuilder(StackNComponentsBuilder):
         use_rectangular_lattice=True,
     )
 
-    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, NanoTapeConfiguration):
-            return self.get_material(configuration_or_material)
-        if isinstance(configuration_or_material, CrystalLatticeLinesUniqueRepeatedConfiguration):
-            builder = CrystalLatticeLinesRepeatedBuilder()
-            return builder.get_material(configuration_or_material)
-        return super()._configuration_to_material(configuration_or_material)
+    @property
+    def stack_component_types_conversion_map(self):
+        return {
+            **super().stack_component_types_conversion_map,
+            CrystalLatticeLinesUniqueRepeatedConfiguration: CrystalLatticeLinesRepeatedBuilder,
+        }
 
     def _make_rectangular_lattice(self, item: Material) -> Material:
         lattice_vectors = item.lattice.vector_arrays

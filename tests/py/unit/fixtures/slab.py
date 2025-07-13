@@ -135,6 +135,7 @@ SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
                         },
                         {"type": "VacuumConfiguration", "direction": "z", "size": 5.0, "crystal": BULK_Si_CONVENTIONAL},
                     ],
+                    # TODO: should be in `build_parameters`
                     "xy_supercell_matrix": [[1, 0], [0, 1]],
                 },
             }
@@ -246,7 +247,6 @@ SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
                         },
                         {"type": "VacuumConfiguration", "direction": "z", "size": 5.0},
                     ],
-                    "xy_supercell_matrix": [[1, 0], [0, 1]],
                 },
                 "build_parameters": {"use_orthogonal_c": True, "xy_supercell_matrix": [[1, 0], [0, 1]]},
             }
