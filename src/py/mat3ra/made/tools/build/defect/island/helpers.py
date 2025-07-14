@@ -1,25 +1,41 @@
-from typing import Union
+from typing import Union, TypeVar
 
-from mat3ra.made.material import Material
+from ..enums import CoordinatesShapeEnum
 from ..slab.helpers import recreate_slab_with_fractional_layers, create_slab_stack
 from ... import MaterialWithBuildMetadata
 from ....modify import filter_by_condition_on_coordinates
-from ....utils.coordinate import CoordinateCondition
+from ....utils.coordinate import (
+    CoordinateCondition,
+    CylinderCoordinateCondition,
+    SphereCoordinateCondition,
+    BoxCoordinateCondition,
+    TriangularPrismCoordinateCondition,
+    PlaneCoordinateCondition,
+)
+
+CoordinateConditionType = TypeVar("CoordinateConditionType", bound=CoordinateCondition)
 
 
 def create_island_defect(
     slab: MaterialWithBuildMetadata,
-    condition: CoordinateCondition,
+    condition: Union[
+        CylinderCoordinateCondition,
+        SphereCoordinateCondition,
+        BoxCoordinateCondition,
+        TriangularPrismCoordinateCondition,
+        PlaneCoordinateCondition,
+        CoordinateConditionType,
+    ] = CylinderCoordinateCondition(),
     use_cartesian_coordinates: bool = True,
     number_of_added_layers: Union[int, float] = 1,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Create an island defect using the new IslandDefectConfiguration and IslandDefectBuilder.
 
     Args:
         slab: The slab material.
         condition: The coordinate condition that defines the island shape.
-        number_of_added_layers: Number of additional layers to add to the slab.
+        number_of_added_layers: Number of additional layers to add to the slab, from which the island will be created.
 
     Returns:
         Material: The slab with island defect.
@@ -35,3 +51,41 @@ def create_island_defect(
 
     result = create_slab_stack(slab, isolated_island)
     return result
+
+
+def get_coordinate_condition(shape: CoordinatesShapeEnum, dict_params: dict):
+    """
+    Returns the appropriate coordinate condition based on the shape provided.
+
+    Args:
+        shape (CoordinatesShapeEnum): Shape of the island (e.g., cylinder, box, etc.).
+        dict_params (dict): Parameters for the shape condition.
+
+    Returns:
+        CoordinateCondition: The appropriate condition object.
+    """
+    if shape == "cylinder":
+        return CylinderCoordinateCondition(
+            center_position=dict_params.get("center_position", [0.5, 0.5]),
+            radius=dict_params["radius"],
+            min_z=dict_params["min_z"],
+            max_z=dict_params["max_z"],
+        )
+    elif shape == "sphere":
+        return SphereCoordinateCondition(
+            center_position=dict_params.get("center_position", [0.5, 0.5]), radius=dict_params["radius"]
+        )
+    elif shape == "box":
+        return BoxCoordinateCondition(
+            min_coordinate=dict_params["min_coordinate"], max_coordinate=dict_params["max_coordinate"]
+        )
+    elif shape == "triangular_prism":
+        return TriangularPrismCoordinateCondition(
+            position_on_surface_1=dict_params["position_on_surface_1"],
+            position_on_surface_2=dict_params["position_on_surface_2"],
+            position_on_surface_3=dict_params["position_on_surface_3"],
+            min_z=dict_params["min_z"],
+            max_z=dict_params["max_z"],
+        )
+    else:
+        raise ValueError(f"Unsupported island shape: {shape}")

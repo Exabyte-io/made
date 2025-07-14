@@ -1,7 +1,11 @@
+from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.island.configuration import (
+    IslandDefectConfigurationSchema,
+)
+
 from ..slab.configuration import SlabStackConfiguration
 
 
-class IslandDefectConfiguration(SlabStackConfiguration):
+class IslandDefectConfiguration(SlabStackConfiguration, IslandDefectConfigurationSchema):
     """
     Configuration for creating an island defect on a slab surface.
 
