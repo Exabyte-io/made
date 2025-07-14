@@ -38,4 +38,3 @@ class DefectPairBuilder(DefectBuilder):
         secondary_material = self.create_isolated_defect(secondary_defect_configuration)
 
         return secondary_material
-

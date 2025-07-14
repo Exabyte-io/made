@@ -1,7 +1,5 @@
 from typing import Optional, List
 
-import numpy as np
-
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
 from mat3ra.made.tools.build.defect.terrace.analyzer import TerraceMaterialAnalyzer
@@ -9,8 +7,7 @@ from mat3ra.made.tools.build.defect.terrace.builders import TerraceDefectBuilder
 from mat3ra.made.tools.build.defect.terrace.configuration import TerraceDefectConfiguration
 from mat3ra.made.tools.build.defect.terrace.parameters import TerraceBuildParameters
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates, rotate, translate_to_z_level
-from mat3ra.made.tools.operations.core.unary import edit_cell
+from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
 from mat3ra.made.tools.utils.coordinate import PlaneCoordinateCondition
 
 
