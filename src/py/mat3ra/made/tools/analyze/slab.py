@@ -37,8 +37,12 @@ class SlabMaterialAnalyzer(BuildMetadataAnalyzer, CrystalSiteAnalyzer):
         return self.slab_configuration.number_of_layers
 
     @property
+    def layer_thickness(self) -> float:
+        return (self.material.lattice.c - self.build_configuration.vacuum.size) / self.number_of_layers
+
+    @property
     def vacuum_ratio(self) -> float:
-        return self.slab_configuration.vacuum / self.material.lattice.c
+        return self.build_configuration.vacuum.size / self.material.lattice.c
 
     @property
     def vacuum_thickness_in_layers(self) -> float:

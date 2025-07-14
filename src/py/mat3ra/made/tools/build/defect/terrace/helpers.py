@@ -8,7 +8,8 @@ from mat3ra.made.tools.build.defect.terrace.analyzer import TerraceMaterialAnaly
 from mat3ra.made.tools.build.defect.terrace.builders import TerraceDefectBuilder
 from mat3ra.made.tools.build.defect.terrace.configuration import TerraceDefectConfiguration
 from mat3ra.made.tools.build.defect.terrace.parameters import TerraceBuildParameters
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates, rotate
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
+from mat3ra.made.tools.modify import filter_by_condition_on_coordinates, rotate, translate_to_z_level
 from mat3ra.made.tools.operations.core.unary import edit_cell
 from mat3ra.made.tools.utils.coordinate import PlaneCoordinateCondition
 
@@ -41,7 +42,7 @@ def create_terrace(
 
     terrace_analyzer = TerraceMaterialAnalyzer(material=slab)
 
-    material_with_additional_layers = recreate_slab_with_fractional_layers(slab, number_of_added_layers)
+    additional_slab_material = recreate_slab_with_fractional_layers(slab, number_of_added_layers)
 
     normalized_direction_vector = terrace_analyzer.calculate_cut_direction_vector(cut_direction)
 
@@ -50,9 +51,12 @@ def create_terrace(
         plane_point_coordinate=pivot_coordinate,
     ).condition
 
-    slab_in_stack = terrace_analyzer.slab_configuration_with_no_vacuum
+    slab_in_stack_config = terrace_analyzer.slab_configuration_with_no_vacuum
+    slab_build_parameters = terrace_analyzer.build_parameters
+
+    slab_in_stack = SlabBuilder(build_parameters=slab_build_parameters).get_material(slab_in_stack_config)
     isolated_defect = filter_by_condition_on_coordinates(
-        material=material_with_additional_layers,
+        material=additional_slab_material,
         condition=condition,
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
@@ -63,11 +67,10 @@ def create_terrace(
     terrace = TerraceDefectBuilder(build_parameters=parameters).get_material(terrace_configuration)
 
     rotation_parameters = terrace_analyzer.calculate_rotation_parameters(terrace, cut_direction)
-    lattice_vectors_np = np.array(terrace.lattice.vector_arrays)
-    terrace = edit_cell(
-        terrace,
-        lattice_vectors=[lattice_vectors_np[0], lattice_vectors_np[1] * 1.2, lattice_vectors_np[2]],
-    )
-    terrace = rotate(terrace, [1, 0, 0], rotation_parameters.angle)
+    angle, rotation_axis, delta_length = rotation_parameters
+
+    # terrace = edit_cell(terrace, lattice_vectors=new_lattice_vectors.tolist())
+    # terrace = translate_to_z_level(terrace, "center")
+    # terrace = rotate(terrace, rotation_axis, angle)
 
     return terrace

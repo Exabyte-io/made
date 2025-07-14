@@ -1,47 +1,55 @@
 import sys
 
-import numpy as np
 import pytest
-from pymatgen.cli.pmg_analyze import analyze
-
-from mat3ra.made.lattice import COORDINATE_TOLERANCE
-from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.terrace.helpers import create_terrace
 from mat3ra.utils import assertion as assertion_utils
 
-from mat3ra.made.tools.modify import rotate
-from mat3ra.made.tools.operations.core.unary import edit_cell, supercell
+from mat3ra.made.lattice import COORDINATE_TOLERANCE
+from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
+from mat3ra.made.tools.build.defect.terrace.helpers import create_terrace
+from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.made.tools.operations.core.unary import supercell
+from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
+from unit.fixtures.terrace import TERRACE_SLAB_Si_001_3x3
+from unit.utils import assert_two_entities_deep_almost_equal
 
 
 @pytest.mark.parametrize(
-    "crystal_config, cut_direction, pivot_coordinate, num_added_layers, expected_coordinates_platform",
+    "slab_parameters, cut_direction, pivot_coordinate, num_added_layers, expected_config",
     [
         (
-            SI_CONVENTIONAL_SLAB_001,
+            {"crystal": BULK_Si_CONVENTIONAL, "number_of_layers": 2, "xy_supercell_matrix": [[3, 0], [0, 3]]},
             [0, 1, 0],
             [0.5, 0.5, 0.5],
-            0.25,
-            {"darwin": [0.627786405, 0.75, 0.671264194], "other": [0.591583068, 0.75, 0.716534426]},
+            0.5,
+            TERRACE_SLAB_Si_001_3x3,
         )
     ],
 )
 def test_create_terrace(
-    crystal_config, cut_direction, pivot_coordinate, num_added_layers, expected_coordinates_platform
+    slab_parameters,
+    cut_direction,
+    pivot_coordinate,
+    num_added_layers,
+    expected_config,
 ):
-    crystal = MaterialWithBuildMetadata.create(crystal_config)
-    crystal = supercell(crystal, [[3, 0, 0], [0, 3, 0], [0, 0, 1]])
+    slab = create_slab(
+        Material.create(slab_parameters["crystal"]),
+        number_of_layers=slab_parameters["number_of_layers"],
+        xy_supercell_matrix=slab_parameters["xy_supercell_matrix"],
+    )
     terrace = create_terrace(
-        slab=crystal,
+        slab=slab,
         cut_direction=cut_direction,
         pivot_coordinate=pivot_coordinate,
         number_of_added_layers=num_added_layers,
     )
-    if sys.platform == "darwin":
-        coordinate_expected = expected_coordinates_platform["darwin"]
-    else:
-        coordinate_expected = expected_coordinates_platform["other"]
-    defect_coordinate = terrace.basis.coordinates.values[-1]  # Use last atom (index 59) instead of previous index 35
+    # if sys.platform == "darwin":
+    #     coordinate_expected = expected_coordinates_platform["darwin"]
+    # else:
+    #     coordinate_expected = expected_coordinates_platform["other"]
+    defect_coordinate = terrace.basis.coordinates.values[-1]
     atol = 10 ** (-COORDINATE_TOLERANCE)
 
-    assertion_utils.assert_deep_almost_equal(coordinate_expected, defect_coordinate, atol=atol)
+    assert_two_entities_deep_almost_equal(terrace, expected_config)

@@ -62,23 +62,22 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         height_cartesian = added_layers_max_z - original_max_z
         return height_cartesian
 
-    #
     def calculate_rotation_parameters(
         self,
         new_material: MaterialWithBuildMetadata,
-        direction_vector: List[float],
+        direction_vector: List[int],
     ):
         """
         Calculate the necessary rotation angle and axis.
 
         Args:
             new_material: The material with the added layers.
-            direction_vector: The normalized cut direction vector in Cartesian coordinates.
+            direction_vector: The cut direction vector in Miller indices.
 
         Returns:
             The rotation angle, normalized rotation axis, and delta length.
         """
-        height_cartesian = self._calculate_height_cartesian(self.material, new_material)
+        height_cartesian = self.calculate_height_cartesian(new_material)
         normalized_direction_vector = self.calculate_cut_direction_vector(direction_vector)
         cut_direction_xy_proj_cart = np.linalg.norm(
             np.dot(np.array(new_material.lattice.vector_arrays), normalized_direction_vector)

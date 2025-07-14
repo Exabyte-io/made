@@ -2,12 +2,13 @@ from typing import Union
 
 from mat3ra.made.material import Material
 from ..slab.helpers import recreate_slab_with_fractional_layers, create_slab_stack
+from ... import MaterialWithBuildMetadata
 from ....modify import filter_by_condition_on_coordinates
 from ....utils.coordinate import CoordinateCondition
 
 
 def create_island_defect(
-    slab: Material,
+    slab: MaterialWithBuildMetadata,
     condition: CoordinateCondition,
     use_cartesian_coordinates: bool = True,
     number_of_added_layers: Union[int, float] = 1,
