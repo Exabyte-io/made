@@ -20,11 +20,12 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         normalized = normalized_rotation_axis / norm
         return np.round(normalized).astype(int).tolist()
 
-    def get_angle(self, number_of_added_layers: float) -> float:
+    def get_angle(self, cut_direction, number_of_added_layers: float) -> float:
         """
         Calculate the angle of rotation based on the number of added layers.
 
         Args:
+            cut_direction: The direction of the cut in Miller indices.
             number_of_added_layers: The number of layers added to the slab.
 
         Returns:
@@ -32,7 +33,7 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         """
         height_cartesian = self.layer_thickness * number_of_added_layers
         cut_direction_xy_proj_cart = np.linalg.norm(
-            np.dot(np.array(self.material.lattice.vector_arrays), self.calculate_cut_direction_vector([0, 0, 1]))
+            np.dot(np.array(self.material.lattice.vector_arrays), self.calculate_cut_direction_vector(cut_direction))
         )
         angle = np.arctan(height_cartesian / cut_direction_xy_proj_cart) * 180 / np.pi
         return angle

@@ -61,7 +61,7 @@ def create_terrace(
 
     terrace_configuration = TerraceDefectConfiguration(stack_components=[slab_in_stack, isolated_defect, vacuum])
 
-    angle = terrace_analyzer.get_angle(number_of_added_layers)
+    angle = terrace_analyzer.get_angle(cut_direction, number_of_added_layers)
     axis = terrace_analyzer.get_rotation_axis(cut_direction)
     new_lattice_vectors = terrace_analyzer.get_new_lattice_vectors(cut_direction, number_of_added_layers)
     parameters = TerraceBuildParameters(
