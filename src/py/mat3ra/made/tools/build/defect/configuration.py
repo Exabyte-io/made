@@ -7,7 +7,6 @@ from mat3ra.made.material import Material
 from mat3ra.made.utils import get_atomic_coordinates_extremum
 from .enums import (
     PointDefectTypeEnum,
-    SlabDefectTypeEnum,
     AtomPlacementMethodEnum,
     ComplexDefectTypeEnum,
 )
@@ -188,7 +187,6 @@ class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
             "defect_type": self.defect_type.name,
             "placement_method": self.placement_method.name,
         }
-
 
 
 class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
