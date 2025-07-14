@@ -1,6 +1,6 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.slab.helpers import create_island_defect
+from mat3ra.made.tools.build.defect.island.helpers import create_island_defect
 from mat3ra.made.tools.build.slab.helpers import create_slab
 from mat3ra.made.tools.utils import coordinate as CoordinateCondition
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
@@ -20,9 +20,7 @@ from unit.utils import assert_two_entities_deep_almost_equal
         )
     ],
 )
-def test_create_island_defect_new_pattern(
-    slab_parameters, condition_class, condition_params, num_added_layers, expected_config
-):
+def test_create_island_defect(slab_parameters, condition_class, condition_params, num_added_layers, expected_config):
     slab = create_slab(
         Material.create(slab_parameters["crystal"]),
         number_of_layers=slab_parameters["number_of_layers"],
