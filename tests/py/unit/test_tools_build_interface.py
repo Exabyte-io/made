@@ -69,6 +69,7 @@ def test_simple_interface_builder(substrate, film, expected_interface):
         stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
     )
     interface = builder.get_material(config)
+    print(interface.metadata.to_dict())
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 

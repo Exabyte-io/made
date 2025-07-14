@@ -13,7 +13,7 @@ class BuildMetadata(BaseMetadata):
 
 class MaterialBuildMetadata(BaseMetadata):
     # Other metadata fields can be added as needed
-    build: Optional[List[BuildMetadata]] = Field([])
+    build: List[BuildMetadata] = Field([])
 
     def get_build_metadata_of_type(self, configuration_type: str) -> Optional[BuildMetadata]:
         """

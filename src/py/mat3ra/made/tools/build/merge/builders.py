@@ -1,11 +1,10 @@
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Union
 
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder, BaseBuilderParameters, MaterialWithBuildMetadata
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
-from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import merge
 
@@ -31,56 +30,41 @@ class MergeBuilder(BaseSingleBuilder):
     Behaves like StackBuilder but performs merge operations.
     """
 
+    _ConfigurationType = MergeConfiguration
     _BuildParametersType = MergeBuilderParameters()
     _DefaultBuildParameters = MergeBuilderParameters()
 
-    def _configuration_to_material(self, configuration_or_material: Any) -> MaterialWithBuildMetadata:
-        # TODO: consider moving this method to a common base class
-        if isinstance(configuration_or_material, Material):
+    def _merge_component_to_material(
+        self, configuration_or_material: Any
+    ) -> Union[MaterialWithBuildMetadata, Material]:
+        if isinstance(configuration_or_material, Material) or isinstance(
+            configuration_or_material, MaterialWithBuildMetadata
+        ):
             return configuration_or_material
         if isinstance(configuration_or_material, VacuumConfiguration):
-            builder = VacuumBuilder()
-            material = builder.get_material(configuration_or_material)
-            return material
+            raise ValueError("Merge with VacuumConfiguration is not supported by design.")
         raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
 
-    def _merge_add(
-        self, materials: List[MaterialWithBuildMetadata], parameters: MergeBuilderParameters
+    def _merge_by_method(
+        self,
+        materials: List[MaterialWithBuildMetadata],
+        parameters: MergeBuilderParameters,
+        method: MergeMethodsEnum = MergeMethodsEnum.ADD,
     ) -> MaterialWithBuildMetadata:
+        if method not in MergeMethodsEnum:
+            raise ValueError(f"Unknown merge method: {method}")
         return merge(
             materials=materials,
-            merge_method=MergeMethodsEnum.ADD,
+            merge_method=method,
             material_name=parameters.material_name or materials[0].name,
             distance_tolerance=parameters.distance_tolerance,
             merge_dangerously=parameters.merge_dangerously,
         )
 
-    def _merge_replace(
-        self, materials: List[MaterialWithBuildMetadata], parameters: MergeBuilderParameters
-    ) -> MaterialWithBuildMetadata:
-        return merge(
-            materials=materials,
-            merge_method=MergeMethodsEnum.REPLACE,
-            material_name=parameters.material_name or materials[0].name,
-            distance_tolerance=parameters.distance_tolerance,
-            merge_dangerously=parameters.merge_dangerously,
-        )
-
-    def _merge_yield(
-        self, materials: List[MaterialWithBuildMetadata], parameters: MergeBuilderParameters
-    ) -> MaterialWithBuildMetadata:
-        return merge(
-            materials=materials,
-            merge_method=MergeMethodsEnum.YIELD,
-            material_name=parameters.material_name or materials[0].name,
-            distance_tolerance=parameters.distance_tolerance,
-            merge_dangerously=parameters.merge_dangerously,
-        )
-
-    def _generate(self, configuration: MergeConfiguration) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: _ConfigurationType) -> MaterialWithBuildMetadata:
         materials = []
         for component in configuration.merge_components:
-            material = self._configuration_to_material(component)
+            material = self._merge_component_to_material(component)
             materials.append(material)
 
         if len(materials) == 1:
@@ -88,14 +72,4 @@ class MergeBuilder(BaseSingleBuilder):
 
         parameters = self.build_parameters or self._DefaultBuildParameters
         merge_method = getattr(configuration, "merge_method", None)
-        if merge_method is not None:
-            if merge_method == MergeMethodsEnum.ADD:
-                return self._merge_add(materials, parameters)
-            elif merge_method == MergeMethodsEnum.REPLACE:
-                return self._merge_replace(materials, parameters)
-            elif merge_method == MergeMethodsEnum.YIELD:
-                return self._merge_yield(materials, parameters)
-            else:
-                raise ValueError(f"Unknown merge method: {merge_method}")
-        else:
-            return self._merge_add(materials, parameters)
+        return self._merge_by_method(materials, parameters, merge_method)

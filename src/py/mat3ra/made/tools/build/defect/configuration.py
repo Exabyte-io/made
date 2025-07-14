@@ -1,4 +1,4 @@
-from typing import Optional, List, Union, Generic, TypeVar
+from typing import Optional, List, Union, Generic, TypeVar, Callable
 
 from mat3ra.code.entity import InMemoryEntity
 from pydantic import BaseModel
@@ -225,7 +225,7 @@ class IslandSlabDefectConfiguration(SlabDefectConfigurationLegacy, Generic[Coord
     ] = CylinderCoordinateCondition()
 
     @classmethod
-    def from_dict(cls, crystal: Material, condition: dict, **kwargs):
+    def from_parameters(cls, crystal: Material, condition: Callable, **kwargs):
         """
         Creates an IslandSlabDefectConfiguration instance from a dictionary.
 
@@ -234,8 +234,7 @@ class IslandSlabDefectConfiguration(SlabDefectConfigurationLegacy, Generic[Coord
             condition (dict): The dictionary with shape and other parameters for the condition.
             kwargs: Other configuration parameters (like number_of_added_layers).
         """
-        condition_obj = cls.get_coordinate_condition(shape=condition["shape"], dict_params=condition)
-        return cls(crystal=crystal, condition=condition_obj, **kwargs)
+        return cls(crystal=crystal, condition=condition, **kwargs)
 
     @staticmethod
     def get_coordinate_condition(shape: CoordinatesShapeEnum, dict_params: dict):

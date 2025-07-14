@@ -1,15 +1,19 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from sympy import ceiling
 
-from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from .builders import SlabStackBuilder
 from .configuration import SlabStackConfiguration
+from ... import MaterialWithBuildMetadata
+from ...slab.builders import SlabBuilder
 from ...slab.helpers import create_slab
-from ....analyze.slab import SlabMaterialAnalyzer
+from ...vacuum.configuration import VacuumConfiguration
 from ....modify import filter_by_box
 
 
-def create_slab_stack(slab: Material, added_component: Material) -> Material:
+def create_slab_stack(
+    slab: MaterialWithBuildMetadata, added_component: MaterialWithBuildMetadata
+) -> MaterialWithBuildMetadata:
     """
     Create a slab stack by stacking a slab, a slab component, and a vacuum layer.
 
@@ -21,19 +25,27 @@ def create_slab_stack(slab: Material, added_component: Material) -> Material:
     """
     analyzer = SlabMaterialAnalyzer(material=slab)
 
-    slab_without_vacuum = analyzer.slab_configuration_with_no_vacuum
+    slab_without_vacuum_configuration = analyzer.slab_configuration_with_no_vacuum
+    slab_build_parameters = analyzer.build_parameters
 
-    vacuum_config = analyzer.get_slab_vacuum_configuration()
+    new_slab = SlabBuilder(build_parameters=slab_build_parameters).get_material(slab_without_vacuum_configuration)
+
+    original_vacuum_config = analyzer.get_slab_vacuum_configuration()
+    vacuum_config = VacuumConfiguration(
+        size=original_vacuum_config.size, crystal=new_slab, direction=original_vacuum_config.direction
+    )
 
     slab_stack_config = SlabStackConfiguration(
-        stack_components=[slab_without_vacuum, added_component, vacuum_config], direction=AxisEnum.z
+        stack_components=[new_slab, added_component, vacuum_config], direction=AxisEnum.z
     )
 
     slab_stack_builder = SlabStackBuilder()
     return slab_stack_builder.get_material(slab_stack_config)
 
 
-def recreate_slab_with_fractional_layers(slab: Material, number_of_layers: float) -> Material:
+def recreate_slab_with_fractional_layers(
+    slab: MaterialWithBuildMetadata, number_of_layers: float
+) -> MaterialWithBuildMetadata:
     """
     Create a slab with a specified number of fractional layers.
 
@@ -45,6 +57,7 @@ def recreate_slab_with_fractional_layers(slab: Material, number_of_layers: float
     """
     analyzer = SlabMaterialAnalyzer(material=slab)
     slab_without_vacuum = analyzer.slab_configuration_with_no_vacuum
+    build_parameters = analyzer.build_parameters
     # vacuum_config = analyzer.get_slab_vacuum_configuration()
 
     ceiling_number_of_layers = int(ceiling(number_of_layers))
@@ -54,6 +67,7 @@ def recreate_slab_with_fractional_layers(slab: Material, number_of_layers: float
         termination=slab_without_vacuum.atomic_layers.termination_top,
         number_of_layers=ceiling_number_of_layers,
         vacuum=0,
+        xy_supercell_matrix=build_parameters.xy_supercell_matrix,
     )
 
     max_z_crystal_coordinate = number_of_layers / ceiling_number_of_layers
