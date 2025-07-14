@@ -14,7 +14,48 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         normalized_direction_vector = direction_vector / np.linalg.norm(direction_vector)
         return normalized_direction_vector
 
-    def get_new_lattice_vectors(self, length_increase: float, direction_of_increase: List[float]) -> List[float]:
+    def get_rotation_axis(self, cut_direction: List[int]) -> List[int]:
+        normalized_rotation_axis = np.cross(cut_direction, [0, 0, 1])
+        norm = np.linalg.norm(normalized_rotation_axis)
+        normalized = normalized_rotation_axis / norm
+        return np.round(normalized).astype(int).tolist()
+
+    def get_angle(self, number_of_added_layers: float) -> float:
+        """
+        Calculate the angle of rotation based on the number of added layers.
+
+        Args:
+            number_of_added_layers: The number of layers added to the slab.
+
+        Returns:
+            The angle in degrees.
+        """
+        height_cartesian = self.layer_thickness * number_of_added_layers
+        cut_direction_xy_proj_cart = np.linalg.norm(
+            np.dot(np.array(self.material.lattice.vector_arrays), self.calculate_cut_direction_vector([0, 0, 1]))
+        )
+        angle = np.arctan(height_cartesian / cut_direction_xy_proj_cart) * 180 / np.pi
+        return angle
+
+    def get_length_increase(self, number_of_added_layers: float) -> float:
+        """
+        Calculate the increase in length based on the number of added layers.
+
+        Args:
+            number_of_added_layers: The number of layers added to the slab.
+
+        Returns:
+            The increase in length.
+        """
+        height_cartesian = self.layer_thickness * number_of_added_layers
+        cut_direction_xy_proj_cart = np.linalg.norm(
+            np.dot(np.array(self.material.lattice.vector_arrays), self.calculate_cut_direction_vector([0, 0, 1]))
+        )
+        hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])
+        delta_length = hypotenuse - cut_direction_xy_proj_cart
+        return delta_length
+
+    def get_new_lattice_vectors(self, cut_direction, number_of_added_layers: float) -> List[List[float]]:
         """
         Increase the lattice size in a specific direction.
 
@@ -27,12 +68,15 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         This method adjusts the lattice vectors to accommodate this change.
 
         Args:
-            length_increase: The increase in length.
-            direction_of_increase: The direction of the increase.
+            cut_direction: The direction of the cut in Miller indices.
+            number_of_added_layers: The number of layers added to the slab.
 
         Returns:
             The material with the increased lattice size.
         """
+
+        direction_of_increase = self.calculate_cut_direction_vector(cut_direction)
+        length_increase = self.get_length_increase(number_of_added_layers)
         vector_a, vector_b = self.material.lattice.vectors.a, self.material.lattice.vectors.b
         norm_a, norm_b = vector_a.norm, vector_b.norm
 
@@ -45,7 +89,7 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
 
         new_material = self.material.clone()
         new_lattice = new_material.lattice.get_scaled_by_matrix(scaling_matrix.tolist())
-        return new_lattice.vector_arrays.tolist()
+        return new_lattice.vector_arrays
 
     def calculate_height_cartesian(self, new_material: MaterialWithBuildMetadata):
         """
@@ -61,32 +105,3 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         added_layers_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
         height_cartesian = added_layers_max_z - original_max_z
         return height_cartesian
-
-    def calculate_rotation_parameters(
-        self,
-        new_material: MaterialWithBuildMetadata,
-        direction_vector: List[int],
-    ):
-        """
-        Calculate the necessary rotation angle and axis.
-
-        Args:
-            new_material: The material with the added layers.
-            direction_vector: The cut direction vector in Miller indices.
-
-        Returns:
-            The rotation angle, normalized rotation axis, and delta length.
-        """
-        height_cartesian = self.calculate_height_cartesian(new_material)
-        normalized_direction_vector = self.calculate_cut_direction_vector(direction_vector)
-        cut_direction_xy_proj_cart = np.linalg.norm(
-            np.dot(np.array(new_material.lattice.vector_arrays), normalized_direction_vector)
-        )
-        # Slope of the terrace along the cut direction
-        hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])
-        angle = np.arctan(height_cartesian / cut_direction_xy_proj_cart) * 180 / np.pi
-        normalized_rotation_axis = np.cross(normalized_direction_vector, [0, 0, 1]).tolist()
-        delta_length = hypotenuse - cut_direction_xy_proj_cart
-        return angle, normalized_rotation_axis, delta_length
-
-    #

@@ -1,10 +1,11 @@
 from mat3ra.made.material import Material
+from mat3ra.made.tools.operations.core.unary import edit_cell
 from ... import MaterialWithBuildMetadata
 from ..slab.builders import SlabStackBuilder
 from ..slab.configuration import SlabStackConfiguration
 from .configuration import TerraceDefectConfiguration
 from ...defect.terrace.parameters import TerraceBuildParameters
-from mat3ra.made.tools.modify import rotate
+from mat3ra.made.tools.modify import rotate, translate_to_z_level
 
 
 class TerraceDefectBuilder(SlabStackBuilder):
@@ -15,7 +16,10 @@ class TerraceDefectBuilder(SlabStackBuilder):
         if self.build_parameters.rotate_to_match_pbc:
             axis = self.build_parameters.axis
             angle = self.build_parameters.angle
-            material = rotate(material, axis, angle)
+            new_lattice_vectors = self.build_parameters.new_lattice_vectors
+            translated_material = translate_to_z_level(material, "center")
+            adjusted_material = edit_cell(translated_material, new_lattice_vectors)
+            material = rotate(adjusted_material, axis, angle)
 
         return material
 

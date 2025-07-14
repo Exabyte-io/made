@@ -63,14 +63,13 @@ def create_terrace(
     vacuum = terrace_analyzer.get_slab_vacuum_configuration()
 
     terrace_configuration = TerraceDefectConfiguration(stack_components=[slab_in_stack, isolated_defect, vacuum])
-    parameters = TerraceBuildParameters(rotate_to_match_pbc=rotate_to_match_pbc)
+
+    angle = terrace_analyzer.get_angle(number_of_added_layers)
+    axis = terrace_analyzer.get_rotation_axis(cut_direction)
+    new_lattice_vectors = terrace_analyzer.get_new_lattice_vectors(cut_direction, number_of_added_layers)
+    parameters = TerraceBuildParameters(
+        rotate_to_match_pbc=rotate_to_match_pbc, angle=angle, axis=axis, new_lattice_vectors=new_lattice_vectors
+    )
     terrace = TerraceDefectBuilder(build_parameters=parameters).get_material(terrace_configuration)
-
-    rotation_parameters = terrace_analyzer.calculate_rotation_parameters(terrace, cut_direction)
-    angle, rotation_axis, delta_length = rotation_parameters
-
-    # terrace = edit_cell(terrace, lattice_vectors=new_lattice_vectors.tolist())
-    # terrace = translate_to_z_level(terrace, "center")
-    # terrace = rotate(terrace, rotation_axis, angle)
 
     return terrace
