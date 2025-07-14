@@ -11,10 +11,10 @@ from unit.utils import assert_two_entities_deep_almost_equal
     "slab_parameters, cut_direction, pivot_coordinate, num_added_layers, expected_config",
     [
         (
-            {"crystal": BULK_Si_CONVENTIONAL, "number_of_layers": 2, "xy_supercell_matrix": [[3, 0], [0, 3]]},
+            {"crystal": BULK_Si_CONVENTIONAL, "number_of_layers": 1, "xy_supercell_matrix": [[1, 0], [0, 2]]},
             [0, 1, 0],
             [0.5, 0.5, 0.5],
-            0.5,
+            1,
             TERRACE_SLAB_Si_001_3x3,
         )
     ],

@@ -38,7 +38,7 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         angle = np.arctan(height_cartesian / cut_direction_xy_proj_cart) * 180 / np.pi
         return angle
 
-    def get_length_increase(self, number_of_added_layers: float) -> float:
+    def get_length_increase(self, cut_direction: List[int], number_of_added_layers: float) -> float:
         """
         Calculate the increase in length based on the number of added layers.
 
@@ -50,7 +50,7 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         """
         height_cartesian = self.layer_thickness * number_of_added_layers
         cut_direction_xy_proj_cart = np.linalg.norm(
-            np.dot(np.array(self.material.lattice.vector_arrays), self.calculate_cut_direction_vector([0, 0, 1]))
+            np.dot(np.array(self.material.lattice.vector_arrays), self.calculate_cut_direction_vector(cut_direction))
         )
         hypotenuse = np.linalg.norm([height_cartesian, cut_direction_xy_proj_cart])
         delta_length = hypotenuse - cut_direction_xy_proj_cart
@@ -77,7 +77,7 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         """
 
         direction_of_increase = self.calculate_cut_direction_vector(cut_direction)
-        length_increase = self.get_length_increase(number_of_added_layers)
+        length_increase = self.get_length_increase(cut_direction, number_of_added_layers)
         vector_a, vector_b = self.material.lattice.vectors.a, self.material.lattice.vectors.b
         norm_a, norm_b = vector_a.norm, vector_b.norm
 

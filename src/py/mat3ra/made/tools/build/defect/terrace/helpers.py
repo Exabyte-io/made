@@ -59,7 +59,9 @@ def create_terrace(
     )
     vacuum = terrace_analyzer.get_slab_vacuum_configuration()
 
-    terrace_configuration = TerraceDefectConfiguration(stack_components=[slab_in_stack, isolated_defect, vacuum])
+    terrace_configuration = TerraceDefectConfiguration(
+        stack_components=[slab_in_stack, isolated_defect, vacuum], cut_direction=cut_direction
+    )
 
     angle = terrace_analyzer.get_angle(cut_direction, number_of_added_layers)
     axis = terrace_analyzer.get_rotation_axis(cut_direction)
