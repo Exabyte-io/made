@@ -1,9 +1,15 @@
-from typing import List
+from typing import List, Union
 
 from mat3ra.made.material import Material
 from .builders import PairDefectBuilder
 from .configuration import PairDefectConfiguration
-from ..enums import PointDefectTypeEnum
+from ..enums import (
+    PointDefectTypeEnum,
+    VacancyPlacementMethodEnum,
+    SubstitutionPlacementMethodEnum,
+    InterstitialPlacementMethodEnum,
+    AtomPlacementMethodEnum,
+)
 from ..factories import create_defect_configuration
 
 
@@ -12,9 +18,15 @@ def create_pair_defect(
     defect_type_1: PointDefectTypeEnum = None,
     coordinate_1: List[float] = None,
     element_1: str = None,
+    placement_method_1: Union[
+        VacancyPlacementMethodEnum, SubstitutionPlacementMethodEnum, InterstitialPlacementMethodEnum
+    ] = AtomPlacementMethodEnum.EXACT_COORDINATE,
     defect_type_2: PointDefectTypeEnum = None,
     coordinate_2: List[float] = None,
     element_2: str = None,
+    placement_method_2: Union[
+        VacancyPlacementMethodEnum, SubstitutionPlacementMethodEnum, InterstitialPlacementMethodEnum
+    ] = AtomPlacementMethodEnum.EXACT_COORDINATE,
 ) -> Material:
     """
     Create a pair defect in the given material.
@@ -24,15 +36,17 @@ def create_pair_defect(
         defect_type_1: Type of the first defect.
         coordinate_1: Coordinate for the first defect.
         element_1: Element for substitution/interstitial defects.
+        placement_method_1: Method to resolve the final coordinate for the first defect.
         defect_type_2: Type of the second defect.
         coordinate_2: Coordinate for the second defect.
         element_2: Element for substitution/interstitial defects.
+        placement_method_2: Method to resolve the final coordinate for the second defect.
 
     Returns:
         Material: Material with the pair defect applied.
     """
-    configuration_1 = create_defect_configuration(material, defect_type_1, coordinate_1, element_1)
-    configuration_2 = create_defect_configuration(material, defect_type_2, coordinate_2, element_2)
+    configuration_1 = create_defect_configuration(material, defect_type_1, coordinate_1, element_1, placement_method_1)
+    configuration_2 = create_defect_configuration(material, defect_type_2, coordinate_2, element_2, placement_method_2)
 
     pair_config = PairDefectConfiguration.from_parameters(
         crystal=material,
