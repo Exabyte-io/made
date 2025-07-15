@@ -1,18 +1,21 @@
 from types import SimpleNamespace
 
 import pytest
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect.enums import (
     InterstitialPlacementMethodEnum,
     SubstitutionPlacementMethodEnum,
     VacancyPlacementMethodEnum,
 )
+from mat3ra.made.tools.build.defect.factories import create_defect_configuration
 from mat3ra.made.tools.build.defect.point.helpers import (
     create_point_defect_interstitial,
     create_point_defect_substitution,
     create_point_defect_vacancy,
+    create_multiple_defects,
 )
-from unit.fixtures.bulk import BULK_Si_PRIMITIVE
+from unit.fixtures.bulk import BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL
 from unit.fixtures.point_defects import (
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
     INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si,
@@ -83,3 +86,34 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
     expected_material_config = get_platform_specific_value(expected_material_config)
 
     assert_two_entities_deep_almost_equal(defect, expected_material_config)
+
+
+@pytest.mark.parametrize(
+    "material_config, defect_params_list",
+    [
+        (
+            BULK_Si_CONVENTIONAL,
+            [
+                SimpleNamespace(defect_type="vacancy", coordinate=[0.0, 0.0, 0.0]),
+                SimpleNamespace(defect_type="substitution", coordinate=[0.25, 0.25, 0.25], element="Ge"),
+            ],
+        ),
+    ],
+)
+def test_create_multiple_defects(material_config, defect_params_list):
+    material = Material.create(material_config)
+
+    defect_configs = []
+    for defect_params in defect_params_list:
+        config = create_defect_configuration(
+            material=material,
+            defect_type=defect_params.defect_type,
+            coordinate=defect_params.coordinate,
+            element=defect_params.element if hasattr(defect_params, "element") else None,
+        )
+        defect_configs.append(config)
+
+    result = create_multiple_defects(
+        material=material,
+        defect_configurations=defect_configs,
+    )
