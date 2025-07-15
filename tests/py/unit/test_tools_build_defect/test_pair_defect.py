@@ -3,6 +3,7 @@ from types import SimpleNamespace
 import pytest
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.defect.enums import SubstitutionPlacementMethodEnum
 from mat3ra.made.tools.build.defect.factories import create_defect_configuration
 from mat3ra.made.tools.build.defect.pair_defect.builders import PairDefectBuilder
 from mat3ra.made.tools.build.defect.pair_defect.configuration import PairDefectConfiguration
@@ -32,8 +33,9 @@ from unit.utils import assert_two_entities_deep_almost_equal
             BULK_Si_PRIMITIVE,
             SimpleNamespace(
                 primary_defect_type="substitution",
-                primary_coordinate=[0.0, 0.0, 0.0],
+                primary_coordinate=[0.123, 0.123, 0.123],
                 primary_element="Ge",
+                primary_placement_method=SubstitutionPlacementMethodEnum.CLOSEST_SITE,
                 secondary_defect_type="vacancy",
                 secondary_coordinate=[0.25, 0.25, 0.25],
             ),
@@ -49,12 +51,22 @@ def test_pair_defect_builder(material_config, pair_defect_params, expected_mater
         defect_type=pair_defect_params.primary_defect_type,
         coordinate=pair_defect_params.primary_coordinate,
         element=pair_defect_params.primary_element if hasattr(pair_defect_params, "primary_element") else None,
+        placement_method=(
+            pair_defect_params.primary_placement_method
+            if hasattr(pair_defect_params, "primary_placement_method")
+            else None
+        ),
     )
     secondary_config = create_defect_configuration(
         material=crystal,
         defect_type=pair_defect_params.secondary_defect_type,
         coordinate=pair_defect_params.secondary_coordinate,
         element=pair_defect_params.secondary_element if hasattr(pair_defect_params, "secondary_element") else None,
+        placement_method=(
+            pair_defect_params.secondary_placement_method
+            if hasattr(pair_defect_params, "secondary_placement_method")
+            else None
+        ),
     )
 
     config = PairDefectConfiguration.from_parameters(
