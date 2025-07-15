@@ -5,6 +5,28 @@ from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 
 
 class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
+    """
+    Used to calculate the adjustment values to make a stepped-surface (terrace) slab
+    periodic.
+
+    Build sequence
+    --------------
+    1. **Add extra layers** on top of the parent slab.
+    2. **Cut** those layers with the crystallographic plane given by
+       ``cut_direction`` → isolates the terrace step.
+    3. **Stack** the step onto the original slab → creates a terrace.
+    4. **Stretch lattice** in-plane (``new_lattice_vectors``) so the rotation can be performed inside the unit cell.
+    5. **Rotate** the whole slab by ``angle`` around ``rotation_axis`` so the
+       crystal structure is matched with the repetition in the PBC.
+
+    Key outputs
+    -----------
+    cut_direction_vector : unit Cartesian vector normal to the cut plane
+    rotation_axis        : axis to rotate the slab around
+    angle                : rotation angle in degrees
+    new_lattice_vectors  : stretched lattice vectors used before rotation
+    """
+
     cut_direction: List[int] = [0, 0, 1]
     number_of_added_layers: float = 1.0
 
