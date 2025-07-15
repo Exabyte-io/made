@@ -9,10 +9,6 @@ from .configuration import PairDefectConfiguration
 
 
 class PairDefectBuilder(VacancyDefectBuilder, PointDefectBuilder):
-    """
-    Builder for creating pair defects by handling two defect placements.
-    Extends MergeBuilder and uses component type conversion maps.
-    """
 
     _ConfigurationType: Type[PairDefectConfiguration] = PairDefectConfiguration
 

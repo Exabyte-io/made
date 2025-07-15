@@ -26,7 +26,6 @@ class MergeBuilderParameters(BaseBuilderParameters):
 class MergeBuilder(BaseSingleBuilder):
     """
     Builder class for merging materials based on parameters.
-    Uses component type conversion maps like StackNComponentsBuilder.
     """
 
     _ConfigurationType = MergeConfiguration
