@@ -1,14 +1,17 @@
 from typing import Type
 
 from mat3ra.made.material import Material
-from ..point.builders import PointDefectBuilder
+from mat3ra.made.tools.build.defect.point.builders import (
+    PointDefectBuilder,
+    VacancyDefectBuilder,
+)
 from .configuration import PairDefectConfiguration
 
 
-class PairDefectBuilder(PointDefectBuilder):
+class PairDefectBuilder(VacancyDefectBuilder, PointDefectBuilder):
     """
     Builder for creating pair defects by handling two defect placements.
-    Extends MergeBuilder and uses existing coordinate resolution methods.
+    Extends MergeBuilder and uses component type conversion maps.
     """
 
     _ConfigurationType: Type[PairDefectConfiguration] = PairDefectConfiguration

@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any, Type, Dict
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import (
@@ -67,10 +67,14 @@ class PointDefectSiteBuilder(BaseSingleBuilder):
 class PointDefectBuilder(MergeBuilder):
     _ConfigurationType: Type[PointDefectConfiguration] = PointDefectConfiguration
 
-    def _merge_component_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, PointDefectSiteConfiguration):
-            return PointDefectSiteBuilder().get_material(configuration_or_material)
-        return super()._merge_component_to_material(configuration_or_material)
+    @property
+    def merge_component_types_conversion_map(self) -> Dict[Type, Type]:
+        return {
+            VacancyDefectConfiguration: VacancyDefectBuilder,
+            SubstitutionalDefectConfiguration: SubstitutionalDefectBuilder,
+            InterstitialDefectConfiguration: PointDefectSiteBuilder,
+            PointDefectSiteConfiguration: PointDefectSiteBuilder,
+        }
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         host_material = None
