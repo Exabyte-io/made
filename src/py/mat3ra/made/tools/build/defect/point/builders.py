@@ -6,17 +6,17 @@ from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensi
 )
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseSingleBuilder, MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.point.configuration import (
+from .configuration import (
     PointDefectConfiguration,
     PointDefectSiteConfiguration,
     VacancyDefectConfiguration,
     SubstitutionalDefectConfiguration,
     InterstitialDefectConfiguration,
 )
-from mat3ra.made.tools.build.merge.builders import MergeBuilder
-from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from ... import BaseSingleBuilder, MaterialWithBuildMetadata
+from ...merge.builders import MergeBuilder
+from ...vacuum.builders import VacuumBuilder
+from ...vacuum.configuration import VacuumConfiguration
 
 
 class AtomAtCoordinateConfiguration(VacuumConfiguration, PointDefectSiteConfiguration):
@@ -72,11 +72,6 @@ class PointDefectBuilder(MergeBuilder):
             return PointDefectSiteBuilder().get_material(configuration_or_material)
         return super()._merge_component_to_material(configuration_or_material)
 
-    def _post_process(self, material: Material, configuration: _ConfigurationType) -> Material:
-        if isinstance(configuration, VacancyDefectConfiguration):
-            material.basis.remove_atoms_by_elements("Vac")
-        return material
-
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
         host_material = None
         for component in configuration.merge_components:
@@ -93,6 +88,11 @@ class PointDefectBuilder(MergeBuilder):
 
 class VacancyDefectBuilder(PointDefectBuilder):
     _ConfigurationType = VacancyDefectConfiguration
+
+    def _post_process(self, material: MaterialWithBuildMetadata, post_process_parameters=None) -> Material:
+        material = super()._post_process(material, post_process_parameters)
+        material.basis.remove_atoms_by_elements("Vac")
+        return material
 
 
 class SubstitutionalDefectBuilder(PointDefectBuilder):
