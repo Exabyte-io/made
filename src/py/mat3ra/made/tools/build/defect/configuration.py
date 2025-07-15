@@ -104,109 +104,116 @@ class PointDefectConfigurationLegacy(BaseDefectConfiguration, InMemoryEntity):
         }
 
 
-class SlabDefectConfigurationLegacy(BaseDefectConfiguration, InMemoryEntity):
-    """
-    Configuration for a slab defect.
+#
+#
+# class SlabDefectConfigurationLegacy(BaseDefectConfiguration, InMemoryEntity):
+#     """
+#     Configuration for a slab defect.
+#
+#     Args:
+#         crystal (Material): The Material object.
+#         number_of_added_layers (Union[int, float]): The number of added layers to the slab.
+#     """
+#
+#     number_of_added_layers: Union[int, float] = 1
+#
+#     @property
+#     def _json(self):
+#         return {
+#             **super()._json,
+#             "type": self.get_cls_name(),
+#             "number_of_added_layers": self.number_of_added_layers,
+#         }
+#
+#
+# class SlabPointDefectConfiguration(SlabDefectConfigurationLegacy, PointDefectConfigurationLegacy):
+#     """
+#     Configuration for a slab point defect.
+#
+#     Args:
+#         crystal (Material): The Material object.
+#         defect_type (PointDefectTypeEnum): The type of the defect.
+#         coordinate (List[float]): The crystal coordinate of the defect.
+#         chemical_element (Optional[str]): The chemical element.
+#         position_on_surface (List[float]): The position on the surface in 2D crystal coordinates.
+#         distance_z (float): The distance in z direction in angstroms.
+#     """
+#
+#     position_on_surface: List[float]
+#     distance_z: float  # in angstroms
+#
+#     def __init__(self, **data):
+#         super().__init__(**data)
+#         if not self.position_on_surface:
+#             self.position_on_surface = [self.coordinate[0], self.coordinate[1]]
+#         if not self.distance_z:
+#             self.distance_z = self.crystal.basis.cell.convert_point_to_cartesian(
+#                 [
+#                     self.coordinate[0],
+#                     self.coordinate[1],
+#                     self.coordinate[2] - get_atomic_coordinates_extremum(self.crystal),
+#                 ]
+#             )[2]
+#
+#     @property
+#     def _json(self):
+#         return {
+#             **super()._json,
+#             "type": self.get_cls_name(),
+#             "position_on_surface": self.position_on_surface,
+#             "distance_z": self.distance_z,
+#         }
+#
+#
+# class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
+#     """
+#     Configuration for an adatom slab point defect.
+#
+#     Args:
+#         crystal (Material): The Material object.
+#         defect_type (PointDefectTypeEnum): The type of the defect.
+#         coordinate (List[float]): The crystal coordinate of the defect.
+#         chemical_element (Optional[str]): The chemical element.
+#         position_on_surface (List[float]): The position on the surface in 2D crystal coordinates.
+#         distance_z (float): The distance in z direction in angstroms.
+#     """
+#
+#     defect_type: PointDefectTypeEnum = PointDefectTypeEnum.ADATOM
+#     placement_method: AtomPlacementMethodEnum = AtomPlacementMethodEnum.EXACT_COORDINATE
+#
+#     @property
+#     def _json(self):
+#         return {
+#             **super()._json,
+#             "type": self.get_cls_name(),
+#             "defect_type": self.defect_type.name,
+#             "placement_method": self.placement_method.name,
+#         }
 
-    Args:
-        crystal (Material): The Material object.
-        number_of_added_layers (Union[int, float]): The number of added layers to the slab.
-    """
 
-    number_of_added_layers: Union[int, float] = 1
-
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "number_of_added_layers": self.number_of_added_layers,
-        }
-
-
-class SlabPointDefectConfiguration(SlabDefectConfigurationLegacy, PointDefectConfigurationLegacy):
-    """
-    Configuration for a slab point defect.
-
-    Args:
-        crystal (Material): The Material object.
-        defect_type (PointDefectTypeEnum): The type of the defect.
-        coordinate (List[float]): The crystal coordinate of the defect.
-        chemical_element (Optional[str]): The chemical element.
-        position_on_surface (List[float]): The position on the surface in 2D crystal coordinates.
-        distance_z (float): The distance in z direction in angstroms.
-    """
-
-    position_on_surface: List[float]
-    distance_z: float  # in angstroms
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        if not self.position_on_surface:
-            self.position_on_surface = [self.coordinate[0], self.coordinate[1]]
-        if not self.distance_z:
-            self.distance_z = self.crystal.basis.cell.convert_point_to_cartesian(
-                [
-                    self.coordinate[0],
-                    self.coordinate[1],
-                    self.coordinate[2] - get_atomic_coordinates_extremum(self.crystal),
-                ]
-            )[2]
-
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "position_on_surface": self.position_on_surface,
-            "distance_z": self.distance_z,
-        }
-
-
-class AdatomSlabPointDefectConfiguration(SlabPointDefectConfiguration):
-    """
-    Configuration for an adatom slab point defect.
-
-    Args:
-        crystal (Material): The Material object.
-        defect_type (PointDefectTypeEnum): The type of the defect.
-        coordinate (List[float]): The crystal coordinate of the defect.
-        chemical_element (Optional[str]): The chemical element.
-        position_on_surface (List[float]): The position on the surface in 2D crystal coordinates.
-        distance_z (float): The distance in z direction in angstroms.
-    """
-
-    defect_type: PointDefectTypeEnum = PointDefectTypeEnum.ADATOM
-    placement_method: AtomPlacementMethodEnum = AtomPlacementMethodEnum.EXACT_COORDINATE
-
-    @property
-    def _json(self):
-        return {
-            **super()._json,
-            "type": self.get_cls_name(),
-            "defect_type": self.defect_type.name,
-            "placement_method": self.placement_method.name,
-        }
-
-
-class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
-    """
-    Configuration for a pair of point defects.
-
-    Args:
-        primary_defect_configuration: The first defect configuration.
-        secondary_defect_configuration: The second defect configuration. Material is used from the primary defect.
-    """
-
-    defect_type: ComplexDefectTypeEnum = ComplexDefectTypeEnum.PAIR
-    primary_defect_configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration]
-    secondary_defect_configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration]
-
-    @property
-    def _json(self):
-        return {
-            "type": self.get_cls_name(),
-            "defect_type": self.defect_type.name,
-            "primary_defect_configuration": self.primary_defect_configuration.to_json(),
-            "secondary_defect_configuration": self.secondary_defect_configuration.to_json(),
-        }
+#
+# # Legacy PointDefectPairConfiguration - replaced by new modular architecture
+# # Use PairDefectConfiguration from mat3ra.made.tools.build.defect.pair_defect.configuration
+# class PointDefectPairConfiguration(BaseDefectConfiguration, InMemoryEntity):
+#     """
+#     DEPRECATED: Use PairDefectConfiguration from mat3ra.made.tools.build.defect.pair_defect.configuration
+#
+#     Configuration for a pair of point defects.
+#
+#     Args:
+#         primary_defect_configuration: The first defect configuration.
+#         secondary_defect_configuration: The second defect configuration. Material is used from the primary defect.
+#     """
+#
+#     defect_type: ComplexDefectTypeEnum = ComplexDefectTypeEnum.PAIR
+#     primary_defect_configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration]
+#     secondary_defect_configuration: Union[PointDefectConfigurationLegacy, AdatomSlabPointDefectConfiguration]
+#
+#     @property
+#     def _json(self):
+#         return {
+#             "type": self.get_cls_name(),
+#             "defect_type": self.defect_type.name,
+#             "primary_defect_configuration": self.primary_defect_configuration.to_json(),
+#             "secondary_defect_configuration": self.secondary_defect_configuration.to_json(),
+#         }
