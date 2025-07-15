@@ -1,13 +1,15 @@
 from typing import List, Union
-
-from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.base_configuration import (
+# fmt: off
+from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional. \
+    point_defect.base_configuration import (
     PointDefectBaseConfigurationSchema,
 )
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+# fmt: on
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.point.configuration import PointDefectConfiguration
-from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
+from ...defect.point.configuration import PointDefectSiteConfiguration, PointDefectConfiguration
+from ...merge.configuration import MergeConfiguration
 
 
 class PairDefectConfiguration(MergeConfiguration, PointDefectBaseConfigurationSchema):
@@ -20,7 +22,7 @@ class PairDefectConfiguration(MergeConfiguration, PointDefectBaseConfigurationSc
     """
 
     type: str = "PairDefectConfiguration"
-    merge_components: List[Union[Material, PointDefectConfiguration]]
+    merge_components: List[Union[Material, PointDefectSiteConfiguration]]
     merge_method: MergeMethodsEnum = MergeMethodsEnum.REPLACE
 
     @classmethod
@@ -31,4 +33,8 @@ class PairDefectConfiguration(MergeConfiguration, PointDefectBaseConfigurationSc
         secondary_defect_configuration: PointDefectConfiguration,
         **kwargs,
     ):
-        return cls(merge_components=[crystal, primary_defect_configuration, secondary_defect_configuration], **kwargs)
+        primary_defect_site_configuration = primary_defect_configuration.merge_components[1]
+        secondary_defect_site_configuration = secondary_defect_configuration.merge_components[1]
+        return cls(
+            merge_components=[crystal, primary_defect_site_configuration, secondary_defect_site_configuration], **kwargs
+        )

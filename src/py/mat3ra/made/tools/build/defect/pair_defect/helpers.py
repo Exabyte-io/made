@@ -1,59 +1,44 @@
 from typing import List
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer
-from mat3ra.made.tools.build.defect.point.builders import PointDefectBuilder
-from mat3ra.made.tools.build.defect.point.configuration import PointDefectConfiguration
+from .builders import PairDefectBuilder
+from .configuration import PairDefectConfiguration
+from ..enums import PointDefectTypeEnum
+from ..factories import create_defect_configuration
 
 
-def create_multiple_defects(
+def create_pair_defect(
     material: Material,
-    defect_configurations: List[PointDefectConfiguration],
-    coord_resolution_method: str = "closest_site",
+    defect_type_1: PointDefectTypeEnum = None,
+    coordinate_1: List[float] = None,
+    element_1: str = None,
+    defect_type_2: PointDefectTypeEnum = None,
+    coordinate_2: List[float] = None,
+    element_2: str = None,
 ) -> Material:
     """
-    Create a material with multiple defects.
+    Create a pair defect in the given material.
 
     Args:
         material: The host material.
-        defect_configurations: List of point defect configurations.
-        coord_resolution_method: Method to resolve coordinates ("closest_site", "exact_coordinate", etc.).
+        defect_type_1: Type of the first defect.
+        coordinate_1: Coordinate for the first defect.
+        element_1: Element for substitution/interstitial defects.
+        defect_type_2: Type of the second defect.
+        coordinate_2: Coordinate for the second defect.
+        element_2: Element for substitution/interstitial defects.
 
     Returns:
-        Material: Material with multiple defects applied.
+        Material: Material with the pair defect applied.
     """
-    current_material = material
+    configuration_1 = create_defect_configuration(material, defect_type_1, coordinate_1, element_1)
+    configuration_2 = create_defect_configuration(material, defect_type_2, coordinate_2, element_2)
 
-    for defect_config in defect_configurations:
-        builder = PointDefectBuilder()
-        current_material = builder.get_material(defect_config)
+    pair_config = PairDefectConfiguration.from_parameters(
+        crystal=material,
+        primary_defect_configuration=configuration_1,
+        secondary_defect_configuration=configuration_2,
+    )
 
-    return current_material
-
-
-def resolve_coordinate_by_method(
-    material: Material,
-    coordinate: List[float],
-    method: str,
-) -> List[float]:
-    """
-    Resolve coordinate using the specified method.
-
-    Args:
-        material: The host material.
-        coordinate: The input coordinate.
-        method: The resolution method.
-
-    Returns:
-        List[float]: The resolved coordinate.
-    """
-    analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
-
-    if method == "closest_site":
-        return analyzer.closest_site_coordinate
-    elif method == "exact_coordinate":
-        return analyzer.exact_coordinate
-    elif method == "equidistant":
-        return analyzer.get_equidistant_coordinate()
-    else:
-        raise ValueError(f"Unknown coordinate resolution method: {method}")
+    builder = PairDefectBuilder()
+    return builder.get_material(pair_config)

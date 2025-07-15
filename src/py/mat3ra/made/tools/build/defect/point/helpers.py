@@ -1,18 +1,19 @@
-from typing import List
+from typing import List, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
-from mat3ra.made.tools.build.defect.enums import (
+from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
+from ..enums import (
     VacancyPlacementMethodEnum,
     SubstitutionPlacementMethodEnum,
     InterstitialPlacementMethodEnum,
 )
-from mat3ra.made.tools.build.defect.point.builders import (
+from .builders import (
     VacancyDefectBuilder,
     SubstitutionalDefectBuilder,
     InterstitialDefectBuilder,
+    PointDefectBuilder,
 )
-from mat3ra.made.tools.build.defect.point.configuration import (
+from .configuration import (
     VacancyDefectConfiguration,
     SubstitutionalDefectConfiguration,
     InterstitialDefectConfiguration,
@@ -105,3 +106,28 @@ def create_point_defect_interstitial(
     )
     builder = InterstitialDefectBuilder()
     return builder.get_material(config)
+
+
+def create_multiple_defects(
+    material: Material,
+    defect_configurations: List[
+        Union[VacancyDefectConfiguration, SubstitutionalDefectConfiguration, InterstitialDefectConfiguration]
+    ],
+) -> Material:
+    """
+    Create a material with multiple defects.
+
+    Args:
+        material: The host material.
+        defect_configurations: List of point defect configurations.
+
+    Returns:
+        Material: Material with multiple defects applied.
+    """
+    current_material = material
+
+    for defect_config in defect_configurations:
+        builder = PointDefectBuilder()
+        current_material = builder.get_material(defect_config)
+
+    return current_material
