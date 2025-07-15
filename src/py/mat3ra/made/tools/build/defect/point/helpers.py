@@ -1,23 +1,22 @@
 from typing import List, Union
 
 from mat3ra.made.material import Material
-from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
-from ..enums import (
-    VacancyPlacementMethodEnum,
-    SubstitutionPlacementMethodEnum,
-    InterstitialPlacementMethodEnum,
-)
 from .builders import (
     VacancyDefectBuilder,
     SubstitutionalDefectBuilder,
     InterstitialDefectBuilder,
-    PointDefectBuilder,
 )
 from .configuration import (
     VacancyDefectConfiguration,
     SubstitutionalDefectConfiguration,
     InterstitialDefectConfiguration,
 )
+from ..enums import (
+    VacancyPlacementMethodEnum,
+    SubstitutionPlacementMethodEnum,
+    InterstitialPlacementMethodEnum,
+)
+from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 
 
 def create_point_defect_vacancy(
@@ -124,11 +123,20 @@ def create_multiple_defects(
     Returns:
         Material: Material with multiple defects applied.
     """
+
+    builder_mapping = {
+        VacancyDefectConfiguration: VacancyDefectBuilder,
+        SubstitutionalDefectConfiguration: SubstitutionalDefectBuilder,
+        InterstitialDefectConfiguration: InterstitialDefectBuilder,
+    }
+
     current_material = material
 
     for defect_config in defect_configurations:
         defect_config.merge_components[0] = current_material
-        builder = PointDefectBuilder()
+
+        builder_class = builder_mapping[type(defect_config)]
+        builder = builder_class()
         current_material = builder.get_material(defect_config)
 
     return current_material

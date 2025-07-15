@@ -19,6 +19,7 @@ from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.point_defects import (
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
     INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si,
+    MULTIPLE_POINT_DEFECTS_BULK_Si_CONVENTIONAL,
     SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
     VACANCY_DEFECT_BULK_PRIMITIVE_Si,
 )
@@ -112,7 +113,7 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
                     placement_method=SubstitutionPlacementMethodEnum.CLOSEST_SITE,
                 ),
             ],
-            BULK_Si_CONVENTIONAL,  # change to have defects
+            MULTIPLE_POINT_DEFECTS_BULK_Si_CONVENTIONAL,
         ),
     ],
 )

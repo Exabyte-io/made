@@ -1,4 +1,4 @@
-from typing import Callable, List, Dict, Union, Type
+from typing import List, Dict, Union, Type
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer

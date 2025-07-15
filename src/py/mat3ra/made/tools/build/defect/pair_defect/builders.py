@@ -9,7 +9,6 @@ from .configuration import PairDefectConfiguration
 
 
 class PairDefectBuilder(VacancyDefectBuilder, PointDefectBuilder):
-
     _ConfigurationType: Type[PairDefectConfiguration] = PairDefectConfiguration
 
     def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
