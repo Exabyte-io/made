@@ -29,11 +29,19 @@ def resolve_coordinate(material: Material, coordinate: List[float], placement_me
         return analyzer.exact_coordinate
 
 
-DEFECT_CONFIGURATION_FACTORIES: Dict[PointDefectTypeEnum, Type[PointDefectConfiguration]] = {
-    PointDefectTypeEnum.VACANCY: VacancyDefectConfiguration,
-    PointDefectTypeEnum.SUBSTITUTION: SubstitutionalDefectConfiguration,
-    PointDefectTypeEnum.INTERSTITIAL: InterstitialDefectConfiguration,
-}
+class PointDefectConfigurationFactory:
+    _type_to_configuration_map: Dict[PointDefectTypeEnum, Type[PointDefectConfiguration]] = {
+        PointDefectTypeEnum.VACANCY: VacancyDefectConfiguration,
+        PointDefectTypeEnum.SUBSTITUTION: SubstitutionalDefectConfiguration,
+        PointDefectTypeEnum.INTERSTITIAL: InterstitialDefectConfiguration,
+    }
+
+    @classmethod
+    def get_constructor(cls, defect_type: PointDefectTypeEnum) -> Type[PointDefectConfiguration]:
+        try:
+            return cls._type_to_configuration_map[defect_type]
+        except KeyError:
+            raise ValueError(f"Unsupported defect type: {defect_type}")
 
 
 def create_defect_configuration(
@@ -45,10 +53,7 @@ def create_defect_configuration(
         VacancyPlacementMethodEnum, SubstitutionPlacementMethodEnum, InterstitialPlacementMethodEnum
     ] = AtomPlacementMethodEnum.EXACT_COORDINATE,
 ) -> PointDefectConfiguration:
-    if defect_type not in DEFECT_CONFIGURATION_FACTORIES:
-        raise ValueError(f"Unknown defect type: {defect_type}")
-
     resolved_coordinate = resolve_coordinate(material, coordinate, placement_method)
+    config_class = PointDefectConfigurationFactory.get_constructor(defect_type=defect_type)
 
-    config_class = DEFECT_CONFIGURATION_FACTORIES[defect_type]
     return config_class.from_parameters(crystal=material, coordinate=resolved_coordinate, element=element)
