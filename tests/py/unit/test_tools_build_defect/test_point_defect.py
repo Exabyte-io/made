@@ -1,8 +1,8 @@
 from types import SimpleNamespace
 
 import pytest
-
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.enums import (
     InterstitialPlacementMethodEnum,
     SubstitutionPlacementMethodEnum,
@@ -10,12 +10,12 @@ from mat3ra.made.tools.build.defect.enums import (
 )
 from mat3ra.made.tools.build.defect.factories import create_defect_configuration
 from mat3ra.made.tools.build.defect.point.helpers import (
+    create_multiple_defects,
     create_point_defect_interstitial,
     create_point_defect_substitution,
     create_point_defect_vacancy,
-    create_multiple_defects,
 )
-from unit.fixtures.bulk import BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL
+from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.point_defects import (
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
     INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si,
@@ -89,19 +89,35 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
 
 
 @pytest.mark.parametrize(
-    "material_config, defect_params_list",
+    "material_config, defect_params_list, expected_material_config",
     [
         (
             BULK_Si_CONVENTIONAL,
             [
-                SimpleNamespace(defect_type="vacancy", coordinate=[0.0, 0.0, 0.0]),
-                SimpleNamespace(defect_type="substitution", coordinate=[0.25, 0.25, 0.25], element="Ge"),
+                SimpleNamespace(
+                    defect_type="vacancy",
+                    coordinate=[0.75, 0.70, 0.70],
+                    placement_method=VacancyPlacementMethodEnum.CLOSEST_SITE,
+                ),
+                SimpleNamespace(
+                    defect_type="interstitial",
+                    coordinate=[0.25, 0.25, 0.2],
+                    element="N",
+                    placement_method=InterstitialPlacementMethodEnum.VORONOI_SITE,
+                ),
+                SimpleNamespace(
+                    defect_type="substitution",
+                    coordinate=[0.543, 0.543, 0.5],
+                    element="Ge",
+                    placement_method=SubstitutionPlacementMethodEnum.CLOSEST_SITE,
+                ),
             ],
+            BULK_Si_CONVENTIONAL,  # change to have defects
         ),
     ],
 )
-def test_create_multiple_defects(material_config, defect_params_list):
-    material = Material.create(material_config)
+def test_create_multiple_defects(material_config, defect_params_list, expected_material_config):
+    material = MaterialWithBuildMetadata.create(material_config)
 
     defect_configs = []
     for defect_params in defect_params_list:
@@ -110,10 +126,12 @@ def test_create_multiple_defects(material_config, defect_params_list):
             defect_type=defect_params.defect_type,
             coordinate=defect_params.coordinate,
             element=defect_params.element if hasattr(defect_params, "element") else None,
+            placement_method=(defect_params.placement_method if hasattr(defect_params, "placement_method") else None),
         )
         defect_configs.append(config)
 
-    result = create_multiple_defects(
+    defects = create_multiple_defects(
         material=material,
         defect_configurations=defect_configs,
     )
+    assert_two_entities_deep_almost_equal(defects, expected_material_config)

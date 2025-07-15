@@ -127,6 +127,7 @@ def create_multiple_defects(
     current_material = material
 
     for defect_config in defect_configurations:
+        defect_config.merge_components[0] = current_material
         builder = PointDefectBuilder()
         current_material = builder.get_material(defect_config)
 

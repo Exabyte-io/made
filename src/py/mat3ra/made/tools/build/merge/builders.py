@@ -1,8 +1,7 @@
-from typing import Any, Optional, List, Union, Dict, Type
+from typing import Any, Optional, List, Dict, Type
 
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
-from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder, BaseBuilderParameters, MaterialWithBuildMetadata
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
@@ -48,7 +47,6 @@ class MergeBuilder(BaseSingleBuilder):
         configuration: MergeConfiguration,
         merge_component_build_parameters: Any = None,
     ) -> Optional[MaterialWithBuildMetadata]:
-
         if isinstance(merge_component_configuration_or_material, VacuumConfiguration):
             raise ValueError("Merge with VacuumConfiguration is not supported by design.")
 

@@ -1,4 +1,4 @@
-from typing import Any, Type, Dict
+from typing import Type, Dict
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import (

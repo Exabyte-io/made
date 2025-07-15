@@ -1,7 +1,6 @@
 from types import SimpleNamespace
 
 import pytest
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect.enums import SubstitutionPlacementMethodEnum
 from mat3ra.made.tools.build.defect.factories import create_defect_configuration
@@ -9,8 +8,8 @@ from mat3ra.made.tools.build.defect.pair_defect.builders import PairDefectBuilde
 from mat3ra.made.tools.build.defect.pair_defect.configuration import PairDefectConfiguration
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 from unit.fixtures.pair_defects import (
-    PAIR_DEFECT_VACANCY_INTERSTITIAL_BULK_PRIMITIVE_Si,
     PAIR_DEFECT_SUBSTITUTION_VACANCY_BULK_PRIMITIVE_Si,
+    PAIR_DEFECT_VACANCY_INTERSTITIAL_BULK_PRIMITIVE_Si,
 )
 from unit.utils import assert_two_entities_deep_almost_equal
 
