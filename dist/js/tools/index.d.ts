@@ -3,12 +3,12 @@ declare const _default: {
         generateConfig: (material: import("../material").Material, millerIndices: import("@mat3ra/esse/dist/js/types").Coordinate3DSchema, numberOfLayers?: number, vx?: number, vy?: number) => import("./surface").SlabConfigSchema;
     };
     supercell: {
-        generateConfig: (material: import("../types").MaterialInterface, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => {
+        generateConfig: (material: import("../material").Material, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => {
             name: string;
             basis: import("@mat3ra/esse/dist/js/types").BasisSchema;
             lattice: import("@mat3ra/esse/dist/js/types").LatticeSchema;
         };
-        generateNewBasisWithinSupercell: (basis: import("../basis/basis").Basis | import("../basis/constrained_basis").ConstrainedBasis, cell: import("../cell/cell").Cell, supercell: import("../cell/cell").Cell, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => import("../basis/basis").Basis;
+        generateNewBasisWithinSupercell: (basis: import("../made").Basis | import("../basis/constrained_basis").ConstrainedBasis, cell: import("../made").Cell, supercell: import("../made").Cell, supercellMatrix: import("@mat3ra/esse/dist/js/types").Matrix3X3Schema) => import("../made").Basis;
     };
     material: {
         scaleOneLatticeVector: (material: import("../material").Material, key?: "a" | "b" | "c", factor?: number) => void;
@@ -16,8 +16,8 @@ declare const _default: {
         translateAtomsToCenter: (material: import("../material").Material) => void;
     };
     basis: {
-        repeat: (basis: import("../basis/basis").Basis, repetitions: number[]) => import("../basis/basis").Basis;
-        interpolate: (initialBasis: import("../basis/basis").Basis, finalBasis: import("../basis/basis").Basis, numberOfSteps?: number) => import("../basis/basis").Basis[];
+        repeat: (basis: import("../made").Basis, repetitions: number[]) => import("../made").Basis;
+        interpolate: (initialBasis: import("../made").Basis, finalBasis: import("../made").Basis, numberOfSteps?: number) => import("../made").Basis[];
     };
 };
 export default _default;
