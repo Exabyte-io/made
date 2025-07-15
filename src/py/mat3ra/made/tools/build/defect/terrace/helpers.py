@@ -1,12 +1,12 @@
 from typing import Optional, List
 
-from .analyzer import TerraceMaterialAnalyzer
 from .builders import TerraceDefectBuilder
 from .configuration import TerraceDefectConfiguration
 from .parameters import TerraceBuildParameters
 from ..slab.builders import SlabBuilder
 from ..slab.helpers import recreate_slab_with_fractional_layers
 from ... import MaterialWithBuildMetadata
+from ....analyze.terrace import TerraceMaterialAnalyzer
 from ....modify import filter_by_condition_on_coordinates
 from ....utils.coordinate import PlaneCoordinateCondition
 
