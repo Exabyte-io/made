@@ -13,11 +13,6 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         return np.array(self.material.lattice.vector_arrays)
 
     @property
-    def cut_direction_vector(self) -> np.ndarray:
-        direction = np.dot(self._lattice_matrix, np.array(self.cut_direction))
-        return direction / np.linalg.norm(direction)
-
-    @property
     def _height_cartesian(self) -> float:
         return self.layer_thickness * self.number_of_added_layers
 
@@ -26,32 +21,57 @@ class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):
         return np.linalg.norm(np.dot(self._lattice_matrix, self.cut_direction_vector))
 
     @property
-    def rotation_axis(self) -> List[int]:
-        axis = np.cross(np.array(self.cut_direction), [0, 0, 1])
-        return np.round(axis / np.linalg.norm(axis)).astype(int).tolist()
-
-    @property
-    def angle(self) -> float:
-        return np.degrees(np.arctan(self._height_cartesian / self._cut_direction_xy_proj_cart))
-
-    @property
-    def _length_increase(self) -> float:
+    def _length_increment(self) -> float:
         return (
             np.linalg.norm([self._height_cartesian, self._cut_direction_xy_proj_cart])
             - self._cut_direction_xy_proj_cart
         )
 
     @property
-    def new_lattice_vectors(self) -> np.ndarray:
-        dir_vec = self.cut_direction_vector
-        length_inc = self._length_increase
+    def cut_direction_vector(self) -> np.ndarray:
+        """
+        Get the normalized Cartesian vector normal to the terrace cut plane.
+
+        The terrace is constructed by cutting the material with a crystallographic
+        plane defined by `cut_direction`
+        """
+        direction = np.dot(self._lattice_matrix, np.array(self.cut_direction))
+        return direction / np.linalg.norm(direction)
+
+    @property
+    def rotation_axis(self) -> List[int]:
+        """
+        Calculate the axis of rotation to align the terrace with its repetition in the PBC.
+        """
+        axis = np.cross(np.array(self.cut_direction), [0, 0, 1])
+        return np.round(axis / np.linalg.norm(axis)).astype(int).tolist()
+
+    @property
+    def angle(self) -> float:
+        """
+        Calculate the angle of the tilt needed to align the terrace with its repetition in the PBC.
+        """
+        return np.degrees(np.arctan(self._height_cartesian / self._cut_direction_xy_proj_cart))
+
+    @property
+    def new_lattice_vectors(self) -> List[List[float]]:
+        """
+        Compute updated lattice vectors to accommodate terrace tilt before rotation.
+
+        The terrace step introduces an additional height, so to match it across PBC,
+        the in-plane lattice vectors must be stretched. This method calculates the
+        additional in-plane length needed and applies directional scaling to both
+        a and b vectors, in proportion to their projection along the terrace normal.
+        """
+        direction_vector = self.cut_direction_vector
+        length_increment = self._length_increment
 
         vector_a = self.material.lattice.vectors.a
         vector_b = self.material.lattice.vectors.b
 
         norm_a, norm_b = vector_a.norm, vector_b.norm
-        delta_a_cart = np.dot(vector_a.value, dir_vec) * length_inc / norm_a
-        delta_b_cart = np.dot(vector_b.value, dir_vec) * length_inc / norm_b
+        delta_a_cart = np.dot(vector_a.value, direction_vector) * length_increment / norm_a
+        delta_b_cart = np.dot(vector_b.value, direction_vector) * length_increment / norm_b
 
         scaling_matrix = np.eye(3)
         scaling_matrix[0, 0] += delta_a_cart / norm_a
