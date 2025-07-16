@@ -3,7 +3,10 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build.nanoparticle.enums import NanoparticleShapesEnum
 from mat3ra.made.tools.build.nanoparticle.helpers import create_nanoparticle_by_shape, create_nanoparticle_from_material
 from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition
+
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE
+from unit.fixtures.nanoparticle import SI_NANOPARTICLE_SPHERE
+from unit.utils import assert_two_entities_deep_almost_equal
 
 
 @pytest.mark.parametrize(
@@ -12,7 +15,7 @@ from unit.fixtures.bulk import BULK_Si_PRIMITIVE
         (
             BULK_Si_PRIMITIVE,
             SphereCoordinateCondition(radius=6.0),
-            BULK_Si_PRIMITIVE,  # Change to nanoparticle material
+            SI_NANOPARTICLE_SPHERE,
         ),
     ],
 )
@@ -21,7 +24,8 @@ def test_create_nanoparticle_by_condition(material_config, condition, expected_m
     nanoparticle = create_nanoparticle_from_material(
         material, condition=condition, center_around_atom=True, use_cartesian_coordinates=True
     )
-    assert isinstance(nanoparticle, Material)
+
+    assert_two_entities_deep_almost_equal(nanoparticle, expected_material_config)
 
 
 @pytest.mark.parametrize(
