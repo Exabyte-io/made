@@ -1,16 +1,19 @@
 import math
 
 import pytest
+import sympy as sp
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.operations.core.binary import stack_two_materials
-from mat3ra.made.tools.operations.core.unary import strain
+from mat3ra.made.tools.operations.core.unary import strain, perturb
+from mat3ra.made.tools.utils.perturbation import PerturbationFunctionHolder, SineWavePerturbationFunctionHolder
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
 from unit.fixtures.strain import BULK_Si_CONVENTIONAL_STRAINED
 from unit.utils import assert_two_entities_deep_almost_equal
 
 from .fixtures.bulk import BULK_Si_PRIMITIVE
+from .fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 
 STRAIN_TEST_CASES = [
     (BULK_Si_CONVENTIONAL, [[1.1, 0, 0], [0, 1.1, 0], [0, 0, 1.0]], BULK_Si_CONVENTIONAL_STRAINED),
@@ -56,3 +59,24 @@ def test_stack_two_materials(
     assert math.isclose(stacked_material.lattice.a, expected_a)
     assert math.isclose(stacked_material.lattice.b, expected_b)
     assert math.isclose(stacked_material.lattice.c, expected_c)
+
+
+@pytest.mark.parametrize(
+    "material_config, perturbation_function, is_isometric, expected_coord_changes",
+    [
+        (
+            GRAPHENE_ZIGZAG_NANORIBBON,
+            SineWavePerturbationFunctionHolder(amplitude=0.1, wavelength=1.0, phase=0.0, axis="x"),
+            True,
+            [0.0, 0.0, 0.1],
+        ),
+    ],
+)
+def test_perturb(material_config, perturbation_function, is_isometric, expected_coord_changes):
+    material = Material.create(material_config)
+    original_coords = [coord[:] for coord in material.basis.coordinates.values]
+
+    perturbed_material = perturb(material, perturbation_function, is_isometric)
+
+    # Check that original material is unchanged
+    assert material.basis.coordinates.values == original_coords

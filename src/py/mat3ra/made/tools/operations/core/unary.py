@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
@@ -8,6 +10,7 @@ from ...build import MaterialWithBuildMetadata
 from ...convert import from_ase, to_ase
 from ...third_party import ase_make_supercell
 from ...utils import decorator_convert_supercell_matrix_2x2_to_3x3
+from ...utils.perturbation import PerturbationFunctionHolder
 
 
 def translate(material: Material, vector: Vector3D) -> Material:
@@ -54,4 +57,51 @@ def strain(material: Material, strain_matrix: Matrix3x3Schema) -> Material:
     new_material.set_lattice_vectors_from_array(new_lattice_vectors)
     new_material.basis.coordinates.values = original_crystal_coords
 
+    return new_material
+
+
+def perturb(
+    material: Material, perturbation_function: PerturbationFunctionHolder, is_isometric: bool = False
+) -> Material:
+    """
+    Applies a perturbation to a material's atomic coordinates.
+
+    Args:
+        material: The input Material instance containing coordinates.
+        perturbation_function: A PerturbationFunctionHolder that defines
+                     a function f(x,y,z) -> float (or vector) and
+                     optional transform_coordinates behavior.
+        is_isometric: If True, preserves arc-length along each axis by
+                      reparameterizing coordinates before applying f.
+
+    Returns:
+        A new Material with perturbed coordinates.
+    """
+    new_material = material.clone()
+    original_coordinates = material.basis.coordinates.values
+    perturbed_coordinates: List[List[float]] = []
+
+    # If isometric, transform lattice vectors first
+    if is_isometric:
+        lattice_vectors = new_material.lattice.vector_arrays
+        new_lattice_vectors = [perturbation_function.transform_coordinates(vector) for vector in lattice_vectors]
+        new_material.set_lattice_vectors_from_array(new_lattice_vectors)
+
+    for coordinate in original_coordinates:
+        # reparameterize coordinates along each axis to preserve arc-length
+        if is_isometric:
+            coordinate = perturbation_function.transform_coordinates(coordinate)
+
+        # If func_holder returns a scalar, assume z-axis; otherwise vector
+        displacement = perturbation_function.apply_function(coordinate)
+        if isinstance(displacement, (list, tuple, np.ndarray)):
+            delta = np.array(displacement)
+        else:
+            # scalar: apply to z-axis
+            delta = np.array([0.0, 0.0, displacement])
+
+        new_coordinate = np.array(coordinate) + delta
+        perturbed_coordinates.append(new_coordinate.tolist())
+
+    new_material.set_coordinates(perturbed_coordinates)
     return new_material
