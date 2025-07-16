@@ -1,15 +1,11 @@
 from typing import Union, List
 
-import numpy as np
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.island.helpers import CoordinateConditionType
 from mat3ra.made.tools.build.nanoparticle.analyzer import NanoparticleMaterialAnalyzer
-from mat3ra.made.tools.build.nanoparticle.configuration import NanoparticleConfiguration
 from mat3ra.made.tools.build.slab.helpers import create_slab
-from mat3ra.made.tools.build.supercell import create_supercell
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
-from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
 from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition
 
@@ -20,7 +16,9 @@ def create_nanoparticle_by_condition(
         SphereCoordinateCondition,
         CoordinateConditionType,
     ] = SphereCoordinateCondition(),
-    orientation_z: List[int] = [0, 0, 1],  # direction, perpendicular to Miller indices plane
+    orientation_z: List[int] = [0, 0, 1],
+    center_around_atom: bool = True,
+    use_cartesian_coordinates: bool = True,
     vacuum_padding: float = 10.0,
 ) -> MaterialWithBuildMetadata:
     """
@@ -30,6 +28,8 @@ def create_nanoparticle_by_condition(
         material: The crystal material from which the nanoparticle is created.
         condition: The coordinate condition that defines the nanoparticle shape.
         orientation_z: The orientation of the crystallographic axis in the z-direction.
+        center_around_atom: Whether to center the condition around an atom close to the center in the material.
+        use_cartesian_coordinates: Whether the condition supplied is in Cartesian coordinates.
         vacuum_padding: Padding for vacuum space around the nanoparticle.
 
     Returns:
@@ -54,6 +54,16 @@ def create_nanoparticle_by_condition(
         vacuum=0,
     )
 
-    nanoparticle = filter_by_condition_on_coordinates(slab, condition.condition, use_cartesian_coordinates=True)
+    # Find an atom close to center, to apply the condition around it
+    if center_around_atom:
+        slab.to_cartesian()
+        center_coordinate = slab.basis.cell.convert_point_to_cartesian([0.5, 0.5, 0.5])
+        center_id_at_site = get_closest_site_id_from_coordinate(slab, center_coordinate, use_cartesian_coordinates=True)
+        center_coordinate = slab.basis.coordinates.get_element_value_by_index(center_id_at_site)
+        condition.center_coordinate = center_coordinate
+
+    nanoparticle = filter_by_condition_on_coordinates(
+        slab, condition.condition, use_cartesian_coordinates=use_cartesian_coordinates
+    )
 
     return nanoparticle
