@@ -1,16 +1,17 @@
 from typing import Union, List
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate, get_chemical_formula
-from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.island.helpers import CoordinateConditionType
-from mat3ra.made.tools.build.nanoparticle.analyzer import NanoparticleMaterialAnalyzer
-from mat3ra.made.tools.build.nanoparticle.builders import ASEBasedNanoparticleBuilder
-from mat3ra.made.tools.build.nanoparticle.configuration import ASEBasedNanoparticleConfiguration
-from mat3ra.made.tools.build.nanoparticle.enums import NanoparticleShapesEnum
-from mat3ra.made.tools.build.slab.helpers import create_slab
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
-from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition
+from .. import MaterialWithBuildMetadata
+from ..defect.island.helpers import CoordinateConditionType
+from ..nanoparticle.analyzer import NanoparticleMaterialAnalyzer
+from ..nanoparticle.builders import ASEBasedNanoparticleBuilder, NanoparticleBuilder
+from ..nanoparticle.configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
+from ..nanoparticle.enums import NanoparticleShapesEnum
+from ..slab.helpers import create_slab
+from ..void_region.configuration import VoidRegionConfiguration
+from ...analyze.other import get_closest_site_id_from_coordinate, get_chemical_formula
+from ...modify import filter_by_condition_on_coordinates
+from ...utils.coordinate import SphereCoordinateCondition
 
 
 def create_nanoparticle_from_material(
@@ -65,15 +66,14 @@ def create_nanoparticle_from_material(
         center_coordinate = slab.basis.coordinates.get_element_value_by_index(center_id_at_site)
         condition.center_coordinate = center_coordinate
 
-    nanoparticle = filter_by_condition_on_coordinates(
-        slab, condition.condition, use_cartesian_coordinates=use_cartesian_coordinates
+    void_region_config = VoidRegionConfiguration(
+        crystal=slab,
+        coordinate_condition=condition,
+        use_cartesian_coordinates=use_cartesian_coordinates,
     )
+    config = NanoparticleConfiguration(merge_components=[slab, void_region_config])
 
-    formula = get_chemical_formula(nanoparticle)
-    coordinate_condition_name = condition.__class__.__name__.replace("CoordinateCondition", "")
-
-    nanoparticle.name = f"{formula} {coordinate_condition_name} Nanoparticle"
-
+    nanoparticle = NanoparticleBuilder().get_material(config)
     return nanoparticle
 
 

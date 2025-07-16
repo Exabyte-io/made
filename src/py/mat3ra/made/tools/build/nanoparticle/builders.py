@@ -1,12 +1,38 @@
-from typing import List, Callable, Dict
+from typing import List, Callable, Dict, Type
 
 from mat3ra.made.material import Material
-from .configuration import ASEBasedNanoparticleConfiguration
+from .configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
 from .enums import NanoparticleShapesEnum
+from ..defect.point.builders import VacancyDefectBuilder
+from ..merge import MergeBuilder
+from ..slab.builders import SlabBuilder
+from ..slab.configurations import SlabConfiguration
+from ..void_region.builders import VoidRegionBuilder
+from ..void_region.configuration import VoidRegionConfiguration
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsASEAtomsMixin
 from ...third_party import ASEAtoms
+
+
+class NanoparticleBuilder(VacancyDefectBuilder, MergeBuilder):
+    # WE create first material whatever it is like the merge builder, converting congfiguration to the first material
+    # then we create material that has "Vac" in all coordinates that fall outside the coordiante condition
+    # then we merge them together
+    # then the post process is run like for VacnacyBuilder -- removing the Vac atoms
+
+    @property
+    def merge_component_types_conversion_map(self) -> Dict[Type, Type]:
+        return {
+            SlabConfiguration: SlabBuilder,
+            VoidRegionConfiguration: VoidRegionBuilder,
+        }
+
+    def _update_material_name(self, material: Material, configuration: NanoparticleConfiguration) -> Material:
+        formula = get_chemical_formula(material)
+
+        material.name = f"{formula} {configuration.void_region_configuration.condition_name} Nanoparticle"
+        return material
 
 
 class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseBuilder):

@@ -1,19 +1,21 @@
 from typing import Dict, Optional, List
 
-from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.void_region import (
-    VoidRegionSchema,
-)
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from .enums import NanoparticleShapesEnum
 from .. import BaseConfigurationPydantic
 from ..merge.configuration import MergeConfiguration
 from ..slab.configurations import SlabConfiguration
+from ..void_region.configuration import VoidRegionConfiguration
 
 
 class NanoparticleConfiguration(MergeConfiguration):
-    merge_components: List = [SlabConfiguration, VoidRegionSchema]
-    merge_method: MergeMethodsEnum = MergeMethodsEnum.ADD
+    merge_components: List = [SlabConfiguration, VoidRegionConfiguration]
+    merge_method: MergeMethodsEnum = MergeMethodsEnum.REPLACE
+
+    @property
+    def void_region_configuration(self) -> VoidRegionConfiguration:
+        return self.merge_components[1]
 
 
 class ASEBasedNanoparticleConfiguration(BaseConfigurationPydantic):
