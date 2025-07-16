@@ -60,19 +60,15 @@ def strain(material: Material, strain_matrix: Matrix3x3Schema) -> Material:
     return new_material
 
 
-def perturb(
-    material: Material, perturbation_function: PerturbationFunctionHolder, is_isometric: bool = False
-) -> Material:
+def perturb(material: Material, perturbation_function: PerturbationFunctionHolder) -> Material:
     """
-    Applies a perturbation to a material's atomic coordinates.
+    Applies a small delta perturbation to a each atom in the material. Lattice vectors are not modified.
 
     Args:
         material: The input Material instance containing coordinates.
         perturbation_function: A PerturbationFunctionHolder that defines
                      a function f(x,y,z) -> float (or vector) and
                      optional transform_coordinates behavior.
-        is_isometric: If True, preserves arc-length along each axis by
-                      reparameterizing coordinates before applying f.
 
     Returns:
         A new Material with perturbed coordinates.
@@ -81,17 +77,7 @@ def perturb(
     original_coordinates = material.basis.coordinates.values
     perturbed_coordinates: List[List[float]] = []
 
-    # If isometric, transform lattice vectors first
-    if is_isometric:
-        lattice_vectors = new_material.lattice.vector_arrays
-        new_lattice_vectors = [perturbation_function.transform_coordinates(vector) for vector in lattice_vectors]
-        new_material.set_lattice_vectors_from_array(new_lattice_vectors)
-
     for coordinate in original_coordinates:
-        # reparameterize coordinates along each axis to preserve arc-length
-        if is_isometric:
-            coordinate = perturbation_function.transform_coordinates(coordinate)
-
         # If func_holder returns a scalar, assume z-axis; otherwise vector
         displacement = perturbation_function.apply_function(coordinate)
         if isinstance(displacement, (list, tuple, np.ndarray)):

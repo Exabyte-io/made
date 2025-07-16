@@ -95,13 +95,6 @@ class PerturbationFunctionHolder(FunctionHolder):
         perturbed_coordinate[2] += perturbation_value
         return perturbed_coordinate
 
-    def get_json(self) -> dict:
-        return {
-            "type": self.__class__.__name__,
-            "function": str(self.function),
-            "variables": self.variables,
-        }
-
 
 class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):
     amplitude: float = 0.05
@@ -125,14 +118,3 @@ class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):
         self.wavelength = wavelength
         self.phase = phase
         self.axis = axis
-
-    def get_json(self) -> dict:
-        return {
-            "type": self.__class__.__name__,
-            "function": str(self.function),
-            "variables": self.variables,
-            "amplitude": self.amplitude,
-            "wavelength": self.wavelength,
-            "phase": self.phase,
-            "axis": self.axis,
-        }
