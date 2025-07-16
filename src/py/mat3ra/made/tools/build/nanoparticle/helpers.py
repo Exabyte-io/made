@@ -1,16 +1,19 @@
 from typing import Union, List
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate
+from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate, get_chemical_formula
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.island.helpers import CoordinateConditionType
 from mat3ra.made.tools.build.nanoparticle.analyzer import NanoparticleMaterialAnalyzer
+from mat3ra.made.tools.build.nanoparticle.builders import ASEBasedNanoparticleBuilder
+from mat3ra.made.tools.build.nanoparticle.configuration import ASEBasedNanoparticleConfiguration
+from mat3ra.made.tools.build.nanoparticle.enums import NanoparticleShapesEnum
 from mat3ra.made.tools.build.slab.helpers import create_slab
 from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
 from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition
 
 
-def create_nanoparticle_by_condition(
+def create_nanoparticle_from_material(
     material: Material,
     condition: Union[
         SphereCoordinateCondition,
@@ -66,4 +69,49 @@ def create_nanoparticle_by_condition(
         slab, condition.condition, use_cartesian_coordinates=use_cartesian_coordinates
     )
 
+    formula = get_chemical_formula(nanoparticle)
+    coordinate_condition_name = condition.__class__.__name__.replace("CoordinateCondition", "")
+
+    nanoparticle.name = f"{formula} {coordinate_condition_name} Nanoparticle"
+
     return nanoparticle
+
+
+def create_nanoparticle_by_shape(
+    crystal: Material,
+    shape: NanoparticleShapesEnum,
+    parameters: dict,
+):
+    """
+    Create a nanoparticle from a crystal material by specifying its shape and parameters.
+
+    Provide the crystal which first element nad lattice constant will be used to create the nanoparticle.
+
+    """
+
+    # TODO: should done in analyzer
+    element = crystal.basis.elements.values[0]
+    lattice_constant = crystal.lattice.a
+
+    return create_nanoparticle_by_shape_from_element(
+        element=element, shape=shape, lattice_constant=lattice_constant, parameters=parameters
+    )
+
+
+def create_nanoparticle_by_shape_from_element(
+    element: str,
+    lattice_constant: float,
+    shape: NanoparticleShapesEnum,
+    parameters: dict,
+):
+    """
+    Create a nanoparticle from a specified element, lattice constant, shape, and parameters.
+    The shape is defined by the NanoparticleShapesEnum, and parameters are passed directly to the ASE constructor.
+    """
+    if "latticeconstant" not in parameters:
+        parameters["latticeconstant"] = lattice_constant
+
+    config = ASEBasedNanoparticleConfiguration(shape=shape, parameters=parameters, element=element)
+    builder = ASEBasedNanoparticleBuilder()
+    nanoparticles = builder.get_materials(config)
+    return nanoparticles[0]

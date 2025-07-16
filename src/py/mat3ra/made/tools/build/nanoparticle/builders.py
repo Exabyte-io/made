@@ -2,7 +2,7 @@ from typing import List, Callable, Dict
 
 from mat3ra.made.material import Material
 from .configuration import ASEBasedNanoparticleConfiguration
-from .enums import ASENanoparticleShapesEnum
+from .enums import NanoparticleShapesEnum
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsASEAtomsMixin
@@ -30,12 +30,11 @@ class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseBuilde
     def _get_ase_nanoparticle_parameters(config: ASEBasedNanoparticleConfiguration) -> Dict:
         parameters = config.parameters or {}
         parameters["symbol"] = config.element
-        parameters.setdefault("latticeconstant", config.lattice_constant)
         return parameters
 
     @classmethod
     def _get_ase_nanoparticle_constructor(cls, config: ASEBasedNanoparticleConfiguration) -> Callable[..., ASEAtoms]:
-        constructor = ASENanoparticleShapesEnum.get_ase_constructor(config.shape.value)
+        constructor = NanoparticleShapesEnum.get_ase_constructor(config.shape.value)
         return constructor
 
     @staticmethod
