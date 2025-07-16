@@ -73,7 +73,7 @@ def get_coordinate_condition(shape: CoordinatesShapeEnum, dict_params: dict):
         )
     elif shape == "sphere":
         return SphereCoordinateCondition(
-            center_position=dict_params.get("center_position", [0.5, 0.5]), radius=dict_params["radius"]
+            center_coordinate=dict_params.get("center_coordinate", [0.5, 0.5, 0.5]), radius=dict_params["radius"]
         )
     elif shape == "box":
         return BoxCoordinateCondition(
