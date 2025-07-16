@@ -1,76 +1,12 @@
-from typing import List, Callable, Dict, Type
+from typing import List, Callable, Dict
 
 from mat3ra.made.material import Material
+from .configuration import ASEBasedNanoparticleConfiguration
+from .enums import ASENanoparticleShapesEnum
 from ...analyze.other import get_chemical_formula
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsASEAtomsMixin
-from ...build.slab.configuration import SlabConfiguration
-from ...modify import filter_by_condition_on_coordinates
-from ...utils.coordinate import SphereCoordinateCondition
-from ...analyze.other import get_closest_site_id_from_coordinate
 from ...third_party import ASEAtoms
-from ..slab.helpers import create_slab
-from .configuration import ASEBasedNanoparticleConfiguration, SphereSlabBasedNanoparticleConfiguration
-from .enums import ASENanoparticleShapesEnum
-
-
-class SlabBasedNanoparticleBuilder(BaseBuilder):
-    """
-    Builder for creating nanoparticles by cutting from bulk materials supercells.
-    """
-
-    _ConfigurationType: type(ASEBasedNanoparticleConfiguration) = ASEBasedNanoparticleConfiguration  # type: ignore
-    _GeneratedItemType: type(Material) = Material  # type: ignore
-
-    def create_nanoparticle(self, config: _ConfigurationType) -> _GeneratedItemType:
-        slab = self._create_slab(config)
-        center_coordinate = self._find_slab_center_coordinate(slab)
-        condition = self._build_coordinate_condition(config, center_coordinate)
-        nanoparticle = filter_by_condition_on_coordinates(slab, condition, use_cartesian_coordinates=True)
-        return nanoparticle
-
-    def _build_coordinate_condition(self, config: _ConfigurationType, center_coordinate: List[float]) -> Callable:
-        coordinate_condition = config.condition_builder(center_coordinate)
-        return coordinate_condition.condition
-
-    def _create_slab(self, config: _ConfigurationType) -> Material:
-        slab_config = SlabConfiguration.from_parameters(
-            bulk=config.material,
-            miller_indices=config.orientation_z,
-            number_of_layers=config.supercell_size,
-            use_conventional_cell=True,
-            use_orthogonal_z=True,
-            make_primitive=False,
-            vacuum=0,
-            xy_supercell_matrix=[[config.supercell_size, 0], [0, config.supercell_size]],
-        )
-        slab = create_slab(slab_config)
-        return slab
-
-    def _find_slab_center_coordinate(self, slab: Material) -> List[float]:
-        slab.to_cartesian()
-        center_coordinate = slab.basis.cell.convert_point_to_cartesian([0.5, 0.5, 0.5])
-        center_id_at_site = get_closest_site_id_from_coordinate(slab, center_coordinate, use_cartesian_coordinates=True)
-        center_coordinate_at_site = slab.basis.coordinates.get_element_value_by_index(center_id_at_site)
-        return center_coordinate_at_site
-
-    def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
-        for material in materials:
-            material.name = f"{get_chemical_formula(material)} Nanoparticle"
-        return materials
-
-
-class SphereSlabBasedNanoparticleBuilder(SlabBasedNanoparticleBuilder):
-    """
-    Builder for creating spherical nanoparticles by cutting from bulk materials supercells.
-    """
-
-    _ConfigurationType: Type[ASEBasedNanoparticleConfiguration] = SphereSlabBasedNanoparticleConfiguration
-
-    def _build_coordinate_condition(
-        self, config: SphereSlabBasedNanoparticleConfiguration, center_coordinate: List[float]
-    ) -> Callable:
-        return SphereCoordinateCondition(center_position=center_coordinate, radius=config.radius).condition
 
 
 class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseBuilder):
