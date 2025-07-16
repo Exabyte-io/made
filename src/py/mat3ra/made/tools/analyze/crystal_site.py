@@ -1,17 +1,18 @@
 from typing import List
 
 from ...utils import get_center_of_coordinates
-from ..analyze import BaseMaterialAnalyzer
-from ..analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
-from ..analyze.other import get_closest_site_id_from_coordinate
 from ..build.supercell import create_supercell
 from ..convert import to_pymatgen
+from ..modify import filter_by_condition_on_coordinates
 from ..third_party import PymatgenVoronoiInterstitialGenerator
 from ..utils import get_distance_between_coordinates, transform_coordinate_to_supercell
+from . import BaseMaterialAnalyzer
+from .coordination import get_voronoi_nearest_neighbors_atom_indices
+from .other import get_closest_site_id_from_coordinate
 
 
 class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
-    coordinate: List[float]
+    coordinate: List[float] = [0.0, 0.0, 0.0]
 
     @property
     def exact_coordinate(self) -> List[float]:
@@ -22,12 +23,7 @@ class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
         site_id = get_closest_site_id_from_coordinate(self.material, self.coordinate)
         return self.material.coordinates_array[site_id]
 
-    @property
-    def new_crystal_site_coordinate(self) -> List[float]:
-        return self.coordinate
-
-    @property
-    def equidistant_coordinate(self) -> List[float]:
+    def get_equidistant_coordinate(self, coordinate=None) -> List[float]:
         """
         Compute a coordinate that is equidistant from the nearest atoms to the target coordinate. Useful for adatom.
 
@@ -41,12 +37,14 @@ class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
 
         The [3, 3, 1] supercell ensures robust neighbor search in x and y, but not in z (for 2D/slab systems).
         """
+        if coordinate is None:
+            coordinate = self.coordinate
         scaling_factor = [3, 3, 1]
         translation_vector = [1 / 3, 1 / 3, 0]
         supercell_material = create_supercell(self.material, scaling_factor=scaling_factor)
 
         coordinate_in_supercell = transform_coordinate_to_supercell(
-            coordinate=self.coordinate, scaling_factor=scaling_factor, translation_vector=translation_vector
+            coordinate=coordinate, scaling_factor=scaling_factor, translation_vector=translation_vector
         )
 
         neighboring_atoms_ids_in_supercell = get_voronoi_nearest_neighbors_atom_indices(
@@ -56,12 +54,13 @@ class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
         if neighboring_atoms_ids_in_supercell is None:
             raise ValueError("No neighboring atoms found for equidistant calculation.")
 
+        # Filter out atoms that are too close to the z boundaries of the supercell
+        supercell_material = filter_by_condition_on_coordinates(supercell_material, lambda c: 1e-2 < c[2] < 1 - 1e-2)
         isolated_neighboring_atoms_basis = supercell_material.basis.model_copy()
         isolated_neighboring_atoms_basis.coordinates.filter_by_ids(neighboring_atoms_ids_in_supercell)
         equidistant_coordinate_in_supercell = get_center_of_coordinates(
             isolated_neighboring_atoms_basis.coordinates.values
         )
-        equidistant_coordinate_in_supercell[2] = self.coordinate[2]
 
         return transform_coordinate_to_supercell(
             equidistant_coordinate_in_supercell, scaling_factor, translation_vector, reverse=True

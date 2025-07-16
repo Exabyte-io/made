@@ -11,7 +11,8 @@ from .enums import (
     ComplexDefectTypeEnum,
     CoordinatesShapeEnum,
 )
-from ...analyze.other import get_closest_site_id_from_coordinate, get_atomic_coordinates_extremum
+from ...analyze.other import get_closest_site_id_from_coordinate
+from mat3ra.made.utils import get_atomic_coordinates_extremum
 from ...utils.coordinate import (
     CylinderCoordinateCondition,
     SphereCoordinateCondition,

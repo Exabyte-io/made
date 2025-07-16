@@ -2,8 +2,8 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from sympy import ceiling
 
 from mat3ra.made.material import Material
-from ...defect.slab.builders import SlabStackBuilder
-from ...defect.slab.configuration import SlabStackConfiguration
+from .builders import SlabStackBuilder
+from .configuration import SlabStackConfiguration
 from ...slab.helpers import create_slab
 from ....analyze.slab import SlabMaterialAnalyzer
 from ....modify import filter_by_box
@@ -21,7 +21,7 @@ def create_slab_stack(slab: Material, added_component: Material) -> Material:
     """
     analyzer = SlabMaterialAnalyzer(material=slab)
 
-    slab_without_vacuum = analyzer.get_slab_configuration_with_no_vacuum()
+    slab_without_vacuum = analyzer.slab_configuration_with_no_vacuum
 
     vacuum_config = analyzer.get_slab_vacuum_configuration()
 
@@ -44,7 +44,7 @@ def recreate_slab_with_fractional_layers(slab: Material, number_of_layers: float
         Material: The new slab material with the specified number of layers and vacuum if needed.
     """
     analyzer = SlabMaterialAnalyzer(material=slab)
-    slab_without_vacuum = analyzer.get_slab_configuration_with_no_vacuum()
+    slab_without_vacuum = analyzer.slab_configuration_with_no_vacuum
     # vacuum_config = analyzer.get_slab_vacuum_configuration()
 
     ceiling_number_of_layers = int(ceiling(number_of_layers))

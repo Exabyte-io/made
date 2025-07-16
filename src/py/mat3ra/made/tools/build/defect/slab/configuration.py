@@ -1,9 +1,15 @@
+# fmt: off
+from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.\
+    slab_stack_configuration import    SlabStackConfigurationSchema
+
+# fmt: on
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.stack.configuration import StackConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 
 
-class SlabStackConfiguration(StackConfiguration):
+class SlabStackConfiguration(StackConfiguration, SlabStackConfigurationSchema):
     """
     Configuration for stacking a slab, an isolated defect and a vacuum layer.
 

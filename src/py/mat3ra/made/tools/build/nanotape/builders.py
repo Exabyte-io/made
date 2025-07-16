@@ -4,7 +4,7 @@ from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilderParameters
 from pydantic import Field
-from ..stack.builders import Stack2ComponentsBuilder
+from ..stack.builders import StackNComponentsBuilder
 from ..lattice_lines.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration, EdgeTypes
 from ..lattice_lines.builders import CrystalLatticeLinesRepeatedBuilder
 from .configuration import NanoTapeConfiguration
@@ -17,7 +17,7 @@ class NanoTapeBuilderParameters(BaseBuilderParameters):
     )
 
 
-class NanoTapeBuilder(Stack2ComponentsBuilder):
+class NanoTapeBuilder(StackNComponentsBuilder):
     _ConfigurationType = "NanoTapeConfiguration"  # String type annotation to avoid circular import
     _GeneratedItemType = Material
     _BuilderParametersType = NanoTapeBuilderParameters

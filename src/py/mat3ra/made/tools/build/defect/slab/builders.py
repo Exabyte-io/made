@@ -1,10 +1,10 @@
 from typing import Any
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.slab.configuration import SlabStackConfiguration
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
-from mat3ra.made.tools.build.stack.builders import StackNComponentsBuilder
+from ..slab.configuration import SlabStackConfiguration
+from ...slab.builders import SlabBuilder
+from ...slab.configurations import SlabConfiguration
+from ...stack.builders import StackNComponentsBuilder
 
 
 class SlabStackBuilder(StackNComponentsBuilder):

@@ -80,7 +80,7 @@ def test_grain_boundary_builder(
         phase_1_configuration=strained_config.substrate_configuration,
         phase_2_configuration=strained_config.film_configuration,
         xy_shift=translation_vector,
-        gap=gap,
+        gaps=[gap, gap],
     )
 
     builder = GrainBoundaryPlanarBuilder()

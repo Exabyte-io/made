@@ -14,4 +14,4 @@ class VacuumConfiguration(VacuumConfigurationSchema, BaseConfigurationPydantic):
     type: str = "VacuumConfiguration"
     size: float = VacuumConfigurationSchema.model_fields["size"].default
     crystal: Optional[Material] = None
-    direction: Optional[AxisEnum] = VacuumConfigurationSchema.model_fields["direction"].default
+    direction: Optional[AxisEnum] = AxisEnum.z

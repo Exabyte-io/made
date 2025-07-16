@@ -4,6 +4,7 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import SlabConfigurationSchema
 
 from mat3ra.made.material import Material
+from ... import MaterialWithBuildMetadata
 from ...stack.configuration import StackConfiguration
 from ...vacuum.configuration import VacuumConfiguration
 from .base_configurations import AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration
@@ -64,7 +65,7 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
             SlabConfiguration: The created slab configuration.
         """
         if isinstance(material_or_dict, dict):
-            material = Material.create(material_or_dict)
+            material = MaterialWithBuildMetadata.create(material_or_dict)
         else:
             material = material_or_dict
 
