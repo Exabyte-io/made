@@ -1,10 +1,7 @@
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.nanoparticle.enums import NanoparticleShapesEnum
-from mat3ra.made.tools.build.nanoparticle.helpers import (
-    create_nanoparticle_from_material,
-    create_nanoparticle_by_shape,
-)
+from mat3ra.made.tools.build.nanoparticle.helpers import create_nanoparticle_by_shape, create_nanoparticle_from_material
 from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 

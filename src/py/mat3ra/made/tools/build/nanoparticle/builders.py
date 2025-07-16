@@ -16,10 +16,9 @@ from ...third_party import ASEAtoms
 
 
 class NanoparticleBuilder(VacancyDefectBuilder, MergeBuilder):
-    # WE create first material whatever it is like the merge builder, converting congfiguration to the first material
-    # then we create material that has "Vac" in all coordinates that fall outside the coordiante condition
-    # then we merge them together
-    # then the post process is run like for VacnacyBuilder -- removing the Vac atoms
+    """
+    Builder class for creating a nanoparticle by merging a slab with a void region.
+    """
 
     @property
     def merge_component_types_conversion_map(self) -> Dict[Type, Type]:

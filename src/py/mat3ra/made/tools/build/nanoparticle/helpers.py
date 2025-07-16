@@ -9,8 +9,7 @@ from ..nanoparticle.configuration import ASEBasedNanoparticleConfiguration, Nano
 from ..nanoparticle.enums import NanoparticleShapesEnum
 from ..slab.helpers import create_slab
 from ..void_region.configuration import VoidRegionConfiguration
-from ...analyze.other import get_closest_site_id_from_coordinate, get_chemical_formula
-from ...modify import filter_by_condition_on_coordinates
+from ...analyze.other import get_closest_site_id_from_coordinate
 from ...utils.coordinate import SphereCoordinateCondition
 
 

@@ -1,14 +1,18 @@
-from typing import Dict, Type
+from typing import Type
 
-from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.point.builders import PointDefectSiteBuilder
-from mat3ra.made.tools.build.merge import MergeBuilder
-from mat3ra.made.tools.build.void_region.configuration import VoidRegionConfiguration
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
+from .. import MaterialWithBuildMetadata
+from ..defect.point.builders import PointDefectSiteBuilder
+from ..void_region.configuration import VoidRegionConfiguration
+from ...modify import filter_by_condition_on_coordinates
 
 
 class VoidRegionBuilder(PointDefectSiteBuilder):
-    # we need to replace all atoms elements whose coordinates fall outside of the coordinate condition with "Vac" and remove the rest.
+    """
+    Builder class for creating a material with a void region based on a coordinate condition.
+    Uses "Vac" as the element for all atoms that fall outside the specified coordinate condition
+        and those positions will void elements in target crystal when merging.
+    """
+
     _ConfigurationType: Type[VoidRegionConfiguration] = VoidRegionConfiguration
 
     def _generate(self, configuration: VoidRegionConfiguration) -> MaterialWithBuildMetadata:
