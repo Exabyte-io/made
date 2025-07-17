@@ -338,11 +338,13 @@ def get_surface_atom_indices(
     coordinates = np.array(new_material.basis.coordinates.values)
     ids = new_material.basis.coordinates.ids
 
-    # Get z-extremum and sort atoms by z-coordinate
+    # Get z-extremum of atoms inside the unit cell and sort atoms by z-coordinate
     z_coords = coordinates[:, 2]
-    z_extremum = np.max(z_coords) if surface == SurfaceTypes.TOP else np.min(z_coords)
+    mask = (z_coords >= 0) & (z_coords <= material.lattice.c)
+    filtered_coords = coordinates[mask]
+    z_extremum = np.max(filtered_coords) if surface == SurfaceTypes.TOP else np.min(filtered_coords)
 
-    # First filter by height
+    # First filter by height to be within the specified depth from the surface
     height_mask = np.array([is_height_within_limits(z, z_extremum, depth, surface) for z in z_coords])
     potential_surface_indices = np.where(height_mask)[0]
 
