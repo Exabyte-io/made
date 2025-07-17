@@ -46,8 +46,6 @@ class MergeBuilder(BaseSingleBuilder):
         configuration: MergeConfiguration,
         merge_component_build_parameters: Any = None,
     ) -> Optional[MaterialWithBuildMetadata]:
-        if isinstance(merge_component_configuration_or_material, VacuumConfiguration):
-            raise ValueError("Merge with VacuumConfiguration is not supported by design.")
 
         builder = self.merge_component_types_conversion_map.get(type(merge_component_configuration_or_material))
         pre_process_function = self.merge_component_types_conversion_pre_process_map.get(
@@ -61,6 +59,8 @@ class MergeBuilder(BaseSingleBuilder):
             return builder(build_parameters=merge_component_build_parameters).get_material(
                 merge_component_configuration_or_material
             )
+        elif isinstance(merge_component_configuration_or_material, VacuumConfiguration):
+            raise ValueError("Merge with VacuumConfiguration is not supported by design.")
         else:
             return merge_component_configuration_or_material
 
