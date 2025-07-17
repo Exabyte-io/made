@@ -3,11 +3,10 @@ from typing import Union
 import sympy as sp
 
 from mat3ra.made.material import Material
-from .builders import PerturbationBuilder
+from .builders import PerturbationBuilder, IsometricPerturbationBuilder
 from .configuration import (
     PerturbationConfiguration,
 )
-from ...utils.functions import FunctionHolder
 from ...utils.perturbation import PerturbationFunctionHolder
 
 
@@ -32,14 +31,11 @@ def create_perturbation(
 
     configuration = PerturbationConfiguration(
         material=material,
-        perturbation_function_holder=FunctionHolder(
-            function=perturbation_function,
-        ),
+        perturbation_function_holder=PerturbationFunctionHolder(function=perturbation_function),
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
     if is_isometric:
-        # builder = CellMatchingDistancePreservingSlabPerturbationBuilder()
-        pass
+        builder = IsometricPerturbationBuilder()
     else:
         builder = PerturbationBuilder()
     return builder.get_material(configuration)

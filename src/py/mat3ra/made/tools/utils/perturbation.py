@@ -26,7 +26,7 @@ class PerturbationFunctionHolder(FunctionHolder):
         arc_length = quad(self._integrand, a, b, args=(coordinate, axis), limit=1000)[0]
         return arc_length - coordinate[AXIS_TO_INDEX_MAP[axis]]
 
-    def transform_coordinates(self, coordinate: List[float]) -> List[float]:
+    def normalize_coordinates(self, coordinate: List[float]) -> List[float]:
         """
         Transform coordinates to preserve the distance between points on a sine wave when perturbation is applied.
         Achieved by calculating the integral of the length between [0,0,0] and given coordinate.
@@ -45,15 +45,6 @@ class PerturbationFunctionHolder(FunctionHolder):
             )
             coordinate[index] = result.root
         return coordinate
-
-    def apply_perturbation(self, coordinate: List[float]) -> List[float]:
-        """
-        Apply the perturbation to the given coordinate by adding the function's value to the third coordinate (z-axis).
-        """
-        perturbation_value = self.apply_function(coordinate)
-        perturbed_coordinate = coordinate[:]
-        perturbed_coordinate[2] += perturbation_value
-        return perturbed_coordinate
 
 
 class SineWavePerturbationFunctionHolder(PerturbationFunctionHolder):

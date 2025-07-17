@@ -3,14 +3,14 @@ from typing import List
 import numpy as np
 from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector, wrap_to_unit_cell
-
 from ...build import MaterialWithBuildMetadata
 from ...convert import from_ase, to_ase
 from ...third_party import ase_make_supercell
 from ...utils import decorator_convert_supercell_matrix_2x2_to_3x3
-from ...utils.perturbation import PerturbationFunctionHolder
+from ...utils.functions import FunctionHolder
 
 
 def translate(material: Material, vector: Vector3D) -> Material:
@@ -60,7 +60,9 @@ def strain(material: Material, strain_matrix: Matrix3x3Schema) -> Material:
     return new_material
 
 
-def perturb(material: Material, perturbation_function: PerturbationFunctionHolder) -> Material:
+def perturb(
+    material: Material, perturbation_function: FunctionHolder, use_cartesian_coordinates: bool = False
+) -> Material:
     """
     Applies a small delta perturbation to a each atom in the material. Lattice vectors are not modified.
 
@@ -69,12 +71,16 @@ def perturb(material: Material, perturbation_function: PerturbationFunctionHolde
         perturbation_function: A PerturbationFunctionHolder that defines
                      a function f(x,y,z) -> float (or vector) and
                      optional transform_coordinates behavior.
+        use_cartesian_coordinates: If True, the perturbation is applied in Cartesian coordinates.
+                                   If False, the perturbation is applied in crystal coordinates.
 
     Returns:
         A new Material with perturbed coordinates.
     """
     new_material = material.clone()
-    original_coordinates = material.basis.coordinates.values
+    if use_cartesian_coordinates:
+        new_material.to_cartesian()
+    original_coordinates = new_material.basis.coordinates.values
     perturbed_coordinates: List[List[float]] = []
 
     for coordinate in original_coordinates:
@@ -90,4 +96,6 @@ def perturb(material: Material, perturbation_function: PerturbationFunctionHolde
         perturbed_coordinates.append(new_coordinate.tolist())
 
     new_material.set_coordinates(perturbed_coordinates)
+    if use_cartesian_coordinates:
+        new_material.to_crystal()
     return new_material
