@@ -1,3 +1,5 @@
+from typing import Union
+
 import sympy as sp
 
 from mat3ra.made.material import Material
@@ -11,7 +13,7 @@ from ...utils.perturbation import PerturbationFunctionHolder
 
 def create_perturbation(
     material: Material,
-    perturbation_function: sp.Expr,
+    perturbation_function: Union[sp.Expr, str],
     use_cartesian_coordinates: bool = True,
     is_isometric: bool = False,
 ):
@@ -27,6 +29,9 @@ def create_perturbation(
     Returns:
         Material: The perturbed material.
     """
+    if isinstance(perturbation_function, str):
+        perturbation_function = sp.Expr(sp.sympify(perturbation_function))
+
     variables = [str(s) for s in perturbation_function.free_symbols]
 
     configuration = PerturbationConfiguration(

@@ -1,9 +1,10 @@
 import pytest
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.perturbation import create_perturbation
 from mat3ra.made.tools.build.perturbation.builders import PerturbationBuilder
 from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
+from mat3ra.made.tools.build.perturbation.helpers import create_perturbation
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.utils.perturbation import SineWavePerturbationFunctionHolder
 from mat3ra.utils import assertion as assertion_utils
@@ -56,7 +57,7 @@ def test_sine_perturbation(
         ),
     ],
 )
-def test_distance_preserved_sine_perturbation(
+def test_create_perturbation(
     material_config,
     supercell_matrix,
     perturbation_function_params,
@@ -67,13 +68,9 @@ def test_distance_preserved_sine_perturbation(
 ):
     material = MaterialWithBuildMetadata.create(material_config)
     slab = create_supercell(material, supercell_matrix)
+    function = "f(x)=x*2"
 
-    perturbation_config = PerturbationConfiguration(
-        material=slab,
-        perturbation_function=SineWavePerturbationFunctionHolder(**perturbation_function_params),
-        use_cartesian_coordinates=use_cartesian,
-    )
-    perturbed_slab = create_perturbation(configuration=perturbation_config, preserve_distance=preserve_distance)
+    perturbed_slab = create_perturbation(material, function)
     # Check selected atoms to avoid using 100+ atoms fixture
     for index, expected_coord in coordinates_to_check.items():
         assertion_utils.assert_deep_almost_equal(expected_coord, perturbed_slab.basis.coordinates.values[index])
