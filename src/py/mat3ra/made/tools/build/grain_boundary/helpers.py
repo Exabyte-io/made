@@ -4,7 +4,7 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
-from mat3ra.made.tools.build.interface import get_commensurate_strained_configs
+from mat3ra.made.tools.build.interface import get_commensurate_strained_configurations
 
 from .builders import GrainBoundaryLinearBuilder
 from .builders import GrainBoundaryPlanarBuilder
@@ -114,7 +114,7 @@ def create_grain_boundary_linear(
     Raises:
         ValueError: If no commensurate lattice matches are found.
     """
-    strained_configs, actual_angle = get_commensurate_strained_configs(
+    strained_configs, actual_angle = get_commensurate_strained_configurations(
         material=material,
         target_angle=target_angle,
         angle_tolerance=angle_tolerance,
