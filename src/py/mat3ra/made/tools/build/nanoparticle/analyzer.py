@@ -2,8 +2,8 @@ from typing import List, Union
 
 import numpy as np
 
-from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
-from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition, CoordinateCondition
+from ...analyze import BaseMaterialAnalyzer
+from ...utils.coordinate import SphereCoordinateCondition, CoordinateCondition
 
 
 class NanoparticleMaterialAnalyzer(BaseMaterialAnalyzer):
