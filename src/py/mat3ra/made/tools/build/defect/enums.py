@@ -34,8 +34,8 @@ class SubstitutionPlacementMethodEnum(str, Enum):
 
 
 class InterstitialPlacementMethodEnum(str, Enum):
-    EXACT_COORDINATE = "exact_coordinate"
-    VORONOI_SITE = "voronoi_site"
+    EXACT_COORDINATE = AtomPlacementMethodEnum.EXACT_COORDINATE
+    VORONOI_SITE = AtomPlacementMethodEnum.VORONOI_SITE
 
 
 class AdatomPlacementMethodEnum(str, Enum):

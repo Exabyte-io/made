@@ -1,8 +1,7 @@
-from typing import Any, Optional, List, Union
+from typing import Any, Optional, List, Dict, Type
 
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
-from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseSingleBuilder, BaseBuilderParameters, MaterialWithBuildMetadata
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
@@ -27,23 +26,43 @@ class MergeBuilderParameters(BaseBuilderParameters):
 class MergeBuilder(BaseSingleBuilder):
     """
     Builder class for merging materials based on parameters.
-    Behaves like StackBuilder but performs merge operations.
     """
 
     _ConfigurationType = MergeConfiguration
     _BuildParametersType = MergeBuilderParameters()
     _DefaultBuildParameters = MergeBuilderParameters()
 
+    @property
+    def merge_component_types_conversion_map(self) -> Dict[Type, Type]:
+        return {}
+
+    @property
+    def merge_component_types_conversion_pre_process_map(self) -> Dict[Type, Any]:
+        return {}
+
     def _merge_component_to_material(
-        self, configuration_or_material: Any
-    ) -> Union[MaterialWithBuildMetadata, Material]:
-        if isinstance(configuration_or_material, Material) or isinstance(
-            configuration_or_material, MaterialWithBuildMetadata
-        ):
-            return configuration_or_material
-        if isinstance(configuration_or_material, VacuumConfiguration):
+        self,
+        merge_component_configuration_or_material: Any,
+        configuration: MergeConfiguration,
+        merge_component_build_parameters: Any = None,
+    ) -> Optional[MaterialWithBuildMetadata]:
+        if isinstance(merge_component_configuration_or_material, VacuumConfiguration):
             raise ValueError("Merge with VacuumConfiguration is not supported by design.")
-        raise ValueError(f"Unknown configuration type: {type(configuration_or_material)}")
+
+        builder = self.merge_component_types_conversion_map.get(type(merge_component_configuration_or_material))
+        pre_process_function = self.merge_component_types_conversion_pre_process_map.get(
+            type(merge_component_configuration_or_material), lambda x, y: x
+        )
+
+        if builder:
+            merge_component_configuration_or_material = pre_process_function(
+                merge_component_configuration_or_material, configuration
+            )
+            return builder(build_parameters=merge_component_build_parameters).get_material(
+                merge_component_configuration_or_material
+            )
+        else:
+            return merge_component_configuration_or_material
 
     def _merge_by_method(
         self,
@@ -64,7 +83,7 @@ class MergeBuilder(BaseSingleBuilder):
     def _generate(self, configuration: _ConfigurationType) -> MaterialWithBuildMetadata:
         materials = []
         for component in configuration.merge_components:
-            material = self._merge_component_to_material(component)
+            material = self._merge_component_to_material(component, configuration)
             materials.append(material)
 
         if len(materials) == 1:
