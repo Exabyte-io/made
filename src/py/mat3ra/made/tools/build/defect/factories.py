@@ -1,15 +1,15 @@
 from typing import List, Dict, Union, Type
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
-from mat3ra.made.tools.build.defect.enums import (
+from ...analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
+from ..defect.enums import (
     PointDefectTypeEnum,
     VacancyPlacementMethodEnum,
     SubstitutionPlacementMethodEnum,
     InterstitialPlacementMethodEnum,
     AtomPlacementMethodEnum,
 )
-from mat3ra.made.tools.build.defect.point.configuration import (
+from ..defect.point.configuration import (
     VacancyDefectConfiguration,
     SubstitutionalDefectConfiguration,
     InterstitialDefectConfiguration,
