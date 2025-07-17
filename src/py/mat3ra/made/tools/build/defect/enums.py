@@ -43,6 +43,12 @@ class InterstitialPlacementMethodEnum(str, Enum):
     VORONOI_SITE = "voronoi_site"
 
 
+class AdatomPlacementMethodEnum(str, Enum):
+    EXACT_COORDINATE = AtomPlacementMethodEnum.EXACT_COORDINATE
+    EQUIDISTANT = AtomPlacementMethodEnum.EQUIDISTANT
+    NEW_CRYSTAL_SITE = AtomPlacementMethodEnum.NEW_CRYSTAL_SITE
+
+
 class CoordinatesShapeEnum(str, Enum):
     SPHERE = "sphere"
     CYLINDER = "cylinder"

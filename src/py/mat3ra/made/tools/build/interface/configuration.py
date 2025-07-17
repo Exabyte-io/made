@@ -1,29 +1,25 @@
-from typing import Union, List
+from typing import Union, List, Optional
 
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interface.configuration import (  # noqa: E501
     InterfaceConfigurationSchema,
 )
 
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
-from .. import BaseConfigurationPydantic
+from ..vacuum.configuration import VacuumConfiguration
 from ..slab.configurations import (
     SlabConfiguration,
     SlabStrainedSupercellConfiguration,
-    SlabStrainedSupercellWithGapConfiguration,
 )
+from ..stack.configuration import StackConfiguration
 
 
-class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPydantic):
+class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):
     # components and their modifiers added in the order they are stacked, from bottom to top
     stack_components: List[
         Union[
             SlabStrainedSupercellConfiguration,
-            SlabStrainedSupercellWithGapConfiguration,
             VacuumConfiguration,
         ]
     ]
-    direction: AxisEnum = AxisEnum.z
     xy_shift: List[float] = InterfaceConfigurationSchema.model_fields["xy_shift"].default  # in Angstroms
 
     @property
@@ -35,12 +31,10 @@ class InterfaceConfiguration(InterfaceConfigurationSchema, BaseConfigurationPyda
         return self.stack_components[1]
 
     @property
-    def vacuum_configuration(self) -> VacuumConfiguration:
+    def vacuum_configuration(self) -> Optional[VacuumConfiguration]:
         if len(self.stack_components) > 2:
             return self.stack_components[2]
-        return VacuumConfiguration(
-            size=0.0, crystal=self.film_configuration.atomic_layers.crystal, direction=self.direction
-        )
+        return None
 
 
 class TwistedNanoribbonsInterfaceConfiguration(InterfaceConfiguration):

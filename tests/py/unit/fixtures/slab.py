@@ -57,10 +57,12 @@ SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL,
-            "build_parameters": SI_SLAB_001_BUILD_PARAMETERS,
-        },
+        "build": [
+            {
+                "configuration": CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL,
+                "build_parameters": SI_SLAB_001_BUILD_PARAMETERS,
+            }
+        ],
     },
 }
 
@@ -119,22 +121,24 @@ SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "stack_components": [
-                    {
-                        "crystal": BULK_Si_CONVENTIONAL,
-                        "miller_indices": [0, 0, 1],
-                        "number_of_repetitions": 2,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "use_conventional_cell": True,
-                    },
-                    {"type": "VacuumConfiguration", "direction": "z", "size": 5.0, "crystal": BULK_Si_CONVENTIONAL},
-                ],
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-            },
-        },
+        "build": [
+            {
+                "configuration": {
+                    "type": "SlabConfiguration",
+                    "stack_components": [
+                        {
+                            "crystal": BULK_Si_CONVENTIONAL,
+                            "miller_indices": [0, 0, 1],
+                            "number_of_repetitions": 2,
+                            "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                            "use_conventional_cell": True,
+                        },
+                        {"type": "VacuumConfiguration", "direction": "z", "size": 5.0, "crystal": BULK_Si_CONVENTIONAL},
+                    ],
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                },
+            }
+        ],
     },
 }
 
@@ -228,23 +232,25 @@ SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
     },
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "stack_components": [
-                    {
-                        "crystal": BULK_Si_PRIMITIVE,
-                        "miller_indices": [0, 0, 1],
-                        "number_of_repetitions": 2,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "use_conventional_cell": False,
-                    },
-                    {"type": "VacuumConfiguration", "direction": "z", "size": 5.0},
-                ],
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-            },
-            "build_parameters": {"use_orthogonal_c": True, "xy_supercell_matrix": [[1, 0], [0, 1]]},
-        },
+        "build": [
+            {
+                "configuration": {
+                    "type": "SlabConfiguration",
+                    "stack_components": [
+                        {
+                            "crystal": BULK_Si_PRIMITIVE,
+                            "miller_indices": [0, 0, 1],
+                            "number_of_repetitions": 2,
+                            "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                            "use_conventional_cell": False,
+                        },
+                        {"type": "VacuumConfiguration", "direction": "z", "size": 5.0},
+                    ],
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                },
+                "build_parameters": {"use_orthogonal_c": True, "xy_supercell_matrix": [[1, 0], [0, 1]]},
+            }
+        ],
     },
 }
 
@@ -280,16 +286,20 @@ SI_SLAB_PASSIVATED = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "PassivationConfiguration",
-                # TODO: `basis` retains "cell" leading to a mismatch in the test
-                "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], SI_SLAB_001_2_ATOMS).pop("cell", None),
-                "passivant": "H",
-                "bond_length": 1.48,
-                "surface": "both",
+        "build": [
+            SI_SLAB_001_2_ATOMS["metadata"]["build"][0],
+            {
+                "build_parameters": {},
+                "configuration": {
+                    "type": "PassivationConfiguration",
+                    # TODO: `basis` retains "cell" leading to a mismatch in the test
+                    "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], SI_SLAB_001_2_ATOMS).pop("cell", None),
+                    "passivant": "H",
+                    "bond_length": 1.48,
+                    "surface": "both",
+                },
             },
-        },
+        ],
     },
 }
 
@@ -342,95 +352,30 @@ SI_SLAB_DEFAULT_PARAMETERS = {
     },
     "metadata": {
         "boundaryConditions": {"offset": 0, "type": "pbc"},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "stack_components": [
-                    {
-                        "crystal": BULK_Si_CONVENTIONAL,
-                        "miller_indices": [0, 0, 1],
-                        "number_of_repetitions": 1,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "use_conventional_cell": True,
-                    },
-                    {"type": "VacuumConfiguration", "direction": "z", "size": 10.0},
-                ],
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-            },
-        },
+        "build": [
+            {
+                "configuration": {
+                    "type": "SlabConfiguration",
+                    "stack_components": [
+                        {
+                            "crystal": BULK_Si_CONVENTIONAL,
+                            "miller_indices": [0, 0, 1],
+                            "number_of_repetitions": 1,
+                            "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                            "use_conventional_cell": True,
+                        },
+                        {"type": "VacuumConfiguration", "direction": "z", "size": 10.0},
+                    ],
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                },
+            }
+        ],
     },
     "name": "Si8(001), termination Si_P4/mmm_2, Slab",
 }
 
 SI_SLAB_001_ADDED_LAYER = {
-    "metadata": {
-        "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-                "stack_components": [
-                    {
-                        "crystal": {
-                            "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-                            "name": "Si8",
-                            "basis": {
-                                "elements": [
-                                    {"id": 0, "value": "Si"},
-                                    {"id": 1, "value": "Si"},
-                                    {"id": 2, "value": "Si"},
-                                    {"id": 3, "value": "Si"},
-                                    {"id": 4, "value": "Si"},
-                                    {"id": 5, "value": "Si"},
-                                    {"id": 6, "value": "Si"},
-                                    {"id": 7, "value": "Si"},
-                                ],
-                                "coordinates": [
-                                    {"id": 0, "value": [0.5, 0, 0]},
-                                    {"id": 1, "value": [0.25, 0.25, 0.75]},
-                                    {"id": 2, "value": [0.5, 0.5, 0.5]},
-                                    {"id": 3, "value": [0.25, 0.75, 0.25]},
-                                    {"id": 4, "value": [0, 0, 0.5]},
-                                    {"id": 5, "value": [0.75, 0.25, 0.25]},
-                                    {"id": 6, "value": [0, 0.5, 0]},
-                                    {"id": 7, "value": [0.75, 0.75, 0.75]},
-                                ],
-                                "units": "crystal",
-                                "labels": [],
-                                "constraints": [],
-                            },
-                            "lattice": {
-                                "a": 5.468763846,
-                                "b": 5.468763846,
-                                "c": 5.468763846,
-                                "alpha": 90,
-                                "beta": 90,
-                                "gamma": 90,
-                                "units": {"length": "angstrom", "angle": "degree"},
-                                "type": "TRI",
-                            },
-                        },
-                        "miller_indices": [0, 0, 1],
-                        "use_conventional_cell": True,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "number_of_repetitions": 3,
-                    },
-                    {"direction": "z", "size": 5, "type": "VacuumConfiguration"},
-                ],
-                "direction": "z",
-            },
-            "build_parameters": {
-                "min_vacuum_size": 0,
-                "in_unit_planes": True,
-                "reorient_lattice": True,
-                "symmetrize": True,
-                "make_primitive": False,
-                "use_orthogonal_c": True,
-            },
-        },
-    },
     "name": "Si8(001), termination Si_P4/mmm_2, Slab",
-    "isDefault": False,
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -459,30 +404,30 @@ SI_SLAB_001_ADDED_LAYER = {
             {"id": 23, "value": "Si"},
         ],
         "coordinates": [
-            {"id": 0, "value": [0.5, 0, 0.223540278]},
-            {"id": 1, "value": [0.25, 0.25, 0.159671627]},
-            {"id": 2, "value": [0.5, 0.5, 0.095802976]},
-            {"id": 3, "value": [0.25, 0.75, 0.031934326]},
-            {"id": 4, "value": [0, 0, 0.095802976]},
-            {"id": 5, "value": [0.75, 0.25, 0.031934326]},
-            {"id": 6, "value": [0, 0.5, 0.223540278]},
-            {"id": 7, "value": [0.75, 0.75, 0.159671627]},
-            {"id": 8, "value": [0.5, 0, 0.479014882]},
-            {"id": 9, "value": [0.25, 0.25, 0.415146231]},
-            {"id": 10, "value": [0.5, 0.5, 0.35127758]},
-            {"id": 11, "value": [0.25, 0.75, 0.287408929]},
-            {"id": 12, "value": [0, 0, 0.35127758]},
-            {"id": 13, "value": [0.75, 0.25, 0.287408929]},
-            {"id": 14, "value": [0, 0.5, 0.479014882]},
-            {"id": 15, "value": [0.75, 0.75, 0.415146231]},
-            {"id": 16, "value": [0.5, 0, 0.734489485]},
-            {"id": 17, "value": [0.25, 0.25, 0.670620835]},
-            {"id": 18, "value": [0.5, 0.5, 0.606752184]},
-            {"id": 19, "value": [0.25, 0.75, 0.542883532]},
-            {"id": 20, "value": [0, 0, 0.606752184]},
-            {"id": 21, "value": [0.75, 0.25, 0.542883532]},
-            {"id": 22, "value": [0, 0.5, 0.734489485]},
-            {"id": 23, "value": [0.75, 0.75, 0.670620835]},
+            {"id": 0, "value": [0.5, 0.0, 0.191606953]},
+            {"id": 1, "value": [0.25, 0.25, 0.127738302]},
+            {"id": 2, "value": [0.5, 0.5, 0.063869651]},
+            {"id": 3, "value": [0.25, 0.75, 1e-06]},
+            {"id": 4, "value": [0.0, 0.0, 0.063869651]},
+            {"id": 5, "value": [0.75, 0.25, 1e-06]},
+            {"id": 6, "value": [0, 0.5, 0.191606953]},
+            {"id": 7, "value": [0.75, 0.75, 0.127738302]},
+            {"id": 8, "value": [0.5, 0.0, 0.447081557]},
+            {"id": 9, "value": [0.25, 0.25, 0.383212906]},
+            {"id": 10, "value": [0.5, 0.5, 0.319344254]},
+            {"id": 11, "value": [0.25, 0.75, 0.255475604]},
+            {"id": 12, "value": [0.0, 0.0, 0.319344254]},
+            {"id": 13, "value": [0.75, 0.25, 0.255475604]},
+            {"id": 14, "value": [0.0, 0.5, 0.447081557]},
+            {"id": 15, "value": [0.75, 0.75, 0.383212906]},
+            {"id": 16, "value": [0.5, 0.0, 0.70255616]},
+            {"id": 17, "value": [0.25, 0.25, 0.638687509]},
+            {"id": 18, "value": [0.5, 0.5, 0.574818859]},
+            {"id": 19, "value": [0.25, 0.75, 0.510950207]},
+            {"id": 20, "value": [0.0, 0.0, 0.574818859]},
+            {"id": 21, "value": [0.75, 0.25, 0.510950207]},
+            {"id": 22, "value": [0.0, 0.5, 0.70255616]},
+            {"id": 23, "value": [0.75, 0.75, 0.638687509]},
         ],
         "units": "crystal",
         "labels": [],
@@ -492,18 +437,11 @@ SI_SLAB_001_ADDED_LAYER = {
         "a": 5.468763846,
         "b": 5.468763846,
         "c": 21.406291538,
-        "alpha": 90,
-        "beta": 90,
-        "gamma": 90,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-        "vectors": {
-            "a": [5.468763846, 0, 0],
-            "b": [0, 5.468763846, 0],
-            "c": [0, 0, 21.406291538],
-            "alat": 1,
-            "units": "angstrom",
-        },
     },
 }
 
@@ -535,40 +473,40 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
             {"id": 21, "value": "Si"},
             {"id": 22, "value": "Si"},
             {"id": 23, "value": "Si"},
+            {"id": 24, "value": "Si"},
+            {"id": 25, "value": "Si"},
             {"id": 26, "value": "Si"},
             {"id": 27, "value": "Si"},
-            {"id": 28, "value": "Si"},
-            {"id": 29, "value": "Si"},
         ],
         "coordinates": [
-            {"id": 0, "value": [0.5, 0.0, 0.178052409]},
-            {"id": 1, "value": [0.25, 0.25, 0.127180292]},
-            {"id": 2, "value": [0.5, 0.5, 0.076308175]},
-            {"id": 3, "value": [0.25, 0.75, 0.025436058]},
-            {"id": 4, "value": [0.0, 0.0, 0.076308175]},
-            {"id": 5, "value": [0.75, 0.25, 0.025436058]},
-            {"id": 6, "value": [0.0, 0.5, 0.178052409]},
-            {"id": 7, "value": [0.75, 0.75, 0.127180292]},
-            {"id": 8, "value": [0.5, 0.0, 0.381540877]},
-            {"id": 9, "value": [0.25, 0.25, 0.33066876]},
-            {"id": 10, "value": [0.5, 0.5, 0.279796643]},
-            {"id": 11, "value": [0.25, 0.75, 0.228924526]},
-            {"id": 12, "value": [0.0, 0.0, 0.279796643]},
-            {"id": 13, "value": [0.75, 0.25, 0.228924526]},
-            {"id": 14, "value": [0.0, 0.5, 0.381540877]},
-            {"id": 15, "value": [0.75, 0.75, 0.33066876]},
-            {"id": 16, "value": [0.5, 0.0, 0.585029345]},
-            {"id": 17, "value": [0.25, 0.25, 0.534157228]},
-            {"id": 18, "value": [0.5, 0.5, 0.483285111]},
-            {"id": 19, "value": [0.25, 0.75, 0.432412994]},
-            {"id": 20, "value": [0.0, 0.0, 0.483285111]},
-            {"id": 21, "value": [0.75, 0.25, 0.432412994]},
-            {"id": 22, "value": [0.0, 0.5, 0.585029345]},
-            {"id": 23, "value": [0.75, 0.75, 0.534157228]},
-            {"id": 26, "value": [0.5, 0.5, 0.686773579]},
-            {"id": 27, "value": [0.25, 0.75, 0.635901462]},
-            {"id": 28, "value": [0.0, 0.0, 0.686773579]},
-            {"id": 29, "value": [0.75, 0.25, 0.635901462]},
+            {"id": 0, "value": [0.5, 0.0, 0.152616961]},
+            {"id": 1, "value": [0.25, 0.25, 0.101744844]},
+            {"id": 2, "value": [0.5, 0.5, 0.050872727]},
+            {"id": 3, "value": [0.25, 0.75, 6.1e-07]},
+            {"id": 4, "value": [0.0, 0.0, 0.050872727]},
+            {"id": 5, "value": [0.75, 0.25, 6.1e-07]},
+            {"id": 6, "value": [0.0, 0.5, 0.152616961]},
+            {"id": 7, "value": [0.75, 0.75, 0.101744844]},
+            {"id": 8, "value": [0.5, 0.0, 0.356105429]},
+            {"id": 9, "value": [0.25, 0.25, 0.305233312]},
+            {"id": 10, "value": [0.5, 0.5, 0.254361195]},
+            {"id": 11, "value": [0.25, 0.75, 0.203489078]},
+            {"id": 12, "value": [0.0, 0.0, 0.254361195]},
+            {"id": 13, "value": [0.75, 0.25, 0.203489078]},
+            {"id": 14, "value": [0.0, 0.5, 0.356105429]},
+            {"id": 15, "value": [0.75, 0.75, 0.305233312]},
+            {"id": 16, "value": [0.5, 0.0, 0.559593897]},
+            {"id": 17, "value": [0.25, 0.25, 0.50872178]},
+            {"id": 18, "value": [0.5, 0.5, 0.457849663]},
+            {"id": 19, "value": [0.25, 0.75, 0.406977546]},
+            {"id": 20, "value": [0.0, 0.0, 0.457849663]},
+            {"id": 21, "value": [0.75, 0.25, 0.406977546]},
+            {"id": 22, "value": [0.0, 0.5, 0.559593897]},
+            {"id": 23, "value": [0.75, 0.75, 0.50872178]},
+            {"id": 24, "value": [0.5, 0.5, 0.661337724]},
+            {"id": 25, "value": [0.25, 0.75, 0.610465607]},
+            {"id": 26, "value": [0.0, 0.0, 0.661337724]},
+            {"id": 27, "value": [0.75, 0.25, 0.610465607]},
         ],
         "units": "crystal",
         "labels": [],
@@ -583,35 +521,6 @@ SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
         "gamma": 90.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-    },
-    "isNonPeriodic": False,
-    "metadata": {
-        "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "SlabConfiguration",
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-                "stack_components": [
-                    {
-                        "crystal": BULK_Si_CONVENTIONAL,
-                        "miller_indices": [0, 0, 1],
-                        "use_conventional_cell": True,
-                        "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
-                        "number_of_repetitions": 4,
-                    },
-                    {"direction": "z", "size": 5.0, "type": "VacuumConfiguration"},
-                ],
-                "direction": "z",
-            },
-            "build_parameters": {
-                "min_vacuum_size": 0,
-                "in_unit_planes": True,
-                "reorient_lattice": True,
-                "symmetrize": True,
-                "make_primitive": False,
-                "use_orthogonal_c": True,
-            },
-        },
     },
 }
 

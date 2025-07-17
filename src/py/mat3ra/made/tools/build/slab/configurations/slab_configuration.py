@@ -4,6 +4,7 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import SlabConfigurationSchema
 
 from mat3ra.made.material import Material
+from ... import MaterialWithBuildMetadata
 from ...stack.configuration import StackConfiguration
 from ...vacuum.configuration import VacuumConfiguration
 from .base_configurations import AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration
@@ -22,12 +23,25 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     direction: AxisEnum = AxisEnum.z
 
     @property
+    def number_of_layers(self):
+        return self.atomic_layers.number_of_repetitions
+
+    @property
+    def vacuum(self):
+        return self.vacuum_configuration.size
+
+    @property
     def atomic_layers(self):
         return self.stack_components[0]
 
     @property
     def vacuum_configuration(self) -> VacuumConfiguration:
         return self.stack_components[1]
+
+    def set_vacuum(self, vacuum: float) -> None:
+        vacuum_configuration = self.vacuum_configuration
+        vacuum_configuration.size = vacuum
+        self.stack_components[1] = vacuum_configuration
 
     @classmethod
     def from_parameters(
@@ -51,7 +65,7 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
             SlabConfiguration: The created slab configuration.
         """
         if isinstance(material_or_dict, dict):
-            material = Material.create(material_or_dict)
+            material = MaterialWithBuildMetadata.create(material_or_dict)
         else:
             material = material_or_dict
 

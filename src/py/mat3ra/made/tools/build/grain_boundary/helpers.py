@@ -1,5 +1,6 @@
 from typing import Optional, List, Tuple
 
+from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
@@ -65,7 +66,7 @@ def create_grain_boundary_planar(
         phase_1_configuration=strained_config.substrate_configuration,
         phase_2_configuration=strained_config.film_configuration,
         xy_shift=translation_vector,
-        gap=gap,
+        gaps=[gap, gap],
     )
 
     builder = GrainBoundaryPlanarBuilder()
@@ -123,14 +124,12 @@ def create_grain_boundary_linear(
         miller_indices=miller_indices,
         number_of_layers=number_of_layers,
         vacuum=vacuum,
-        direction=direction,
-        gap=gap,
     )
 
     grain_boundary_config = GrainBoundaryLinearConfiguration(
         stack_components=strained_configs,
         direction=direction,
-        gap=gap,
+        gaps=ArrayWithIds.from_values([gap, gap]),
         actual_angle=actual_angle,
     )
 

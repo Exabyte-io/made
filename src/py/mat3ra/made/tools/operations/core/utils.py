@@ -5,6 +5,7 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 
 
 def merge_two_bases(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
@@ -46,7 +47,7 @@ def merge_two_materials(
     material_name: Optional[str] = None,
     distance_tolerance: float = 0.1,
     merge_dangerously: bool = False,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Merge two materials using a specific merge method.
 
@@ -59,7 +60,7 @@ def merge_two_materials(
         merge_dangerously (bool): If True, allows merging even if lattices are different.
 
     Returns:
-        Material: The merged material.
+        MaterialWithBuildMetadata: The merged material.
     """
     if not np.allclose(material1.lattice.vector_arrays, material2.lattice.vector_arrays) and not merge_dangerously:
         raise ValueError("Lattices of the two materials must be the same.")
@@ -74,9 +75,10 @@ def merge_two_materials(
         raise ValueError(f"Unknown merge method: {merge_method}")
 
     name = material_name or "Merged Material"
-    new_material = Material.create(
+    new_material = MaterialWithBuildMetadata.create(
         {"name": name, "lattice": material1.lattice.to_dict(), "basis": merged_basis.to_dict()}
     )
+
     return new_material
 
 

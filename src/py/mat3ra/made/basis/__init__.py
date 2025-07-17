@@ -7,9 +7,27 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material import BasisSchema, BasisUnitsEnum
 from mat3ra.made.basis.coordinates import Coordinates
 from mat3ra.made.cell import Cell
-from mat3ra.made.utils import get_overlapping_coordinates
 from pydantic import Field
 from scipy.spatial import cKDTree
+
+
+def get_overlapping_coordinates(
+    coordinate: List[float],
+    coordinates: List[List[float]],
+    threshold: float = 0.01,
+) -> List[List[float]]:
+    """
+    Find coordinates that are within a certain threshold of a given coordinate.
+
+    Args:
+        coordinate (List[float]): The coordinate.
+        coordinates (List[List[float]]): The list of coordinates.
+        threshold (float): The threshold for the distance, in the units of the coordinates.
+
+    Returns:
+        List[List[float]]: The list of overlapping coordinates.
+    """
+    return [c for c in coordinates if np.linalg.norm(np.array(c) - np.array(coordinate)) < threshold]
 
 
 class Basis(BasisSchema, InMemoryEntityPydantic):
@@ -152,10 +170,10 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.filter_atoms_by_ids(ids_to_remove, invert=True)
         return self
 
-    def filter_atoms_by_ids(self, ids: Union[List[int], int], invert: bool = False) -> "Basis":
-        self.elements.filter_by_ids(ids, invert)
-        self.coordinates.filter_by_ids(ids, invert)
-        self.labels.filter_by_ids(ids, invert)
+    def filter_atoms_by_ids(self, ids: Union[List[int], int], invert: bool = False, reset_ids=False) -> "Basis":
+        self.elements.filter_by_ids(ids, invert, reset_ids=reset_ids)
+        self.coordinates.filter_by_ids(ids, invert, reset_ids=reset_ids)
+        self.labels.filter_by_ids(ids, invert, reset_ids=reset_ids)
         return self
 
     def filter_atoms_by_labels(self, labels: Union[List[str], str]) -> "Basis":
