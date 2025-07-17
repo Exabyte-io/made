@@ -43,13 +43,13 @@ def test_sine_perturbation(
 
 
 @pytest.mark.parametrize(
-    "material_config, supercell_matrix, perturbation_function_params, use_cartesian, preserve_distance,"
+    "material_config, supercell_matrix, perturbation_function, use_cartesian, is_isometric,"
     + " coordinates_to_check, expected_cell",
     [
         (
             GRAPHENE,
             [[10, 0, 0], [0, 10, 0], [0, 0, 1]],
-            {"amplitude": 0.05, "wavelength": 1, "phase": 0.25, "axis": "y"},
+            "0.25*sin(x) + 0.25*cos(y)",
             False,
             True,
             {0: [0.0, 0.0, 0.5], 42: [0.194051947, 0.1, 0.546942315]},
@@ -60,17 +60,18 @@ def test_sine_perturbation(
 def test_create_perturbation(
     material_config,
     supercell_matrix,
-    perturbation_function_params,
+    perturbation_function,
     use_cartesian,
-    preserve_distance,
+    is_isometric,
     coordinates_to_check,
     expected_cell,
 ):
     material = MaterialWithBuildMetadata.create(material_config)
     slab = create_supercell(material, supercell_matrix)
-    function = "f(x)=x*2"
 
-    perturbed_slab = create_perturbation(material, function)
+    perturbed_slab = create_perturbation(
+        material=slab, perturbation_function=perturbation_function, use_cartesian_coordinates=use_cartesian
+    )
     # Check selected atoms to avoid using 100+ atoms fixture
     for index, expected_coord in coordinates_to_check.items():
         assertion_utils.assert_deep_almost_equal(expected_coord, perturbed_slab.basis.coordinates.values[index])

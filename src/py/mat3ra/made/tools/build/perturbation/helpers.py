@@ -29,16 +29,11 @@ def create_perturbation(
     Returns:
         Material: The perturbed material.
     """
-    if isinstance(perturbation_function, str):
-        perturbation_function = sp.Expr(sp.sympify(perturbation_function))
-
-    variables = [str(s) for s in perturbation_function.free_symbols]
 
     configuration = PerturbationConfiguration(
         material=material,
         perturbation_function_holder=FunctionHolder(
             function=perturbation_function,
-            variables=variables,
         ),
         use_cartesian_coordinates=use_cartesian_coordinates,
     )

@@ -1,8 +1,9 @@
-from typing import List, Callable, Optional, Any
+from typing import List, Callable, Any, Union
 
 import sympy as sp
 from mat3ra.code.entity import InMemoryEntityPydantic
 from pydantic import field_serializer
+from sympy import parse_expr
 
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
@@ -18,22 +19,34 @@ class FunctionHolder(InMemoryEntityPydantic):
     function_numeric: Callable = sp.lambdify(sp.symbols(variables), sp.Symbol("f"), modules=["numpy"])
     derivatives_numeric: dict = {}
 
-    def __init__(self, function: Optional[sp.Expr] = None, variables: Optional[List[str]] = None, **data: Any):
-        """
-        Initializes with a function involving multiple variables.
-        """
-        if function is None:
-            function = default_function()
+    def __init__(self, function: Union[sp.Expr, str], variables: List[str] = None, **data: Any):
+        # normalize string → Expr
+        expr = self._to_expr(function)
+
+        # if no variables list given, infer from free symbols (defaults to x,y,z)
         if variables is None:
-            variables = ["x", "y", "z"]
+            vs = sorted(expr.free_symbols, key=lambda s: s.name)
+            variables = [str(v) for v in vs] or ["x", "y", "z"]
         super().__init__(**data)
+
         self.variables = variables
         self.symbols = sp.symbols(variables)
-        self.function = function
+        self.function = expr
+
         self.function_numeric = sp.lambdify(self.symbols, self.function, modules=["numpy"])
         self.derivatives_numeric = {
-            var: sp.lambdify(self.symbols, sp.diff(self.function, var), modules=["numpy"]) for var in variables
+            var: sp.lambdify(self.symbols, sp.diff(self.function, var), modules=["numpy"]) for var in self.variables
         }
+
+    @staticmethod
+    def _to_expr(expr_or_str: Union[sp.Expr, str]) -> sp.Expr:
+        if isinstance(expr_or_str, sp.Expr):
+            return expr_or_str
+        if isinstance(expr_or_str, str):
+            # We can swap in sympy.sympify for slightly laxer parsing,
+            # or configure parse_expr with custom transformations.
+            return parse_expr(expr_or_str, evaluate=True)
+        raise TypeError(f"Expected sympy.Expr or str, got {type(expr_or_str)}")
 
     @property
     def function_str(self) -> str:
