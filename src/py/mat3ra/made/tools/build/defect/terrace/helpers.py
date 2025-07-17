@@ -1,14 +1,14 @@
 from typing import Optional, List
 
-from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
-from mat3ra.made.tools.build.defect.terrace.analyzer import TerraceMaterialAnalyzer
-from mat3ra.made.tools.build.defect.terrace.builders import TerraceDefectBuilder
-from mat3ra.made.tools.build.defect.terrace.configuration import TerraceDefectConfiguration
-from mat3ra.made.tools.build.defect.terrace.parameters import TerraceBuildParameters
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
-from mat3ra.made.tools.utils.coordinate import PlaneCoordinateCondition
+from .builders import TerraceDefectBuilder
+from .configuration import TerraceDefectConfiguration
+from .parameters import TerraceBuildParameters
+from ..slab.builders import SlabBuilder
+from ..slab.helpers import recreate_slab_with_fractional_layers
+from ... import MaterialWithBuildMetadata
+from ....analyze.terrace import TerraceMaterialAnalyzer
+from ....modify import filter_by_condition_on_coordinates
+from ....utils.coordinate import PlaneCoordinateCondition
 
 
 def create_terrace(
@@ -37,11 +37,13 @@ def create_terrace(
     if pivot_coordinate is None:
         pivot_coordinate = [0.5, 0.5, 0.5]
 
-    terrace_analyzer = TerraceMaterialAnalyzer(material=slab)
+    terrace_analyzer = TerraceMaterialAnalyzer(
+        material=slab, cut_direction=cut_direction, number_of_added_layers=number_of_added_layers
+    )
 
     additional_slab_material = recreate_slab_with_fractional_layers(slab, number_of_added_layers)
 
-    normalized_direction_vector = terrace_analyzer.calculate_cut_direction_vector(cut_direction)
+    normalized_direction_vector = terrace_analyzer.cut_direction_vector
 
     condition = PlaneCoordinateCondition(
         plane_normal=normalized_direction_vector,
@@ -63,9 +65,9 @@ def create_terrace(
         stack_components=[slab_in_stack, isolated_defect, vacuum], cut_direction=cut_direction
     )
 
-    angle = terrace_analyzer.get_angle(cut_direction, number_of_added_layers)
-    axis = terrace_analyzer.get_rotation_axis(cut_direction)
-    new_lattice_vectors = terrace_analyzer.get_new_lattice_vectors(cut_direction, number_of_added_layers)
+    angle = terrace_analyzer.angle
+    axis = terrace_analyzer.rotation_axis
+    new_lattice_vectors = terrace_analyzer.new_lattice_vectors
     parameters = TerraceBuildParameters(
         rotate_to_match_pbc=rotate_to_match_pbc, angle=angle, axis=axis, new_lattice_vectors=new_lattice_vectors
     )

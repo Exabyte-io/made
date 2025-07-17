@@ -19,6 +19,8 @@ GRAPHENE = {
     "isNonPeriodic": False,
 }
 
+# TODO: Use material from Standata. Add materials equivalency comparator.
+#  Right now generated Silicene monolayer and one from Standata differ in gamma angle (120 vs 60 degrees).
 SILICENE = {
     "name": "Silicon FCC - Monolayer ((1, 1, 1))",
     "lattice": {
