@@ -1,11 +1,10 @@
-from typing import List, Callable, Any, Union
+from typing import Any, Callable, List, Union
 
 import sympy as sp
 from mat3ra.code.entity import InMemoryEntityPydantic
+from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 from pydantic import field_serializer
 from sympy import parse_expr
-
-from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
 
 def default_function() -> sp.Expr:

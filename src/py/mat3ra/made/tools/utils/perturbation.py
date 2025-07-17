@@ -5,14 +5,13 @@ import sympy as sp
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
 
-from .functions import FunctionHolder
 from ...utils import AXIS_TO_INDEX_MAP
+from .functions import FunctionHolder
 
 EQUATION_RANGE_COEFFICIENT = 5
 
 
 class PerturbationFunctionHolder(FunctionHolder):
-
     def _integrand(self, t: float, coordinate: List[float], axis: str) -> float:
         temp_coordinate = coordinate[:]
         temp_coordinate[AXIS_TO_INDEX_MAP[axis]] = t

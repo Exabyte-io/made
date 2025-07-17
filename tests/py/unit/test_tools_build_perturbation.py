@@ -1,12 +1,12 @@
 import pytest
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.perturbation.builders import PerturbationBuilder
 from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
 from mat3ra.made.tools.build.perturbation.helpers import create_perturbation
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.utils.perturbation import SineWavePerturbationFunctionHolder
+from mat3ra.utils import assertion as assertion_utils
+
 from .fixtures.monolayer import GRAPHENE
 from .fixtures.nanoribbon.armchair import GRAPHENE_NANORIBBON_ARMCHAIR
 
