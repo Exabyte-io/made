@@ -46,7 +46,6 @@ class MergeBuilder(BaseSingleBuilder):
         configuration: MergeConfiguration,
         merge_component_build_parameters: Any = None,
     ) -> Optional[MaterialWithBuildMetadata]:
-
         builder = self.merge_component_types_conversion_map.get(type(merge_component_configuration_or_material))
         pre_process_function = self.merge_component_types_conversion_pre_process_map.get(
             type(merge_component_configuration_or_material), lambda x, y: x

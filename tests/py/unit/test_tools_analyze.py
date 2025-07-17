@@ -5,10 +5,10 @@ from mat3ra.made.tools.analyze.adatom import AdatomCrystalSiteMaterialAnalyzer, 
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import (
+    SurfaceTypes,
     get_average_interlayer_distance,
     get_surface_area,
     get_surface_atom_indices,
-    SurfaceTypes,
 )
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from mat3ra.made.tools.build import MaterialWithBuildMetadata

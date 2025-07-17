@@ -1,12 +1,12 @@
 import pytest
-
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.passivation.helpers import (
     create_passivated_surface,
-    passivate_dangling_bonds,
-    get_unique_coordination_numbers,
     get_coordination_numbers_distribution,
+    get_unique_coordination_numbers,
+    passivate_dangling_bonds,
 )
+
 from .fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from .fixtures.passivated.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED
 from .fixtures.passivated.slab import PASSIVATED_SI_CONVENTIONAL_SLAB_001
