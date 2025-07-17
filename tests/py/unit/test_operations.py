@@ -62,21 +62,18 @@ def test_stack_two_materials(
 
 
 @pytest.mark.parametrize(
-    "material_config, perturbation_function, is_isometric, expected_coord_changes",
+    "material_config, perturbation_function, expected_coord_changes",
     [
         (
             GRAPHENE_ZIGZAG_NANORIBBON,
             SineWavePerturbationFunctionHolder(amplitude=0.1, wavelength=1.0, phase=0.0, axis="x"),
-            True,
             [0.0, 0.0, 0.1],
         ),
     ],
 )
-def test_perturb(material_config, perturbation_function, is_isometric, expected_coord_changes):
+def test_perturb(material_config, perturbation_function, expected_coord_changes):
     material = Material.create(material_config)
     original_coords = [coord[:] for coord in material.basis.coordinates.values]
 
-    perturbed_material = perturb(material, perturbation_function, is_isometric)
-
-    # Check that original material is unchanged
-    assert material.basis.coordinates.values == original_coords
+    perturbed_material = perturb(material, perturbation_function)
+    assert perturbed_material.basis.coordinates == original_coords
