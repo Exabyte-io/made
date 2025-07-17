@@ -8,11 +8,6 @@ class PointDefectTypeEnum(str, Enum):
     ADATOM = "adatom"
 
 
-class SlabDefectTypeEnum(str, Enum):
-    ISLAND = "island"
-    TERRACE = "terrace"
-
-
 class ComplexDefectTypeEnum(str, Enum):
     PAIR = "pair"
 

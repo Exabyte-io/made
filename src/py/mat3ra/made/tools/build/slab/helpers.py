@@ -61,7 +61,7 @@ def create_slab(
     number_of_layers=1,
     vacuum=10.0,
     xy_supercell_matrix=DEFAULT_XY_SUPERCELL_MATRIX,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Creates a slab material from a crystal material with specified Miller indices and other parameters.
 

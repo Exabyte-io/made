@@ -1,42 +1,42 @@
-import sys
-
 import pytest
-from mat3ra.made.lattice import COORDINATE_TOLERANCE
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.builders import TerraceSlabDefectBuilder
-from mat3ra.made.tools.build.defect.configuration import TerraceSlabDefectConfiguration
-from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
+from mat3ra.made.tools.build.defect.terrace.helpers import create_terrace
+from mat3ra.made.tools.build.slab.helpers import create_slab
+from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
+from unit.fixtures.terrace import TERRACE_SLAB_Si_001_3x3
+from unit.utils import assert_two_entities_deep_almost_equal
 
 
-@pytest.mark.skip(reason="we'll fix before epic-7623 is merged")
 @pytest.mark.parametrize(
-    "crystal_config, cut_direction, pivot_coordinate, num_added_layers, expected_coordinates_platform",
+    "slab_parameters, cut_direction, pivot_coordinate, num_added_layers, expected_config",
     [
         (
-            SI_CONVENTIONAL_SLAB_001,
-            [1, 0, 0],
+            {"crystal": BULK_Si_CONVENTIONAL, "number_of_layers": 1, "xy_supercell_matrix": [[1, 0], [0, 2]]},
+            [0, 1, 0],
             [0.5, 0.5, 0.5],
             1,
-            {"darwin": [0.627786405, 0.75, 0.671264194], "other": [0.591583068, 0.75, 0.716534426]},
+            TERRACE_SLAB_Si_001_3x3,
         )
     ],
 )
 def test_create_terrace(
-    crystal_config, cut_direction, pivot_coordinate, num_added_layers, expected_coordinates_platform
+    slab_parameters,
+    cut_direction,
+    pivot_coordinate,
+    num_added_layers,
+    expected_config,
 ):
-    crystal = Material.create(crystal_config)
-    config = TerraceSlabDefectConfiguration(
-        crystal=crystal,
+    slab = create_slab(
+        Material.create(slab_parameters["crystal"]),
+        number_of_layers=slab_parameters["number_of_layers"],
+        xy_supercell_matrix=slab_parameters["xy_supercell_matrix"],
+    )
+    terrace = create_terrace(
+        slab=slab,
         cut_direction=cut_direction,
         pivot_coordinate=pivot_coordinate,
         number_of_added_layers=num_added_layers,
+        rotate_to_match_pbc=True,
     )
-    new_slab = TerraceSlabDefectBuilder().get_material(configuration=config)
-    if sys.platform == "darwin":
-        coordinate_expected = expected_coordinates_platform["darwin"]
-    else:
-        coordinate_expected = expected_coordinates_platform["other"]
-    defect_coordinate = new_slab.basis.coordinates.values[-1]  # Use last atom (index 59) instead of previous index 35
-    atol = 10 ** (-COORDINATE_TOLERANCE)
-    assertion_utils.assert_deep_almost_equal(coordinate_expected, defect_coordinate, atol=atol)
+
+    assert_two_entities_deep_almost_equal(terrace, expected_config)
