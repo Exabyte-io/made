@@ -41,10 +41,9 @@ def test_passivate_surface(
     [(GRAPHENE_ZIGZAG_NANORIBBON, "H", 1.48, "both", 3.0, [2, 3])],
 )
 def test_get_unique_coordination_numbers(slab_config, passivant, bond_length, surface, cutoff, expected_numbers):
-    config = PassivationConfiguration(
-        material=Material.create(slab_config), passivant=passivant, bond_length=bond_length, surface=surface
-    )
-    unique_coordination_numbers = get_unique_coordination_numbers(config, cutoff=cutoff)
+    """Test getting unique coordination numbers for passivation analysis"""
+    material = MaterialWithBuildMetadata.create(slab_config)
+    unique_coordination_numbers = get_unique_coordination_numbers(material=material, cutoff=cutoff)
     assert unique_coordination_numbers == expected_numbers
 
 
@@ -56,10 +55,8 @@ def test_get_coordination_numbers_distribution(
     slab_config, passivant, bond_length, surface, cutoff, expected_distribution
 ):
     """Test getting coordination numbers distribution for passivation analysis"""
-    config = PassivationConfiguration(
-        material=Material.create(slab_config), passivant=passivant, bond_length=bond_length, surface=surface
-    )
-    distribution = get_coordination_numbers_distribution(config, cutoff=cutoff)
+    material = MaterialWithBuildMetadata.create(slab_config)
+    distribution = get_coordination_numbers_distribution(material=material, cutoff=cutoff)
     # Should return a dictionary with coordination numbers as keys and counts as values
     assert distribution == expected_distribution
 

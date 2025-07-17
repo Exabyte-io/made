@@ -1,6 +1,10 @@
+from collections import Counter
+from typing import List, Dict
+
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import AtomSchema
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.material import MaterialWithCrystalSites
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.point.builders import AtomAtCoordinateConfiguration
 from mat3ra.made.tools.build.passivation.analyzer import (
@@ -82,3 +86,42 @@ def passivate_dangling_bonds(
 
     builder = PassivationBuilder()
     return builder.get_material(config)
+
+
+def get_unique_coordination_numbers(
+    material: MaterialWithBuildMetadata,
+    cutoff: float = 3.0,
+) -> List[int]:
+    """
+    Get the unique coordination numbers for the provided passivation configuration and cutoff radius.
+
+    Args:
+        material (MaterialWithBuildMetadata): The material object.
+        cutoff (float): The cutoff radius for defining neighbors.
+    Returns:
+        set: The unique coordination numbers.
+    """
+    material_with_crystal_sites = MaterialWithCrystalSites.from_material(material)
+    material_with_crystal_sites.analyze()
+    return material_with_crystal_sites.get_unique_coordination_numbers(cutoff=cutoff)
+
+
+def get_coordination_numbers_distribution(
+    material: MaterialWithBuildMetadata,
+    cutoff: float = 3.0,
+) -> Dict[int, int]:
+    """
+    Get the unique coordination numbers for the provided passivation configuration and cutoff radius.
+
+    Args:
+        material (MaterialWithBuildMetadata): The material object.
+        cutoff (float): The cutoff radius for defining neighbors.
+    Returns:
+        set: The unique coordination numbers.
+    """
+    material_with_crystal_sites = MaterialWithCrystalSites.from_material(material)
+    material_with_crystal_sites.analyze()
+    coordinatation_numbers = material_with_crystal_sites.get_coordination_numbers(cutoff=cutoff)
+    sorted_coordinatation_numbers = sorted(coordinatation_numbers.values)
+    distribution = dict(Counter(sorted_coordinatation_numbers))
+    return distribution
