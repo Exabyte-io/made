@@ -37,7 +37,7 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
     def nanoribbon2(self):
         return self.film_slab_configuration.atomic_layers.crystal
 
-    def _create_primitive_slab_from_nanoribbon(self, nanoribbon: Material) -> SlabConfiguration:
+    def _create_default_slab_from_nanoribbon(self, nanoribbon: Material) -> SlabConfiguration:
         return SlabConfiguration.from_parameters(
             material_or_dict=nanoribbon,
             miller_indices=(0, 0, 1),
@@ -46,6 +46,10 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
         )
 
     def _match_lattice_vectors(self, material1: Material, material2: Material) -> Tuple[Material, Material]:
+        """
+        Matches the lattice vectors of two nanoribbons with vacuum on the sides to assume the size of the larger one.
+        Before stacking, two materials must have the same lattice vectors.
+        """
         area1 = get_surface_area(material1)
         area2 = get_surface_area(material2)
 
@@ -70,8 +74,8 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
 
         rotated_nanoribbon2 = rotate(matched_nanoribbon2, [0, 0, 1], self.angle, wrap=False)
 
-        substrate_slab_config = self._create_primitive_slab_from_nanoribbon(matched_nanoribbon1)
-        film_slab_config = self._create_primitive_slab_from_nanoribbon(rotated_nanoribbon2)
+        substrate_slab_config = self._create_default_slab_from_nanoribbon(matched_nanoribbon1)
+        film_slab_config = self._create_default_slab_from_nanoribbon(rotated_nanoribbon2)
 
         return self.create_matched_configuration_holder(substrate_slab_config, film_slab_config, match_id=0)
 

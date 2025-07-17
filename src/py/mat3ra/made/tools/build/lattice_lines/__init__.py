@@ -1,15 +1,16 @@
 from typing import Optional, Tuple
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
+from .builders import (
+    CrystalLatticeLinesBuilder,
+    CrystalLatticeLinesRepeatedBuilder,
+)
 from .configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
     get_miller_indices_from_edge_type,
     EdgeTypes,
-)
-from .builders import (
-    CrystalLatticeLinesBuilder,
-    CrystalLatticeLinesRepeatedBuilder,
 )
 from ..slab.termination_utils import select_slab_termination
 
@@ -38,9 +39,7 @@ def create_lattice_lines_config_and_material(
         number_of_repetitions_width=width,
         number_of_repetitions_length=length,
     )
-    lattice_lines_builder = CrystalLatticeLinesRepeatedBuilder()
-    lattice_lines_material = lattice_lines_builder.get_material(lattice_lines_config)
-    return lattice_lines_config, lattice_lines_material
+    return lattice_lines_config
 
 
 __all__ = [

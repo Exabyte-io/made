@@ -13,7 +13,7 @@ from ..vacuum.configuration import VacuumConfiguration
 class NanoribbonConfiguration(NanoribbonConfigurationSchema, StackConfiguration):
     """
     Configuration for building a nanoribbon from a nanotape.
-    Nanoribbon = [NanoTape, vacuum] stacked on X direction.
+    Nanoribbon = [NanoTape, vacuum] stacked in X or Y direction.
 
     Args:
         stack_components: List of configuration objects for nanoribbon components.
@@ -26,10 +26,8 @@ class NanoribbonConfiguration(NanoribbonConfigurationSchema, StackConfiguration)
 
     @property
     def nanotape(self):
-        """Get the nanotape configuration component."""
         return self.stack_components[0]
 
     @property
     def vacuum_configuration(self) -> VacuumConfiguration:
-        """Get the vacuum configuration component."""
         return self.stack_components[1]
