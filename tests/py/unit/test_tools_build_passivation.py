@@ -1,16 +1,16 @@
 import pytest
 
-from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
 from mat3ra.made.tools.build.passivation.helpers import (
     create_passivated_surface,
     passivate_dangling_bonds,
     get_unique_coordination_numbers,
     get_coordination_numbers_distribution,
 )
-from .fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED
-from .fixtures.slab import SI_SLAB_PASSIVATED, SI_CONVENTIONAL_SLAB_001
+from .fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
+from .fixtures.passivated.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED
+from .fixtures.passivated.slab import PASSIVATED_SI_CONVENTIONAL_SLAB_001
+from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 from .utils import assert_two_entities_deep_almost_equal
 
 
@@ -23,7 +23,7 @@ from .utils import assert_two_entities_deep_almost_equal
             1.48,
             "both",
             {"shadowing_radius": 2.5, "depth": 2.0},
-            SI_SLAB_PASSIVATED,
+            PASSIVATED_SI_CONVENTIONAL_SLAB_001,
         ),
     ],
 )

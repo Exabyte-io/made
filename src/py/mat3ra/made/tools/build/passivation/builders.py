@@ -4,6 +4,7 @@ from mat3ra.made.tools.bonds import BondDirections
 from pydantic import BaseModel
 import numpy as np
 
+from .. import MaterialWithBuildMetadata
 from ..defect.point.builders import AtomAtCoordinateConfiguration, AtomAtCoordinateBuilder
 from ..merge import MergeBuilder
 from ...analyze.material import MaterialWithCrystalSites
@@ -23,10 +24,10 @@ class PassivationBuilder(MergeBuilder):
         }
 
     def _update_material_name(
-        self, material: BaseBuilder._GeneratedItemType, configuration: BaseBuilder._ConfigurationType
-    ) -> BaseBuilder._GeneratedItemType:
-        material = super()._update_material_name(material, configuration)
-        material.name += f" {configuration.passivant}-passivated"
+        self, material: BaseBuilder._GeneratedItemType, configuration: PassivationConfiguration
+    ) -> MaterialWithBuildMetadata:
+        material_name = configuration.material.name
+        material.name = f"{material_name}, {configuration.passivant}-passivated"
         return material
 
     # def create_passivated_material(self, configuration: BaseBuilder._ConfigurationType) -> Material:
