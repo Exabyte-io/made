@@ -3,7 +3,6 @@ import scipy as sp
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.perturbation import (
     PerturbationConfiguration,
-    CellMatchingDistancePreservingSlabPerturbationBuilder,
 )
 from mat3ra.made.tools.build.perturbation.builders import PerturbationBuilder
 from mat3ra.made.tools.utils.perturbation import PerturbationFunctionHolder
@@ -34,7 +33,8 @@ def create_perturbation(
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
     if is_isometric:
-        builder = CellMatchingDistancePreservingSlabPerturbationBuilder()
+        # builder = CellMatchingDistancePreservingSlabPerturbationBuilder()
+        pass
     else:
         builder = PerturbationBuilder()
     return builder.get_material(configuration)
