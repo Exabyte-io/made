@@ -1,5 +1,6 @@
 import math
 
+import numpy as np
 import pytest
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
@@ -66,7 +67,7 @@ def test_stack_two_materials(
         (
             GRAPHENE_ZIGZAG_NANORIBBON,
             SineWavePerturbationFunctionHolder(amplitude=0.1, wavelength=1.0, phase=0.0, axis="x"),
-            [0.0, 0.0, 0.1],
+            [0.0, 0.0, -0.0383],
         ),
     ],
 )
@@ -75,4 +76,5 @@ def test_perturb(material_config, perturbation_function, expected_coord_changes)
     original_coords = [coord[:] for coord in material.basis.coordinates.values]
 
     perturbed_material = perturb(material, perturbation_function)
-    assert perturbed_material.basis.coordinates == original_coords
+    actual_delta = np.array(original_coords[0]) - np.array(perturbed_material.basis.coordinates.values[0])
+    assert np.isclose(actual_delta, expected_coord_changes, atol=1e-4).all()
