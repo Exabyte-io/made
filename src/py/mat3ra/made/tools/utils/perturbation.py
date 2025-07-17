@@ -1,57 +1,17 @@
-from typing import Any, Callable, List, Optional
+from typing import Any, List
 
 import numpy as np
 import sympy as sp
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
 
-from ...utils import AXIS_TO_INDEX_MAP
 from .functions import FunctionHolder
+from ...utils import AXIS_TO_INDEX_MAP
 
 EQUATION_RANGE_COEFFICIENT = 5
 
 
-def default_function() -> sp.Expr:
-    return sp.Symbol("f")
-
-
 class PerturbationFunctionHolder(FunctionHolder):
-    variables: List[str] = ["x"]
-    symbols: List[sp.Symbol] = [sp.Symbol(var) for var in variables]
-    function: sp.Expr = sp.Symbol("f")
-    function_numeric: Callable = default_function
-    derivatives_numeric: dict = {}
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    def __init__(self, function: Optional[sp.Expr] = None, variables: Optional[List[str]] = None, **data: Any):
-        """
-        Initializes with a function involving multiple variables.
-        """
-        if function is None:
-            function = default_function()
-        if variables is None:
-            variables = ["x", "y", "z"]
-        super().__init__(**data)
-        self.variables = variables
-        self.symbols = sp.symbols(variables)
-        self.function = function
-        self.function_numeric = sp.lambdify(self.symbols, self.function, modules=["numpy"])
-        self.derivatives_numeric = {
-            var: sp.lambdify(self.symbols, sp.diff(self.function, var), modules=["numpy"]) for var in variables
-        }
-
-    def apply_function(self, coordinate: List[float]) -> float:
-        values = [coordinate[AXIS_TO_INDEX_MAP[var]] for var in self.variables]
-        return self.function_numeric(*values)
-
-    def calculate_derivative(self, coordinate: List[float], axis: str) -> float:
-        if axis in self.variables:
-            values = [coordinate[AXIS_TO_INDEX_MAP[var]] for var in self.variables]
-            return self.derivatives_numeric[axis](*values)
-        else:
-            return 0
 
     def _integrand(self, t: float, coordinate: List[float], axis: str) -> float:
         temp_coordinate = coordinate[:]
