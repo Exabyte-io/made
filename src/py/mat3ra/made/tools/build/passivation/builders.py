@@ -4,7 +4,6 @@ from .configuration import PassivationConfiguration
 from .. import MaterialWithBuildMetadata
 from ..defect.point.builders import AtomAtCoordinateConfiguration, AtomAtCoordinateBuilder
 from ..merge import MergeBuilder
-from ...build import BaseBuilder
 
 
 class PassivationBuilder(MergeBuilder):
@@ -15,7 +14,7 @@ class PassivationBuilder(MergeBuilder):
         }
 
     def _update_material_name(
-        self, material: BaseBuilder._GeneratedItemType, configuration: PassivationConfiguration
+        self, material: MaterialWithBuildMetadata, configuration: PassivationConfiguration
     ) -> MaterialWithBuildMetadata:
         material_name = configuration.material.name
         material.name = f"{material_name}, {configuration.passivant}-passivated"
