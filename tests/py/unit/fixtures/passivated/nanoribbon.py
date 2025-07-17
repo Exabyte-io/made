@@ -1,5 +1,5 @@
 GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
-    "name": "Graphene (Zigzag nanoribbon) H-passivated",
+    "name": "Graphene (Zigzag nanoribbon), H-passivated",
     "basis": {
         "elements": [
             {"id": 0, "value": "C"},
@@ -66,5 +66,4 @@ GRAPHENE_ZIGZAG_NANORIBBON_PASSIVATED = {
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
     },
-    "isNonPeriodic": False,
 }

@@ -61,7 +61,7 @@ def passivate_dangling_bonds(
     symmetry_tolerance: float = 0.1,
     shadowing_radius: float = 2.5,
     depth: float = 5.0,
-):
+) -> MaterialWithBuildMetadata:
     analyzer = CoordinationBasedPassivationMaterialAnalyzer(
         material=material,
         passivant=passivant,
