@@ -2,6 +2,7 @@ from typing import Union
 
 from mat3ra.made.material import Material
 from .. import BaseConfigurationPydantic
+from ...utils.functions import FunctionHolder
 from ...utils.perturbation import SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
 
 
@@ -16,7 +17,7 @@ class PerturbationConfiguration(BaseConfigurationPydantic):
     """
 
     material: Material
-    perturbation_function_holder: Union[SineWavePerturbationFunctionHolder, PerturbationFunctionHolder] = (
-        SineWavePerturbationFunctionHolder()
-    )
+    perturbation_function_holder: Union[
+        SineWavePerturbationFunctionHolder, PerturbationFunctionHolder, FunctionHolder
+    ] = SineWavePerturbationFunctionHolder()
     use_cartesian_coordinates: bool = True

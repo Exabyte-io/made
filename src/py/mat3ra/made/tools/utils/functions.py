@@ -1,7 +1,8 @@
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, Any
 
-from mat3ra.code.entity import InMemoryEntityPydantic
 import sympy as sp
+from mat3ra.code.entity import InMemoryEntityPydantic
+from pydantic import field_serializer
 
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
@@ -12,9 +13,9 @@ def default_function() -> sp.Expr:
 
 class FunctionHolder(InMemoryEntityPydantic):
     variables: List[str] = ["x"]
-    symbols: List[sp.Symbol] = [sp.Symbol(var) for var in variables]
+    symbols: List[sp.Symbol] = sp.symbols(variables)
     function: sp.Expr = sp.Symbol("f")
-    function_numeric: Callable = default_function
+    function_numeric: Callable = sp.lambdify(sp.symbols(variables), sp.Symbol("f"), modules=["numpy"])
     derivatives_numeric: dict = {}
 
     def __init__(self, function: Optional[sp.Expr] = None, variables: Optional[List[str]] = None, **data: Any):
@@ -48,3 +49,19 @@ class FunctionHolder(InMemoryEntityPydantic):
             return self.derivatives_numeric[axis](*values)
         else:
             return 0
+
+    @field_serializer("function")
+    def serialize_function(self, value: sp.Expr) -> str:
+        return str(value)
+
+    @field_serializer("symbols")
+    def serialize_symbols(self, value: List[sp.Symbol]) -> List[str]:
+        return [str(symbol) for symbol in value]
+
+    @field_serializer("function_numeric")
+    def serialize_function_numeric(self, value: Callable) -> str:
+        return "lambdified_function"
+
+    @field_serializer("derivatives_numeric")
+    def serialize_derivatives_numeric(self, value: dict) -> dict:
+        return {k: "lambdified_derivative" for k, v in value.items()}

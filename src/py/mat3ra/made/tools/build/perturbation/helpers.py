@@ -1,10 +1,11 @@
 import sympy as sp
 
 from mat3ra.made.material import Material
+from .builders import PerturbationBuilder
 from .configuration import (
     PerturbationConfiguration,
 )
-from .builders import PerturbationBuilder
+from ...utils.functions import FunctionHolder
 from ...utils.perturbation import PerturbationFunctionHolder
 
 
@@ -30,8 +31,8 @@ def create_perturbation(
 
     configuration = PerturbationConfiguration(
         material=material,
-        perturbation_function_holder=PerturbationFunctionHolder(
-            function_str=perturbation_function,
+        perturbation_function_holder=FunctionHolder(
+            function=perturbation_function,
             variables=variables,
         ),
         use_cartesian_coordinates=use_cartesian_coordinates,
