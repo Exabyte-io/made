@@ -3,7 +3,10 @@ from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensi
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.point.builders import AtomAtCoordinateConfiguration
-from mat3ra.made.tools.build.passivation.analyzer import SurfacePassivationMaterialAnalyzer
+from mat3ra.made.tools.build.passivation.analyzer import (
+    SurfacePassivationMaterialAnalyzer,
+    CoordinationBasedPassivationMaterialAnalyzer,
+)
 from mat3ra.made.tools.build.passivation.builders import PassivationBuilder
 from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
 
@@ -28,6 +31,42 @@ def create_passivated_surface(
     """
     analyzer = SurfacePassivationMaterialAnalyzer(
         material=material, passivant=passivant, bond_length=bond_length, shadowing_radius=shadowing_radius, depth=depth
+    )
+
+    passivant_coordinates = analyzer.get_passivant_coordinates()
+    passivant_configs = [
+        AtomAtCoordinateConfiguration(
+            crystal=material, element=AtomSchema(chemical_element=passivant), coordinate=coord
+        )
+        for coord in passivant_coordinates
+    ]
+    config = PassivationConfiguration(
+        merge_components=[material, *passivant_configs], passivant=passivant, bond_length=bond_length
+    )
+
+    builder = PassivationBuilder()
+    return builder.get_material(config)
+
+
+def passivate_dangling_bonds(
+    material: MaterialWithBuildMetadata,
+    passivant: str = "H",
+    bond_length: float = 1.0,
+    coordination_threshold: int = 3,
+    number_of_bonds_to_passivate: int = 1,
+    symmetry_tolerance: float = 0.1,
+    shadowing_radius: float = 2.5,
+    depth: float = 5.0,
+):
+    analyzer = CoordinationBasedPassivationMaterialAnalyzer(
+        material=material,
+        passivant=passivant,
+        bond_length=bond_length,
+        coordination_threshold=coordination_threshold,
+        number_of_bonds_to_passivate=number_of_bonds_to_passivate,
+        symmetry_tolerance=symmetry_tolerance,
+        shadowing_radius=shadowing_radius,
+        depth=depth,
     )
 
     passivant_coordinates = analyzer.get_passivant_coordinates()
