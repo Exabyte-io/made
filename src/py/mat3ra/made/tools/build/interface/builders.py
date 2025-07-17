@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Type
 
 from mat3ra.code.entity import InMemoryEntityPydantic
 
@@ -23,39 +23,40 @@ class InterfaceBuilderParameters(InMemoryEntityPydantic):
 
 class InterfaceBuilder(StackNComponentsBuilder):
     """
-    Creates matching interface between substrate and film by straining the film to match the substrate.
+    Creates an interface by straining the film to match the substrate.
     """
 
     _ConfigurationType = InterfaceConfiguration
     _BuildParametersType = InterfaceBuilderParameters
     _GeneratedItemType: Type[Material] = Material
 
-    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, SlabStrainedSupercellConfiguration):
-            builder = SlabStrainedSupercellBuilder()
-            return builder.get_material(configuration_or_material)
-        return super()._configuration_to_material(configuration_or_material)
+    @property
+    def stack_component_types_conversion_map(self):
+        return {
+            **super().stack_component_types_conversion_map,
+            SlabStrainedSupercellConfiguration: SlabStrainedSupercellBuilder,
+        }
 
     def _generate(self, configuration: InterfaceConfiguration) -> Material:
-        film_material = self._configuration_to_material(configuration.film_configuration)
-        substrate_material = self._configuration_to_material(configuration.substrate_configuration)
+        film_material = self._stack_component_to_material(configuration.film_configuration, configuration)
+        substrate_material = self._stack_component_to_material(configuration.substrate_configuration, configuration)
 
         film_material.set_labels_from_value(InterfacePartsEnum.FILM)
         substrate_material.set_labels_from_value(InterfacePartsEnum.SUBSTRATE)
 
+        # Apply xy shift to the film material
         stacking_axis = AXIS_TO_INDEX_MAP[configuration.direction.value]
         other_axes = [i for i in range(3) if i != stacking_axis]
         translation_vector = [0.0, 0.0, 0.0]
         translation_vector[other_axes[0]] = configuration.xy_shift[0]
         translation_vector[other_axes[1]] = configuration.xy_shift[1]
-
         film_material = translate_by_vector(film_material, translation_vector, use_cartesian_coordinates=True)
+
         stack_configuration = StackConfiguration(
             stack_components=[substrate_material, film_material, configuration.vacuum_configuration],
             gaps=configuration.gaps,
             direction=configuration.direction,
         )
-
         interface = super()._generate(stack_configuration)
         wrapped_interface = wrap_to_unit_cell(interface)
         return wrapped_interface

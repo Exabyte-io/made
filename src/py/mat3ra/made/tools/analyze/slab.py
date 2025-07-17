@@ -3,6 +3,7 @@ from typing import Type
 from mat3ra.made.utils import get_atomic_coordinates_extremum
 
 from ..build import BuildMetadata, MaterialWithBuildMetadata
+from ..build.slab.builders import SlabBuilderParameters
 from ..build.slab.configurations import SlabConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
 from . import BaseMaterialAnalyzer
@@ -12,6 +13,7 @@ from .crystal_site import CrystalSiteAnalyzer
 class BuildMetadataAnalyzer(BaseMaterialAnalyzer):
     material: MaterialWithBuildMetadata
     configuration_cls: None
+    build_parameters_cls: None
 
     @property
     def build_metadata(self) -> BuildMetadata:
@@ -23,11 +25,12 @@ class BuildMetadataAnalyzer(BaseMaterialAnalyzer):
 
     @property
     def build_parameters(self) -> "configuration_cls":
-        return self.configuration_cls(**self.build_metadata.build_parameters)
+        return self.build_parameters_cls(**self.build_metadata.build_parameters)
 
 
 class SlabMaterialAnalyzer(BuildMetadataAnalyzer, CrystalSiteAnalyzer):
     configuration_cls: Type[SlabConfiguration] = SlabConfiguration
+    build_parameters_cls: Type[SlabBuilderParameters] = SlabBuilderParameters
 
     @property
     def number_of_layers(self) -> int:

@@ -104,8 +104,6 @@ def get_commensurate_strained_configurations(
         number_of_layers (int): Number of atomic layers in the slab.
         vacuum (float): Size of the vacuum layer in Angstroms.
         match_id (int): ID of the match to use (0 for first match).
-        direction (AxisEnum): Direction for the gap configuration.
-        gap (float): The gap between the two phases in Angstroms.
 
     Returns:
         Tuple[List[SlabStrainedSupercellConfiguration], float]:

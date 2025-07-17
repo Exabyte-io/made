@@ -69,18 +69,18 @@ class SlabBuilder(StackNComponentsBuilder):
     _BuildParametersType = SlabBuilderParameters
     _DefaultBuildParameters: SlabBuilderParameters = SlabBuilderParameters()
 
-    def _configuration_to_material(self, configuration_or_material: Any) -> Material:
-        if isinstance(configuration_or_material, AtomicLayersUniqueRepeatedConfiguration):
-            builder = AtomicLayersUniqueRepeatedBuilder()
-            return builder.get_material(configuration_or_material)
-        return super()._configuration_to_material(configuration_or_material)
+    @property
+    def stack_component_types_conversion_map(self):
+        return {
+            **super().stack_component_types_conversion_map,
+            AtomicLayersUniqueRepeatedConfiguration: AtomicLayersUniqueRepeatedBuilder,
+        }
 
     def _generate(self, configuration: SlabConfiguration) -> Material:
         stack_as_material = super()._generate(configuration)
         supercell_slab = supercell(stack_as_material, self.build_parameters.xy_supercell_matrix)
         if self.build_parameters.use_orthogonal_c:
             supercell_slab = get_orthogonal_c_slab(supercell_slab)
-
         return supercell_slab
 
     def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:

@@ -1,4 +1,4 @@
-from typing import List, Callable, Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 
@@ -6,7 +6,6 @@ from mat3ra.made.material import Material
 from .configuration import (
     PointDefectConfigurationLegacy,
     AdatomSlabPointDefectConfiguration,
-    IslandSlabDefectConfiguration,
     TerraceSlabDefectConfiguration,
     PointDefectPairConfiguration,
 )
@@ -15,7 +14,6 @@ from .point.builders import PointDefectBuilder
 from mat3ra.made.utils import get_atomic_coordinates_extremum
 from ...build import BaseBuilder
 from ...modify import (
-    filter_by_box,
     filter_by_condition_on_coordinates,
     translate_to_z_level,
     rotate,
@@ -84,68 +82,6 @@ class PointDefectPairBuilder(PointDefectBuilder, DefectPairBuilder):
         new_name = f"{updated_material.name}, {name_1} and {name_2} Defect Pair"
         updated_material.name = new_name
         return updated_material
-
-
-class IslandSlabDefectBuilder(DefectBuilder):
-    _ConfigurationType: type(IslandSlabDefectConfiguration) = IslandSlabDefectConfiguration  # type: ignore
-    _GeneratedItemType: Material = Material
-
-    @staticmethod
-    def _default_condition(coordinate: List[float]):
-        return True
-
-    def create_island(
-        self,
-        material: Material,
-        condition: Optional[Callable[[List[float]], bool]] = None,
-        thickness: int = 1,
-        use_cartesian_coordinates: bool = False,
-    ) -> Material:
-        """
-        Create an island at the specified position on the surface of the material.
-
-        Args:
-            material: The material to add the island to.
-            condition: The condition on coordinates to describe the island.
-            thickness: The thickness of the island in layers.
-            use_cartesian_coordinates: Whether to use Cartesian coordinates for the condition.
-        Returns:
-            The material with the island added.
-        """
-        new_material = material.clone()
-        original_max_z = get_atomic_coordinates_extremum(new_material, use_cartesian_coordinates=True)
-        material_with_additional_layers = self.create_material_with_additional_layers(new_material, thickness)
-        added_layers_max_z = get_atomic_coordinates_extremum(
-            material_with_additional_layers, use_cartesian_coordinates=True
-        )
-        if condition is None:
-            condition = self._default_condition
-
-        atoms_within_island = filter_by_condition_on_coordinates(
-            material=material_with_additional_layers,
-            condition=condition,
-            use_cartesian_coordinates=use_cartesian_coordinates,
-        )
-        # Filter atoms in the added layers between the original and added layers
-        island_material = filter_by_box(
-            material=atoms_within_island,
-            min_coordinate=[0, 0, original_max_z],
-            max_coordinate=[material.lattice.a, material.lattice.b, added_layers_max_z],
-            use_cartesian_coordinates=True,
-        )
-
-        return self.merge_slab_and_defect(island_material, new_material)
-
-    def _generate(self, configuration: _ConfigurationType) -> List[_GeneratedItemType]:
-        condition_callable = configuration.condition.condition
-        return [
-            self.create_island(
-                material=configuration.crystal,
-                condition=condition_callable,
-                thickness=configuration.number_of_added_layers,
-                use_cartesian_coordinates=configuration.use_cartesian_coordinates,
-            )
-        ]
 
 
 class TerraceSlabDefectBuilder(DefectBuilder):

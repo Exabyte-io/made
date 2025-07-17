@@ -1,43 +1,43 @@
 import pytest
+from mat3ra.made.material import Material
+from mat3ra.made.tools.build.defect.island.helpers import create_island_defect
+from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.made.tools.utils import coordinate as CoordinateCondition
+from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
+from unit.fixtures.island import ISLAND_SLAB_Si_001_CYLINDER_CONDITION_1_LAYER
+from unit.utils import assert_two_entities_deep_almost_equal
 
-# from mat3ra.made.tools.build.defect.builders import IslandSlabDefectBuilder
-# from mat3ra.made.tools.build.defect.configuration import IslandSlabDefectConfiguration
-# from mat3ra.made.tools.utils import coordinate as CoordinateCondition
-from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
-# from mat3ra.made.material import Material
-
-
-@pytest.mark.skip(reason="we'll fix before epic-7623 is merged")
 @pytest.mark.parametrize(
-    "crystal_config, condition_params, defect_type, num_added_layers, num_atoms_in_island, expected_last_element",
+    "slab_parameters, condition_class, condition_params, num_added_layers, expected_config",
     [
         (
-            SI_CONVENTIONAL_SLAB_001,
-            {"center_position": [0.5, 0.5], "radius": 0.15, "min_z": 0, "max_z": 1},
-            "island",
+            {"crystal": BULK_Si_CONVENTIONAL, "number_of_layers": 2, "xy_supercell_matrix": [[3, 0], [0, 3]]},
+            CoordinateCondition.CylinderCoordinateCondition,
+            {"center_position": [0.5, 0.5], "radius": 0.25, "min_z": 0, "max_z": 1},
             1,
-            1,
-            "Si",
+            ISLAND_SLAB_Si_001_CYLINDER_CONDITION_1_LAYER,
         )
     ],
 )
-def test_create_island(
-    crystal_config, condition_params, defect_type, num_added_layers, num_atoms_in_island, expected_last_element
-):
-    # TODO: use TiN
-    # crystal = Material.create(crystal_config)
-    # condition = CoordinateCondition.CylinderCoordinateCondition(**condition_params)
-    # island_config = IslandSlabDefectConfiguration(
-    #     crystal=crystal,
-    #     defect_type=defect_type,
-    #     condition=condition,
-    #     number_of_added_layers=num_added_layers,
-    # )
+def test_create_island_defect(slab_parameters, condition_class, condition_params, num_added_layers, expected_config):
+    slab = create_slab(
+        Material.create(slab_parameters["crystal"]),
+        number_of_layers=slab_parameters["number_of_layers"],
+        xy_supercell_matrix=slab_parameters["xy_supercell_matrix"],
+    )
+    condition = condition_class(
+        center_position=condition_params["center_position"],
+        radius=condition_params["radius"],
+        min_z=condition_params["min_z"],
+        max_z=condition_params["max_z"],
+    )
 
-    # defect = create_slab_defect(configuration=island_config, builder=IslandSlabDefectBuilder())
-
-    # # 1 atom in the island were added for this configuration with 001 slab orientation
-    # assert len(defect.basis.elements.values) == len(crystal.basis.elements.values) + num_atoms_in_island
-    # assert defect.basis.elements.values[-1] == expected_last_element
-    pass
+    defect = create_island_defect(
+        slab=slab,
+        condition=condition,
+        use_cartesian_coordinates=False,
+        number_of_added_layers=1,
+    )
+    defect.metadata.build = []
+    assert_two_entities_deep_almost_equal(defect, expected_config)

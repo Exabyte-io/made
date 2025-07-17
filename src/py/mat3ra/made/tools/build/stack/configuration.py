@@ -14,5 +14,12 @@ class StackConfiguration(StackSchema, BaseConfigurationPydantic):
     gaps: ArrayWithIds = ArrayWithIds.from_values([])
     direction: AxisEnum = AxisEnum.z
 
+    def __init__(self, **data):
+        # Convert gaps to ArrayWithIds if not already
+        gaps = data.get("gaps", [])
+        if not isinstance(gaps, ArrayWithIds):
+            data["gaps"] = ArrayWithIds.from_values(gaps)
+        super().__init__(**data)
+
     def get_gap_by_id(self, gap_id: int) -> float:
         return self.gaps.get_element_value_by_index(gap_id)
