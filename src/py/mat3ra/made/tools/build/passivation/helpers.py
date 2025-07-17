@@ -32,11 +32,13 @@ def create_passivated_surface(
 
     passivant_coordinates = analyzer.get_passivant_coordinates()
     passivant_configs = [
-        AtomAtCoordinateConfiguration(element=AtomSchema(chemical_element=passivant), coordinate=coord)
+        AtomAtCoordinateConfiguration(
+            crystal=material, element=AtomSchema(chemical_element=passivant), coordinate=coord
+        )
         for coord in passivant_coordinates
     ]
     config = PassivationConfiguration(
-        merge_components=[material + passivant_configs], passivant=passivant, bond_length=bond_length
+        merge_components=[material, *passivant_configs], passivant=passivant, bond_length=bond_length
     )
 
     builder = PassivationBuilder()
