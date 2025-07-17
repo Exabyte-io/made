@@ -1,11 +1,11 @@
-import scipy as sp
+import sympy as sp
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.perturbation import (
+from .configuration import (
     PerturbationConfiguration,
 )
-from mat3ra.made.tools.build.perturbation.builders import PerturbationBuilder
-from mat3ra.made.tools.utils.perturbation import PerturbationFunctionHolder
+from .builders import PerturbationBuilder
+from ...utils.perturbation import PerturbationFunctionHolder
 
 
 def create_perturbation(
@@ -26,10 +26,14 @@ def create_perturbation(
     Returns:
         Material: The perturbed material.
     """
+    variables = [str(s) for s in perturbation_function.free_symbols]
 
     configuration = PerturbationConfiguration(
         material=material,
-        perturbation_function_holder=perturbation_function,
+        perturbation_function_holder=PerturbationFunctionHolder(
+            function_str=perturbation_function,
+            variables=variables,
+        ),
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
     if is_isometric:
