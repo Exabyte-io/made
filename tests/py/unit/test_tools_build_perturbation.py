@@ -2,7 +2,7 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.perturbation import create_perturbation
-from mat3ra.made.tools.build.perturbation.builders import SlabPerturbationBuilder
+from mat3ra.made.tools.build.perturbation.builders import PerturbationBuilder
 from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
 from mat3ra.made.tools.build.supercell import create_supercell
 from mat3ra.made.tools.utils.perturbation import SineWavePerturbationFunctionHolder
@@ -26,15 +26,15 @@ from .fixtures.monolayer import GRAPHENE
 def test_sine_perturbation(
     material_config, supercell_matrix, perturbation_function_params, use_cartesian, coordinates_to_check
 ):
-    material = Material.create(material_config)
+    material = MaterialWithBuildMetadata.create(material_config)
     slab = create_supercell(material, supercell_matrix)
 
     perturbation_config = PerturbationConfiguration(
         material=slab,
-        perturbation_function=SineWavePerturbationFunctionHolder(**perturbation_function_params),
+        perturbation_function_holder=SineWavePerturbationFunctionHolder(**perturbation_function_params),
         use_cartesian_coordinates=use_cartesian,
     )
-    builder = SlabPerturbationBuilder()
+    builder = PerturbationBuilder()
     perturbed_slab = builder.get_material(perturbation_config)
     # Check selected atoms to avoid using 100+ atoms fixture
     for index, expected_coord in coordinates_to_check.items():
