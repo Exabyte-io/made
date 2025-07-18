@@ -5,7 +5,7 @@ import numpy as np
 from ...analyze.material import MaterialWithCrystalSites
 from ...analyze.other import get_surface_atom_indices
 from ...analyze.slab import SlabMaterialAnalyzer
-from ...bonds import BondDirections
+from ...bonds import BondDirections, BondDirectionsTemplatesForElement
 from ...enums import SurfaceTypes
 
 
@@ -14,7 +14,8 @@ class PassivationMaterialAnalyzer(SlabMaterialAnalyzer):
     bond_length: float = 1.0
     surface: SurfaceTypes = SurfaceTypes.TOP
 
-    def get_passivant_coordinates(self):
+    @property
+    def passivant_coordinates(self) -> List[List[float]]:
         raise NotImplementedError(
             "This method should be implemented in subclasses to return passivant coordinates based on the surface type."
         )
@@ -24,7 +25,8 @@ class SurfacePassivationMaterialAnalyzer(PassivationMaterialAnalyzer):
     shadowing_radius: float = 2.5
     depth: float = 5.0
 
-    def get_passivant_coordinates(
+    @property
+    def passivant_coordinates(
         self,
     ):
         """
@@ -69,9 +71,59 @@ class CoordinationBasedPassivationMaterialAnalyzer(SurfacePassivationMaterialAna
 
     @property
     def material_with_crystal_sites(self) -> MaterialWithCrystalSites:
-        return MaterialWithCrystalSites.from_material(material=self.material)
+        material_with_crystal_sites = MaterialWithCrystalSites.from_material(material=self.material)
+        material_with_crystal_sites.analyze()
+        return material_with_crystal_sites
 
-    def get_passivant_coordinates(
+    @property
+    def undercoordinated_atoms_indices(self):
+        return self.material_with_crystal_sites.get_undercoordinated_atom_indices(
+            cutoff=self.shadowing_radius,
+            coordination_threshold=self.coordination_threshold,
+        )
+
+    @property
+    def bonds_templates(self) -> List[BondDirectionsTemplatesForElement]:
+        """
+        Find unique bond directions based on the material's crystal sites.
+
+        Returns:
+            List[BondDirectionsTemplatesForElement]: A list of unique bond direction templates.
+        """
+        # TODO: bonds_templates will be passed from the self in the "controlled" version of this class
+        return self.material_with_crystal_sites.find_unique_bond_directions()
+
+    @property
+    def reconstructed_bonds(self) -> List[BondDirections]:
+        """
+        Find missing bonds for all sites based on the bond templates.
+
+        Returns:
+            List[BondDirections]: A list of reconstructed bond directions for each atom.
+        """
+        return self.material_with_crystal_sites.find_missing_bonds_for_all_sites(
+            bond_templates_list=self.bonds_templates,
+            max_bonds_to_add=self.number_of_bonds_to_passivate,
+            angle_tolerance=self.symmetry_tolerance,
+        )
+
+    def _normalize_and_convert_bond_vector(self, bond_vector):
+        """
+        Normalize a bond vector and convert it to crystal coordinates.
+        Args:
+            bond_vector: The bond vector to normalize and convert.
+
+        Returns:
+            numpy.ndarray: The normalized bond vector in crystal coordinates, or None if the vector is zero.
+        """
+        bond_vector_np = np.array(bond_vector)
+        if np.linalg.norm(bond_vector_np) == 0:
+            return None
+        normalized_bond = bond_vector_np / np.linalg.norm(bond_vector_np) * self.bond_length
+        return self.material.basis.cell.convert_point_to_crystal(normalized_bond)
+
+    @property
+    def passivant_coordinates(
         self,
     ):
         """
@@ -83,30 +135,13 @@ class CoordinationBasedPassivationMaterialAnalyzer(SurfacePassivationMaterialAna
         Returns:
             list: Coordinates where passivants should be added.
         """
-        material_with_crystal_sites = self.material_with_crystal_sites
-        material_with_crystal_sites.analyze()
-
-        undercoordinated_atoms_indices = material_with_crystal_sites.get_undercoordinated_atom_indices(
-            cutoff=self.shadowing_radius,
-            coordination_threshold=self.coordination_threshold,
-        )
-        # TODO: bonds_templates will be passed from the self in the "controlled" version of this class
-        bonds_templates = material_with_crystal_sites.find_unique_bond_directions()
-        reconstructed_bonds: List[BondDirections] = material_with_crystal_sites.find_missing_bonds_for_all_sites(
-            bond_templates_list=bonds_templates,
-            max_bonds_to_add=self.number_of_bonds_to_passivate,
-            angle_tolerance=self.symmetry_tolerance,
-        )
-
         passivant_coordinates = []
 
-        for idx in undercoordinated_atoms_indices:
-            for bond_vector in reconstructed_bonds[idx]:
-                bond_vector_np = np.array(bond_vector)
-                if np.linalg.norm(bond_vector_np) == 0:
-                    continue  # Avoid division by zero
-                normalized_bond = bond_vector_np / np.linalg.norm(bond_vector_np) * self.bond_length
-                normalized_bond_crystal = self.material.basis.cell.convert_point_to_crystal(normalized_bond)
+        for idx in self.undercoordinated_atoms_indices:
+            for bond_vector in self.reconstructed_bonds[idx]:
+                normalized_bond_crystal = self._normalize_and_convert_bond_vector(bond_vector)
+                if normalized_bond_crystal is None:
+                    continue
                 passivant_coordinates.append(
                     np.array(self.material.basis.coordinates.get_element_value_by_index(idx))
                     + np.array(normalized_bond_crystal)

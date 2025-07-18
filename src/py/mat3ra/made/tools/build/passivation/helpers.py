@@ -37,7 +37,7 @@ def create_passivated_surface(
         material=material, passivant=passivant, bond_length=bond_length, shadowing_radius=shadowing_radius, depth=depth
     )
 
-    passivant_coordinates = analyzer.get_passivant_coordinates()
+    passivant_coordinates = analyzer.passivant_coordinates
     passivant_configs = [
         AtomAtCoordinateConfiguration(
             crystal=material, element=AtomSchema(chemical_element=passivant), coordinate=coord
@@ -73,7 +73,7 @@ def passivate_dangling_bonds(
         depth=depth,
     )
 
-    passivant_coordinates = analyzer.get_passivant_coordinates()
+    passivant_coordinates = analyzer.passivant_coordinates
     passivant_configs = [
         AtomAtCoordinateConfiguration(
             crystal=material, element=AtomSchema(chemical_element=passivant), coordinate=coord

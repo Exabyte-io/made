@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.made.tools.analyze.adatom import AdatomCrystalSiteMaterialAnalyzer, AdatomMaterialAnalyzer
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
@@ -16,6 +15,7 @@ from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum, AtomPlacementMethodEnum
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from unit.utils import TestPlatform, get_platform_specific_value
+
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
@@ -192,7 +192,6 @@ def test_adatom_crystal_site_material_analyzer(
     ],
 )
 def test_get_surface_atom_indices_top_and_bottom(material_config, expected_indices_top, expected_indices_bottom):
-
     material = Material.create(material_config)
     top_indices = get_surface_atom_indices(material, SurfaceTypes.TOP)
     bottom_indices = get_surface_atom_indices(material, SurfaceTypes.BOTTOM)
