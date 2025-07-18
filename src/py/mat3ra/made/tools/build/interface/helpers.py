@@ -164,6 +164,77 @@ def create_zsl_interface(
     return builder.get_material(interface_config)
 
 
+def create_zsl_interface_between_slabs(
+    substrate_slab: MaterialWithBuildMetadata,
+    film_slab: MaterialWithBuildMetadata,
+    gap: Optional[float] = None,
+    vacuum: float = 10.0,
+    xy_shift: Optional[List[float]] = None,
+    max_area: float = 200.0,
+    max_area_ratio_tol: float = 0.1,
+    max_length_tol: float = 0.03,
+    max_angle_tol: float = 0.01,
+    match_id: int = 0,
+) -> Material:
+    """
+    Create an interface between two slab materials using the ZSL algorithm.
+
+    Args:
+        substrate_slab (MaterialWithBuildMetadata): Substrate slab material.
+        film_slab (MaterialWithBuildMetadata): Film slab material.
+        gap (Optional[float]): Gap between the two materials, in Angstroms.
+        vacuum (float): Size of the vacuum layer in Angstroms.
+        xy_shift (Optional[List[float]]): Shift in x and y directions, in Angstroms. Defaults to [0, 0].
+        max_area (float): Maximum area of the supercell.
+        max_area_ratio_tol (float): Tolerance for the ratio of the areas of the two supercells.
+        max_length_tol (float): Tolerance for the length of the supercell vectors.
+        max_angle_tol (float): Tolerance for the angle between the supercell vectors.
+        match_id (int): Index of the match to use from the list of found ZSL matches.
+
+    Returns:
+        Material: The interface material.
+    """
+    if xy_shift is None:
+        xy_shift = [0, 0]
+
+    substrate_slab_config = SlabMaterialAnalyzer(material=substrate_slab).build_configuration
+    film_slab_config = SlabMaterialAnalyzer(material=film_slab).build_configuration
+
+    analyzer = ZSLInterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
+        max_area=max_area,
+        max_area_ratio_tol=max_area_ratio_tol,
+        max_length_tol=max_length_tol,
+        max_angle_tol=max_angle_tol,
+    )
+    interface_configurations = analyzer.get_strained_configurations()
+    if not interface_configurations:
+        raise ValueError("No ZSL match found for the given parameters.")
+
+    if match_id >= len(interface_configurations):
+        raise IndexError(f"match_id {match_id} is out of bounds for {len(interface_configurations)} matches found.")
+
+    selected_config = interface_configurations[match_id]
+
+    vacuum_configuration = VacuumConfiguration(
+        size=vacuum,
+    )
+
+    interface_config = InterfaceConfiguration(
+        stack_components=[
+            selected_config.substrate_configuration,
+            selected_config.film_configuration,
+            vacuum_configuration,
+        ],
+        gaps=ArrayWithIds.from_values(values=[gap, gap] if gap is not None else []),
+        xy_shift=xy_shift,
+    )
+
+    builder = InterfaceBuilder()
+    return builder.get_material(interface_config)
+
+
 def create_twisted_interface(
     material1: Material,
     material2: Material,

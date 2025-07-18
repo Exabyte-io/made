@@ -14,6 +14,7 @@ from mat3ra.made.tools.build.interface.helpers import (
     create_simple_interface_between_slabs,
     create_twisted_interface,
     create_zsl_interface,
+    create_zsl_interface_between_slabs,
 )
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
@@ -156,6 +157,42 @@ def test_create_zsl_interface(substrate, film, expected_interface):
         film_number_of_layers=film.number_of_layers,
         substrate_termination_formula=None,
         film_termination_formula=None,
+        gap=None,
+        vacuum=0.0,
+        xy_shift=[0, 0],
+        max_area=MAX_AREA,
+        max_area_ratio_tol=0.1,
+        max_length_tol=0.05,
+        max_angle_tol=0.02,
+    )
+    interface.metadata.build = []
+    expected_interface["metadata"].pop("build", None)
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
+
+
+@pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
+def test_create_zsl_interface_between_slabs(substrate, film, expected_interface):
+    substrate_slab_config = SlabConfiguration.from_parameters(
+        material_or_dict=substrate.bulk_config,
+        miller_indices=substrate.miller_indices,
+        number_of_layers=substrate.number_of_layers,
+        vacuum=0.0,
+        termination_formula=None,
+    )
+    film_slab_config = SlabConfiguration.from_parameters(
+        material_or_dict=film.bulk_config,
+        miller_indices=film.miller_indices,
+        number_of_layers=film.number_of_layers,
+        vacuum=0.0,
+        termination_formula=None,
+    )
+
+    substrate_slab = SlabBuilder().get_material(substrate_slab_config)
+    film_slab = SlabBuilder().get_material(film_slab_config)
+
+    interface = create_zsl_interface_between_slabs(
+        substrate_slab=substrate_slab,
+        film_slab=film_slab,
         gap=None,
         vacuum=0.0,
         xy_shift=[0, 0],
