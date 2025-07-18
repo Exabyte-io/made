@@ -1,10 +1,10 @@
 import pytest
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.passivation.helpers import (
-    create_passivated_surface,
     get_coordination_numbers_distribution,
     get_unique_coordination_numbers,
     passivate_dangling_bonds,
+    passivate_surface,
 )
 
 from .fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
@@ -31,7 +31,7 @@ def test_passivate_surface(
     slab_config, passivant, bond_length, surface, passivation_parameters, expected_material_config
 ):
     slab = MaterialWithBuildMetadata.create(slab_config)
-    passivated_material = create_passivated_surface(slab, passivant, bond_length, **passivation_parameters)
+    passivated_material = passivate_surface(slab, passivant, bond_length, **passivation_parameters)
     assert_two_entities_deep_almost_equal(passivated_material, expected_material_config)
 
 

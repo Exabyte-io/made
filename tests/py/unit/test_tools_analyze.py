@@ -5,7 +5,7 @@ from mat3ra.made.tools.analyze.adatom import AdatomCrystalSiteMaterialAnalyzer, 
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import (
-    SurfaceTypes,
+    SurfaceTypesEnum,
     get_average_interlayer_distance,
     get_surface_area,
     get_surface_atom_indices,
@@ -193,7 +193,7 @@ def test_adatom_crystal_site_material_analyzer(
 )
 def test_get_surface_atom_indices_top_and_bottom(material_config, expected_indices_top, expected_indices_bottom):
     material = Material.create(material_config)
-    top_indices = get_surface_atom_indices(material, SurfaceTypes.TOP)
-    bottom_indices = get_surface_atom_indices(material, SurfaceTypes.BOTTOM)
+    top_indices = get_surface_atom_indices(material, SurfaceTypesEnum.TOP)
+    bottom_indices = get_surface_atom_indices(material, SurfaceTypesEnum.BOTTOM)
     assert set(top_indices) == set(expected_indices_top)
     assert set(bottom_indices) == set(expected_indices_bottom)

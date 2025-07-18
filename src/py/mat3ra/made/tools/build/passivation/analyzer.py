@@ -6,13 +6,13 @@ from ...analyze.material import MaterialWithCrystalSites
 from ...analyze.other import get_surface_atom_indices
 from ...analyze.slab import SlabMaterialAnalyzer
 from ...bonds import BondDirections, BondDirectionsTemplatesForElement
-from ...enums import SurfaceTypes
+from ...enums import SurfaceTypesEnum
 
 
 class PassivationMaterialAnalyzer(SlabMaterialAnalyzer):
     passivant: str = "H"
     bond_length: float = 1.0
-    surface: SurfaceTypes = SurfaceTypes.TOP
+    surface: SurfaceTypesEnum = SurfaceTypesEnum.TOP
 
     @property
     def passivant_coordinates(self) -> List[List[float]]:
@@ -42,7 +42,7 @@ class SurfacePassivationMaterialAnalyzer(PassivationMaterialAnalyzer):
         surface_atoms_coordinates = [
             self.material.basis.coordinates.get_element_value_by_index(i) for i in surface_atoms_indices
         ]
-        bond_vector = [0, 0, self.bond_length] if self.surface == SurfaceTypes.TOP else [0, 0, -self.bond_length]
+        bond_vector = [0, 0, self.bond_length] if self.surface == SurfaceTypesEnum.TOP else [0, 0, -self.bond_length]
         passivant_bond_vector_crystal = self.material.basis.cell.convert_point_to_crystal(bond_vector)
         return (np.array(surface_atoms_coordinates) + np.array(passivant_bond_vector_crystal)).tolist()
 

@@ -13,28 +13,37 @@ from mat3ra.made.tools.build.passivation.analyzer import (
 )
 from mat3ra.made.tools.build.passivation.builders import PassivationBuilder
 from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
+from mat3ra.made.tools.enums import SurfaceTypesEnum
 
 
-def create_passivated_surface(
+def passivate_surface(
     material: MaterialWithBuildMetadata,
     passivant: str = "H",
     bond_length: float = 1.0,
     shadowing_radius: float = 2.5,
     depth: float = 5.0,
+    surface: SurfaceTypesEnum = SurfaceTypesEnum.TOP,
 ) -> Material:
     """
     Create a passivated material by adding passivant atoms to the surface of the provided material.
 
     Args:
-        material (Material): The material to be passivated.
+        material (Material): The material to be passivated. Should have vacuum space above or below the surface.
         passivant (str): The chemical symbol of the passivating atom (default is 'H').
-        bond_length (float): The bond length for the passivation (default is 1.0).
-
+        bond_length (float): The bond length for the passivation (default is 1.0). Å
+        shadowing_radius (float): The radius with which an atom shadows/covers underlying atom from being exposed. Å
+        depth (float): The depth from the most top (or bottom) atom into the slab to search for exposed atoms. Å
+        surface (SurfaceTypesEnum): The surface to passivate (TOP, BOTTOM, or BOTH).
     Returns:
         Material: The passivated material.
     """
     analyzer = SurfacePassivationMaterialAnalyzer(
-        material=material, passivant=passivant, bond_length=bond_length, shadowing_radius=shadowing_radius, depth=depth
+        material=material,
+        passivant=passivant,
+        bond_length=bond_length,
+        shadowing_radius=shadowing_radius,
+        depth=depth,
+        surface=surface,
     )
 
     passivant_coordinates = analyzer.passivant_coordinates
@@ -62,6 +71,22 @@ def passivate_dangling_bonds(
     shadowing_radius: float = 2.5,
     depth: float = 5.0,
 ) -> MaterialWithBuildMetadata:
+    """
+    Create a passivated material by adding passivant atoms to the undercoordinated atoms of the provided material.
+
+    Args:
+        material (MaterialWithBuildMetadata): The material to be passivated.
+        passivant (str): The chemical symbol of the passivating atom (default is 'H').
+        bond_length (float): The bond length for the passivation (default is 1.0). Å
+        coordination_threshold (int): The coordination number threshold for an atom to be considered undercoordinated.
+        number_of_bonds_to_passivate (int): The maximum number of bonds to passivate for each undercoordinated atom.
+        symmetry_tolerance (float): The tolerance for symmetry comparison of vectors for bonds.
+        shadowing_radius (float): The radius with which an atom shadows/covers underlying atom from being exposed. Å
+        depth (float): The depth from the most top (or bottom) atom into the slab to search for exposed atoms. Å
+
+    Returns:
+        MaterialWithBuildMetadata: The passivated material with dangling bonds filled.
+    """
     analyzer = CoordinationBasedPassivationMaterialAnalyzer(
         material=material,
         passivant=passivant,

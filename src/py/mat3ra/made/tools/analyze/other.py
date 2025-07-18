@@ -5,7 +5,7 @@ from mat3ra.made.material import Material
 from scipy.spatial import cKDTree
 
 from ..convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
-from ..enums import SurfaceTypes
+from ..enums import SurfaceTypesEnum
 from ..third_party import ASEAtoms, PymatgenIStructure
 from ..utils import decorator_convert_position_to_coordinate
 from .utils import decorator_handle_periodic_boundary_conditions
@@ -281,7 +281,7 @@ def get_atom_indices_with_condition_on_coordinates(
     return selected_indices
 
 
-def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: SurfaceTypes) -> bool:
+def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: SurfaceTypesEnum) -> bool:
     """
     Check if the height of an atom is within the specified limits.
 
@@ -289,16 +289,16 @@ def is_height_within_limits(z: float, z_extremum: float, depth: float, surface: 
         z (float): The z-coordinate of the atom.
         z_extremum (float): The extremum z-coordinate of the surface.
         depth (float): The depth from the surface to look for exposed atoms.
-        surface (SurfaceTypes): The surface type (top or bottom).
+        surface (SurfaceTypesEnum): The surface type (top or bottom).
 
     Returns:
         bool: True if the height is within the limits, False otherwise.
     """
-    return (z >= z_extremum - depth) if surface == SurfaceTypes.TOP else (z <= z_extremum + depth)
+    return (z >= z_extremum - depth) if surface == SurfaceTypesEnum.TOP else (z <= z_extremum + depth)
 
 
 def is_shadowed_by_neighbors_from_surface(
-    z: float, neighbors_indices: List[int], surface: SurfaceTypes, coordinates: np.ndarray
+    z: float, neighbors_indices: List[int], surface: SurfaceTypesEnum, coordinates: np.ndarray
 ) -> bool:
     """
     Check if any one of the neighboring atoms shadow the atom from the surface by being closer to the specified surface.
@@ -306,27 +306,30 @@ def is_shadowed_by_neighbors_from_surface(
     Args:
         z (float): The z-coordinate of the atom.
         neighbors_indices (List[int]): List of indices of neighboring atoms.
-        surface (SurfaceTypes): The surface type (top or bottom).
+        surface (SurfaceTypesEnum): The surface type (top or bottom).
         coordinates (np.ndarray): The coordinates of the atoms.
 
     Returns:
         bool: True if the atom is not shadowed, False otherwise.
     """
     return not any(
-        (coordinates[n][2] > z if surface == SurfaceTypes.TOP else coordinates[n][2] < z) for n in neighbors_indices
+        (coordinates[n][2] > z if surface == SurfaceTypesEnum.TOP else coordinates[n][2] < z) for n in neighbors_indices
     )
 
 
 @decorator_handle_periodic_boundary_conditions(cutoff=0.25)
 def get_surface_atom_indices(
-    material: Material, surface: SurfaceTypes = SurfaceTypes.TOP, shadowing_radius: float = 2.5, depth: float = 5
+    material: Material,
+    surface: SurfaceTypesEnum = SurfaceTypesEnum.TOP,
+    shadowing_radius: float = 2.5,
+    depth: float = 5,
 ) -> List[int]:
     """
     Identify exposed atoms on the top or bottom surface of the material.
 
     Args:
         material (Material): Material object to get surface atoms from.
-        surface (SurfaceTypes): Specify "top" or "bottom" to detect the respective surface atoms.
+        surface (SurfaceTypesEnum): Specify "top" or "bottom" to detect the respective surface atoms.
         shadowing_radius (float): Radius for atoms shadowing underlying from detecting as exposed.
         depth (float): Depth from the surface to look for exposed atoms.
 
@@ -343,7 +346,9 @@ def get_surface_atom_indices(
     unit_cell_mask = (z_coords > 0) & (z_coords <= material.lattice.c)
     coords_inside_unit_cell = coordinates[unit_cell_mask]
     z_extremum = (
-        np.max(coords_inside_unit_cell[:, 2]) if surface == SurfaceTypes.TOP else np.min(coords_inside_unit_cell[:, 2])
+        np.max(coords_inside_unit_cell[:, 2])
+        if surface == SurfaceTypesEnum.TOP
+        else np.min(coords_inside_unit_cell[:, 2])
     )
 
     # First filter by height to be within the specified depth from the surface
@@ -377,12 +382,12 @@ def get_surface_atom_indices(
 
     except Exception:
         # Fallback if KDTree fails completely - use simple z-coordinate based detection
-        z_threshold = z_extremum - (0.5 * depth) if surface == SurfaceTypes.TOP else z_extremum + (0.5 * depth)
+        z_threshold = z_extremum - (0.5 * depth) if surface == SurfaceTypesEnum.TOP else z_extremum + (0.5 * depth)
         exposed_atoms_indices = [
             ids[i]
             for i in potential_surface_indices
-            if (surface == SurfaceTypes.TOP and z_coords[i] >= z_threshold)
-            or (surface == SurfaceTypes.BOTTOM and z_coords[i] <= z_threshold)
+            if (surface == SurfaceTypesEnum.TOP and z_coords[i] >= z_threshold)
+            or (surface == SurfaceTypesEnum.BOTTOM and z_coords[i] <= z_threshold)
         ]
 
     return exposed_atoms_indices
