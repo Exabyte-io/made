@@ -4,7 +4,12 @@ from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.made.tools.analyze.adatom import AdatomCrystalSiteMaterialAnalyzer, AdatomMaterialAnalyzer
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
-from mat3ra.made.tools.analyze.other import get_average_interlayer_distance, get_surface_area
+from mat3ra.made.tools.analyze.other import (
+    SurfaceTypesEnum,
+    get_average_interlayer_distance,
+    get_surface_area,
+    get_surface_atom_indices,
+)
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum, AtomPlacementMethodEnum
@@ -174,3 +179,21 @@ def test_adatom_crystal_site_material_analyzer(
     resolved_coord = analyzer.coordinate_in_added_component
 
     assert np.allclose(resolved_coord, expected_coordinate, atol=1e-6)
+
+
+@pytest.mark.parametrize(
+    "material_config, expected_indices_top, expected_indices_bottom",
+    [
+        (
+            SI_CONVENTIONAL_SLAB_001,
+            [8, 14],
+            [3, 4, 5],
+        ),
+    ],
+)
+def test_get_surface_atom_indices_top_and_bottom(material_config, expected_indices_top, expected_indices_bottom):
+    material = Material.create(material_config)
+    top_indices = get_surface_atom_indices(material, SurfaceTypesEnum.TOP)
+    bottom_indices = get_surface_atom_indices(material, SurfaceTypesEnum.BOTTOM)
+    assert set(top_indices) == set(expected_indices_top)
+    assert set(bottom_indices) == set(expected_indices_bottom)
