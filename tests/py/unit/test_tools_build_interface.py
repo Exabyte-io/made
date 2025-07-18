@@ -1,10 +1,10 @@
 import platform
 from types import SimpleNamespace
-from typing import Final
 
 import pytest
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
@@ -19,30 +19,29 @@ from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
-
-# Test the analyzer directly
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.interface.twisted_nanoribbons import TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
-PARAMETERS_SLAB_Si_001: Final = SimpleNamespace(
-    bulk_config=BULK_Si_CONVENTIONAL,
-    miller_indices=(0, 0, 1),
-    number_of_layers=2,
-    vacuum=0.0,
-)
-
-PARAMETERS_SLAB_Ge_001: Final = SimpleNamespace(
-    bulk_config=BULK_Ge_CONVENTIONAL,
-    miller_indices=(0, 0, 1),
-    number_of_layers=2,
-    vacuum=0.0,
-)
-
-
-SIMPLE_INTERFACE_BUILDER_TEST_CASES = [(PARAMETERS_SLAB_Si_001, PARAMETERS_SLAB_Ge_001, INTERFACE_Si_001_Ge_001)]
+SIMPLE_INTERFACE_BUILDER_TEST_CASES = [
+    (
+        SimpleNamespace(
+            bulk_config=BULK_Si_CONVENTIONAL,
+            miller_indices=(0, 0, 1),
+            number_of_layers=2,
+            vacuum=0.0,
+        ),
+        SimpleNamespace(
+            bulk_config=BULK_Ge_CONVENTIONAL,
+            miller_indices=(0, 0, 1),
+            number_of_layers=2,
+            vacuum=0.0,
+        ),
+        INTERFACE_Si_001_Ge_001,
+    )
+]
 
 
 MAX_AREA = 100

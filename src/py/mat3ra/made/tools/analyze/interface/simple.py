@@ -7,9 +7,9 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabBuilderParameters
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
+from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from ...build.slab.builders import SlabBuilder, SlabBuilderParameters
+from ...build.slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
 
 
 class InterfaceAnalyzer(InMemoryEntityPydantic):
