@@ -181,8 +181,20 @@ def test_adatom_crystal_site_material_analyzer(
     assert np.allclose(resolved_coord, expected_coordinate, atol=1e-6)
 
 
-def test_get_surface_atom_indices_top_and_bottom():
-    material = Material.create(SI_CONVENTIONAL_SLAB_001)
+@pytest.mark.parametrize(
+    "material_config, expected_indices_top, expected_indices_bottom",
+    [
+        (
+            SI_CONVENTIONAL_SLAB_001,
+            [8, 14],
+            [3, 4, 5],
+        ),
+    ],
+)
+def test_get_surface_atom_indices_top_and_bottom(material_config, expected_indices_top, expected_indices_bottom):
+
+    material = Material.create(material_config)
     top_indices = get_surface_atom_indices(material, SurfaceTypes.TOP)
     bottom_indices = get_surface_atom_indices(material, SurfaceTypes.BOTTOM)
-    assert isinstance(top_indices, list) and isinstance(bottom_indices, list)
+    assert set(top_indices) == set(expected_indices_top)
+    assert set(bottom_indices) == set(expected_indices_bottom)
