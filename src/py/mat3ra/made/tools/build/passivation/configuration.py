@@ -1,5 +1,8 @@
 from typing import List, Union
 
+from mat3ra.esse.models.materials_category.processed_structures.two_dimensional.passivation.configuration import (
+    PassivationConfigurationSchema,
+)
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from mat3ra.made.material import Material
@@ -8,7 +11,7 @@ from ..defect.point.builders import AtomAtCoordinateConfiguration
 from ..merge.configuration import MergeConfiguration
 
 
-class PassivationConfiguration(MergeConfiguration):
+class PassivationConfiguration(MergeConfiguration, PassivationConfigurationSchema):
     """
     Configuration for a passivation.
 
