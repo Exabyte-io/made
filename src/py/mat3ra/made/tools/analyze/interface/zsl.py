@@ -82,6 +82,8 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
 
     def get_strained_configuration_by_match_id(self, match_id: int) -> MatchedSubstrateFilmConfigurationHolder:
         match_holders = self.zsl_match_holders
+        if not match_holders:
+            raise ValueError("No ZSL matches found. Please check the input configurations.")
         if match_id < 0 or match_id >= len(match_holders):
             raise ValueError(f"Match ID {match_id} out of range. Available IDs: 0-{len(match_holders)-1}")
 

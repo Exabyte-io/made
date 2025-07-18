@@ -10,7 +10,11 @@ from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLattice
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceConfiguration
-from mat3ra.made.tools.build.interface.helpers import create_interface, create_twisted_interface
+from mat3ra.made.tools.build.interface.helpers import (
+    create_simple_interface,
+    create_twisted_interface,
+    create_zsl_interface,
+)
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
@@ -86,7 +90,7 @@ def test_zsl_interface_builder(substrate, film, expected_interface):
     analyzer = ZSLInterfaceAnalyzer(
         substrate_slab_configuration=substrate_slab_config,
         film_slab_configuration=film_slab_config,
-        max_area=50.0,
+        max_area=MAX_AREA,
         max_area_ratio_tol=0.1,
         max_length_tol=0.05,
         max_angle_tol=0.02,
@@ -110,30 +114,47 @@ def test_zsl_interface_builder(substrate, film, expected_interface):
 
 
 @pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
-def test_create_interface(substrate, film, expected_interface):
-    substrate_slab_config = SlabConfiguration.from_parameters(
-        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
+def test_create_simple_interface(substrate, film, expected_interface):
+    interface = create_simple_interface(
+        substrate_crystal=substrate.bulk_config,
+        film_crystal=film.bulk_config,
+        substrate_miller_indices=substrate.miller_indices,
+        film_miller_indices=film.miller_indices,
+        substrate_number_of_layers=substrate.number_of_layers,
+        film_number_of_layers=film.number_of_layers,
+        substrate_termination_formula=None,
+        film_termination_formula=None,
+        gap=None,
+        vacuum=0.0,
+        xy_shift=[0, 0],
     )
-    film_slab_config = SlabConfiguration.from_parameters(
-        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
-    )
-
-    analyzer = InterfaceAnalyzer(
-        substrate_slab_configuration=substrate_slab_config,
-        film_slab_configuration=film_slab_config,
-    )
-
-    film_configuration = analyzer.film_strained_configuration
-    substrate_configuration = analyzer.substrate_strained_configuration
-    vacuum_configuration = film_slab_config.vacuum_configuration
-
-    configuration = InterfaceConfiguration(
-        stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
-    )
-
-    interface = create_interface(configuration)
     interface.metadata.build = []
     expected_interface["metadata"].pop("build", None)
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
+
+
+@pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
+def test_create_zsl_interface(substrate, film, expected_interface):
+    interface = create_zsl_interface(
+        substrate_crystal=substrate.bulk_config,
+        film_crystal=film.bulk_config,
+        substrate_miller_indices=substrate.miller_indices,
+        film_miller_indices=film.miller_indices,
+        substrate_number_of_layers=substrate.number_of_layers,
+        film_number_of_layers=film.number_of_layers,
+        substrate_termination_formula=None,
+        film_termination_formula=None,
+        gap=None,
+        vacuum=0.0,
+        xy_shift=[0, 0],
+        max_area=MAX_AREA,
+        max_area_ratio_tol=0.1,
+        max_length_tol=0.05,
+        max_angle_tol=0.02,
+    )
+    interface.metadata.build = []
+    expected_interface["metadata"].pop("build", None)
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
 @pytest.mark.parametrize(
