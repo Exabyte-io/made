@@ -13,7 +13,7 @@ from ...third_party import (
 )
 
 
-class ASENanoparticleShapesEnum(str, Enum):
+class NanoparticleShapesEnum(str, Enum):
     """
     Enum for supported nanoparticle shapes.
     """

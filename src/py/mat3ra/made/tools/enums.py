@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SurfaceTypes(str, Enum):
+class SurfaceTypesEnum(str, Enum):
     TOP = "top"
     BOTTOM = "bottom"
     BOTH = "both"

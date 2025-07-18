@@ -14,7 +14,7 @@ class RadialDistributionFunction(BaseModel):
 
     @classmethod
     def from_material(cls, material: Material, cutoff: float = 10.0, bin_size: float = 0.1):
-        analyzer = BaseMaterialAnalyzer(material)
+        analyzer = BaseMaterialAnalyzer(material=material)
         distances = analyzer.pairwise_distances
         density = analyzer.atomic_density
         distances = distances[distances <= cutoff]
