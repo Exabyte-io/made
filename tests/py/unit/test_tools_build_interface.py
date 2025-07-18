@@ -16,8 +16,8 @@ from mat3ra.made.tools.build.interface.helpers import (
     create_zsl_interface,
 )
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
+from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 # Test the analyzer directly

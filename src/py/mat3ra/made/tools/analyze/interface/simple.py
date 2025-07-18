@@ -1,4 +1,5 @@
 from functools import cached_property
+from typing import Optional
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
@@ -7,7 +8,7 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     SupercellMatrix2DSchema,
 )
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
+from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabBuilderParameters
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
 
 
@@ -22,6 +23,8 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
 
     substrate_slab_configuration: SlabConfiguration
     film_slab_configuration: SlabConfiguration
+    substrate_build_parameters: Optional[SlabBuilderParameters] = None
+    film_build_parameters: Optional[SlabBuilderParameters] = None
 
     def get_component_material(self, configuration: SlabConfiguration):
         return SlabBuilder().get_material(configuration)
@@ -113,7 +116,9 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
             film_strain_matrix = self._no_strain_matrix
 
         substrate_config = self.get_component_strained_configuration(
-            substrate_slab_config, substrate_strain_matrix, xy_supercell_matrix=substrate_xy_supercell_matrix
+            substrate_slab_config,
+            substrate_strain_matrix,
+            xy_supercell_matrix=substrate_xy_supercell_matrix,
         )
 
         film_config = self.get_component_strained_configuration(
@@ -128,16 +133,22 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
 
     @property
     def substrate_supercell_matrix(self) -> SupercellMatrix2DSchema:
+        if self.substrate_build_parameters and self.substrate_build_parameters.xy_supercell_matrix:
+            return SupercellMatrix2DSchema(root=self.substrate_build_parameters.xy_supercell_matrix)
         return self.identity_supercell
 
     @property
     def film_supercell_matrix(self) -> SupercellMatrix2DSchema:
+        if self.film_build_parameters and self.film_build_parameters.xy_supercell_matrix:
+            return SupercellMatrix2DSchema(root=self.film_build_parameters.xy_supercell_matrix)
         return self.identity_supercell
 
     @cached_property
     def substrate_strained_configuration(self) -> SlabStrainedSupercellConfiguration:
         return self.get_component_strained_configuration(
-            self.substrate_slab_configuration, self.get_substrate_strain_matrix()
+            self.substrate_slab_configuration,
+            self._no_strain_matrix,
+            xy_supercell_matrix=self.substrate_supercell_matrix,
         )
 
     @cached_property
@@ -147,4 +158,5 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
             self.get_film_strain_matrix(
                 self.substrate_material.lattice.vector_arrays, self.film_material.lattice.vector_arrays
             ),
+            xy_supercell_matrix=self.film_supercell_matrix,
         )

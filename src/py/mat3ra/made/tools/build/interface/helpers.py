@@ -51,12 +51,14 @@ def create_simple_interface_between_slabs(
     Returns:
         Material: The interface material.
     """
-    substrate_slab_config = SlabMaterialAnalyzer(material=substrate_slab).build_configuration
-    film_slab_config = SlabMaterialAnalyzer(material=film_slab).build_configuration
+    substrate_analyzer = SlabMaterialAnalyzer(material=substrate_slab)
+    film_analyzer = SlabMaterialAnalyzer(material=film_slab)
 
     analyzer = InterfaceAnalyzer(
-        substrate_slab_configuration=substrate_slab_config,
-        film_slab_configuration=film_slab_config,
+        substrate_slab_configuration=substrate_analyzer.build_configuration,
+        film_slab_configuration=film_analyzer.build_configuration,
+        substrate_build_parameters=substrate_analyzer.build_parameters,
+        film_build_parameters=film_analyzer.build_parameters,
     )
 
     film_configuration = analyzer.film_strained_configuration
