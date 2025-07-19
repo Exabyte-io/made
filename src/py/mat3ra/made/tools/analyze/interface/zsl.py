@@ -107,6 +107,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             substrate_xy_supercell_matrix=match_holder.substrate_transformation_matrix,
             film_xy_supercell_matrix=match_holder.film_transformation_matrix,
             film_strain_matrix=film_strain_3d,
+            total_strain_percentage=match_holder.total_strain_percentage,
         )
 
     def get_strained_configurations(

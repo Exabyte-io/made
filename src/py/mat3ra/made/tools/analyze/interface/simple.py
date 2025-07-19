@@ -7,9 +7,10 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+
 from ...build.slab.builders import SlabBuilder, SlabBuilderParameters
 from ...build.slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
+from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 
 
 class InterfaceAnalyzer(InMemoryEntityPydantic):
@@ -109,6 +110,7 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
         film_xy_supercell_matrix: SupercellMatrix2DSchema = None,
         substrate_strain_matrix: Matrix3x3Schema = None,
         film_strain_matrix: Matrix3x3Schema = None,
+        total_strain_percentage: Optional[float] = None,
     ) -> MatchedSubstrateFilmConfigurationHolder:
         if substrate_strain_matrix is None:
             substrate_strain_matrix = self._no_strain_matrix
@@ -129,6 +131,7 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
             match_id=match_id,
             substrate_configuration=substrate_config,
             film_configuration=film_config,
+            total_strain_percentage=total_strain_percentage,
         )
 
     @property

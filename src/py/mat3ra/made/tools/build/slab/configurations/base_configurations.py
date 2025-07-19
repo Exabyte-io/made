@@ -5,7 +5,7 @@ from mat3ra.esse.models.materials_category_components.entities.reusable.two_dime
 )
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab.entities import Termination
+from mat3ra.made.tools.build.slab.entities import Termination, MillerIndices
 from ... import BaseConfigurationPydantic
 
 
@@ -16,6 +16,11 @@ class CrystalLatticePlanesConfiguration(CrystalLatticePlanesSchema, BaseConfigur
     def in_plane_vectors(self):
         # Two vectors in the plane of the Miller indices
         return self.crystal.lattice.vector_arrays[:2, :2]
+
+    @property
+    def miller_indices_as_string(self) -> str:
+        miller_indices_cls_instance = MillerIndices(root=self.miller_indices)
+        return str(miller_indices_cls_instance)
 
 
 class AtomicLayersUniqueConfiguration(CrystalLatticePlanesConfiguration):
