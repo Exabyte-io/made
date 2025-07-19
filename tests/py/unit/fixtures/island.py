@@ -1,5 +1,5 @@
 ISLAND_SLAB_Si_001_CYLINDER_CONDITION_1_LAYER = {
-    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},

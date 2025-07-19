@@ -1,5 +1,5 @@
 GRAIN_BOUNDARY_SI_001_011 = {
-    "name": "Si8(001)-Si8(011), Grain Boundary",
+    "name": "Si(001)-Si(011), Grain Boundary",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -311,7 +311,7 @@ GRAIN_BOUNDARY_SI_001_011 = {
 }
 
 GRAIN_BOUNDARY_LINEAR_SI = {
-    "name": "C2-C2, Linear Grain Boundary , 13.17 degrees",
+    "name": "C(001)-C(001), Linear Grain Boundary, 13.17 degrees",
     "basis": {
         "elements": [
             {"id": 0, "value": "C"},

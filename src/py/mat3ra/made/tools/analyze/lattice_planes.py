@@ -131,6 +131,10 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
     def miller_supercell_matrix(self) -> Matrix3x3Schema:
         return self.pymatgen_slab_generator_without_vacuum.slab_scale_factor.tolist()
 
+    def get_material_name_for_termination(self, termination: Termination) -> str:
+        # for example: "Si(001), termination Si_P4/mmm_1, Slab"
+        return f"{self.material.formula}({self.miller_indices}), termination {termination}, Slab"
+
     def get_material_with_termination_without_vacuum(self, termination: Termination) -> Material:
         # Note: termination is passed with vacuum, but we return the material without vacuum
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
@@ -139,7 +143,8 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         slab = self.all_planes_as_pymatgen_slabs_without_vacuum[
             self.terminations_without_vacuum.index(holder.termination_without_vacuum)
         ]
-        return MaterialWithBuildMetadata.create(from_pymatgen(slab))
+        material = MaterialWithBuildMetadata.create(from_pymatgen(slab))
+        material.name = self.get_material_name_for_termination(termination)
 
     def get_translation_vector_for_termination_without_vacuum(self, termination: Termination) -> Vector3D:
         holder = next((h for h in self.termination_holders if h.termination_with_vacuum == termination), None)
@@ -151,3 +156,6 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
         crystal_shift = [0.0, 0.0, -holder.shift_without_vacuum]
         cartesian_shift = self.material_with_conventional_lattice.basis.cell.convert_point_to_cartesian(crystal_shift)
         return cartesian_shift
+
+    def get_materials_for_all_terminations_without_vacuum(self) -> List[Material]:
+        return [self.get_material_with_termination_without_vacuum(t) for t in self.terminations_without_vacuum]

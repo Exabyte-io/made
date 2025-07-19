@@ -6,7 +6,7 @@ MERGED_BULK_Si_Ge = {
                     "merge_components": [
                         {
                             "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-                            "name": "Si8",
+                            "name": "Si",
                             "basis": {
                                 "elements": [
                                     {"id": 0, "value": "Si"},

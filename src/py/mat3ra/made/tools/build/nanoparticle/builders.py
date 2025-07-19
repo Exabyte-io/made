@@ -9,7 +9,7 @@ from ..slab.builders import SlabBuilder
 from ..slab.configurations import SlabConfiguration
 from ..void_region.builders import VoidRegionBuilder
 from ..void_region.configuration import VoidRegionConfiguration
-from ...analyze.other import get_chemical_formula
+from ...analyze.other import get_chemical_formula_empirical
 from ...build import BaseBuilder
 from ...build.mixins import ConvertGeneratedItemsASEAtomsMixin
 from ...third_party import ASEAtoms
@@ -28,7 +28,7 @@ class NanoparticleBuilder(VacancyDefectBuilder, MergeBuilder):
         }
 
     def _update_material_name(self, material: Material, configuration: NanoparticleConfiguration) -> Material:
-        formula = get_chemical_formula(material)
+        formula = get_chemical_formula_empirical(material)
 
         material.name = f"{formula} {configuration.void_region_configuration.condition_name} Nanoparticle"
         return material
@@ -79,5 +79,5 @@ class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseBuilde
 
     def _finalize(self, materials: List[Material], configuration: _ConfigurationType) -> List[Material]:
         for material in materials:
-            material.name = f"{get_chemical_formula(material)} {configuration.shape.value.capitalize()}"
+            material.name = f"{get_chemical_formula_empirical(material)} {configuration.shape.value.capitalize()}"
         return materials

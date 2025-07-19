@@ -5,7 +5,11 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface import CommensurateLatticeInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface import (
+    CommensurateLatticeInterfaceAnalyzer,
+    InterfaceAnalyzer,
+    ZSLInterfaceAnalyzer,
+)
 from mat3ra.made.tools.analyze.interface.twisted_nanoribbons import TwistedNanoribbonsInterfaceAnalyzer
 from .builders import (
     InterfaceBuilder,
@@ -13,13 +17,222 @@ from .builders import (
 from .configuration import (
     InterfaceConfiguration,
 )
+from .. import MaterialWithBuildMetadata
 from ..slab.configurations import (
     SlabConfiguration,
     SlabStrainedSupercellConfiguration,
 )
+from ..vacuum.configuration import VacuumConfiguration
 from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import interface_displace_part
 from ...optimize import evaluate_calculator_on_xy_grid
+from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
+
+
+def create_simple_interface_between_slabs(
+    substrate_slab: MaterialWithBuildMetadata,
+    film_slab: MaterialWithBuildMetadata,
+    gap: Optional[float] = None,
+    vacuum: float = 10.0,
+    xy_shift: List[float] = [0, 0],
+) -> Material:
+    """
+    Create an interface between two slab materials with specified parameters.
+    No strain matching is performed, the interface is created as a simple stack of two slabs.
+
+    Args:
+        substrate_slab (MaterialWithBuildMetadata): Substrate slab material.
+        film_slab (MaterialWithBuildMetadata): Film slab material.
+        gap (Optional[float]): Gap between the two materials, in Angstroms.
+            Distance between top most atom of the substrate and bottom most atom of the film.
+        vacuum (float): Size of the vacuum layer in Angstroms.
+        xy_shift (List[float]): Shift in x and y directions, in Angstroms.
+
+    Returns:
+        Material: The interface material.
+    """
+    substrate_analyzer = SlabMaterialAnalyzer(material=substrate_slab)
+    film_analyzer = SlabMaterialAnalyzer(material=film_slab)
+
+    analyzer = InterfaceAnalyzer(
+        substrate_slab_configuration=substrate_analyzer.build_configuration,
+        film_slab_configuration=film_analyzer.build_configuration,
+        substrate_build_parameters=substrate_analyzer.build_parameters,
+        film_build_parameters=film_analyzer.build_parameters,
+    )
+
+    film_configuration = analyzer.film_strained_configuration
+    substrate_configuration = analyzer.substrate_strained_configuration
+    vacuum_configuration = VacuumConfiguration(
+        size=vacuum,
+    )
+
+    config = InterfaceConfiguration(
+        stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
+        xy_shift=xy_shift,
+        gaps=ArrayWithIds.from_values([gap]),
+    )
+    builder = InterfaceBuilder()
+    interface = builder.get_material(config)
+    return interface
+
+
+def create_zsl_interface(
+    substrate_crystal: Material,
+    film_crystal: Material,
+    substrate_miller_indices: Tuple[int, int, int] = (0, 0, 1),
+    film_miller_indices: Tuple[int, int, int] = (0, 0, 1),
+    substrate_number_of_layers: int = 1,
+    film_number_of_layers: int = 1,
+    substrate_termination_formula: Optional[str] = None,
+    film_termination_formula: Optional[str] = None,
+    gap: Optional[float] = None,
+    vacuum: float = 10.0,
+    xy_shift: List[float] = [0, 0],
+    max_area: float = 50.0,
+    match_id: int = 0,
+    max_area_ratio_tol: float = 0.09,
+    max_length_tol: float = 0.03,
+    max_angle_tol: float = 0.01,
+) -> Material:
+    """
+    Create an interface between two materials using the ZSL algorithm to find matching supercells.
+
+    Args:
+        substrate_crystal (Material): Substrate bulk material.
+        film_crystal (Material): Film bulk material.
+        substrate_miller_indices (Tuple[int, int, int]): Miller indices for the substrate.
+        film_miller_indices (Tuple[int, int, int]): Miller indices for the film.
+        substrate_number_of_layers (int): Number of layers in the substrate.
+        film_number_of_layers (int): Number of layers in the film.
+        substrate_termination_formula (Optional[str]): Termination formula for the substrate.
+        film_termination_formula (Optional[str]): Termination formula for the film.
+        gap (Optional[float]): Gap between the two materials, in Angstroms.
+            Distance between top most atom of the substrate and bottom most atom of the film.
+        vacuum (float): Size of the vacuum layer in Angstroms.
+        xy_shift (List[float]): Shift in x and y directions, in Angstroms.
+        max_area (float): Maximum area for ZSL matching.
+        match_id (int): ZSL match ID to use (0 for first match).
+        max_area_ratio_tol (float): Area ratio tolerance for ZSL matching.
+        max_length_tol (float): Length tolerance for ZSL matching.
+        max_angle_tol (float): Angle tolerance for ZSL matching.
+
+    Returns:
+        Material: The ZSL interface material.
+    """
+    substrate_slab_config = SlabConfiguration.from_parameters(
+        material_or_dict=substrate_crystal,
+        miller_indices=substrate_miller_indices,
+        number_of_layers=substrate_number_of_layers,
+        vacuum=0,
+        termination_formula=substrate_termination_formula,
+    )
+    film_slab_config = SlabConfiguration.from_parameters(
+        material_or_dict=film_crystal,
+        miller_indices=film_miller_indices,
+        number_of_layers=film_number_of_layers,
+        vacuum=0,
+        termination_formula=film_termination_formula,
+    )
+
+    # Use ZSLInterfaceAnalyzer to get strained slab configurations
+    analyzer = ZSLInterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
+        max_area=max_area,
+        max_area_ratio_tol=max_area_ratio_tol,
+        max_length_tol=max_length_tol,
+        max_angle_tol=max_angle_tol,
+    )
+
+    selected_config = analyzer.get_strained_configuration_by_match_id(match_id=match_id)
+
+    vacuum_configuration = VacuumConfiguration(
+        size=vacuum,
+    )
+    interface_config = InterfaceConfiguration(
+        stack_components=[
+            selected_config.substrate_configuration,
+            selected_config.film_configuration,
+            vacuum_configuration,
+        ],
+        xy_shift=xy_shift,
+        gaps=ArrayWithIds.from_values([gap]),
+    )
+
+    builder = InterfaceBuilder()
+    return builder.get_material(interface_config)
+
+
+def create_zsl_interface_between_slabs(
+    substrate_slab: MaterialWithBuildMetadata,
+    film_slab: MaterialWithBuildMetadata,
+    gap: Optional[float] = None,
+    vacuum: float = 10.0,
+    xy_shift: Optional[List[float]] = None,
+    max_area: float = 200.0,
+    max_area_ratio_tol: float = 0.1,
+    max_length_tol: float = 0.03,
+    max_angle_tol: float = 0.01,
+    match_id: int = 0,
+) -> Material:
+    """
+    Create an interface between two slab materials using the ZSL algorithm.
+
+    Args:
+        substrate_slab (MaterialWithBuildMetadata): Substrate slab material.
+        film_slab (MaterialWithBuildMetadata): Film slab material.
+        gap (Optional[float]): Gap between the two materials, in Angstroms.
+        vacuum (float): Size of the vacuum layer in Angstroms.
+        xy_shift (Optional[List[float]]): Shift in x and y directions, in Angstroms. Defaults to [0, 0].
+        max_area (float): Maximum area of the supercell.
+        max_area_ratio_tol (float): Tolerance for the ratio of the areas of the two supercells.
+        max_length_tol (float): Tolerance for the length of the supercell vectors.
+        max_angle_tol (float): Tolerance for the angle between the supercell vectors.
+        match_id (int): Index of the match to use from the list of found ZSL matches.
+
+    Returns:
+        Material: The interface material.
+    """
+    if xy_shift is None:
+        xy_shift = [0, 0]
+
+    substrate_slab_config = SlabMaterialAnalyzer(material=substrate_slab).build_configuration
+    film_slab_config = SlabMaterialAnalyzer(material=film_slab).build_configuration
+
+    analyzer = ZSLInterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
+        max_area=max_area,
+        max_area_ratio_tol=max_area_ratio_tol,
+        max_length_tol=max_length_tol,
+        max_angle_tol=max_angle_tol,
+    )
+    interface_configurations = analyzer.get_strained_configurations()
+    if not interface_configurations:
+        raise ValueError("No ZSL match found for the given parameters.")
+
+    if match_id >= len(interface_configurations):
+        raise IndexError(f"match_id {match_id} is out of bounds for {len(interface_configurations)} matches found.")
+
+    selected_config = interface_configurations[match_id]
+
+    vacuum_configuration = VacuumConfiguration(
+        size=vacuum,
+    )
+
+    interface_config = InterfaceConfiguration(
+        stack_components=[
+            selected_config.substrate_configuration,
+            selected_config.film_configuration,
+            vacuum_configuration,
+        ],
+        gaps=ArrayWithIds.from_values(values=[gap, gap] if gap is not None else []),
+        xy_shift=xy_shift,
+    )
+
+    builder = InterfaceBuilder()
+    return builder.get_material(interface_config)
 
 
 def create_twisted_interface(
@@ -135,22 +348,6 @@ def get_commensurate_strained_configurations(
     selected_config = analyzer.get_strained_configuration_by_match_id(match_id)
     actual_angle = match_holders[match_id].actual_angle
     return [selected_config.substrate_configuration, selected_config.film_configuration], actual_angle
-
-
-def create_interface(
-    configuration: InterfaceConfiguration,
-) -> Material:
-    """
-    Create an interface from a configuration.
-
-    Args:
-        configuration (InterfaceConfiguration): The interface configuration.
-
-    Returns:
-        Material: The interface material.
-    """
-    builder = InterfaceBuilder()
-    return builder.get_material(configuration)
 
 
 def create_commensurate_interface(

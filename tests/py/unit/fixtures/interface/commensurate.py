@@ -1,6 +1,6 @@
 INTERFACE_GRAPHENE_GRAPHENE_Z = {
     "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-    "name": "C2(001)-C2(001), Interface",
+    "name": "C(001)-C(001), Interface",
     "basis": {
         "elements": [
             {"id": 0, "value": "C"},
@@ -253,7 +253,7 @@ INTERFACE_GRAPHENE_GRAPHENE_Z = {
 
 INTERFACE_GRAPHENE_GRAPHENE_X = {
     "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-    "name": "C2(001)-C2(001), Interface",
+    "name": "C(001)-C(001), Interface",
     "basis": {
         "elements": [
             {"id": 0, "value": "C"},
