@@ -32,7 +32,7 @@ SI_SLAB_001_BUILD_PARAMETERS: Dict[str, Any] = {
 
 
 SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
-    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+    "name": "Si(001), termination Si_P4/mmm_1, Slab",
     "basis": {
         "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
         "coordinates": [
@@ -66,7 +66,7 @@ SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
 }
 
 SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
-    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "constraints": [],
         "coordinates": [
@@ -143,7 +143,7 @@ SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
 }
 
 SLAB_SI_CONVENTIONAL_001_NO_VACUUM: Dict[str, Any] = {
-    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -202,7 +202,7 @@ SLAB_SI_CONVENTIONAL_001_NO_VACUUM: Dict[str, Any] = {
 
 
 SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
-    "name": "Si2(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -320,11 +320,11 @@ SI_SLAB_DEFAULT_PARAMETERS = {
             }
         ],
     },
-    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
 }
 
 SI_SLAB_001_ADDED_LAYER = {
-    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -395,7 +395,7 @@ SI_SLAB_001_ADDED_LAYER = {
 }
 
 SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
-    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
