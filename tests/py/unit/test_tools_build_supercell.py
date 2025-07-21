@@ -3,8 +3,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build.supercell import create_supercell
 from unit.fixtures.supercell import SI_SUPERCELL_2X2X1
 
-from .fixtures.bulk import BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL
-from .fixtures.slab import SLAB_SrTiO3_011_TERMINATION_O2
+from .fixtures.bulk import BULK_Si_PRIMITIVE
 from .utils import assert_two_entities_deep_almost_equal
 
 

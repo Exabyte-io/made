@@ -23,6 +23,7 @@ from ..slab.configurations import (
     SlabStrainedSupercellConfiguration,
 )
 from ..vacuum.configuration import VacuumConfiguration
+from ...analyze.lattice import get_conventional_material
 from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import interface_displace_part
 from ...optimize import evaluate_calculator_on_xy_grid
@@ -94,6 +95,7 @@ def create_zsl_interface(
     max_area_ratio_tol: float = 0.09,
     max_length_tol: float = 0.03,
     max_angle_tol: float = 0.01,
+    use_conventional_cell: bool = True,
 ) -> Material:
     """
     Create an interface between two materials using the ZSL algorithm to find matching supercells.
@@ -120,6 +122,9 @@ def create_zsl_interface(
     Returns:
         Material: The ZSL interface material.
     """
+    substrate_crystal = get_conventional_material(substrate_crystal, use_conventional_cell)
+    film_crystal = get_conventional_material(film_crystal, use_conventional_cell)
+
     substrate_slab_config = SlabConfiguration.from_parameters(
         material_or_dict=substrate_crystal,
         miller_indices=substrate_miller_indices,
@@ -242,6 +247,7 @@ def create_twisted_interface(
     vacuum_x: float = 5.0,
     vacuum_y: float = 5.0,
     gap: float = 3.0,
+    use_conventional_cell: bool = False,
 ) -> Material:
     """
     Create a twisted interface between two nanoribbons.
@@ -257,6 +263,8 @@ def create_twisted_interface(
     Returns:
         Material: The twisted interface material.
     """
+    material1 = get_conventional_material(material1, use_conventional_cell)
+    material2 = get_conventional_material(material2, use_conventional_cell)
     slab1 = SlabConfiguration.from_parameters(
         material_or_dict=material1,
         miller_indices=(0, 0, 1),
@@ -299,6 +307,7 @@ def get_commensurate_strained_configurations(
     number_of_layers: int,
     vacuum: float,
     match_id: int = 0,
+    use_conventional_cell: bool = True,
 ) -> Tuple[List[SlabStrainedSupercellConfiguration], float]:
     """
     Get strained configurations for commensurate lattice matching.
@@ -325,6 +334,8 @@ def get_commensurate_strained_configurations(
     Raises:
         ValueError: If no commensurate lattice matches are found.
     """
+    material = get_conventional_material(material, use_conventional_cell)
+
     slab_config = SlabConfiguration.from_parameters(
         material_or_dict=material,
         miller_indices=miller_indices,
@@ -363,6 +374,7 @@ def create_commensurate_interface(
     number_of_layers: int = 1,
     vacuum: float = 0.0,
     match_id: int = 0,
+    use_conventional_cell: bool = True,
 ) -> Material:
     """
     Create a commensurate lattice interface (twisted interface) from a material with specified twist angle.
@@ -404,6 +416,7 @@ def create_commensurate_interface(
         number_of_layers=number_of_layers,
         vacuum=vacuum,
         match_id=match_id,
+        use_conventional_cell=use_conventional_cell,
     )
 
     interface_config = InterfaceConfiguration(

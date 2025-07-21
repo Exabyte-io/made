@@ -9,11 +9,10 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
 )
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.convert import to_pymatgen
 from mat3ra.made.tools.operations.core.unary import supercell
-from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
 from mat3ra.made.utils import calculate_von_mises_strain
+from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):
@@ -62,7 +61,6 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         match_holders = []
 
         for idx, match_pymatgen in enumerate(zsl_matches_pymatgen):
-
             match_holder = ZSLMatchHolder(
                 match_id=idx,
                 substrate_transformation_matrix=SupercellMatrix2DSchema(

@@ -1,19 +1,17 @@
 from typing import Union, List, Optional
 
 import numpy as np
-
 from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dimensional.interface.configuration import (  # noqa: E501
     InterfaceConfigurationSchema,
 )
 
-from ..vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.utils import unwrap
+from mat3ra.made.utils import calculate_von_mises_strain
 from ..slab.configurations import (
-    SlabConfiguration,
     SlabStrainedSupercellConfiguration,
 )
 from ..stack.configuration import StackConfiguration
-from mat3ra.made.utils import calculate_von_mises_strain
-from mat3ra.made.tools.utils import unwrap
+from ..vacuum.configuration import VacuumConfiguration
 
 
 class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):

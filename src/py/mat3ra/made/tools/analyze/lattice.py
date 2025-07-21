@@ -23,3 +23,10 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         Convert a structure to its conventional cell.
         """
         return Material.create(from_pymatgen(self.spacegroup_analyzer.get_conventional_standard_structure()))
+
+
+def get_conventional_material(material: Material, use_conventional_cell: bool = True) -> Material:
+    if use_conventional_cell:
+        analyzer = LatticeMaterialAnalyzer(material=material)
+        return analyzer.material_with_conventional_lattice
+    return material
