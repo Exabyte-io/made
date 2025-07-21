@@ -1,5 +1,5 @@
 GRAIN_BOUNDARY_SI_001_011 = {
-    "name": "Si(001)-Si(011), Grain Boundary",
+    "name": "Si(011)-Si(001), Grain Boundary",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},

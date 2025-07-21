@@ -1,5 +1,6 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.interface import get_optimal_film_displacement
 from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
@@ -206,7 +207,7 @@ def test_displace_interface():
 
 
 def test_displace_interface_optimized():
-    material = Material.create(GRAPHENE_NICKEL_INTERFACE)
+    material = MaterialWithBuildMetadata.create(GRAPHENE_NICKEL_INTERFACE)
     expected_coordinates = [
         {"id": 0, "value": [0.666666667, 0.666666667, 0.350869517]},
         {"id": 1, "value": [-0.0, 0.0, 0.425701769]},

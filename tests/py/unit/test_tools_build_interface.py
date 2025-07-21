@@ -129,7 +129,6 @@ def test_zsl_interface_builder(substrate, film, expected_interface):
 
     # remove metadata
     interface.metadata.build = []
-    expected_interface["metadata"].pop("build", None)
 
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
@@ -162,7 +161,6 @@ def test_create_simple_interface_between_slabs(substrate, film, expected_interfa
         xy_shift=[0, 0],
     )
     interface.metadata.build = []
-    expected_interface["metadata"].pop("build", None)
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
@@ -186,7 +184,6 @@ def test_create_zsl_interface(substrate, film, expected_interface):
         max_angle_tol=0.02,
     )
     interface.metadata.build = []
-    expected_interface["metadata"].pop("build", None)
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
@@ -222,7 +219,6 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         max_angle_tol=0.02,
     )
     interface.metadata.build = []
-    expected_interface["metadata"].pop("build", None)
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 

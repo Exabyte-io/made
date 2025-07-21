@@ -119,7 +119,7 @@ INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si = {
 }
 
 MULTIPLE_POINT_DEFECTS_BULK_Si_CONVENTIONAL = {
-    "name": "Si with vacancy defect with interstitial defect with substitutional defect",
+    "name": "Si8 with vacancy defect with interstitial defect with substitutional defect",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},

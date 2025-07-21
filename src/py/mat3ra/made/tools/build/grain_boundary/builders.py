@@ -39,8 +39,7 @@ class GrainBoundaryPlanarBuilder(InterfaceBuilder):
         wrapped_interface = wrap_to_unit_cell(rotated_interface)
         return wrapped_interface
 
-    @property
-    def name_suffix(self) -> str:
+    def get_name_suffix(self, configuration: GrainBoundaryPlanarConfiguration) -> str:
         return "Grain Boundary"
 
 
