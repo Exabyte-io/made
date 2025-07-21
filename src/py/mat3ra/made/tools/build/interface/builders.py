@@ -68,12 +68,9 @@ class InterfaceBuilder(StackNComponentsBuilder):
         second_component_miller = second_configuration.atomic_layers.miller_indices_as_string
         return f"{first_component_formula}{first_component_miller}-{second_component_formula}{second_component_miller}"
 
-    @property
-    def name_suffix(self) -> str:
-        return "Interface"
-
     def get_name_suffix(self, configuration: InterfaceConfiguration) -> str:
-        return ""
+        strain = configuration.von_mises_strain_percentage
+        return f"Interface, Strain {strain:.3f}pct"
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
         base_name = self.get_base_name_from_configuration(

@@ -9,9 +9,11 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
 )
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.convert import to_pymatgen
 from mat3ra.made.tools.operations.core.unary import supercell
 from pymatgen.analysis.interfaces.coherent_interfaces import CoherentInterfaceBuilder, ZSLGenerator
+from mat3ra.made.utils import calculate_von_mises_strain
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):
@@ -52,13 +54,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
 
     @classmethod
     def calculate_total_strain_percentage(cls, strain_matrix: np.ndarray) -> float:
-        """Calculate von Mises strain from a 2D strain transformation matrix."""
-        exx = strain_matrix[0, 0] - 1.0
-        eyy = strain_matrix[1, 1] - 1.0
-        exy = strain_matrix[0, 1]
-
-        von_mises = np.sqrt(exx**2 - exx * eyy + eyy**2 + 3 * exy**2) / np.sqrt(2)
-        return abs(von_mises) * 100.0
+        return calculate_von_mises_strain(strain_matrix)
 
     @cached_property
     def zsl_match_holders(self) -> List[ZSLMatchHolder]:
@@ -66,6 +62,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         match_holders = []
 
         for idx, match_pymatgen in enumerate(zsl_matches_pymatgen):
+
             match_holder = ZSLMatchHolder(
                 match_id=idx,
                 substrate_transformation_matrix=SupercellMatrix2DSchema(
