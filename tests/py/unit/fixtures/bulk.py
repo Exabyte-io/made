@@ -23,7 +23,7 @@ BULK_Si_PRIMITIVE: Dict[str, Any] = {
 
 
 BULK_Si_CONVENTIONAL: Dict[str, Any] = {
-    "name": "Si",
+    "name": "Si8",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},

@@ -60,6 +60,7 @@ GRAPHENE_NICKEL_TEST_CASE = (
     ),
     3.0,  # gap between graphene and nickel
     10.0,  # vacuum
+    50,  # max area
     GRAPHENE_NICKEL_INTERFACE,
 )
 
@@ -189,8 +190,8 @@ def test_create_zsl_interface(substrate, film, expected_interface):
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
-@pytest.mark.parametrize("substrate, film, gap, vacuum, expected_interface", [GRAPHENE_NICKEL_TEST_CASE])
-def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, expected_interface):
+@pytest.mark.parametrize("substrate, film, gap, vacuum, max_area, expected_interface", [GRAPHENE_NICKEL_TEST_CASE])
+def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_area, expected_interface):
     substrate_slab_config = SlabConfiguration.from_parameters(
         material_or_dict=substrate.bulk_config,
         miller_indices=substrate.miller_indices,
@@ -215,7 +216,7 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, expect
         gap=gap,
         vacuum=vacuum,
         xy_shift=[0, 0],
-        max_area=MAX_AREA,
+        max_area=max_area,
         max_area_ratio_tol=0.1,
         max_length_tol=0.05,
         max_angle_tol=0.02,

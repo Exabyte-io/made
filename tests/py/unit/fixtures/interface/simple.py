@@ -1339,5 +1339,5 @@ INTERFACE_Si_001_Ge_001 = {
         ],
         "boundaryConditions": {"type": "pbc", "offset": 0},
     },
-    "name": "Ge(001)-Si(001), Interface",
+    "name": "Ge(001)-Si(001), Interface, Strain 2.522pct",
 }

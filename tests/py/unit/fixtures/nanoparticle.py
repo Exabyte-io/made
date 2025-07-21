@@ -1,5 +1,5 @@
 SI_NANOPARTICLE_SPHERE = {
-    "name": "Si7 Sphere Nanoparticle",
+    "name": "Si Sphere Nanoparticle",
     "basis": {
         "elements": [
             {"id": 175, "value": "Si"},

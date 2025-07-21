@@ -1,7 +1,7 @@
 from typing import Final
 
 BULK_Si_CONVENTIONAL_STRAINED: Final = {
-    "name": "Si",
+    "name": "Si8",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
