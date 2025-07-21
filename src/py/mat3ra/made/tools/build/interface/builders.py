@@ -70,6 +70,8 @@ class InterfaceBuilder(StackNComponentsBuilder):
 
     def get_name_suffix(self, configuration: InterfaceConfiguration) -> str:
         strain = configuration.von_mises_strain_percentage
+        if strain == 0:
+            return "Interface"
         return f"Interface, Strain {strain:.3f}pct"
 
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
