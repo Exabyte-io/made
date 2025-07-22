@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 
 from mat3ra.made.material import Material
 from .builders import (
@@ -12,11 +12,31 @@ from .configuration import (
     InterstitialDefectConfiguration,
 )
 from ..enums import (
+    PointDefectTypeEnum,
     VacancyPlacementMethodEnum,
     SubstitutionPlacementMethodEnum,
     InterstitialPlacementMethodEnum,
 )
+from ..utils import ensure_enum
 from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
+
+DEFECT_TYPE_MAPPING = {
+    PointDefectTypeEnum.VACANCY: {
+        "create_func": "create_point_defect_vacancy",
+        "placement_enum": VacancyPlacementMethodEnum,
+        "default_method": VacancyPlacementMethodEnum.CLOSEST_SITE,
+    },
+    PointDefectTypeEnum.SUBSTITUTION: {
+        "create_func": "create_point_defect_substitution",
+        "placement_enum": SubstitutionPlacementMethodEnum,
+        "default_method": SubstitutionPlacementMethodEnum.CLOSEST_SITE,
+    },
+    PointDefectTypeEnum.INTERSTITIAL: {
+        "create_func": "create_point_defect_interstitial",
+        "placement_enum": InterstitialPlacementMethodEnum,
+        "default_method": InterstitialPlacementMethodEnum.EXACT_COORDINATE,
+    },
+}
 
 
 def create_point_defect_vacancy(
@@ -109,34 +129,47 @@ def create_point_defect_interstitial(
 
 def create_multiple_defects(
     material: Material,
-    defect_configurations: List[
-        Union[VacancyDefectConfiguration, SubstitutionalDefectConfiguration, InterstitialDefectConfiguration]
-    ],
+    defect_dicts: List[dict],
 ) -> Material:
     """
-    Create a material with multiple defects.
+    Create multiple point defects from a list of dictionaries.
 
     Args:
-        material: The host material.
-        defect_configurations: List of point defect configurations.
+        material (Material): The host material.
+        defect_dicts (List[dict]): List of defect dictionaries with keys:
+            - type: str ("vacancy", "substitution", "interstitial")
+            - coordinate: List[float]
+            - element: str (required for substitution and interstitial)
+            - resolution_method: str (optional)
+                - For vacancy/substitution: "closest_site"
+                - For interstitial: "exact_coordinate", "voronoi_site"
+                Defaults to "closest_site" for vacancy/substitution and "exact_coordinate" for interstitial.
+
 
     Returns:
-        Material: Material with multiple defects applied.
+        Material: A new material with all defects applied.
     """
-
-    builder_mapping = {
-        VacancyDefectConfiguration: VacancyDefectBuilder,
-        SubstitutionalDefectConfiguration: SubstitutionalDefectBuilder,
-        InterstitialDefectConfiguration: InterstitialDefectBuilder,
-    }
-
     current_material = material
 
-    for defect_config in defect_configurations:
-        defect_config.merge_components[0] = current_material
+    for defect_dict in defect_dicts:
+        defect_type = ensure_enum(defect_dict["type"], PointDefectTypeEnum)
 
-        builder_class = builder_mapping[type(defect_config)]
-        builder = builder_class()
-        current_material = builder.get_material(defect_config)
+        if defect_type not in DEFECT_TYPE_MAPPING:
+            raise ValueError(f"Unsupported defect type: {defect_type}")
+
+        defect_info = DEFECT_TYPE_MAPPING[defect_type]
+        create_func = globals()[defect_info["create_func"]]
+
+        resolution_method = defect_dict.get("resolution_method")
+        if resolution_method:
+            placement_method = ensure_enum(resolution_method, defect_info["placement_enum"])
+        else:
+            placement_method = defect_info["default_method"]
+
+        args = [current_material, defect_dict["coordinate"], placement_method]
+        if defect_type in (PointDefectTypeEnum.SUBSTITUTION, PointDefectTypeEnum.INTERSTITIAL):
+            args.insert(-1, defect_dict["element"])
+
+        current_material = create_func(*args)
 
     return current_material

@@ -37,7 +37,7 @@ def test_create_island_defect(slab_parameters, condition_class, condition_params
         slab=slab,
         condition=condition,
         use_cartesian_coordinates=False,
-        number_of_added_layers=1,
+        number_of_added_layers=num_added_layers,
     )
     defect.metadata.build = []
     assert_two_entities_deep_almost_equal(defect, expected_config)

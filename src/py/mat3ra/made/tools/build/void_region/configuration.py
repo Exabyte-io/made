@@ -5,12 +5,12 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_di
 )
 
 from .. import MaterialWithBuildMetadata
-from ...utils.coordinate import SphereCoordinateCondition, BoxCoordinateCondition
+from ...utils.coordinate import SphereCoordinateCondition, BoxCoordinateCondition, CoordinateCondition
 
 
 class VoidRegionConfiguration(VoidRegionSchema):
     crystal: MaterialWithBuildMetadata
-    coordinate_condition: Union[SphereCoordinateCondition, BoxCoordinateCondition]
+    coordinate_condition: Union[SphereCoordinateCondition, BoxCoordinateCondition, CoordinateCondition]
     use_cartesian_coordinates: bool = False
     invert_selection: bool = False
 

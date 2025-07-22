@@ -8,7 +8,6 @@ from mat3ra.made.tools.build.defect.enums import (
     SubstitutionPlacementMethodEnum,
     VacancyPlacementMethodEnum,
 )
-from mat3ra.made.tools.build.defect.factories import create_defect_configuration
 from mat3ra.made.tools.build.defect.point.helpers import (
     create_multiple_defects,
     create_point_defect_interstitial,
@@ -120,19 +119,21 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
 def test_create_multiple_defects(material_config, defect_params_list, expected_material_config):
     material = MaterialWithBuildMetadata.create(material_config)
 
-    defect_configs = []
+    defect_dicts = []
     for defect_params in defect_params_list:
-        config = create_defect_configuration(
-            material=material,
-            defect_type=defect_params.defect_type,
-            coordinate=defect_params.coordinate,
-            element=defect_params.element if hasattr(defect_params, "element") else None,
-            placement_method=(defect_params.placement_method if hasattr(defect_params, "placement_method") else None),
-        )
-        defect_configs.append(config)
+        defect_dict = {
+            "type": defect_params.defect_type,
+            "coordinate": defect_params.coordinate,
+        }
+        if hasattr(defect_params, "element"):
+            defect_dict["element"] = defect_params.element
+        if hasattr(defect_params, "placement_method"):
+            defect_dict["resolution_method"] = defect_params.placement_method.value
+
+        defect_dicts.append(defect_dict)
 
     defects = create_multiple_defects(
         material=material,
-        defect_configurations=defect_configs,
+        defect_dicts=defect_dicts,
     )
     assert_two_entities_deep_almost_equal(defects, expected_material_config)
