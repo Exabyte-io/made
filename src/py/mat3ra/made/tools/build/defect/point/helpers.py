@@ -143,6 +143,7 @@ def create_multiple_defects(
             - resolution_method: str (optional)
                 - For vacancy/substitution: "closest_site"
                 - For interstitial: "exact_coordinate", "voronoi_site"
+                Defaults to "closest_site" for vacancy/substitution and "exact_coordinate" for interstitial
 
     Returns:
         Material: A new material with all defects applied.

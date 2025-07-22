@@ -16,15 +16,22 @@ def ensure_enum(value: Union[str, EnumType], enum_class: Type[EnumType]) -> Enum
         EnumType: The enum value
     """
     if isinstance(value, str):
-        # Try direct conversion first
-        try:
-            return enum_class(value)
-        except ValueError:
-            # If direct conversion fails, try to find a matching value
-            for enum_value in enum_class:
-                if enum_value.value == value:
-                    return enum_value
-            # If no match found, raise the original error with helpful message
-            valid_values = [e.value for e in enum_class]
-            raise ValueError(f"'{value}' is not a valid {enum_class.__name__}. Valid values are: {valid_values}")
+        # Get all valid values, handling both direct values and referenced enum values
+        valid_values = {}
+        for enum_value in enum_class:
+            # Handle both direct string values and referenced enum values
+            if isinstance(enum_value.value, str):
+                valid_values[enum_value.value] = enum_value
+            elif isinstance(enum_value.value, Enum):
+                valid_values[enum_value.value.value] = enum_value
+
+        # Try to find a matching value
+        if value in valid_values:
+            return valid_values[value]
+
+        # If no match found, raise error with helpful message
+        raise ValueError(
+            f"'{value}' is not a valid {enum_class.__name__}. "
+            f"Valid values are: {list(valid_values.keys())}"
+        )
     return value
