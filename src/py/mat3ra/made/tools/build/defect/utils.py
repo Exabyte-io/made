@@ -21,28 +21,38 @@ def get_enum_value(enum_member: Enum) -> str:
 def ensure_enum(value: Union[str, EnumType], enum_class: Type[EnumType]) -> EnumType:
     """
     Ensures a value is converted to the specified enum type if it's a string.
-    
+
     Args:
         value: String or enum value
         enum_class: The enum class to convert to
-        
+
     Returns:
         EnumType: The enum value
     """
     if isinstance(value, str):
-        # Get all valid values, handling both direct values and referenced enum values
-        valid_values = {}
+        # Try to match by the actual string value
         for enum_value in enum_class:
-            actual_value = get_enum_value(enum_value)
-            valid_values[actual_value] = enum_value
-        
-        # Try to find a matching value
-        if value in valid_values:
-            return valid_values[value]
-            
+            # Handle direct string value
+            if enum_value.value == value:
+                return enum_value
+            # Handle referenced enum value
+            if isinstance(enum_value.value, Enum) and enum_value.value.value == value:
+                return enum_value
+        # Try to match by the referenced enum's name (e.g., "CLOSEST_SITE")
+        for enum_value in enum_class:
+            if isinstance(enum_value.value, Enum) and enum_value.value.name.lower() == value.lower():
+                return enum_value
+            if enum_value.name.lower() == value.lower():
+                return enum_value
         # If no match found, raise error with helpful message
+        valid_values = []
+        for enum_value in enum_class:
+            if isinstance(enum_value.value, Enum):
+                valid_values.append(enum_value.value.value)
+            else:
+                valid_values.append(enum_value.value)
         raise ValueError(
             f"'{value}' is not a valid {enum_class.__name__}. "
-            f"Valid values are: {list(valid_values.keys())}"
+            f"Valid values are: {valid_values}"
         )
     return value
