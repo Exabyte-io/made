@@ -86,7 +86,10 @@ def create_multiple_adatom_defects(
             - coordinate: List[float] (position on surface [x, y])
             - distance_z: float (distance above surface in Angstroms)
         placement_method: Method to place all adatoms (common for all defects).
-            Valid values: "exact_coordinate" (default), "new_crystal_site", "equidistant"
+            Valid values from AtomPlacementMethodEnum:
+                - "exact_coordinate" (default): Places atom at exact coordinate
+                - "new_crystal_site": Places atom at nearest crystal site
+                - "equidistant": Places atom equidistant from nearest atoms
 
     Returns:
         Material: The slab with all adatom defects applied.
