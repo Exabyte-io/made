@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from mat3ra.made.material import Material
 from .builders import (
@@ -17,7 +17,26 @@ from ..enums import (
     SubstitutionPlacementMethodEnum,
     InterstitialPlacementMethodEnum,
 )
+from ..utils import ensure_enum
 from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
+
+DEFECT_TYPE_MAPPING = {
+    PointDefectTypeEnum.VACANCY: {
+        "create_func": "create_point_defect_vacancy",
+        "placement_enum": VacancyPlacementMethodEnum,
+        "default_method": VacancyPlacementMethodEnum.CLOSEST_SITE,
+    },
+    PointDefectTypeEnum.SUBSTITUTION: {
+        "create_func": "create_point_defect_substitution",
+        "placement_enum": SubstitutionPlacementMethodEnum,
+        "default_method": SubstitutionPlacementMethodEnum.CLOSEST_SITE,
+    },
+    PointDefectTypeEnum.INTERSTITIAL: {
+        "create_func": "create_point_defect_interstitial",
+        "placement_enum": InterstitialPlacementMethodEnum,
+        "default_method": InterstitialPlacementMethodEnum.EXACT_COORDINATE,
+    },
+}
 
 
 def create_point_defect_vacancy(
@@ -129,31 +148,24 @@ def create_multiple_defects(
     current_material = material
 
     for defect_dict in defect_dicts:
-        defect_type = defect_dict["type"]
-        coordinate = defect_dict["coordinate"]
-        resolution_method = defect_dict.get("resolution_method")
+        defect_type = ensure_enum(defect_dict["type"], PointDefectTypeEnum)
 
-        if defect_type == PointDefectTypeEnum.VACANCY:
-            placement_method = VacancyPlacementMethodEnum.CLOSEST_SITE
-            if resolution_method:
-                placement_method = VacancyPlacementMethodEnum(resolution_method)
-            current_material = create_point_defect_vacancy(current_material, coordinate, placement_method)
-
-        elif defect_type == PointDefectTypeEnum.SUBSTITUTION:
-            element = defect_dict["element"]
-            placement_method = SubstitutionPlacementMethodEnum.CLOSEST_SITE
-            if resolution_method:
-                placement_method = SubstitutionPlacementMethodEnum(resolution_method)
-            current_material = create_point_defect_substitution(current_material, coordinate, element, placement_method)
-
-        elif defect_type == PointDefectTypeEnum.INTERSTITIAL:
-            element = defect_dict["element"]
-            placement_method = InterstitialPlacementMethodEnum.EXACT_COORDINATE
-            if resolution_method:
-                placement_method = InterstitialPlacementMethodEnum(resolution_method)
-            current_material = create_point_defect_interstitial(current_material, coordinate, element, placement_method)
-
-        else:
+        if defect_type not in DEFECT_TYPE_MAPPING:
             raise ValueError(f"Unsupported defect type: {defect_type}")
+
+        defect_info = DEFECT_TYPE_MAPPING[defect_type]
+        create_func = globals()[defect_info["create_func"]]
+
+        resolution_method = defect_dict.get("resolution_method")
+        if resolution_method:
+            placement_method = ensure_enum(resolution_method, defect_info["placement_enum"])
+        else:
+            placement_method = defect_info["default_method"]
+
+        args = [current_material, defect_dict["coordinate"], placement_method]
+        if defect_type in (PointDefectTypeEnum.SUBSTITUTION, PointDefectTypeEnum.INTERSTITIAL):
+            args.insert(-1, defect_dict["element"])
+
+        current_material = create_func(*args)
 
     return current_material
