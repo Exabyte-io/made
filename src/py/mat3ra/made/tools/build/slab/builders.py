@@ -1,5 +1,8 @@
 from typing import List, Optional, Any, Type
 
+import numpy as np
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
+
 from mat3ra.made.material import Material
 from .configurations import (
     CrystalLatticePlanesConfiguration,
@@ -114,6 +117,9 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
 
         if configuration.xy_supercell_matrix:
             slab_material = supercell(slab_material, configuration.xy_supercell_matrix)
-        strained_slab_material = strain(slab_material, configuration.strain_matrix)
+        diagonal_strain_matrix = [configuration.strain_matrix.root[i].root[i] for i in range(len(configuration.strain_matrix.root))]
+        diagonal_strain_3x3 = np.diag(diagonal_strain_matrix)
+        diagonal_strain_schema = Matrix3x3Schema(root=diagonal_strain_3x3.tolist())
+        strained_slab_material = strain(slab_material, diagonal_strain_schema)
 
         return strained_slab_material

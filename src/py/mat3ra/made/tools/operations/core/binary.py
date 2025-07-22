@@ -3,12 +3,12 @@ from typing import List, Optional
 import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.modify import translate_by_vector
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
-
-from .utils import merge_two_materials, should_skip_stacking
+from .utils import merge_two_materials, should_skip_stacking, switch_in_plane_lattice_vectors
 
 
 def merge(
@@ -54,6 +54,9 @@ def stack_two_materials(
     """
     Stack two materials along a specified direction by expanding lattices and merging.
 
+    First attempts to stack materials as-is. If that fails due to lattice mismatch,
+    adjusts the in-plane lattice vectors of material_2 to match material_1 and tries again.
+
     Args:
         material_1: First material to stack.
         material_2: Second material to stack.
@@ -64,9 +67,42 @@ def stack_two_materials(
     """
     lattice_vector_index = AXIS_TO_INDEX_MAP[direction.value]
 
-    if should_skip_stacking(material_1, material_2, lattice_vector_index):
-        return material_1.clone()
+    # First attempt: try stacking as-is
+    try:
+        if should_skip_stacking(material_1, material_2, lattice_vector_index):
+            return material_1.clone()
 
+        return _perform_stacking(material_1, material_2, lattice_vector_index)
+
+    except ValueError as e:
+        if "In-plane lattice vectors" in str(e):
+            # Second attempt: adjust in-plane lattice vectors of material_2 and try again
+            material_2_adjusted = switch_in_plane_lattice_vectors(material_1, material_2, lattice_vector_index)
+
+            if should_skip_stacking(material_1, material_2_adjusted, lattice_vector_index):
+                return material_1.clone()
+
+            return _perform_stacking(material_1, material_2_adjusted, lattice_vector_index)
+        else:
+            raise
+
+
+def _perform_stacking(
+    material_1: Material,
+    material_2: Material,
+    lattice_vector_index: int,
+) -> MaterialWithBuildMetadata:
+    """
+    Perform the actual stacking operation.
+
+    Args:
+        material_1: First material to stack.
+        material_2: Second material to stack.
+        lattice_vector_index: Index of the lattice vector in the stacking direction.
+
+    Returns:
+        MaterialWithBuildMetadata: Stacked material.
+    """
     material_1_lattice_vectors = material_1.lattice.vector_arrays
     material_2_lattice_vectors = material_2.lattice.vector_arrays
 

@@ -66,9 +66,6 @@ GRAPHENE_NICKEL_TEST_CASE = (
 
 
 MAX_AREA = 100
-# pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2
-EXPECTED_NUMBER_OF_INTERFACES = 1 if platform.python_version().startswith("3.8") else 1
-interface_configuration = None
 
 
 @pytest.mark.parametrize("substrate, film, expected_interface", [SIMPLE_INTERFACE_BUILDER_TEST_CASE])
@@ -196,6 +193,7 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         number_of_layers=substrate.number_of_layers,
         vacuum=0.0,
         termination_formula=None,
+        use_conventional_cell=False,
     )
     film_slab_config = SlabConfiguration.from_parameters(
         material_or_dict=film.bulk_config,
@@ -203,6 +201,7 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         number_of_layers=film.number_of_layers,
         vacuum=0.0,
         termination_formula=None,
+        use_conventional_cell=False,
     )
 
     substrate_slab = SlabBuilder().get_material(substrate_slab_config)

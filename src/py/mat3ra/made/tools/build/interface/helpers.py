@@ -11,6 +11,7 @@ from mat3ra.made.tools.analyze.interface import (
     ZSLInterfaceAnalyzer,
 )
 from mat3ra.made.tools.analyze.interface.twisted_nanoribbons import TwistedNanoribbonsInterfaceAnalyzer
+from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from .builders import (
     InterfaceBuilder,
 )
@@ -27,7 +28,6 @@ from ...analyze.lattice import get_conventional_material
 from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import interface_displace_part
 from ...optimize import evaluate_calculator_on_xy_grid
-from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 
 
 def create_simple_interface_between_slabs(

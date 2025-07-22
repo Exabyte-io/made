@@ -20,6 +20,8 @@ class Termination(TerminationSchema, InMemoryEntityPydantic):
         super().__init__(chemical_elements=chemical_elements, space_group_symmetry_label=space_group_symmetry_label)
 
     def __eq__(self, other):
+        if not isinstance(other, Termination):
+            return NotImplemented
         return (
             self.chemical_elements == other.chemical_elements
             and self.space_group_symmetry_label == other.space_group_symmetry_label

@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.operations.core.binary import stack_two_materials
 from mat3ra.made.tools.operations.core.unary import perturb, strain
@@ -11,7 +12,6 @@ from mat3ra.made.tools.utils.perturbation import SineWavePerturbationFunctionHol
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
 from unit.fixtures.strain import BULK_Si_CONVENTIONAL_STRAINED
 from unit.utils import assert_two_entities_deep_almost_equal
-
 from .fixtures.bulk import BULK_Si_PRIMITIVE
 from .fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 
