@@ -116,9 +116,7 @@ def test_terminations_without_vacuum(material_config, miller_indices, expected_t
     all_materials = analyzer.get_materials_for_all_terminations_without_vacuum()
     assert sorted(terminations_without_vacuum_str_list) == sorted(expected_terminations_without_vacuum_str)
     assert all_materials
-    assert len(all_materials) == len(
-        [t for t in analyzer.terminations_without_vacuum if t is not None]
-    )
+    assert len(all_materials) == len([t for t in analyzer.terminations_without_vacuum if t is not None])
 
 
 @pytest.mark.parametrize(

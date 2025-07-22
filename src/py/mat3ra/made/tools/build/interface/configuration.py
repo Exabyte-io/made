@@ -23,6 +23,7 @@ class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):
         ]
     ]
     xy_shift: List[float] = InterfaceConfigurationSchema.model_fields["xy_shift"].default  # in Angstroms
+    type: str = "InterfaceConfiguration"
 
     @property
     def substrate_configuration(self) -> SlabStrainedSupercellConfiguration:

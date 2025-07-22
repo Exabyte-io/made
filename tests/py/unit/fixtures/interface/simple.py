@@ -33,7 +33,7 @@ INTERFACE_Si_001_Ge_001 = {
             {"id": 28, "value": [0.5, 0.0, 0.809096611]},
             {"id": 29, "value": [0.75, 0.75, 0.745461979]},
             {"id": 30, "value": [0.5, 0.5, 0.936365876]},
-            {"id": 31, "value": [0.75, 0.25, 0.872731244]}
+            {"id": 31, "value": [0.75, 0.25, 0.872731244]},
         ],
         "elements": [
             {"id": 0, "value": "Si"},
@@ -67,7 +67,7 @@ INTERFACE_Si_001_Ge_001 = {
             {"id": 28, "value": "Ge"},
             {"id": 29, "value": "Ge"},
             {"id": 30, "value": "Ge"},
-            {"id": 31, "value": "Ge"}
+            {"id": 31, "value": "Ge"},
         ],
         "units": "crystal",
     },
@@ -78,7 +78,7 @@ INTERFACE_Si_001_Ge_001 = {
         "alpha": 90.0,
         "beta": 90.0,
         "gamma": 90.0,
-        "units": {"angle": "degree","length": "angstrom"},
-        "type": "TRI"
-    }
+        "units": {"angle": "degree", "length": "angstrom"},
+        "type": "TRI",
+    },
 }

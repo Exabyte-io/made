@@ -389,7 +389,7 @@ GRAIN_BOUNDARY_LINEAR_SI = {
             {"id": 72, "value": "C"},
             {"id": 73, "value": "C"},
             {"id": 74, "value": "C"},
-            {"id": 75, "value": "C"}
+            {"id": 75, "value": "C"},
         ],
         "coordinates": [
             {"id": 0, "value": [0.424143404, 0.701754386, 1e-06]},
@@ -467,7 +467,7 @@ GRAIN_BOUNDARY_LINEAR_SI = {
             {"id": 72, "value": [0.565252831, 0.98245614, 1e-06]},
             {"id": 73, "value": [0.508156604, 0.122807018, 1e-06]},
             {"id": 74, "value": [0.956769819, 0.877192982, 1e-06]},
-            {"id": 75, "value": [0.899673592, 0.01754386, 1e-06]}
+            {"id": 75, "value": [0.899673592, 0.01754386, 1e-06]},
         ],
         "units": "crystal",
         "labels": [
@@ -548,7 +548,7 @@ GRAIN_BOUNDARY_LINEAR_SI = {
             {"id": 74, "value": 1},
             {"id": 75, "value": 1},
         ],
-        "constraints": []
+        "constraints": [],
     },
     "lattice": {
         "a": 23.131987342,
@@ -558,6 +558,6 @@ GRAIN_BOUNDARY_LINEAR_SI = {
         "beta": 90.0,
         "gamma": 60.0,
         "units": {"length": "angstrom", "angle": "degree"},
-        "type": "TRI"
+        "type": "TRI",
     },
 }

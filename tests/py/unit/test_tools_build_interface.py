@@ -1,27 +1,23 @@
-import platform
 from types import SimpleNamespace
 
 import pytest
-from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceConfiguration
 from mat3ra.made.tools.build.interface.helpers import (
+    create_commensurate_interface,
     create_simple_interface_between_slabs,
     create_twisted_interface,
     create_zsl_interface,
     create_zsl_interface_between_slabs,
-    create_commensurate_interface,
 )
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
-from mat3ra.standata.materials import Materials
-
 from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.standata.materials import Materials
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
@@ -221,7 +217,6 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         max_length_tol=0.05,
         max_angle_tol=0.02,
     )
-    interface.metadata.build = []
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 

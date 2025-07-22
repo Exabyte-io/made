@@ -3,11 +3,11 @@ from typing import List, Optional
 import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.modify import translate_by_vector
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
+
 from .utils import merge_two_materials, should_skip_stacking, switch_in_plane_lattice_vectors
 
 
