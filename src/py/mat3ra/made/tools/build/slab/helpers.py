@@ -100,6 +100,7 @@ def create_slab(
         number_of_layers=number_of_layers,
         termination_formula=termination_formula,
         vacuum=vacuum,
+        use_conventional_cell=use_conventional_cell,
     )
     builder = SlabBuilder(build_parameters=slab_builder_parameters)
     return builder.get_material(slab_configuration)
@@ -110,9 +111,13 @@ def create_slab_if_not(
 ) -> MaterialWithBuildMetadata:
     slab = material
     metadata = slab.metadata
-    if not metadata.build[-1].configuration or metadata.build[-1].configuration.get("type") != "SlabConfiguration":
+    if (
+        not metadata.build
+        or not metadata.build[-1].configuration
+        or metadata.build[-1].configuration.get("type") != "SlabConfiguration"
+    ):
         print("The material is not a slab. Creating a new slab...")
-        slab = create_slab(**default_slab_configuration.to_dict())
+        slab = SlabBuilder().get_material(default_slab_configuration)
     return slab
 
 
