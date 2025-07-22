@@ -114,13 +114,25 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
 
     def _generate(self, configuration: _ConfigurationType) -> Material:
         slab_material = super()._generate(configuration)
-
-        if configuration.xy_supercell_matrix:
-            slab_material = supercell(slab_material, configuration.xy_supercell_matrix)
+        # TODO: Fix pymatgen's strain matching (issue for HEX a and b switching)
         diagonal_strain_matrix = [
             configuration.strain_matrix.root[i].root[i] for i in range(len(configuration.strain_matrix.root))
         ]
-        diagonal_strain_3x3 = np.diag(diagonal_strain_matrix)
+
+        if configuration.xy_supercell_matrix:
+            slab_material = supercell(slab_material, configuration.xy_supercell_matrix)
+
+        # In case pymatgen returned strain matrix that has supercell matrix embedded, we extract it.
+        integer_parts = [int(val) if val >= 1 else 1 for val in diagonal_strain_matrix]
+        fractional_parts = [val / int(val) if val >= 1 else val for val in diagonal_strain_matrix]
+
+        # Create supercell if any integer parts are > 1
+        if any(val > 1 for val in integer_parts):
+            supercell_matrix = np.diag(integer_parts).tolist()
+            slab_material = supercell(slab_material, supercell_matrix)
+
+        # Apply remaining fractional strain
+        diagonal_strain_3x3 = np.diag(fractional_parts)
         diagonal_strain_schema = Matrix3x3Schema(root=diagonal_strain_3x3.tolist())
         strained_slab_material = strain(slab_material, diagonal_strain_schema)
 
