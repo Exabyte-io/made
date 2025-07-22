@@ -270,12 +270,14 @@ def create_twisted_interface(
         miller_indices=(0, 0, 1),
         number_of_layers=1,
         vacuum=0.0,
+        use_conventional_cell=use_conventional_cell,
     )
     slab2 = SlabConfiguration.from_parameters(
         material_or_dict=material2,
         miller_indices=(0, 0, 1),
         number_of_layers=1,
         vacuum=0.0,
+        use_conventional_cell=use_conventional_cell,
     )
     analyzer = TwistedNanoribbonsInterfaceAnalyzer(
         substrate_slab_configuration=slab1,
@@ -375,6 +377,8 @@ def create_commensurate_interface(
     vacuum: float = 0.0,
     match_id: int = 0,
     use_conventional_cell: bool = True,
+    remove_overlapping_atoms: bool = True,
+    tolerance_for_overlap: float = 1.0,
 ) -> Material:
     """
     Create a commensurate lattice interface (twisted interface) from a material with specified twist angle.
@@ -398,7 +402,9 @@ def create_commensurate_interface(
         number_of_layers (int): Number of atomic layers in the slab.
         vacuum (float): Size of the vacuum layer in Angstroms.
         match_id (int): ID of the match to use (0 for first match).
-
+        use_conventional_cell (bool): Whether to use the conventional cell for the material.
+        remove_overlapping_atoms (bool): Whether to resolve overlapping atoms in the interface after creation.
+        tolerance_for_overlap (float): Tolerance for resolving overlapping atoms, in Angstroms.
     Returns:
         Material: The commensurate interface material.
 
@@ -426,7 +432,10 @@ def create_commensurate_interface(
     )
 
     builder = InterfaceBuilder()
-    return builder.get_material(interface_config)
+    interface = builder.get_material(interface_config)
+    if remove_overlapping_atoms:
+        interface.basis.resolve_colliding_coordinates(tolerance=tolerance_for_overlap)
+    return interface
 
 
 def get_optimal_film_displacement(

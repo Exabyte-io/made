@@ -14,11 +14,14 @@ from mat3ra.made.tools.build.interface.helpers import (
     create_twisted_interface,
     create_zsl_interface,
     create_zsl_interface_between_slabs,
+    create_commensurate_interface,
 )
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.standata.materials import Materials
+
+from mat3ra.made.tools.build.slab.helpers import create_slab
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
@@ -277,37 +280,38 @@ def test_create_twisted_interface(material_config, config_params, expected_inter
             GRAPHENE,
             {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
             AxisEnum.z,
-            [3.0, 3.0],
+            3.0,
             INTERFACE_GRAPHENE_GRAPHENE_Z,
         ),
         (
             GRAPHENE,
             {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
             AxisEnum.x,
-            [],  # testing no gaps
+            None,  # testing no gaps
             INTERFACE_GRAPHENE_GRAPHENE_X,
         ),
     ],
 )
 def test_commensurate_interface_creation(material_config, analyzer_params, direction, gaps, expected_interface):
-    slab_config = SlabConfiguration.from_parameters(
-        material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0
+    material = Material.create(material_config)
+
+    slab = create_slab(
+        crystal=material,
+        miller_indices=(0, 0, 1),
+        use_conventional_cell=True,
+        use_orthogonal_c=True,
+        number_of_layers=1,
+        vacuum=0.0,
     )
 
-    analyzer = CommensurateLatticeInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
+    interface = create_commensurate_interface(
+        material=slab,
+        target_angle=analyzer_params["target_angle"],
+        angle_tolerance=analyzer_params["angle_tolerance"],
+        max_repetition_int=analyzer_params["max_supercell_matrix_int"],
+        return_first_match=analyzer_params["return_first_match"],
+        direction=direction,
+        gap=gaps,
+    )
 
-    match_holders = analyzer.commensurate_lattice_match_holders
-
-    if len(match_holders) > 0:
-        selected_config = analyzer.get_strained_configuration_by_match_id(0)
-        interface_config = InterfaceConfiguration(
-            stack_components=[selected_config.substrate_configuration, selected_config.film_configuration],
-            gaps=ArrayWithIds.from_values(values=gaps),
-            direction=direction,
-        )
-
-        builder = InterfaceBuilder()
-        interface = builder.get_material(interface_config)
-        interface.metadata.build = []
-
-        assert_two_entities_deep_almost_equal(interface, expected_interface, atol=1e-5)
+    assert_two_entities_deep_almost_equal(interface, expected_interface, atol=1e-5)
