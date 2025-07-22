@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 
 from mat3ra.made.material import Material
 from .builders import (

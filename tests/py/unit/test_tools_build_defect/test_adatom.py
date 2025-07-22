@@ -61,7 +61,7 @@ def test_create_multiple_adatom_defects(crystal_config, adatom_dicts, placement_
     defects = create_multiple_adatom_defects(slab, adatom_dicts, placement_method)
 
     assert len(defects.basis.elements.values) == expected_num_atoms
-    
+
     # Check that all expected elements are present
     expected_elements = ["Si"] * 16 + ["Si", "C", "N"]  # Original slab + added adatoms
     actual_elements = defects.basis.elements.values
