@@ -3,13 +3,14 @@ from typing import TypeVar, Type, Union
 
 EnumType = TypeVar("EnumType", bound=Enum)
 
+
 def get_enum_value(enum_member: Enum) -> str:
     """
     Gets the actual string value from an enum member, handling nested enum references.
-    
+
     Args:
         enum_member: The enum member to get the value from
-        
+
     Returns:
         str: The actual string value
     """
@@ -17,6 +18,7 @@ def get_enum_value(enum_member: Enum) -> str:
     while isinstance(value, Enum):
         value = value.value
     return value
+
 
 def ensure_enum(value: Union[str, EnumType], enum_class: Type[EnumType]) -> EnumType:
     """
@@ -51,8 +53,5 @@ def ensure_enum(value: Union[str, EnumType], enum_class: Type[EnumType]) -> Enum
                 valid_values.append(enum_value.value.value)
             else:
                 valid_values.append(enum_value.value)
-        raise ValueError(
-            f"'{value}' is not a valid {enum_class.__name__}. "
-            f"Valid values are: {valid_values}"
-        )
+        raise ValueError(f"'{value}' is not a valid {enum_class.__name__}. " f"Valid values are: {valid_values}")
     return value
