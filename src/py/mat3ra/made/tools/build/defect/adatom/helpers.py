@@ -108,3 +108,70 @@ def create_adatom_defect_at_crystal_site(
 
     builder = AdatomDefectBuilder()
     return builder.get_material(configuration)
+
+
+def create_multiple_adatom_defects(
+    slab: MaterialWithBuildMetadata,
+    adatom_dicts: List[dict],
+    placement_method: AdatomPlacementMethodEnum = AdatomPlacementMethodEnum.EXACT_COORDINATE,
+) -> Material:
+    """
+    Create multiple adatom defects from a list of dictionaries.
+
+    Args:
+        slab: The slab material.
+        adatom_dicts: List of adatom dictionaries with keys:
+            - element: str (chemical element for the adatom)
+            - coordinate: List[float] (position on surface [x, y])
+            - distance_z: float (distance above surface in Angstroms)
+        placement_method: Method to place all adatoms (common for all defects).
+
+    Returns:
+        Material: The slab with all adatom defects applied.
+    """
+    all_adatom_configs = []
+
+    for adatom_dict in adatom_dicts:
+        element = adatom_dict["element"]
+        coordinate = adatom_dict["coordinate"]
+        distance_z = adatom_dict.get("distance_z", 1.0)
+
+        if placement_method == AdatomPlacementMethodEnum.EXACT_COORDINATE:
+            adatom_analyzer = AdatomMaterialAnalyzer(
+                material=slab, coordinate_2d=coordinate, distance_z=distance_z, element=element
+            )
+        elif placement_method == AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE:
+            adatom_analyzer = AdatomCrystalSiteMaterialAnalyzer(
+                material=slab, coordinate_2d=coordinate, distance_z=distance_z, element=element
+            )
+        else:
+            raise ValueError(f"Unsupported adatom placement method: {placement_method}")
+
+        isolated_defect = adatom_analyzer.added_component
+        all_adatom_configs.append(isolated_defect)
+
+    # Create final configuration with all adatoms
+    if placement_method == AdatomPlacementMethodEnum.EXACT_COORDINATE:
+        slab_in_stack = adjust_material_cell_to_set_gap_along_direction(slab, 0)
+        vacuum_configuration = AdatomMaterialAnalyzer(
+            material=slab,
+            coordinate_2d=adatom_dicts[0]["coordinate"],
+            distance_z=adatom_dicts[0].get("distance_z", 1.0),
+            element=adatom_dicts[0]["element"],
+        ).get_slab_vacuum_configuration()
+    else:
+        analyzer = AdatomCrystalSiteMaterialAnalyzer(
+            material=slab,
+            coordinate_2d=adatom_dicts[0]["coordinate"],
+            distance_z=adatom_dicts[0].get("distance_z", 1.0),
+            element=adatom_dicts[0]["element"],
+        )
+        slab_in_stack = analyzer.slab_configuration_with_no_vacuum
+        vacuum_configuration = analyzer.get_slab_vacuum_configuration()
+
+    # Stack all components together
+    stack_components = [slab_in_stack] + all_adatom_configs + [vacuum_configuration]
+    configuration = AdatomDefectConfiguration(stack_components=stack_components)
+
+    builder = AdatomDefectBuilder()
+    return builder.get_material(configuration)
