@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 
 from mat3ra.made.material import Material
 from .builders import (
@@ -12,6 +12,7 @@ from .configuration import (
     InterstitialDefectConfiguration,
 )
 from ..enums import (
+    PointDefectTypeEnum,
     VacancyPlacementMethodEnum,
     SubstitutionPlacementMethodEnum,
     InterstitialPlacementMethodEnum,
@@ -109,34 +110,50 @@ def create_point_defect_interstitial(
 
 def create_multiple_defects(
     material: Material,
-    defect_configurations: List[
-        Union[VacancyDefectConfiguration, SubstitutionalDefectConfiguration, InterstitialDefectConfiguration]
-    ],
+    defect_dicts: List[dict],
 ) -> Material:
     """
-    Create a material with multiple defects.
+    Create multiple point defects from a list of dictionaries.
 
     Args:
-        material: The host material.
-        defect_configurations: List of point defect configurations.
+        material (Material): The host material.
+        defect_dicts (List[dict]): List of defect dictionaries with keys:
+            - type: str ("vacancy", "substitution", "interstitial")
+            - coordinate: List[float]
+            - element: str (required for substitution and interstitial)
+            - resolution_method: str (placement method)
 
     Returns:
-        Material: Material with multiple defects applied.
+        Material: A new material with all defects applied.
     """
-
-    builder_mapping = {
-        VacancyDefectConfiguration: VacancyDefectBuilder,
-        SubstitutionalDefectConfiguration: SubstitutionalDefectBuilder,
-        InterstitialDefectConfiguration: InterstitialDefectBuilder,
-    }
-
     current_material = material
 
-    for defect_config in defect_configurations:
-        defect_config.merge_components[0] = current_material
+    for defect_dict in defect_dicts:
+        defect_type = defect_dict["type"]
+        coordinate = defect_dict["coordinate"]
+        resolution_method = defect_dict.get("resolution_method")
 
-        builder_class = builder_mapping[type(defect_config)]
-        builder = builder_class()
-        current_material = builder.get_material(defect_config)
+        if defect_type == PointDefectTypeEnum.VACANCY:
+            placement_method = VacancyPlacementMethodEnum.CLOSEST_SITE
+            if resolution_method:
+                placement_method = VacancyPlacementMethodEnum(resolution_method)
+            current_material = create_point_defect_vacancy(current_material, coordinate, placement_method)
+
+        elif defect_type == PointDefectTypeEnum.SUBSTITUTION:
+            element = defect_dict["element"]
+            placement_method = SubstitutionPlacementMethodEnum.CLOSEST_SITE
+            if resolution_method:
+                placement_method = SubstitutionPlacementMethodEnum(resolution_method)
+            current_material = create_point_defect_substitution(current_material, coordinate, element, placement_method)
+
+        elif defect_type == PointDefectTypeEnum.INTERSTITIAL:
+            element = defect_dict["element"]
+            placement_method = InterstitialPlacementMethodEnum.EXACT_COORDINATE
+            if resolution_method:
+                placement_method = InterstitialPlacementMethodEnum(resolution_method)
+            current_material = create_point_defect_interstitial(current_material, coordinate, element, placement_method)
+
+        else:
+            raise ValueError(f"Unsupported defect type: {defect_type}")
 
     return current_material
