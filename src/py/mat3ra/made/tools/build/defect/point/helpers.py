@@ -140,7 +140,9 @@ def create_multiple_defects(
             - type: str ("vacancy", "substitution", "interstitial")
             - coordinate: List[float]
             - element: str (required for substitution and interstitial)
-            - resolution_method: str (placement method)
+            - resolution_method: str (optional)
+                - For vacancy/substitution: "closest_site"
+                - For interstitial: "exact_coordinate", "voronoi_site"
 
     Returns:
         Material: A new material with all defects applied.
