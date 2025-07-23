@@ -94,20 +94,23 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     def _create_strained_configs_from_match(
         self, match_holder: ZSLMatchHolder
     ) -> MatchedSubstrateFilmConfigurationHolder:
-        substrate_supercell = supercell(self.substrate_material, match_holder.substrate_transformation_matrix)
-        film_supercell = supercell(self.film_material, match_holder.film_transformation_matrix)
 
-        film_strain_3d = self.get_film_strain_matrix(
-            substrate_supercell.lattice.vector_arrays, film_supercell.lattice.vector_arrays
+        substrate_config = self.get_component_strained_configuration(
+            self.substrate_slab_configuration,
+            Matrix3x3Schema(root=match_holder.strain_transformation_matrix.root),
+            xy_supercell_matrix=match_holder.substrate_transformation_matrix,
         )
 
-        return self.create_matched_configuration_holder(
-            self.substrate_slab_configuration,
+        film_config = self.get_component_strained_configuration(
             self.film_slab_configuration,
+            Matrix3x3Schema(root=match_holder.strain_transformation_matrix.root),
+            xy_supercell_matrix=match_holder.film_transformation_matrix,
+        )
+
+        return MatchedSubstrateFilmConfigurationHolder(
             match_id=match_holder.match_id,
-            substrate_xy_supercell_matrix=match_holder.substrate_transformation_matrix,
-            film_xy_supercell_matrix=match_holder.film_transformation_matrix,
-            film_strain_matrix=film_strain_3d,
+            substrate_configuration=substrate_config,
+            film_configuration=film_config,
             total_strain_percentage=match_holder.total_strain_percentage,
         )
 

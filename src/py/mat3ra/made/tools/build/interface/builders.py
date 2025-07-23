@@ -14,6 +14,7 @@ from ...modify import (
     translate_by_vector,
     wrap_to_unit_cell,
 )
+from ...operations.core.utils import should_skip_stacking, switch_in_plane_lattice_vectors
 from ....utils import AXIS_TO_INDEX_MAP
 
 
@@ -51,6 +52,13 @@ class InterfaceBuilder(StackNComponentsBuilder):
         translation_vector[other_axes[0]] = configuration.xy_shift[0]
         translation_vector[other_axes[1]] = configuration.xy_shift[1]
         film_material = translate_by_vector(film_material, translation_vector, use_cartesian_coordinates=True)
+
+        try:
+            should_skip_stacking(substrate_material, film_material, stacking_axis)
+        except ValueError:
+            # we try to get equivalent film lattice by switcing in-plane lattice vectors
+            film_material = switch_in_plane_lattice_vectors(substrate_material, film_material, stacking_axis)
+            should_skip_stacking(substrate_material, film_material, stacking_axis)
 
         stack_configuration = StackConfiguration(
             stack_components=[substrate_material, film_material, configuration.vacuum_configuration],
