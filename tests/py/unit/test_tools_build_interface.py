@@ -178,7 +178,7 @@ def test_create_zsl_interface(substrate, film, expected_interface):
         max_area_ratio_tol=0.1,
         max_length_tol=0.05,
         max_angle_tol=0.02,
-        use_conventional_cell=False,
+        use_conventional_cell=True,
     )
     interface.metadata.build = []
     assert_two_entities_deep_almost_equal(interface, expected_interface)
