@@ -10,6 +10,7 @@ from .configurations import (
 )
 from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfiguration
 from .configurations.slab_configuration import SlabConfiguration
+from .entities import MillerIndices
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder, MaterialWithBuildMetadata
 from ..stack.builders import StackNComponentsBuilder
@@ -71,9 +72,9 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
         material_analyzer = BaseMaterialAnalyzer(material=material)
         material.formula = material_analyzer.formula
         termination = configuration.termination_top
-        miller_indices_str = "".join([str(i) for i in configuration.miller_indices])
+        miller_indices_str = str(MillerIndices(root=configuration.miller_indices))
         # for example: "Si(001), termination Si_P4/mmm_1"
-        new_name = f"{material.formula}({miller_indices_str}), termination {termination}"
+        new_name = f"{material.formula}{miller_indices_str}, termination {termination}"
         material.name = new_name
         return material
 
