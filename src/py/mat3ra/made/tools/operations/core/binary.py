@@ -67,67 +67,40 @@ def stack_two_materials(
     """
     lattice_vector_index = AXIS_TO_INDEX_MAP[direction.value]
 
-    # First attempt: try stacking as-is
     try:
         if should_skip_stacking(material_1, material_2, lattice_vector_index):
             return material_1.clone()
 
-        return _perform_stacking(material_1, material_2, lattice_vector_index)
+        material_1_lattice_vectors = material_1.lattice.vector_arrays
+        material_2_lattice_vectors = material_2.lattice.vector_arrays
 
+        stacked_lattice_vectors_values = [vector.copy() for vector in material_1_lattice_vectors]
+        stacked_lattice_vectors_values[lattice_vector_index] = (
+            np.array(material_1_lattice_vectors[lattice_vector_index])
+            + np.array(material_2_lattice_vectors[lattice_vector_index])
+        ).tolist()
+
+        material_1_final_lattice_config = material_1.clone()
+        material_1_final_lattice_config.set_lattice_vectors_from_array(stacked_lattice_vectors_values)
+
+        # Translate material2 so its atoms are positioned correctly relative to material1
+        material_2_adjusted_c = material_2.clone()
+        material_2_adjusted_c.set_lattice_vectors_from_array(stacked_lattice_vectors_values)
+        # The translation amount is the original lattice vector of material1 in the stacking direction
+        translation_vec = material_1_lattice_vectors[lattice_vector_index]
+        material_2_translated = translate_by_vector(
+            material_2_adjusted_c, translation_vec, use_cartesian_coordinates=True
+        )
+
+        stacked_material = merge_two_materials(
+            material1=material_1_final_lattice_config,
+            material2=material_2_translated,
+            distance_tolerance=0,
+            merge_dangerously=False,
+            material_name=material_1.name,
+        )
+        return stacked_material
     except ValueError as e:
-        if "In-plane lattice vectors" in str(e):
-            # Second attempt: adjust in-plane lattice vectors of material_2 and try again
-            material_2_adjusted = switch_in_plane_lattice_vectors(material_1, material_2, lattice_vector_index)
-
-            if should_skip_stacking(material_1, material_2_adjusted, lattice_vector_index):
-                return material_1.clone()
-
-            return _perform_stacking(material_1, material_2_adjusted, lattice_vector_index)
-        else:
-            raise
-
-
-def _perform_stacking(
-    material_1: Material,
-    material_2: Material,
-    lattice_vector_index: int,
-) -> MaterialWithBuildMetadata:
-    """
-    Perform the actual stacking operation.
-
-    Args:
-        material_1: First material to stack.
-        material_2: Second material to stack.
-        lattice_vector_index: Index of the lattice vector in the stacking direction.
-
-    Returns:
-        MaterialWithBuildMetadata: Stacked material.
-    """
-    material_1_lattice_vectors = material_1.lattice.vector_arrays
-    material_2_lattice_vectors = material_2.lattice.vector_arrays
-
-    stacked_lattice_vectors_values = [vector.copy() for vector in material_1_lattice_vectors]
-    stacked_lattice_vectors_values[lattice_vector_index] = (
-        np.array(material_1_lattice_vectors[lattice_vector_index])
-        + np.array(material_2_lattice_vectors[lattice_vector_index])
-    ).tolist()
-
-    material_1_final_lattice_config = material_1.clone()
-    material_1_final_lattice_config.set_lattice_vectors_from_array(stacked_lattice_vectors_values)
-
-    # Translate material2 so its atoms are positioned correctly relative to material1
-    material_2_adjusted_c = material_2.clone()
-    material_2_adjusted_c.set_lattice_vectors_from_array(stacked_lattice_vectors_values)
-    # The translation amount is the original lattice vector of material1 in the stacking direction
-    translation_vec = material_1_lattice_vectors[lattice_vector_index]
-    material_2_translated = translate_by_vector(material_2_adjusted_c, translation_vec, use_cartesian_coordinates=True)
-
-    stacked_material = merge_two_materials(
-        material1=material_1_final_lattice_config,
-        material2=material_2_translated,
-        distance_tolerance=0,
-        merge_dangerously=False,
-        material_name=material_1.name,
-    )
-
-    return stacked_material
+        raise ValueError(
+            f"Failed to stack materials {material_1.name} and {material_2.name} due to lattice mismatch: {str(e)}"
+        ) from e
