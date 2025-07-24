@@ -3,6 +3,8 @@ from typing import Final
 
 import numpy as np
 import pytest
+from mat3ra.standata.materials import Materials
+
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
@@ -83,6 +85,22 @@ def test_interface_analyzer(substrate, film, expected):
             SUBSTRATE_SI_001,
             FILM_GE_001,
             {"max_area": 350.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
+            1,
+        ),
+        (
+            SimpleNamespace(
+                bulk_config=Materials.get_by_name_first_match("Nickel"),
+                miller_indices=(1, 0, 0),
+                number_of_layers=2,
+                vacuum=0.0,
+            ),
+            SimpleNamespace(
+                bulk_config=GRAPHENE,
+                miller_indices=(0, 0, 1),
+                number_of_layers=1,
+                vacuum=0.0,
+            ),
+            {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
             1,
         ),
     ],
