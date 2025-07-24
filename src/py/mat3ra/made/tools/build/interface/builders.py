@@ -14,7 +14,8 @@ from ...modify import (
     translate_by_vector,
     wrap_to_unit_cell,
 )
-from ...operations.core.utils import should_skip_stacking, switch_in_plane_lattice_vectors
+from ...operations.core.unary import supercell
+from ...operations.core.utils import should_skip_stacking
 from ....utils import AXIS_TO_INDEX_MAP
 
 
@@ -56,8 +57,8 @@ class InterfaceBuilder(StackNComponentsBuilder):
         try:
             should_skip_stacking(substrate_material, film_material, stacking_axis)
         except ValueError:
-            # we try to get equivalent film lattice by switcing in-plane lattice vectors
-            film_material = switch_in_plane_lattice_vectors(substrate_material, film_material, stacking_axis)
+            # we try to get equivalent film lattice by switching in-plane lattice vectors
+            film_material = supercell(film_material, [[0, 1, 0], [1, 0, 0], [0, 0, 1]])
             should_skip_stacking(substrate_material, film_material, stacking_axis)
 
         stack_configuration = StackConfiguration(
