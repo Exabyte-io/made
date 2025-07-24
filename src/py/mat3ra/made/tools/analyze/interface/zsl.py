@@ -112,41 +112,43 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         film_target_lattice_vectors = match_holder.film_sl_vector_arrays
         substrate_target_lattice_vectors = match_holder.substrate_sl_vector_arrays
 
-        film_float_matrix = (
-            np.linalg.inv(np.array(film_current_lattice_vectors)[:2, :2])
-            @ np.array(film_target_lattice_vectors)[:2, :2]
+        # film_float_matrix = (
+        #     np.linalg.inv(np.array(film_current_lattice_vectors)[:2, :2])
+        #     @ np.array(film_target_lattice_vectors)[:2, :2]
+        # )
+        # film_transformation_matrix = np.rint(film_float_matrix).astype(int)
+        #
+        # substrate_float_matrix = (
+        #     np.linalg.inv(np.array(substrate_current_lattice_vectors)[:2, :2])
+        #     @ np.array(substrate_target_lattice_vectors)[:2, :2]
+        # )
+        # substrate_transformation_matrix = np.rint(substrate_float_matrix).astype(int)
+        #
+        # # 1) build the supercells
+        # film_sc = supercell(film_slab, convert_2x2_to_3x3(film_transformation_matrix))
+        # substrate_sc = supercell(substrate_slab, convert_2x2_to_3x3(substrate_transformation_matrix))
+        #
+        # # 2) pull off their 2×2 in-plane lattice matrices (row-vectors)
+        # C_film_sc = np.array(film_sc.lattice.vector_arrays)[:2, :2]
+        # C_substrate_sc = np.array(substrate_sc.lattice.vector_arrays)[:2, :2]
+        #
+        # # 3) compute the exact 2×2 deformation gradient
+        # F2 = np.linalg.inv(C_film_sc) @ C_substrate_sc
+        #
+        # # 4) embed into a full 3×3 strain
+        # strain_3x3 = np.eye(3)
+        # strain_3x3[:2, :2] = F2
+
+        film_strain_matrix = super().get_film_strain_matrix(
+            substrate_target_lattice_vectors, film_target_lattice_vectors
         )
-        film_transformation_matrix = np.rint(film_float_matrix).astype(int)
-
-        substrate_float_matrix = (
-            np.linalg.inv(np.array(substrate_current_lattice_vectors)[:2, :2])
-            @ np.array(substrate_target_lattice_vectors)[:2, :2]
-        )
-        substrate_transformation_matrix = np.rint(substrate_float_matrix).astype(int)
-
-        # 1) build the supercells
-        film_sc = supercell(film_slab, convert_2x2_to_3x3(film_transformation_matrix))
-        substrate_sc = supercell(substrate_slab, convert_2x2_to_3x3(substrate_transformation_matrix))
-
-        # 2) pull off their 2×2 in-plane lattice matrices (row-vectors)
-        C_film_sc = np.array(film_sc.lattice.vector_arrays)[:2, :2]
-        C_substrate_sc = np.array(substrate_sc.lattice.vector_arrays)[:2, :2]
-
-        # 3) compute the exact 2×2 deformation gradient
-        F2 = np.linalg.inv(C_film_sc) @ C_substrate_sc
-
-        # 4) embed into a full 3×3 strain
-        strain_3x3 = np.eye(3)
-        strain_3x3[:2, :2] = F2
-
-        film_strain_matrix = Matrix3x3Schema(root=strain_3x3.tolist())
 
         return super().create_matched_configuration_holder(
             substrate_slab_config=self.substrate_slab_configuration,
             film_slab_config=self.film_slab_configuration,
             match_id=match_holder.match_id,
-            substrate_xy_supercell_matrix=SupercellMatrix2DSchema(root=substrate_transformation_matrix.tolist()),
-            film_xy_supercell_matrix=SupercellMatrix2DSchema(root=film_transformation_matrix.tolist()),
+            substrate_xy_supercell_matrix=match_holder.substrate_transformation_matrix,
+            film_xy_supercell_matrix=match_holder.film_transformation_matrix,
             substrate_strain_matrix=self._no_strain_matrix,
             film_strain_matrix=Matrix3x3Schema(root=film_strain_matrix.root),
             total_strain_percentage=match_holder.total_strain_percentage,
