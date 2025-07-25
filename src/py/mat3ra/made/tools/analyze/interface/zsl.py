@@ -77,9 +77,11 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         for idx, match_pymatgen in enumerate(self.get_pymatgen_match_holders()):
             pymatgen_film_vectors = np.array(match_pymatgen.film_vectors)[:, :2]
             pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
+            pymatgen_film_sl_vectors = self.align_first_vector_to_x(pymatgen_film_sl_vectors)
 
             pymatgen_substrate_vectors = np.array(match_pymatgen.substrate_vectors)[:, :2]
             pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
+            pymatgen_substrate_sl_vectors = self.align_first_vector_to_x(pymatgen_substrate_sl_vectors)
 
             film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
             substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
@@ -91,13 +93,6 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             substrate_supercell_matrix = np.rint(
                 np.linalg.solve(pymatgen_substrate_vectors, pymatgen_substrate_sl_vectors)
             ).astype(int)
-
-            film_to_pymatgen_supercell = np.linalg.solve(
-                film_slab_vectors, pymatgen_film_vectors
-            )  # Identity! They are the same!
-            substrate_to_pymatgen_supercell = np.linalg.solve(
-                substrate_slab_vectors, pymatgen_substrate_vectors
-            )  # Identity! They are the same!
 
             film_sl_supercell_vectors = film_supercell_matrix @ film_slab_vectors
             substrate_sl_supercell_vectors = substrate_supercell_matrix @ substrate_slab_vectors
@@ -179,3 +174,20 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             strained_configs.append(config_holder)
 
         return strained_configs
+
+    def align_first_vector_to_x(self, vectors):
+        vectors = np.array(vectors)
+        if vectors.shape != (2, 2):
+            raise ValueError("Input must be two 2D vectors (shape (2, 2)).")
+        v = vectors[0]
+        a = np.linalg.norm(v)
+        if a == 0:
+            raise ValueError("First lattice vector has zero length.")
+        # Angle to x-axis
+        angle = np.arctan2(v[1], v[0])
+        # 2D rotation matrix to align v with x-axis
+        R = np.array([[np.cos(-angle), -np.sin(-angle)], [np.sin(-angle), np.cos(-angle)]])
+        rotated_vectors = vectors @ R.T
+        # Set first vector to [a, 0]
+        rotated_vectors[0] = np.array([a, 0])
+        return rotated_vectors
