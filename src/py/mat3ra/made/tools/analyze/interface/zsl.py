@@ -74,31 +74,31 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     def zsl_match_holders(self) -> List[ZSLMatchHolder]:
         match_holders = []
         for idx, match_pymatgen in enumerate(self.get_pymatgen_match_holders()):
-            real_film_supercell_matrix = (
-                match_pymatgen.film_sl_vectors[:, :2] @ np.linalg.inv(np.array(match_pymatgen.film_vectors)[:, :2])
+            real_film_supercell_matrix = np.rint(
+                np.linalg.inv(np.array(match_pymatgen.film_vectors)[:, :2]) @ match_pymatgen.film_sl_vectors[:, :2]
             ).astype(int)
 
-            real_substrate_supercell_matrix = (
-                match_pymatgen.substrate_sl_vectors[:, :2]
-                @ np.linalg.inv(np.array(match_pymatgen.substrate_vectors)[:, :2])
+            real_substrate_supercell_matrix = np.rint(
+                np.linalg.inv(np.array(match_pymatgen.substrate_vectors)[:, :2])
+                @ match_pymatgen.substrate_sl_vectors[:, :2]
             ).astype(int)
 
             film_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
             substrate_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
 
-            film_sl_supercell_vectors = film_vectors @ real_film_supercell_matrix
-            substrate_sl_supercell_vectors = substrate_vectors @ real_substrate_supercell_matrix
+            film_sl_supercell_vectors = real_film_supercell_matrix @ film_vectors
+            substrate_sl_supercell_vectors = real_substrate_supercell_matrix @ substrate_vectors
             if (
                 abs(np.linalg.det(film_sl_supercell_vectors)) < 1e-4
                 or abs(np.linalg.det(substrate_sl_supercell_vectors)) < 1e-4
             ):
                 continue
-            real_strain_matrix = np.linalg.inv(film_sl_supercell_vectors) @ substrate_sl_supercell_vectors
+            real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
 
             # Sanity check for strain matrix: applied to film sl vectors should yield substrate sl vectors
+            film_supercell_vectors = real_film_supercell_matrix @ film_vectors
             delta = np.abs(
-                film_vectors @ real_film_supercell_matrix @ real_strain_matrix
-                - substrate_vectors @ real_substrate_supercell_matrix
+                film_supercell_vectors @ real_strain_matrix - real_substrate_supercell_matrix @ substrate_vectors
             )
             assert np.allclose(delta, 0.0, atol=1e-5)
 
@@ -142,7 +142,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             substrate_xy_supercell_matrix=match_holder.substrate_supercell_matrix,
             film_xy_supercell_matrix=match_holder.film_supercell_matrix,
             substrate_strain_matrix=self._no_strain_matrix,
-            film_strain_matrix=Matrix3x3Schema(root=match_holder.strain_transformation_matrix.root),
+            film_strain_matrix=match_holder.strain_transformation_matrix,
             total_strain_percentage=match_holder.total_strain_percentage,
         )
 
