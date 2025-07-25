@@ -1,5 +1,6 @@
+from collections import defaultdict
 from functools import cached_property
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
@@ -14,10 +15,8 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from mat3ra.made.tools.analyze.other import get_surface_area
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabBuilderParameters
-from mat3ra.made.tools.operations.core.unary import supercell
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.utils import calculate_von_mises_strain
 
 
@@ -77,74 +76,62 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     def zsl_match_holders(self) -> List[ZSLMatchHolder]:
         match_holders = []
         for idx, match_pymatgen in enumerate(self.get_pymatgen_match_holders()):
-            pymatgen_film_vectors = np.array(match_pymatgen.film_vectors)[:, :2]
-            film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
-
-            pymatgen_substrate_vectors = np.array(match_pymatgen.substrate_vectors)[:, :2]
-            substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
-
-            pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
-            pymatgen_film_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
-
-            pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
-            pymatgen_substrate_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
-
-            # Check if film and substrate supercell vectors are colinear (i.e., a and b are orthogonal or nearly so)
-            def are_vectors_colinear(v1, v2, tol=1e-3):
-                v1 = np.array(v1)
-                v2 = np.array(v2)
-                norm1 = np.linalg.norm(v1)
-                norm2 = np.linalg.norm(v2)
-                if norm1 < tol or norm2 < tol:
-                    return False
-                cos_angle = np.dot(v1, v2) / (norm1 * norm2)
-                # Colinear if |cos_angle| close to 1
-                return np.abs(np.abs(cos_angle) - 1) < tol
-
-            # Check that film a is colinear with substrate a, and film b with substrate b
-            a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
-            b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
-            if not (a_colinear and b_colinear):
+            match_holder = self.get_zsl_match_holder(idx, match_pymatgen)
+            if match_holder is None:
                 continue
-
-            film_supercell_matrix = np.rint(np.linalg.solve(pymatgen_film_vectors, pymatgen_film_sl_vectors)).astype(
-                int
-            )
-
-            substrate_supercell_matrix = np.rint(
-                np.linalg.solve(pymatgen_substrate_vectors, pymatgen_substrate_sl_vectors)
-            ).astype(int)
-
-            film_sl_supercell_vectors = film_supercell_matrix @ film_slab_vectors
-            substrate_sl_supercell_vectors = substrate_supercell_matrix @ substrate_slab_vectors
-            if (
-                abs(np.linalg.det(film_sl_supercell_vectors)) < 1e-4
-                or abs(np.linalg.det(substrate_sl_supercell_vectors)) < 1e-4
-            ):
-                continue
-
-            real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
-
-            real_strain_matrix = convert_2x2_to_3x3(real_strain_matrix)
-            strain_percentage = self.calculate_total_strain_percentage(real_strain_matrix)
-
-            match_holder = ZSLMatchHolder(
-                match_id=idx,
-                substrate_supercell_matrix=SupercellMatrix2DSchema(root=substrate_supercell_matrix.tolist()),
-                film_supercell_matrix=SupercellMatrix2DSchema(root=film_supercell_matrix.tolist()),
-                strain_transformation_matrix=Matrix3x3Schema(root=real_strain_matrix),
-                match_area=match_pymatgen.match_area,
-                total_strain_percentage=strain_percentage,
-            )
             match_holders.append(match_holder)
 
-        # sort matches by strain in ascending order, then by area in ascending order
-        # 2) sort by strain (stable!), so equal strains keep the area order
-        match_holders.sort(key=lambda x: x.total_strain_percentage)
-        # 1) sort by area (so ties in strain will inherit this area order)
-        match_holders.sort(key=lambda x: x.match_area)
+        # sort matches by strain in ascending order, then for each equal strain by area in ascending order
+        match_holders = self.sort_by_strain_then_area(match_holders)
 
         return match_holders
+
+    def get_zsl_match_holder(self, match_id: int, match_pymatgen) -> Optional[ZSLMatchHolder]:
+        pymatgen_film_vectors = np.array(match_pymatgen.film_vectors)[:, :2]
+        film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
+
+        pymatgen_substrate_vectors = np.array(match_pymatgen.substrate_vectors)[:, :2]
+        substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
+
+        pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
+        pymatgen_film_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
+
+        pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
+        pymatgen_substrate_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
+
+        a_colinear = self.are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
+        b_colinear = self.are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
+        if not (a_colinear and b_colinear):
+            return None
+
+        film_supercell_matrix = np.rint(np.linalg.solve(pymatgen_film_vectors, pymatgen_film_sl_vectors)).astype(int)
+
+        substrate_supercell_matrix = np.rint(
+            np.linalg.solve(pymatgen_substrate_vectors, pymatgen_substrate_sl_vectors)
+        ).astype(int)
+
+        film_sl_supercell_vectors = film_supercell_matrix @ film_slab_vectors
+        substrate_sl_supercell_vectors = substrate_supercell_matrix @ substrate_slab_vectors
+
+        if (
+            abs(np.linalg.det(film_sl_supercell_vectors)) < 1e-4
+            or abs(np.linalg.det(substrate_sl_supercell_vectors)) < 1e-4
+        ):
+            return None
+
+        real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
+
+        real_strain_matrix = convert_2x2_to_3x3(real_strain_matrix.tolist())
+        strain_percentage = self.calculate_total_strain_percentage(real_strain_matrix)
+
+        return ZSLMatchHolder(
+            match_id=match_id,
+            substrate_supercell_matrix=SupercellMatrix2DSchema(root=substrate_supercell_matrix.tolist()),
+            film_supercell_matrix=SupercellMatrix2DSchema(root=film_supercell_matrix.tolist()),
+            strain_transformation_matrix=Matrix3x3Schema(root=real_strain_matrix),
+            match_area=match_pymatgen.match_area,
+            total_strain_percentage=strain_percentage,
+        )
 
     def get_strained_configuration_by_match_id(self, match_id: int) -> MatchedSubstrateFilmConfigurationHolder:
         match_holders = self.zsl_match_holders
@@ -210,3 +197,28 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             rotated_vectors[1] = -rotated_vectors[1]
 
         return rotated_vectors
+
+    def sort_by_strain_then_area(self, match_holders, strain_tol=1e-3):
+        same_strain_groups = defaultdict(list)
+        for m in match_holders:
+            strain_key = round(m.total_strain_percentage / strain_tol) * strain_tol
+            same_strain_groups[strain_key].append(m)
+
+        result = []
+        for strain_key in sorted(same_strain_groups.keys()):
+            bucket = same_strain_groups[strain_key]
+            bucket.sort(key=lambda m: m.match_area)
+            result.extend(bucket)
+
+        return result
+
+    def are_vectors_colinear(self, v1, v2, tol=1e-3):
+        v1 = np.array(v1)
+        v2 = np.array(v2)
+        norm1 = np.linalg.norm(v1)
+        norm2 = np.linalg.norm(v2)
+        if norm1 < tol or norm2 < tol:
+            return False
+        cos_angle = np.dot(v1, v2) / (norm1 * norm2)
+        # Colinear if |cos_angle| close to 1
+        return np.abs(np.abs(cos_angle) - 1) < tol
