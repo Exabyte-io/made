@@ -57,8 +57,11 @@ class InterfaceBuilder(StackNComponentsBuilder):
         try:
             should_skip_stacking(substrate_material, film_material, stacking_axis)
         except ValueError:
-            # we try to get equivalent film lattice by switching in-plane lattice vectors
             film_material = supercell(film_material, [[0, 1, 0], [1, 0, 0], [0, 0, 1]])
+            print(
+                "Switched in-plane lattice vectors of the film material to match substrate"
+                + "Direct stacking was not possible."
+            )
             should_skip_stacking(substrate_material, film_material, stacking_axis)
 
         stack_configuration = StackConfiguration(

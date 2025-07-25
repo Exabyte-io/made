@@ -1,7 +1,5 @@
 from typing import List, Optional, Any, Type
 
-from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
-
 from mat3ra.made.material import Material
 from .configurations import (
     CrystalLatticePlanesConfiguration,

@@ -87,10 +87,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         return match_holders
 
     def get_zsl_match_holder(self, match_id: int, match_pymatgen) -> Optional[ZSLMatchHolder]:
-        pymatgen_film_vectors = np.array(match_pymatgen.film_vectors)[:, :2]
         film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
-
-        pymatgen_substrate_vectors = np.array(match_pymatgen.substrate_vectors)[:, :2]
         substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
 
         pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
@@ -104,10 +101,10 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         if not (a_colinear and b_colinear):
             return None
 
-        film_supercell_matrix = np.rint(np.linalg.solve(pymatgen_film_vectors, pymatgen_film_sl_vectors)).astype(int)
+        film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
 
         substrate_supercell_matrix = np.rint(
-            np.linalg.solve(pymatgen_substrate_vectors, pymatgen_substrate_sl_vectors)
+            np.linalg.solve(substrate_slab_vectors, pymatgen_substrate_sl_vectors)
         ).astype(int)
 
         film_sl_supercell_vectors = film_supercell_matrix @ film_slab_vectors
