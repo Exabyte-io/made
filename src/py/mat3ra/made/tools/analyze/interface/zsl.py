@@ -14,7 +14,8 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
+from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabBuilderParameters
+from mat3ra.made.tools.operations.core.unary import supercell
 from mat3ra.made.utils import calculate_von_mises_strain
 
 
@@ -41,7 +42,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
 
     @classmethod
     def calculate_total_strain_percentage(cls, strain_matrix: list) -> float:
-        return calculate_von_mises_strain(strain_matrix)
+        return calculate_von_mises_strain(np.array(strain_matrix))
 
     @property
     def film_slab(self) -> MaterialWithBuildMetadata:
@@ -74,40 +75,62 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     def zsl_match_holders(self) -> List[ZSLMatchHolder]:
         match_holders = []
         for idx, match_pymatgen in enumerate(self.get_pymatgen_match_holders()):
-            real_film_supercell_matrix = np.rint(
-                np.linalg.inv(np.array(match_pymatgen.film_vectors)[:, :2]) @ match_pymatgen.film_sl_vectors[:, :2]
+            pymatgen_film_vectors = np.array(match_pymatgen.film_vectors)[:, :2]
+            pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
+
+            pymatgen_substrate_vectors = np.array(match_pymatgen.substrate_vectors)[:, :2]
+            pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
+
+            film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
+            substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
+
+            film_supercell_matrix = np.rint(np.linalg.solve(pymatgen_film_vectors, pymatgen_film_sl_vectors)).astype(
+                int
+            )
+
+            substrate_supercell_matrix = np.rint(
+                np.linalg.solve(pymatgen_substrate_vectors, pymatgen_substrate_sl_vectors)
             ).astype(int)
 
-            real_substrate_supercell_matrix = np.rint(
-                np.linalg.inv(np.array(match_pymatgen.substrate_vectors)[:, :2])
-                @ match_pymatgen.substrate_sl_vectors[:, :2]
-            ).astype(int)
+            film_to_pymatgen_supercell = np.linalg.solve(
+                film_slab_vectors, pymatgen_film_vectors
+            )  # Identity! They are the same!
+            substrate_to_pymatgen_supercell = np.linalg.solve(
+                substrate_slab_vectors, pymatgen_substrate_vectors
+            )  # Identity! They are the same!
 
-            film_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
-            substrate_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
-
-            film_sl_supercell_vectors = real_film_supercell_matrix @ film_vectors
-            substrate_sl_supercell_vectors = real_substrate_supercell_matrix @ substrate_vectors
+            film_sl_supercell_vectors = film_supercell_matrix @ film_slab_vectors
+            substrate_sl_supercell_vectors = substrate_supercell_matrix @ substrate_slab_vectors
             if (
                 abs(np.linalg.det(film_sl_supercell_vectors)) < 1e-4
                 or abs(np.linalg.det(substrate_sl_supercell_vectors)) < 1e-4
             ):
                 continue
-            real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
+
+            # Calculate the real strain matrix that transforms film supercell vectors to substrate supercell vectors
+            # Since matrix multiplication doesn't give the actual final lattices in general case (not orthogonal),
+            # we need to create slabs and get the vectors from them...
+            # real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors) # this is not correct
+            film_sl_slab = supercell(self.film_slab, film_supercell_matrix.tolist())
+            substrate_sl_slab = supercell(self.substrate_slab, substrate_supercell_matrix.tolist())
+            film_sl_slab_vectors = np.array(film_sl_slab.lattice.vector_arrays[0:2])[:, :2]
+            substrate_sl_slab_vectors = np.array(substrate_sl_slab.lattice.vector_arrays[0:2])[:, :2]
+
+            real_strain_matrix = np.linalg.solve(film_sl_slab_vectors, substrate_sl_slab_vectors)
 
             # Sanity check for strain matrix: applied to film sl vectors should yield substrate sl vectors
-            film_supercell_vectors = real_film_supercell_matrix @ film_vectors
-            delta = np.abs(
-                film_supercell_vectors @ real_strain_matrix - real_substrate_supercell_matrix @ substrate_vectors
-            )
-            assert np.allclose(delta, 0.0, atol=1e-5)
+            # film_supercell_vectors = film_supercell_matrix @ film_slab_vectors
+            # delta = np.abs(
+            #     film_supercell_vectors @ real_strain_matrix - substrate_supercell_matrix @ substrate_slab_vectors
+            # )
+            # assert np.allclose(delta, 0.0, atol=1e-5)
 
             real_strain_matrix = convert_2x2_to_3x3(real_strain_matrix)
 
             match_holder = ZSLMatchHolder(
                 match_id=idx,
-                substrate_supercell_matrix=SupercellMatrix2DSchema(root=real_substrate_supercell_matrix.tolist()),
-                film_supercell_matrix=SupercellMatrix2DSchema(root=real_film_supercell_matrix.tolist()),
+                substrate_supercell_matrix=SupercellMatrix2DSchema(root=substrate_supercell_matrix.tolist()),
+                film_supercell_matrix=SupercellMatrix2DSchema(root=film_supercell_matrix.tolist()),
                 strain_transformation_matrix=Matrix3x3Schema(root=real_strain_matrix),
                 match_area=match_pymatgen.match_area,
                 total_strain_percentage=self.calculate_total_strain_percentage(real_strain_matrix),
