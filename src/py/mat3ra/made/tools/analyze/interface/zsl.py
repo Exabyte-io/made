@@ -77,11 +77,11 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         for idx, match_pymatgen in enumerate(self.get_pymatgen_match_holders()):
             pymatgen_film_vectors = np.array(match_pymatgen.film_vectors)[:, :2]
             pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
-            pymatgen_film_sl_vectors = self.align_first_vector_to_x(pymatgen_film_sl_vectors)
+            pymatgen_film_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
 
             pymatgen_substrate_vectors = np.array(match_pymatgen.substrate_vectors)[:, :2]
             pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
-            pymatgen_substrate_sl_vectors = self.align_first_vector_to_x(pymatgen_substrate_sl_vectors)
+            pymatgen_substrate_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
 
             film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
             substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
@@ -105,13 +105,13 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             # Calculate the real strain matrix that transforms film supercell vectors to substrate supercell vectors
             # Since matrix multiplication doesn't give the actual final lattices in general case (not orthogonal),
             # we need to create slabs and get the vectors from them...
-            # real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors) # this is not correct
-            film_sl_slab = supercell(self.film_slab, film_supercell_matrix.tolist())
-            substrate_sl_slab = supercell(self.substrate_slab, substrate_supercell_matrix.tolist())
-            film_sl_slab_vectors = np.array(film_sl_slab.lattice.vector_arrays[0:2])[:, :2]
-            substrate_sl_slab_vectors = np.array(substrate_sl_slab.lattice.vector_arrays[0:2])[:, :2]
+            # film_sl_slab = supercell(self.film_slab, film_supercell_matrix.tolist())
+            # substrate_sl_slab = supercell(self.substrate_slab, substrate_supercell_matrix.tolist())
+            # film_sl_slab_vectors = np.array(film_sl_slab.lattice.vector_arrays[0:2])[:, :2]
+            # substrate_sl_slab_vectors = np.array(substrate_sl_slab.lattice.vector_arrays[0:2])[:, :2]
 
-            real_strain_matrix = np.linalg.solve(film_sl_slab_vectors, substrate_sl_slab_vectors)
+            # real_strain_matrix = np.linalg.solve(film_sl_slab_vectors, substrate_sl_slab_vectors)
+            real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
 
             # Sanity check for strain matrix: applied to film sl vectors should yield substrate sl vectors
             # film_supercell_vectors = film_supercell_matrix @ film_slab_vectors
@@ -175,7 +175,13 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
 
         return strained_configs
 
-    def align_first_vector_to_x(self, vectors):
+    def align_first_vector_to_x_2d_right_handed(self, vectors):
+        """
+        Rotates a set of 2D lattice vectors so that the first vector is aligned with the x-axis,
+        and makes the cell right-handed.
+        vectors: (2, 2) array
+        Returns: rotated (2, 2) array
+        """
         vectors = np.array(vectors)
         if vectors.shape != (2, 2):
             raise ValueError("Input must be two 2D vectors (shape (2, 2)).")
@@ -190,4 +196,10 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         rotated_vectors = vectors @ R.T
         # Set first vector to [a, 0]
         rotated_vectors[0] = np.array([a, 0])
+
+        # Check handedness: z-component of cross product should be positive
+        cross_z = np.cross(rotated_vectors[0], rotated_vectors[1])
+        if cross_z < 0:
+            rotated_vectors[1] = -rotated_vectors[1]
+
         return rotated_vectors
