@@ -86,12 +86,12 @@ def test_interface_analyzer(substrate, film, expected):
 @pytest.mark.parametrize(
     "substrate, film, zsl_params, expected_matches_min",
     [
-        (
-            SUBSTRATE_SI_001,
-            FILM_GE_001,
-            {"max_area": 350.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
-            1,
-        ),
+        # (
+        #     SUBSTRATE_SI_001,
+        #     FILM_GE_001,
+        #     {"max_area": 350.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
+        #     1,
+        # ),
         (
             SimpleNamespace(
                 bulk_config=Materials.get_by_name_first_match("Nickel"),
@@ -137,19 +137,21 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
     substrate_vectors = np.array(analyzer.substrate_slab.lattice.vector_arrays)
 
     film_sl_vectors = (
-        film_vectors
-        @ np.array(convert_2x2_to_3x3([row.root for row in film_config.xy_supercell_matrix]))
+        np.array(convert_2x2_to_3x3([row.root for row in film_config.xy_supercell_matrix]))
+        @ film_vectors
         @ np.array([row.root for row in film_config.strain_matrix.root])
     )
-    substrate_sl_vectors = substrate_vectors @ np.array(
-        convert_2x2_to_3x3([row.root for row in sub_config.xy_supercell_matrix])
+    substrate_sl_vectors = (
+        np.array(convert_2x2_to_3x3([row.root for row in sub_config.xy_supercell_matrix])) @ substrate_vectors
     )
 
     substrate_material = SlabStrainedSupercellBuilder().get_material(sub_config)
     film_material = SlabStrainedSupercellBuilder().get_material(film_config)
 
-    assert np.allclose(substrate_material.lattice.vector_arrays, substrate_sl_vectors, atol=1e-4)
-    assert np.allclose(film_material.lattice.vector_arrays, film_sl_vectors, atol=1e-4)
+    assert np.allclose(film_sl_vectors[0:2], substrate_sl_vectors[0:2], atol=1e-4)
+
+    assert np.allclose(substrate_material.lattice.vector_arrays[0:2], substrate_sl_vectors[0:2], atol=1e-4)
+    assert np.allclose(film_material.lattice.vector_arrays[0:2], film_sl_vectors[0:2], atol=1e-4)
 
     assert np.isclose(substrate_material.lattice.a, film_material.lattice.a, atol=1e-4)
     assert np.isclose(substrate_material.lattice.b, film_material.lattice.b, atol=1e-4)

@@ -3,12 +3,27 @@ from typing import Final, Tuple
 
 import numpy as np
 import pytest
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
+    SupercellMatrix2DSchema,
+)
+from mat3ra.utils.matrix import convert_2x2_to_3x3
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.slab.builders import AtomicLayersUniqueRepeatedBuilder, SlabBuilder, SlabBuilderParameters
-from mat3ra.made.tools.build.slab.configurations import AtomicLayersUniqueRepeatedConfiguration, SlabConfiguration
+from mat3ra.made.tools.build.slab.builders import (
+    AtomicLayersUniqueRepeatedBuilder,
+    SlabBuilder,
+    SlabBuilderParameters,
+    SlabStrainedSupercellBuilder,
+)
+from mat3ra.made.tools.build.slab.configurations import (
+    AtomicLayersUniqueRepeatedConfiguration,
+    SlabConfiguration,
+    SlabStrainedSupercellConfiguration,
+)
 from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations
 from mat3ra.made.tools.build.slab.termination_utils import select_slab_termination
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
@@ -279,3 +294,55 @@ def test_adjust_lattice_for_gap(material_config, direction, gap, expected_length
     axis_index = AXIS_TO_INDEX_MAP[direction.value]
     actual_length = np.linalg.norm(adjusted_material.lattice.vector_arrays[axis_index])
     assertion.assert_almost_equal_numbers(actual_length.tolist(), expected_length)
+
+
+@pytest.mark.parametrize(
+    "material_config, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix, strain_matrix",
+    [
+        (
+            BULK_Si_PRIMITIVE,
+            (0, 0, 1),
+            "Si",
+            2,
+            5.0,
+            [[1, 0], [0, 1]],
+            [[1.2, 0.2, 0.0], [0.05, 1.2, 0.0], [0.0, 0.0, 1.0]],
+        ),
+    ],
+)
+def test_build_slab_strained(
+    material_config,
+    miller_indices,
+    termination_formula,
+    number_of_layers,
+    vacuum,
+    xy_supercell_matrix,
+    strain_matrix,
+):
+
+    material = MaterialWithBuildMetadata.create(material_config)
+    config = SlabStrainedSupercellConfiguration.from_parameters(
+        material_or_dict=material,
+        miller_indices=miller_indices,
+        termination_formula=termination_formula,
+        number_of_layers=number_of_layers,
+        vacuum=vacuum,
+    )
+
+    normal_slab = SlabBuilder().get_material(config)
+
+    config.strain_matrix = Matrix3x3Schema(root=strain_matrix)
+    config.xy_supercell_matrix = SupercellMatrix2DSchema(root=xy_supercell_matrix)
+
+    slab = SlabStrainedSupercellBuilder().get_material(config)
+
+    actual_lattice_vectors = np.array(slab.lattice.vector_arrays)
+    expected_lattice_vectors = (
+        np.array(strain_matrix)
+        @ np.array(convert_2x2_to_3x3(xy_supercell_matrix))
+        @ np.array(normal_slab.lattice.vector_arrays)
+    )
+
+    assert np.allclose(
+        actual_lattice_vectors, expected_lattice_vectors, atol=1e-6
+    ), "Strained supercell lattice vectors do not match expected values."
