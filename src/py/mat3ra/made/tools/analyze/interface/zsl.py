@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import List
 
 import numpy as np
@@ -13,6 +14,7 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
 
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from mat3ra.made.tools.analyze.other import get_surface_area
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.slab.builders import SlabBuilder, SlabBuilderParameters
 from mat3ra.made.tools.operations.core.unary import supercell
@@ -44,11 +46,11 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     def calculate_total_strain_percentage(cls, strain_matrix: list) -> float:
         return calculate_von_mises_strain(np.array(strain_matrix))
 
-    @property
+    @cached_property
     def film_slab(self) -> MaterialWithBuildMetadata:
         return SlabBuilder().get_material(self.film_slab_configuration)
 
-    @property
+    @cached_property
     def substrate_slab(self) -> MaterialWithBuildMetadata:
         return SlabBuilder().get_material(self.substrate_slab_configuration)
 
@@ -71,20 +73,39 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         )
         return zsl_matches_pymatgen
 
-    @property
+    @cached_property
     def zsl_match_holders(self) -> List[ZSLMatchHolder]:
         match_holders = []
         for idx, match_pymatgen in enumerate(self.get_pymatgen_match_holders()):
             pymatgen_film_vectors = np.array(match_pymatgen.film_vectors)[:, :2]
+            film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
+
+            pymatgen_substrate_vectors = np.array(match_pymatgen.substrate_vectors)[:, :2]
+            substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
+
             pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
             pymatgen_film_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
 
-            pymatgen_substrate_vectors = np.array(match_pymatgen.substrate_vectors)[:, :2]
             pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
             pymatgen_substrate_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
 
-            film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
-            substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
+            # Check if film and substrate supercell vectors are colinear (i.e., a and b are orthogonal or nearly so)
+            def are_vectors_colinear(v1, v2, tol=1e-3):
+                v1 = np.array(v1)
+                v2 = np.array(v2)
+                norm1 = np.linalg.norm(v1)
+                norm2 = np.linalg.norm(v2)
+                if norm1 < tol or norm2 < tol:
+                    return False
+                cos_angle = np.dot(v1, v2) / (norm1 * norm2)
+                # Colinear if |cos_angle| close to 1
+                return np.abs(np.abs(cos_angle) - 1) < tol
+
+            # Check that film a is colinear with substrate a, and film b with substrate b
+            a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
+            b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
+            if not (a_colinear and b_colinear):
+                continue
 
             film_supercell_matrix = np.rint(np.linalg.solve(pymatgen_film_vectors, pymatgen_film_sl_vectors)).astype(
                 int
@@ -102,25 +123,10 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             ):
                 continue
 
-            # Calculate the real strain matrix that transforms film supercell vectors to substrate supercell vectors
-            # Since matrix multiplication doesn't give the actual final lattices in general case (not orthogonal),
-            # we need to create slabs and get the vectors from them...
-            # film_sl_slab = supercell(self.film_slab, film_supercell_matrix.tolist())
-            # substrate_sl_slab = supercell(self.substrate_slab, substrate_supercell_matrix.tolist())
-            # film_sl_slab_vectors = np.array(film_sl_slab.lattice.vector_arrays[0:2])[:, :2]
-            # substrate_sl_slab_vectors = np.array(substrate_sl_slab.lattice.vector_arrays[0:2])[:, :2]
-
-            # real_strain_matrix = np.linalg.solve(film_sl_slab_vectors, substrate_sl_slab_vectors)
             real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
 
-            # Sanity check for strain matrix: applied to film sl vectors should yield substrate sl vectors
-            # film_supercell_vectors = film_supercell_matrix @ film_slab_vectors
-            # delta = np.abs(
-            #     film_supercell_vectors @ real_strain_matrix - substrate_supercell_matrix @ substrate_slab_vectors
-            # )
-            # assert np.allclose(delta, 0.0, atol=1e-5)
-
             real_strain_matrix = convert_2x2_to_3x3(real_strain_matrix)
+            strain_percentage = self.calculate_total_strain_percentage(real_strain_matrix)
 
             match_holder = ZSLMatchHolder(
                 match_id=idx,
@@ -128,14 +134,15 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
                 film_supercell_matrix=SupercellMatrix2DSchema(root=film_supercell_matrix.tolist()),
                 strain_transformation_matrix=Matrix3x3Schema(root=real_strain_matrix),
                 match_area=match_pymatgen.match_area,
-                total_strain_percentage=self.calculate_total_strain_percentage(real_strain_matrix),
+                total_strain_percentage=strain_percentage,
             )
             match_holders.append(match_holder)
 
-        # sort matches by area in ascending order
-        match_holders.sort(key=lambda x: x.match_area)
-        # sort matches by strain in ascending order
+        # sort matches by strain in ascending order, then by area in ascending order
+        # 2) sort by strain (stable!), so equal strains keep the area order
         match_holders.sort(key=lambda x: x.total_strain_percentage)
+        # 1) sort by area (so ties in strain will inherit this area order)
+        match_holders.sort(key=lambda x: x.match_area)
 
         return match_holders
 
