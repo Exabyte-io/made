@@ -5,7 +5,12 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceConfiguration
+from mat3ra.made.tools.analyze.lattice import get_primitive_material
+from mat3ra.made.tools.build.interface.builders import (
+    InterfaceBuilder,
+    InterfaceConfiguration,
+    InterfaceBuilderParameters,
+)
 from mat3ra.made.tools.build.interface.helpers import (
     create_commensurate_interface,
     create_simple_interface_between_slabs,
@@ -27,7 +32,7 @@ from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
-SIMPLE_INTERFACE_BUILDER_TEST_CASE = (
+Si_Ge_SIMPLE_INTERFACE_TEST_CASE = (
     SimpleNamespace(
         bulk_config=BULK_Si_CONVENTIONAL,
         miller_indices=(0, 0, 1),
@@ -47,7 +52,7 @@ SIMPLE_INTERFACE_BUILDER_TEST_CASE = (
 GRAPHENE_NICKEL_TEST_CASE = (
     SimpleNamespace(
         bulk_config=Materials.get_by_name_first_match("Nickel"),
-        miller_indices=(1, 1, 1),
+        miller_indices=(0, 1, 1),
         number_of_layers=3,
         vacuum=0.0,
     ),
@@ -59,17 +64,14 @@ GRAPHENE_NICKEL_TEST_CASE = (
     ),
     3.0,  # gap between graphene and nickel
     10.0,  # vacuum
-    50,  # max area
+    190,  # max area
     GRAPHENE_NICKEL_INTERFACE,
 )
 
 
-MAX_AREA = 100
-
-
-@pytest.mark.parametrize("substrate, film, expected_interface", [SIMPLE_INTERFACE_BUILDER_TEST_CASE])
+@pytest.mark.parametrize("substrate, film, expected_interface", [Si_Ge_SIMPLE_INTERFACE_TEST_CASE])
 def test_simple_interface_builder(substrate, film, expected_interface):
-    builder = InterfaceBuilder()
+    builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters(make_primitive=False))
     substrate_slab_config = SlabConfiguration.from_parameters(
         substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
     )
@@ -93,8 +95,8 @@ def test_simple_interface_builder(substrate, film, expected_interface):
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
-@pytest.mark.parametrize("substrate, film, expected_interface", [SIMPLE_INTERFACE_BUILDER_TEST_CASE])
-def test_zsl_interface_builder(substrate, film, expected_interface):
+@pytest.mark.parametrize("substrate, film,gap, vacuum, max_area, expected_interface", [GRAPHENE_NICKEL_TEST_CASE])
+def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_interface):
     """Test creating Si/Ge interface using ZSL approach."""
     substrate_slab_config = SlabConfiguration.from_parameters(
         substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
@@ -107,13 +109,14 @@ def test_zsl_interface_builder(substrate, film, expected_interface):
     analyzer = ZSLInterfaceAnalyzer(
         substrate_slab_configuration=substrate_slab_config,
         film_slab_configuration=film_slab_config,
-        max_area=MAX_AREA,
-        max_area_ratio_tol=0.1,
+        max_area=90,
+        max_area_ratio_tol=0.09,
         max_length_tol=0.05,
         max_angle_tol=0.02,
     )
 
     interface_configurations = analyzer.get_strained_configurations()
+    matches = analyzer.zsl_match_holders
 
     selected_config = interface_configurations[0]
     interface_config = InterfaceConfiguration(
@@ -129,7 +132,7 @@ def test_zsl_interface_builder(substrate, film, expected_interface):
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
-@pytest.mark.parametrize("substrate, film, expected_interface", [SIMPLE_INTERFACE_BUILDER_TEST_CASE])
+@pytest.mark.parametrize("substrate, film, expected_interface", [Si_Ge_SIMPLE_INTERFACE_TEST_CASE])
 def test_create_simple_interface_between_slabs(substrate, film, expected_interface):
     substrate_slab_config = SlabConfiguration.from_parameters(
         material_or_dict=substrate.bulk_config,
@@ -155,13 +158,14 @@ def test_create_simple_interface_between_slabs(substrate, film, expected_interfa
         gap=None,
         vacuum=0.0,
         xy_shift=[0, 0],
+        make_primitive=False,
     )
     interface.metadata.build = []
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
-@pytest.mark.parametrize("substrate, film, expected_interface", [SIMPLE_INTERFACE_BUILDER_TEST_CASE])
-def test_create_zsl_interface(substrate, film, expected_interface):
+@pytest.mark.parametrize("substrate, film,gap, vacuum, max_area, expected_interface", [GRAPHENE_NICKEL_TEST_CASE])
+def test_create_zsl_interface(substrate, film, gap, vacuum, max_area, expected_interface):
     interface = create_zsl_interface(
         substrate_crystal=substrate.bulk_config,
         film_crystal=film.bulk_config,
@@ -174,7 +178,7 @@ def test_create_zsl_interface(substrate, film, expected_interface):
         gap=None,
         vacuum=0.0,
         xy_shift=[0, 0],
-        max_area=MAX_AREA,
+        max_area=max_area,
         max_area_ratio_tol=0.1,
         max_length_tol=0.05,
         max_angle_tol=0.02,
@@ -192,7 +196,7 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         number_of_layers=substrate.number_of_layers,
         vacuum=0.0,
         termination_formula=None,
-        use_conventional_cell=False,
+        use_conventional_cell=True,
     )
     film_slab_config = SlabConfiguration.from_parameters(
         material_or_dict=film.bulk_config,
@@ -200,7 +204,7 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         number_of_layers=film.number_of_layers,
         vacuum=0.0,
         termination_formula=None,
-        use_conventional_cell=False,
+        use_conventional_cell=True,
     )
 
     substrate_slab = SlabBuilder().get_material(substrate_slab_config)
