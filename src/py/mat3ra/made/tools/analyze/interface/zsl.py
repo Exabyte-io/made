@@ -17,7 +17,7 @@ from ...build import MaterialWithBuildMetadata
 from ...build.slab.builders import SlabBuilder
 from ..interface.simple import InterfaceAnalyzer
 from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from .utils.vector import are_vectors_colinear
+from .utils.vector import align_first_vector_to_x_2d_right_handed, are_vectors_colinear
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):
@@ -93,10 +93,10 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
 
         pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
-        pymatgen_film_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
+        pymatgen_film_sl_vectors = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
 
         pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
-        pymatgen_substrate_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
+        pymatgen_substrate_sl_vectors = align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
 
         a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
         b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
@@ -167,37 +167,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
 
         return strained_configs
 
-    @staticmethod
-    def align_first_vector_to_x_2d_right_handed(vectors):
-        """
-        Rotates a set of 2D lattice vectors so that the first vector is aligned with the x-axis,
-        and makes the cell right-handed.
-        vectors: (2, 2) array
-        Returns: rotated (2, 2) array
-        """
-        vectors = np.array(vectors)
-        if vectors.shape != (2, 2):
-            raise ValueError("Input must be two 2D vectors (shape (2, 2)).")
-        v = vectors[0]
-        a = np.linalg.norm(v)
-        if a == 0:
-            raise ValueError("First lattice vector has zero length.")
-        # Angle to x-axis
-        angle = np.arctan2(v[1], v[0])
-        # 2D rotation matrix to align v with x-axis
-        R = np.array([[np.cos(-angle), -np.sin(-angle)], [np.sin(-angle), np.cos(-angle)]])
-        rotated_vectors = vectors @ R.T
-        # Set first vector to [a, 0]
-        rotated_vectors[0] = np.array([a, 0])
-
-        # Check handedness: z-component of cross product should be positive
-        cross_z = np.cross(rotated_vectors[0], rotated_vectors[1])
-        if cross_z < 0:
-            rotated_vectors[1] = -rotated_vectors[1]
-
-        return rotated_vectors
-
-    def sort_by_strain_then_area(self, match_holders, strain_tol=1e-3):
+    def sort_by_strain_then_area(self, match_holders: List[ZSLMatchHolder], strain_tol=1e-3):
         same_strain_groups = defaultdict(list)
         for m in match_holders:
             strain_key = round(m.total_strain_percentage / strain_tol) * strain_tol

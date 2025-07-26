@@ -19,11 +19,13 @@ from .builders import (
 from .configuration import (
     InterfaceConfiguration,
 )
+from .utils import _build_interface_from_stack
 from .. import MaterialWithBuildMetadata
 from ..slab.configurations import (
     SlabConfiguration,
     SlabStrainedSupercellConfiguration,
 )
+from ..slab.helpers import create_slab
 from ..vacuum.configuration import VacuumConfiguration
 from ...analyze.lattice import get_material_with_conventional_lattice
 from ...calculate.calculators import InterfaceMaterialCalculator
@@ -80,33 +82,6 @@ def create_simple_interface_between_slabs(
     return interface
 
 
-def _build_interface_from_stack(
-    selected_config,
-    vacuum: float,
-    gaps=None,
-    xy_shift=None,
-    direction=None,
-) -> Material:
-    vacuum_configuration = VacuumConfiguration(size=vacuum)
-    stack_components = [
-        selected_config.substrate_configuration,
-        selected_config.film_configuration,
-        vacuum_configuration,
-    ]
-    interface_config_kwargs = {
-        "stack_components": stack_components,
-    }
-    if gaps is not None:
-        interface_config_kwargs["gaps"] = gaps
-    if xy_shift is not None:
-        interface_config_kwargs["xy_shift"] = xy_shift
-    if direction is not None:
-        interface_config_kwargs["direction"] = direction
-    interface_config = InterfaceConfiguration(**interface_config_kwargs)
-    builder = InterfaceBuilder()
-    return builder.get_material(interface_config)
-
-
 def create_zsl_interface(
     substrate_crystal: Material,
     film_crystal: Material,
@@ -130,16 +105,16 @@ def create_zsl_interface(
         substrate_crystal = get_material_with_conventional_lattice(substrate_crystal)
         film_crystal = get_material_with_conventional_lattice(film_crystal)
 
-    substrate_slab_config = SlabConfiguration.from_parameters(
-        material_or_dict=substrate_crystal,
+    substrate_slab = create_slab(
+        crystal=substrate_crystal,
         miller_indices=substrate_miller_indices,
         number_of_layers=substrate_number_of_layers,
         vacuum=0,
         termination_formula=substrate_termination_formula,
         use_conventional_cell=use_conventional_cell,
     )
-    film_slab_config = SlabConfiguration.from_parameters(
-        material_or_dict=film_crystal,
+    film_slab = create_slab(
+        crystal=film_crystal,
         miller_indices=film_miller_indices,
         number_of_layers=film_number_of_layers,
         vacuum=0,
@@ -147,22 +122,17 @@ def create_zsl_interface(
         use_conventional_cell=use_conventional_cell,
     )
 
-    analyzer = ZSLInterfaceAnalyzer(
-        substrate_slab_configuration=substrate_slab_config,
-        film_slab_configuration=film_slab_config,
+    return create_zsl_interface_between_slabs(
+        substrate_slab=substrate_slab,
+        film_slab=film_slab,
+        gap=gap,
+        vacuum=vacuum,
+        xy_shift=xy_shift,
         max_area=max_area,
         max_area_ratio_tol=max_area_ratio_tol,
         max_length_tol=max_length_tol,
         max_angle_tol=max_angle_tol,
-    )
-
-    selected_config = analyzer.get_strained_configuration_by_match_id(match_id=match_id)
-
-    return _build_interface_from_stack(
-        selected_config=selected_config,
-        vacuum=vacuum,
-        gaps=ArrayWithIds.from_values(values=[gap, gap] if gap is not None else []),
-        xy_shift=xy_shift,
+        match_id=match_id,
     )
 
 

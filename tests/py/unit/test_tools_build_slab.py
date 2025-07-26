@@ -9,7 +9,7 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     SupercellMatrix2DSchema,
 )
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface import ZSLInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.utils.vector import align_first_vector_to_x_2d_right_handed
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.slab.builders import (
@@ -341,12 +341,8 @@ def test_build_slab_strained(
     ) @ np.array(strain_matrix)
 
     # Align the first vector to x-axis and ensure right-handedness
-    actual_lattice_vectors = ZSLInterfaceAnalyzer.align_first_vector_to_x_2d_right_handed(
-        actual_lattice_vectors[:2, :2]
-    )
-    expected_lattice_vectors = ZSLInterfaceAnalyzer.align_first_vector_to_x_2d_right_handed(
-        expected_lattice_vectors[:2, :2]
-    )
+    actual_lattice_vectors = align_first_vector_to_x_2d_right_handed(actual_lattice_vectors[:2, :2])
+    expected_lattice_vectors = align_first_vector_to_x_2d_right_handed(expected_lattice_vectors[:2, :2])
     assert np.allclose(
         actual_lattice_vectors, expected_lattice_vectors, atol=1e-6
     ), "Strained supercell lattice vectors do not match expected values."

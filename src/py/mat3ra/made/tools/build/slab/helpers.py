@@ -58,6 +58,7 @@ def create_slab(
     use_conventional_cell=True,
     use_orthogonal_c: bool = True,
     termination: Termination = None,
+    termination_formula: str = None,
     number_of_layers=1,
     vacuum=10.0,
     xy_supercell_matrix=DEFAULT_XY_SUPERCELL_MATRIX,
@@ -70,7 +71,8 @@ def create_slab(
         miller_indices (Tuple[int, int, int]): Miller indices for the slab surface.
         use_conventional_cell (bool): Whether to use the conventional cell for the crystal to apply Miller indices.
         use_orthogonal_c (bool): Whether to make slab with c-lattice orthogonal to miller indices plane, along z-axis.
-        termination (Termination): The termination to use for the slab.
+        termination (Termination): The termination to use for the slab, supply a class instance of Termination.
+        termination_formula (str): The stoichiometric formula of the termination, e.g. "Si", "TiO", "SrTiO", "Hf2O".
         number_of_layers (int): Number of atomic layers in the slab, in the number of unit cells.
         vacuum (float): Size of the vacuum layer in Angstroms.
         xy_supercell_matrix (List[List[int]]): Supercell matrix for the xy plane to apply to the generated slab.
@@ -86,7 +88,6 @@ def create_slab(
         )
         material_to_use = crystal_lattice_planes_analyzer.material_with_conventional_lattice
 
-    termination_formula = None
     if termination is not None:
         termination_formula = termination.formula
 
