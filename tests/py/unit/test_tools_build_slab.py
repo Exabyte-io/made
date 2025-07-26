@@ -11,6 +11,7 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.interface import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.slab.builders import (
@@ -305,8 +306,8 @@ def test_adjust_lattice_for_gap(material_config, direction, gap, expected_length
             "Si",
             2,
             5.0,
-            [[1, 0], [0, 1]],
-            [[1.2, 0.2, 0.0], [0.05, 1.2, 0.0], [0.0, 0.0, 1.0]],
+            [[2, 0], [-1, 1]],
+            [[0.8, -0.2, 0.0], [0.05, 1.2, 0.0], [0.0, 0.0, 1.0]],
         ),
     ],
 )
@@ -334,15 +335,20 @@ def test_build_slab_strained(
     config.strain_matrix = Matrix3x3Schema(root=strain_matrix)
     config.xy_supercell_matrix = SupercellMatrix2DSchema(root=xy_supercell_matrix)
 
-    slab = SlabStrainedSupercellBuilder().get_material(config)
+    strained_slab = SlabStrainedSupercellBuilder().get_material(config)
 
-    actual_lattice_vectors = np.array(slab.lattice.vector_arrays)
+    actual_lattice_vectors = np.array(strained_slab.lattice.vector_arrays)
     expected_lattice_vectors = (
-        np.array(strain_matrix)
-        @ np.array(convert_2x2_to_3x3(xy_supercell_matrix))
-        @ np.array(normal_slab.lattice.vector_arrays)
-    )
+        np.array(convert_2x2_to_3x3(xy_supercell_matrix)) @ np.array(normal_slab.lattice.vector_arrays)
+    ) @ np.array(strain_matrix)
 
+    # Align the first vector to x-axis and ensure right-handedness
+    actual_lattice_vectors = ZSLInterfaceAnalyzer.align_first_vector_to_x_2d_right_handed(
+        actual_lattice_vectors[:2, :2]
+    )
+    expected_lattice_vectors = ZSLInterfaceAnalyzer.align_first_vector_to_x_2d_right_handed(
+        expected_lattice_vectors[:2, :2]
+    )
     assert np.allclose(
         actual_lattice_vectors, expected_lattice_vectors, atol=1e-6
     ), "Strained supercell lattice vectors do not match expected values."
