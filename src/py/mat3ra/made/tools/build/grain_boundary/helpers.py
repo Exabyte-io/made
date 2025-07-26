@@ -11,7 +11,7 @@ from .builders import GrainBoundaryLinearBuilder
 from .builders import GrainBoundaryPlanarBuilder
 from .configuration import GrainBoundaryLinearConfiguration
 from .configuration import GrainBoundaryPlanarConfiguration
-from ...analyze.lattice import get_conventional_material
+from ...analyze.lattice import get_material_with_conventional_lattice
 
 
 def create_grain_boundary_planar(
@@ -50,8 +50,10 @@ def create_grain_boundary_planar(
     Returns:
         Material: The grain boundary material
     """
-    phase_1_material = get_conventional_material(phase_1_material, use_conventional_cell)
-    phase_2_material = get_conventional_material(phase_2_material or phase_1_material, use_conventional_cell)
+    phase_2_material = phase_2_material or phase_1_material
+    if use_conventional_cell:
+        phase_1_material = get_material_with_conventional_lattice(phase_1_material)
+        phase_2_material = get_material_with_conventional_lattice(phase_2_material)
 
     analyzer = GrainBoundaryPlanarAnalyzer(
         phase_1_material=phase_1_material,
@@ -121,7 +123,8 @@ def create_grain_boundary_linear(
     Raises:
         ValueError: If no commensurate lattice matches are found.
     """
-    material = get_conventional_material(material, use_conventional_cell)
+    if use_conventional_cell:
+        material = get_material_with_conventional_lattice(material)
 
     strained_configs, actual_angle = get_commensurate_strained_configurations(
         material=material,

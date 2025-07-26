@@ -25,7 +25,7 @@ from ..slab.configurations import (
     SlabStrainedSupercellConfiguration,
 )
 from ..vacuum.configuration import VacuumConfiguration
-from ...analyze.lattice import get_conventional_material
+from ...analyze.lattice import get_material_with_conventional_lattice
 from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import interface_displace_part
 from ...optimize import evaluate_calculator_on_xy_grid
@@ -126,8 +126,9 @@ def create_zsl_interface(
     max_angle_tol: float = 0.01,
     use_conventional_cell: bool = True,
 ) -> Material:
-    substrate_crystal = get_conventional_material(substrate_crystal, use_conventional_cell)
-    film_crystal = get_conventional_material(film_crystal, use_conventional_cell)
+    if use_conventional_cell:
+        substrate_crystal = get_material_with_conventional_lattice(substrate_crystal)
+        film_crystal = get_material_with_conventional_lattice(film_crystal)
 
     substrate_slab_config = SlabConfiguration.from_parameters(
         material_or_dict=substrate_crystal,
@@ -231,8 +232,9 @@ def create_twisted_interface(
     Returns:
         Material: The twisted interface material.
     """
-    material1 = get_conventional_material(material1, use_conventional_cell)
-    material2 = get_conventional_material(material2, use_conventional_cell)
+    if use_conventional_cell:
+        material1 = get_material_with_conventional_lattice(material1)
+        material2 = get_material_with_conventional_lattice(material2)
     slab1 = SlabConfiguration.from_parameters(
         material_or_dict=material1,
         miller_indices=(0, 0, 1),
@@ -304,7 +306,8 @@ def get_commensurate_strained_configurations(
     Raises:
         ValueError: If no commensurate lattice matches are found.
     """
-    material = get_conventional_material(material, use_conventional_cell)
+    if use_conventional_cell:
+        material = get_material_with_conventional_lattice(material)
 
     slab_config = SlabConfiguration.from_parameters(
         material_or_dict=material,

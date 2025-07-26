@@ -30,19 +30,11 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         )
 
 
-def get_conventional_material(
-    material: MaterialWithBuildMetadata, use_conventional_cell: bool = True
-) -> MaterialWithBuildMetadata:
-    if use_conventional_cell:
-        analyzer = LatticeMaterialAnalyzer(material=material)
-        return analyzer.material_with_conventional_lattice
-    return material
+def get_material_with_conventional_lattice(material: MaterialWithBuildMetadata) -> MaterialWithBuildMetadata:
+    analyzer = LatticeMaterialAnalyzer(material=material)
+    return analyzer.material_with_conventional_lattice
 
 
-def get_primitive_material(
-    material: MaterialWithBuildMetadata, use_primitive_cell: bool = True
-) -> MaterialWithBuildMetadata:
-    if use_primitive_cell:
-        analyzer = LatticeMaterialAnalyzer(material=material)
-        return analyzer.material_with_primitive_lattice
-    return material
+def get_material_with_primitive_lattice(material: MaterialWithBuildMetadata) -> MaterialWithBuildMetadata:
+    analyzer = LatticeMaterialAnalyzer(material=material)
+    return analyzer.material_with_primitive_lattice

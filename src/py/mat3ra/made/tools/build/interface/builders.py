@@ -10,7 +10,7 @@ from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ...analyze import BaseMaterialAnalyzer
-from ...analyze.lattice import get_primitive_material
+from ...analyze.lattice import get_material_with_primitive_lattice
 from ...convert.utils import InterfacePartsEnum
 from ...modify import (
     translate_by_vector,
@@ -81,7 +81,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
     ) -> MaterialWithBuildMetadata:
         if self.build_parameters.make_primitive:
             number_of_atoms = material.basis.number_of_atoms
-            primitive_material = get_primitive_material(material)
+            primitive_material = get_material_with_primitive_lattice(material)
             # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
             if primitive_material.basis.number_of_atoms < number_of_atoms:
                 material = primitive_material
