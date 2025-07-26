@@ -120,7 +120,6 @@ def test_create_simple_interface_between_slabs(substrate, film, expected_interfa
         gap=None,
         vacuum=0.0,
         xy_shift=[0, 0],
-        make_primitive=False,
     )
     interface.metadata.build = []
     assert_two_entities_deep_almost_equal(interface, expected_interface)
@@ -144,6 +143,7 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
         max_area_ratio_tol=0.09,
         max_length_tol=0.05,
         max_angle_tol=0.02,
+        reduce_result_cell=False,
     )
 
     interface_configurations = analyzer.get_strained_configurations()
@@ -181,6 +181,8 @@ def test_create_zsl_interface(substrate, film, gap, vacuum, max_area, expected_i
         max_length_tol=0.05,
         max_angle_tol=0.02,
         use_conventional_cell=True,
+        reduce_result_cell=False,
+        reduce_result_cell_to_primitive=True,
     )
     interface.metadata.build = []
     assert_two_entities_deep_almost_equal(interface, expected_interface)

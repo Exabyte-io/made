@@ -39,7 +39,7 @@ def create_simple_interface_between_slabs(
     gap: Optional[float] = None,
     vacuum: float = 10.0,
     xy_shift: List[float] = [0, 0],
-    make_primitive: bool = False,
+    reduce_result_cell_to_primitive: bool = False,
 ) -> Material:
     """
     Create an interface between two slab materials with specified parameters.
@@ -77,7 +77,9 @@ def create_simple_interface_between_slabs(
         xy_shift=xy_shift,
         gaps=ArrayWithIds.from_values([gap]),
     )
-    builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters(make_primitive=make_primitive))
+    builder = InterfaceBuilder(
+        build_parameters=InterfaceBuilderParameters(make_primitive=reduce_result_cell_to_primitive)
+    )
     interface = builder.get_material(config)
     return interface
 
@@ -100,6 +102,8 @@ def create_zsl_interface(
     max_length_tol: float = 0.03,
     max_angle_tol: float = 0.01,
     use_conventional_cell: bool = True,
+    reduce_result_cell: bool = True,
+    reduce_result_cell_to_primitive: bool = False,
 ) -> Material:
     if use_conventional_cell:
         substrate_crystal = get_material_with_conventional_lattice(substrate_crystal)
@@ -133,6 +137,8 @@ def create_zsl_interface(
         max_length_tol=max_length_tol,
         max_angle_tol=max_angle_tol,
         match_id=match_id,
+        reduce_result_cell=reduce_result_cell,
+        reduce_result_cell_to_primitive=reduce_result_cell_to_primitive,
     )
 
 
@@ -147,6 +153,8 @@ def create_zsl_interface_between_slabs(
     max_length_tol: float = 0.03,
     max_angle_tol: float = 0.01,
     match_id: int = 0,
+    reduce_result_cell: bool = True,
+    reduce_result_cell_to_primitive: bool = False,
 ) -> Material:
     if xy_shift is None:
         xy_shift = [0, 0]
@@ -161,7 +169,9 @@ def create_zsl_interface_between_slabs(
         max_area_ratio_tol=max_area_ratio_tol,
         max_length_tol=max_length_tol,
         max_angle_tol=max_angle_tol,
+        reduce_result_cell=reduce_result_cell,
     )
+
     interface_configurations = analyzer.get_strained_configurations()
     if not interface_configurations:
         raise ValueError("No ZSL match found for the given parameters.")
@@ -176,6 +186,7 @@ def create_zsl_interface_between_slabs(
         vacuum=vacuum,
         gaps=ArrayWithIds.from_values(values=[gap, gap] if gap is not None else []),
         xy_shift=xy_shift,
+        reduce_to_primitive=reduce_result_cell_to_primitive,
     )
 
 

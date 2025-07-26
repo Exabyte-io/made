@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 
 from mat3ra.made.material import Material
-from .builders import InterfaceBuilder
+from .builders import InterfaceBuilder, InterfaceBuilderParameters
 from .configuration import InterfaceConfiguration
 from .enums import StrainModes
 from ..vacuum.configuration import VacuumConfiguration
@@ -44,6 +44,7 @@ def _build_interface_from_stack(
     gaps=None,
     xy_shift=None,
     direction=None,
+    reduce_to_primitive: bool = False,
 ) -> Material:
     vacuum_configuration = VacuumConfiguration(size=vacuum)
     stack_components = [
@@ -61,5 +62,5 @@ def _build_interface_from_stack(
     if direction is not None:
         interface_config_kwargs["direction"] = direction
     interface_config = InterfaceConfiguration(**interface_config_kwargs)
-    builder = InterfaceBuilder()
+    builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters(make_primitive=reduce_to_primitive))
     return builder.get_material(interface_config)

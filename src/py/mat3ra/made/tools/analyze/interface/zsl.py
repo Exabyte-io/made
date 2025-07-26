@@ -17,7 +17,7 @@ from ...build import MaterialWithBuildMetadata
 from ...build.slab.builders import SlabBuilder
 from ..interface.simple import InterfaceAnalyzer
 from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from .utils.vector import align_first_vector_to_x_2d_right_handed, are_vectors_colinear
+from .utils.vector import align_first_vector_to_x_2d_right_handed, are_vectors_colinear, get_global_gcd
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):
@@ -41,6 +41,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     max_length_tol: float = 0.03
     max_angle_tol: float = 0.01
     math_precision: float = Field(1e-4, exclude=True)
+    reduce_result_cell: bool = True
 
     @classmethod
     def calculate_total_strain_percentage(cls, strain_matrix: list) -> float:
@@ -104,10 +105,17 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             return None
 
         film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
-
         substrate_supercell_matrix = np.rint(
             np.linalg.solve(substrate_slab_vectors, pymatgen_substrate_sl_vectors)
         ).astype(int)
+
+        area = match_pymatgen.match_area
+        if self.reduce_result_cell:
+            # If possible, reduce supercell matrices by their GCD
+            g = get_global_gcd(film_supercell_matrix, substrate_supercell_matrix)
+            film_supercell_matrix = film_supercell_matrix // g
+            substrate_supercell_matrix = substrate_supercell_matrix // g
+            area = area / g**2
 
         film_sl_supercell_vectors = film_supercell_matrix @ film_slab_vectors
         substrate_sl_supercell_vectors = substrate_supercell_matrix @ substrate_slab_vectors
@@ -128,7 +136,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             substrate_supercell_matrix=SupercellMatrix2DSchema(root=substrate_supercell_matrix.tolist()),
             film_supercell_matrix=SupercellMatrix2DSchema(root=film_supercell_matrix.tolist()),
             strain_transformation_matrix=Matrix3x3Schema(root=real_strain_matrix),
-            match_area=match_pymatgen.match_area,
+            match_area=area,
             total_strain_percentage=strain_percentage,
         )
 

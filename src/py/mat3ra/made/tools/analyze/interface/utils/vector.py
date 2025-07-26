@@ -1,7 +1,11 @@
+from functools import reduce
 from typing import List
 
 import numpy as np
 from mat3ra.esse.models.core.abstract.vector_2d import Vector2dSchema
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
+    SupercellMatrix2DSchema,
+)
 
 
 def are_vectors_colinear(v1: Vector2dSchema, v2: Vector2dSchema, tol=1e-3):
@@ -44,3 +48,9 @@ def align_first_vector_to_x_2d_right_handed(vectors: List[Vector2dSchema]):
         rotated_vectors[1] = -rotated_vectors[1]
 
     return rotated_vectors
+
+
+def get_global_gcd(A: SupercellMatrix2DSchema, B: SupercellMatrix2DSchema) -> int:
+    # flatten all entries, compute gcd over them
+    vals = np.hstack((A.ravel(), B.ravel())).astype(int)
+    return reduce(np.gcd, vals.tolist())

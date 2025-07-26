@@ -1,4 +1,3 @@
-from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
 from mat3ra.made.tools.convert import from_pymatgen, to_pymatgen
 
@@ -12,7 +11,7 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         return PymatgenSpacegroupAnalyzer(to_pymatgen(self.material))
 
     @property
-    def material_with_primitive_lattice(self: Material) -> MaterialWithBuildMetadata:
+    def material_with_primitive_lattice(self: MaterialWithBuildMetadata) -> MaterialWithBuildMetadata:
         """
         Convert a structure to its primitive cell.
         """
@@ -21,7 +20,7 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         )
 
     @property
-    def material_with_conventional_lattice(self: Material) -> MaterialWithBuildMetadata:
+    def material_with_conventional_lattice(self: MaterialWithBuildMetadata) -> MaterialWithBuildMetadata:
         """
         Convert a structure to its conventional cell.
         """
