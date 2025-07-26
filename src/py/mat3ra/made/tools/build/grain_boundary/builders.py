@@ -13,7 +13,7 @@ class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):
     pass
 
 
-class GrainBoundaryLinearBuilderParameters(BaseBuilderParameters):
+class GrainBoundaryLinearBuilderParameters(GrainBoundaryBuilderParameters):
     max_supercell_matrix_int: Optional[int] = None
     limit_max_int: Optional[int] = 30
     angle_tolerance: float = 0.1
