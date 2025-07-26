@@ -8,13 +8,16 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.utils import calculate_von_mises_strain
 from mat3ra.utils.matrix import convert_2x2_to_3x3
+from pydantic import Field
 from pymatgen.analysis.interfaces.coherent_interfaces import ZSLGenerator as PymatgenZSLGenerator
+
+from ...build import MaterialWithBuildMetadata
+from ...build.slab.builders import SlabBuilder
+from ..interface.simple import InterfaceAnalyzer
+from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from .utils.vector import are_vectors_colinear
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):
@@ -37,6 +40,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     max_area_ratio_tol: float = 0.09
     max_length_tol: float = 0.03
     max_angle_tol: float = 0.01
+    math_precision: float = Field(1e-4, exclude=True)
 
     @classmethod
     def calculate_total_strain_percentage(cls, strain_matrix: list) -> float:
@@ -50,7 +54,8 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     def substrate_slab(self) -> MaterialWithBuildMetadata:
         return SlabBuilder().get_material(self.substrate_slab_configuration)
 
-    def get_pymatgen_match_holders(self):
+    @cached_property
+    def generated_matches(self):
         zsl_generator = PymatgenZSLGenerator(
             max_area=self.max_area,
             max_area_ratio_tol=self.max_area_ratio_tol,
@@ -72,8 +77,8 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     @cached_property
     def zsl_match_holders(self) -> List[ZSLMatchHolder]:
         match_holders = []
-        for idx, match_pymatgen in enumerate(self.get_pymatgen_match_holders()):
-            match_holder = self.get_zsl_match_holder(idx, match_pymatgen)
+        for idx, match_pymatgen in enumerate(self.generated_matches):
+            match_holder = self.convert_generated_match_to_match_holder(idx, match_pymatgen)
             if match_holder is None:
                 continue
             match_holders.append(match_holder)
@@ -83,7 +88,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
 
         return match_holders
 
-    def get_zsl_match_holder(self, match_id: int, match_pymatgen) -> Optional[ZSLMatchHolder]:
+    def convert_generated_match_to_match_holder(self, match_id: int, match_pymatgen) -> Optional[ZSLMatchHolder]:
         film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
         substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
 
@@ -93,8 +98,8 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
         pymatgen_substrate_sl_vectors = self.align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
 
-        a_colinear = self.are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
-        b_colinear = self.are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
+        a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
+        b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
         if not (a_colinear and b_colinear):
             return None
 
@@ -108,8 +113,8 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         substrate_sl_supercell_vectors = substrate_supercell_matrix @ substrate_slab_vectors
 
         if (
-            abs(np.linalg.det(film_sl_supercell_vectors)) < 1e-4
-            or abs(np.linalg.det(substrate_sl_supercell_vectors)) < 1e-4
+            abs(np.linalg.det(film_sl_supercell_vectors)) < self.math_precision
+            or abs(np.linalg.det(substrate_sl_supercell_vectors)) < self.math_precision
         ):
             return None
 
@@ -205,14 +210,3 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             result.extend(bucket)
 
         return result
-
-    def are_vectors_colinear(self, v1, v2, tol=1e-3):
-        v1 = np.array(v1)
-        v2 = np.array(v2)
-        norm1 = np.linalg.norm(v1)
-        norm2 = np.linalg.norm(v2)
-        if norm1 < tol or norm2 < tol:
-            return False
-        cos_angle = np.dot(v1, v2) / (norm1 * norm2)
-        # Colinear if |cos_angle| close to 1
-        return np.abs(np.abs(cos_angle) - 1) < tol
