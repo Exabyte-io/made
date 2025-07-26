@@ -5,11 +5,10 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.analyze.lattice import get_primitive_material
 from mat3ra.made.tools.build.interface.builders import (
     InterfaceBuilder,
-    InterfaceConfiguration,
     InterfaceBuilderParameters,
+    InterfaceConfiguration,
 )
 from mat3ra.made.tools.build.interface.helpers import (
     create_commensurate_interface,
@@ -116,7 +115,6 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
     )
 
     interface_configurations = analyzer.get_strained_configurations()
-    matches = analyzer.zsl_match_holders
 
     selected_config = interface_configurations[0]
     interface_config = InterfaceConfiguration(

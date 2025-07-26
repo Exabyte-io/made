@@ -8,7 +8,7 @@ from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.modify import translate_by_vector
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
-from .utils import merge_two_materials, should_skip_stacking, switch_in_plane_lattice_vectors
+from .utils import merge_two_materials, should_skip_stacking
 
 
 def merge(

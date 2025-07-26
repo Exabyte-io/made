@@ -14,6 +14,7 @@ from mat3ra.made.tools.analyze.interface.twisted_nanoribbons import TwistedNanor
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from .builders import (
     InterfaceBuilder,
+    InterfaceBuilderParameters,
 )
 from .configuration import (
     InterfaceConfiguration,
@@ -36,6 +37,7 @@ def create_simple_interface_between_slabs(
     gap: Optional[float] = None,
     vacuum: float = 10.0,
     xy_shift: List[float] = [0, 0],
+    make_primitive: bool = False,
 ) -> Material:
     """
     Create an interface between two slab materials with specified parameters.
@@ -73,7 +75,7 @@ def create_simple_interface_between_slabs(
         xy_shift=xy_shift,
         gaps=ArrayWithIds.from_values([gap]),
     )
-    builder = InterfaceBuilder()
+    builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters(make_primitive=make_primitive))
     interface = builder.get_material(config)
     return interface
 
@@ -92,14 +94,14 @@ def _build_interface_from_stack(
         vacuum_configuration,
     ]
     interface_config_kwargs = {
-        'stack_components': stack_components,
+        "stack_components": stack_components,
     }
     if gaps is not None:
-        interface_config_kwargs['gaps'] = gaps
+        interface_config_kwargs["gaps"] = gaps
     if xy_shift is not None:
-        interface_config_kwargs['xy_shift'] = xy_shift
+        interface_config_kwargs["xy_shift"] = xy_shift
     if direction is not None:
-        interface_config_kwargs['direction'] = direction
+        interface_config_kwargs["direction"] = direction
     interface_config = InterfaceConfiguration(**interface_config_kwargs)
     builder = InterfaceBuilder()
     return builder.get_material(interface_config)

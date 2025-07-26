@@ -8,16 +8,13 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from mat3ra.utils.matrix import convert_2x2_to_3x3
-from pymatgen.analysis.interfaces.coherent_interfaces import (
-    ZSLGenerator as PymatgenZSLGenerator,
-)
-
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.utils import calculate_von_mises_strain
+from mat3ra.utils.matrix import convert_2x2_to_3x3
+from pymatgen.analysis.interfaces.coherent_interfaces import ZSLGenerator as PymatgenZSLGenerator
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):
@@ -143,7 +140,6 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     def _create_strained_configs_from_match(
         self, match_holder: ZSLMatchHolder
     ) -> MatchedSubstrateFilmConfigurationHolder:
-
         return super().create_matched_configuration_holder(
             substrate_slab_config=self.substrate_slab_configuration,
             film_slab_config=self.film_slab_configuration,
@@ -166,7 +162,8 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
 
         return strained_configs
 
-    def align_first_vector_to_x_2d_right_handed(self, vectors):
+    @staticmethod
+    def align_first_vector_to_x_2d_right_handed(vectors):
         """
         Rotates a set of 2D lattice vectors so that the first vector is aligned with the x-axis,
         and makes the cell right-handed.

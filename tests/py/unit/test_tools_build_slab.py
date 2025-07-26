@@ -8,8 +8,6 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from mat3ra.utils.matrix import convert_2x2_to_3x3
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
@@ -30,6 +28,7 @@ from mat3ra.made.tools.build.slab.termination_utils import select_slab_terminati
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP, adjust_material_cell_to_set_gap_along_direction
 from mat3ra.utils import assertion
+from mat3ra.utils.matrix import convert_2x2_to_3x3
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
@@ -298,7 +297,7 @@ def test_adjust_lattice_for_gap(material_config, direction, gap, expected_length
 
 
 @pytest.mark.parametrize(
-    "material_config, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix, strain_matrix",
+    "crystal_config, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix, strain_matrix",
     [
         (
             BULK_Si_PRIMITIVE,
@@ -312,7 +311,7 @@ def test_adjust_lattice_for_gap(material_config, direction, gap, expected_length
     ],
 )
 def test_build_slab_strained(
-    material_config,
+    crystal_config,
     miller_indices,
     termination_formula,
     number_of_layers,
@@ -320,8 +319,7 @@ def test_build_slab_strained(
     xy_supercell_matrix,
     strain_matrix,
 ):
-
-    material = MaterialWithBuildMetadata.create(material_config)
+    material = MaterialWithBuildMetadata.create(crystal_config)
     config = SlabStrainedSupercellConfiguration.from_parameters(
         material_or_dict=material,
         miller_indices=miller_indices,
