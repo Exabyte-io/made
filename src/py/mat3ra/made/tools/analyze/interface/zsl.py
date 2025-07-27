@@ -1,6 +1,6 @@
 from collections import defaultdict
 from functools import cached_property
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
@@ -10,7 +10,6 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
 )
 from mat3ra.made.utils import calculate_von_mises_strain
 from mat3ra.utils.matrix import convert_2x2_to_3x3
-from pydantic import Field
 from pymatgen.analysis.interfaces.coherent_interfaces import ZSLGenerator as PymatgenZSLGenerator
 
 from ...build import MaterialWithBuildMetadata
@@ -40,8 +39,9 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
     max_area_ratio_tol: float = 0.09
     max_length_tol: float = 0.03
     max_angle_tol: float = 0.01
-    math_precision: float = Field(1e-4, exclude=True)
     reduce_result_cell: bool = True
+
+    math_precision: ClassVar[float] = 1e-4
 
     @classmethod
     def calculate_total_strain_percentage(cls, strain_matrix: list) -> float:

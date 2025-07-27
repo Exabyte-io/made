@@ -3,10 +3,7 @@ from typing import List
 import numpy as np
 
 from mat3ra.made.material import Material
-from .builders import InterfaceBuilder, InterfaceBuilderParameters
-from .configuration import InterfaceConfiguration
 from .enums import StrainModes
-from ..vacuum.configuration import VacuumConfiguration
 from ...convert import PymatgenInterface, INTERFACE_LABELS_MAP
 from ...modify import filter_by_label
 
@@ -36,31 +33,3 @@ def get_slab(interface: Material, part: str = "film"):
         return filter_by_label(interface, INTERFACE_LABELS_MAP[part])
     except ValueError:
         raise ValueError(f"Material does not contain label for {part}.")
-
-
-def _build_interface_from_stack(
-    selected_config,
-    vacuum: float,
-    gaps=None,
-    xy_shift=None,
-    direction=None,
-    reduce_to_primitive: bool = False,
-) -> Material:
-    vacuum_configuration = VacuumConfiguration(size=vacuum)
-    stack_components = [
-        selected_config.substrate_configuration,
-        selected_config.film_configuration,
-        vacuum_configuration,
-    ]
-    interface_config_kwargs = {
-        "stack_components": stack_components,
-    }
-    if gaps is not None:
-        interface_config_kwargs["gaps"] = gaps
-    if xy_shift is not None:
-        interface_config_kwargs["xy_shift"] = xy_shift
-    if direction is not None:
-        interface_config_kwargs["direction"] = direction
-    interface_config = InterfaceConfiguration(**interface_config_kwargs)
-    builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters(make_primitive=reduce_to_primitive))
-    return builder.get_material(interface_config)

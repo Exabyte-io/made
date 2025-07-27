@@ -19,7 +19,6 @@ from .builders import (
 from .configuration import (
     InterfaceConfiguration,
 )
-from .utils import _build_interface_from_stack
 from .. import MaterialWithBuildMetadata
 from ..slab.configurations import (
     SlabConfiguration,
@@ -181,13 +180,20 @@ def create_zsl_interface_between_slabs(
 
     selected_config = interface_configurations[match_id]
 
-    return _build_interface_from_stack(
-        selected_config=selected_config,
-        vacuum=vacuum,
-        gaps=ArrayWithIds.from_values(values=[gap, gap] if gap is not None else []),
-        xy_shift=xy_shift,
-        reduce_to_primitive=reduce_result_cell_to_primitive,
+    vacuum_configuration = VacuumConfiguration(size=vacuum)
+    stack_components = [
+        selected_config.substrate_configuration,
+        selected_config.film_configuration,
+        vacuum_configuration,
+    ]
+
+    interface_config = InterfaceConfiguration(
+        stack_components=stack_components, gaps=ArrayWithIds.from_values([gap, gap]), xy_shift=xy_shift
     )
+    builder = InterfaceBuilder(
+        build_parameters=InterfaceBuilderParameters(make_primitive=reduce_result_cell_to_primitive)
+    )
+    return builder.get_material(interface_config)
 
 
 def create_twisted_interface(
