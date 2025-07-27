@@ -5,9 +5,9 @@ from mat3ra.made.material import Material
 from pydantic import BaseModel
 from scipy.spatial.distance import pdist
 
+from ..build import MaterialWithBuildMetadata
 from .other import get_chemical_formula_empirical
 from .utils import decorator_perform_operation_in_cartesian_coordinates
-from ..build import MaterialWithBuildMetadata
 
 
 class BaseMaterialAnalyzer(BaseModel):
