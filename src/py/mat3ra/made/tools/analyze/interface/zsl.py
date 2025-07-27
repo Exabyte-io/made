@@ -8,10 +8,10 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from mat3ra.made.utils import calculate_von_mises_strain
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 from pymatgen.analysis.interfaces.coherent_interfaces import ZSLGenerator as PymatgenZSLGenerator
 
+from ..utils import calculate_von_mises_strain
 from ...build import MaterialWithBuildMetadata
 from ...build.slab.builders import SlabBuilder
 from ..interface.simple import InterfaceAnalyzer

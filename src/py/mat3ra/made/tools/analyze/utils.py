@@ -113,3 +113,24 @@ def decorator_perform_operation_in_cartesian_coordinates(func):
         return result
 
     return wrapper
+
+
+def calculate_von_mises_strain(strain_matrix: np.ndarray) -> float:
+    """
+    Calculate von Mises strain (%) from a 2D strain transformation matrix (top-left 2x2 of 3x3).
+
+    Args:
+        strain_matrix (np.ndarray): A 2D numpy array representing the strain transformation matrix.
+    Returns:
+        float: The von Mises strain in percentage.
+    """
+    # allow passing a Python list
+    E = np.array(strain_matrix, dtype=float)
+
+    exx = E[0, 0] - 1.0
+    eyy = E[1, 1] - 1.0
+    exy = 0.5 * (E[0, 1] + E[1, 0])
+
+    e_von_mises = np.sqrt(exx**2 - exx * eyy + eyy**2 + 3 * exy**2)
+
+    return abs(e_von_mises) * 100.0
