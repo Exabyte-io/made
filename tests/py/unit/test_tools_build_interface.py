@@ -21,6 +21,7 @@ from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.standata.materials import Materials
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
@@ -149,8 +150,14 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
     interface_configurations = analyzer.get_strained_configurations()
 
     selected_config = interface_configurations[0]
+    vacuum_configuration = VacuumConfiguration(size=vacuum)
     interface_config = InterfaceConfiguration(
-        stack_components=[selected_config.substrate_configuration, selected_config.film_configuration]
+        stack_components=[
+            selected_config.substrate_configuration,
+            selected_config.film_configuration,
+            vacuum_configuration,
+        ],
+        gaps=[gap, gap],
     )
 
     builder = InterfaceBuilder()
@@ -173,8 +180,8 @@ def test_create_zsl_interface(substrate, film, gap, vacuum, max_area, expected_i
         film_number_of_layers=film.number_of_layers,
         substrate_termination_formula=None,
         film_termination_formula=None,
-        gap=None,
-        vacuum=0.0,
+        gap=gap,
+        vacuum=vacuum,
         xy_shift=[0, 0],
         max_area=max_area,
         max_area_ratio_tol=0.1,
@@ -220,6 +227,8 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         max_area_ratio_tol=0.1,
         max_length_tol=0.05,
         max_angle_tol=0.02,
+        reduce_result_cell=False,
+        reduce_result_cell_to_primitive=True,
     )
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
