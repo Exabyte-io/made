@@ -43,30 +43,19 @@ def create_adatom_defect(
     Returns:
         Material: The slab with adatom defect.
     """
-
-    if placement_method not in ADATOM_PLACEMENT_MAPPING:
-        raise ValueError(f"Unsupported adatom placement method: {placement_method}")
-
-    placement_info = ADATOM_PLACEMENT_MAPPING[placement_method]
-    analyzer = placement_info["analyzer_class"](
-        material=slab, coordinate_2d=position_on_surface, distance_z=distance_z, element=element
+    # Reuse the create_multiple_adatom_defects function below
+    slab_with_adatom = create_multiple_adatom_defects(
+        slab,
+        adatom_dicts=[
+            {
+                "element": element or "Si",  # Default to Silicon if no element provided
+                "coordinate": position_on_surface,
+                "distance_z": distance_z,
+            }
+        ],
+        placement_method=placement_method,
     )
-
-    slab_in_stack = (
-        adjust_material_cell_to_set_gap_along_direction(slab, 0)
-        if placement_info["needs_gap_adjustment"]
-        else analyzer.slab_configuration_with_no_vacuum
-    )
-
-    isolated_defect = analyzer.added_component
-    vacuum_configuration = analyzer.get_slab_vacuum_configuration()
-
-    configuration = AdatomDefectConfiguration(
-        stack_components=[slab_in_stack, isolated_defect, vacuum_configuration],
-    )
-
-    builder = AdatomDefectBuilder()
-    return builder.get_material(configuration)
+    return slab_with_adatom
 
 
 def create_multiple_adatom_defects(
@@ -75,7 +64,7 @@ def create_multiple_adatom_defects(
     placement_method: AdatomPlacementMethodEnum = AdatomPlacementMethodEnum.EXACT_COORDINATE,
 ) -> Material:
     """
-    Create multiple adatom defects from a list of dictionaries.
+    Create multiple adatom defects (at once) from a list of dictionaries.
 
     Args:
         slab: The slab material.
