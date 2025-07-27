@@ -124,11 +124,9 @@ def test_create_multiple_defects(material_config, defect_params_list, expected_m
         defect_dict = {
             "type": defect_params.defect_type,
             "coordinate": defect_params.coordinate,
+            "placement_method": defect_params.placement_method if hasattr(defect_params, "placement_method") else None,
+            "element": defect_params.element if hasattr(defect_params, "element") else None,
         }
-        if hasattr(defect_params, "element"):
-            defect_dict["element"] = defect_params.element
-        if hasattr(defect_params, "placement_method"):
-            defect_dict["placement_method"] = defect_params.placement_method
 
         defect_dicts.append(defect_dict)
 

@@ -38,6 +38,34 @@ DEFECT_TYPE_MAPPING = {
 }
 
 
+def _convert_placement_method_to_enum(placement_method, placement_enum_class):
+    """
+    Convert placement method string to enum value.
+
+    Args:
+        placement_method: String or enum value
+        placement_enum_class: The enum class to convert to
+
+    Returns:
+        Enum value
+    """
+    if isinstance(placement_method, placement_enum_class):
+        return placement_method
+
+    if isinstance(placement_method, str):
+        try:
+            return placement_enum_class[placement_method.upper()]
+        except KeyError:
+            raise ValueError(f"Invalid placement method '{placement_method}' for {placement_enum_class.__name__}")
+
+    if hasattr(placement_method, "value"):
+        for enum_member in placement_enum_class:
+            if getattr(enum_member.value, "value", enum_member.value) == placement_method.value:
+                return enum_member
+
+    raise ValueError(f"Cannot convert placement method '{placement_method}' to {placement_enum_class.__name__}")
+
+
 def create_point_defect_vacancy(
     material: Material,
     coordinate: List[float],
@@ -139,9 +167,9 @@ def create_multiple_defects(
             - type: str ("vacancy", "substitution", "interstitial")
             - coordinate: List[float]
             - element: str (required for substitution and interstitial)
-            - placement_method: str (optional)
-                - For vacancy/substitution: "closest_site"
-                - For interstitial: "exact_coordinate", "voronoi_site"
+            - placement_method: str or enum (optional)
+                - For vacancy/substitution: "CLOSEST_SITE"
+                - For interstitial:  "EXACT_COORDINATE", "VORONOI_SITE"
                 Defaults to "closest_site" for vacancy/substitution and "exact_coordinate" for interstitial.
 
 
@@ -161,7 +189,9 @@ def create_multiple_defects(
 
         placement_method = defect_dict.get("placement_method") or defect_info["default_method"]
 
-        args = [current_material, defect_dict["coordinate"], placement_method]
+        placement_method_enum = _convert_placement_method_to_enum(placement_method, defect_info["placement_enum"])
+
+        args = [current_material, defect_dict["coordinate"], placement_method_enum]
         if defect_type in (PointDefectTypeEnum.SUBSTITUTION, PointDefectTypeEnum.INTERSTITIAL):
             args.insert(-1, defect_dict["element"])
 
