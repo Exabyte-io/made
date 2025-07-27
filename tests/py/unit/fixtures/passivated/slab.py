@@ -1,5 +1,5 @@
 PASSIVATED_SI_CONVENTIONAL_SLAB_001 = {
-    "name": "Si8(001), termination Si_P4/mmm_2, Slab, H-passivated",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab, H-passivated",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},

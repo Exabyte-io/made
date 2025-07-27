@@ -32,8 +32,8 @@ PAIR_DEFECT_SUBSTITUTION_VACANCY_BULK_PRIMITIVE_Si = {
         "type": "FCC",
     },
     "basis": {
-        "elements": [{"id": 1, "value": "Ge"}],
-        "coordinates": [{"id": 1, "value": [0.0, 0.0, 0.0]}],
+        "elements": [{"id": 0, "value": "Ge"}],
+        "coordinates": [{"id": 0, "value": [0.0, 0.0, 0.0]}],
         "units": "crystal",
         "labels": [],
         "constraints": [],

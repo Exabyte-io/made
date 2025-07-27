@@ -7,11 +7,12 @@ from .configurations import (
 )
 from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfiguration
 from .configurations.slab_configuration import SlabConfiguration
+from .entities import MillerIndices
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder, MaterialWithBuildMetadata
 from ..stack.builders import StackNComponentsBuilder
+from ...analyze import BaseMaterialAnalyzer
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from ...analyze.other import get_chemical_formula
 from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...operations.core.unary import supercell, translate, strain
 
@@ -20,10 +21,13 @@ class CrystalLatticePlanesBuilder(BaseSingleBuilder):
     _PostProcessParametersType: Any = None
     use_enforce_convention: bool = True
 
-    def _generate(self, configuration: CrystalLatticePlanesConfiguration) -> MaterialWithBuildMetadata:
-        crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
+    def get_analyzer(self, configuration: CrystalLatticePlanesConfiguration) -> CrystalLatticePlanesMaterialAnalyzer:
+        return CrystalLatticePlanesMaterialAnalyzer(
             material=configuration.crystal, miller_indices=configuration.miller_indices
         )
+
+    def _generate(self, configuration: CrystalLatticePlanesConfiguration) -> MaterialWithBuildMetadata:
+        crystal_lattice_planes_analyzer = self.get_analyzer(configuration)
         miller_supercell_matrix = crystal_lattice_planes_analyzer.miller_supercell_matrix
         miller_supercell_material = supercell(configuration.crystal, miller_supercell_matrix)
         return miller_supercell_material
@@ -46,11 +50,11 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
     def _generate(self, configuration: AtomicLayersUniqueRepeatedConfiguration) -> MaterialWithBuildMetadata:
         crystal_lattice_planes_material = super()._generate(configuration)
 
-        crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-            material=configuration.crystal, miller_indices=configuration.miller_indices
-        )
-        translation_vector = crystal_lattice_planes_analyzer.get_translation_vector_for_termination_without_vacuum(
-            configuration.termination_top
+        crystal_lattice_planes_material_analyzer = self.get_analyzer(configuration)
+        translation_vector = (
+            crystal_lattice_planes_material_analyzer.get_translation_vector_for_termination_without_vacuum(
+                configuration.termination_top
+            )
         )
         material_translated = translate(crystal_lattice_planes_material, translation_vector)
         material_translated_wrapped = wrap_to_unit_cell(material_translated)
@@ -58,6 +62,18 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
             material_translated_wrapped, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
         )
         return material_translated_wrapped_layered
+
+    def _update_material_name(
+        self, material: MaterialWithBuildMetadata, configuration: AtomicLayersUniqueRepeatedConfiguration
+    ) -> MaterialWithBuildMetadata:
+        material_analyzer = BaseMaterialAnalyzer(material=material)
+        material.formula = material_analyzer.formula
+        termination = configuration.termination_top
+        miller_indices_str = str(MillerIndices(root=configuration.miller_indices))
+        # for example: "Si(001), termination Si_P4/mmm_1"
+        new_name = f"{material.formula}{miller_indices_str}, termination {termination}"
+        material.name = new_name
+        return material
 
 
 class SlabBuilderParameters(BaseBuilderParameters):
@@ -83,15 +99,10 @@ class SlabBuilder(StackNComponentsBuilder):
             supercell_slab = get_orthogonal_c_slab(supercell_slab)
         return supercell_slab
 
-    def _update_material_name(self, material: Material, configuration: SlabConfiguration) -> Material:
-        atomic_layers = configuration.atomic_layers
-
-        formula = get_chemical_formula(configuration.atomic_layers.crystal)
-        miller_indices_str = "".join([str(i) for i in atomic_layers.miller_indices])
-        termination = atomic_layers.termination_top
-
-        # for example: "Si8(001), termination Si_P4/mmm_1, Slab"
-        new_name = f"{formula}({miller_indices_str}), termination {termination}, Slab"
+    def _update_material_name(self, material: MaterialWithBuildMetadata, configuration: SlabConfiguration) -> Material:
+        # for example: "Si(001), termination Si_P4/mmm_1, Slab"
+        material = AtomicLayersUniqueRepeatedBuilder()._update_material_name(material, configuration.atomic_layers)
+        new_name = f"{material.name}, Slab"
         material.name = new_name
         return material
 
@@ -101,9 +112,12 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
 
     def _generate(self, configuration: _ConfigurationType) -> Material:
         slab_material = super()._generate(configuration)
-
         if configuration.xy_supercell_matrix:
             slab_material = supercell(slab_material, configuration.xy_supercell_matrix)
-        strained_slab_material = strain(slab_material, configuration.strain_matrix)
+
+        strained_slab_material = strain(
+            slab_material,
+            configuration.strain_matrix,
+        )
 
         return strained_slab_material

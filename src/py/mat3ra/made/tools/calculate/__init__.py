@@ -1,10 +1,11 @@
-from typing import List, Optional, Union
+from typing import Optional
 
 from ...material import Material
 from ..analyze.other import get_surface_area
+from ..build.interface.configuration import InterfaceConfiguration
 from ..build.interface.utils import get_slab
 from ..build.metadata import MaterialBuildMetadata
-from ..convert import decorator_convert_material_args_kwargs_to_atoms, from_ase
+from ..convert import decorator_convert_material_args_kwargs_to_atoms
 from ..third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
 from .interaction_functions import sum_of_inverse_distances_squared
 
@@ -115,17 +116,11 @@ def calculate_interfacial_energy(
 
     metadata = MaterialBuildMetadata(**interface.metadata)
     build_configuration = metadata.build[-1].configuration if metadata.build else {}
+    config = InterfaceConfiguration(**build_configuration)
+
     try:
-        substrate_bulk = (
-            Material.create(build_configuration.get("substrate_configuration", {}).get("bulk"))
-            if substrate_bulk is None
-            else substrate_bulk
-        )
-        film_bulk = (
-            Material.create(build_configuration.get("film_configuration", {}).get("bulk"))
-            if film_bulk is None
-            else film_bulk
-        )
+        substrate_bulk = config.substrate_configuration.atomic_layers.crystal
+        film_bulk = config.film_configuration.atomic_layers.crystal
     except KeyError:
         raise ValueError("The substrate and film bulk materials must be provided or defined in the interface metadata.")
     surface_energy_substrate = calculate_surface_energy(substrate_slab, substrate_bulk, calculator)

@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from ase import Atoms
 from ase.build import bulk
 from mat3ra.code.array_with_ids import ArrayWithIds
@@ -6,6 +7,8 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
 from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Element, Lattice, Structure
+
+from .fixtures.monolayer import GRAPHENE
 
 # from unit.fixtures.generated.fixtures import INTERFACE_PROPERTIES_JSON, INTERFACE_STRUCTURE
 
@@ -25,13 +28,34 @@ direct
 """
 
 
-def test_to_pymatgen():
-    material = Material.create_default()
+@pytest.mark.parametrize(
+    "material_config, expected_lattice_params, expected_species, expected_frac_coords",
+    [
+        (
+            Material.__default_config__,
+            {"a": 3.867, "b": 3.867, "c": 3.867, "alpha": 60, "beta": 60, "gamma": 60},
+            [Element("Si"), Element("Si")],
+            [[0.0, 0.0, 0.0], [0.25, 0.25, 0.25]],
+        ),
+        (
+            GRAPHENE,
+            {"a": 2.467291, "b": 2.467291, "c": 20.0, "alpha": 90, "beta": 90, "gamma": 120},
+            [Element("C"), Element("C")],
+            [[0.0, 0.0, 0.0], [0.333333, 0.666667, 0.0]],
+        ),
+    ],
+)
+def test_to_pymatgen(material_config, expected_lattice_params, expected_species, expected_frac_coords):
+    material = Material.create(material_config)
     structure = to_pymatgen(material)
     assert isinstance(structure, Structure)
-    assert structure.lattice == Lattice.from_parameters(3.867, 3.867, 3.867, 60, 60, 60)
-    assert structure.species == [Element("Si"), Element("Si")]
-    assert (structure.frac_coords == [[0.0, 0.0, 0.0], [0.25, 0.25, 0.25]]).all()
+    assert np.allclose(structure.lattice.parameters, tuple(expected_lattice_params.values()), atol=1e-6)
+    assert structure.species == expected_species
+    assert np.allclose(structure.frac_coords, expected_frac_coords, atol=1e-6)
+
+    structure_to_poscar_str = structure.to(fmt="poscar")
+    material_to_poscar_str = to_poscar(material)
+    assert structure_to_poscar_str == material_to_poscar_str
 
 
 def test_from_pymatgen():

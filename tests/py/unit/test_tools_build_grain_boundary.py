@@ -20,7 +20,7 @@ from .utils import assert_two_entities_deep_almost_equal
             (0, 1, 1),
             2.0,
             [2.0, 1.0],
-            150,
+            250,
             GRAIN_BOUNDARY_SI_001_011,
         ),
     ],
@@ -53,7 +53,7 @@ def test_create_grain_boundary_planar(
             (0, 1, 1),
             2.0,
             [2.0, 1.0],
-            150,
+            250,
             GRAIN_BOUNDARY_SI_001_011,
         ),
     ],
@@ -105,11 +105,12 @@ def test_grain_boundary_builder(
 )
 def test_create_grain_boundary_linear(config_params, builder_params_dict, expected_material_config):
     config_params["film"] = Material.create(config_params.pop("film_config"))
-    gb = create_grain_boundary_linear(
+    grain_boundary = create_grain_boundary_linear(
         material=config_params["film"],
         target_angle=config_params["twist_angle"],
         gap=config_params["gap"],
+        use_conventional_cell=False,
         **builder_params_dict,
     )
 
-    assert_two_entities_deep_almost_equal(gb, expected_material_config)
+    assert_two_entities_deep_almost_equal(grain_boundary, expected_material_config)

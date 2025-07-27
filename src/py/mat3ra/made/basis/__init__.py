@@ -215,6 +215,6 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         for index_1, index_2 in self.get_coordinates_colliding_pairs(tolerance):
             ids_to_remove.add(atom_ids[index_1])  # Keep the last one in the pair
 
-        self.filter_atoms_by_ids(list(ids_to_remove), invert=True)
+        self.filter_atoms_by_ids(list(ids_to_remove), invert=True, reset_ids=True)
         if original_is_in_crystal:
             self.to_crystal()

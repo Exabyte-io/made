@@ -3,10 +3,7 @@ from typing import Type, Optional
 from mat3ra.made.material import Material
 from .configuration import GrainBoundaryLinearConfiguration
 from .configuration import GrainBoundaryPlanarConfiguration
-from .. import BaseBuilderParameters
-
 from ..interface.builders import InterfaceBuilder, InterfaceBuilderParameters
-from ...analyze.other import get_chemical_formula
 from ...modify import wrap_to_unit_cell
 from ...operations.core.unary import supercell
 
@@ -15,7 +12,7 @@ class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):
     pass
 
 
-class GrainBoundaryLinearBuilderParameters(BaseBuilderParameters):
+class GrainBoundaryLinearBuilderParameters(GrainBoundaryBuilderParameters):
     max_supercell_matrix_int: Optional[int] = None
     limit_max_int: Optional[int] = 30
     angle_tolerance: float = 0.1
@@ -41,15 +38,8 @@ class GrainBoundaryPlanarBuilder(InterfaceBuilder):
         wrapped_interface = wrap_to_unit_cell(rotated_interface)
         return wrapped_interface
 
-    def _update_material_name(self, material: Material, configuration: GrainBoundaryPlanarConfiguration) -> Material:
-        phase_1_formula = get_chemical_formula(configuration.phase_1_configuration.atomic_layers.crystal)
-        phase_2_formula = get_chemical_formula(configuration.phase_2_configuration.atomic_layers.crystal)
-        phase_1_miller = "".join([str(i) for i in configuration.phase_1_configuration.atomic_layers.miller_indices])
-        phase_2_miller = "".join([str(i) for i in configuration.phase_2_configuration.atomic_layers.miller_indices])
-
-        new_name = f"{phase_1_formula}({phase_1_miller})-{phase_2_formula}({phase_2_miller}), Grain Boundary"
-        material.name = new_name
-        return material
+    def get_name_suffix(self, configuration: GrainBoundaryPlanarConfiguration) -> str:
+        return "Grain Boundary"
 
 
 class GrainBoundaryLinearBuilder(InterfaceBuilder):
@@ -61,10 +51,6 @@ class GrainBoundaryLinearBuilder(InterfaceBuilder):
     _BuildParametersType = GrainBoundaryLinearBuilderParameters
     _DefaultBuildParameters = GrainBoundaryLinearBuilderParameters()
 
-    def _update_material_name(self, material: Material, configuration: GrainBoundaryLinearConfiguration) -> Material:
-        phase_1_formula = get_chemical_formula(configuration.phase_1_configuration.atomic_layers.crystal)
-        phase_2_formula = get_chemical_formula(configuration.phase_2_configuration.atomic_layers.crystal)
-        angle_str = f", {configuration.actual_angle:.2f} degrees" if configuration.actual_angle is not None else ""
-        new_name = f"{phase_1_formula}-{phase_2_formula}, Linear Grain Boundary {angle_str}"
-        material.name = new_name
-        return material
+    def get_name_suffix(self, configuration: GrainBoundaryLinearConfiguration) -> str:
+        angle_str = f"{configuration.actual_angle:.2f} degrees" if configuration.actual_angle is not None else ""
+        return f"Linear Grain Boundary, {angle_str}"

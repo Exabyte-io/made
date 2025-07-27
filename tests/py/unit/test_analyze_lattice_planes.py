@@ -113,7 +113,10 @@ def test_terminations_without_vacuum(material_config, miller_indices, expected_t
     analyzer = CrystalLatticePlanesMaterialAnalyzer(material=material, miller_indices=miller_indices)
     terminations_without_vacuum = analyzer.terminations_without_vacuum
     terminations_without_vacuum_str_list = [str(t) for t in terminations_without_vacuum]
+    all_materials = analyzer.get_materials_for_all_terminations_without_vacuum()
     assert sorted(terminations_without_vacuum_str_list) == sorted(expected_terminations_without_vacuum_str)
+    assert all_materials
+    assert len(all_materials) == len([t for t in analyzer.terminations_without_vacuum if t is not None])
 
 
 @pytest.mark.parametrize(

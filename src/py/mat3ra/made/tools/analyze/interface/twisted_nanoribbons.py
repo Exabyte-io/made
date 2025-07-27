@@ -43,6 +43,7 @@ class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
             miller_indices=(0, 0, 1),
             number_of_layers=1,
             vacuum=0.0,
+            use_conventional_cell=False,
         )
 
     def _match_lattice_vectors(self, material1: Material, material2: Material) -> Tuple[Material, Material]:

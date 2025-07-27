@@ -1,7 +1,507 @@
-from ..monolayer import GRAPHENE
-
+# ruff: noqa
 GRAPHENE_NICKEL_INTERFACE = {
-    "name": "C2(001)-Ni4(111), Interface, Strain 0.105pct",
+    "metadata": {
+        "build": [
+            {
+                "configuration": {
+                    "stack_components": [
+                        {
+                            "xy_supercell_matrix": [[1, 0], [0, 1]],
+                            "strain_matrix": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                            "stack_components": [
+                                {
+                                    "miller_indices": [1, 1, 1],
+                                    "crystal": {
+                                        "metadata": {"build": []},
+                                        "name": "Ni, Nickel, FCC (Fm-3m) 3D (Bulk), mp-23",
+                                        "isDefault": False,
+                                        "basis": {
+                                            "elements": [{"id": 0, "value": "Ni"}],
+                                            "coordinates": [{"id": 0, "value": [0, 0, 0]}],
+                                            "units": "crystal",
+                                            "labels": [],
+                                            "constraints": [],
+                                        },
+                                        "lattice": {
+                                            "a": 2.478974,
+                                            "b": 2.478974,
+                                            "c": 2.478974,
+                                            "alpha": 60,
+                                            "beta": 60,
+                                            "gamma": 60,
+                                            "units": {"length": "angstrom", "angle": "degree"},
+                                            "type": "FCC",
+                                        },
+                                        "external": {
+                                            "id": "mp-23",
+                                            "source": "Materials Project",
+                                            "origin": True,
+                                            "doi": "10.17188/1199153",
+                                            "url": "https://next-gen.materialsproject.org/materials/mp-23",
+                                        },
+                                        "isNonPeriodic": False,
+                                    },
+                                    "use_conventional_cell": True,
+                                    "termination_top": {
+                                        "chemical_elements": "Ni",
+                                        "space_group_symmetry_label": "R-3m_4",
+                                    },
+                                    "number_of_repetitions": 3,
+                                },
+                                {
+                                    "direction": "z",
+                                    "size": 0,
+                                    "crystal": {
+                                        "metadata": {
+                                            "build": [
+                                                {
+                                                    "configuration": {
+                                                        "miller_indices": [1, 1, 1],
+                                                        "crystal": {
+                                                            "metadata": {"build": []},
+                                                            "name": "Ni, Nickel, FCC (Fm-3m) 3D (Bulk), mp-23",
+                                                            "isDefault": False,
+                                                            "basis": {
+                                                                "elements": [{"id": 0, "value": "Ni"}],
+                                                                "coordinates": [{"id": 0, "value": [0, 0, 0]}],
+                                                                "units": "crystal",
+                                                                "labels": [],
+                                                                "constraints": [],
+                                                            },
+                                                            "lattice": {
+                                                                "a": 2.478974,
+                                                                "b": 2.478974,
+                                                                "c": 2.478974,
+                                                                "alpha": 60,
+                                                                "beta": 60,
+                                                                "gamma": 60,
+                                                                "units": {"length": "angstrom", "angle": "degree"},
+                                                                "type": "FCC",
+                                                            },
+                                                            "external": {
+                                                                "id": "mp-23",
+                                                                "source": "Materials Project",
+                                                                "origin": True,
+                                                                "doi": "10.17188/1199153",
+                                                                "url": "https://next-gen.materialsproject.org/materials/mp-23",
+                                                            },
+                                                            "isNonPeriodic": False,
+                                                        },
+                                                        "use_conventional_cell": True,
+                                                        "termination_top": {
+                                                            "chemical_elements": "Ni",
+                                                            "space_group_symmetry_label": "R-3m_4",
+                                                        },
+                                                        "number_of_repetitions": 3,
+                                                    },
+                                                    "build_parameters": {},
+                                                }
+                                            ],
+                                            "boundaryConditions": {"type": "pbc", "offset": 0},
+                                        },
+                                        "name": "Ni(111), termination Ni_R-3m_4",
+                                        "isDefault": False,
+                                        "formula": "Ni",
+                                        "basis": {
+                                            "elements": [
+                                                {"id": 0, "value": "Ni"},
+                                                {"id": 1, "value": "Ni"},
+                                                {"id": 2, "value": "Ni"},
+                                            ],
+                                            "coordinates": [
+                                                {"id": 0, "value": [0, 0, 0.000001]},
+                                                {"id": 1, "value": [0, 0, 0.333334333]},
+                                                {"id": 2, "value": [0, 0, 0.666667667]},
+                                            ],
+                                            "units": "crystal",
+                                            "labels": [],
+                                            "constraints": [],
+                                        },
+                                        "lattice": {
+                                            "a": 2.478974,
+                                            "b": 2.478974,
+                                            "c": 7.436922,
+                                            "alpha": 120,
+                                            "beta": 120,
+                                            "gamma": 60,
+                                            "units": {"length": "angstrom", "angle": "degree"},
+                                            "type": "TRI",
+                                        },
+                                        "isNonPeriodic": False,
+                                    },
+                                    "type": "VacuumConfiguration",
+                                },
+                            ],
+                            "direction": "z",
+                            "type": "SlabStrainedSupercellConfiguration",
+                            "gaps": [],
+                        },
+                        {
+                            "xy_supercell_matrix": [[1, 0], [0, 1]],
+                            "strain_matrix": [
+                                [1.004735152845773, 0, 0],
+                                [1.1601682219195737, 1.0047351528457729, 0],
+                                [0, 0, 1],
+                            ],
+                            "stack_components": [
+                                {
+                                    "miller_indices": [0, 0, 1],
+                                    "crystal": {
+                                        "metadata": {"build": []},
+                                        "name": "Graphene",
+                                        "isDefault": False,
+                                        "basis": {
+                                            "elements": [{"id": 0, "value": "C"}, {"id": 1, "value": "C"}],
+                                            "coordinates": [
+                                                {"id": 0, "value": [0, 0, 0]},
+                                                {"id": 1, "value": [0.333333, 0.666667, 0]},
+                                            ],
+                                            "units": "crystal",
+                                            "labels": [],
+                                            "constraints": [],
+                                        },
+                                        "lattice": {
+                                            "a": 2.467291,
+                                            "b": 2.467291,
+                                            "c": 20,
+                                            "alpha": 90,
+                                            "beta": 90,
+                                            "gamma": 120,
+                                            "units": {"length": "angstrom", "angle": "degree"},
+                                            "type": "HEX",
+                                        },
+                                        "isNonPeriodic": False,
+                                    },
+                                    "use_conventional_cell": True,
+                                    "termination_top": {
+                                        "chemical_elements": "C",
+                                        "space_group_symmetry_label": "P6/mmm_2",
+                                    },
+                                    "number_of_repetitions": 1,
+                                },
+                                {
+                                    "direction": "z",
+                                    "size": 0,
+                                    "crystal": {
+                                        "metadata": {
+                                            "build": [
+                                                {
+                                                    "configuration": {
+                                                        "miller_indices": [0, 0, 1],
+                                                        "crystal": {
+                                                            "metadata": {"build": []},
+                                                            "name": "Graphene",
+                                                            "isDefault": False,
+                                                            "basis": {
+                                                                "elements": [
+                                                                    {"id": 0, "value": "C"},
+                                                                    {"id": 1, "value": "C"},
+                                                                ],
+                                                                "coordinates": [
+                                                                    {"id": 0, "value": [0, 0, 0]},
+                                                                    {"id": 1, "value": [0.333333, 0.666667, 0]},
+                                                                ],
+                                                                "units": "crystal",
+                                                                "labels": [],
+                                                                "constraints": [],
+                                                            },
+                                                            "lattice": {
+                                                                "a": 2.467291,
+                                                                "b": 2.467291,
+                                                                "c": 20,
+                                                                "alpha": 90,
+                                                                "beta": 90,
+                                                                "gamma": 120,
+                                                                "units": {"length": "angstrom", "angle": "degree"},
+                                                                "type": "HEX",
+                                                            },
+                                                            "isNonPeriodic": False,
+                                                        },
+                                                        "use_conventional_cell": True,
+                                                        "termination_top": {
+                                                            "chemical_elements": "C",
+                                                            "space_group_symmetry_label": "P6/mmm_2",
+                                                        },
+                                                        "number_of_repetitions": 1,
+                                                    },
+                                                    "build_parameters": {},
+                                                }
+                                            ],
+                                            "boundaryConditions": {"type": "pbc", "offset": 0},
+                                        },
+                                        "name": "C(001), termination C_P6/mmm_2",
+                                        "isDefault": False,
+                                        "formula": "C",
+                                        "basis": {
+                                            "elements": [{"id": 0, "value": "C"}, {"id": 1, "value": "C"}],
+                                            "coordinates": [
+                                                {"id": 0, "value": [0, 0, 0.000001]},
+                                                {"id": 1, "value": [0.333333, 0.666667, 0.000001]},
+                                            ],
+                                            "units": "crystal",
+                                            "labels": [],
+                                            "constraints": [],
+                                        },
+                                        "lattice": {
+                                            "a": 2.467291,
+                                            "b": 2.467291,
+                                            "c": 20,
+                                            "alpha": 90,
+                                            "beta": 90,
+                                            "gamma": 120,
+                                            "units": {"length": "angstrom", "angle": "degree"},
+                                            "type": "TRI",
+                                        },
+                                        "isNonPeriodic": False,
+                                    },
+                                    "type": "VacuumConfiguration",
+                                },
+                            ],
+                            "direction": "z",
+                            "type": "SlabStrainedSupercellConfiguration",
+                            "gaps": [],
+                        },
+                        {
+                            "direction": "z",
+                            "size": 10,
+                            "crystal": {
+                                "metadata": {
+                                    "build": [
+                                        {
+                                            "configuration": {
+                                                "miller_indices": [1, 1, 1],
+                                                "crystal": {
+                                                    "metadata": {"build": []},
+                                                    "name": "Ni, Nickel, FCC (Fm-3m) 3D (Bulk), mp-23",
+                                                    "isDefault": False,
+                                                    "basis": {
+                                                        "elements": [{"id": 0, "value": "Ni"}],
+                                                        "coordinates": [{"id": 0, "value": [0, 0, 0]}],
+                                                        "units": "crystal",
+                                                        "labels": [],
+                                                        "constraints": [],
+                                                    },
+                                                    "lattice": {
+                                                        "a": 2.478974,
+                                                        "b": 2.478974,
+                                                        "c": 2.478974,
+                                                        "alpha": 60,
+                                                        "beta": 60,
+                                                        "gamma": 60,
+                                                        "units": {"length": "angstrom", "angle": "degree"},
+                                                        "type": "FCC",
+                                                    },
+                                                    "external": {
+                                                        "id": "mp-23",
+                                                        "source": "Materials Project",
+                                                        "origin": True,
+                                                        "doi": "10.17188/1199153",
+                                                        "url": "https://next-gen.materialsproject.org/materials/mp-23",
+                                                    },
+                                                    "isNonPeriodic": False,
+                                                },
+                                                "use_conventional_cell": True,
+                                                "termination_top": {
+                                                    "chemical_elements": "Ni",
+                                                    "space_group_symmetry_label": "R-3m_4",
+                                                },
+                                                "number_of_repetitions": 3,
+                                            },
+                                            "build_parameters": {},
+                                        },
+                                        {
+                                            "configuration": {
+                                                "xy_supercell_matrix": [[1, 0], [0, 1]],
+                                                "strain_matrix": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                                                "stack_components": [
+                                                    {
+                                                        "miller_indices": [1, 1, 1],
+                                                        "crystal": {
+                                                            "metadata": {"build": []},
+                                                            "name": "Ni, Nickel, FCC (Fm-3m) 3D (Bulk), mp-23",
+                                                            "isDefault": False,
+                                                            "basis": {
+                                                                "elements": [{"id": 0, "value": "Ni"}],
+                                                                "coordinates": [{"id": 0, "value": [0, 0, 0]}],
+                                                                "units": "crystal",
+                                                                "labels": [],
+                                                                "constraints": [],
+                                                            },
+                                                            "lattice": {
+                                                                "a": 2.478974,
+                                                                "b": 2.478974,
+                                                                "c": 2.478974,
+                                                                "alpha": 60,
+                                                                "beta": 60,
+                                                                "gamma": 60,
+                                                                "units": {"length": "angstrom", "angle": "degree"},
+                                                                "type": "FCC",
+                                                            },
+                                                            "external": {
+                                                                "id": "mp-23",
+                                                                "source": "Materials Project",
+                                                                "origin": True,
+                                                                "doi": "10.17188/1199153",
+                                                                "url": "https://next-gen.materialsproject.org/materials/mp-23",
+                                                            },
+                                                            "isNonPeriodic": False,
+                                                        },
+                                                        "use_conventional_cell": True,
+                                                        "termination_top": {
+                                                            "chemical_elements": "Ni",
+                                                            "space_group_symmetry_label": "R-3m_4",
+                                                        },
+                                                        "number_of_repetitions": 3,
+                                                    },
+                                                    {
+                                                        "direction": "z",
+                                                        "size": 0,
+                                                        "crystal": {
+                                                            "metadata": {
+                                                                "build": [
+                                                                    {
+                                                                        "configuration": {
+                                                                            "miller_indices": [1, 1, 1],
+                                                                            "crystal": {
+                                                                                "metadata": {"build": []},
+                                                                                "name": "Ni, Nickel, FCC (Fm-3m) 3D (Bulk), mp-23",
+                                                                                "isDefault": False,
+                                                                                "basis": {
+                                                                                    "elements": [
+                                                                                        {"id": 0, "value": "Ni"}
+                                                                                    ],
+                                                                                    "coordinates": [
+                                                                                        {"id": 0, "value": [0, 0, 0]}
+                                                                                    ],
+                                                                                    "units": "crystal",
+                                                                                    "labels": [],
+                                                                                    "constraints": [],
+                                                                                },
+                                                                                "lattice": {
+                                                                                    "a": 2.478974,
+                                                                                    "b": 2.478974,
+                                                                                    "c": 2.478974,
+                                                                                    "alpha": 60,
+                                                                                    "beta": 60,
+                                                                                    "gamma": 60,
+                                                                                    "units": {
+                                                                                        "length": "angstrom",
+                                                                                        "angle": "degree",
+                                                                                    },
+                                                                                    "type": "FCC",
+                                                                                },
+                                                                                "derivedProperties": None,
+                                                                                "external": {
+                                                                                    "id": "mp-23",
+                                                                                    "source": "Materials Project",
+                                                                                    "origin": True,
+                                                                                    "data": None,
+                                                                                    "doi": "10.17188/1199153",
+                                                                                    "url": "https://next-gen.materialsproject.org/materials/mp-23",
+                                                                                },
+                                                                            },
+                                                                            "use_conventional_cell": True,
+                                                                            "termination_top": {
+                                                                                "chemical_elements": "Ni",
+                                                                                "space_group_symmetry_label": "R-3m_4",
+                                                                            },
+                                                                            "termination_bottom": None,
+                                                                            "number_of_repetitions": 3,
+                                                                        },
+                                                                        "build_parameters": {},
+                                                                    }
+                                                                ],
+                                                                "boundaryConditions": {"type": "pbc", "offset": 0},
+                                                            },
+                                                            "name": "Ni(111), termination Ni_R-3m_4",
+                                                            "formula": "Ni",
+                                                            "basis": {
+                                                                "elements": [
+                                                                    {"id": 0, "value": "Ni"},
+                                                                    {"id": 1, "value": "Ni"},
+                                                                    {"id": 2, "value": "Ni"},
+                                                                ],
+                                                                "coordinates": [
+                                                                    {"id": 0, "value": [0, 0, 0.000001]},
+                                                                    {"id": 1, "value": [0, 0, 0.333334333]},
+                                                                    {"id": 2, "value": [0, 0, 0.666667667]},
+                                                                ],
+                                                                "units": "crystal",
+                                                                "labels": [],
+                                                                "constraints": [],
+                                                            },
+                                                            "lattice": {
+                                                                "a": 2.478974,
+                                                                "b": 2.478974,
+                                                                "c": 7.436922,
+                                                                "alpha": 120,
+                                                                "beta": 120,
+                                                                "gamma": 60,
+                                                                "units": {"length": "angstrom", "angle": "degree"},
+                                                                "type": "TRI",
+                                                            },
+                                                        },
+                                                        "type": "VacuumConfiguration",
+                                                    },
+                                                ],
+                                                "direction": "z",
+                                                "type": "SlabStrainedSupercellConfiguration",
+                                                "gaps": [],
+                                            },
+                                            "build_parameters": {
+                                                "use_orthogonal_c": True,
+                                                "xy_supercell_matrix": [[1, 0], [0, 1]],
+                                            },
+                                        },
+                                    ],
+                                    "boundaryConditions": {"type": "pbc", "offset": 0},
+                                },
+                                "name": "Ni(111), termination Ni_R-3m_4, Slab",
+                                "formula": "Ni",
+                                "basis": {
+                                    "elements": [
+                                        {"id": 0, "value": "Ni"},
+                                        {"id": 1, "value": "Ni"},
+                                        {"id": 2, "value": "Ni"},
+                                    ],
+                                    "coordinates": [
+                                        {"id": 0, "value": [-0.000001, -0.000001, 0.000001]},
+                                        {"id": 1, "value": [0.666665667, 0.666665667, 0.333334333]},
+                                        {"id": 2, "value": [0.333332333, 0.333332333, 0.666667667]},
+                                    ],
+                                    "units": "crystal",
+                                    "labels": [
+                                        {"id": 0, "value": "0"},
+                                        {"id": 1, "value": "0"},
+                                        {"id": 2, "value": "0"},
+                                    ],
+                                    "constraints": [],
+                                },
+                                "lattice": {
+                                    "a": 2.478974,
+                                    "b": 2.478974,
+                                    "c": 6.072221386,
+                                    "alpha": 90,
+                                    "beta": 90,
+                                    "gamma": 59.999999999999986,
+                                    "units": {"length": "angstrom", "angle": "degree"},
+                                    "type": "TRI",
+                                },
+                            },
+                            "type": "VacuumConfiguration",
+                        },
+                    ],
+                    "direction": "z",
+                    "xy_shift": [0, 0],
+                    "type": "InterfaceConfiguration",
+                    "gaps": [{"id": 0, "value": 3}, {"id": 1, "value": 3}],
+                },
+                "build_parameters": {},
+            },
+        ],
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+    },
+    "name": "C(001)-Ni(111), Interface, Strain 0.335pct",
     "basis": {
         "elements": [
             {"id": 0, "value": "Ni"},
@@ -11,14 +511,13 @@ GRAPHENE_NICKEL_INTERFACE = {
             {"id": 4, "value": "C"},
         ],
         "coordinates": [
-            {"id": 0, "value": [0.666666667, 0.666666667, 0.350869517]},
-            {"id": 1, "value": [1.0, 0.0, 0.425701769]},
-            {"id": 2, "value": [0.333333333, 0.333333333, 0.500534021]},
-            {"id": 3, "value": [0.333333333, 0.333333333, 0.611447347]},
-            {"id": 4, "value": [0.666666667, 0.666666667, 0.611447347]},
+            {"id": 0, "value": [0.999999, 0.999999, 3.03e-7]},
+            {"id": 1, "value": [0.666665667, 0.666665667, 0.100960811]},
+            {"id": 2, "value": [0.333332333, 0.333332333, 0.201921319]},
+            {"id": 3, "value": [0, 0, 0.351561882]},
+            {"id": 4, "value": [0.666666, 0.666667, 0.351561882]},
         ],
         "units": "crystal",
-        "constraints": [],
         "labels": [
             {"id": 0, "value": 0},
             {"id": 1, "value": 0},
@@ -26,98 +525,16 @@ GRAPHENE_NICKEL_INTERFACE = {
             {"id": 3, "value": 1},
             {"id": 4, "value": 1},
         ],
+        "constraints": [],
     },
     "lattice": {
         "a": 2.478974,
         "b": 2.478974,
-        "c": 27.048147591,
-        "alpha": 90.0,
-        "beta": 90.0,
-        "gamma": 60.0,
+        "c": 20.048173665,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 60,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
-    },
-    "isNonPeriodic": False,
-    "metadata": {
-        "interface_properties": {
-            "film_sl_vectors": [[2.467291, 0.0, 0.0], [1.2336455, -2.136736685, -0.0]],
-            "substrate_sl_vectors": [[-1.752899326, 1.752899326, 0.0], [-1.752899326, 0.0, 1.752899326]],
-            "film_vectors": [[2.467291, 0.0, 0.0], [-1.2336455, 2.136736685, 0.0]],
-            "substrate_vectors": [[-1.752899326, 1.752899326, 0.0], [-1.752899326, 0.0, 1.752899326]],
-            "film_transformation": [[1.0, 0.0], [0.0, 1.0]],
-            "substrate_transformation": [[1.0, 0.0], [0.0, 1.0]],
-            "strain": [[0.004746364, -0.0, -0.0], [-0.0, 0.004746364, -0.0], [-0.0, -0.0, 0.0]],
-            "von_mises_strain": 0.003164242537164297,
-            "termination": "('C_P6/mmm_2', 'Ni_R-3m_1')",
-            "film_thickness": 1,
-            "substrate_thickness": 3,
-            "mean_abs_strain": 0.0010500000000000002,
-        },
-        "boundaryConditions": {"type": "pbc", "offset": 0},
-        "mean_abs_strain": 0.0010500000000000002,
-        "build": [
-            {
-                "configuration": {
-                    "type": "InterfaceConfiguration",
-                    "film_configuration": {
-                        "type": "SlabConfiguration",
-                        "bulk": {**GRAPHENE, "name": "C2"},
-                        "miller_indices": [0, 0, 1],
-                        "number_of_layers": 1,
-                        "vacuum": 0,
-                        "xy_supercell_matrix": [[1, 0], [0, 1]],
-                        "use_conventional_cell": True,
-                        "use_orthogonal_z": True,
-                        "make_primitive": False,
-                    },
-                    "substrate_configuration": {
-                        "type": "SlabConfiguration",
-                        "bulk": {
-                            "name": "Ni4",
-                            "basis": {
-                                "elements": [
-                                    {"id": 0, "value": "Ni"},
-                                    {"id": 1, "value": "Ni"},
-                                    {"id": 2, "value": "Ni"},
-                                    {"id": 3, "value": "Ni"},
-                                ],
-                                "coordinates": [
-                                    {"id": 0, "value": [0.0, 0.0, 0.0]},
-                                    {"id": 1, "value": [0.0, 0.5, 0.5]},
-                                    {"id": 2, "value": [0.5, 0.0, 0.5]},
-                                    {"id": 3, "value": [0.5, 0.5, 0.0]},
-                                ],
-                                "units": "crystal",
-                                "constraints": [],
-                                "labels": [],
-                            },
-                            "lattice": {
-                                "a": 3.505798652,
-                                "b": 3.505798652,
-                                "c": 3.505798652,
-                                "alpha": 90.0,
-                                "beta": 90.0,
-                                "gamma": 90.0,
-                                "units": {"length": "angstrom", "angle": "degree"},
-                                "type": "TRI",
-                            },
-                            "isNonPeriodic": False,
-                            "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-                        },
-                        "miller_indices": [1, 1, 1],
-                        "number_of_layers": 3,
-                        "vacuum": 3,
-                        "xy_supercell_matrix": [[1, 0], [0, 1]],
-                        "use_conventional_cell": True,
-                        "use_orthogonal_z": True,
-                        "make_primitive": False,
-                    },
-                    "film_termination": "C_P6/mmm_2",
-                    "substrate_termination": "Ni_P6/mmm_4",
-                    "distance_z": 3.0,
-                    "vacuum": 20.0,
-                }
-            }
-        ],
     },
 }

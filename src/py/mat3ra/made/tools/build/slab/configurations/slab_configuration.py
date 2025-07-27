@@ -51,6 +51,7 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
         number_of_layers: int,
         termination_formula: Optional[str] = None,
         vacuum: float = 10.0,
+        use_conventional_cell: bool = True,
     ) -> "SlabConfiguration":
         """
         Creates a SlabConfiguration from the given parameters.
@@ -75,6 +76,8 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
         terminations = crystal_lattice_planes_analyzer.terminations
         termination = select_slab_termination(terminations, termination_formula)
 
+        if use_conventional_cell:
+            material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
         atomic_layers_repeated_configuration = AtomicLayersUniqueRepeatedConfiguration(
             crystal=material,
             miller_indices=miller_indices,

@@ -1,5 +1,5 @@
 TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60 = {
-    "name": "C18(001)-C18(001), Interface",
+    "name": "C(001)-C(001), Interface",
     "basis": {
         "elements": [
             {"id": 0, "value": "C"},
