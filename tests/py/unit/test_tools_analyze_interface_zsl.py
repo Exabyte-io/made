@@ -108,27 +108,47 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
     assert np.isclose(substrate_material.lattice.b, film_material.lattice.b, atol=1e-4)
 
 
-def test_zsl_interface_analyzer_sort_by_strain_then_area():
-    substrate_slab_config = SlabConfiguration.from_parameters(
-        BULK_Si_CONVENTIONAL, (0, 0, 1), number_of_layers=2, vacuum=0.0
-    )
-    film_slab_config = SlabConfiguration.from_parameters(
-        BULK_Ge_CONVENTIONAL, (0, 0, 1), number_of_layers=2, vacuum=0.0
-    )
+@pytest.mark.parametrize(
+    "substrate, film, zsl_parameters, number_of_matches, expected_properties",
+    [
+        (
+            SimpleNamespace(
+                bulk_config=Materials.get_by_name_first_match("Nickel"),
+                miller_indices=(1, 1, 1),
+                number_of_layers=3,
+                vacuum=0.0,
+            ),
+            SimpleNamespace(
+                bulk_config=GRAPHENE,
+                miller_indices=(0, 0, 1),
+                number_of_layers=1,
+                vacuum=0.0,
+            ),
+            {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.05, "max_angle_tol": 0.02},
+            # {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
+            32,
+            # 31,
+            {"strain_percentage": 0.474, "match_id": 0},
+        )
+    ],
+)
+def test_zsl_interface_analyzer_sort_by_strain_then_area(
+    substrate, film, zsl_parameters, number_of_matches, expected_properties
+):
 
     analyzer = ZSLInterfaceAnalyzer(
-        substrate_slab_configuration=substrate_slab_config,
-        film_slab_configuration=film_slab_config,
-        max_area=350.0,
-        max_area_ratio_tol=0.09,
-        max_length_tol=0.03,
-        max_angle_tol=0.01,
+        substrate_slab_configuration=SlabConfiguration.from_parameters(
+            substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=0.0
+        ),
+        film_slab_configuration=SlabConfiguration.from_parameters(
+            film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=0.0
+        ),
+        **zsl_parameters,
     )
 
-    match_holders = analyzer.zsl_match_holders
+    sorted_match_holders = analyzer.zsl_match_holders
 
-    # Sort matches by strain percentage and then by area
-    sorted_matches = sorted(match_holders, key=lambda x: (x.total_strain_percentage, x.match_area))
-
-    assert len(sorted_matches) == len(match_holders)
-    assert sorted_matches[0].total_strain_percentage <= sorted_matches[-1].total_strain_percentage
+    assert len(sorted_match_holders) == number_of_matches
+    index_to_check = expected_properties["match_id"]
+    match_to_check = sorted_match_holders[index_to_check]
+    assert np.isclose(match_to_check.total_strain_percentage, expected_properties["strain_percentage"], atol=1e-3)
