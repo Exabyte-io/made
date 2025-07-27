@@ -3,13 +3,13 @@ from typing import Final
 
 import numpy as np
 import pytest
-from mat3ra.standata.materials import Materials
-from mat3ra.utils.matrix import convert_2x2_to_3x3
-
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.slab.builders import SlabStrainedSupercellBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
+from mat3ra.standata.materials import Materials
+from mat3ra.utils.matrix import convert_2x2_to_3x3
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+
 from .fixtures.monolayer import GRAPHENE
 
 SUBSTRATE_SI_001: Final = SimpleNamespace(
@@ -153,7 +153,6 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
 def test_zsl_interface_analyzer_sort_by_strain_then_area(
     substrate, film, zsl_parameters, number_of_matches, expected_properties
 ):
-
     analyzer = ZSLInterfaceAnalyzer(
         substrate_slab_configuration=SlabConfiguration.from_parameters(
             substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=0.0
