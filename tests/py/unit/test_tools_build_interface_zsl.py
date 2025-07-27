@@ -38,6 +38,10 @@ GRAPHENE_NICKEL_TEST_CASE = (
     },
 )
 
+MAX_AREA_RATIO_TOL = 0.09
+MAX_LENGTH_TOL = 0.05
+MAX_ANGLE_TOL = 0.02
+
 
 @pytest.mark.parametrize(
     "substrate, film,gap, vacuum, max_area, expected_interface",
@@ -57,9 +61,9 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
         substrate_slab_configuration=substrate_slab_config,
         film_slab_configuration=film_slab_config,
         max_area=max_area,
-        max_area_ratio_tol=0.09,
-        max_length_tol=0.05,
-        max_angle_tol=0.02,
+        max_area_ratio_tol=MAX_AREA_RATIO_TOL,
+        max_length_tol=MAX_LENGTH_TOL,
+        max_angle_tol=MAX_ANGLE_TOL,
         reduce_result_cell=False,
     )
 
@@ -82,6 +86,7 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
     # remove metadata
     interface.metadata.build = []
     expected_interface = get_platform_specific_value(expected_interface)
+    print(interface.to_dict())
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
@@ -100,9 +105,9 @@ def test_create_zsl_interface(substrate, film, gap, vacuum, max_area, expected_i
         vacuum=vacuum,
         xy_shift=[0, 0],
         max_area=max_area,
-        max_area_ratio_tol=0.1,
-        max_length_tol=0.05,
-        max_angle_tol=0.02,
+        max_area_ratio_tol=MAX_AREA_RATIO_TOL,
+        max_length_tol=MAX_LENGTH_TOL,
+        max_angle_tol=MAX_ANGLE_TOL,
         use_conventional_cell=True,
         reduce_result_cell=False,
         reduce_result_cell_to_primitive=True,
@@ -141,9 +146,9 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         vacuum=vacuum,
         xy_shift=[0, 0],
         max_area=max_area,
-        max_area_ratio_tol=0.1,
-        max_length_tol=0.05,
-        max_angle_tol=0.02,
+        max_area_ratio_tol=MAX_AREA_RATIO_TOL,
+        max_length_tol=MAX_LENGTH_TOL,
+        max_angle_tol=MAX_ANGLE_TOL,
         reduce_result_cell=False,
         reduce_result_cell_to_primitive=True,
     )
