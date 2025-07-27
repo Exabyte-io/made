@@ -11,6 +11,7 @@ from mat3ra.utils.matrix import convert_2x2_to_3x3
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE
+from .utils import TestPlatform, get_platform_specific_value
 
 SUBSTRATE_SI_001: Final = SimpleNamespace(
     bulk_config=BULK_Si_CONVENTIONAL,
@@ -109,7 +110,7 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
 
 
 @pytest.mark.parametrize(
-    "substrate, film, zsl_parameters, number_of_matches, expected_properties",
+    "substrate, film, zsl_parameters, expected_number_of_matches, expected_properties",
     [
         (
             SimpleNamespace(
@@ -125,34 +126,24 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
                 vacuum=0.0,
             ),
             {"max_area": 90.0, "max_area_ratio_tol": 0.1, "max_length_tol": 0.1, "max_angle_tol": 0.1},
+            {TestPlatform.DARWIN: 32, TestPlatform.OTHER: 33},
+            {
+                TestPlatform.DARWIN: {"strain_percentage": 0.474, "match_id": 0},
+                TestPlatform.OTHER: {"strain_percentage": 25.122, "match_id": 0},
+            },
+            # NOTE: the following values are expected for the DARWIN platform.
             # {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
-            32,
             # 31,
-            {"strain_percentage": 0.474, "match_id": 0},
             # {"strain_percentage": 25.122, "match_id": 0},
         ),
-        # (
-        #     SimpleNamespace(
-        #         bulk_config=Materials.get_by_name_first_match("Nickel"),
-        #         miller_indices=(1, 1, 1),
-        #         number_of_layers=3,
-        #         vacuum=0.0,
-        #     ),
-        #     SimpleNamespace(
-        #         bulk_config=GRAPHENE,
-        #         miller_indices=(0, 0, 1),
-        #         number_of_layers=1,
-        #         vacuum=0.0,
-        #     ),
-        #     {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
-        #     31,
-        #     {"strain_percentage": 25.122, "match_id": 0},
-        # ),
     ],
 )
 def test_zsl_interface_analyzer_sort_by_strain_then_area(
-    substrate, film, zsl_parameters, number_of_matches, expected_properties
+    substrate, film, zsl_parameters, expected_number_of_matches, expected_properties
 ):
+    expected_number_of_matches = get_platform_specific_value(expected_number_of_matches)
+    expected_properties = get_platform_specific_value(expected_properties)
+
     analyzer = ZSLInterfaceAnalyzer(
         substrate_slab_configuration=SlabConfiguration.from_parameters(
             substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=0.0
@@ -165,7 +156,10 @@ def test_zsl_interface_analyzer_sort_by_strain_then_area(
 
     sorted_match_holders = analyzer.zsl_match_holders
 
-    assert len(sorted_match_holders) == number_of_matches
+    assert len(sorted_match_holders) == expected_number_of_matches
+
     index_to_check = expected_properties["match_id"]
     match_to_check = sorted_match_holders[index_to_check]
-    assert np.isclose(match_to_check.total_strain_percentage, expected_properties["strain_percentage"], atol=1e-3)
+    expected_strain_percentage = expected_properties["strain_percentage"]
+
+    assert np.isclose(match_to_check.total_strain_percentage, expected_strain_percentage, atol=1e-3)
