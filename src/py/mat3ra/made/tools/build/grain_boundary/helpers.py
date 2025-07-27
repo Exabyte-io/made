@@ -2,6 +2,7 @@ from typing import Optional, List, Tuple
 
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
 from mat3ra.made.tools.build.interface import get_commensurate_strained_configurations
@@ -10,6 +11,7 @@ from .builders import GrainBoundaryLinearBuilder
 from .builders import GrainBoundaryPlanarBuilder
 from .configuration import GrainBoundaryLinearConfiguration
 from .configuration import GrainBoundaryPlanarConfiguration
+from ...analyze.lattice import get_material_with_conventional_lattice
 
 
 def create_grain_boundary_planar(
@@ -26,6 +28,7 @@ def create_grain_boundary_planar(
     max_area_ratio_tol: float = 0.09,
     max_length_tol: float = 0.03,
     max_angle_tol: float = 0.01,
+    use_conventional_cell: bool = True,
 ) -> Material:
     """
     Create a planar grain boundary between two materials with different orientations.
@@ -47,9 +50,14 @@ def create_grain_boundary_planar(
     Returns:
         Material: The grain boundary material
     """
+    phase_2_material = phase_2_material or phase_1_material
+    if use_conventional_cell:
+        phase_1_material = get_material_with_conventional_lattice(phase_1_material)
+        phase_2_material = get_material_with_conventional_lattice(phase_2_material)
+
     analyzer = GrainBoundaryPlanarAnalyzer(
         phase_1_material=phase_1_material,
-        phase_2_material=phase_2_material or phase_1_material,
+        phase_2_material=phase_2_material,
         phase_1_miller_indices=phase_1_miller_indices,
         phase_2_miller_indices=phase_2_miller_indices,
         phase_1_thickness=phase_1_thickness,
@@ -85,6 +93,7 @@ def create_grain_boundary_linear(
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
     number_of_layers: int = 1,
     vacuum: float = 0.0,
+    use_conventional_cell: bool = True,
 ) -> Material:
     """
     Create a linear grain boundary from a material with specified twist angle.
@@ -114,6 +123,9 @@ def create_grain_boundary_linear(
     Raises:
         ValueError: If no commensurate lattice matches are found.
     """
+    if use_conventional_cell:
+        material = get_material_with_conventional_lattice(material)
+
     strained_configs, actual_angle = get_commensurate_strained_configurations(
         material=material,
         target_angle=target_angle,
@@ -124,6 +136,7 @@ def create_grain_boundary_linear(
         miller_indices=miller_indices,
         number_of_layers=number_of_layers,
         vacuum=vacuum,
+        use_conventional_cell=use_conventional_cell,
     )
 
     grain_boundary_config = GrainBoundaryLinearConfiguration(

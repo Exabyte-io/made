@@ -4,21 +4,25 @@ from mat3ra.code.entity import InMemoryEntityPydantic
 
 from mat3ra.made.material import Material
 from .configuration import InterfaceConfiguration
+from .. import MaterialWithBuildMetadata
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
-from ...analyze.other import get_chemical_formula
+from ...analyze import BaseMaterialAnalyzer
+from ...analyze.lattice import get_material_with_primitive_lattice
 from ...convert.utils import InterfacePartsEnum
 from ...modify import (
     translate_by_vector,
     wrap_to_unit_cell,
 )
+from ...operations.core.unary import supercell
+from ...operations.core.utils import should_skip_stacking
 from ....utils import AXIS_TO_INDEX_MAP
 
 
 class InterfaceBuilderParameters(InMemoryEntityPydantic):
-    pass
+    make_primitive: bool = True
 
 
 class InterfaceBuilder(StackNComponentsBuilder):
@@ -28,6 +32,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
 
     _ConfigurationType = InterfaceConfiguration
     _BuildParametersType = InterfaceBuilderParameters
+    _DefaultBuildParameters = InterfaceBuilderParameters()
     _GeneratedItemType: Type[Material] = Material
 
     @property
@@ -52,6 +57,16 @@ class InterfaceBuilder(StackNComponentsBuilder):
         translation_vector[other_axes[1]] = configuration.xy_shift[1]
         film_material = translate_by_vector(film_material, translation_vector, use_cartesian_coordinates=True)
 
+        try:
+            should_skip_stacking(substrate_material, film_material, stacking_axis)
+        except ValueError:
+            film_material = supercell(film_material, [[0, 1, 0], [1, 0, 0], [0, 0, 1]])
+            print(
+                "Switched in-plane lattice vectors of the film material to match substrate"
+                + "Direct stacking was not possible."
+            )
+            should_skip_stacking(substrate_material, film_material, stacking_axis)
+
         stack_configuration = StackConfiguration(
             stack_components=[substrate_material, film_material, configuration.vacuum_configuration],
             gaps=configuration.gaps,
@@ -61,13 +76,34 @@ class InterfaceBuilder(StackNComponentsBuilder):
         wrapped_interface = wrap_to_unit_cell(interface)
         return wrapped_interface
 
+    def _post_process(
+        self, material: MaterialWithBuildMetadata, configuration: InterfaceConfiguration
+    ) -> MaterialWithBuildMetadata:
+        if self.build_parameters.make_primitive:
+            # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
+            primitive_material = get_material_with_primitive_lattice(material, return_original_if_not_reduced=True)
+            material = primitive_material
+
+        return super()._post_process(material, configuration)
+
+    def get_base_name_from_configuration(self, first_configuration, second_configuration) -> str:
+        first_component_formula = BaseMaterialAnalyzer(material=first_configuration.atomic_layers.crystal).formula
+        second_component_formula = BaseMaterialAnalyzer(material=second_configuration.atomic_layers.crystal).formula
+        first_component_miller = first_configuration.atomic_layers.miller_indices_as_string
+        second_component_miller = second_configuration.atomic_layers.miller_indices_as_string
+        return f"{first_component_formula}{first_component_miller}-{second_component_formula}{second_component_miller}"
+
+    def get_name_suffix(self, configuration: InterfaceConfiguration) -> str:
+        strain = configuration.von_mises_strain_percentage
+        if strain == 0:
+            return "Interface"
+        return f"Interface, Strain {strain:.3f}pct"
+
     def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
-        film_formula = get_chemical_formula(configuration.film_configuration.atomic_layers.crystal)
-        substrate_formula = get_chemical_formula(configuration.substrate_configuration.atomic_layers.crystal)
-        film_miller_indices = "".join([str(i) for i in configuration.film_configuration.atomic_layers.miller_indices])
-        substrate_miller_indices = "".join(
-            [str(i) for i in configuration.substrate_configuration.atomic_layers.miller_indices]
+        base_name = self.get_base_name_from_configuration(
+            configuration.film_configuration, configuration.substrate_configuration
         )
-        name = f"{film_formula}({film_miller_indices})-{substrate_formula}({substrate_miller_indices}), Interface"
+        name_suffix = self.get_name_suffix(configuration) or self.name_suffix
+        name = f"{base_name}, {name_suffix}"
         material.name = name
         return material

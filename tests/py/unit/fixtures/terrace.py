@@ -1,5 +1,5 @@
 TERRACE_SLAB_Si_001_3x3 = {
-    "name": "Si8(001), termination Si_P4/mmm_2, Slab, Terrace [0, 1, 0]",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab, Terrace [0, 1, 0]",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},

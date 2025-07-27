@@ -1,54 +1,79 @@
-import platform
 from types import SimpleNamespace
-from typing import Final
 
 import pytest
-from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceConfiguration
-from mat3ra.made.tools.build.interface.helpers import create_interface, create_twisted_interface
+from mat3ra.made.tools.build.interface.builders import (
+    InterfaceBuilder,
+    InterfaceBuilderParameters,
+    InterfaceConfiguration,
+)
+from mat3ra.made.tools.build.interface.helpers import (
+    create_commensurate_interface,
+    create_simple_interface_between_slabs,
+    create_twisted_interface,
+)
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
+from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.standata.materials import Materials
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
-# Test the analyzer directly
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
+from .fixtures.interface.gr_ni_111_top_hcp import (
+    GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
+    GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
+)
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.interface.twisted_nanoribbons import TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60
 from .fixtures.monolayer import GRAPHENE
-from .utils import assert_two_entities_deep_almost_equal
+from .utils import TestPlatform, assert_two_entities_deep_almost_equal
 
-PARAMETERS_SLAB_Si_001: Final = SimpleNamespace(
-    bulk_config=BULK_Si_CONVENTIONAL,
-    miller_indices=(0, 0, 1),
-    number_of_layers=2,
-    vacuum=0.0,
+Si_Ge_SIMPLE_INTERFACE_TEST_CASE = (
+    SimpleNamespace(
+        bulk_config=BULK_Si_CONVENTIONAL,
+        miller_indices=(0, 0, 1),
+        number_of_layers=2,
+        vacuum=0.0,
+    ),
+    SimpleNamespace(
+        bulk_config=BULK_Ge_CONVENTIONAL,
+        miller_indices=(0, 0, 1),
+        number_of_layers=2,
+        vacuum=0.0,
+    ),
+    INTERFACE_Si_001_Ge_001,
 )
 
-PARAMETERS_SLAB_Ge_001: Final = SimpleNamespace(
-    bulk_config=BULK_Ge_CONVENTIONAL,
-    miller_indices=(0, 0, 1),
-    number_of_layers=2,
-    vacuum=0.0,
+
+GRAPHENE_NICKEL_TEST_CASE = (
+    SimpleNamespace(
+        bulk_config=Materials.get_by_name_first_match("Nickel"),
+        miller_indices=(1, 1, 1),
+        number_of_layers=3,
+        vacuum=0.0,
+    ),
+    SimpleNamespace(
+        bulk_config=GRAPHENE,
+        miller_indices=(0, 0, 1),
+        number_of_layers=1,
+        vacuum=0.0,
+    ),
+    3.0,  # gap between graphene and nickel
+    10.0,  # vacuum
+    90,  # max area
+    {
+        TestPlatform.DARWIN: GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
+        TestPlatform.OTHER: GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
+    },
 )
 
 
-SIMPLE_INTERFACE_BUILDER_TEST_CASES = [(PARAMETERS_SLAB_Si_001, PARAMETERS_SLAB_Ge_001, INTERFACE_Si_001_Ge_001)]
-
-
-MAX_AREA = 100
-# pymatgen `2023.6.23` supporting py3.8 returns 1 interface instead of 2
-EXPECTED_NUMBER_OF_INTERFACES = 1 if platform.python_version().startswith("3.8") else 1
-interface_configuration = None
-
-
-@pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
+@pytest.mark.parametrize("substrate, film, expected_interface", [Si_Ge_SIMPLE_INTERFACE_TEST_CASE])
 def test_simple_interface_builder(substrate, film, expected_interface):
-    builder = InterfaceBuilder()
+    builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters(make_primitive=False))
     substrate_slab_config = SlabConfiguration.from_parameters(
         substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
     )
@@ -72,68 +97,35 @@ def test_simple_interface_builder(substrate, film, expected_interface):
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
-@pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
-def test_zsl_interface_builder(substrate, film, expected_interface):
-    """Test creating Si/Ge interface using ZSL approach."""
+@pytest.mark.parametrize("substrate, film, expected_interface", [Si_Ge_SIMPLE_INTERFACE_TEST_CASE])
+def test_create_simple_interface_between_slabs(substrate, film, expected_interface):
     substrate_slab_config = SlabConfiguration.from_parameters(
-        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
+        material_or_dict=substrate.bulk_config,
+        miller_indices=substrate.miller_indices,
+        number_of_layers=substrate.number_of_layers,
+        vacuum=0,
+        termination_formula=None,
     )
     film_slab_config = SlabConfiguration.from_parameters(
-        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
+        material_or_dict=film.bulk_config,
+        miller_indices=film.miller_indices,
+        number_of_layers=film.number_of_layers,
+        vacuum=0,
+        termination_formula=None,
     )
 
-    # Use ZSLInterfaceAnalyzer to get strained slab configurations
-    analyzer = ZSLInterfaceAnalyzer(
-        substrate_slab_configuration=substrate_slab_config,
-        film_slab_configuration=film_slab_config,
-        max_area=50.0,
-        max_area_ratio_tol=0.1,
-        max_length_tol=0.05,
-        max_angle_tol=0.02,
+    substrate_slab = SlabBuilder().get_material(substrate_slab_config)
+    film_slab = SlabBuilder().get_material(film_slab_config)
+
+    interface = create_simple_interface_between_slabs(
+        substrate_slab=substrate_slab,
+        film_slab=film_slab,
+        gap=None,
+        vacuum=0.0,
+        xy_shift=[0, 0],
     )
-
-    interface_configurations = analyzer.get_strained_configurations()
-
-    selected_config = interface_configurations[0]
-    interface_config = InterfaceConfiguration(
-        stack_components=[selected_config.substrate_configuration, selected_config.film_configuration]
-    )
-
-    builder = InterfaceBuilder()
-    interface = builder.get_material(interface_config)
-
-    # remove metadata
     interface.metadata.build = []
-    expected_interface["metadata"].pop("build", None)
-
     assert_two_entities_deep_almost_equal(interface, expected_interface)
-
-
-@pytest.mark.parametrize("substrate, film, expected_interface", SIMPLE_INTERFACE_BUILDER_TEST_CASES)
-def test_create_interface(substrate, film, expected_interface):
-    substrate_slab_config = SlabConfiguration.from_parameters(
-        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
-    )
-    film_slab_config = SlabConfiguration.from_parameters(
-        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
-    )
-
-    analyzer = InterfaceAnalyzer(
-        substrate_slab_configuration=substrate_slab_config,
-        film_slab_configuration=film_slab_config,
-    )
-
-    film_configuration = analyzer.film_strained_configuration
-    substrate_configuration = analyzer.substrate_strained_configuration
-    vacuum_configuration = film_slab_config.vacuum_configuration
-
-    configuration = InterfaceConfiguration(
-        stack_components=[substrate_configuration, film_configuration, vacuum_configuration],
-    )
-
-    interface = create_interface(configuration)
-    interface.metadata.build = []
-    expected_interface["metadata"].pop("build", None)
 
 
 @pytest.mark.parametrize(
@@ -191,37 +183,38 @@ def test_create_twisted_interface(material_config, config_params, expected_inter
             GRAPHENE,
             {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
             AxisEnum.z,
-            [3.0, 3.0],
+            3.0,
             INTERFACE_GRAPHENE_GRAPHENE_Z,
         ),
         (
             GRAPHENE,
             {"target_angle": 13.0, "angle_tolerance": 0.5, "max_supercell_matrix_int": 5, "return_first_match": True},
             AxisEnum.x,
-            [],  # testing no gaps
+            None,  # testing no gaps
             INTERFACE_GRAPHENE_GRAPHENE_X,
         ),
     ],
 )
 def test_commensurate_interface_creation(material_config, analyzer_params, direction, gaps, expected_interface):
-    slab_config = SlabConfiguration.from_parameters(
-        material_config, miller_indices=(0, 0, 1), number_of_layers=1, vacuum=0.0
+    material = Material.create(material_config)
+
+    slab = create_slab(
+        crystal=material,
+        miller_indices=(0, 0, 1),
+        use_conventional_cell=True,
+        use_orthogonal_c=True,
+        number_of_layers=1,
+        vacuum=0.0,
     )
 
-    analyzer = CommensurateLatticeInterfaceAnalyzer(substrate_slab_configuration=slab_config, **analyzer_params)
+    interface = create_commensurate_interface(
+        material=slab,
+        target_angle=analyzer_params["target_angle"],
+        angle_tolerance=analyzer_params["angle_tolerance"],
+        max_repetition_int=analyzer_params["max_supercell_matrix_int"],
+        return_first_match=analyzer_params["return_first_match"],
+        direction=direction,
+        gap=gaps,
+    )
 
-    match_holders = analyzer.commensurate_lattice_match_holders
-
-    if len(match_holders) > 0:
-        selected_config = analyzer.get_strained_configuration_by_match_id(0)
-        interface_config = InterfaceConfiguration(
-            stack_components=[selected_config.substrate_configuration, selected_config.film_configuration],
-            gaps=ArrayWithIds.from_values(values=gaps),
-            direction=direction,
-        )
-
-        builder = InterfaceBuilder()
-        interface = builder.get_material(interface_config)
-        interface.metadata.build = []
-
-        assert_two_entities_deep_almost_equal(interface, expected_interface, atol=1e-5)
+    assert_two_entities_deep_almost_equal(interface, expected_interface, atol=1e-5)

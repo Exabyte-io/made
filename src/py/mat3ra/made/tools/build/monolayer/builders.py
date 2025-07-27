@@ -37,6 +37,7 @@ class MonolayerBuilder(SlabBuilder):
             miller_indices=miller_indices,
             number_of_layers=1,
             vacuum=vacuum,
+            use_conventional_cell=False,
         )
         slab = super()._generate(slab_config)
 

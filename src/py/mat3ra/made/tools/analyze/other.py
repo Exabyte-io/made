@@ -65,7 +65,7 @@ def get_surface_area(atoms: ASEAtoms):
 
 
 @decorator_convert_material_args_kwargs_to_atoms
-def get_chemical_formula(atoms: ASEAtoms):
+def get_chemical_formula_empirical(atoms: ASEAtoms) -> str:
     """
     Calculate the formula of the atoms structure.
 
@@ -75,7 +75,7 @@ def get_chemical_formula(atoms: ASEAtoms):
     Returns:
         str: The formula of the atoms.
     """
-    return atoms.get_chemical_formula()
+    return atoms.get_chemical_formula(empirical=True)
 
 
 def get_closest_site_id_from_coordinate(
