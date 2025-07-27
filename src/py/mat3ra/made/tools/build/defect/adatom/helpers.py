@@ -9,7 +9,6 @@ from .configuration import (
 )
 from ... import MaterialWithBuildMetadata
 from ...defect.enums import AdatomPlacementMethodEnum
-from ..utils import ensure_enum
 
 # Define mapping of placement methods to their corresponding analyzers
 ADATOM_PLACEMENT_MAPPING = {
@@ -44,7 +43,6 @@ def create_adatom_defect(
     Returns:
         Material: The slab with adatom defect.
     """
-    placement_method = ensure_enum(placement_method, AdatomPlacementMethodEnum)
 
     if placement_method not in ADATOM_PLACEMENT_MAPPING:
         raise ValueError(f"Unsupported adatom placement method: {placement_method}")
@@ -94,8 +92,6 @@ def create_multiple_adatom_defects(
     Returns:
         Material: The slab with all adatom defects applied.
     """
-    placement_method = ensure_enum(placement_method, AdatomPlacementMethodEnum)
-
     if placement_method not in ADATOM_PLACEMENT_MAPPING:
         raise ValueError(f"Unsupported adatom placement method: {placement_method}")
 

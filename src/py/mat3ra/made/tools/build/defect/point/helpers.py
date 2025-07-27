@@ -17,7 +17,6 @@ from ..enums import (
     SubstitutionPlacementMethodEnum,
     InterstitialPlacementMethodEnum,
 )
-from ..utils import ensure_enum
 from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 
 DEFECT_TYPE_MAPPING = {
@@ -140,7 +139,7 @@ def create_multiple_defects(
             - type: str ("vacancy", "substitution", "interstitial")
             - coordinate: List[float]
             - element: str (required for substitution and interstitial)
-            - resolution_method: str (optional)
+            - placement_method: str (optional)
                 - For vacancy/substitution: "closest_site"
                 - For interstitial: "exact_coordinate", "voronoi_site"
                 Defaults to "closest_site" for vacancy/substitution and "exact_coordinate" for interstitial.
@@ -152,7 +151,7 @@ def create_multiple_defects(
     current_material = material
 
     for defect_dict in defect_dicts:
-        defect_type = ensure_enum(defect_dict["type"], PointDefectTypeEnum)
+        defect_type = defect_dict["type"]
 
         if defect_type not in DEFECT_TYPE_MAPPING:
             raise ValueError(f"Unsupported defect type: {defect_type}")
@@ -160,11 +159,7 @@ def create_multiple_defects(
         defect_info = DEFECT_TYPE_MAPPING[defect_type]
         create_func = globals()[defect_info["create_func"]]
 
-        resolution_method = defect_dict.get("resolution_method")
-        if resolution_method:
-            placement_method = ensure_enum(resolution_method, defect_info["placement_enum"])
-        else:
-            placement_method = defect_info["default_method"]
+        placement_method = defect_dict.get("placement_method") or defect_info["default_method"]
 
         args = [current_material, defect_dict["coordinate"], placement_method]
         if defect_type in (PointDefectTypeEnum.SUBSTITUTION, PointDefectTypeEnum.INTERSTITIAL):

@@ -109,7 +109,7 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
                     defect_type="substitution",
                     coordinate=[0.543, 0.543, 0.5],
                     element="Ge",
-                    placement_method=SubstitutionPlacementMethodEnum.CLOSEST_SITE,
+                    placement_method="CLOSEST_SITE",
                 ),
             ],
             MULTIPLE_POINT_DEFECTS_BULK_Si_CONVENTIONAL,
@@ -128,7 +128,7 @@ def test_create_multiple_defects(material_config, defect_params_list, expected_m
         if hasattr(defect_params, "element"):
             defect_dict["element"] = defect_params.element
         if hasattr(defect_params, "placement_method"):
-            defect_dict["resolution_method"] = defect_params.placement_method.value
+            defect_dict["placement_method"] = defect_params.placement_method
 
         defect_dicts.append(defect_dict)
 
