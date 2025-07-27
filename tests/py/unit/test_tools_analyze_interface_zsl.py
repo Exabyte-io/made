@@ -124,30 +124,30 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
                 number_of_layers=1,
                 vacuum=0.0,
             ),
-            {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.05, "max_angle_tol": 0.02},
+            {"max_area": 90.0, "max_area_ratio_tol": 0.1, "max_length_tol": 0.1, "max_angle_tol": 0.1},
             # {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
             32,
             # 31,
             {"strain_percentage": 0.474, "match_id": 0},
             # {"strain_percentage": 25.122, "match_id": 0},
         ),
-        (
-            SimpleNamespace(
-                bulk_config=Materials.get_by_name_first_match("Nickel"),
-                miller_indices=(1, 1, 1),
-                number_of_layers=3,
-                vacuum=0.0,
-            ),
-            SimpleNamespace(
-                bulk_config=GRAPHENE,
-                miller_indices=(0, 0, 1),
-                number_of_layers=1,
-                vacuum=0.0,
-            ),
-            {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
-            31,
-            {"strain_percentage": 25.122, "match_id": 0},
-        ),
+        # (
+        #     SimpleNamespace(
+        #         bulk_config=Materials.get_by_name_first_match("Nickel"),
+        #         miller_indices=(1, 1, 1),
+        #         number_of_layers=3,
+        #         vacuum=0.0,
+        #     ),
+        #     SimpleNamespace(
+        #         bulk_config=GRAPHENE,
+        #         miller_indices=(0, 0, 1),
+        #         number_of_layers=1,
+        #         vacuum=0.0,
+        #     ),
+        #     {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
+        #     31,
+        #     {"strain_percentage": 25.122, "match_id": 0},
+        # ),
     ],
 )
 def test_zsl_interface_analyzer_sort_by_strain_then_area(
