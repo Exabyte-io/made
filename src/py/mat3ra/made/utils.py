@@ -142,17 +142,3 @@ def get_atomic_coordinates_extremum(
     else:
         new_material.to_crystal()
     return new_material.basis.coordinates.get_extremum_value_along_axis(extremum, axis)
-
-
-def calculate_von_mises_strain(strain_matrix: np.ndarray) -> float:
-    """Calculate von Mises strain (%) from a 2D strain transformation matrix (top-left 2x2 of 3x3)."""
-    # allow passing a Python list
-    E = np.array(strain_matrix, dtype=float)
-
-    exx = E[0, 0] - 1.0
-    eyy = E[1, 1] - 1.0
-    exy = 0.5 * (E[0, 1] + E[1, 0])
-
-    e_von_mises = np.sqrt(exx**2 - exx * eyy + eyy**2 + 3 * exy**2)
-
-    return abs(e_von_mises) * 100.0

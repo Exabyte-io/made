@@ -6,12 +6,12 @@ from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dime
 )
 
 from mat3ra.made.tools.utils import unwrap
-from mat3ra.made.utils import calculate_von_mises_strain
 from ..slab.configurations import (
     SlabStrainedSupercellConfiguration,
 )
 from ..stack.configuration import StackConfiguration
 from ..vacuum.configuration import VacuumConfiguration
+from ...analyze.utils import calculate_von_mises_strain
 
 
 class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):

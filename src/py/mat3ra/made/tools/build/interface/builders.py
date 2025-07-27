@@ -80,16 +80,9 @@ class InterfaceBuilder(StackNComponentsBuilder):
         self, material: MaterialWithBuildMetadata, configuration: InterfaceConfiguration
     ) -> MaterialWithBuildMetadata:
         if self.build_parameters.make_primitive:
-            number_of_atoms = material.basis.number_of_atoms
-            primitive_material = get_material_with_primitive_lattice(material)
             # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
-            if primitive_material.basis.number_of_atoms < number_of_atoms:
-                material = primitive_material
-            else:
-                print(
-                    "Primitive cell has more atoms than the original material. "
-                    "Skipping primitive cell conversion to avoid potential issues."
-                )
+            primitive_material = get_material_with_primitive_lattice(material, return_original_if_not_reduced=True)
+            material = primitive_material
 
         return super()._post_process(material, configuration)
 
