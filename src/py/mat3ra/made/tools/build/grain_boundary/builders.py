@@ -3,7 +3,6 @@ from typing import Type, Optional
 from mat3ra.made.material import Material
 from .configuration import GrainBoundaryLinearConfiguration
 from .configuration import GrainBoundaryPlanarConfiguration
-from .. import BaseBuilderParameters
 from ..interface.builders import InterfaceBuilder, InterfaceBuilderParameters
 from ...modify import wrap_to_unit_cell
 from ...operations.core.unary import supercell
@@ -13,7 +12,7 @@ class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):
     pass
 
 
-class GrainBoundaryLinearBuilderParameters(BaseBuilderParameters):
+class GrainBoundaryLinearBuilderParameters(GrainBoundaryBuilderParameters):
     max_supercell_matrix_int: Optional[int] = None
     limit_max_int: Optional[int] = 30
     angle_tolerance: float = 0.1

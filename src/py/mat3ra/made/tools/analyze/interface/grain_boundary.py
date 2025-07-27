@@ -62,8 +62,8 @@ class GrainBoundaryPlanarAnalyzer(ZSLInterfaceAnalyzer):
         for idx, zsl_match in enumerate(zsl_matches):
             match_holder = GrainBoundaryPlanarMatchHolder(
                 match_id=idx,
-                substrate_transformation_matrix=zsl_match.substrate_transformation_matrix,
-                film_transformation_matrix=zsl_match.film_transformation_matrix,
+                substrate_transformation_matrix=zsl_match.substrate_supercell_matrix,
+                film_transformation_matrix=zsl_match.film_supercell_matrix,
                 match_area=zsl_match.match_area,
                 strain_transformation_matrix=zsl_match.strain_transformation_matrix,
                 total_strain_percentage=zsl_match.total_strain_percentage,

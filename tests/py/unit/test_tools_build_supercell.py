@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.supercell import create_supercell
@@ -20,4 +21,9 @@ from .utils import assert_two_entities_deep_almost_equal
 def test_create_supercell(material_config, supercell_matrix, expected_material_config):
     material = Material.create(material_config)
     supercell_material = create_supercell(material, supercell_matrix)
+
     assert_two_entities_deep_almost_equal(supercell_material, expected_material_config)
+
+    expected_vectors = np.array(supercell_matrix) @ np.array(material.lattice.vector_arrays)
+    actual_vectors = np.array(supercell_material.lattice.vector_arrays)
+    assert np.allclose(actual_vectors, expected_vectors, atol=1e-6), "Supercell vectors do not match expected values."

@@ -4,21 +4,25 @@ from mat3ra.code.entity import InMemoryEntityPydantic
 
 from mat3ra.made.material import Material
 from .configuration import InterfaceConfiguration
+from .. import MaterialWithBuildMetadata
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ...analyze import BaseMaterialAnalyzer
+from ...analyze.lattice import get_material_with_primitive_lattice
 from ...convert.utils import InterfacePartsEnum
 from ...modify import (
     translate_by_vector,
     wrap_to_unit_cell,
 )
+from ...operations.core.unary import supercell
+from ...operations.core.utils import should_skip_stacking
 from ....utils import AXIS_TO_INDEX_MAP
 
 
 class InterfaceBuilderParameters(InMemoryEntityPydantic):
-    pass
+    make_primitive: bool = True
 
 
 class InterfaceBuilder(StackNComponentsBuilder):
@@ -28,6 +32,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
 
     _ConfigurationType = InterfaceConfiguration
     _BuildParametersType = InterfaceBuilderParameters
+    _DefaultBuildParameters = InterfaceBuilderParameters()
     _GeneratedItemType: Type[Material] = Material
 
     @property
@@ -52,6 +57,16 @@ class InterfaceBuilder(StackNComponentsBuilder):
         translation_vector[other_axes[1]] = configuration.xy_shift[1]
         film_material = translate_by_vector(film_material, translation_vector, use_cartesian_coordinates=True)
 
+        try:
+            should_skip_stacking(substrate_material, film_material, stacking_axis)
+        except ValueError:
+            film_material = supercell(film_material, [[0, 1, 0], [1, 0, 0], [0, 0, 1]])
+            print(
+                "Switched in-plane lattice vectors of the film material to match substrate"
+                + "Direct stacking was not possible."
+            )
+            should_skip_stacking(substrate_material, film_material, stacking_axis)
+
         stack_configuration = StackConfiguration(
             stack_components=[substrate_material, film_material, configuration.vacuum_configuration],
             gaps=configuration.gaps,
@@ -60,6 +75,23 @@ class InterfaceBuilder(StackNComponentsBuilder):
         interface = super()._generate(stack_configuration)
         wrapped_interface = wrap_to_unit_cell(interface)
         return wrapped_interface
+
+    def _post_process(
+        self, material: MaterialWithBuildMetadata, configuration: InterfaceConfiguration
+    ) -> MaterialWithBuildMetadata:
+        if self.build_parameters.make_primitive:
+            number_of_atoms = material.basis.number_of_atoms
+            primitive_material = get_material_with_primitive_lattice(material)
+            # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
+            if primitive_material.basis.number_of_atoms < number_of_atoms:
+                material = primitive_material
+            else:
+                print(
+                    "Primitive cell has more atoms than the original material. "
+                    "Skipping primitive cell conversion to avoid potential issues."
+                )
+
+        return super()._post_process(material, configuration)
 
     def get_base_name_from_configuration(self, first_configuration, second_configuration) -> str:
         first_component_formula = BaseMaterialAnalyzer(material=first_configuration.atomic_layers.crystal).formula

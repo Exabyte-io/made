@@ -124,38 +124,6 @@ def should_skip_stacking(
     return False
 
 
-def switch_in_plane_lattice_vectors(material_1: Material, material_2: Material, lattice_vector_index: int) -> Material:
-    """
-    Adjust the in-plane lattice vectors of material_2 to match material_1.
-
-    Args:
-        material_1: Reference material with target in-plane vectors.
-        material_2: Material to adjust.
-        lattice_vector_index: Index of the stacking direction (to preserve this vector).
-
-    Returns:
-        Material: material_2 with adjusted in-plane lattice vectors.
-    """
-    material_1_lattice_vectors = material_1.lattice.vector_arrays
-    material_2_lattice_vectors = material_2.lattice.vector_arrays
-
-    # Create new lattice vectors for material_2
-    adjusted_lattice_vectors = [vector.copy() for vector in material_2_lattice_vectors]
-
-    # Replace in-plane vectors with those from material_1
-    all_indices = [0, 1, 2]
-    in_plane_indices = [i for i in all_indices if i != lattice_vector_index]
-
-    for i in in_plane_indices:
-        adjusted_lattice_vectors[i] = material_1_lattice_vectors[i].copy()
-
-    # Create adjusted material_2
-    material_2_adjusted = material_2.clone()
-    material_2_adjusted.set_lattice_vectors_from_array(adjusted_lattice_vectors)
-
-    return material_2_adjusted
-
-
 def merge_bases_add(basis1: Basis, basis2: Basis, distance_tolerance: float) -> Basis:
     return merge_two_bases(basis1, basis2, distance_tolerance)
 
