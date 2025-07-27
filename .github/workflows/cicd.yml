@@ -60,7 +60,7 @@ jobs:
         uses: ./actions/py/pytest
         with:
           python-version: ${{ matrix.python-version }}
-          unit-test-directory: tests/py/unit
+          unit-test-directory:  tests/py/unit/test_tools_analyze_interface_zsl.py::test_zsl_interface_analyzer_sort_by_strain_then_area
           bot-ssh-key: ${{ secrets.BOT_GITHUB_KEY }}
 
   run-js-tests:

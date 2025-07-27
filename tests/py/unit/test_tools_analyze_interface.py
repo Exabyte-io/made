@@ -3,15 +3,11 @@ from typing import Final
 
 import numpy as np
 import pytest
+
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.slab.builders import SlabStrainedSupercellBuilder
 from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
-from mat3ra.standata.materials import Materials
-from mat3ra.utils.matrix import convert_2x2_to_3x3
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
-
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 
@@ -75,80 +71,6 @@ def test_interface_analyzer(substrate, film, expected):
     film_strained = film_2d @ strain_matrix_2d
 
     assert np.allclose(film_strained, substrate_2d, atol=1e-10)
-
-
-@pytest.mark.parametrize(
-    "substrate, film, zsl_params, expected_matches_min",
-    [
-        (
-            SUBSTRATE_SI_001,
-            FILM_GE_001,
-            {"max_area": 350.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
-            1,
-        ),
-        (
-            SimpleNamespace(
-                bulk_config=Materials.get_by_name_first_match("Nickel"),
-                miller_indices=(0, 0, 1),
-                number_of_layers=2,
-                vacuum=0.0,
-            ),
-            SimpleNamespace(
-                bulk_config=GRAPHENE,
-                miller_indices=(0, 0, 1),
-                number_of_layers=1,
-                vacuum=0.0,
-            ),
-            {"max_area": 120.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
-            1,
-        ),
-    ],
-)
-def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_min):
-    substrate_slab_config = SlabConfiguration.from_parameters(
-        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=0.0
-    )
-    film_slab_config = SlabConfiguration.from_parameters(
-        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=0.0
-    )
-
-    analyzer = ZSLInterfaceAnalyzer(
-        substrate_slab_configuration=substrate_slab_config,
-        film_slab_configuration=film_slab_config,
-        **zsl_params,
-    )
-
-    # Test ZSL match generation
-    match_holders = analyzer.zsl_match_holders
-    assert len(match_holders) >= expected_matches_min
-
-    match = analyzer.get_strained_configuration_by_match_id(0)
-
-    sub_config = match.substrate_configuration
-    film_config = match.film_configuration
-
-    film_vectors = np.array(analyzer.film_slab.lattice.vector_arrays)
-    substrate_vectors = np.array(analyzer.substrate_slab.lattice.vector_arrays)
-
-    film_sl_vectors = (
-        np.array(convert_2x2_to_3x3([row.root for row in film_config.xy_supercell_matrix]))
-        @ film_vectors
-        @ np.array([row.root for row in film_config.strain_matrix.root])
-    )
-    substrate_sl_vectors = (
-        np.array(convert_2x2_to_3x3([row.root for row in sub_config.xy_supercell_matrix])) @ substrate_vectors
-    )
-
-    substrate_material = SlabStrainedSupercellBuilder().get_material(sub_config)
-    film_material = SlabStrainedSupercellBuilder().get_material(film_config)
-
-    assert np.allclose(film_sl_vectors[0:2], substrate_sl_vectors[0:2], atol=1e-4)
-
-    assert np.allclose(substrate_material.lattice.vector_arrays[0:2], substrate_sl_vectors[0:2], atol=1e-4)
-    assert np.allclose(film_material.lattice.vector_arrays[0:2], film_sl_vectors[0:2], atol=1e-4)
-
-    assert np.isclose(substrate_material.lattice.a, film_material.lattice.a, atol=1e-4)
-    assert np.isclose(substrate_material.lattice.b, film_material.lattice.b, atol=1e-4)
 
 
 @pytest.mark.parametrize(
