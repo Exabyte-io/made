@@ -138,7 +138,7 @@ MULTIPLE_POINT_DEFECTS_BULK_Si_CONVENTIONAL = {
             {"id": 3, "value": [0.0, 0.0, 0.5]},
             {"id": 4, "value": [0.75, 0.25, 0.25]},
             {"id": 5, "value": [0.0, 0.5, 0.0]},
-            {"id": 6, "value": [0.0, 0.0, 0.0]},
+            {"id": 6, "value": [0.25, 0.25, 0.25]},
             {"id": 7, "value": [0.5, 0.5, 0.5]},
         ],
         "units": "crystal",

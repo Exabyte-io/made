@@ -1,4 +1,5 @@
-from typing import List, Union
+from types import SimpleNamespace
+from typing import List
 
 from mat3ra.made.material import Material
 from .builders import (
@@ -12,18 +13,33 @@ from .configuration import (
     InterstitialDefectConfiguration,
 )
 from ..enums import (
+    PointDefectTypeEnum,
     VacancyPlacementMethodEnum,
     SubstitutionPlacementMethodEnum,
     InterstitialPlacementMethodEnum,
 )
 from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 
+DEFECT_TYPE_MAPPING = {
+    PointDefectTypeEnum.VACANCY: {
+        "create_func": "create_point_defect_vacancy",
+        "placement_enum": VacancyPlacementMethodEnum,
+        "default_method": VacancyPlacementMethodEnum.CLOSEST_SITE,
+    },
+    PointDefectTypeEnum.SUBSTITUTION: {
+        "create_func": "create_point_defect_substitution",
+        "placement_enum": SubstitutionPlacementMethodEnum,
+        "default_method": SubstitutionPlacementMethodEnum.CLOSEST_SITE,
+    },
+    PointDefectTypeEnum.INTERSTITIAL: {
+        "create_func": "create_point_defect_interstitial",
+        "placement_enum": InterstitialPlacementMethodEnum,
+        "default_method": InterstitialPlacementMethodEnum.EXACT_COORDINATE,
+    },
+}
 
-def create_point_defect_vacancy(
-    material: Material,
-    coordinate: List[float],
-    placement_method: VacancyPlacementMethodEnum = VacancyPlacementMethodEnum.CLOSEST_SITE,
-) -> Material:
+
+def create_point_defect_vacancy(material: Material, coordinate: List[float], placement_method: str) -> Material:
     """
     Create a vacancy defect in the given material at the specified coordinate.
 
@@ -35,21 +51,17 @@ def create_point_defect_vacancy(
     Returns:
         Material: A new material with the vacancy defect.
     """
+    if placement_method not in [e.value for e in VacancyPlacementMethodEnum]:
+        raise ValueError(f"Unsupported placement method: {placement_method}")
     analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
-    if placement_method == VacancyPlacementMethodEnum.CLOSEST_SITE:
-        resolved_coordinate = analyzer.closest_site_coordinate
-    else:
-        raise NotImplementedError(f"Vacancy placement method '{placement_method}' is not implemented.")
+    resolved_coordinate = analyzer.closest_site_coordinate
     config = VacancyDefectConfiguration.from_parameters(crystal=material, coordinate=resolved_coordinate)
     builder = VacancyDefectBuilder()
     return builder.get_material(config)
 
 
 def create_point_defect_substitution(
-    material: Material,
-    coordinate: List[float],
-    element: str,
-    placement_method: SubstitutionPlacementMethodEnum = SubstitutionPlacementMethodEnum.CLOSEST_SITE,
+    material: Material, coordinate: List[float], element: str, placement_method: str
 ) -> Material:
     """
     Create a substitution defect in the given material.
@@ -63,11 +75,10 @@ def create_point_defect_substitution(
     Returns:
         Material: A new material with the substitution defect.
     """
+    if placement_method not in [e.value for e in SubstitutionPlacementMethodEnum]:
+        raise ValueError(f"Unsupported placement method: {placement_method}")
     analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
-    if placement_method == SubstitutionPlacementMethodEnum.CLOSEST_SITE:
-        resolved_coordinate = analyzer.closest_site_coordinate
-    else:
-        raise NotImplementedError(f"Substitution placement method '{placement_method}' is not implemented.")
+    resolved_coordinate = analyzer.closest_site_coordinate
     config = SubstitutionalDefectConfiguration.from_parameters(
         crystal=material, coordinate=resolved_coordinate, element=element
     )
@@ -76,10 +87,7 @@ def create_point_defect_substitution(
 
 
 def create_point_defect_interstitial(
-    material: Material,
-    coordinate: List[float],
-    element: str,
-    placement_method: InterstitialPlacementMethodEnum = InterstitialPlacementMethodEnum.EXACT_COORDINATE,
+    material: Material, coordinate: List[float], element: str, placement_method: str
 ) -> Material:
     """
     Create an interstitial defect in the given material.
@@ -93,12 +101,14 @@ def create_point_defect_interstitial(
     Returns:
         Material: A new material with the interstitial defect.
     """
-    if placement_method == InterstitialPlacementMethodEnum.VORONOI_SITE:
+    if placement_method == InterstitialPlacementMethodEnum.VORONOI_SITE.value:
         analyzer = VoronoiCrystalSiteAnalyzer(material=material, coordinate=coordinate)
         resolved_coordinate = analyzer.voronoi_site_coordinate
-    else:
+    elif placement_method == InterstitialPlacementMethodEnum.EXACT_COORDINATE.value:
         analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
         resolved_coordinate = analyzer.exact_coordinate
+    else:
+        raise ValueError(f"Unsupported placement method for interstitial: {placement_method}")
 
     config = InterstitialDefectConfiguration.from_parameters(
         crystal=material, coordinate=resolved_coordinate, element=element
@@ -109,34 +119,56 @@ def create_point_defect_interstitial(
 
 def create_multiple_defects(
     material: Material,
-    defect_configurations: List[
-        Union[VacancyDefectConfiguration, SubstitutionalDefectConfiguration, InterstitialDefectConfiguration]
-    ],
+    defect_dicts: List[dict],
 ) -> Material:
     """
-    Create a material with multiple defects.
+    Create multiple point defects from a list of dictionaries.
 
     Args:
-        material: The host material.
-        defect_configurations: List of point defect configurations.
+        material (Material): The host material.
+        defect_dicts (List[dict]): List of defect dictionaries with keys:
+            - type: str ("vacancy", "substitution", "interstitial")
+            - coordinate: List[float]
+            - element: str (required for substitution and interstitial)
+            - placement_method: str or enum (optional)
+                - For vacancy/substitution: "CLOSEST_SITE"
+                - For interstitial:  "EXACT_COORDINATE", "VORONOI_SITE"
+                Defaults to "closest_site" for vacancy/substitution and "exact_coordinate" for interstitial.
+
 
     Returns:
-        Material: Material with multiple defects applied.
+        Material: A new material with all defects applied.
     """
-
-    builder_mapping = {
-        VacancyDefectConfiguration: VacancyDefectBuilder,
-        SubstitutionalDefectConfiguration: SubstitutionalDefectBuilder,
-        InterstitialDefectConfiguration: InterstitialDefectBuilder,
-    }
-
     current_material = material
 
-    for defect_config in defect_configurations:
-        defect_config.merge_components[0] = current_material
+    for defect_dict in defect_dicts:
+        defect_configuration = SimpleNamespace(**defect_dict)
+        defect_type = defect_configuration.type
 
-        builder_class = builder_mapping[type(defect_config)]
-        builder = builder_class()
-        current_material = builder.get_material(defect_config)
+        if defect_type not in [e.value for e in PointDefectTypeEnum]:
+            raise ValueError(f"Unsupported defect type: {defect_configuration.type}")
+
+        if defect_type == "vacancy":
+            current_material = create_point_defect_vacancy(
+                current_material,
+                coordinate=defect_configuration.coordinate,
+                placement_method=defect_configuration.placement_method,
+            )
+
+        elif defect_type == "substitution":
+            current_material = create_point_defect_substitution(
+                current_material,
+                coordinate=defect_configuration.coordinate,
+                element=defect_configuration.element,
+                placement_method=defect_configuration.placement_method,
+            )
+
+        elif defect_type == "interstitial":
+            current_material = create_point_defect_interstitial(
+                current_material,
+                coordinate=defect_configuration.coordinate,
+                element=defect_configuration.element,
+                placement_method=defect_configuration.placement_method,
+            )
 
     return current_material

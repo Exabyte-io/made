@@ -25,20 +25,20 @@ class AtomPlacementMethodEnum(str, Enum):
     VORONOI_SITE = "voronoi_site"
 
 
-class VacancyPlacementMethodEnum(str, Enum):
+class VacancyPlacementMethodEnum(Enum):
     CLOSEST_SITE = AtomPlacementMethodEnum.CLOSEST_SITE
 
 
-class SubstitutionPlacementMethodEnum(str, Enum):
+class SubstitutionPlacementMethodEnum(Enum):
     CLOSEST_SITE = AtomPlacementMethodEnum.CLOSEST_SITE
 
 
-class InterstitialPlacementMethodEnum(str, Enum):
+class InterstitialPlacementMethodEnum(Enum):
     EXACT_COORDINATE = AtomPlacementMethodEnum.EXACT_COORDINATE
     VORONOI_SITE = AtomPlacementMethodEnum.VORONOI_SITE
 
 
-class AdatomPlacementMethodEnum(str, Enum):
+class AdatomPlacementMethodEnum(Enum):
     EXACT_COORDINATE = AtomPlacementMethodEnum.EXACT_COORDINATE
     EQUIDISTANT = AtomPlacementMethodEnum.EQUIDISTANT
     NEW_CRYSTAL_SITE = AtomPlacementMethodEnum.NEW_CRYSTAL_SITE

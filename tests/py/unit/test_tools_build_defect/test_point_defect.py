@@ -8,7 +8,6 @@ from mat3ra.made.tools.build.defect.enums import (
     SubstitutionPlacementMethodEnum,
     VacancyPlacementMethodEnum,
 )
-from mat3ra.made.tools.build.defect.factories import create_defect_configuration
 from mat3ra.made.tools.build.defect.point.helpers import (
     create_multiple_defects,
     create_point_defect_interstitial,
@@ -32,7 +31,9 @@ from unit.utils import assert_two_entities_deep_almost_equal, get_platform_speci
         (
             BULK_Si_PRIMITIVE,
             SimpleNamespace(
-                type="vacancy", coordinate=[0.0, 0.0, 0.0], placement_method=VacancyPlacementMethodEnum.CLOSEST_SITE
+                type="vacancy",
+                coordinate=[0.0, 0.0, 0.0],
+                placement_method=VacancyPlacementMethodEnum.CLOSEST_SITE.value,
             ),
             VACANCY_DEFECT_BULK_PRIMITIVE_Si,
         ),
@@ -42,7 +43,7 @@ from unit.utils import assert_two_entities_deep_almost_equal, get_platform_speci
                 type="substitution",
                 coordinate=[0.0, 0.0, 0.0],
                 element="Ge",
-                placement_method=SubstitutionPlacementMethodEnum.CLOSEST_SITE,
+                placement_method=SubstitutionPlacementMethodEnum.CLOSEST_SITE.value,
             ),
             SUBSTITUTION_DEFECT_BULK_PRIMITIVE_Si,
         ),
@@ -52,7 +53,7 @@ from unit.utils import assert_two_entities_deep_almost_equal, get_platform_speci
                 type="interstitial",
                 coordinate=[0.5, 0.5, 0.5],
                 element="C",
-                placement_method=InterstitialPlacementMethodEnum.EXACT_COORDINATE,
+                placement_method=InterstitialPlacementMethodEnum.EXACT_COORDINATE.value,
             ),
             INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
         ),
@@ -62,7 +63,7 @@ from unit.utils import assert_two_entities_deep_almost_equal, get_platform_speci
                 type="interstitial",
                 coordinate=[0.25, 0.25, 0.5],
                 element="Ge",
-                placement_method=InterstitialPlacementMethodEnum.VORONOI_SITE,
+                placement_method=InterstitialPlacementMethodEnum.VORONOI_SITE.value,
             ),
             INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si,
         ),
@@ -98,19 +99,19 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
                 SimpleNamespace(
                     defect_type="vacancy",
                     coordinate=[0.75, 0.70, 0.70],
-                    placement_method=VacancyPlacementMethodEnum.CLOSEST_SITE,
+                    placement_method=VacancyPlacementMethodEnum.CLOSEST_SITE.value,
                 ),
                 SimpleNamespace(
                     defect_type="interstitial",
                     coordinate=[0.25, 0.25, 0.2],
                     element="N",
-                    placement_method=InterstitialPlacementMethodEnum.VORONOI_SITE,
+                    placement_method=InterstitialPlacementMethodEnum.VORONOI_SITE.value,
                 ),
                 SimpleNamespace(
                     defect_type="substitution",
                     coordinate=[0.543, 0.543, 0.5],
                     element="Ge",
-                    placement_method=SubstitutionPlacementMethodEnum.CLOSEST_SITE,
+                    placement_method="closest_site",
                 ),
             ],
             MULTIPLE_POINT_DEFECTS_BULK_Si_CONVENTIONAL,
@@ -120,19 +121,19 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
 def test_create_multiple_defects(material_config, defect_params_list, expected_material_config):
     material = MaterialWithBuildMetadata.create(material_config)
 
-    defect_configs = []
+    defect_dicts = []
     for defect_params in defect_params_list:
-        config = create_defect_configuration(
-            material=material,
-            defect_type=defect_params.defect_type,
-            coordinate=defect_params.coordinate,
-            element=defect_params.element if hasattr(defect_params, "element") else None,
-            placement_method=(defect_params.placement_method if hasattr(defect_params, "placement_method") else None),
-        )
-        defect_configs.append(config)
+        defect_dict = {
+            "type": defect_params.defect_type,
+            "coordinate": defect_params.coordinate,
+            "placement_method": defect_params.placement_method if hasattr(defect_params, "placement_method") else None,
+            "element": defect_params.element if hasattr(defect_params, "element") else None,
+        }
+
+        defect_dicts.append(defect_dict)
 
     defects = create_multiple_defects(
         material=material,
-        defect_configurations=defect_configs,
+        defect_dicts=defect_dicts,
     )
     assert_two_entities_deep_almost_equal(defects, expected_material_config)
