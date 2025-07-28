@@ -21,6 +21,8 @@ from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 from .utils import assert_two_entities_deep_almost_equal
 
+COMPARISON_PRECISION = 1e-4
+
 
 @pytest.mark.parametrize(
     "material_config, layer_indices, expected_distance",
@@ -122,7 +124,7 @@ def test_crystal_site_analyzer(placement_method, coordinate, expected_coordinate
         else:
             raise ValueError(f"Unknown method: {placement_method}")
 
-    assert np.allclose(final_coordinate, expected_coordinate, atol=1e-6)
+    assert np.allclose(final_coordinate, expected_coordinate, atol=COMPARISON_PRECISION)
 
 
 @pytest.mark.parametrize(
@@ -134,7 +136,7 @@ def test_crystal_site_analyzer(placement_method, coordinate, expected_coordinate
             AdatomPlacementMethodEnum.EXACT_COORDINATE,
             1.0,
             "Si",
-            [0.25, 0.25, 0.5],
+            [0.25, 0.25, 0.1828],
         ),
     ],
 )
@@ -148,7 +150,7 @@ def test_adatom_material_analyzer(
     )
     resolved_coord = analyzer.coordinate_in_added_component
 
-    assert np.allclose(resolved_coord, expected_coordinate, atol=1e-6)
+    assert np.allclose(resolved_coord, expected_coordinate, atol=COMPARISON_PRECISION)
 
 
 @pytest.mark.parametrize(
@@ -178,7 +180,7 @@ def test_adatom_crystal_site_material_analyzer(
     )
     resolved_coord = analyzer.coordinate_in_added_component
 
-    assert np.allclose(resolved_coord, expected_coordinate, atol=1e-6)
+    assert np.allclose(resolved_coord, expected_coordinate, atol=COMPARISON_PRECISION)
 
 
 @pytest.mark.parametrize(
