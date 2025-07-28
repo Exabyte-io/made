@@ -19,7 +19,7 @@ class AdatomMaterialAnalyzer(SlabMaterialAnalyzer):
 
     @property
     def added_component_height(self) -> float:
-        return self.distance_z * 2
+        return self.layer_thickness
 
     @property
     def added_component_prototype(self) -> MaterialWithBuildMetadata:

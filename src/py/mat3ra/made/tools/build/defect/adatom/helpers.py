@@ -101,10 +101,14 @@ def create_multiple_adatom_defects(
         all_adatom_configs.append(analyzer.added_component)
 
     vacuum_configuration = last_analyzer.get_slab_vacuum_configuration()
-    # if True, it merges, but different slabs have different height c
-    merged_adatoms = merge(all_adatom_configs, merge_dangerously=False)
 
-    stack_components = [last_analyzer.slab_material_or_configuration_for_stacking, merged_adatoms, vacuum_configuration]
+    merged_adatoms_component = merge(all_adatom_configs)
+
+    stack_components = [
+        last_analyzer.slab_material_or_configuration_for_stacking,
+        merged_adatoms_component,
+        vacuum_configuration,
+    ]
     configuration = AdatomDefectConfiguration(stack_components=stack_components)
 
     builder = AdatomDefectBuilder()
