@@ -21,7 +21,7 @@ def resolve_coordinate(
     material: Material, coordinate: List[float], placement_method, use_cartesian_coordinates: bool = False
 ) -> List[float]:
     if use_cartesian_coordinates:
-        coordinate = material.cell.convert_point_to_crystal(coordinate)
+        coordinate = material.basis.cell.convert_point_to_crystal(coordinate)
 
     if placement_method in [VacancyPlacementMethodEnum.CLOSEST_SITE, SubstitutionPlacementMethodEnum.CLOSEST_SITE]:
         analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)

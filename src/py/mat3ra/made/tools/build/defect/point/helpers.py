@@ -59,7 +59,7 @@ def create_point_defect_vacancy(
 
     # Convert coordinate to crystal if needed
     if use_cartesian_coordinates:
-        coordinate = material.cell.convert_point_to_crystal(coordinate)
+        coordinate = material.basis.cell.convert_point_to_crystal(coordinate)
 
     analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
     resolved_coordinate = analyzer.closest_site_coordinate
@@ -91,9 +91,8 @@ def create_point_defect_substitution(
     if placement_method not in [e.value for e in SubstitutionPlacementMethodEnum]:
         raise ValueError(f"Unsupported placement method: {placement_method}")
 
-    # Convert coordinate to crystal if needed
     if use_cartesian_coordinates:
-        coordinate = material.cell.convert_point_to_crystal(coordinate)
+        coordinate = material.basis.cell.convert_point_to_crystal(coordinate)
 
     analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
     resolved_coordinate = analyzer.closest_site_coordinate
@@ -125,7 +124,7 @@ def create_point_defect_interstitial(
         Material: A new material with the interstitial defect.
     """
     if use_cartesian_coordinates:
-        coordinate = material.cell.convert_point_to_crystal(coordinate)
+        coordinate = material.basis.cell.convert_point_to_crystal(coordinate)
 
     if placement_method == InterstitialPlacementMethodEnum.VORONOI_SITE.value:
         analyzer = VoronoiCrystalSiteAnalyzer(material=material, coordinate=coordinate)
