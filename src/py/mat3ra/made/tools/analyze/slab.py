@@ -1,13 +1,12 @@
 from typing import Type
 
-from mat3ra.made.utils import get_atomic_coordinates_extremum
-
+from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction, get_atomic_coordinates_extremum
+from . import BaseMaterialAnalyzer
+from .crystal_site import CrystalSiteAnalyzer
 from ..build import BuildMetadata, MaterialWithBuildMetadata
 from ..build.slab.builders import SlabBuilderParameters
 from ..build.slab.configurations import SlabConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
-from . import BaseMaterialAnalyzer
-from .crystal_site import CrystalSiteAnalyzer
 
 
 class BuildMetadataAnalyzer(BaseMaterialAnalyzer):
@@ -80,3 +79,10 @@ class SlabMaterialAnalyzer(BuildMetadataAnalyzer, CrystalSiteAnalyzer):
             )[2]
             return gap_bottom_in_cartesian
         return gap_bottom_in_crystal
+
+    @property
+    def _slab_with_no_gap(self) -> MaterialWithBuildMetadata:
+        """
+        Returns a fictitious structure with no gap along the z-direction. Used for stacking components.
+        """
+        return adjust_material_cell_to_set_gap_along_direction(self.material, 0)

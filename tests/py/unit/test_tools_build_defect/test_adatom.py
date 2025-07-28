@@ -1,8 +1,9 @@
 import pytest
+from mat3ra.utils import assertion as assertion_utils
+
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.adatom.helpers import create_adatom_defect, create_multiple_adatom_defects
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
-from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
 
@@ -14,7 +15,7 @@ from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
             [0.5, 0.5],
             2.0,
             "Si",
-            AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE,
+            AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE.value,
             [0.5, 0.5, 0.5748],
         ),
         (
@@ -22,7 +23,7 @@ from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
             [0.55, 0.51],
             2.0,
             "Si",
-            AdatomPlacementMethodEnum.EXACT_COORDINATE,
+            AdatomPlacementMethodEnum.EXACT_COORDINATE.value,
             [0.55, 0.51, 0.6231],
         ),
     ],
@@ -49,9 +50,9 @@ def test_create_adatom(
             [
                 {"element": "Si", "coordinate": [0.5, 0.5], "distance_z": 2.0},
                 {"element": "C", "coordinate": [0.25, 0.25], "distance_z": 1.5},
-                {"element": "N", "coordinate": [0.75, 0.75]},  # distance_z will default to 1.0
+                {"element": "N", "coordinate": [0.75, 0.75], "distance_z": 1.0},
             ],
-            AdatomPlacementMethodEnum.EXACT_COORDINATE,
+            AdatomPlacementMethodEnum.EXACT_COORDINATE.value,
             19,  # 16 atoms in slab + 3 adatoms
         ),
     ],
