@@ -1,7 +1,6 @@
 from typing import List
 
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import AtomSchema
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
