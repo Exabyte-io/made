@@ -17,7 +17,12 @@ from ..defect.point.configuration import (
 )
 
 
-def resolve_coordinate(material: Material, coordinate: List[float], placement_method) -> List[float]:
+def resolve_coordinate(
+    material: Material, coordinate: List[float], placement_method, use_cartesian_coordinates: bool = False
+) -> List[float]:
+    if use_cartesian_coordinates:
+        coordinate = material.cell.convert_point_to_crystal(coordinate)
+
     if placement_method in [VacancyPlacementMethodEnum.CLOSEST_SITE, SubstitutionPlacementMethodEnum.CLOSEST_SITE]:
         analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
         return analyzer.closest_site_coordinate
@@ -52,8 +57,9 @@ def create_defect_configuration(
     placement_method: Union[
         VacancyPlacementMethodEnum, SubstitutionPlacementMethodEnum, InterstitialPlacementMethodEnum
     ] = AtomPlacementMethodEnum.EXACT_COORDINATE,
+    use_cartesian_coordinates: bool = False,
 ) -> PointDefectConfiguration:
-    resolved_coordinate = resolve_coordinate(material, coordinate, placement_method)
+    resolved_coordinate = resolve_coordinate(material, coordinate, placement_method, use_cartesian_coordinates)
     config_class = PointDefectConfigurationFactory.get_constructor(defect_type=defect_type)
 
     return config_class.from_parameters(crystal=material, coordinate=resolved_coordinate, element=element)
