@@ -7,7 +7,7 @@ from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.point.builders import AtomAtCoordinateBuilder, AtomAtCoordinateConfiguration
 from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
 from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 
@@ -69,5 +69,7 @@ class AdatomCrystalSiteMaterialAnalyzer(AdatomMaterialAnalyzer):
         return crystal_site_analyzer.closest_site_coordinate
 
     @property
-    def slab_material_or_configuration_for_stacking(self) -> SlabConfiguration:
-        return self.slab_configuration_with_no_vacuum
+    def slab_material_or_configuration_for_stacking(self) -> MaterialWithBuildMetadata:
+        config = self.slab_configuration_with_no_vacuum
+        params = self.build_parameters
+        return SlabBuilder(build_parameters=params).get_material(config)

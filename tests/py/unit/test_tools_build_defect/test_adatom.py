@@ -1,11 +1,10 @@
 import pytest
-from mat3ra.utils import assertion as assertion_utils
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.adatom.helpers import create_adatom_defect, create_multiple_adatom_defects
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum
 from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.adatom import SLAB_Si_3_ADATOMS
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001
@@ -21,7 +20,7 @@ from unit.utils import assert_two_entities_deep_almost_equal
             2.0,
             "Si",
             AdatomPlacementMethodEnum.NEW_CRYSTAL_SITE.value,
-            [0.5, 0.5, 0.5748],
+            [0.5, 0.5, 0.4659],
         ),
         (
             BULK_Si_CONVENTIONAL,
@@ -29,7 +28,7 @@ from unit.utils import assert_two_entities_deep_almost_equal
             2.0,
             "Si",
             AdatomPlacementMethodEnum.EXACT_COORDINATE.value,
-            [0.55, 0.51, 0.6231],
+            [0.55, 0.51, 0.4621],
         ),
     ],
 )
@@ -67,7 +66,6 @@ def test_create_adatom(
     ],
 )
 def test_create_multiple_adatom_defects(crystal_config, adatom_dicts, placement_method, expected_material_config):
-
     slab = MaterialWithBuildMetadata.create(crystal_config)
     defects = create_multiple_adatom_defects(slab, adatom_dicts, placement_method)
     defects.metadata.build = []
