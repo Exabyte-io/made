@@ -9,3 +9,7 @@ class IslandDefectBuilder(SlabStackBuilder):
     """
 
     _ConfigurationType = IslandDefectConfiguration
+
+    @property
+    def name_suffix(self) -> str:
+        return "Island"

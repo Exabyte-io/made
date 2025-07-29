@@ -1,4 +1,3 @@
-from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
 from .configuration import AdatomDefectConfiguration
 from ..slab.builders import SlabStackBuilder
 
@@ -7,5 +6,6 @@ class AdatomDefectBuilder(SlabStackBuilder):
     _ConfigurationType = AdatomDefectConfiguration
 
     def get_name_suffix(self, configuration: AdatomDefectConfiguration) -> str:
-        formula = BaseMaterialAnalyzer(material=configuration.added_component).formula
-        return f"{formula} Adatom"
+        elements = set(configuration.added_component.basis.elements.values)
+        elements_str = ", ".join(elements)
+        return f"{elements_str} Adatom"

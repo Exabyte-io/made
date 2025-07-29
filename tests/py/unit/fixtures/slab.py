@@ -324,7 +324,7 @@ SI_SLAB_DEFAULT_PARAMETERS = {
 }
 
 SI_SLAB_001_ADDED_LAYER = {
-    "name": "Si(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab, Slab Stack",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -395,7 +395,7 @@ SI_SLAB_001_ADDED_LAYER = {
 }
 
 SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
-    "name": "Si(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab, Slab Stack",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},

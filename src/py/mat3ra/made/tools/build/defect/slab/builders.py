@@ -15,6 +15,13 @@ class SlabStackBuilder(StackNComponentsBuilder):
             SlabConfiguration: SlabBuilder,
         }
 
+    @property
+    def name_suffix(self) -> str:
+        return "Slab Stack"
+
+    def get_name_suffix(self, configuration: SlabStackConfiguration) -> str:
+        return self.name_suffix
+
     def _update_material_name(
         self, material: MaterialWithBuildMetadata, configuration: _ConfigurationType
     ) -> MaterialWithBuildMetadata:
