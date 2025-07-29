@@ -106,7 +106,8 @@ def create_nanoparticle_by_shape_from_element(
     Create a nanoparticle from a specified element, lattice constant, shape, and parameters.
     The shape is defined by the NanoparticleShapesEnum, and parameters are passed directly to the ASE constructor.
     """
-    parameters = SimpleNamespace(**parameters)
+    if not isinstance(parameters, SimpleNamespace):
+        parameters = SimpleNamespace(**parameters)
     if not hasattr(parameters, "latticeconstant"):
         parameters.latticeconstant = lattice_constant
 
