@@ -174,7 +174,7 @@ def create_multiple_defects(
         if defect_type not in [e.value for e in PointDefectTypeEnum]:
             raise ValueError(f"Unsupported defect type: {defect_configuration.type}")
 
-        use_cartesian = getattr(defect_configuration, "use_cartesian_coordinates", False)
+        use_cartesian = defect_configuration.use_cartesian_coordinates
 
         if defect_type == "vacancy":
             current_material = create_point_defect_vacancy(
