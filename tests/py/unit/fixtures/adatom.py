@@ -1,5 +1,5 @@
 SLAB_Si_3_ADATOMS = {
-    "name": "Si(001), termination Si_P4/mmm_2, Slab, C, N, Si Adatom",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab, C, Si, N Adatom",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
