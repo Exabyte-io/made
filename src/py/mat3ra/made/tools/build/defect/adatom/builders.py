@@ -7,5 +7,5 @@ class AdatomDefectBuilder(SlabStackBuilder):
 
     def get_name_suffix(self, configuration: AdatomDefectConfiguration) -> str:
         elements = set(configuration.added_component.basis.elements.values)
-        elements_str = ", ".join(elements)
+        elements_str = ", ".join(sorted(elements))
         return f"{elements_str} Adatom"
