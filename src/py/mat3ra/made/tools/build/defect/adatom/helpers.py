@@ -96,7 +96,7 @@ def create_multiple_adatom_defects(
         defect_configuration = SimpleNamespace(**defect_dict)
 
         coordinate_2d = defect_configuration.coordinate
-        use_cartesian = defect_configuration.use_cartesian_coordinates
+        use_cartesian = getattr(defect_configuration, "use_cartesian_coordinates", False)
 
         if use_cartesian:
             coordinate_3d = coordinate_2d + [0.0]
