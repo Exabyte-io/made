@@ -1,6 +1,5 @@
 import { ATOMIC_COORD_UNITS, units as UNITS } from "@mat3ra/code/dist/js/constants";
 import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
-import almostEqual from "array-almost-equal";
 import lodash from "lodash";
 
 import math from "../../math";
@@ -108,7 +107,7 @@ export class ReciprocalLattice extends Lattice {
 
         dataPoints.forEach((point: KPointCoordinates, index: number) => {
             const symmPoint: SymmetryPoint | undefined = symmPoints.find((x) => {
-                return almostEqual(x.coordinates, point, 1e-4);
+                return math.vEqualWithTolerance(x.coordinates, point, 1e-4);
             });
             if (symmPoint) {
                 kpointPath.push({
