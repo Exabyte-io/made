@@ -39,7 +39,9 @@ DEFECT_TYPE_MAPPING = {
 }
 
 
-def create_point_defect_vacancy(material: Material, coordinate: List[float], placement_method: str) -> Material:
+def create_point_defect_vacancy(
+    material: Material, coordinate: List[float], placement_method: str, use_cartesian_coordinates: bool = False
+) -> Material:
     """
     Create a vacancy defect in the given material at the specified coordinate.
 
@@ -47,12 +49,18 @@ def create_point_defect_vacancy(material: Material, coordinate: List[float], pla
         material (Material): The host material.
         coordinate (List[float]): The coordinate where the vacancy will be created.
         placement_method (VacancyPlacementMethodEnum): Method to resolve the final coordinate.
+        use_cartesian_coordinates (bool): Whether the input coordinate is in Cartesian units.
 
     Returns:
         Material: A new material with the vacancy defect.
     """
     if placement_method not in [e.value for e in VacancyPlacementMethodEnum]:
         raise ValueError(f"Unsupported placement method: {placement_method}")
+
+    # Convert coordinate to crystal if needed
+    if use_cartesian_coordinates:
+        coordinate = material.basis.cell.convert_point_to_crystal(coordinate)
+
     analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
     resolved_coordinate = analyzer.closest_site_coordinate
     config = VacancyDefectConfiguration.from_parameters(crystal=material, coordinate=resolved_coordinate)
@@ -61,7 +69,11 @@ def create_point_defect_vacancy(material: Material, coordinate: List[float], pla
 
 
 def create_point_defect_substitution(
-    material: Material, coordinate: List[float], element: str, placement_method: str
+    material: Material,
+    coordinate: List[float],
+    element: str,
+    placement_method: str,
+    use_cartesian_coordinates: bool = False,
 ) -> Material:
     """
     Create a substitution defect in the given material.
@@ -71,12 +83,17 @@ def create_point_defect_substitution(
         coordinate (List[float]): The coordinate of the atom to be substituted.
         element (str): The chemical element to substitute with.
         placement_method (SubstitutionPlacementMethodEnum): Method to resolve the final coordinate.
+        use_cartesian_coordinates (bool): Whether the input coordinate is in Cartesian units.
 
     Returns:
         Material: A new material with the substitution defect.
     """
     if placement_method not in [e.value for e in SubstitutionPlacementMethodEnum]:
         raise ValueError(f"Unsupported placement method: {placement_method}")
+
+    if use_cartesian_coordinates:
+        coordinate = material.basis.cell.convert_point_to_crystal(coordinate)
+
     analyzer = CrystalSiteAnalyzer(material=material, coordinate=coordinate)
     resolved_coordinate = analyzer.closest_site_coordinate
     config = SubstitutionalDefectConfiguration.from_parameters(
@@ -87,7 +104,11 @@ def create_point_defect_substitution(
 
 
 def create_point_defect_interstitial(
-    material: Material, coordinate: List[float], element: str, placement_method: str
+    material: Material,
+    coordinate: List[float],
+    element: str,
+    placement_method: str,
+    use_cartesian_coordinates: bool = False,
 ) -> Material:
     """
     Create an interstitial defect in the given material.
@@ -97,10 +118,14 @@ def create_point_defect_interstitial(
         coordinate (List[float]): The coordinate where the interstitial atom will be placed.
         element (str): The chemical element of the interstitial atom.
         placement_method (InterstitialPlacementMethodEnum): Method to resolve the final coordinate.
+        use_cartesian_coordinates (bool): Whether the input coordinate is in Cartesian units.
 
     Returns:
         Material: A new material with the interstitial defect.
     """
+    if use_cartesian_coordinates:
+        coordinate = material.basis.cell.convert_point_to_crystal(coordinate)
+
     if placement_method == InterstitialPlacementMethodEnum.VORONOI_SITE.value:
         analyzer = VoronoiCrystalSiteAnalyzer(material=material, coordinate=coordinate)
         resolved_coordinate = analyzer.voronoi_site_coordinate
@@ -134,7 +159,8 @@ def create_multiple_defects(
                 - For vacancy/substitution: "CLOSEST_SITE"
                 - For interstitial:  "EXACT_COORDINATE", "VORONOI_SITE"
                 Defaults to "closest_site" for vacancy/substitution and "exact_coordinate" for interstitial.
-
+            - use_cartesian_coordinates: bool (optional, defaults to False)
+                Whether the input coordinates are in Cartesian units.
 
     Returns:
         Material: A new material with all defects applied.
@@ -148,11 +174,14 @@ def create_multiple_defects(
         if defect_type not in [e.value for e in PointDefectTypeEnum]:
             raise ValueError(f"Unsupported defect type: {defect_configuration.type}")
 
+        use_cartesian = getattr(defect_configuration, "use_cartesian_coordinates", False)
+
         if defect_type == "vacancy":
             current_material = create_point_defect_vacancy(
                 current_material,
                 coordinate=defect_configuration.coordinate,
-                placement_method=defect_configuration.placement_method,
+                placement_method=defect_configuration.placement_method or VacancyPlacementMethodEnum.CLOSEST_SITE.value,
+                use_cartesian_coordinates=use_cartesian,
             )
 
         elif defect_type == "substitution":
@@ -160,7 +189,9 @@ def create_multiple_defects(
                 current_material,
                 coordinate=defect_configuration.coordinate,
                 element=defect_configuration.element,
-                placement_method=defect_configuration.placement_method,
+                placement_method=defect_configuration.placement_method
+                or SubstitutionPlacementMethodEnum.CLOSEST_SITE.value,
+                use_cartesian_coordinates=use_cartesian,
             )
 
         elif defect_type == "interstitial":
@@ -168,7 +199,9 @@ def create_multiple_defects(
                 current_material,
                 coordinate=defect_configuration.coordinate,
                 element=defect_configuration.element,
-                placement_method=defect_configuration.placement_method,
+                placement_method=defect_configuration.placement_method
+                or InterstitialPlacementMethodEnum.EXACT_COORDINATE.value,
+                use_cartesian_coordinates=use_cartesian,
             )
 
     return current_material

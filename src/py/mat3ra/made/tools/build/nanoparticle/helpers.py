@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from typing import Union, List
 
 from mat3ra.made.material import Material
@@ -77,9 +78,7 @@ def create_nanoparticle_from_material(
 
 
 def create_nanoparticle_by_shape(
-    crystal: Material,
-    shape: NanoparticleShapesEnum,
-    parameters: dict,
+    crystal: Material, shape: NanoparticleShapesEnum, parameters: Union[dict, SimpleNamespace]
 ):
     """
     Create a nanoparticle from a crystal material by specifying its shape and parameters.
@@ -101,16 +100,18 @@ def create_nanoparticle_by_shape_from_element(
     element: str,
     lattice_constant: float,
     shape: NanoparticleShapesEnum,
-    parameters: dict,
+    parameters: Union[dict, SimpleNamespace],
 ):
     """
     Create a nanoparticle from a specified element, lattice constant, shape, and parameters.
     The shape is defined by the NanoparticleShapesEnum, and parameters are passed directly to the ASE constructor.
     """
-    if "latticeconstant" not in parameters:
-        parameters["latticeconstant"] = lattice_constant
+    if not isinstance(parameters, SimpleNamespace):
+        parameters = SimpleNamespace(**parameters)
+    if not hasattr(parameters, "latticeconstant"):
+        parameters.latticeconstant = lattice_constant
 
-    config = ASEBasedNanoparticleConfiguration(shape=shape, parameters=parameters, element=element)
+    config = ASEBasedNanoparticleConfiguration(shape=shape, parameters=parameters.__dict__, element=element)
     builder = ASEBasedNanoparticleBuilder()
     nanoparticles = builder.get_materials(config)
     return nanoparticles[0]

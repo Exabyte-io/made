@@ -1,7 +1,10 @@
 from typing import Union, TypeVar
 
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from ..enums import CoordinatesShapeEnum
-from ..slab.helpers import recreate_slab_with_fractional_layers, create_slab_stack
+from ..slab.helpers import recreate_slab_with_fractional_layers
+from .builders import IslandDefectBuilder
+from .configuration import IslandDefectConfiguration
 from ... import MaterialWithBuildMetadata
 from ....modify import filter_by_condition_on_coordinates
 from ....utils.coordinate import (
@@ -12,6 +15,9 @@ from ....utils.coordinate import (
     TriangularPrismCoordinateCondition,
     PlaneCoordinateCondition,
 )
+from ....analyze.slab import SlabMaterialAnalyzer
+from ...slab.builders import SlabBuilder
+from ...vacuum.configuration import VacuumConfiguration
 
 CoordinateConditionType = TypeVar("CoordinateConditionType", bound=CoordinateCondition)
 
@@ -49,8 +55,24 @@ def create_island_defect(
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
 
-    result = create_slab_stack(slab, isolated_island)
-    return result
+    # Create the island defect using IslandDefectBuilder
+    analyzer = SlabMaterialAnalyzer(material=slab)
+    slab_without_vacuum_configuration = analyzer.slab_configuration_with_no_vacuum
+    slab_build_parameters = analyzer.build_parameters
+
+    new_slab = SlabBuilder(build_parameters=slab_build_parameters).get_material(slab_without_vacuum_configuration)
+
+    original_vacuum_config = analyzer.get_slab_vacuum_configuration()
+    vacuum_config = VacuumConfiguration(
+        size=original_vacuum_config.size, crystal=new_slab, direction=original_vacuum_config.direction
+    )
+
+    island_config = IslandDefectConfiguration(
+        stack_components=[new_slab, isolated_island, vacuum_config], direction=AxisEnum.z
+    )
+
+    island_builder = IslandDefectBuilder()
+    return island_builder.get_material(island_config)
 
 
 def get_coordinate_condition(shape: CoordinatesShapeEnum, dict_params: dict):

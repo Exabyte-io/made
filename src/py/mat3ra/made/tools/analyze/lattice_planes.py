@@ -78,11 +78,37 @@ class CrystalLatticePlanesMaterialAnalyzer(LatticeMaterialAnalyzer):
             # *self.pymatgen_slab_generator_without_vacuum.get_slabs(symmetrize=not self.DEFAULT_SYMMETRIZE),
         ]
 
+    def _create_fallback_termination_for_failed_slab_generation(self) -> TerminationHolder:
+        """
+        Creates a fallback termination when pymatgen's SlabGenerator fails to generate slabs.
+
+        This happens for certain materials where SlabGenerator removes "too many sites"
+        and returns empty slab lists (e.g., some nanoribbons, thin 2D materials).
+
+        Returns:
+            TerminationHolder: A basic termination using the material's chemical formula
+        """
+        formula = self.formula
+        fallback_termination = Termination(chemical_elements=formula, space_group_symmetry_label="")
+
+        return TerminationHolder(
+            termination_with_vacuum=fallback_termination,
+            termination_without_vacuum=fallback_termination,
+            shift_with_vacuum=0.0,
+            shift_without_vacuum=0.0,
+        )
+
     @property
     def termination_holders(self):
         termination_holders = []
         slabs_with_vacuum = self.all_planes_as_pymatgen_slabs_with_vacuum
         slabs_without_vacuum = self.all_planes_as_pymatgen_slabs_without_vacuum
+
+        # Handle case where pymatgen fails to generate slabs for certain materials
+        # (e.g., some nanoribbons where "Too many sites removed" by SlabGenerator)
+        if not slabs_with_vacuum:
+            fallback_holder = self._create_fallback_termination_for_failed_slab_generation()
+            termination_holders.append(fallback_holder)
 
         for slab_with_vacuum in slabs_with_vacuum:
             termination_with_vacuum_string = label_pymatgen_slab_termination(slab_with_vacuum)

@@ -27,6 +27,7 @@ def create_pair_defect(
     placement_method_2: Union[
         VacancyPlacementMethodEnum, SubstitutionPlacementMethodEnum, InterstitialPlacementMethodEnum
     ] = AtomPlacementMethodEnum.EXACT_COORDINATE,
+    use_cartesian_coordinates: bool = False,
 ) -> Material:
     """
     Create a pair defect in the given material.
@@ -41,12 +42,17 @@ def create_pair_defect(
         coordinate_2: Coordinate for the second defect.
         element_2: Element for substitution/interstitial defects.
         placement_method_2: Method to resolve the final coordinate for the second defect.
+        use_cartesian_coordinates: Whether the coordinates are in Cartesian units.
 
     Returns:
         Material: Material with the pair defect applied.
     """
-    configuration_1 = create_defect_configuration(material, defect_type_1, coordinate_1, element_1, placement_method_1)
-    configuration_2 = create_defect_configuration(material, defect_type_2, coordinate_2, element_2, placement_method_2)
+    configuration_1 = create_defect_configuration(
+        material, defect_type_1, coordinate_1, element_1, placement_method_1, use_cartesian_coordinates
+    )
+    configuration_2 = create_defect_configuration(
+        material, defect_type_2, coordinate_2, element_2, placement_method_2, use_cartesian_coordinates
+    )
 
     pair_config = PairDefectConfiguration.from_parameters(
         crystal=material,
