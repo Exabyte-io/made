@@ -7,7 +7,7 @@ from mat3ra.made.material import Material
 from ... import MaterialWithBuildMetadata
 from ...stack.configuration import StackConfiguration
 from ...vacuum.configuration import VacuumConfiguration
-from .base_configurations import AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration
+from .base_configurations import AtomicLayersUniqueRepeatedConfiguration
 
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build.slab.termination_utils import select_slab_termination
@@ -15,11 +15,7 @@ from mat3ra.made.tools.build.slab.termination_utils import select_slab_terminati
 
 class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     type: str = "SlabConfiguration"
-    stack_components: List[
-        Union[
-            AtomicLayersUniqueConfiguration, AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration
-        ]  # No Materials!
-    ]
+    stack_components: List[Union[AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]]  # No Materials!
     direction: AxisEnum = AxisEnum.z
 
     @property

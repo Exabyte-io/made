@@ -3,7 +3,6 @@ from typing import List, Dict
 
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import AtomSchema
 
-from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.material import MaterialWithCrystalSites
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.point.builders import AtomAtCoordinateConfiguration
@@ -23,7 +22,7 @@ def passivate_surface(
     shadowing_radius: float = 2.5,
     depth: float = 5.0,
     surface: SurfaceTypesEnum = SurfaceTypesEnum.TOP,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Create a passivated material by adding passivant atoms to the surface of the provided material.
 

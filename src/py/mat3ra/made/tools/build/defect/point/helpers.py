@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from typing import List
+from typing import List, Union
 
 from mat3ra.made.material import Material
 from .builders import (
@@ -18,6 +18,7 @@ from ..enums import (
     SubstitutionPlacementMethodEnum,
     InterstitialPlacementMethodEnum,
 )
+from ... import MaterialWithBuildMetadata
 from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 
 DEFECT_TYPE_MAPPING = {
@@ -40,7 +41,10 @@ DEFECT_TYPE_MAPPING = {
 
 
 def create_point_defect_vacancy(
-    material: Material, coordinate: List[float], placement_method: str, use_cartesian_coordinates: bool = False
+    material: Union[Material, MaterialWithBuildMetadata],
+    coordinate: List[float],
+    placement_method: str,
+    use_cartesian_coordinates: bool = False,
 ) -> Material:
     """
     Create a vacancy defect in the given material at the specified coordinate.
@@ -69,7 +73,7 @@ def create_point_defect_vacancy(
 
 
 def create_point_defect_substitution(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     coordinate: List[float],
     element: str,
     placement_method: str,
@@ -104,7 +108,7 @@ def create_point_defect_substitution(
 
 
 def create_point_defect_interstitial(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     coordinate: List[float],
     element: str,
     placement_method: str,
@@ -143,7 +147,7 @@ def create_point_defect_interstitial(
 
 
 def create_multiple_defects(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     defect_dicts: List[dict],
 ) -> Material:
     """

@@ -1,6 +1,6 @@
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Union
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseConfigurationPydantic
+from mat3ra.made.tools.build import BaseConfigurationPydantic, MaterialWithBuildMetadata
 from ..slab.entities import Termination
 from enum import Enum
 
@@ -41,7 +41,7 @@ class CrystalLatticeLinesConfiguration(BaseConfigurationPydantic):
         miller_indices_2d: The (u,v) Miller indices for the line direction.
     """
 
-    crystal: Material
+    crystal: Union[Material, MaterialWithBuildMetadata]
     miller_indices_2d: Tuple[int, int]
 
 

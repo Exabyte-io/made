@@ -111,7 +111,7 @@ def translate_to_center(material: Material, axes: Optional[List[str]] = None) ->
     return material
 
 
-def wrap_to_unit_cell(material: Material) -> Material:
+def wrap_to_unit_cell(material: Material) -> MaterialWithBuildMetadata:
     """
     Wrap the material to the unit cell.
 
@@ -144,7 +144,7 @@ def filter_by_ids(material: Material, ids: List[int], invert: bool = False, rese
 
 
 def filter_by_condition_on_coordinates(
-    material: Material,
+    material: MaterialWithBuildMetadata,
     condition: Callable[[List[float]], bool],
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
@@ -174,12 +174,12 @@ def filter_by_condition_on_coordinates(
 
 
 def filter_by_layers(
-    material: Material,
+    material: MaterialWithBuildMetadata,
     center_coordinate: List[float] = [0, 0, 0],
     central_atom_id: Optional[int] = None,
     layer_thickness: float = 1.0,
     invert_selection: bool = False,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Filter out atoms within a specified layer thickness of a central atom along c-vector direction.
 

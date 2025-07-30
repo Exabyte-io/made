@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.crystal_lattice_planes import (
     CrystalLatticePlanesSchema,
@@ -6,11 +6,11 @@ from mat3ra.esse.models.materials_category_components.entities.reusable.two_dime
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.entities import Termination, MillerIndices
-from ... import BaseConfigurationPydantic
+from ... import BaseConfigurationPydantic, MaterialWithBuildMetadata
 
 
 class CrystalLatticePlanesConfiguration(CrystalLatticePlanesSchema, BaseConfigurationPydantic):
-    crystal: Material
+    crystal: Union[Material, MaterialWithBuildMetadata]
 
     @property
     def in_plane_vectors(self):

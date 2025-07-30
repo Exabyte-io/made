@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
@@ -84,8 +84,8 @@ def create_simple_interface_between_slabs(
 
 
 def create_zsl_interface(
-    substrate_crystal: Material,
-    film_crystal: Material,
+    substrate_crystal: Union[Material, MaterialWithBuildMetadata],
+    film_crystal: Union[Material, MaterialWithBuildMetadata],
     substrate_miller_indices: Tuple[int, int, int] = (0, 0, 1),
     film_miller_indices: Tuple[int, int, int] = (0, 0, 1),
     substrate_number_of_layers: int = 1,
@@ -103,7 +103,7 @@ def create_zsl_interface(
     use_conventional_cell: bool = True,
     reduce_result_cell: bool = True,
     reduce_result_cell_to_primitive: bool = False,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     if use_conventional_cell:
         substrate_crystal = get_material_with_conventional_lattice(substrate_crystal)
         film_crystal = get_material_with_conventional_lattice(film_crystal)
@@ -154,7 +154,7 @@ def create_zsl_interface_between_slabs(
     match_id: int = 0,
     reduce_result_cell: bool = True,
     reduce_result_cell_to_primitive: bool = False,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     if xy_shift is None:
         xy_shift = [0, 0]
 
@@ -197,14 +197,14 @@ def create_zsl_interface_between_slabs(
 
 
 def create_twisted_interface(
-    material1: Material,
-    material2: Material,
+    material1: Union[Material, MaterialWithBuildMetadata],
+    material2: Union[Material, MaterialWithBuildMetadata],
     angle: float = 0.0,
     vacuum_x: float = 5.0,
     vacuum_y: float = 5.0,
     gap: float = 3.0,
     use_conventional_cell: bool = False,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Create a twisted interface between two nanoribbons.
 
@@ -256,7 +256,7 @@ def create_twisted_interface(
 
 
 def get_commensurate_strained_configurations(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     target_angle: float,
     angle_tolerance: float,
     max_repetition_int: Optional[int],
@@ -322,7 +322,7 @@ def get_commensurate_strained_configurations(
 
 
 def create_commensurate_interface(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     target_angle: float = 0.0,
     angle_tolerance: float = 0.1,
     max_repetition_int: Optional[int] = None,
@@ -337,7 +337,7 @@ def create_commensurate_interface(
     use_conventional_cell: bool = True,
     remove_overlapping_atoms: bool = True,
     tolerance_for_overlap: float = 1.0,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Create a commensurate lattice interface (twisted interface) from a material with specified twist angle.
 
@@ -397,7 +397,7 @@ def create_commensurate_interface(
 
 
 def get_optimal_film_displacement(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     grid_size_xy: Tuple[int, int] = (10, 10),
     grid_offset_position: List[float] = [0, 0],
     grid_range_x=(-0.5, 0.5),

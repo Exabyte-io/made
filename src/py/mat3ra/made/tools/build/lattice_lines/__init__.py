@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
@@ -12,11 +12,12 @@ from .configuration import (
     get_miller_indices_from_edge_type,
     EdgeTypes,
 )
+from .. import MaterialWithBuildMetadata
 from ..slab.termination_utils import select_slab_termination
 
 
 def create_lattice_lines_config_and_material(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     miller_indices_2d: Optional[Tuple[int, int]],
     edge_type: Optional[EdgeTypes],
     width: int,

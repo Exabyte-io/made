@@ -1,8 +1,9 @@
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_to_center
 from . import NanoribbonConfiguration
+from .. import MaterialWithBuildMetadata
 from ..nanotape import NanoTapeConfiguration
 from ..nanotape.builders import NanoTapeBuilder, NanoTapeBuilderParameters
 
@@ -27,7 +28,9 @@ class NanoribbonBuilder(NanoTapeBuilder):
         item = translate_to_center(item, axes=["x", "y"])
         return item
 
-    def _update_material_name(self, material: Material, configuration: Any) -> Material:
+    def _update_material_name(
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: Any
+    ) -> Material:
         if isinstance(configuration, NanoribbonConfiguration):
             nanotape = configuration.nanotape
             material = self._update_material_name_with_edge_type(
@@ -37,7 +40,11 @@ class NanoribbonBuilder(NanoTapeBuilder):
         return super()._update_material_name(material, configuration)
 
     def _update_material_name_with_edge_type(
-        self, material: Material, crystal_name: str, miller_indices_2d: tuple, structure_type: str
+        self,
+        material: Union[Material, MaterialWithBuildMetadata],
+        crystal_name: str,
+        miller_indices_2d: tuple,
+        structure_type: str,
     ) -> Material:
         edge_type = self._get_edge_type_from_miller_indices(miller_indices_2d)
         miller_str = f"{miller_indices_2d[0]}{miller_indices_2d[1]}"

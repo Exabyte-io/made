@@ -1,4 +1,4 @@
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Union
 
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
@@ -11,11 +11,12 @@ from .builders import GrainBoundaryLinearBuilder
 from .builders import GrainBoundaryPlanarBuilder
 from .configuration import GrainBoundaryLinearConfiguration
 from .configuration import GrainBoundaryPlanarConfiguration
+from .. import MaterialWithBuildMetadata
 from ...analyze.lattice import get_material_with_conventional_lattice
 
 
 def create_grain_boundary_planar(
-    phase_1_material: Material,
+    phase_1_material: Union[Material, MaterialWithBuildMetadata],
     phase_2_material: Optional[Material] = None,
     phase_1_miller_indices: Tuple[int, int, int] = (0, 0, 1),
     phase_2_miller_indices: Tuple[int, int, int] = (0, 0, 1),
@@ -82,7 +83,7 @@ def create_grain_boundary_planar(
 
 
 def create_grain_boundary_linear(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     target_angle: float = 0.0,
     angle_tolerance: float = 0.1,
     max_repetition_int: Optional[int] = None,

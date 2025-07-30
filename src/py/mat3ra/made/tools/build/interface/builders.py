@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Union
 
 from mat3ra.code.entity import InMemoryEntityPydantic
 
@@ -42,7 +42,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
             SlabStrainedSupercellConfiguration: SlabStrainedSupercellBuilder,
         }
 
-    def _generate(self, configuration: InterfaceConfiguration) -> Material:
+    def _generate(self, configuration: InterfaceConfiguration) -> MaterialWithBuildMetadata:
         film_material = self._stack_component_to_material(configuration.film_configuration, configuration)
         substrate_material = self._stack_component_to_material(configuration.substrate_configuration, configuration)
 
@@ -99,7 +99,9 @@ class InterfaceBuilder(StackNComponentsBuilder):
             return "Interface"
         return f"Interface, Strain {strain:.3f}pct"
 
-    def _update_material_name(self, material: Material, configuration: InterfaceConfiguration) -> Material:
+    def _update_material_name(
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: InterfaceConfiguration
+    ) -> MaterialWithBuildMetadata:
         base_name = self.get_base_name_from_configuration(
             configuration.film_configuration, configuration.substrate_configuration
         )

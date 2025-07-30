@@ -1,14 +1,18 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector
+from . import MaterialWithBuildMetadata
 from .supercell import create_supercell
 from ..modify import filter_by_box
 from ..operations.core.binary import merge
 
 
-def double_and_filter_material(material: Material, start: List[float], end: List[float]) -> Material:
+def double_and_filter_material(
+    material: Union[Material, MaterialWithBuildMetadata], start: List[float], end: List[float]
+) -> Material:
     """
     Double the material and filter it by a box defined by the start and end coordinates.
     Args:
@@ -22,7 +26,9 @@ def double_and_filter_material(material: Material, start: List[float], end: List
     return filter_by_box(material_doubled, start, end)
 
 
-def expand_lattice_vectors(material: Material, gap: float, direction: int = 0) -> Material:
+def expand_lattice_vectors(
+    material: Union[Material, MaterialWithBuildMetadata], gap: float, direction: int = 0
+) -> Material:
     """
     Expand the lattice vectors of the material in the specified direction by the given gap.
 
@@ -42,8 +48,8 @@ def expand_lattice_vectors(material: Material, gap: float, direction: int = 0) -
 
 
 def stack_two_materials_xy(
-    phase_1_material: Material,
-    phase_2_material: Material,
+    phase_1_material: Union[Material, MaterialWithBuildMetadata],
+    phase_2_material: Union[Material, MaterialWithBuildMetadata],
     gap: float,
     edge_inclusion_tolerance: Optional[float] = 1.0,
     distance_tolerance: float = 1.0,

@@ -17,6 +17,7 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 # fmt: on
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.site import CrystalSite
 
@@ -42,7 +43,7 @@ class VacancyDefectConfiguration(PointDefectConfiguration, VacancyPointDefectSch
     type: str = "VacancyDefectConfiguration"
 
     @classmethod
-    def from_parameters(cls, crystal: Material, coordinate: List[float], **kwargs):
+    def from_parameters(cls, crystal: Union[Material, MaterialWithBuildMetadata], coordinate: List[float], **kwargs):
         point_defect_site = PointDefectSiteConfiguration(
             crystal=crystal,
             element=VacancySchema(chemical_element=ChemicalElement.Vac.value),
@@ -55,7 +56,9 @@ class SubstitutionalDefectConfiguration(PointDefectConfiguration, Substitutional
     type: str = "SubstitutionalDefectConfiguration"
 
     @classmethod
-    def from_parameters(cls, crystal: Material, coordinate: List[float], element: str, **kwargs):
+    def from_parameters(
+        cls, crystal: Union[Material, MaterialWithBuildMetadata], coordinate: List[float], element: str, **kwargs
+    ):
         substitution_site = PointDefectSiteConfiguration(
             crystal=crystal,
             element=AtomSchema(chemical_element=element),
@@ -68,7 +71,9 @@ class InterstitialDefectConfiguration(PointDefectConfiguration, InterstitialPoin
     type: str = "InterstitialDefectConfiguration"
 
     @classmethod
-    def from_parameters(cls, crystal: Material, coordinate: List[float], element: str, **kwargs):
+    def from_parameters(
+        cls, crystal: Union[Material, MaterialWithBuildMetadata], coordinate: List[float], element: str, **kwargs
+    ):
         interstitial_site = PointDefectSiteConfiguration(
             crystal=crystal,
             element=AtomSchema(chemical_element=element),

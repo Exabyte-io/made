@@ -1,4 +1,4 @@
-from typing import Type, Dict
+from typing import Type, Dict, Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import (
@@ -76,7 +76,9 @@ class PointDefectBuilder(MergeBuilder):
             PointDefectSiteConfiguration: PointDefectSiteBuilder,
         }
 
-    def _update_material_name(self, material: Material, configuration: _ConfigurationType) -> Material:
+    def _update_material_name(
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: _ConfigurationType
+    ) -> Material:
         host_material = None
         for component in configuration.merge_components:
             if isinstance(component, Material):

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.entities import Termination
@@ -18,7 +18,7 @@ DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 
 
 def create_atomic_layers(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
     termination: Termination = None,
     number_of_layers: int = 1,
@@ -53,7 +53,7 @@ def create_atomic_layers(
 
 
 def create_slab(
-    crystal: Material,
+    crystal: Union[Material, MaterialWithBuildMetadata],
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
     use_conventional_cell=True,
     use_orthogonal_c: bool = True,
@@ -118,14 +118,16 @@ def create_slab_if_not(
     return slab
 
 
-def get_slab_terminations(material: Material, miller_indices: Tuple[int, int, int] = (0, 0, 1)) -> List[Termination]:
+def get_slab_terminations(
+    material: Union[Material, MaterialWithBuildMetadata], miller_indices: Tuple[int, int, int] = (0, 0, 1)
+) -> List[Termination]:
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
         material=material, miller_indices=miller_indices
     )
     return crystal_lattice_planes_analyzer.terminations
 
 
-def get_slab_material_in_standard_representation(slab_material: Material) -> Material:
+def get_slab_material_in_standard_representation(slab_material: Union[Material, MaterialWithBuildMetadata]) -> Material:
     """
     Get the slab material in a standard representation.
 

@@ -1,6 +1,7 @@
 from typing import List, Dict, Union, Type
 
 from mat3ra.made.material import Material
+from .. import MaterialWithBuildMetadata
 from ...analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from ..defect.enums import (
     PointDefectTypeEnum,
@@ -18,7 +19,10 @@ from ..defect.point.configuration import (
 
 
 def resolve_coordinate(
-    material: Material, coordinate: List[float], placement_method, use_cartesian_coordinates: bool = False
+    material: Union[Material, MaterialWithBuildMetadata],
+    coordinate: List[float],
+    placement_method,
+    use_cartesian_coordinates: bool = False,
 ) -> List[float]:
     if use_cartesian_coordinates:
         coordinate = material.basis.cell.convert_point_to_crystal(coordinate)
@@ -50,7 +54,7 @@ class PointDefectConfigurationFactory:
 
 
 def create_defect_configuration(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     defect_type: PointDefectTypeEnum,
     coordinate: List[float],
     element: str = None,

@@ -7,11 +7,12 @@ from .builders import PerturbationBuilder, IsometricPerturbationBuilder
 from .configuration import (
     PerturbationConfiguration,
 )
+from .. import MaterialWithBuildMetadata
 from ...utils.perturbation import PerturbationFunctionHolder
 
 
 def create_perturbation(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     perturbation_function: Union[sp.Expr, str],
     use_cartesian_coordinates: bool = True,
     is_isometric: bool = False,

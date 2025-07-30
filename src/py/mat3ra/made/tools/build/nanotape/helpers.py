@@ -1,17 +1,18 @@
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
 from . import NanoTapeConfiguration
 from .builders import NanoTapeBuilder, NanoTapeBuilderParameters
+from .. import MaterialWithBuildMetadata
 from ..lattice_lines.configuration import EdgeTypes
 from ..lattice_lines import create_lattice_lines_config_and_material
 from ..vacuum.configuration import VacuumConfiguration
 
 
 def create_nanotape(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     miller_indices_2d: Optional[Tuple[int, int]] = None,
     edge_type: EdgeTypes = EdgeTypes.zigzag,
     width: int = 2,

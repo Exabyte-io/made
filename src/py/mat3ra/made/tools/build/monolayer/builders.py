@@ -1,7 +1,8 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 from mat3ra.made.material import Material
 from .configurations import MonolayerConfiguration
+from .. import MaterialWithBuildMetadata
 from ..slab.builders import SlabBuilder
 from ..slab.configurations import SlabConfiguration
 from ...modify import translate_to_z_level, filter_by_box
@@ -57,14 +58,16 @@ class MonolayerBuilder(SlabBuilder):
         return half_filtered_slab
 
     # TODO: we need to move this to a common place for this and CLPBuilder
-    def _enforce_convention(self, material: Material) -> Material:
+    def _enforce_convention(self, material: Union[Material, MaterialWithBuildMetadata]) -> Material:
         return translate_to_z_level(material, "bottom")
 
     def _post_process(self, item: Material, post_process_parameters=None) -> Material:
         item = super()._post_process(item, post_process_parameters)
         return self._enforce_convention(item)
 
-    def _update_material_name(self, material: Material, configuration: MonolayerConfiguration) -> Material:
+    def _update_material_name(
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: MonolayerConfiguration
+    ) -> Material:
         crystal = configuration.crystal
 
         original_name = crystal.name or "Crystal"

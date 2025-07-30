@@ -15,7 +15,7 @@ from ...utils.coordinate import SphereCoordinateCondition
 
 
 def create_nanoparticle_from_material(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     condition: Union[
         SphereCoordinateCondition,
         CoordinateConditionType,
@@ -78,7 +78,9 @@ def create_nanoparticle_from_material(
 
 
 def create_nanoparticle_by_shape(
-    crystal: Material, shape: NanoparticleShapesEnum, parameters: Union[dict, SimpleNamespace]
+    crystal: Union[Material, MaterialWithBuildMetadata],
+    shape: NanoparticleShapesEnum,
+    parameters: Union[dict, SimpleNamespace],
 ):
     """
     Create a nanoparticle from a crystal material by specifying its shape and parameters.
