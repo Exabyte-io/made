@@ -2,6 +2,10 @@ import numpy as np
 from ase.build import add_adsorbate, bulk, fcc111, graphene, surface
 from ase.calculators import emt
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
+from mat3ra.made.tools.build.interface.helpers import create_zsl_interface_between_slabs
+from mat3ra.made.tools.build.slab.builders import SlabBuilder
+from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.made.tools.calculate import (
     calculate_adhesion_energy,
     calculate_interfacial_energy,
@@ -10,6 +14,7 @@ from mat3ra.made.tools.calculate import (
     calculate_total_energy_per_atom,
 )
 from mat3ra.made.tools.convert import from_ase
+
 from unit.fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 
 # Interface and its constituents structures setup
