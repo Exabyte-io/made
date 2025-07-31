@@ -2,7 +2,7 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.made.material import Material
-
+from mat3ra.made.utils import get_atomic_coordinates_extremum
 
 from .analyze.other import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
 from .build.metadata import MaterialWithBuildMetadata
@@ -15,7 +15,6 @@ from .utils.coordinate import (
     is_coordinate_in_triangular_prism,
     is_coordinate_within_layer,
 )
-from mat3ra.made.utils import get_atomic_coordinates_extremum
 
 
 def filter_by_label(material: Material, label: Union[int, str]) -> Material:

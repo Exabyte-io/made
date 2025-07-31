@@ -2,7 +2,7 @@
 from typing import Dict, List
 
 import numpy as np
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 def is_coordinate_in_cylinder(

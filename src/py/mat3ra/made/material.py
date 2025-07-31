@@ -1,13 +1,12 @@
-from typing import Any, List, Union, Optional, Literal
+from typing import Any, List, Literal, Optional, Union
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
 from mat3ra.esse.models.material import MaterialSchema
+from mat3ra.esse.models.properties_directory.structural.lattice import LatticeTypeEnum
 
 from .basis import Basis
 from .lattice import Lattice
-
-from mat3ra.esse.models.properties_directory.structural.lattice import LatticeTypeEnum
 
 defaultMaterialConfig = {
     "name": "Silicon FCC",
@@ -116,8 +115,8 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         z_level: Optional[Literal["top", "bottom", "center"]] = "bottom",
         tolerance: float = 1e-6,
     ) -> "Material":
-        from mat3ra.made.utils import get_atomic_coordinates_extremum
         from mat3ra.made.tools.modify import translate_by_vector
+        from mat3ra.made.utils import get_atomic_coordinates_extremum
 
         min_z = get_atomic_coordinates_extremum(self, "min")
         max_z = get_atomic_coordinates_extremum(self, "max")

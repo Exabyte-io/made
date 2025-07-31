@@ -1,4 +1,5 @@
 import copy
+
 import numpy as np
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.lattice import Lattice

@@ -2,10 +2,10 @@ from typing import Any, List
 
 import numpy as np
 import sympy as sp
+from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
 
-from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 from .functions import FunctionHolder
 
 EQUATION_RANGE_COEFFICIENT = 5

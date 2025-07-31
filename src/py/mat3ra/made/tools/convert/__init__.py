@@ -3,7 +3,6 @@ from functools import wraps
 from typing import Any, Callable, Dict, Union
 
 from mat3ra.made.material import Material
-
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 
 from ..third_party import (

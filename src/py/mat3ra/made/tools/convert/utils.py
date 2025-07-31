@@ -1,7 +1,6 @@
 import json
 from enum import Enum
-from typing import Any, Dict, List, Union
-
+from typing import Any, Dict, List
 
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
 
