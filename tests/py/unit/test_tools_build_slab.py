@@ -1,4 +1,5 @@
 import copy
+import copy
 from typing import Final, Tuple
 
 import numpy as np
@@ -154,7 +155,7 @@ def test_build_slab_primitive(
     xy_supercell_matrix,
     expected_slab_config,
 ):
-    material = MaterialWithBuildMetadata.create(material_config)
+    material = MaterialWithBuildMetadata.model_validate(material_config)
     slab = get_slab_with_builder(
         material, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix
     )
@@ -186,7 +187,7 @@ def test_build_slab_conventional(
     xy_supercell_matrix,
     expected_slab_config,
 ):
-    material = Material.create(material_config)
+    material = Material.model_validate(material_config)
     crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
         material=material, miller_indices=miller_indices
     )
@@ -264,7 +265,7 @@ def test_create_slab(
     use_conventional_cell,
     expected_slab_config,
 ):
-    crystal = Material.create(material_config)
+    crystal = Material.model_validate(material_config)
     terminations = get_slab_terminations(material=crystal, miller_indices=miller_indices)
     termination = select_slab_termination(terminations, termination_formula)
     slab = create_slab(
@@ -288,7 +289,7 @@ def test_create_slab(
     ],
 )
 def test_adjust_lattice_for_gap(material_config, direction, gap, expected_length):
-    material = Material.create(material_config)
+    material = Material.model_validate(material_config)
     adjusted_material = adjust_material_cell_to_set_gap_along_direction(material, gap, direction)
 
     axis_index = AXIS_TO_INDEX_MAP[direction.value]

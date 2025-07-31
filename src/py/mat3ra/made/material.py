@@ -109,21 +109,3 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
 
     def set_labels_from_value(self, value: Union[int, str]) -> None:
         self.basis.set_labels_from_list([value] * self.basis.number_of_atoms)
-
-    def translate_to_z_level(
-        self,
-        z_level: Optional[Literal["top", "bottom", "center"]] = "bottom",
-        tolerance: float = 1e-6,
-    ) -> "Material":
-        from mat3ra.made.tools.modify import translate_by_vector
-        from mat3ra.made.utils import get_atomic_coordinates_extremum
-
-        min_z = get_atomic_coordinates_extremum(self, "min")
-        max_z = get_atomic_coordinates_extremum(self, "max")
-        if z_level == "top":
-            self = translate_by_vector(self, vector=[0, 0, 1 - max_z - tolerance])
-        elif z_level == "bottom":
-            self = translate_by_vector(self, vector=[0, 0, -min_z + tolerance])
-        elif z_level == "center":
-            self = translate_by_vector(self, vector=[0, 0, (1 - min_z - max_z) / 2])
-        return self
