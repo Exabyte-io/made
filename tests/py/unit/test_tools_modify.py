@@ -1,4 +1,6 @@
 from ase.build import bulk
+from mat3ra.utils import assertion as assertion_utils
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.interface import get_optimal_film_displacement
@@ -18,8 +20,6 @@ from mat3ra.made.tools.modify import (
     rotate,
     translate_to_z_level,
 )
-from mat3ra.utils import assertion as assertion_utils
-
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_CONVENTIONAL_FILTERED
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_SLAB_001_2_ATOMS, SI_SLAB_001_WITH_VACUUM

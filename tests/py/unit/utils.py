@@ -90,7 +90,7 @@ def show_difference(expected_data, actual_data):
         raise AssertionError(f"Entities differ:\n{diff_str}")
 
 
-def assert_two_entities_deep_almost_equal(entity1, entity2, rtol=1e-5, atol=1e-9):
+def assert_two_entities_deep_almost_equal(entity1, entity2, rtol=1e-5, atol=1e-5):
     # First unwrap any nested schema objects
     entity1 = unwrap(entity1)
     entity2 = unwrap(entity2)

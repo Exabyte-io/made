@@ -40,6 +40,12 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         0.1, exclude=True
     )  # Angstroms, used for checking overlapping coordinates
 
+    @property
+    def cartesian_values(self):
+        if self.is_in_cartesian_units:
+            return self.coordinates.values
+        return [self.cell.convert_point_to_cartesian(c) for c in self.coordinates.values]
+
     def __convert_kwargs__(self, **kwargs: Any) -> Dict[str, Any]:
         if isinstance(kwargs.get("elements"), list):
             kwargs["elements"] = ArrayWithIds.from_list_of_dicts(kwargs["elements"])

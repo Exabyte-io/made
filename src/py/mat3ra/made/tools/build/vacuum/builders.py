@@ -2,7 +2,7 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.tools.build import BaseSingleBuilder, MaterialWithBuildMetadata
 from .configuration import VacuumConfiguration
-from ....utils import AXIS_TO_INDEX_MAP
+from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
 
 class VacuumBuilder(BaseSingleBuilder):

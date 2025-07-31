@@ -2,7 +2,7 @@ import json
 from enum import Enum
 from typing import Any, Dict, List, Union
 
-from mat3ra.made.utils import map_array_to_array_with_id_value
+
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
 
 from ..third_party import ASEAtoms, PymatgenInterface, PymatgenStructure
@@ -39,9 +39,9 @@ def extract_metadata_from_pymatgen_structure(structure: PymatgenStructure) -> Di
     return metadata
 
 
-def extract_tags_from_ase_atoms(atoms: ASEAtoms) -> List[Union[str, int]]:
+def extract_tags_from_ase_atoms(atoms: ASEAtoms) -> List[Dict[str, Any]]:
     result = []
     if "tags" in atoms.arrays:
-        int_tags = [int(tag) for tag in atoms.arrays["tags"] if tag is not None]
-        result = map_array_to_array_with_id_value(int_tags, remove_none=True)
+        # Ensure tags are integers and convert to list of dicts with 'id' and 'value'
+        result = [{"id": i, "value": int(tag)} for i, tag in enumerate(atoms.arrays["tags"]) if tag is not None]
     return result

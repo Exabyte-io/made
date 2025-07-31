@@ -1,7 +1,7 @@
 from typing import List, Optional, Any, TypeVar
 
 from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from .metadata import MaterialBuildMetadata, BuildMetadata, MaterialWithBuildMetadata
 from ...material import Material
@@ -18,8 +18,7 @@ class BaseConfiguration(BaseModel, InMemoryEntity):
     - `_json`: The JSON representation of the configuration.
     """
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @property
     def _json(self):
@@ -63,8 +62,7 @@ class BaseSingleBuilder(BaseModel):
     - `_PostProcessParametersType`: The data structure model for the post-process parameters.
     """
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     build_parameters: Any = None
     _BuildParametersType: Any = None
@@ -137,8 +135,7 @@ class BaseBuilder(BaseModel):
     - `_PostProcessParametersType`: The data structure model for the post-process parameters.
     """
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     build_parameters: Any = None
     _BuildParametersType: Any = None

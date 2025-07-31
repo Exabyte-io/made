@@ -5,7 +5,7 @@ import sympy as sp
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
 
-from ...utils import AXIS_TO_INDEX_MAP
+from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 from .functions import FunctionHolder
 
 EQUATION_RANGE_COEFFICIENT = 5

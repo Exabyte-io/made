@@ -3,7 +3,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.utils import map_array_with_id_value_to_array
+
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 
 from ..third_party import (
@@ -21,7 +21,6 @@ from .utils import (
     extract_labels_from_pymatgen_structure,
     extract_metadata_from_pymatgen_structure,
     extract_tags_from_ase_atoms,
-    map_array_to_array_with_id_value,
 )
 
 
@@ -115,9 +114,7 @@ def from_pymatgen(structure: Union[PymatgenStructure, PymatgenInterface]) -> Dic
         "boundaryConditions": {"type": "pbc", "offset": 0},
     }
 
-    basis["labels"] = map_array_to_array_with_id_value(
-        extract_labels_from_pymatgen_structure(structure), remove_none=True
-    )
+    basis["labels"] = extract_labels_from_pymatgen_structure(structure)
 
     material_data = {
         "name": structure.formula,
@@ -184,7 +181,7 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAto
 
     atomic_labels = material_config["basis"].get("labels", [])
     if atomic_labels:
-        atoms.set_tags(map_array_with_id_value_to_array(atomic_labels))
+        atoms.set_tags([label["value"] for label in atomic_labels])
     if "metadata" in material_config:
         atoms.info.update({"metadata": material_config["metadata"]})
 

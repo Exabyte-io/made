@@ -11,6 +11,7 @@ from mat3ra.made.tools.operations.core.binary import stack
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction
 
 
+
 class StackNComponentsBuilder(BaseSingleBuilder):
     _ConfigurationType = StackConfiguration
     _StackComponentTypes = [MaterialWithBuildMetadata, VacuumConfiguration]

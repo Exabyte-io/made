@@ -1,6 +1,5 @@
 from typing import Type
 
-from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction, get_atomic_coordinates_extremum
 
 from ..build import BuildMetadata, MaterialWithBuildMetadata
 from ..build.slab.builders import SlabBuilderParameters
@@ -8,6 +7,7 @@ from ..build.slab.configurations import SlabConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
 from . import BaseMaterialAnalyzer
 from .crystal_site import CrystalSiteAnalyzer
+from ...utils import adjust_material_cell_to_set_gap_along_direction
 
 
 class BuildMetadataAnalyzer(BaseMaterialAnalyzer):

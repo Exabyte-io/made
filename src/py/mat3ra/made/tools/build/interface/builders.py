@@ -18,7 +18,7 @@ from ...modify import (
 )
 from ...operations.core.unary import supercell
 from ...operations.core.utils import should_skip_stacking
-from ....utils import AXIS_TO_INDEX_MAP
+from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
 
 class InterfaceBuilderParameters(InMemoryEntityPydantic):

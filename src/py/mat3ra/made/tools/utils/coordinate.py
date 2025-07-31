@@ -2,7 +2,7 @@
 from typing import Dict, List
 
 import numpy as np
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 def is_coordinate_in_cylinder(
@@ -160,8 +160,7 @@ def is_coordinate_behind_plane(
 
 
 class CoordinateCondition(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def condition(self, coordinate: List[float]) -> bool:
         raise NotImplementedError

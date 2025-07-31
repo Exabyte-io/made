@@ -1,5 +1,5 @@
 import math
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
@@ -9,7 +9,7 @@ from mat3ra.esse.models.properties_directory.structural.lattice import (
     LatticeUnitsSchema,
 )
 from mat3ra.utils.mixins import RoundNumericValuesMixin
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from .cell import Cell
 
@@ -30,7 +30,7 @@ class LatticeSchemaVectorless(BaseModel):
     beta: float
     gamma: float
     units: LatticeUnitsSchema = LatticeSchema.model_fields["units"].default_factory()
-    type: LatticeTypeEnum = LatticeSchema.model_fields["type"].default
+    type: Union[str, LatticeTypeEnum] = LatticeSchema.model_fields["type"].default
 
 
 class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPydantic):
@@ -44,6 +44,12 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
     alpha: float = 90.0
     beta: float = alpha
     gamma: float = alpha
+
+    @field_validator("type", mode="before")
+    def convert_string_to_enum(cls, v: Union[str, LatticeTypeEnum]) -> LatticeTypeEnum:
+        if isinstance(v, str):
+            return LatticeTypeEnum[v]
+        return v
 
     @property
     def vectors(self) -> LatticeVectors:

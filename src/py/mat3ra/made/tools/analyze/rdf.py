@@ -1,16 +1,15 @@
 import numpy as np
 from mat3ra.made.material import Material
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from . import BaseMaterialAnalyzer
 
 
 class RadialDistributionFunction(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     rdf: np.ndarray
     bin_centers: np.ndarray
-
-    class Config:
-        arbitrary_types_allowed = True
 
     @classmethod
     def from_material(cls, material: Material, cutoff: float = 10.0, bin_size: float = 0.1):

@@ -7,6 +7,7 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_di
     CrystalSiteSchema,
 )
 from mat3ra.made.material import Material
+from pydantic import ConfigDict
 
 
 class CrystalSite(CrystalSiteSchema, InMemoryEntityPydantic):
@@ -18,8 +19,7 @@ class CrystalSite(CrystalSiteSchema, InMemoryEntityPydantic):
     # see https://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list for an example
     wyckoff_letter: Optional[str] = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @property
     def coordination_number(self):
