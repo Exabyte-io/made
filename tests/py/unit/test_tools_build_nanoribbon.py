@@ -1,33 +1,42 @@
+import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.nanoribbon import NanoribbonConfiguration, create_nanoribbon
-from mat3ra.made.tools.build.nanoribbon.enums import EdgeTypes
+from mat3ra.made.tools.build.lattice_lines.builders import CrystalLatticeLinesBuilder
+from mat3ra.made.tools.build.nanoribbon import CrystalLatticeLinesConfiguration, create_nanoribbon
 
 from .fixtures.monolayer import GRAPHENE
-from .fixtures.nanoribbon import GRAPHENE_ARMCHAIR_NANORIBBON, GRAPHENE_ZIGZAG_NANORIBBON
+from .fixtures.nanoribbon.armchair import GRAPHENE_NANORIBBON_ARMCHAIR
+from .fixtures.nanoribbon.zigzag import GRAPHENE_NANORIBBON_ZIGZAG
 from .utils import assert_two_entities_deep_almost_equal
 
 
-def test_build_zigzag_nanoribbon():
-    config = NanoribbonConfiguration(
-        material=Material.create(GRAPHENE),
-        width=2,
-        length=4,
-        vacuum_width=3,
-        edge_type=EdgeTypes.zigzag,
+@pytest.mark.parametrize(
+    "material_config, width, length, vacuum_width, vacuum_length, miller_indices_2d, edge_type, expected_nanoribbon",
+    [
+        (GRAPHENE, 5, 4, 5.0, 5.0, (1, 1), "armchair", GRAPHENE_NANORIBBON_ARMCHAIR),
+        (GRAPHENE, 2, 4, 5.0, 5.0, (0, 1), "zigzag", GRAPHENE_NANORIBBON_ZIGZAG),
+    ],
+)
+def test_build_nanoribbon(
+    material_config, width, length, vacuum_width, vacuum_length, miller_indices_2d, edge_type, expected_nanoribbon
+):
+    material = Material.create(material_config)
+
+    nanoribbon = create_nanoribbon(
+        material=material,
+        miller_indices_2d=miller_indices_2d,
+        width=width,
+        length=length,
+        vacuum_width=vacuum_width,
+        vacuum_length=vacuum_length,
     )
 
-    nanoribbon = create_nanoribbon(config)
-    assert_two_entities_deep_almost_equal(nanoribbon, GRAPHENE_ZIGZAG_NANORIBBON)
+    assert_two_entities_deep_almost_equal(nanoribbon, expected_nanoribbon)
 
 
-def test_build_armchair_nanoribbon():
-    config = NanoribbonConfiguration(
-        material=Material.create(GRAPHENE),
-        width=2,
-        length=4,
-        vacuum_width=3,
-        edge_type=EdgeTypes.armchair,
-    )
+def test_crystal_lattice_lines():
+    builder = CrystalLatticeLinesBuilder()
+    config = CrystalLatticeLinesConfiguration(crystal=Material.create(GRAPHENE), miller_indices_2d=(1, 0))
 
-    nanoribbon = create_nanoribbon(config)
-    assert_two_entities_deep_almost_equal(nanoribbon, GRAPHENE_ARMCHAIR_NANORIBBON)
+    material = builder.get_material(config)
+    material.name = f"{material.name} {config.miller_indices_2d}"
+    assert isinstance(material, Material)

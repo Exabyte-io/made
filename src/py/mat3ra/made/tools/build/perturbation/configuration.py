@@ -1,13 +1,12 @@
 from typing import Union
 
-from mat3ra.code.entity import InMemoryEntity
 from mat3ra.made.material import Material
-from pydantic import BaseModel
-
+from .. import BaseConfigurationPydantic, MaterialWithBuildMetadata
+from ...utils.functions import FunctionHolder
 from ...utils.perturbation import SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
 
 
-class PerturbationConfiguration(BaseModel, InMemoryEntity):
+class PerturbationConfiguration(BaseConfigurationPydantic):
     """
     Configuration for a geometrical perturbation.
 
@@ -17,21 +16,8 @@ class PerturbationConfiguration(BaseModel, InMemoryEntity):
         use_cartesian_coordinates (bool): Whether to use cartesian coordinates
     """
 
-    material: Material
+    material: Union[Material, MaterialWithBuildMetadata]
     perturbation_function_holder: Union[
-        SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
+        SineWavePerturbationFunctionHolder, PerturbationFunctionHolder, FunctionHolder
     ] = SineWavePerturbationFunctionHolder()
     use_cartesian_coordinates: bool = True
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    @property
-    def _json(self):
-        perturbation_function_json = self.perturbation_function_holder.get_json()
-        return {
-            "type": self.get_cls_name(),
-            "material": self.material.to_json(),
-            "perturbation_function": perturbation_function_json,
-            "use_cartesian_coordinates": self.use_cartesian_coordinates,
-        }

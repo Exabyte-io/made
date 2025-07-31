@@ -1,22 +1,11 @@
-import types
 from typing import List
+
 import numpy as np
+
 from mat3ra.made.material import Material
-
-from ...modify import filter_by_label
-from ...convert import PymatgenInterface, INTERFACE_LABELS_MAP
 from .enums import StrainModes
-
-
-def interface_patch_with_mean_abs_strain(target: PymatgenInterface, tolerance: float = 10e-6):
-    def get_mean_abs_strain(target):
-        return target.interface_properties[StrainModes.mean_abs_strain]
-
-    target.get_mean_abs_strain = types.MethodType(get_mean_abs_strain, target)
-    target.interface_properties[StrainModes.mean_abs_strain] = (
-        round(np.mean(np.abs(target.interface_properties["strain"])) / tolerance) * tolerance
-    )
-    return target
+from ...convert import PymatgenInterface, INTERFACE_LABELS_MAP
+from ...modify import filter_by_label
 
 
 def remove_duplicate_interfaces(

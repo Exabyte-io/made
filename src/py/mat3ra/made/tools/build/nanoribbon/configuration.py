@@ -1,37 +1,33 @@
-from mat3ra.made.material import Material
-from mat3ra.made.tools.build.nanoribbon.enums import EdgeTypes
+from typing import List, Union
 
-from ...build import BaseConfiguration
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.nanoribbon import (
+    NanoribbonConfigurationSchema,
+)
+
+from ..nanotape.configuration import NanoTapeConfiguration
+from ..stack.configuration import StackConfiguration
+from ..vacuum.configuration import VacuumConfiguration
 
 
-class NanoribbonConfiguration(BaseConfiguration):
+class NanoribbonConfiguration(NanoribbonConfigurationSchema, StackConfiguration):
     """
-    Configuration for building a nanoribbon from a material.
+    Configuration for building a nanoribbon from a nanotape.
+    Nanoribbon = [NanoTape, vacuum] stacked in X or Y direction.
 
-
-    Attributes:
-        material (Material): The material to build the nanoribbon from.
-        width (int): The width of the nanoribbon in number of unit cells.
-        length (int): The length of the nanoribbon in number of unit cells.
-        vacuum_width (int): The width of the vacuum region in number of unit cells.
-        vacuum_length (int): The length of the vacuum region in number of unit cells.
-        edge_type (EdgeTypes): The type of edge to use for the nanoribbon, either zigzag or armchair.
+    Args:
+        stack_components: List of configuration objects for nanoribbon components.
+        direction: Direction along which to stack components.
     """
 
-    material: Material
-    width: int  # in number of unit cells
-    length: int  # in number of unit cells
-    vacuum_width: int = 3  # in number of unit cells
-    vacuum_length: int = 0  # in number of unit cells
-    edge_type: EdgeTypes = EdgeTypes.zigzag
+    type: str = "NanoribbonConfiguration"
+    stack_components: List[Union[NanoTapeConfiguration, VacuumConfiguration]]
+    direction: AxisEnum = AxisEnum.x
 
     @property
-    def _json(self):
-        return {
-            "material": self.material.to_dict(),
-            "width": self.width,
-            "length": self.length,
-            "vacuum_width": self.vacuum_width,
-            "vacuum_length": self.vacuum_length,
-            "edge_type": self.edge_type,
-        }
+    def nanotape(self):
+        return self.stack_components[0]
+
+    @property
+    def vacuum_configuration(self) -> VacuumConfiguration:
+        return self.stack_components[1]

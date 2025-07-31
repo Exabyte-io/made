@@ -1,16 +1,15 @@
 import math
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
-    LatticeImplicitSchema as LatticeBravaisSchema,
-)
-from mat3ra.esse.models.properties_directory.structural.lattice.lattice_bravais import (
+from mat3ra.esse.models.properties_directory.structural.lattice import (
+    LatticeSchema,
     LatticeTypeEnum,
     LatticeUnitsSchema,
 )
 from mat3ra.utils.mixins import RoundNumericValuesMixin
+from pydantic import BaseModel, field_validator
 
 from .cell import Cell
 
@@ -21,10 +20,23 @@ class LatticeVectors(Cell):
     pass
 
 
-class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydantic):
+class LatticeSchemaVectorless(BaseModel):
+    """LatticeSchema without the vectors field to avoid conflicts."""
+
+    a: float
+    b: float
+    c: float
+    alpha: float
+    beta: float
+    gamma: float
+    units: LatticeUnitsSchema = LatticeSchema.model_fields["units"].default_factory()
+    type: Union[str, LatticeTypeEnum] = LatticeSchema.model_fields["type"].default
+
+
+class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPydantic):
     __types__ = LatticeTypeEnum
-    __type_default__ = LatticeBravaisSchema.model_fields["type"].default
-    __units_default__ = LatticeBravaisSchema.model_fields["units"].default_factory()
+    __type_default__ = LatticeSchema.model_fields["type"].default
+    __units_default__ = LatticeSchema.model_fields["units"].default_factory()
 
     a: float = 1.0
     b: float = a
@@ -32,6 +44,12 @@ class Lattice(RoundNumericValuesMixin, LatticeBravaisSchema, InMemoryEntityPydan
     alpha: float = 90.0
     beta: float = alpha
     gamma: float = alpha
+
+    @field_validator("type", mode="before")
+    def convert_string_to_enum(cls, v: Union[str, LatticeTypeEnum]) -> LatticeTypeEnum:
+        if isinstance(v, str):
+            return LatticeTypeEnum[v]
+        return v
 
     @property
     def vectors(self) -> LatticeVectors:

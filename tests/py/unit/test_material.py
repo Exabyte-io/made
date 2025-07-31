@@ -1,9 +1,11 @@
+import copy
+
 import numpy as np
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.cell import SI_CONVENTIONAL_CELL
+from unit.fixtures.slab import BULK_Si_CONVENTIONAL
 from unit.utils import assert_two_entities_deep_almost_equal
 
 
@@ -16,11 +18,11 @@ def test_create_default():
 
 
 def test_create():
-    material = Material.create(SI_CONVENTIONAL_CELL)
+    material = Material.create(BULK_Si_CONVENTIONAL)
     assert isinstance(material.basis, Basis)
     assert isinstance(material.basis.coordinates, Coordinates)
     assert isinstance(material.lattice, Lattice)
-    assert_two_entities_deep_almost_equal(material, SI_CONVENTIONAL_CELL)
+    assert_two_entities_deep_almost_equal(material, BULK_Si_CONVENTIONAL)
 
 
 def test_create_with_cell_as_list():
@@ -40,7 +42,9 @@ def test_create_with_cell_as_list():
 def test_material_to_json():
     material = Material.create_default()
     # Remove all keys that are null in the config
-    assert_two_entities_deep_almost_equal(material, Material.__default_config__)
+    default_config_copy = copy.deepcopy(Material.__default_config__)
+    default_config_copy["lattice"]["type"] = default_config_copy["lattice"]["type"].value
+    assert_two_entities_deep_almost_equal(material, default_config_copy)
 
 
 def test_material_clone():
@@ -61,7 +65,9 @@ def test_material_to_from_cartesian():
     assert material.basis.is_in_crystal_units is True
     assert material.basis.is_in_cartesian_units is False
     assert np.allclose(material.basis.coordinates.values[1], [0.25, 0.25, 0.25], atol=1e-4)
-    assert_two_entities_deep_almost_equal(material, Material.__default_config__)
+    default_config_copy = copy.deepcopy(Material.__default_config__)
+    default_config_copy["lattice"]["type"] = default_config_copy["lattice"]["type"].value
+    assert_two_entities_deep_almost_equal(material, default_config_copy)
 
 
 def test_material_to_cartesian_to_crystal_repeated():
@@ -71,7 +77,9 @@ def test_material_to_cartesian_to_crystal_repeated():
     assert np.allclose(material.basis.coordinates.values[1], [1.1163, 0.7893, 1.9335], atol=1e-4)
     material.to_crystal()
     material.to_crystal()
-    assert_two_entities_deep_almost_equal(material, Material.__default_config__)
+    default_config_copy = copy.deepcopy(Material.__default_config__)
+    default_config_copy["lattice"]["type"] = default_config_copy["lattice"]["type"].value
+    assert_two_entities_deep_almost_equal(material, default_config_copy)
 
 
 def test_basis_to_json():

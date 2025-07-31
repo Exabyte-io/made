@@ -2,7 +2,7 @@
 from typing import Dict, List
 
 import numpy as np
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 def is_coordinate_in_cylinder(
@@ -160,8 +160,7 @@ def is_coordinate_behind_plane(
 
 
 class CoordinateCondition(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def condition(self, coordinate: List[float]) -> bool:
         raise NotImplementedError
@@ -183,11 +182,11 @@ class CylinderCoordinateCondition(CoordinateCondition):
 
 
 class SphereCoordinateCondition(CoordinateCondition):
-    center_position: List[float] = Field(default_factory=lambda: [0.5, 0.5])
+    center_coordinate: List[float] = Field(default_factory=lambda: [0.5, 0.5, 0.5])
     radius: float = 0.25
 
     def condition(self, coordinate: List[float]) -> bool:
-        return is_coordinate_in_sphere(coordinate, self.center_position, self.radius)
+        return is_coordinate_in_sphere(coordinate, self.center_coordinate, self.radius)
 
 
 class BoxCoordinateCondition(CoordinateCondition):

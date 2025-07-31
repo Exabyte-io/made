@@ -1,6 +1,6 @@
 name: Continuous Testing and Publication
 
-on: [push]
+on: [ push ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: [3.10.13]
+        python-version: [ 3.10.13 ]
 
     steps:
       - name: Checkout this repository
@@ -132,22 +132,22 @@ jobs:
     if: (github.repository != 'Exabyte-io/template-definitions-js-py') && (github.ref_name == 'main')
 
     steps:
-      -   name: Checkout this repository
-          uses: actions/checkout@v4
-          with:
-            lfs: true
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
 
-      -   name: Checkout actions repository
-          uses: actions/checkout@v4
-          with:
-            repository: Exabyte-io/actions
-            token: ${{ secrets.BOT_GITHUB_TOKEN }}
-            path: actions
+      - name: Checkout actions repository
+        uses: actions/checkout@v4
+        with:
+          repository: Exabyte-io/actions
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          path: actions
 
-      -   name: Publish python release
-          uses: ./actions/py/publish
-          with:
-            python-version: 3.10.13
-            github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-            pypi-api-token: ${{ secrets.PYPI_API_TOKEN }}
-            publish-tag: 'false'
+      - name: Publish python release
+        uses: ./actions/py/publish
+        with:
+          python-version: 3.10.13
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          pypi-api-token: ${{ secrets.PYPI_API_TOKEN }}
+          publish-tag: 'false'

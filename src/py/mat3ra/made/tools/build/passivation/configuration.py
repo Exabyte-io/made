@@ -1,30 +1,31 @@
+from typing import List, Union
+
+from mat3ra.esse.models.materials_category.processed_structures.two_dimensional.passivation.configuration import (
+    PassivationConfigurationSchema,
+)
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+
 from mat3ra.made.material import Material
+from .. import MaterialWithBuildMetadata
+from ..defect.point.builders import AtomAtCoordinateConfiguration
+from ..merge.configuration import MergeConfiguration
 
-from ...enums import SurfaceTypes
-from ...build import BaseConfiguration
 
-
-class PassivationConfiguration(BaseConfiguration):
+class PassivationConfiguration(MergeConfiguration, PassivationConfigurationSchema):
     """
     Configuration for a passivation.
 
     Args:
-        slab (Material): The Material object.
+        merge_components (List[Material, AtomAtCoordinateConfiguration]): The components to merge.
         passivant (str): The passivating element.
         bond_length (float): The bond length.
     """
 
-    slab: Material
+    merge_components: List[Union[Material, MaterialWithBuildMetadata, AtomAtCoordinateConfiguration]]
+    merge_method: MergeMethodsEnum = MergeMethodsEnum.ADD
     passivant: str = "H"
     bond_length: float = 1.0
-    surface: SurfaceTypes = SurfaceTypes.BOTH
 
     @property
-    def _json(self):
-        return {
-            "type": self.get_cls_name(),
-            "slab": self.slab.to_json(),
-            "passivant": self.passivant,
-            "bond_length": self.bond_length,
-            "surface": self.surface.value,
-        }
+    def material(self) -> MaterialWithBuildMetadata:
+        return self.merge_components[0]

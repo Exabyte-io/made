@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 import numpy as np
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from ...third_party import ASEAtoms
 
@@ -11,8 +11,7 @@ class InterfaceConstraint(BaseModel):
     Based on  https://wiki.fysik.dtu.dk/ase/ase/constraints.html#making-your-own-constraint-class
     """
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def adjust_positions(self, atoms: ASEAtoms, new_positions: np.ndarray) -> None:
         """

@@ -10,6 +10,7 @@ from mat3ra.made.tools.calculate import (
     calculate_total_energy_per_atom,
 )
 from mat3ra.made.tools.convert import from_ase
+from unit.fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 
 # Interface and its constituents structures setup
 nickel_slab = fcc111("Ni", size=(2, 2, 3), vacuum=10, a=3.52)
@@ -19,7 +20,7 @@ interface = nickel_slab.copy()
 add_adsorbate(interface, graphene_layer, height=2, position="ontop")
 
 # Material objects setup
-interface_material = Material.create(from_ase(interface))
+interface_material = Material.create(GRAPHENE_NICKEL_INTERFACE)
 nickel_slab_material = Material.create(from_ase(nickel_slab))
 nickel_bulk_material = Material.create(from_ase(bulk("Ni", "fcc", a=3.52)))
 graphene_layer_material = Material.create(from_ase(graphene_layer))
@@ -68,5 +69,5 @@ def test_calculate_interfacial_energy():
     )
     assert np.isclose(
         interfacial_energy,
-        0.030331590159230523,
+        -0.78488,
     )
