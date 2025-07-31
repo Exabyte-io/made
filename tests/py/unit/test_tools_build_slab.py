@@ -10,6 +10,7 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     SupercellMatrix2DSchema,
 )
 from mat3ra.made.material import Material
+from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.utils.vector import align_first_vector_to_x_2d_right_handed
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
@@ -30,6 +31,8 @@ from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP, adjust_material_cell_to_set_gap_along_direction
 from mat3ra.utils import assertion
 from mat3ra.utils.matrix import convert_2x2_to_3x3
+from mat3ra.code.constants import AtomicCoordinateUnits
+from mat3ra.code.constants import AtomicCoordinateUnits
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
@@ -320,7 +323,8 @@ def test_build_slab_strained(
     xy_supercell_matrix,
     strain_matrix,
 ):
-    material = MaterialWithBuildMetadata.create(crystal_config)
+    crystal_config["basis"]["units"] = AtomicCoordinateUnits.crystal
+    material = MaterialWithBuildMetadata.model_validate(crystal_config)
     config = SlabStrainedSupercellConfiguration.from_parameters(
         material_or_dict=material,
         miller_indices=miller_indices,

@@ -1,4 +1,5 @@
 from typing import Any, Dict
+from mat3ra.code.constants import AtomicCoordinateUnits
 
 BULK_Si_PRIMITIVE: Dict[str, Any] = {
     "name": "Silicon FCC",
@@ -7,7 +8,7 @@ BULK_Si_PRIMITIVE: Dict[str, Any] = {
         "coordinates": [{"id": 0, "value": [0.0, 0.0, 0.0]}, {"id": 1, "value": [0.25, 0.25, 0.25]}],
         "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
         "labels": [],
-        "units": "crystal",
+        "units": AtomicCoordinateUnits.crystal,
     },
     "lattice": {
         "a": 3.867,
@@ -45,9 +46,9 @@ BULK_Si_CONVENTIONAL: Dict[str, Any] = {
             {"id": 6, "value": [0.0, 0.5, 0.0]},
             {"id": 7, "value": [0.75, 0.75, 0.75]},
         ],
-        "units": "crystal",
         "constraints": [],
         "labels": [],
+        "units": AtomicCoordinateUnits.crystal,
     },
     "lattice": {
         "a": 5.468763846,
@@ -74,7 +75,7 @@ BULK_Si_CONVENTIONAL_FILTERED: Dict[str, Any] = {
             {"id": 0, "value": [0.5, 0.0, 0.0]},
             {"id": 2, "value": [0.5, 0.5, 0.5]},
         ],
-        "units": "crystal",
+        "units": AtomicCoordinateUnits.crystal,
         "labels": [],
         "constraints": [],
     },
@@ -93,7 +94,7 @@ BULK_Si_CONVENTIONAL_FILTERED: Dict[str, Any] = {
 BULK_Ge_CONVENTIONAL: Dict[str, Any] = {
     "name": "Germanium FCC",
     "basis": {
-        "units": "crystal",
+        "units": AtomicCoordinateUnits.crystal,
         "elements": [
             {"id": 0, "value": "Ge"},
             {"id": 1, "value": "Ge"},

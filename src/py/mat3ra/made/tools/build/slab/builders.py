@@ -115,7 +115,7 @@ class SlabStrainedSupercellBuilder(SlabBuilder):
     def _generate(self, configuration: _ConfigurationType) -> MaterialWithBuildMetadata:
         slab_material = super()._generate(configuration)
         if configuration.xy_supercell_matrix:
-            slab_material = supercell(slab_material, configuration.xy_supercell_matrix)
+            slab_material = supercell(slab_material, configuration.xy_supercell_matrix.root)
 
         strained_slab_material = strain(
             slab_material,

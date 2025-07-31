@@ -62,7 +62,7 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
             SlabConfiguration: The created slab configuration.
         """
         if isinstance(material_or_dict, dict):
-            material = MaterialWithBuildMetadata.create(material_or_dict)
+            material = MaterialWithBuildMetadata.model_validate(material_or_dict)
         else:
             material = material_or_dict
 
