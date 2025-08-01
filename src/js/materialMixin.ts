@@ -24,7 +24,6 @@ import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
-import { MaterialJSON } from "./types";
 
 export const defaultMaterialConfig: MaterialSchema = {
     name: "Silicon FCC",
@@ -69,10 +68,11 @@ export const defaultMaterialConfig: MaterialSchema = {
 
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
 
-type MaterialMixinProps = ReturnType<typeof materialMixin>;
+export type MaterialMixinProps = ReturnType<typeof materialMixin>;
 type MaterialMixinStaticProps = ReturnType<typeof materialMixinStaticProps>;
 
-export type MaterialMixin = MaterialMixinProps;
+export type MaterialInMemoryEntity = InMemoryEntity & MaterialMixinProps;
+
 export type MaterialMixinConstructor = Constructor<MaterialMixinProps> & MaterialMixinStaticProps;
 
 export type OptionallyConstrainedBasisConfig = BasisConfig &
@@ -84,7 +84,7 @@ export function materialMixin<T extends Base = Base>(item: T) {
     const originalToJSON = item.toJSON.bind(item);
 
     const properties = {
-        toJSON(): MaterialJSON {
+        toJSON(): MaterialSchema {
             return {
                 ...originalToJSON(),
                 lattice: this.Lattice.toJSON(),
@@ -348,19 +348,20 @@ export function materialMixin<T extends Base = Base>(item: T) {
          * Returns a copy of the material with conventional cell constructed instead of primitive.
          */
         getACopyWithConventionalCell(): T {
-            const material = item.clone() as T & typeof properties;
+            const material = item.clone();
 
             // if conventional and primitive cells are the same => return a copy.
-            if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type)) return material;
+            if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type))
+                return material as T & typeof properties;
 
             const conventionalSupercellMatrix =
                 PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[this.Lattice.type];
             const conventionalLatticeType =
                 PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES[this.Lattice.type];
-            const config = supercellTools.generateConfig(material, conventionalSupercellMatrix);
+            const config = supercellTools.generateConfig(this as any, conventionalSupercellMatrix);
 
             config.lattice.type = conventionalLatticeType;
-            config.name = `${material.name} - conventional cell`;
+            config.name = `${this.name} - conventional cell`;
 
             return new (this.constructor as any)(config);
         },

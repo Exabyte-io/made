@@ -21,6 +21,28 @@ BULK_Si_PRIMITIVE: Dict[str, Any] = {
     },
 }
 
+BULK_Si_PRIMITIVIZED = {
+    "metadata": {"build": [], "boundaryConditions": {"type": "pbc", "offset": 0}},
+    "name": "Si2",
+    "basis": {
+        "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
+        "coordinates": [{"id": 0, "value": [0.5, 0.5, 0.5]}, {"id": 1, "value": [0.75, 0.75, 0.75]}],
+        "units": "crystal",
+        "labels": [],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 3.867,
+        "b": 3.867,
+        "c": 3.867,
+        "alpha": 60.0,
+        "beta": 60.0,
+        "gamma": 60.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+    },
+}
+
 
 BULK_Si_CONVENTIONAL: Dict[str, Any] = {
     "name": "Si8",

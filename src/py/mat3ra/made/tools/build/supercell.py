@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.three_dimensional.supercell_matrix_3d import (
@@ -16,7 +16,9 @@ class SupercellConfiguration(BaseConfigurationPydantic):
 
 
 def create_supercell(
-    material: Material, supercell_matrix: Optional[List[List[int]]] = None, scaling_factor: Optional[List[int]] = None
+    material: Union[Material, MaterialWithBuildMetadata],
+    supercell_matrix: Optional[List[List[int]]] = None,
+    scaling_factor: Optional[List[int]] = None,
 ) -> Material:
     """
     Create a supercell of the atoms.

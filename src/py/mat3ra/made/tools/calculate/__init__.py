@@ -2,6 +2,7 @@ from typing import Optional
 
 from ...material import Material
 from ..analyze.other import get_surface_area
+from ..build import MaterialWithBuildMetadata
 from ..build.interface.configuration import InterfaceConfiguration
 from ..build.interface.utils import get_slab
 from ..build.metadata import MaterialBuildMetadata
@@ -114,7 +115,11 @@ def calculate_interfacial_energy(
     substrate_slab = get_slab(interface, part="substrate") if substrate_slab is None else substrate_slab
     film_slab = get_slab(interface, part="film") if film_slab is None else film_slab
 
-    metadata = MaterialBuildMetadata(**interface.metadata)
+    metadata = (
+        interface.metadata
+        if isinstance(interface, MaterialWithBuildMetadata)
+        else MaterialBuildMetadata(**interface.metadata)
+    )
     build_configuration = metadata.build[-1].configuration if metadata.build else {}
     config = InterfaceConfiguration(**build_configuration)
 

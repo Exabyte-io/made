@@ -1,4 +1,4 @@
-from typing import Optional, Any, Type
+from typing import Optional, Any, Type, Union
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.utils import get_orthogonal_c_slab
@@ -6,7 +6,7 @@ from .configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
 )
-from .. import BaseSingleBuilder
+from .. import BaseSingleBuilder, MaterialWithBuildMetadata
 from ...analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...operations.core.unary import supercell, translate
@@ -32,7 +32,7 @@ class CrystalLatticeLinesBuilder(BaseSingleBuilder):
         orthogonal_material = get_orthogonal_c_slab(rotated_material)
         return orthogonal_material
 
-    def _enforce_convention(self, material: Material) -> Material:
+    def _enforce_convention(self, material: Union[Material, MaterialWithBuildMetadata]) -> Material:
         if not self.use_enforce_convention:
             return material
         return translate_to_z_level(material, "bottom")

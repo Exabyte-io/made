@@ -1,9 +1,9 @@
-from typing import Tuple, Optional, TypeVar
+from typing import Tuple, Optional, TypeVar, Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilder, BaseBuilderParameters
+from mat3ra.made.tools.build import BaseBuilder, BaseBuilderParameters, MaterialWithBuildMetadata
 from . import NanoribbonConfiguration
 from .builders import NanoribbonBuilder, NanoribbonBuilderParameters
 from ..lattice_lines import create_lattice_lines_config_and_material
@@ -16,7 +16,7 @@ P = TypeVar("P", bound=BaseBuilderParameters)
 
 
 def create_nanoribbon(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     miller_indices_2d: Optional[Tuple[int, int]] = None,
     edge_type: EdgeTypes = EdgeTypes.zigzag,
     width: int = 2,

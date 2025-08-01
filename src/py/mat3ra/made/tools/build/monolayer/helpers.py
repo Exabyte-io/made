@@ -1,10 +1,13 @@
+from typing import Union
+
 from mat3ra.made.material import Material
 from .builders import MonolayerBuilder
 from .configurations import MonolayerConfiguration
+from .. import MaterialWithBuildMetadata
 
 
 def create_monolayer(
-    crystal: Material,
+    crystal: Union[Material, MaterialWithBuildMetadata],
     vacuum: float = 10.0,
 ) -> Material:
     """

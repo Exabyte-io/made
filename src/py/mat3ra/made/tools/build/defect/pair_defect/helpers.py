@@ -11,10 +11,11 @@ from ..enums import (
     AtomPlacementMethodEnum,
 )
 from ..factories import create_defect_configuration
+from ... import MaterialWithBuildMetadata
 
 
 def create_pair_defect(
-    material: Material,
+    material: Union[Material, MaterialWithBuildMetadata],
     defect_type_1: PointDefectTypeEnum = None,
     coordinate_1: List[float] = None,
     element_1: str = None,
@@ -45,7 +46,7 @@ def create_pair_defect(
         use_cartesian_coordinates: Whether the coordinates are in Cartesian units.
 
     Returns:
-        Material: Material with the pair defect applied.
+        material: Union[Material, MaterialWithBuildMetadata] with the pair defect applied.
     """
     configuration_1 = create_defect_configuration(
         material, defect_type_1, coordinate_1, element_1, placement_method_1, use_cartesian_coordinates

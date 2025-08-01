@@ -1,12 +1,15 @@
+from typing import Union
+
 import numpy as np
 
+from .. import MaterialWithBuildMetadata
 from ...modify import wrap_to_unit_cell
 from ...operations.core.unary import edit_cell
 from ....lattice import Lattice
 from ....material import Material
 
 
-def get_orthogonal_c_slab(material: Material) -> Material:
+def get_orthogonal_c_slab(material: Union[Material, MaterialWithBuildMetadata]) -> Material:
     """
     Make the c-vector orthogonal to the ab plane and update the basis.
 

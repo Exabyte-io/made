@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReciprocalLattice = void 0;
 const constants_1 = require("@mat3ra/code/dist/js/constants");
-const array_almost_equal_1 = __importDefault(require("array-almost-equal"));
 const lodash_1 = __importDefault(require("lodash"));
 const math_1 = __importDefault(require("../../math"));
 const lattice_1 = require("../lattice");
@@ -75,7 +74,7 @@ class ReciprocalLattice extends lattice_1.Lattice {
         const symmPoints = this.symmetryPoints;
         dataPoints.forEach((point, index) => {
             const symmPoint = symmPoints.find((x) => {
-                return (0, array_almost_equal_1.default)(x.coordinates, point, 1e-4);
+                return math_1.default.vEqualWithTolerance(x.coordinates, point, 1e-4);
             });
             if (symmPoint) {
                 kpointPath.push({

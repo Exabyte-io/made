@@ -8,6 +8,7 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 # fmt: on
 
 from mat3ra.made.material import Material
+from ... import MaterialWithBuildMetadata
 from ...defect.point.configuration import PointDefectSiteConfiguration, PointDefectConfiguration
 from ...merge.configuration import MergeConfiguration
 
@@ -28,7 +29,7 @@ class PairDefectConfiguration(MergeConfiguration, PointDefectBaseConfigurationSc
     @classmethod
     def from_parameters(
         cls,
-        crystal: Material,
+        crystal: Union[Material, MaterialWithBuildMetadata],
         primary_defect_configuration: PointDefectConfiguration,
         secondary_defect_configuration: PointDefectConfiguration,
         **kwargs,

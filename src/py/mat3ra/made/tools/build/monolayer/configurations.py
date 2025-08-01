@@ -1,5 +1,7 @@
+from typing import Union
+
 from mat3ra.made.material import Material
-from .. import BaseConfigurationPydantic
+from .. import BaseConfigurationPydantic, MaterialWithBuildMetadata
 
 
 class MonolayerConfiguration(BaseConfigurationPydantic):
@@ -15,5 +17,5 @@ class MonolayerConfiguration(BaseConfigurationPydantic):
         vacuum: Size of the vacuum layer in Angstroms.
     """
 
-    crystal: Material
+    crystal: Union[Material, MaterialWithBuildMetadata]
     vacuum: float = 10.0

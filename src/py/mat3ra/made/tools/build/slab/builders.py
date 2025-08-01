@@ -92,14 +92,16 @@ class SlabBuilder(StackNComponentsBuilder):
             AtomicLayersUniqueRepeatedConfiguration: AtomicLayersUniqueRepeatedBuilder,
         }
 
-    def _generate(self, configuration: SlabConfiguration) -> Material:
+    def _generate(self, configuration: SlabConfiguration) -> MaterialWithBuildMetadata:
         stack_as_material = super()._generate(configuration)
         supercell_slab = supercell(stack_as_material, self.build_parameters.xy_supercell_matrix)
         if self.build_parameters.use_orthogonal_c:
             supercell_slab = get_orthogonal_c_slab(supercell_slab)
         return supercell_slab
 
-    def _update_material_name(self, material: MaterialWithBuildMetadata, configuration: SlabConfiguration) -> Material:
+    def _update_material_name(
+        self, material: MaterialWithBuildMetadata, configuration: SlabConfiguration
+    ) -> MaterialWithBuildMetadata:
         # for example: "Si(001), termination Si_P4/mmm_1, Slab"
         material = AtomicLayersUniqueRepeatedBuilder()._update_material_name(material, configuration.atomic_layers)
         new_name = f"{material.name}, Slab"
@@ -110,7 +112,7 @@ class SlabBuilder(StackNComponentsBuilder):
 class SlabStrainedSupercellBuilder(SlabBuilder):
     _ConfigurationType: Type[SlabStrainedSupercellConfiguration] = SlabStrainedSupercellConfiguration
 
-    def _generate(self, configuration: _ConfigurationType) -> Material:
+    def _generate(self, configuration: _ConfigurationType) -> MaterialWithBuildMetadata:
         slab_material = super()._generate(configuration)
         if configuration.xy_supercell_matrix:
             slab_material = supercell(slab_material, configuration.xy_supercell_matrix)

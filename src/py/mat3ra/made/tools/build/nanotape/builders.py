@@ -1,8 +1,8 @@
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilderParameters
+from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata
 from pydantic import Field
 from ..stack.builders import StackNComponentsBuilder
 from ..lattice_lines.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration, EdgeTypes
@@ -53,14 +53,20 @@ class NanoTapeBuilder(StackNComponentsBuilder):
             return f"({miller_str})"
 
     def _update_material_name_with_edge_type(
-        self, material: Material, crystal_name: str, miller_indices_2d: tuple, structure_type: str
+        self,
+        material: Union[Material, MaterialWithBuildMetadata],
+        crystal_name: str,
+        miller_indices_2d: tuple,
+        structure_type: str,
     ) -> Material:
         edge_type = self._get_edge_type_from_miller_indices(miller_indices_2d)
         miller_str = f"{miller_indices_2d[0]}{miller_indices_2d[1]}"
         material.name = f"{crystal_name} - {edge_type} {structure_type} ({miller_str})"
         return material
 
-    def _update_material_name(self, material: Material, configuration: Any) -> Material:
+    def _update_material_name(
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: Any
+    ) -> Material:
         if isinstance(configuration, NanoTapeConfiguration):
             lattice_lines = configuration.lattice_lines
             material = self._update_material_name_with_edge_type(

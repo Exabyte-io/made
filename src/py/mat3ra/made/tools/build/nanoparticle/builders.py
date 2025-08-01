@@ -1,8 +1,9 @@
-from typing import List, Callable, Dict, Type
+from typing import List, Callable, Dict, Type, Union
 
 from mat3ra.made.material import Material
 from .configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
 from .enums import NanoparticleShapesEnum
+from .. import MaterialWithBuildMetadata
 from ..defect.point.builders import VacancyDefectBuilder
 from ..merge import MergeBuilder
 from ..slab.builders import SlabBuilder
@@ -27,7 +28,9 @@ class NanoparticleBuilder(VacancyDefectBuilder, MergeBuilder):
             VoidRegionConfiguration: VoidRegionBuilder,
         }
 
-    def _update_material_name(self, material: Material, configuration: NanoparticleConfiguration) -> Material:
+    def _update_material_name(
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: NanoparticleConfiguration
+    ) -> Material:
         formula = get_chemical_formula_empirical(material)
 
         material.name = f"{formula} {configuration.void_region_configuration.condition_name} Nanoparticle"
