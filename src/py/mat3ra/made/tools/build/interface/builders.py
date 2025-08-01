@@ -1,5 +1,6 @@
 from typing import Type, Union
 
+import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
 
 from mat3ra.made.material import Material
@@ -81,7 +82,14 @@ class InterfaceBuilder(StackNComponentsBuilder):
     ) -> MaterialWithBuildMetadata:
         if self.build_parameters.make_primitive:
             # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
-            material = get_material_with_primitive_lattice(material, return_original_if_not_reduced=True)
+            primitive_material = get_material_with_primitive_lattice(material, return_original_if_not_reduced=True)
+
+            if primitive_material != material:
+                primitive_material = self._preserve_interface_labels_after_primitive_conversion(
+                    original_material=material, primitive_material=primitive_material
+                )
+
+            material = primitive_material
 
         return super()._post_process(material, configuration)
 
@@ -108,3 +116,53 @@ class InterfaceBuilder(StackNComponentsBuilder):
         name = f"{base_name}, {name_suffix}"
         material.name = name
         return material
+
+    def _preserve_interface_labels_after_primitive_conversion(
+        self, original_material: MaterialWithBuildMetadata, primitive_material: MaterialWithBuildMetadata
+    ) -> MaterialWithBuildMetadata:
+        """
+        Preserve interface part labels (film vs substrate) after primitive lattice conversion.
+
+        Maps atoms from primitive material to closest atoms in original material
+        based on cartesian coordinates and transfers their labels.
+
+        Args:
+            original_material: The original interface material with labels
+            primitive_material: The primitive material without labels
+
+        Returns:
+            MaterialWithBuildMetadata: Primitive material with restored interface labels
+        """
+        if not original_material.basis.labels.values:
+            return primitive_material
+
+        labeled_primitive = primitive_material.clone()
+
+        original_cartesian = original_material.clone()
+        original_cartesian.to_cartesian()
+        original_coords = np.array(original_cartesian.coordinates_array)
+        original_labels = original_material.basis.labels.values
+
+        primitive_cartesian = labeled_primitive.clone()
+        primitive_cartesian.to_cartesian()
+        primitive_coords = np.array(primitive_cartesian.coordinates_array)
+
+        # Map each primitive atom to closest original atom and transfer label
+        primitive_labels = []
+        for primitive_coord in primitive_coords:
+            # Find closest atom in original material
+            distances = np.linalg.norm(original_coords - primitive_coord, axis=1)
+            closest_original_idx = int(np.argmin(distances))
+
+            # Transfer the label from closest original atom
+            closest_label = (
+                original_labels[closest_original_idx]
+                if closest_original_idx < len(original_labels)
+                else InterfacePartsEnum.SUBSTRATE.value
+            )
+            primitive_labels.append(closest_label)
+
+        # Set the mapped labels on the primitive material
+        labeled_primitive.set_labels_from_list(primitive_labels)
+
+        return labeled_primitive
