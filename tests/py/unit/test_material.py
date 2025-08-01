@@ -3,7 +3,7 @@ from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.cell import SI_CONVENTIONAL_CELL
+from unit.fixtures.slab import BULK_Si_CONVENTIONAL
 from unit.utils import assert_two_entities_deep_almost_equal
 
 
@@ -16,11 +16,11 @@ def test_create_default():
 
 
 def test_create():
-    material = Material.create(SI_CONVENTIONAL_CELL)
+    material = Material.create(BULK_Si_CONVENTIONAL)
     assert isinstance(material.basis, Basis)
     assert isinstance(material.basis.coordinates, Coordinates)
     assert isinstance(material.lattice, Lattice)
-    assert_two_entities_deep_almost_equal(material, SI_CONVENTIONAL_CELL)
+    assert_two_entities_deep_almost_equal(material, BULK_Si_CONVENTIONAL)
 
 
 def test_create_with_cell_as_list():

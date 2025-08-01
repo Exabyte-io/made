@@ -2,12 +2,10 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.made.material import Material
+from mat3ra.made.utils import get_atomic_coordinates_extremum
 
-from .analyze.other import (
-    get_atom_indices_with_condition_on_coordinates,
-    get_atom_indices_within_radius_pbc,
-    get_atomic_coordinates_extremum,
-)
+from .analyze.other import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
+from .build.metadata import MaterialWithBuildMetadata
 from .convert import from_ase, to_ase
 from .convert.utils import InterfacePartsEnum
 from .third_party import ase_add_vacuum
@@ -85,7 +83,7 @@ def translate_by_vector(
     atoms = to_ase(material)
     # ASE accepts cartesian coordinates for translation
     atoms.translate(tuple(vector))
-    return Material.create(from_ase(atoms))
+    return MaterialWithBuildMetadata.create(from_ase(atoms))
 
 
 def translate_to_center(material: Material, axes: Optional[List[str]] = None) -> Material:
@@ -113,7 +111,7 @@ def translate_to_center(material: Material, axes: Optional[List[str]] = None) ->
     return material
 
 
-def wrap_to_unit_cell(material: Material) -> Material:
+def wrap_to_unit_cell(material: Material) -> MaterialWithBuildMetadata:
     """
     Wrap the material to the unit cell.
 
@@ -124,10 +122,10 @@ def wrap_to_unit_cell(material: Material) -> Material:
     """
     atoms = to_ase(material)
     atoms.wrap()
-    return Material.create(from_ase(atoms))
+    return MaterialWithBuildMetadata.create(from_ase(atoms))
 
 
-def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> Material:
+def filter_by_ids(material: Material, ids: List[int], invert: bool = False, reset_ids: bool = False) -> Material:
     """
     Filter out only atoms corresponding to the ids.
 
@@ -135,21 +133,23 @@ def filter_by_ids(material: Material, ids: List[int], invert: bool = False) -> M
         material (Material): The material object to filter.
         ids (List[int]): The ids to filter by.
         invert (bool): Whether to invert the selection.
+        reset_ids (bool): Whether to reset the ids of the filtered atoms (to start from 0).
 
     Returns:
         Material: The filtered material object.
     """
     new_material = material.clone()
-    new_material.basis.filter_atoms_by_ids(ids, invert)
+    new_material.basis.filter_atoms_by_ids(ids, invert, reset_ids=reset_ids)
     return new_material
 
 
 def filter_by_condition_on_coordinates(
-    material: Material,
+    material: MaterialWithBuildMetadata,
     condition: Callable[[List[float]], bool],
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
-) -> Material:
+    reset_ids: bool = False,
+) -> MaterialWithBuildMetadata:
     """
     Filter atoms based on a condition on their coordinates.
 
@@ -169,17 +169,17 @@ def filter_by_condition_on_coordinates(
         use_cartesian_coordinates=use_cartesian_coordinates,
     )
 
-    new_material = filter_by_ids(new_material, ids, invert=invert_selection)
+    new_material = filter_by_ids(new_material, ids, invert=invert_selection, reset_ids=reset_ids)
     return new_material
 
 
 def filter_by_layers(
-    material: Material,
+    material: MaterialWithBuildMetadata,
     center_coordinate: List[float] = [0, 0, 0],
     central_atom_id: Optional[int] = None,
     layer_thickness: float = 1.0,
     invert_selection: bool = False,
-) -> Material:
+) -> MaterialWithBuildMetadata:
     """
     Filter out atoms within a specified layer thickness of a central atom along c-vector direction.
 
@@ -382,7 +382,8 @@ def filter_by_box(
     tolerance: float = 0.0,
     use_cartesian_coordinates: bool = False,
     invert_selection: bool = False,
-) -> Material:
+    reset_ids: bool = False,
+) -> MaterialWithBuildMetadata:
     """
     Get material with atoms that are within or outside an XYZ box.
 
@@ -409,7 +410,11 @@ def filter_by_box(
         return is_coordinate_in_box(coordinate, min_coordinate, max_coordinate)
 
     return filter_by_condition_on_coordinates(
-        material, condition, use_cartesian_coordinates=use_cartesian_coordinates, invert_selection=invert_selection
+        material,
+        condition,
+        use_cartesian_coordinates=use_cartesian_coordinates,
+        invert_selection=invert_selection,
+        reset_ids=reset_ids,
     )
 
 
@@ -493,7 +498,7 @@ def add_vacuum(material: Material, vacuum: float = 5.0, on_top=True, to_bottom=F
     new_material_atoms = to_ase(material)
     vacuum_amount = vacuum * 2 if on_top and to_bottom else vacuum
     ase_add_vacuum(new_material_atoms, vacuum_amount)
-    new_material = Material.create(from_ase(new_material_atoms))
+    new_material = MaterialWithBuildMetadata.create(from_ase(new_material_atoms))
     if to_bottom and not on_top:
         new_material = translate_to_z_level(new_material, z_level="top")
     elif on_top and to_bottom:
@@ -529,7 +534,7 @@ def add_vacuum_sides(material: Material, vacuum: float = 5.0, on_x=False, on_y=F
         new_y_length = max_y - min_y + 2 * vacuum
         new_lattice_b_vector = [0, new_y_length, 0]
 
-    new_material.set_new_lattice_vectors(new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector)
+    new_material.set_lattice_vectors(new_lattice_a_vector, new_lattice_b_vector, new_lattice_c_vector)
     new_material = translate_by_vector(
         new_material,
         [-min_x + vacuum if on_x else 0, -min_y + vacuum if on_y else 0, 0],
@@ -592,7 +597,7 @@ def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True,
     atoms.rotate(v=axis, a=angle, center="COU", rotate_cell=rotate_cell)
     if wrap:
         atoms.wrap()
-    new_material = Material.create(from_ase(atoms))
+    new_material = MaterialWithBuildMetadata.create(from_ase(atoms))
     if original_is_in_cartesian_units:
         new_material.to_cartesian()
     return new_material
@@ -635,12 +640,13 @@ def interface_displace_part(
 
 
 def interface_get_part(
-    interface: Material,
+    interface: MaterialWithBuildMetadata,
     part: InterfacePartsEnum = InterfacePartsEnum.FILM,
 ) -> Material:
-    if interface.metadata["build"]["configuration"]["type"] != "InterfaceConfiguration":
+    metadata = interface.metadata
+    allowed_configurations = ["InterfaceConfiguration", "StackConfiguration"]
+    if metadata.build[-1].configuration.get("type") not in allowed_configurations:
         raise ValueError("The material is not an interface.")
     interface_part_material = interface.clone()
-    film_atoms_basis = interface_part_material.basis.filter_atoms_by_labels([int(part)])
-    interface_part_material.basis = film_atoms_basis
+    interface_part_material.basis.filter_atoms_by_labels([part.value])
     return interface_part_material

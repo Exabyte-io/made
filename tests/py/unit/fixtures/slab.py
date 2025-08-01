@@ -1,24 +1,38 @@
 import copy
-from functools import reduce
 from typing import Any, Dict
 
-from .cell import SI_CONVENTIONAL_CELL
+from .bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE  # , SI_CONVENTIONAL_CELL_FILTERED
 
-SI_SLAB_001_CONFIGURATION: Dict[str, Any] = {
+SI_SLAB_001_CONFIGURATION_FROM_PRIMITIVE = {
     "type": "SlabConfiguration",
-    "bulk": SI_CONVENTIONAL_CELL,
+    "bulk": BULK_Si_PRIMITIVE,
     "miller_indices": (0, 0, 1),
-    "number_of_layers": 1,
+    "number_of_layers": 2,
+    "vacuum": 5.0,
+    "xy_supercell_matrix": [[1, 0], [0, 1]],
+    "use_conventional_cell": False,
+}
+
+CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL: Dict[str, Any] = {
+    "bulk": BULK_Si_CONVENTIONAL,
+    "miller_indices": (0, 0, 1),
+    "number_of_layers": 2,
     "vacuum": 5.0,
     "xy_supercell_matrix": [[1, 0], [0, 1]],
     "use_conventional_cell": True,
-    "use_orthogonal_z": True,
-    "make_primitive": True,
+}
+
+SI_SLAB_001_BUILD_PARAMETERS: Dict[str, Any] = {
+    "min_vacuum_size": 0.0,
+    "reorient_lattice": True,
+    "symmetrize": True,
+    "make_primitive": False,
+    "use_orthogonal_c": True,
 }
 
 
-SI_SLAB_001: Dict[str, Any] = {
-    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+SI_SLAB_001_2_ATOMS: Dict[str, Any] = {
+    "name": "Si(001), termination Si_P4/mmm_1, Slab",
     "basis": {
         "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}],
         "coordinates": [
@@ -42,12 +56,94 @@ SI_SLAB_001: Dict[str, Any] = {
     "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {"configuration": SI_SLAB_001_CONFIGURATION, "termination": "Si_P4/mmm_1"},
+        "build": [
+            {
+                "configuration": CREATE_SLAB_PARAMETERS_SI_001_USE_CONVENTIONAL,
+                "build_parameters": SI_SLAB_001_BUILD_PARAMETERS,
+            }
+        ],
     },
 }
 
-SI_SLAB_100: Dict[str, Any] = {
-    "name": "Si8(001), termination Si_P4/mmm_1, Slab",
+SI_CONVENTIONAL_SLAB_001: Dict[str, Any] = {
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
+    "basis": {
+        "constraints": [],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.0, 0.257353832]},
+            {"id": 1, "value": [0.25, 0.25, 0.17156945]},
+            {"id": 2, "value": [0.5, 0.5, 0.085785068]},
+            {"id": 3, "value": [0.25, 0.75, 6.86e-07]},
+            {"id": 4, "value": [0.0, 0.0, 0.085785068]},
+            {"id": 5, "value": [0.75, 0.25, 6.86e-07]},
+            {"id": 6, "value": [0.0, 0.5, 0.257353832]},
+            {"id": 7, "value": [0.75, 0.75, 0.17156945]},
+            {"id": 8, "value": [0.5, 0.0, 0.600491359]},
+            {"id": 9, "value": [0.25, 0.25, 0.514706977]},
+            {"id": 10, "value": [0.5, 0.5, 0.428922596]},
+            {"id": 11, "value": [0.25, 0.75, 0.343138214]},
+            {"id": 12, "value": [0.0, 0.0, 0.428922596]},
+            {"id": 13, "value": [0.75, 0.25, 0.343138214]},
+            {"id": 14, "value": [0.0, 0.5, 0.600491359]},
+            {"id": 15, "value": [0.75, 0.75, 0.514706977]},
+        ],
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+            {"id": 4, "value": "Si"},
+            {"id": 5, "value": "Si"},
+            {"id": 6, "value": "Si"},
+            {"id": 7, "value": "Si"},
+            {"id": 8, "value": "Si"},
+            {"id": 9, "value": "Si"},
+            {"id": 10, "value": "Si"},
+            {"id": 11, "value": "Si"},
+            {"id": 12, "value": "Si"},
+            {"id": 13, "value": "Si"},
+            {"id": 14, "value": "Si"},
+            {"id": 15, "value": "Si"},
+        ],
+        "labels": [],
+        "units": "crystal",
+    },
+    "lattice": {
+        "a": 5.468763846,
+        "b": 5.468763846,
+        "c": 15.937527692,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+    },
+    "isNonPeriodic": False,
+    "metadata": {
+        "boundaryConditions": {"type": "pbc", "offset": 0},
+        "build": [
+            {
+                "configuration": {
+                    "type": "SlabConfiguration",
+                    "stack_components": [
+                        {
+                            "crystal": BULK_Si_CONVENTIONAL,
+                            "miller_indices": [0, 0, 1],
+                            "number_of_repetitions": 2,
+                            "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                            "use_conventional_cell": True,
+                        },
+                        {"type": "VacuumConfiguration", "direction": "z", "size": 5.0, "crystal": BULK_Si_CONVENTIONAL},
+                    ],
+                    # TODO: should be in `build_parameters`
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                },
+            }
+        ],
+    },
+}
+
+SLAB_SI_CONVENTIONAL_001_NO_VACUUM: Dict[str, Any] = {
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
@@ -58,138 +154,106 @@ SI_SLAB_100: Dict[str, Any] = {
             {"id": 5, "value": "Si"},
             {"id": 6, "value": "Si"},
             {"id": 7, "value": "Si"},
+            {"id": 8, "value": "Si"},
+            {"id": 9, "value": "Si"},
+            {"id": 10, "value": "Si"},
+            {"id": 11, "value": "Si"},
+            {"id": 12, "value": "Si"},
+            {"id": 13, "value": "Si"},
+            {"id": 14, "value": "Si"},
+            {"id": 15, "value": "Si"},
         ],
         "coordinates": [
-            {"id": 0, "value": [0.5, 0.5, 0.729167246]},
-            {"id": 1, "value": [0.5, 0.0, 0.814951628]},
-            {"id": 2, "value": [0.0, 0.0, 0.90073601]},
-            {"id": 3, "value": [0.0, 0.5, 0.986520391]},
-            {"id": 4, "value": [0.5, 0.5, 0.386029718]},
-            {"id": 5, "value": [0.5, 0.0, 0.4718141]},
-            {"id": 6, "value": [0.0, 0.0, 0.557598482]},
-            {"id": 7, "value": [0.0, 0.5, 0.643382864]},
+            {"id": 0, "value": [0.5, 0, 0.375001]},
+            {"id": 1, "value": [0.25, 0.25, 0.250001]},
+            {"id": 2, "value": [0.5, 0.5, 0.125001]},
+            {"id": 3, "value": [0.25, 0.75, 0.000001]},
+            {"id": 4, "value": [0, 0, 0.125001]},
+            {"id": 5, "value": [0.75, 0.25, 0.000001]},
+            {"id": 6, "value": [0, 0.5, 0.375001]},
+            {"id": 7, "value": [0.75, 0.75, 0.250001]},
+            {"id": 8, "value": [0.5, 0, 0.875001]},
+            {"id": 9, "value": [0.25, 0.25, 0.750001]},
+            {"id": 10, "value": [0.5, 0.5, 0.625001]},
+            {"id": 11, "value": [0.25, 0.75, 0.500001]},
+            {"id": 12, "value": [0, 0, 0.625001]},
+            {"id": 13, "value": [0.75, 0.25, 0.500001]},
+            {"id": 14, "value": [0, 0.5, 0.875001]},
+            {"id": 15, "value": [0.75, 0.75, 0.750001]},
         ],
         "units": "crystal",
-        "constraints": [],
         "labels": [],
+        "constraints": [],
     },
     "lattice": {
-        "a": 3.867,
-        "b": 3.867,
-        "c": 15.937527692,
-        "alpha": 90.0,
-        "beta": 90.0,
-        "gamma": 90.0,
+        "a": 5.468763846,
+        "b": 5.468763846,
+        "c": 10.937527692,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
     },
-    "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "termination": "Si_P4/mmm_1",
-            "configuration": {
-                "type": "SlabConfiguration",
-                "bulk": {
-                    "name": "Si8",
-                    "basis": {
-                        "elements": [
-                            {"id": 0, "value": "Si"},
-                            {"id": 1, "value": "Si"},
-                            {"id": 2, "value": "Si"},
-                            {"id": 3, "value": "Si"},
-                            {"id": 4, "value": "Si"},
-                            {"id": 5, "value": "Si"},
-                            {"id": 6, "value": "Si"},
-                            {"id": 7, "value": "Si"},
-                        ],
-                        "coordinates": [
-                            {"id": 0, "value": [0.5, 0.0, 0.0]},
-                            {"id": 1, "value": [0.25, 0.25, 0.75]},
-                            {"id": 2, "value": [0.5, 0.5, 0.5]},
-                            {"id": 3, "value": [0.25, 0.75, 0.25]},
-                            {"id": 4, "value": [0.0, 0.0, 0.5]},
-                            {"id": 5, "value": [0.75, 0.25, 0.25]},
-                            {"id": 6, "value": [0.0, 0.5, 0.0]},
-                            {"id": 7, "value": [0.75, 0.75, 0.75]},
-                        ],
-                        "units": "crystal",
-                        "constraints": [],
-                        "labels": [],
-                    },
-                    "lattice": {
-                        "a": 5.468763846,
-                        "b": 5.468763846,
-                        "c": 5.468763846,
-                        "alpha": 90.0,
-                        "beta": 90.0,
-                        "gamma": 90.0,
-                        "units": {"length": "angstrom", "angle": "degree"},
-                        "type": "TRI",
-                    },
-                    "isNonPeriodic": False,
-                    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
-                },
-                "miller_indices": (0, 0, 1),
-                "number_of_layers": 2,
-                "vacuum": 5.0,
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-                "use_conventional_cell": True,
-                "use_orthogonal_z": True,
-                "make_primitive": True,
-            },
-        },
     },
 }
 
 
-SI_SLAB_PASSIVATED = {
-    "name": "Si8(001), termination Si_P4/mmm_1, Slab H-passivated",
+SI_PRIMITIVE_SLAB_001: Dict[str, Any] = {
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
     "basis": {
         "elements": [
             {"id": 0, "value": "Si"},
             {"id": 1, "value": "Si"},
-            {"id": 2, "value": "H"},
-            {"id": 3, "value": "H"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
         ],
         "coordinates": [
-            {"id": 0, "value": [0.583333333, 0.833333333, 0.548382368]},
-            {"id": 1, "value": [0.25, 0.5, 0.451617612]},
-            {"id": 2, "value": [0.25, 0.5, 0.270187076]},
-            {"id": 3, "value": [0.583333333, 0.833333333, 0.729812904]},
+            {"id": 0, "value": [0.250000667, 0.250000667, 0.227757008]},
+            {"id": 1, "value": [0.250000666, 0.250000666, 6.07e-07]},
+            {"id": 2, "value": [0.583334, 0.583334, 0.531432208]},
+            {"id": 3, "value": [0.583334, 0.583334, 0.303675808]},
         ],
         "units": "crystal",
         "labels": [],
+        "constraints": [],
     },
     "lattice": {
         "a": 3.867,
         "b": 3.867,
-        "c": 8.157392279,
+        "c": 10.397267462,
         "alpha": 90.0,
         "beta": 90.0,
         "gamma": 60.0,
         "units": {"length": "angstrom", "angle": "degree"},
         "type": "TRI",
     },
-    "isNonPeriodic": False,
     "metadata": {
         "boundaryConditions": {"type": "pbc", "offset": 0},
-        "build": {
-            "configuration": {
-                "type": "PassivationConfiguration",
-                # TODO: `basis` retains "cell" leading to a mismatch in the test
-                "slab": reduce(lambda d, key: d.get(key, {}), ["basis"], SI_SLAB_001).pop("cell", None),
-                "passivant": "H",
-                "bond_length": 1.48,
-                "surface": "both",
-            },
-            "termination": "Si_P4/mmm_1",
-        },
+        "build": [
+            {
+                "configuration": {
+                    "type": "SlabConfiguration",
+                    "stack_components": [
+                        {
+                            "crystal": BULK_Si_PRIMITIVE,
+                            "miller_indices": [0, 0, 1],
+                            "number_of_repetitions": 2,
+                            "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                            "use_conventional_cell": False,
+                        },
+                        {"type": "VacuumConfiguration", "direction": "z", "size": 5.0},
+                    ],
+                },
+                "build_parameters": {"use_orthogonal_c": True, "xy_supercell_matrix": [[1, 0], [0, 1]]},
+            }
+        ],
     },
 }
 
-
-SI_SLAB_001_WITH_VACUUM = copy.deepcopy(SI_SLAB_001)
+SI_SLAB_001_WITH_VACUUM = copy.deepcopy(SI_SLAB_001_2_ATOMS)
 SI_SLAB_001_WITH_VACUUM["lattice"]["c"] = 13.157392279
 # The crystal xy coordinates are the same as SI_SLAB_001, but the z-coordinates are different
 SI_SLAB_001_WITH_VACUUM["basis"]["coordinates"] = [
@@ -201,14 +265,14 @@ SI_SLAB_DEFAULT_PARAMETERS = {
     "basis": {
         "constraints": [],
         "coordinates": [
-            {"id": 0, "value": [0.5, 0.0, 0.457090105]},
-            {"id": 1, "value": [0.25, 0.25, 0.326492932]},
-            {"id": 2, "value": [0.5, 0.5, 0.195895759]},
-            {"id": 3, "value": [0.25, 0.75, 0.065298586]},
-            {"id": 4, "value": [0.0, 0.0, 0.195895759]},
-            {"id": 5, "value": [0.75, 0.25, 0.065298586]},
-            {"id": 6, "value": [0.0, 0.5, 0.457090105]},
-            {"id": 7, "value": [0.75, 0.75, 0.326492932]},
+            {"id": 0, "value": [0.5, 0, 0.309343941]},
+            {"id": 1, "value": [0.25, 0.25, 0.220959958]},
+            {"id": 2, "value": [0.5, 0.5, 0.132575975]},
+            {"id": 3, "value": [0.25, 0.75, 0.044191992]},
+            {"id": 4, "value": [0, 0, 0.132575975]},
+            {"id": 5, "value": [0.75, 0.25, 0.044191992]},
+            {"id": 6, "value": [0, 0.5, 0.309343941]},
+            {"id": 7, "value": [0.75, 0.75, 0.220959958]},
         ],
         "elements": [
             {"id": 0, "value": "Si"},
@@ -227,30 +291,272 @@ SI_SLAB_DEFAULT_PARAMETERS = {
     "isNonPeriodic": False,
     "lattice": {
         "a": 5.468763846,
-        "alpha": 90.0,
         "b": 5.468763846,
+        "c": 15.468763846,
+        "alpha": 90.0,
         "beta": 90.0,
-        "c": 10.468763846,
         "gamma": 90.0,
         "type": "TRI",
         "units": {"angle": "degree", "length": "angstrom"},
     },
     "metadata": {
         "boundaryConditions": {"offset": 0, "type": "pbc"},
-        "build": {
-            "configuration": {
-                "bulk": SI_CONVENTIONAL_CELL,
-                "make_primitive": False,
-                "miller_indices": [0, 0, 1],
-                "number_of_layers": 1,
-                "type": "SlabConfiguration",
-                "use_conventional_cell": True,
-                "use_orthogonal_z": False,
-                "vacuum": 5.0,
-                "xy_supercell_matrix": [[1, 0], [0, 1]],
-            },
-            "termination": "Si_P4/mmm_2",
-        },
+        "build": [
+            {
+                "configuration": {
+                    "type": "SlabConfiguration",
+                    "stack_components": [
+                        {
+                            "crystal": BULK_Si_CONVENTIONAL,
+                            "miller_indices": [0, 0, 1],
+                            "number_of_repetitions": 1,
+                            "termination_top": {"chemical_elements": "Si", "space_group_symmetry_label": "P4/mmm_2"},
+                            "use_conventional_cell": True,
+                        },
+                        {"type": "VacuumConfiguration", "direction": "z", "size": 10.0},
+                    ],
+                    "xy_supercell_matrix": [[1, 0], [0, 1]],
+                },
+            }
+        ],
     },
-    "name": "Si8(001), termination Si_P4/mmm_2, Slab",
+    "name": "Si(001), termination Si_P4/mmm_2, Slab",
+}
+
+SI_SLAB_001_ADDED_LAYER = {
+    "name": "Si(001), termination Si_P4/mmm_2, Slab, Slab Stack",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+            {"id": 4, "value": "Si"},
+            {"id": 5, "value": "Si"},
+            {"id": 6, "value": "Si"},
+            {"id": 7, "value": "Si"},
+            {"id": 8, "value": "Si"},
+            {"id": 9, "value": "Si"},
+            {"id": 10, "value": "Si"},
+            {"id": 11, "value": "Si"},
+            {"id": 12, "value": "Si"},
+            {"id": 13, "value": "Si"},
+            {"id": 14, "value": "Si"},
+            {"id": 15, "value": "Si"},
+            {"id": 16, "value": "Si"},
+            {"id": 17, "value": "Si"},
+            {"id": 18, "value": "Si"},
+            {"id": 19, "value": "Si"},
+            {"id": 20, "value": "Si"},
+            {"id": 21, "value": "Si"},
+            {"id": 22, "value": "Si"},
+            {"id": 23, "value": "Si"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.0, 0.191606953]},
+            {"id": 1, "value": [0.25, 0.25, 0.127738302]},
+            {"id": 2, "value": [0.5, 0.5, 0.063869651]},
+            {"id": 3, "value": [0.25, 0.75, 1e-06]},
+            {"id": 4, "value": [0.0, 0.0, 0.063869651]},
+            {"id": 5, "value": [0.75, 0.25, 1e-06]},
+            {"id": 6, "value": [0, 0.5, 0.191606953]},
+            {"id": 7, "value": [0.75, 0.75, 0.127738302]},
+            {"id": 8, "value": [0.5, 0.0, 0.447081557]},
+            {"id": 9, "value": [0.25, 0.25, 0.383212906]},
+            {"id": 10, "value": [0.5, 0.5, 0.319344254]},
+            {"id": 11, "value": [0.25, 0.75, 0.255475604]},
+            {"id": 12, "value": [0.0, 0.0, 0.319344254]},
+            {"id": 13, "value": [0.75, 0.25, 0.255475604]},
+            {"id": 14, "value": [0.0, 0.5, 0.447081557]},
+            {"id": 15, "value": [0.75, 0.75, 0.383212906]},
+            {"id": 16, "value": [0.5, 0.0, 0.70255616]},
+            {"id": 17, "value": [0.25, 0.25, 0.638687509]},
+            {"id": 18, "value": [0.5, 0.5, 0.574818859]},
+            {"id": 19, "value": [0.25, 0.75, 0.510950207]},
+            {"id": 20, "value": [0.0, 0.0, 0.574818859]},
+            {"id": 21, "value": [0.75, 0.25, 0.510950207]},
+            {"id": 22, "value": [0.0, 0.5, 0.70255616]},
+            {"id": 23, "value": [0.75, 0.75, 0.638687509]},
+        ],
+        "units": "crystal",
+        "labels": [],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 5.468763846,
+        "b": 5.468763846,
+        "c": 21.406291538,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+    },
+}
+
+SI_SLAB_001_ADDED_FRACTIONAL_LAYER = {
+    "name": "Si(001), termination Si_P4/mmm_2, Slab, Slab Stack",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Si"},
+            {"id": 1, "value": "Si"},
+            {"id": 2, "value": "Si"},
+            {"id": 3, "value": "Si"},
+            {"id": 4, "value": "Si"},
+            {"id": 5, "value": "Si"},
+            {"id": 6, "value": "Si"},
+            {"id": 7, "value": "Si"},
+            {"id": 8, "value": "Si"},
+            {"id": 9, "value": "Si"},
+            {"id": 10, "value": "Si"},
+            {"id": 11, "value": "Si"},
+            {"id": 12, "value": "Si"},
+            {"id": 13, "value": "Si"},
+            {"id": 14, "value": "Si"},
+            {"id": 15, "value": "Si"},
+            {"id": 16, "value": "Si"},
+            {"id": 17, "value": "Si"},
+            {"id": 18, "value": "Si"},
+            {"id": 19, "value": "Si"},
+            {"id": 20, "value": "Si"},
+            {"id": 21, "value": "Si"},
+            {"id": 22, "value": "Si"},
+            {"id": 23, "value": "Si"},
+            {"id": 24, "value": "Si"},
+            {"id": 25, "value": "Si"},
+            {"id": 26, "value": "Si"},
+            {"id": 27, "value": "Si"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.0, 0.152616961]},
+            {"id": 1, "value": [0.25, 0.25, 0.101744844]},
+            {"id": 2, "value": [0.5, 0.5, 0.050872727]},
+            {"id": 3, "value": [0.25, 0.75, 6.1e-07]},
+            {"id": 4, "value": [0.0, 0.0, 0.050872727]},
+            {"id": 5, "value": [0.75, 0.25, 6.1e-07]},
+            {"id": 6, "value": [0.0, 0.5, 0.152616961]},
+            {"id": 7, "value": [0.75, 0.75, 0.101744844]},
+            {"id": 8, "value": [0.5, 0.0, 0.356105429]},
+            {"id": 9, "value": [0.25, 0.25, 0.305233312]},
+            {"id": 10, "value": [0.5, 0.5, 0.254361195]},
+            {"id": 11, "value": [0.25, 0.75, 0.203489078]},
+            {"id": 12, "value": [0.0, 0.0, 0.254361195]},
+            {"id": 13, "value": [0.75, 0.25, 0.203489078]},
+            {"id": 14, "value": [0.0, 0.5, 0.356105429]},
+            {"id": 15, "value": [0.75, 0.75, 0.305233312]},
+            {"id": 16, "value": [0.5, 0.0, 0.559593897]},
+            {"id": 17, "value": [0.25, 0.25, 0.50872178]},
+            {"id": 18, "value": [0.5, 0.5, 0.457849663]},
+            {"id": 19, "value": [0.25, 0.75, 0.406977546]},
+            {"id": 20, "value": [0.0, 0.0, 0.457849663]},
+            {"id": 21, "value": [0.75, 0.25, 0.406977546]},
+            {"id": 22, "value": [0.0, 0.5, 0.559593897]},
+            {"id": 23, "value": [0.75, 0.75, 0.50872178]},
+            {"id": 24, "value": [0.5, 0.5, 0.661337724]},
+            {"id": 25, "value": [0.25, 0.75, 0.610465607]},
+            {"id": 26, "value": [0.0, 0.0, 0.661337724]},
+            {"id": 27, "value": [0.75, 0.25, 0.610465607]},
+        ],
+        "units": "crystal",
+        "labels": [],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 5.468763846,
+        "b": 5.468763846,
+        "c": 26.875055384,
+        "alpha": 90.0,
+        "beta": 90.0,
+        "gamma": 90.0,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+    },
+}
+
+SLAB_SrTiO3_011_TERMINATION_O2 = {
+    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+    "name": "O3SrTi(011), termination O2_Pmmm_2, Slab",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Sr"},
+            {"id": 1, "value": "Ti"},
+            {"id": 2, "value": "O"},
+            {"id": 3, "value": "O"},
+            {"id": 4, "value": "O"},
+            {"id": 5, "value": "Sr"},
+            {"id": 6, "value": "Ti"},
+            {"id": 7, "value": "O"},
+            {"id": 8, "value": "O"},
+            {"id": 9, "value": "O"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0, 0.999999, 6.1e-7]},
+            {"id": 1, "value": [0.5, 0.499999, 6.1e-7]},
+            {"id": 2, "value": [0.5, 0.249999, 0.152537778]},
+            {"id": 3, "value": [0.5, 0.749999, 0.152537778]},
+            {"id": 4, "value": [0, 0.499999, 6.1e-7]},
+            {"id": 5, "value": [0, 0.499999, 0.305074946]},
+            {"id": 6, "value": [0.5, 0.999999, 0.305074946]},
+            {"id": 7, "value": [0.5, 0.749999, 0.457612114]},
+            {"id": 8, "value": [0.5, 0.249999, 0.457612114]},
+            {"id": 9, "value": [0, 0.999999, 0.305074946]},
+        ],
+        "units": "crystal",
+        "labels": [],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 3.912701,
+        "b": 5.53339482,
+        "c": 9.068928726,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+    },
+}
+
+SLAB_SrTiO3_011_TERMINATION_SrTiO = {
+    "metadata": {"boundaryConditions": {"type": "pbc", "offset": 0}},
+    "name": "O3SrTi(011), termination SrTiO_Pmmm_3, Slab",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Sr"},
+            {"id": 1, "value": "Ti"},
+            {"id": 2, "value": "O"},
+            {"id": 3, "value": "O"},
+            {"id": 4, "value": "O"},
+            {"id": 5, "value": "Sr"},
+            {"id": 6, "value": "Ti"},
+            {"id": 7, "value": "O"},
+            {"id": 8, "value": "O"},
+            {"id": 9, "value": "O"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0, 0.749999, 0.152537778]},
+            {"id": 1, "value": [0.5, 0.249999, 0.152537778]},
+            {"id": 2, "value": [0.5, 0.499999, 6.1e-7]},
+            {"id": 3, "value": [0.5, 0.999999, 6.1e-7]},
+            {"id": 4, "value": [0, 0.249999, 0.152537778]},
+            {"id": 5, "value": [0, 0.249999, 0.457612114]},
+            {"id": 6, "value": [0.5, 0.749999, 0.457612114]},
+            {"id": 7, "value": [0.5, 0.999999, 0.305074946]},
+            {"id": 8, "value": [0.5, 0.499999, 0.305074946]},
+            {"id": 9, "value": [0, 0.749999, 0.457612114]},
+        ],
+        "units": "crystal",
+        "labels": [],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 3.912701,
+        "b": 5.53339482,
+        "c": 9.068928726,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+    },
 }

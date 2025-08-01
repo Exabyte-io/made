@@ -2,7 +2,7 @@
 
 src/types.ts
 .vscode/
-
+.cursor/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -182,3 +182,4 @@ node_modules/
 *.DS_Store
 
 tsconfig.tsbuildinfo
+.secrets

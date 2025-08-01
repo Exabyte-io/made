@@ -1,9 +1,12 @@
-from typing import List, Optional, Union
+from typing import Optional
 
 from ...material import Material
 from ..analyze.other import get_surface_area
+from ..build import MaterialWithBuildMetadata
+from ..build.interface.configuration import InterfaceConfiguration
 from ..build.interface.utils import get_slab
-from ..convert import decorator_convert_material_args_kwargs_to_atoms, from_ase
+from ..build.metadata import MaterialBuildMetadata
+from ..convert import decorator_convert_material_args_kwargs_to_atoms
 from ..third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
 from .interaction_functions import sum_of_inverse_distances_squared
 
@@ -112,16 +115,17 @@ def calculate_interfacial_energy(
     substrate_slab = get_slab(interface, part="substrate") if substrate_slab is None else substrate_slab
     film_slab = get_slab(interface, part="film") if film_slab is None else film_slab
 
-    build_configuration = interface.metadata["build"]["configuration"] if "build" in interface.metadata else {}
+    metadata = (
+        interface.metadata
+        if isinstance(interface, MaterialWithBuildMetadata)
+        else MaterialBuildMetadata(**interface.metadata)
+    )
+    build_configuration = metadata.build[-1].configuration if metadata.build else {}
+    config = InterfaceConfiguration(**build_configuration)
+
     try:
-        substrate_bulk = (
-            Material.create(build_configuration["substrate_configuration"]["bulk"])
-            if substrate_bulk is None
-            else substrate_bulk
-        )
-        film_bulk = (
-            Material.create(build_configuration["film_configuration"]["bulk"]) if film_bulk is None else film_bulk
-        )
+        substrate_bulk = config.substrate_configuration.atomic_layers.crystal
+        film_bulk = config.film_configuration.atomic_layers.crystal
     except KeyError:
         raise ValueError("The substrate and film bulk materials must be provided or defined in the interface metadata.")
     surface_energy_substrate = calculate_surface_energy(substrate_slab, substrate_bulk, calculator)

@@ -1,94 +1,116 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.grain_boundary import (
-    SlabGrainBoundaryBuilder,
-    SlabGrainBoundaryConfiguration,
-    SurfaceGrainBoundaryBuilder,
-    SurfaceGrainBoundaryBuilderParameters,
-    SurfaceGrainBoundaryConfiguration,
-    create_grain_boundary,
-)
-from mat3ra.made.tools.build.grain_boundary.builders import SlabGrainBoundaryBuilderParameters
-from mat3ra.made.tools.build.slab import SlabConfiguration, get_terminations
-from mat3ra.utils import assertion as assertion_utils
+from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
+from mat3ra.made.tools.build.grain_boundary.builders import GrainBoundaryPlanarBuilder
+from mat3ra.made.tools.build.grain_boundary.configuration import GrainBoundaryPlanarConfiguration
+from mat3ra.made.tools.build.grain_boundary.helpers import create_grain_boundary_linear, create_grain_boundary_planar
 
+from .fixtures.bulk import BULK_Si_CONVENTIONAL
+from .fixtures.grain_boundary import GRAIN_BOUNDARY_LINEAR_SI, GRAIN_BOUNDARY_SI_001_011
 from .fixtures.monolayer import GRAPHENE
+from .utils import assert_two_entities_deep_almost_equal
 
 
-@pytest.mark.skip(reason="Test is failing on GHA due to slab generation differences between GHA and local")
-def test_slab_grain_boundary_builder():
-    material = Material.create_default()
-    phase_1_configuration = SlabConfiguration(
-        bulk=material,
-        vacuum=0,
-        number_of_layers=2,
-        miller_indices=(0, 0, 1),
+@pytest.mark.parametrize(
+    "material_config, phase_1_miller, phase_2_miller, gap, translation_vector, max_area, expected_material_config",
+    [
+        (
+            BULK_Si_CONVENTIONAL,
+            (0, 0, 1),
+            (0, 1, 1),
+            2.0,
+            [2.0, 1.0],
+            250,
+            GRAIN_BOUNDARY_SI_001_011,
+        ),
+    ],
+)
+def test_create_grain_boundary_planar(
+    material_config, phase_1_miller, phase_2_miller, gap, translation_vector, max_area, expected_material_config
+):
+    material = Material.create(material_config)
+
+    grain_boundary = create_grain_boundary_planar(
+        phase_1_material=material,
+        phase_1_miller_indices=phase_1_miller,
+        phase_2_miller_indices=phase_2_miller,
+        phase_1_thickness=1,
+        phase_2_thickness=1,
+        translation_vector=translation_vector,
+        gap=gap,
+        max_area=max_area,
     )
 
-    phase_2_configuration = SlabConfiguration(
-        bulk=material,
-        vacuum=0,
-        number_of_layers=2,
-        miller_indices=(0, 0, 1),
+    assert_two_entities_deep_almost_equal(grain_boundary, expected_material_config)
+
+
+@pytest.mark.parametrize(
+    "material_config, phase_1_miller, phase_2_miller, gap, translation_vector, max_area, expected_material_config",
+    [
+        (
+            BULK_Si_CONVENTIONAL,
+            (0, 0, 1),
+            (0, 1, 1),
+            2.0,
+            [2.0, 1.0],
+            250,
+            GRAIN_BOUNDARY_SI_001_011,
+        ),
+    ],
+)
+def test_grain_boundary_builder(
+    material_config, phase_1_miller, phase_2_miller, gap, translation_vector, max_area, expected_material_config
+):
+    phase_1_material = Material.create(material_config)
+    phase_2_material = Material.create(material_config)
+
+    analyzer = GrainBoundaryPlanarAnalyzer(
+        phase_1_material=phase_1_material,
+        phase_2_material=phase_2_material,
+        phase_1_miller_indices=phase_1_miller,
+        phase_2_miller_indices=phase_2_miller,
+        phase_1_thickness=1,
+        phase_2_thickness=1,
+        max_area=max_area,
     )
 
-    termination1 = get_terminations(phase_1_configuration)[0]
-    termination2 = get_terminations(phase_2_configuration)[0]
+    strained_config = analyzer.get_grain_boundary_configuration_by_match_id(0)
 
-    slab_config = SlabConfiguration(
-        vacuum=1,
-        miller_indices=(0, 0, 1),
-        number_of_layers=2,
-        xy_supercell_matrix=[[1, 0], [0, 1]],
+    config = GrainBoundaryPlanarConfiguration.from_parameters(
+        phase_1_configuration=strained_config.substrate_configuration,
+        phase_2_configuration=strained_config.film_configuration,
+        xy_shift=translation_vector,
+        gaps=[gap, gap],
     )
 
-    config = SlabGrainBoundaryConfiguration(
-        phase_1_configuration=phase_1_configuration,
-        phase_2_configuration=phase_2_configuration,
-        phase_1_termination=termination1,
-        phase_2_termination=termination2,
-        gap=3.0,
-        slab_configuration=slab_config,
+    builder = GrainBoundaryPlanarBuilder()
+    grain_boundary = builder.get_material(config)
+
+    assert_two_entities_deep_almost_equal(grain_boundary, expected_material_config)
+
+
+@pytest.mark.parametrize(
+    "config_params, builder_params_dict, expected_material_config",
+    [
+        (
+            {"film_config": GRAPHENE, "twist_angle": 13.0, "gap": 1.0},
+            {
+                "max_repetition_int": 5,
+                "angle_tolerance": 0.5,
+                "return_first_match": True,
+            },
+            GRAIN_BOUNDARY_LINEAR_SI,
+        ),
+    ],
+)
+def test_create_grain_boundary_linear(config_params, builder_params_dict, expected_material_config):
+    config_params["film"] = Material.create(config_params.pop("film_config"))
+    grain_boundary = create_grain_boundary_linear(
+        material=config_params["film"],
+        target_angle=config_params["twist_angle"],
+        gap=config_params["gap"],
+        use_conventional_cell=False,
+        **builder_params_dict,
     )
 
-    builder_params = SlabGrainBoundaryBuilderParameters()
-    builder = SlabGrainBoundaryBuilder(build_parameters=builder_params)
-    gb = create_grain_boundary(config, builder)
-    expected_lattice_vectors = [
-        [25.140673461, 0.0, 0.0],
-        [0.0, 3.867, 0.0],
-        [0.0, 0.0, 8.734],
-    ]
-    # Adjusted expected value to pass tests on GHA due to slab generation differences between GHA and local
-    expected_coordinate_15 = [0.777190818, 0.5, 0.332064346]
-
-    assert len(gb.basis.elements.values) == 32
-    assertion_utils.assert_deep_almost_equal(expected_coordinate_15, gb.basis.coordinates.values[15])
-    assertion_utils.assert_deep_almost_equal(expected_lattice_vectors, gb.lattice.vector_arrays)
-
-
-def test_create_surface_grain_boundary():
-    config = SurfaceGrainBoundaryConfiguration(
-        film=Material.create(GRAPHENE),
-        twist_angle=13.0,
-        gap=2.0,
-    )
-
-    builder_params = SurfaceGrainBoundaryBuilderParameters(
-        max_repetition_int=5,
-        angle_tolerance=0.5,
-        return_first_match=True,
-        distance_tolerance=1.0,
-    )
-    builder = SurfaceGrainBoundaryBuilder(build_parameters=builder_params)
-
-    gb = builder.get_materials(config)
-
-    expected_cell_vectors = [
-        [23.509344266, 0.0, 0.0],
-        [5.377336066500001, 9.313819276550575, 0.0],
-        [0.0, 0.0, 20.0],
-    ]
-
-    assert len(gb) == 1
-    assertion_utils.assert_deep_almost_equal(expected_cell_vectors, gb[0].basis.cell.vector_arrays)
+    assert_two_entities_deep_almost_equal(grain_boundary, expected_material_config)

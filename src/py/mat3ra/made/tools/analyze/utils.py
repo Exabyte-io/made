@@ -83,3 +83,54 @@ def augment_material_with_periodic_images(material: Union[Material, "MaterialWit
         augmented_material.to_cartesian()
 
     return augmented_material, last_id
+
+
+def decorator_perform_operation_in_cartesian_coordinates(func):
+    """
+    Decorator to perform operations in Cartesian coordinates.
+
+    Converts the material to Cartesian coordinates before executing the function
+    and converts it back to crystal coordinates after execution.
+
+    Args:
+        func (Callable): The function to decorate.
+
+    Returns:
+        Callable: The decorated function.
+    """
+
+    @wraps(func)
+    def wrapper(material, *args, **kwargs):
+        original_basis_is_in_cartesian = material.material.basis.is_in_cartesian_units
+        if not original_basis_is_in_cartesian:
+            material.material.to_cartesian()
+
+        result = func(material, *args, **kwargs)
+
+        if not original_basis_is_in_cartesian:
+            material.material.to_crystal()
+
+        return result
+
+    return wrapper
+
+
+def calculate_von_mises_strain(strain_matrix: np.ndarray) -> float:
+    """
+    Calculate von Mises strain (%) from a 2D strain transformation matrix (top-left 2x2 of 3x3).
+
+    Args:
+        strain_matrix (np.ndarray): A 2D numpy array representing the strain transformation matrix.
+    Returns:
+        float: The von Mises strain in percentage.
+    """
+    # allow passing a Python list
+    E = np.array(strain_matrix, dtype=float)
+
+    exx = E[0, 0] - 1.0
+    eyy = E[1, 1] - 1.0
+    exy = 0.5 * (E[0, 1] + E[1, 0])
+
+    e_von_mises = np.sqrt(exx**2 - exx * eyy + eyy**2 + 3 * exy**2)
+
+    return abs(e_von_mises) * 100.0

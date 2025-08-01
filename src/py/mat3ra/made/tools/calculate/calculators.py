@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from ..analyze.other import get_surface_atom_indices
 from ..convert.utils import InterfacePartsEnum
-from ..enums import SurfaceTypes
+from ..enums import SurfaceTypesEnum
 from ..modify import interface_get_part
 from .interaction_functions import sum_of_inverse_distances_squared
 
@@ -105,10 +105,10 @@ class InterfaceMaterialCalculator(MaterialCalculator):
         substrate_material = interface_get_part(material, part=InterfacePartsEnum.SUBSTRATE)
 
         film_surface_atom_indices = get_surface_atom_indices(
-            film_material, SurfaceTypes.BOTTOM, shadowing_radius=shadowing_radius
+            film_material, SurfaceTypesEnum.BOTTOM, shadowing_radius=shadowing_radius
         )
         substrate_surface_atom_indices = get_surface_atom_indices(
-            substrate_material, SurfaceTypes.TOP, shadowing_radius=shadowing_radius
+            substrate_material, SurfaceTypesEnum.TOP, shadowing_radius=shadowing_radius
         )
 
         film_surface_atom_coordinates = film_material.basis.coordinates

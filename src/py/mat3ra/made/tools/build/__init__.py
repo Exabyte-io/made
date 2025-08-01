@@ -1,10 +1,12 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, TypeVar
 
 from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
-from mat3ra.esse.models.material.builders.base.selector_parameters import BaseSelectorParametersSchema
 from pydantic import BaseModel
 
+from .metadata import MaterialBuildMetadata, BuildMetadata, MaterialWithBuildMetadata
 from ...material import Material
+
+BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound="BaseConfigurationPydantic")
 
 
 class BaseConfiguration(BaseModel, InMemoryEntity):
@@ -25,26 +27,91 @@ class BaseConfiguration(BaseModel, InMemoryEntity):
 
 
 class BaseConfigurationPydantic(InMemoryEntityPydantic):
-    """
-    Base class for material build configurations.
-    This class provides an interface for defining the configuration parameters.
-    """
-
-    type: str = "BaseConfiguration"
-
-    # TODO: remove this in the next PR
-    def to_json(self):  # typing: ignore
-        return self.to_dict()
-
-
-class BaseSelectorParameters(BaseSelectorParametersSchema):
     pass
 
 
-class BaseBuilderParameters(BaseModel):
-    model_config = {"arbitrary_types_allowed": True}
+class BaseSelectorParameters(BaseModel):
+    default_index: int = 0
 
 
+class BaseBuilderParameters(InMemoryEntityPydantic):
+    pass
+
+
+class BaseSingleBuilder(BaseModel):
+    """
+    Base class for material builders.
+    This class provides an interface for generating materials and getter functions.
+    The builder is meant as a description of the process, while its functions require a
+    "Configuration" class instance to perform the generation.
+
+    The class is designed to be subclassed and the subclass should implement the following methods:
+
+    - `_generate`: Generate the material items, possibly using third-party tools/implementation for items.
+    - `_sort`: Sort the items.
+    - `_select`: Select a subset of the items.
+    - `_post_process`: Post-process the items to convert them to materials (Material class).
+    - `_finalize`: Finalize the materials.
+
+    The subclass should also define the following attributes:
+
+    - `_BuildParametersType`: The data structure model for the build parameters.
+    - `_DefaultBuildParameters`: The default build parameters.
+    - `_ConfigurationType`: The data structure model for the Configuration used during the build.
+    - `_GeneratedItemType`: The type of the generated item.
+    - `_SelectorParametersType`: The data structure model for the selector parameters.
+    - `_PostProcessParametersType`: The data structure model for the post-process parameters.
+    """
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    build_parameters: Any = None
+    _BuildParametersType: Any = None
+    _DefaultBuildParameters: Any = None
+
+    _ConfigurationType: Any = Any
+    _PostProcessParametersType: Any = None
+
+    def __init__(self, build_parameters: _BuildParametersType = None):
+        super().__init__(build_parameters=build_parameters)
+        self.build_parameters = build_parameters if build_parameters is not None else self._DefaultBuildParameters
+
+    def _generate(self, configuration: _ConfigurationType) -> MaterialWithBuildMetadata:
+        raise NotImplementedError
+
+    def _post_process(
+        self, item: MaterialWithBuildMetadata, post_process_parameters: Optional[_PostProcessParametersType]
+    ) -> MaterialWithBuildMetadata:
+        return item
+
+    def _finalize(
+        self, material: MaterialWithBuildMetadata, configuration: _ConfigurationType
+    ) -> MaterialWithBuildMetadata:
+        material_with_metadata = self._update_material_metadata(material, configuration)
+        return self._update_material_name(material_with_metadata, configuration)
+
+    def get_material(
+        self,
+        configuration: _ConfigurationType,
+        post_process_parameters: Optional[_PostProcessParametersType] = None,
+    ) -> MaterialWithBuildMetadata:
+        generated_item = self._generate(configuration)
+        material = self._post_process(generated_item, post_process_parameters)
+        finalized_material = self._finalize(material, configuration)
+        return finalized_material
+
+    def _update_material_name(self, material, configuration) -> MaterialWithBuildMetadata:
+        return material
+
+    def _update_material_metadata(
+        self, material: MaterialWithBuildMetadata, configuration
+    ) -> MaterialWithBuildMetadata:
+        material.metadata.add_build_metadata_step(configuration=configuration, build_parameters=self.build_parameters)
+        return material
+
+
+# TODO: Remove BaseBuilder and BaseSingleBuilder in favor of BaseBuilder after refactoring is complete.
 class BaseBuilder(BaseModel):
     """
     Base class for material builders.
@@ -85,7 +152,7 @@ class BaseBuilder(BaseModel):
 
     def __init__(self, build_parameters: _BuildParametersType = None):
         super().__init__(build_parameters=build_parameters)
-        self.build_parameters = build_parameters or self._DefaultBuildParameters
+        self.build_parameters = build_parameters if build_parameters is not None else self._DefaultBuildParameters
         self.__generated_items: List[List[BaseBuilder._GeneratedItemType]] = []
         self.__configurations: List[BaseBuilder._ConfigurationType] = []
 
@@ -111,7 +178,7 @@ class BaseBuilder(BaseModel):
     ) -> List[Material]:
         if self._GeneratedItemType == Material:
             return items
-        return [Material.create(self._convert_generated_item(item)) for item in items]
+        return [MaterialWithBuildMetadata.create(self._convert_generated_item(item)) for item in items]
 
     @staticmethod
     def _convert_generated_item(item: _GeneratedItemType):
@@ -149,8 +216,8 @@ class BaseBuilder(BaseModel):
         # Do nothing by default
         return material
 
-    def _update_material_metadata(self, material, configuration) -> Material:
-        if "build" not in material.metadata:
-            material.metadata["build"] = {}
-        material.metadata["build"]["configuration"] = configuration.to_json()
+    def _update_material_metadata(
+        self, material: MaterialWithBuildMetadata, configuration
+    ) -> MaterialWithBuildMetadata:
+        material.metadata.add_build_metadata_step(configuration=configuration, build_parameters=self.build_parameters)
         return material
