@@ -19,6 +19,7 @@ import {
 } from "../fixtures";
 
 const { assertDeepAlmostEqual } = Utils.assertion;
+const TOLERANCE = 1e-4;
 
 describe("Basis", () => {
     it("should return true if basises are equal", () => {
@@ -205,9 +206,9 @@ describe("Basis", () => {
      */
     it("should return minimum lattice size for a molecule", () => {
         const basis = new Basis(C2H4.basis);
-        const minimumLatticeSize = 3.162;
+        const minimumLatticeSize = 3.1622776601683795;
         const latticeSize = basis.getMinimumLatticeSize();
-        expect(latticeSize).to.be.equal(minimumLatticeSize);
+        expect(latticeSize).to.be.almost(minimumLatticeSize, TOLERANCE);
     });
 
     /**
@@ -224,8 +225,8 @@ describe("Basis", () => {
     //* * Pairwise Distance */
     it("should return max distance", () => {
         const basis = new Basis(C2H4.basis);
-        const maxDistance = 1.581;
-        expect(basis.maxPairwiseDistance).to.be.equal(maxDistance);
+        const maxDistance = 1.5811388300841898;
+        expect(basis.maxPairwiseDistance).to.be.almost(maxDistance, TOLERANCE);
     });
 
     //* * Center of Coordinates */

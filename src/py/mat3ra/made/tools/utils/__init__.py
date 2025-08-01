@@ -1,24 +1,70 @@
 from functools import wraps
-from typing import Callable, List, Optional
+from typing import Any, Callable, List, Optional, Union, cast
 
 import numpy as np
+from mat3ra.esse.models.material.reusable.supercell_matrix_2d import SupercellMatrix2DSchema
+from mat3ra.esse.models.materials_category.single_material.two_dimensional.slab.configuration import (
+    SupercellMatrix2DSchemaItem,
+)
 from mat3ra.utils.matrix import convert_2x2_to_3x3
-
-from ..third_party import PymatgenStructure
 
 DEFAULT_SCALING_FACTOR = np.array([3, 3, 3])
 DEFAULT_TRANSLATION_VECTOR = 1 / DEFAULT_SCALING_FACTOR
 
 
+def is_primitive_2x2_matrix(matrix: Any) -> bool:
+    return (
+        isinstance(matrix, list) and len(matrix) == 2 and all(isinstance(row, list) and len(row) == 2 for row in matrix)
+    )
+
+
+def normalize_2x2_matrix(
+    matrix: Union[
+        List[List[float]],
+        SupercellMatrix2DSchema,
+    ]
+) -> Optional[List[List[float]]]:
+    """
+    Normalize any matrix-like structure to a plain 2x2 list of floats.
+    Returns None if normalization is not possible.
+    """
+    if isinstance(matrix, SupercellMatrix2DSchema) and matrix.root:
+        matrix = matrix.root
+
+    if isinstance(matrix, SupercellMatrix2DSchemaItem):
+        return [matrix.root]
+
+    if (
+        isinstance(matrix, list)
+        and len(matrix) == 2
+        and all(isinstance(row, SupercellMatrix2DSchemaItem) for row in matrix)
+    ):
+        return [cast(SupercellMatrix2DSchemaItem, row).root for row in matrix]
+
+    if is_primitive_2x2_matrix(matrix):
+        return matrix  # already normalized
+
+    return None  # unrecognized format
+
+
 def decorator_convert_2x2_to_3x3(func: Callable) -> Callable:
     """
-    Decorator to convert a 2x2 matrix to a 3x3 matrix.
+    Decorator that converts a 2x2 matrix input to a 3x3 matrix.
+    Supports schema-based formats and raw nested lists.
     """
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        new_args = [convert_2x2_to_3x3(arg) if isinstance(arg, list) and len(arg) == 2 else arg for arg in args]
-        return func(*new_args, **kwargs)
+        def convert_if_matrix(arg):
+            matrix = normalize_2x2_matrix(arg)
+            return convert_2x2_to_3x3(matrix) if matrix else arg
+
+        args = tuple(convert_if_matrix(arg) for arg in args)
+
+        if "supercell_matrix" in kwargs:
+            kwargs["supercell_matrix"] = convert_if_matrix(kwargs["supercell_matrix"])
+
+        return func(*args, **kwargs)
 
     return wrapper
 

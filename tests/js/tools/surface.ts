@@ -1,3 +1,4 @@
+import type { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { Utils } from "@mat3ra/utils";
 
 import { Material } from "../../../src/js/material";
@@ -35,7 +36,7 @@ describe("Tools:Surface", () => {
     });
 
     it("should return slab (111) even if ids shifted", () => {
-        const adjustedSilicon = {
+        const adjustedSilicon: MaterialSchema = {
             ...Silicon,
             basis: {
                 elements: [

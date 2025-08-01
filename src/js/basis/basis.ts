@@ -507,7 +507,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
         }
         const moleculeLatticeSize = this.maxPairwiseDistance * latticeScalingFactor;
         const latticeSize = latticeSizeAdditiveContribution + moleculeLatticeSize;
-        return math.precise(latticeSize, 4);
+        return latticeSize;
     }
 
     /**
@@ -581,7 +581,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             }
         }
         if (originalUnits !== ATOMIC_COORD_UNITS.cartesian) this.toCrystal();
-        return math.precise(maxDistance, 4);
+        return maxDistance;
     }
 
     /**

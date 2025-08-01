@@ -19,7 +19,7 @@ INTERFACE_ATOMS.set_tags([1] * len(substrate) + [2] * len(film))
 SUBSTRATE_MATERIAL = Material.create(from_ase(substrate))
 FILM_MATERIAL = Material.create(from_ase(film))
 
-SUBSTRATE_CONFIGURATION = SlabConfiguration(bulk=SUBSTRATE_MATERIAL, thickness=3)
+SUBSTRATE_CONFIGURATION = SlabConfiguration(bulk=SUBSTRATE_MATERIAL, number_of_layers=3)
 FILM_CONFIGURATION = SlabConfiguration(bulk=FILM_MATERIAL)
 
 substrate_terminations = get_terminations(SUBSTRATE_CONFIGURATION)
@@ -63,7 +63,7 @@ clean_material = Material.create_default()
 slab_111_config = SlabConfiguration(
     bulk=clean_material,
     miller_indices=(1, 1, 1),
-    thickness=4,
+    number_of_layers=4,
     vacuum=6,
     xy_supercell_matrix=[[1, 0], [0, 1]],
     use_orthogonal_z=True,
@@ -74,7 +74,7 @@ SLAB_111 = create_slab(slab_111_config, t_111)
 slab_001_config = SlabConfiguration(
     bulk=clean_material,
     miller_indices=(0, 0, 1),
-    thickness=3,
+    number_of_layers=3,
     vacuum=3,
     xy_supercell_matrix=[[2, 0], [0, 1]],
     use_orthogonal_z=True,

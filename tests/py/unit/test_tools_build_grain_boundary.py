@@ -21,14 +21,14 @@ def test_slab_grain_boundary_builder():
     phase_1_configuration = SlabConfiguration(
         bulk=material,
         vacuum=0,
-        thickness=2,
+        number_of_layers=2,
         miller_indices=(0, 0, 1),
     )
 
     phase_2_configuration = SlabConfiguration(
         bulk=material,
         vacuum=0,
-        thickness=2,
+        number_of_layers=2,
         miller_indices=(0, 0, 1),
     )
 
@@ -38,7 +38,7 @@ def test_slab_grain_boundary_builder():
     slab_config = SlabConfiguration(
         vacuum=1,
         miller_indices=(0, 0, 1),
-        thickness=2,
+        number_of_layers=2,
         xy_supercell_matrix=[[1, 0], [0, 1]],
     )
 
