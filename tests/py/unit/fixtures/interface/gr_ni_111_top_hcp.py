@@ -15,8 +15,14 @@ GRAPHENE_NICKEL_INTERFACE_TOP_HCP = {
             {"id": 3, "value": [0.333333333, 0.666666667, 0.351561882]},
             {"id": 4, "value": [0.666666667, 0.333333333, 0.351561882]},
         ],
+        "labels": [
+            {"id": 0, "value": 0},
+            {"id": 1, "value": 0},
+            {"id": 2, "value": 0},
+            {"id": 3, "value": 1},
+            {"id": 4, "value": 1},
+        ],
         "units": "crystal",
-        "labels": [],
         "constraints": [],
     },
     "lattice": {
