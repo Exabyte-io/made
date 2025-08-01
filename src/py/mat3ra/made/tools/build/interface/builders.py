@@ -46,8 +46,8 @@ class InterfaceBuilder(StackNComponentsBuilder):
         film_material = self._stack_component_to_material(configuration.film_configuration, configuration)
         substrate_material = self._stack_component_to_material(configuration.substrate_configuration, configuration)
 
-        film_material.set_labels_from_value(InterfacePartsEnum.FILM)
-        substrate_material.set_labels_from_value(InterfacePartsEnum.SUBSTRATE)
+        film_material.set_labels_from_value(InterfacePartsEnum.FILM.value)
+        substrate_material.set_labels_from_value(InterfacePartsEnum.SUBSTRATE.value)
 
         # Apply xy shift to the film material
         stacking_axis = AXIS_TO_INDEX_MAP[configuration.direction.value]
@@ -81,8 +81,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
     ) -> MaterialWithBuildMetadata:
         if self.build_parameters.make_primitive:
             # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
-            primitive_material = get_material_with_primitive_lattice(material, return_original_if_not_reduced=True)
-            material = primitive_material
+            material = get_material_with_primitive_lattice(material, return_original_if_not_reduced=True)
 
         return super()._post_process(material, configuration)
 
