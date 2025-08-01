@@ -13,10 +13,11 @@ from mat3ra.made.tools.analyze.other import (
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum, AtomPlacementMethodEnum
+from mat3ra.made.tools.modify import translate_to_z_level
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from unit.utils import TestPlatform, get_platform_specific_value
 
-from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
+from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVIZED
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 from .utils import assert_two_entities_deep_almost_equal
@@ -82,16 +83,19 @@ def test_radial_distribution_function(material_config, rdf_params, expected_firs
 
 
 @pytest.mark.parametrize(
-    "primitive_material_config, expected_conventional_material_config",
-    [(BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL)],
+    "primitive_material_config, expected_conventional_material_config, expected_primitive_material_config",
+    [(BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVIZED)],
 )
-def test_lattice_material_analyzer(primitive_material_config, expected_conventional_material_config):
+def test_lattice_material_analyzer(
+    primitive_material_config, expected_conventional_material_config, expected_primitive_material_config
+):
     primitive_cell = Material.create(primitive_material_config)
     lattice_material_analyzer = LatticeMaterialAnalyzer(material=primitive_cell)
-
     conventional_cell = lattice_material_analyzer.material_with_conventional_lattice
-
     assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)
+
+    primitive_cell_generated = lattice_material_analyzer.material_with_primitive_lattice
+    assert_two_entities_deep_almost_equal(primitive_cell_generated, expected_primitive_material_config)
 
 
 VORONOI_SITE_EXPECTED = {TestPlatform.DARWIN: [0.625, 0.625, 0.125], TestPlatform.OTHER: [0.5, 0.5, 0.5]}
