@@ -15,6 +15,7 @@ from ...analyze.lattice import get_material_with_primitive_lattice
 from ...convert.utils import InterfacePartsEnum
 from ...modify import (
     translate_by_vector,
+    translate_to_z_level,
     wrap_to_unit_cell,
 )
 from ...operations.core.unary import supercell
@@ -120,49 +121,35 @@ class InterfaceBuilder(StackNComponentsBuilder):
     def _preserve_interface_labels_after_primitive_conversion(
         self, original_material: MaterialWithBuildMetadata, primitive_material: MaterialWithBuildMetadata
     ) -> MaterialWithBuildMetadata:
-        """
-        Preserve interface part labels (film vs substrate) after primitive lattice conversion.
-
-        Maps atoms from primitive material to closest atoms in original material
-        based on cartesian coordinates and transfers their labels.
-
-        Args:
-            original_material: The original interface material with labels
-            primitive_material: The primitive material without labels
-
-        Returns:
-            MaterialWithBuildMetadata: Primitive material with restored interface labels
-        """
         if not original_material.basis.labels.values:
             return primitive_material
 
         labeled_primitive = primitive_material.clone()
-
-        original_cartesian = original_material.clone()
-        original_cartesian.to_cartesian()
-        original_coords = np.array(original_cartesian.coordinates_array)
-        original_labels = original_material.basis.labels.values
-
-        primitive_cartesian = labeled_primitive.clone()
-        primitive_cartesian.to_cartesian()
-        primitive_coords = np.array(primitive_cartesian.coordinates_array)
-
-        # Map each primitive atom to closest original atom and transfer label
-        primitive_labels = []
-        for primitive_coord in primitive_coords:
-            # Find closest atom in original material
-            distances = np.linalg.norm(original_coords - primitive_coord, axis=1)
-            closest_original_idx = int(np.argmin(distances))
-
-            # Transfer the label from closest original atom
-            closest_label = (
-                original_labels[closest_original_idx]
-                if closest_original_idx < len(original_labels)
-                else InterfacePartsEnum.SUBSTRATE.value
-            )
-            primitive_labels.append(closest_label)
-
-        # Set the mapped labels on the primitive material
+        interface_z = self._find_interface_z_level(original_material)
+        primitive_labels = self._assign_labels_by_z_level(labeled_primitive, interface_z)
         labeled_primitive.set_labels_from_list(primitive_labels)
-
         return labeled_primitive
+
+    def _find_interface_z_level(self, material: MaterialWithBuildMetadata) -> float:
+        normalized_material = translate_to_z_level(material, z_level="bottom")
+        normalized_material.to_cartesian()
+        z_coords = np.array(normalized_material.coordinates_array)[:, 2]
+        labels = material.basis.labels.values
+
+        substrate_z = z_coords[np.array(labels) == int(InterfacePartsEnum.SUBSTRATE.value)]
+        film_z = z_coords[np.array(labels) == int(InterfacePartsEnum.FILM.value)]
+
+        if len(substrate_z) == 0 or len(film_z) == 0:
+            return (np.min(z_coords) + np.max(z_coords)) / 2
+
+        max_substrate_z = np.max(substrate_z)
+        min_film_z = np.min(film_z)
+        return (max_substrate_z + min_film_z) / 2
+
+    def _assign_labels_by_z_level(self, material: MaterialWithBuildMetadata, interface_z: float) -> list:
+        normalized_material = translate_to_z_level(material, z_level="bottom")
+        normalized_material.to_cartesian()
+        z_coords = np.array(normalized_material.coordinates_array)[:, 2]
+        substrate_label = int(InterfacePartsEnum.SUBSTRATE.value)
+        film_label = int(InterfacePartsEnum.FILM.value)
+        return [substrate_label if z < interface_z else film_label for z in z_coords]

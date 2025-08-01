@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from mat3ra.made.material import Material, defaultMaterialConfig
 from mat3ra.made.tools.analyze.adatom import AdatomCrystalSiteMaterialAnalyzer, AdatomMaterialAnalyzer
 from mat3ra.made.tools.analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
@@ -16,6 +15,7 @@ from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum, AtomPlacementMethodEnum
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from unit.utils import TestPlatform, get_platform_specific_value
+
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVIZED
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
