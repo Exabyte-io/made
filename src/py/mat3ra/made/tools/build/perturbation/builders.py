@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Type
 
 from mat3ra.made.tools.build import MaterialWithBuildMetadata, BaseSingleBuilder
 from .configuration import PerturbationConfiguration
@@ -8,8 +8,8 @@ from ...operations.core.unary import perturb, edit_cell
 
 
 class PerturbationBuilder(BaseSingleBuilder):
-    _ConfigurationType: type(PerturbationConfiguration) = PerturbationConfiguration  # type: ignore
-    _BuildParametersType: type(PerturbationBuildParameters) = PerturbationBuildParameters
+    _ConfigurationType: Type[PerturbationConfiguration] = PerturbationConfiguration
+    _BuildParametersType: Type[PerturbationBuildParameters] = PerturbationBuildParameters
     _DefaultBuildParameters: PerturbationBuildParameters = PerturbationBuildParameters()
     _PostProcessParametersType: Any = None
 

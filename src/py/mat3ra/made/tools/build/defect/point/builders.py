@@ -27,6 +27,8 @@ class AtomAtCoordinateBuilder(VacuumBuilder):
     _ConfigurationType = AtomAtCoordinateConfiguration
 
     def _generate(self, configuration: AtomAtCoordinateConfiguration) -> MaterialWithBuildMetadata:
+        if not configuration.crystal:
+            raise ValueError("Crystal must be provided for AtomAtCoordinateConfiguration")
         vacuum_configuration = VacuumConfiguration(
             crystal=configuration.crystal,
             size=configuration.crystal.lattice.c,
@@ -86,7 +88,8 @@ class PointDefectBuilder(MergeBuilder):
                 break
 
         if host_material:
-            defect_type = configuration.type.lower().replace("defectconfiguration", "").replace("configuration", "")
+            defect_type = configuration.__class__.__name__.lower()
+            defect_type = defect_type.replace("defectconfiguration", "").replace("configuration", "")
             material.name = f"{host_material.name} with {defect_type} defect"
 
         return material

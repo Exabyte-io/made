@@ -29,7 +29,7 @@ def supercell(material: MaterialWithBuildMetadata, supercell_matrix) -> Material
     return new_material
 
 
-def edit_cell(material: Material, lattice_vectors=None) -> Material:
+def edit_cell(material: Material, lattice_vectors=None) -> MaterialWithBuildMetadata:
     if lattice_vectors is not None:
         material.set_lattice_vectors(
             lattice_vector1=lattice_vectors[0], lattice_vector2=lattice_vectors[1], lattice_vector3=lattice_vectors[2]
