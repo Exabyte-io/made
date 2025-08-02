@@ -5,7 +5,7 @@ from mat3ra.code.entity import InMemoryEntityPydantic
 
 from mat3ra.made.material import Material
 from .configuration import InterfaceConfiguration
-from .. import MaterialWithBuildMetadata
+from .. import MaterialWithBuildMetadata, TConfiguration
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configurations import SlabStrainedSupercellConfiguration
 from ..stack.builders import StackNComponentsBuilder
@@ -32,9 +32,9 @@ class InterfaceBuilder(StackNComponentsBuilder):
     Creates an interface by straining the film to match the substrate.
     """
 
-    _ConfigurationType = InterfaceConfiguration
-    _BuildParametersType = InterfaceBuilderParameters
-    _DefaultBuildParameters = InterfaceBuilderParameters()
+    _ConfigurationType: Type[InterfaceConfiguration] = InterfaceConfiguration
+    _BuildParametersType: Type[InterfaceBuilderParameters] = InterfaceBuilderParameters
+    _DefaultBuildParameters: InterfaceBuilderParameters = InterfaceBuilderParameters()
     _GeneratedItemType: Type[Material] = Material
 
     @property
@@ -44,12 +44,14 @@ class InterfaceBuilder(StackNComponentsBuilder):
             SlabStrainedSupercellConfiguration: SlabStrainedSupercellBuilder,
         }
 
-    def _generate(self, configuration: InterfaceConfiguration) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: TConfiguration) -> MaterialWithBuildMetadata:
         film_material = self._stack_component_to_material(configuration.film_configuration, configuration)
         substrate_material = self._stack_component_to_material(configuration.substrate_configuration, configuration)
 
-        film_material.set_labels_from_value(InterfacePartsEnum.FILM.value)
-        substrate_material.set_labels_from_value(InterfacePartsEnum.SUBSTRATE.value)
+        if film_material:
+            film_material.set_labels_from_value(InterfacePartsEnum.FILM.value)
+        if substrate_material:
+            substrate_material.set_labels_from_value(InterfacePartsEnum.SUBSTRATE.value)
 
         # Apply xy shift to the film material
         stacking_axis = AXIS_TO_INDEX_MAP[configuration.direction.value]
@@ -79,7 +81,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
         return wrapped_interface
 
     def _post_process(
-        self, material: MaterialWithBuildMetadata, configuration: InterfaceConfiguration
+        self, material: MaterialWithBuildMetadata, configuration: TConfiguration
     ) -> MaterialWithBuildMetadata:
         if self.build_parameters.make_primitive:
             # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
@@ -108,7 +110,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
         return f"Interface, Strain {strain:.3f}pct"
 
     def _update_material_name(
-        self, material: Union[Material, MaterialWithBuildMetadata], configuration: InterfaceConfiguration
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TConfiguration
     ) -> MaterialWithBuildMetadata:
         base_name = self.get_base_name_from_configuration(
             configuration.film_configuration, configuration.substrate_configuration

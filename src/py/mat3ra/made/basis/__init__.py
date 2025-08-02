@@ -177,8 +177,8 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         return self
 
     def filter_atoms_by_labels(self, labels: Union[List[str], str]) -> "Basis":
-        labels = [int(label) if isinstance(label, str) else label for label in labels]
-        self.labels.filter_by_values(labels)
+        labels_int = [int(label) if isinstance(label, str) else label for label in labels]
+        self.labels.filter_by_values(labels_int)
         ids = self.labels.ids
         self.elements.filter_by_ids(ids)
         self.coordinates.filter_by_ids(ids)

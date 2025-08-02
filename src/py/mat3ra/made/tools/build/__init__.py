@@ -1,4 +1,4 @@
-from typing import Optional, Any, TypeVar
+from typing import Optional, Any, TypeVar, Type, Generic
 
 from mat3ra.code.entity import InMemoryEntityPydantic
 from pydantic import BaseModel
@@ -16,7 +16,11 @@ class BaseBuilderParameters(InMemoryEntityPydantic):
     pass
 
 
-class BaseSingleBuilder(BaseModel):
+TConfiguration = TypeVar("TConfiguration", bound=BaseConfigurationPydantic)
+TBuildParameters = TypeVar("TBuildParameters", bound=BaseBuilderParameters)
+
+
+class BaseSingleBuilder(BaseModel, Generic[TConfiguration, TBuildParameters]):
     """
     Base class for material builders.
     This class provides an interface for generating materials and getter functions.
@@ -43,46 +47,48 @@ class BaseSingleBuilder(BaseModel):
 
     model_config = {"arbitrary_types_allowed": True}
 
-    build_parameters: Any = None
-    _BuildParametersType: Any = None
-    _DefaultBuildParameters: Any = None
+    build_parameters: Optional[TBuildParameters] = None
+    _BuildParametersType: Type[TBuildParameters] = BaseBuilderParameters
+    _DefaultBuildParameters: TBuildParameters = BaseBuilderParameters()
 
-    _ConfigurationType: Any = Any
+    _ConfigurationType: Type[TConfiguration] = BaseConfigurationPydantic
     _PostProcessParametersType: Any = None
 
-    def __init__(self, build_parameters: _BuildParametersType = None):
-        super().__init__(build_parameters=build_parameters)
+    def __init__(self, build_parameters: Optional[TBuildParameters] = None):
+        super().__init__()
         self.build_parameters = build_parameters if build_parameters is not None else self._DefaultBuildParameters
 
-    def _generate(self, configuration: _ConfigurationType) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: TConfiguration) -> MaterialWithBuildMetadata:
         raise NotImplementedError
 
     def _post_process(
-        self, item: MaterialWithBuildMetadata, post_process_parameters: Optional[_PostProcessParametersType]
+        self, item: MaterialWithBuildMetadata, post_process_parameters: Optional[Any]
     ) -> MaterialWithBuildMetadata:
         return item
 
     def _finalize(
-        self, material: MaterialWithBuildMetadata, configuration: _ConfigurationType
+        self, material: MaterialWithBuildMetadata, configuration: TConfiguration
     ) -> MaterialWithBuildMetadata:
         material_with_metadata = self._update_material_metadata(material, configuration)
         return self._update_material_name(material_with_metadata, configuration)
 
     def get_material(
         self,
-        configuration: _ConfigurationType,
-        post_process_parameters: Optional[_PostProcessParametersType] = None,
+        configuration: TConfiguration,
+        post_process_parameters: Optional[Any] = None,
     ) -> MaterialWithBuildMetadata:
         generated_item = self._generate(configuration)
         material = self._post_process(generated_item, post_process_parameters)
         finalized_material = self._finalize(material, configuration)
         return finalized_material
 
-    def _update_material_name(self, material, configuration) -> MaterialWithBuildMetadata:
+    def _update_material_name(
+        self, material: MaterialWithBuildMetadata, configuration: TConfiguration
+    ) -> MaterialWithBuildMetadata:
         return material
 
     def _update_material_metadata(
-        self, material: MaterialWithBuildMetadata, configuration
+        self, material: MaterialWithBuildMetadata, configuration: TConfiguration
     ) -> MaterialWithBuildMetadata:
         material.metadata.add_build_metadata_step(configuration=configuration, build_parameters=self.build_parameters)
         return material

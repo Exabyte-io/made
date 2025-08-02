@@ -1,12 +1,13 @@
 from .configuration import SlabStackConfiguration
-from ... import MaterialWithBuildMetadata
+from ... import MaterialWithBuildMetadata, TConfiguration
 from ...slab.builders import SlabBuilder
+from typing import Type
 from ...slab.configurations import SlabConfiguration
 from ...stack.builders import StackNComponentsBuilder
 
 
 class SlabStackBuilder(StackNComponentsBuilder):
-    _ConfigurationType = SlabStackConfiguration
+    _ConfigurationType: Type[SlabStackConfiguration] = SlabStackConfiguration
 
     @property
     def stack_component_types_conversion_map(self):
@@ -23,7 +24,7 @@ class SlabStackBuilder(StackNComponentsBuilder):
         return self.name_suffix
 
     def _update_material_name(
-        self, material: MaterialWithBuildMetadata, configuration: _ConfigurationType
+        self, material: MaterialWithBuildMetadata, configuration: TConfiguration
     ) -> MaterialWithBuildMetadata:
         name_suffix = self.get_name_suffix(configuration) or self.name_suffix
         base_name = material.name

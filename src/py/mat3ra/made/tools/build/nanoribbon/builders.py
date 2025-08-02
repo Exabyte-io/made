@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Type
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_to_center
@@ -13,8 +13,8 @@ class NanoribbonBuilderParameters(NanoTapeBuilderParameters):
 
 
 class NanoribbonBuilder(NanoTapeBuilder):
-    _ConfigurationType = "NanoribbonConfiguration"  # String type annotation to avoid circular import
-    _BuilderParametersType = NanoribbonBuilderParameters
+    _ConfigurationType: Type[NanoribbonConfiguration] = NanoribbonConfiguration
+    _BuilderParametersType: Type[NanoribbonBuilderParameters] = NanoribbonBuilderParameters
     _DefaultBuildParameters = NanoribbonBuilderParameters(
         use_rectangular_lattice=True,
     )

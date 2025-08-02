@@ -13,7 +13,7 @@ from .configuration import (
     SubstitutionalDefectConfiguration,
     InterstitialDefectConfiguration,
 )
-from ... import BaseSingleBuilder, MaterialWithBuildMetadata
+from ... import BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
 from ...merge.builders import MergeBuilder
 from ...vacuum.builders import VacuumBuilder
 from ...vacuum.configuration import VacuumConfiguration
@@ -79,7 +79,7 @@ class PointDefectBuilder(MergeBuilder):
         }
 
     def _update_material_name(
-        self, material: Union[Material, MaterialWithBuildMetadata], configuration: _ConfigurationType
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TConfiguration
     ) -> Material:
         host_material = None
         for component in configuration.merge_components:

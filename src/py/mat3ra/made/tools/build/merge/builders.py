@@ -2,7 +2,12 @@ from typing import Any, Optional, List, Dict, Type
 
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
-from mat3ra.made.tools.build import BaseSingleBuilder, BaseBuilderParameters, MaterialWithBuildMetadata
+from mat3ra.made.tools.build import (
+    BaseSingleBuilder,
+    BaseBuilderParameters,
+    MaterialWithBuildMetadata,
+    TConfiguration,
+)
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import merge
@@ -28,9 +33,9 @@ class MergeBuilder(BaseSingleBuilder):
     Builder class for merging materials based on parameters.
     """
 
-    _ConfigurationType = MergeConfiguration
-    _BuildParametersType = MergeBuilderParameters()
-    _DefaultBuildParameters = MergeBuilderParameters()
+    _ConfigurationType: Type[MergeConfiguration] = MergeConfiguration
+    _BuildParametersType: Type[MergeBuilderParameters] = MergeBuilderParameters
+    _DefaultBuildParameters: MergeBuilderParameters = MergeBuilderParameters()
 
     @property
     def merge_component_types_conversion_map(self) -> Dict[Type, Type]:
@@ -79,7 +84,7 @@ class MergeBuilder(BaseSingleBuilder):
             merge_dangerously=parameters.merge_dangerously,
         )
 
-    def _generate(self, configuration: _ConfigurationType) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: TConfiguration) -> MaterialWithBuildMetadata:
         materials = []
         for component in configuration.merge_components:
             material = self._merge_component_to_material(component, configuration)

@@ -1,6 +1,6 @@
 from typing import Any, Type
 
-from mat3ra.made.tools.build import MaterialWithBuildMetadata, BaseSingleBuilder
+from mat3ra.made.tools.build import MaterialWithBuildMetadata, BaseSingleBuilder, TConfiguration
 from .configuration import PerturbationConfiguration
 from .parameters import PerturbationBuildParameters
 from ...modify import wrap_to_unit_cell, translate_to_z_level
@@ -24,7 +24,7 @@ class PerturbationBuilder(BaseSingleBuilder):
         return new_material
 
     def _update_material_name(
-        self, material: MaterialWithBuildMetadata, configuration: _ConfigurationType
+        self, material: MaterialWithBuildMetadata, configuration: TConfiguration
     ) -> MaterialWithBuildMetadata:
         perturbation_details = f"Perturbation: {configuration.perturbation_function_holder.function_str}"
         material.name = f"{material.name} ({perturbation_details})"

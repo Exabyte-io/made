@@ -9,7 +9,7 @@ from .configurations.base_configurations import AtomicLayersUniqueRepeatedConfig
 from .configurations.slab_configuration import SlabConfiguration
 from .entities import MillerIndices
 from .utils import get_orthogonal_c_slab
-from .. import BaseBuilderParameters, BaseSingleBuilder, MaterialWithBuildMetadata
+from .. import BaseBuilderParameters, BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
 from ..stack.builders import StackNComponentsBuilder
 from ...analyze import BaseMaterialAnalyzer
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
@@ -82,7 +82,7 @@ class SlabBuilderParameters(BaseBuilderParameters):
 
 
 class SlabBuilder(StackNComponentsBuilder):
-    _BuildParametersType = SlabBuilderParameters
+    _BuildParametersType: Type[SlabBuilderParameters] = SlabBuilderParameters
     _DefaultBuildParameters: SlabBuilderParameters = SlabBuilderParameters()
 
     @property
@@ -112,7 +112,7 @@ class SlabBuilder(StackNComponentsBuilder):
 class SlabStrainedSupercellBuilder(SlabBuilder):
     _ConfigurationType: Type[SlabStrainedSupercellConfiguration] = SlabStrainedSupercellConfiguration
 
-    def _generate(self, configuration: _ConfigurationType) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: TConfiguration) -> MaterialWithBuildMetadata:
         slab_material = super()._generate(configuration)
         if configuration.xy_supercell_matrix:
             slab_material = supercell(slab_material, configuration.xy_supercell_matrix)

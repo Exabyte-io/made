@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Type
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
@@ -18,10 +18,10 @@ class NanoTapeBuilderParameters(BaseBuilderParameters):
 
 
 class NanoTapeBuilder(StackNComponentsBuilder):
-    _ConfigurationType = "NanoTapeConfiguration"  # String type annotation to avoid circular import
-    _GeneratedItemType = Material
-    _BuilderParametersType = NanoTapeBuilderParameters
-    _DefaultBuildParameters = NanoTapeBuilderParameters(
+    _ConfigurationType: Type[NanoTapeConfiguration] = NanoTapeConfiguration
+    _GeneratedItemType: Type[Material] = Material
+    _BuildParametersType: Type[NanoTapeBuilderParameters] = NanoTapeBuilderParameters
+    _DefaultBuildParameters: NanoTapeBuilderParameters = NanoTapeBuilderParameters(
         use_rectangular_lattice=True,
     )
 
