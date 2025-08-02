@@ -86,7 +86,13 @@ GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF = {
             {"id": 19, "value": [0.833333334, 0.833333333, 0.351561882]},
         ],
         "units": "crystal",
-        "labels": [],
+        "labels": [
+            {"id": 0, "value": 0},
+            {"id": 1, "value": 0},
+            {"id": 2, "value": 0},
+            {"id": 3, "value": 1},
+            {"id": 4, "value": 1},
+        ],
         "constraints": [],
     },
     "lattice": {

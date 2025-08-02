@@ -15,8 +15,8 @@ from ...analyze.lattice import get_material_with_primitive_lattice
 from ...convert.utils import InterfacePartsEnum
 from ...modify import (
     translate_by_vector,
-    translate_to_z_level,
     wrap_to_unit_cell,
+    translate_to_center,
 )
 from ...operations.core.unary import supercell
 from ...operations.core.utils import should_skip_stacking
@@ -89,7 +89,9 @@ class InterfaceBuilder(StackNComponentsBuilder):
 
             if primitive_material != material:
                 primitive_material = self._preserve_interface_labels_after_primitive_conversion(
-                    original_material=material, primitive_material=primitive_material
+                    original_material=material,
+                    primitive_material=primitive_material,
+                    axis=configuration.direction.value,
                 )
 
             material = primitive_material
@@ -121,37 +123,39 @@ class InterfaceBuilder(StackNComponentsBuilder):
         return material
 
     def _preserve_interface_labels_after_primitive_conversion(
-        self, original_material: MaterialWithBuildMetadata, primitive_material: MaterialWithBuildMetadata
+        self, original_material: MaterialWithBuildMetadata, primitive_material: MaterialWithBuildMetadata, axis: str
     ) -> MaterialWithBuildMetadata:
         if not original_material.basis.labels.values:
             return primitive_material
 
         labeled_primitive = primitive_material.clone()
-        interface_z = self._find_interface_z_level(original_material)
-        primitive_labels = self._assign_labels_by_z_level(labeled_primitive, interface_z)
+        interface_gap_coordinate = self._find_interface_coordinate_level(original_material, axis)
+        primitive_labels = self._assign_labels_by_coordinate_level(labeled_primitive, interface_gap_coordinate, axis)
         labeled_primitive.set_labels_from_list(primitive_labels)
         return labeled_primitive
 
-    def _find_interface_z_level(self, material: MaterialWithBuildMetadata) -> float:
-        normalized_material = translate_to_z_level(material, z_level="bottom")
+    def _find_interface_coordinate_level(self, material: MaterialWithBuildMetadata, axis) -> float:
+        normalized_material = translate_to_center(material, axes=[axis])
         normalized_material.to_cartesian()
-        z_coords = np.array(normalized_material.coordinates_array)[:, 2]
+        direction_coords = np.array(normalized_material.coordinates_array)[:, AXIS_TO_INDEX_MAP[axis]]
         labels = material.basis.labels.values
 
-        substrate_z = z_coords[np.array(labels) == int(InterfacePartsEnum.SUBSTRATE.value)]
-        film_z = z_coords[np.array(labels) == int(InterfacePartsEnum.FILM.value)]
+        substrate_gap_coordinate = direction_coords[np.array(labels) == int(InterfacePartsEnum.SUBSTRATE.value)]
+        film_gap_coordinate = direction_coords[np.array(labels) == int(InterfacePartsEnum.FILM.value)]
 
-        if len(substrate_z) == 0 or len(film_z) == 0:
-            return (np.min(z_coords) + np.max(z_coords)) / 2
+        if len(substrate_gap_coordinate) == 0 or len(film_gap_coordinate) == 0:
+            return (np.min(direction_coords) + np.max(direction_coords)) / 2
 
-        max_substrate_z = np.max(substrate_z)
-        min_film_z = np.min(film_z)
-        return (max_substrate_z + min_film_z) / 2
+        max_substrate_gap_coordinate = np.max(substrate_gap_coordinate)
+        min_film_gap_coordinate = np.min(film_gap_coordinate)
+        return (max_substrate_gap_coordinate + min_film_gap_coordinate) / 2
 
-    def _assign_labels_by_z_level(self, material: MaterialWithBuildMetadata, interface_z: float) -> list:
-        normalized_material = translate_to_z_level(material, z_level="bottom")
+    def _assign_labels_by_coordinate_level(
+        self, material: MaterialWithBuildMetadata, interface_gap_coordinate: float, axis
+    ) -> list:
+        normalized_material = translate_to_center(material, axes=[axis])
         normalized_material.to_cartesian()
-        z_coords = np.array(normalized_material.coordinates_array)[:, 2]
+        direction_coords = np.array(normalized_material.coordinates_array)[:, AXIS_TO_INDEX_MAP[axis]]
         substrate_label = int(InterfacePartsEnum.SUBSTRATE.value)
         film_label = int(InterfacePartsEnum.FILM.value)
-        return [substrate_label if z < interface_z else film_label for z in z_coords]
+        return [substrate_label if z < interface_gap_coordinate else film_label for z in direction_coords]

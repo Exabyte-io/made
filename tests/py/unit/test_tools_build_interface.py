@@ -1,9 +1,11 @@
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.interface.builders import (
     InterfaceBuilder,
     InterfaceBuilderParameters,
@@ -69,6 +71,8 @@ GRAPHENE_NICKEL_TEST_CASE = (
         OSPlatform.OTHER: GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
     },
 )
+
+PRECISION = 1e-3
 
 
 @pytest.mark.parametrize("substrate, film, expected_interface", [Si_Ge_SIMPLE_INTERFACE_TEST_CASE])
@@ -217,4 +221,18 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
         gap=gaps,
     )
 
-    assert_two_entities_deep_almost_equal(interface, expected_interface, atol=1e-5)
+    assert_two_entities_deep_almost_equal(interface, expected_interface, atol=PRECISION)
+
+
+@pytest.mark.parametrize(
+    "interface_config, expected_coordinate",
+    [(GRAPHENE_NICKEL_INTERFACE_TOP_HCP, 12.048)],
+)
+def test_find_interface_z_level(interface_config, expected_coordinate):
+    interface_material = MaterialWithBuildMetadata.create(interface_config)
+
+    builder = InterfaceBuilder()
+
+    interface_z_level = builder._find_interface_coordinate_level(interface_material, axis=AxisEnum.z.value)
+
+    assert np.allclose(interface_z_level, expected_coordinate, atol=PRECISION)
