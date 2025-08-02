@@ -4,8 +4,7 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.monolayer.helpers import create_monolayer
 
-from .fixtures.bulk import BULK_Si_PRIMITIVE
-from .fixtures.generated.fixtures import BULK_GRAPHITE
+from .fixtures.bulk import BULK_GRAPHITE, BULK_Si_PRIMITIVE
 from .fixtures.monolayer import GRAPHENE, SILICENE
 from .utils import assert_two_entities_deep_almost_equal
 

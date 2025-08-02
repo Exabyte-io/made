@@ -1,5 +1,10 @@
 from typing import Any, Dict
 
+from mat3ra.standata.materials import Materials
+
+BULK_SrTiO3 = Materials.get_by_name_first_match("SrTiO3")
+BULK_GRAPHITE = Materials.get_by_name_first_match("Graphite")
+
 BULK_Si_PRIMITIVE: Dict[str, Any] = {
     "name": "Silicon FCC",
     "basis": {

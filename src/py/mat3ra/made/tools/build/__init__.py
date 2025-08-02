@@ -1,37 +1,15 @@
-from typing import List, Optional, Any, TypeVar
+from typing import Optional, Any, TypeVar
 
-from mat3ra.code.entity import InMemoryEntityPydantic, InMemoryEntity
+from mat3ra.code.entity import InMemoryEntityPydantic
 from pydantic import BaseModel
 
 from .metadata import MaterialBuildMetadata, BuildMetadata, MaterialWithBuildMetadata
-from ...material import Material
 
 BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound="BaseConfigurationPydantic")
 
 
-class BaseConfiguration(BaseModel, InMemoryEntity):
-    """
-    Base class for material build configurations.
-    This class provides an interface for defining the configuration parameters.
-
-    The class is designed to be subclassed and the subclass should define the following attributes:
-    - `_json`: The JSON representation of the configuration.
-    """
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    @property
-    def _json(self):
-        raise NotImplementedError
-
-
 class BaseConfigurationPydantic(InMemoryEntityPydantic):
     pass
-
-
-class BaseSelectorParameters(BaseModel):
-    default_index: int = 0
 
 
 class BaseBuilderParameters(InMemoryEntityPydantic):
@@ -63,8 +41,7 @@ class BaseSingleBuilder(BaseModel):
     - `_PostProcessParametersType`: The data structure model for the post-process parameters.
     """
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
     build_parameters: Any = None
     _BuildParametersType: Any = None

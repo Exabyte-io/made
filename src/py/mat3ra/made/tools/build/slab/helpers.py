@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.slab.entities import Termination
@@ -58,7 +58,7 @@ def create_slab(
     use_conventional_cell=True,
     use_orthogonal_c: bool = True,
     termination: Termination = None,
-    termination_formula: str = None,
+    termination_formula: Optional[str] = None,
     number_of_layers=1,
     vacuum=10.0,
     xy_supercell_matrix=DEFAULT_XY_SUPERCELL_MATRIX,

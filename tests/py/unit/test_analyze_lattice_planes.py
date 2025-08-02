@@ -2,7 +2,7 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.utils import assertion as assertion_utils
-from unit.fixtures.generated.fixtures import BULK_SrTiO3
+from unit.fixtures.bulk import BULK_SrTiO3
 
 SLAB_SrTiO3_EXPECTED_TERMINATIONS_WITH_VACUUM = [
     [

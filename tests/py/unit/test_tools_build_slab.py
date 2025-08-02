@@ -29,7 +29,7 @@ from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP, adjust_material_cell_to_set_gap_along_direction
 from mat3ra.utils import assertion
 from mat3ra.utils.matrix import convert_2x2_to_3x3
-from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
+from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_SrTiO3
 from unit.fixtures.slab import (
     SI_CONVENTIONAL_SLAB_001,
     SI_PRIMITIVE_SLAB_001,
@@ -38,7 +38,6 @@ from unit.fixtures.slab import (
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
 )
 
-from .fixtures.generated.fixtures import BULK_SrTiO3
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
 

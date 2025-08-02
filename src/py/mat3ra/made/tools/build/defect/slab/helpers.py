@@ -58,7 +58,6 @@ def recreate_slab_with_fractional_layers(
     analyzer = SlabMaterialAnalyzer(material=slab)
     slab_without_vacuum = analyzer.slab_configuration_with_no_vacuum
     build_parameters = analyzer.build_parameters
-    # vacuum_config = analyzer.get_slab_vacuum_configuration()
 
     ceiling_number_of_layers = int(ceiling(number_of_layers))
     slab_with_int_layers_without_vacuum = create_slab(
