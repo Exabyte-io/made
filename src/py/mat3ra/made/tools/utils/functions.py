@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List, Optional, Union
 
 import sympy as sp
 from mat3ra.code.entity import InMemoryEntityPydantic
@@ -18,7 +18,7 @@ class FunctionHolder(InMemoryEntityPydantic):
     function_numeric: Callable = sp.lambdify(sp.symbols(variables), sp.Symbol("f"), modules=["numpy"])
     derivatives_numeric: dict = {}
 
-    def __init__(self, function: Union[sp.Expr, str], variables: List[str] = None, **data: Any):
+    def __init__(self, function: Union[sp.Expr, str], variables: Optional[List[str]] = None, **data: Any):
         # normalize string → Expr
         expr = self._to_expr(function)
 

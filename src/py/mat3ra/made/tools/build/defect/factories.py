@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Type
+from typing import List, Dict, Union, Type, Optional
 
 from mat3ra.made.material import Material
 from .. import MaterialWithBuildMetadata
@@ -57,9 +57,12 @@ def create_defect_configuration(
     material: Union[Material, MaterialWithBuildMetadata],
     defect_type: PointDefectTypeEnum,
     coordinate: List[float],
-    element: str = None,
+    element: Optional[str] = None,
     placement_method: Union[
-        VacancyPlacementMethodEnum, SubstitutionPlacementMethodEnum, InterstitialPlacementMethodEnum
+        VacancyPlacementMethodEnum,
+        SubstitutionPlacementMethodEnum,
+        InterstitialPlacementMethodEnum,
+        AtomPlacementMethodEnum,
     ] = AtomPlacementMethodEnum.EXACT_COORDINATE,
     use_cartesian_coordinates: bool = False,
 ) -> PointDefectConfiguration:

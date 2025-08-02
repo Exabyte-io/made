@@ -50,9 +50,11 @@ def create_nanoparticle_from_material(
     repetitions_z = analyzer.number_of_layers_to_fit_nanoparticle
     xy_supercell = analyzer.xy_supercell_matrix_to_fit_nanoparticle
 
+    if len(orientation_z) != 3:
+        raise ValueError("orientation_z must have exactly three elements.")
     slab = create_slab(
         material,
-        miller_indices=orientation_z,
+        miller_indices=tuple(orientation_z),  # type: ignore
         number_of_layers=repetitions_z,
         xy_supercell_matrix=xy_supercell,
         vacuum=0,

@@ -87,6 +87,9 @@ def create_multiple_adatom_defects(
     if placement_method not in [e.value for e in AdatomPlacementMethodEnum]:
         raise ValueError(f"Unsupported placement method: {placement_method}")
 
+    if not defect_dicts:
+        return slab
+
     all_adatom_configs = []
     analyzer_cls = get_adatom_defect_analyzer_cls(placement_method)
 
@@ -112,6 +115,9 @@ def create_multiple_adatom_defects(
         )
         last_analyzer = analyzer
         all_adatom_configs.append(analyzer.added_component)
+
+    if not last_analyzer:
+        return slab
 
     vacuum_configuration = last_analyzer.get_slab_vacuum_configuration()
 
