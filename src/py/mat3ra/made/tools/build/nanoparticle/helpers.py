@@ -115,5 +115,5 @@ def create_nanoparticle_by_shape_from_element(
 
     config = ASEBasedNanoparticleConfiguration(shape=shape, parameters=parameters.__dict__, element=element)
     builder = ASEBasedNanoparticleBuilder()
-    nanoparticles = builder.get_materials(config)
-    return nanoparticles[0]
+    nanoparticles = builder.get_material(config)
+    return nanoparticles

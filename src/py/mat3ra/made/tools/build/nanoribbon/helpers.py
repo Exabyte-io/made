@@ -3,7 +3,7 @@ from typing import Tuple, Optional, TypeVar, Union
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilder, BaseBuilderParameters, MaterialWithBuildMetadata
+from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata
 from . import NanoribbonConfiguration
 from .builders import NanoribbonBuilder, NanoribbonBuilderParameters
 from ..lattice_lines import create_lattice_lines_config_and_material
@@ -11,7 +11,6 @@ from ..lattice_lines.configuration import EdgeTypes
 from ..nanotape.configuration import NanoTapeConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 
-T = TypeVar("T", bound=BaseBuilder)
 P = TypeVar("P", bound=BaseBuilderParameters)
 
 
