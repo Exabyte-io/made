@@ -11,7 +11,7 @@ from mat3ra.utils.matrix import convert_2x2_to_3x3
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE
-from .utils import TestPlatform, get_platform_specific_value
+from .utils import OSPlatform, get_platform_specific_value
 
 SUBSTRATE_SI_001: Final = SimpleNamespace(
     bulk_config=BULK_Si_CONVENTIONAL,
@@ -126,10 +126,10 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
                 vacuum=0.0,
             ),
             {"max_area": 90.0, "max_area_ratio_tol": 0.1, "max_length_tol": 0.1, "max_angle_tol": 0.1},
-            {TestPlatform.DARWIN: 32, TestPlatform.OTHER: 33},
+            {OSPlatform.DARWIN: 32, OSPlatform.OTHER: 33},
             {
-                TestPlatform.DARWIN: {"strain_percentage": 0.474, "match_id": 0},
-                TestPlatform.OTHER: {"strain_percentage": 25.122, "match_id": 0},
+                OSPlatform.DARWIN: {"strain_percentage": 0.474, "match_id": 0},
+                OSPlatform.OTHER: {"strain_percentage": 25.122, "match_id": 0},
             },
             # NOTE: the following values are expected for the DARWIN platform.
             # {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},

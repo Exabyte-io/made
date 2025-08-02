@@ -29,7 +29,7 @@ from .fixtures.interface.gr_ni_111_top_hcp import (
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001  # type: ignore
 from .fixtures.interface.twisted_nanoribbons import TWISTED_INTERFACE_GRAPHENE_GRAPHENE_60
 from .fixtures.monolayer import GRAPHENE
-from .utils import TestPlatform, assert_two_entities_deep_almost_equal
+from .utils import OSPlatform, assert_two_entities_deep_almost_equal
 
 Si_Ge_SIMPLE_INTERFACE_TEST_CASE = (
     SimpleNamespace(
@@ -65,8 +65,8 @@ GRAPHENE_NICKEL_TEST_CASE = (
     10.0,  # vacuum
     90,  # max area
     {
-        TestPlatform.DARWIN: GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
-        TestPlatform.OTHER: GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
+        OSPlatform.DARWIN: GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
+        OSPlatform.OTHER: GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
     },
 )
 

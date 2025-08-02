@@ -10,15 +10,15 @@ from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Structure
 
 
-class TestPlatform(Enum):
+class OSPlatform(Enum):
     """Platform enum for architecture-specific test handling."""
 
     DARWIN = "darwin"
     OTHER = "other"
 
 
-def get_current_platform() -> TestPlatform:
-    return TestPlatform.DARWIN if sys.platform == "darwin" else TestPlatform.OTHER
+def get_current_platform() -> OSPlatform:
+    return OSPlatform.DARWIN if sys.platform == "darwin" else OSPlatform.OTHER
 
 
 def get_platform_specific_value(platform_values: Any) -> Any:
@@ -31,7 +31,7 @@ def get_platform_specific_value(platform_values: Any) -> Any:
     Returns:
         Platform-specific value if input is a platform dictionary, otherwise returns input unchanged
     """
-    if isinstance(platform_values, dict) and TestPlatform.DARWIN in platform_values:
+    if isinstance(platform_values, dict) and OSPlatform.DARWIN in platform_values:
         current_platform = get_current_platform()
         return platform_values[current_platform]
     return platform_values

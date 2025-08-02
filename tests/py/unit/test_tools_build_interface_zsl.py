@@ -14,7 +14,7 @@ from .fixtures.interface.gr_ni_111_top_hcp import (
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
 )
 from .fixtures.monolayer import GRAPHENE
-from .utils import TestPlatform, assert_two_entities_deep_almost_equal, get_platform_specific_value
+from .utils import OSPlatform, assert_two_entities_deep_almost_equal, get_platform_specific_value
 
 GRAPHENE_NICKEL_TEST_CASE = (
     SimpleNamespace(
@@ -33,8 +33,8 @@ GRAPHENE_NICKEL_TEST_CASE = (
     10.0,  # vacuum
     90,  # max area
     {
-        TestPlatform.DARWIN: GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
-        TestPlatform.OTHER: GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
+        OSPlatform.DARWIN: GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
+        OSPlatform.OTHER: GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
     },
 )
 

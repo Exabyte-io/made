@@ -14,7 +14,7 @@ from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum, AtomPlacementMethodEnum
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
-from unit.utils import TestPlatform, get_platform_specific_value
+from unit.utils import OSPlatform, get_platform_specific_value
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVIZED
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
@@ -97,7 +97,7 @@ def test_lattice_material_analyzer(
     assert_two_entities_deep_almost_equal(primitive_cell_generated, expected_primitive_material_config)
 
 
-VORONOI_SITE_EXPECTED = {TestPlatform.DARWIN: [0.625, 0.625, 0.125], TestPlatform.OTHER: [0.5, 0.5, 0.5]}
+VORONOI_SITE_EXPECTED = {OSPlatform.DARWIN: [0.625, 0.625, 0.125], OSPlatform.OTHER: [0.5, 0.5, 0.5]}
 
 
 @pytest.mark.parametrize(
