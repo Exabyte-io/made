@@ -6,7 +6,7 @@ from .configuration import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
 )
-from .. import BaseSingleBuilder, MaterialWithBuildMetadata
+from .. import BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
 from ...analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 from ...modify import wrap_to_unit_cell, translate_to_z_level
 from ...operations.core.unary import supercell, translate
@@ -37,8 +37,13 @@ class CrystalLatticeLinesBuilder(BaseSingleBuilder):
             return material
         return translate_to_z_level(material, "bottom")
 
-    def _post_process(self, item: Material, post_process_parameters: Optional[_PostProcessParametersType]) -> Material:
-        item = super()._post_process(item, post_process_parameters)
+    def _post_process(
+        self,
+        item: Material,
+        post_process_parameters: Optional[_PostProcessParametersType],
+        configuration: Optional[TConfiguration] = None,
+    ) -> Material:
+        item = super()._post_process(item, post_process_parameters, configuration)
         return self._enforce_convention(item)
 
 

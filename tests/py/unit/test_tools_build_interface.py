@@ -225,14 +225,13 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
 
 
 @pytest.mark.parametrize(
-    "interface_config, expected_coordinate",
+    "interface_config, expected_coordinate_level",
     [(GRAPHENE_NICKEL_INTERFACE_TOP_HCP, 12.048)],
 )
-def test_find_interface_z_level(interface_config, expected_coordinate):
+def test_find_interface_z_level(interface_config, expected_coordinate_level):
     interface_material = MaterialWithBuildMetadata.create(interface_config)
-
     builder = InterfaceBuilder()
 
     interface_z_level = builder._find_interface_coordinate_level(interface_material, axis=AxisEnum.z.value)
 
-    assert np.allclose(interface_z_level, expected_coordinate, atol=PRECISION)
+    assert np.allclose(interface_z_level, expected_coordinate_level, atol=PRECISION)

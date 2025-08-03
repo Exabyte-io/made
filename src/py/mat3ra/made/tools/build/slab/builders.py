@@ -1,6 +1,6 @@
 from typing import List, Optional, Any, Type
 
-from mat3ra.made.material import Material
+
 from .configurations import (
     CrystalLatticePlanesConfiguration,
     SlabStrainedSupercellConfiguration,
@@ -38,9 +38,12 @@ class CrystalLatticePlanesBuilder(BaseSingleBuilder):
         return translate_to_z_level(material, "bottom")
 
     def _post_process(
-        self, item: Material, post_process_parameters: Optional[_PostProcessParametersType]
+        self,
+        item: MaterialWithBuildMetadata,
+        post_process_parameters: Optional[Any] = None,
+        configuration: Optional[TConfiguration] = None,
     ) -> MaterialWithBuildMetadata:
-        item = super()._post_process(item, post_process_parameters)
+        item = super()._post_process(item, post_process_parameters, configuration)
         return self._enforce_convention(item)
 
 

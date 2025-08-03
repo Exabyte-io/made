@@ -2,7 +2,7 @@ from typing import Any, Optional, Union, Type
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata
+from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata, TConfiguration
 from pydantic import Field
 from ..stack.builders import StackNComponentsBuilder
 from ..lattice_lines.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration, EdgeTypes
@@ -75,8 +75,13 @@ class NanoTapeBuilder(StackNComponentsBuilder):
             return material
         return super()._update_material_name(material, configuration)
 
-    def _post_process(self, item: Material, post_process_parameters: Optional[Any] = None) -> Material:
-        item = super()._post_process(item, post_process_parameters)
+    def _post_process(
+        self,
+        item: Material,
+        post_process_parameters: Optional[Any] = None,
+        configuration: Optional[TConfiguration] = None,
+    ) -> Material:
+        item = super()._post_process(item, post_process_parameters, configuration)
         params = self.build_parameters or self._DefaultBuildParameters
         if params.use_rectangular_lattice:
             item = self._make_rectangular_lattice(item)

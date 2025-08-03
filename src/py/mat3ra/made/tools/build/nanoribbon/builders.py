@@ -3,7 +3,7 @@ from typing import Any, Optional, Union, Type
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_to_center
 from . import NanoribbonConfiguration
-from .. import MaterialWithBuildMetadata
+from .. import MaterialWithBuildMetadata, TConfiguration
 from ..nanotape import NanoTapeConfiguration
 from ..nanotape.builders import NanoTapeBuilder, NanoTapeBuilderParameters
 
@@ -23,8 +23,13 @@ class NanoribbonBuilder(NanoTapeBuilder):
     def stack_component_types_conversion_map(self):
         return {**super().stack_component_types_conversion_map, NanoTapeConfiguration: NanoTapeBuilder}
 
-    def _post_process(self, item: Material, post_process_parameters: Optional[Any] = None) -> Material:
-        item = super()._post_process(item, post_process_parameters)
+    def _post_process(
+        self,
+        item: Material,
+        post_process_parameters: Optional[Any] = None,
+        configuration: Optional[TConfiguration] = None,
+    ) -> Material:
+        item = super()._post_process(item, post_process_parameters, configuration)
         item = translate_to_center(item, axes=["x", "y"])
         return item
 

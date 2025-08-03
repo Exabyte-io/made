@@ -62,7 +62,10 @@ class BaseSingleBuilder(BaseModel, Generic[TConfiguration, TBuildParameters]):
         raise NotImplementedError
 
     def _post_process(
-        self, item: MaterialWithBuildMetadata, post_process_parameters: Optional[Any]
+        self,
+        item: MaterialWithBuildMetadata,
+        post_process_parameters: Optional[Any],
+        configuration: Optional[TConfiguration] = None,
     ) -> MaterialWithBuildMetadata:
         return item
 
@@ -78,7 +81,7 @@ class BaseSingleBuilder(BaseModel, Generic[TConfiguration, TBuildParameters]):
         post_process_parameters: Optional[Any] = None,
     ) -> MaterialWithBuildMetadata:
         generated_item = self._generate(configuration)
-        material = self._post_process(generated_item, post_process_parameters)
+        material = self._post_process(generated_item, post_process_parameters, configuration)
         finalized_material = self._finalize(material, configuration)
         return finalized_material
 

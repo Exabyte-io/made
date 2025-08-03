@@ -1,4 +1,4 @@
-from typing import Type, Union
+from typing import Type, Union, Optional, Any
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
@@ -81,13 +81,20 @@ class InterfaceBuilder(StackNComponentsBuilder):
         return wrapped_interface
 
     def _post_process(
-        self, material: MaterialWithBuildMetadata, configuration: TConfiguration
+        self,
+        material: MaterialWithBuildMetadata,
+        post_process_parameters: Optional[Any],
+        configuration: Optional[TConfiguration] = None,
     ) -> MaterialWithBuildMetadata:
         if self.build_parameters.make_primitive:
             # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
             primitive_material = get_material_with_primitive_lattice(material, return_original_if_not_reduced=True)
 
             if primitive_material != material:
+                if configuration is None:
+                    raise ValueError(
+                        "Configuration cannot be None when make_primitive is True and material is changed."
+                    )
                 primitive_material = self._preserve_interface_labels_after_primitive_conversion(
                     original_material=material,
                     primitive_material=primitive_material,
@@ -96,7 +103,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
 
             material = primitive_material
 
-        return super()._post_process(material, configuration)
+        return super()._post_process(material, post_process_parameters=None, configuration=configuration)
 
     def get_base_name_from_configuration(self, first_configuration, second_configuration) -> str:
         first_component_formula = BaseMaterialAnalyzer(material=first_configuration.atomic_layers.crystal).formula

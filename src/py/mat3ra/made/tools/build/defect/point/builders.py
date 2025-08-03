@@ -1,4 +1,4 @@
-from typing import Type, Dict, Union
+from typing import Type, Dict, Union, Optional, Any
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import (
@@ -98,8 +98,13 @@ class PointDefectBuilder(MergeBuilder):
 class VacancyDefectBuilder(PointDefectBuilder):
     _ConfigurationType = VacancyDefectConfiguration
 
-    def _post_process(self, material: MaterialWithBuildMetadata, post_process_parameters=None) -> Material:
-        material = super()._post_process(material, post_process_parameters)
+    def _post_process(
+        self,
+        material: MaterialWithBuildMetadata,
+        post_process_parameters: Optional[Any] = None,
+        configuration: Optional[TConfiguration] = None,
+    ) -> Material:
+        material = super()._post_process(material, post_process_parameters, configuration)
         material.basis.remove_atoms_by_elements("Vac")
         return material
 
