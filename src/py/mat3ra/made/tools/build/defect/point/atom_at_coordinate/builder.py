@@ -2,7 +2,7 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.point.atom_at_coordinate.configuration import AtomAtCoordinateConfiguration
-from mat3ra.made.tools.build.vacuum.builders import VacuumBuilder
+from mat3ra.made.tools.build.vacuum.builder import VacuumBuilder
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 
 

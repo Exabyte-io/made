@@ -1,7 +1,7 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from sympy import ceiling
 
-from .builders import SlabStackBuilder
+from .builder import SlabStackBuilder
 from .configuration import SlabStackConfiguration
 from ... import MaterialWithBuildMetadata
 from ...slab.builders import SlabBuilder

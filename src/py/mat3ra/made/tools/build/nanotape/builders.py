@@ -4,7 +4,7 @@ from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata, TConfiguration
 from pydantic import Field
-from ..stack.builders import StackNComponentsBuilder
+from ..stack.builder import StackNComponentsBuilder
 from ..lattice_lines.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration, EdgeTypes
 from ..lattice_lines.builders import CrystalLatticeLinesRepeatedBuilder
 from .configuration import NanoTapeConfiguration

@@ -10,7 +10,7 @@ from mat3ra.made.tools.build.passivation.analyzer import (
     SurfacePassivationMaterialAnalyzer,
     CoordinationBasedPassivationMaterialAnalyzer,
 )
-from mat3ra.made.tools.build.passivation.builders import PassivationBuilder
+from mat3ra.made.tools.build.passivation.builder import PassivationBuilder
 from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
 from mat3ra.made.tools.enums import SurfaceTypesEnum
 

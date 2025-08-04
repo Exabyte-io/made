@@ -8,7 +8,7 @@ from .configuration import InterfaceConfiguration
 from .. import MaterialWithBuildMetadata, TConfiguration
 from ..slab.builders import SlabStrainedSupercellBuilder
 from ..slab.configurations import SlabStrainedSupercellConfiguration
-from ..stack.builders import StackNComponentsBuilder
+from ..stack.builder import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ...analyze import BaseMaterialAnalyzer
 from ...analyze.lattice import get_material_with_primitive_lattice

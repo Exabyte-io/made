@@ -8,7 +8,7 @@ from ..nanoparticle.analyzer import NanoparticleMaterialAnalyzer
 from ..nanoparticle.builders import ASEBasedNanoparticleBuilder, NanoparticleBuilder
 from ..nanoparticle.configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
 from ..nanoparticle.enums import NanoparticleShapesEnum
-from ..slab.helpers import create_slab
+from mat3ra.made.tools.build.defect.slab.helpers import create_slab
 from ..void_region.configuration import VoidRegionConfiguration
 from ...analyze.other import get_closest_site_id_from_coordinate
 from ...utils.coordinate import SphereCoordinateCondition

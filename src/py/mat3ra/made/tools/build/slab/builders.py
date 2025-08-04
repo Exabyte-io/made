@@ -9,7 +9,7 @@ from .configurations.slab_configuration import SlabConfiguration
 from .entities import MillerIndices
 from .utils import get_orthogonal_c_slab
 from .. import BaseBuilderParameters, BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
-from ..stack.builders import StackNComponentsBuilder
+from ..stack.builder import StackNComponentsBuilder
 from ...analyze import BaseMaterialAnalyzer
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ...modify import wrap_to_unit_cell, translate_to_z_level

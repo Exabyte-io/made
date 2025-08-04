@@ -1,5 +1,5 @@
 from .configuration import IslandDefectConfiguration
-from ..slab.builders import SlabStackBuilder
+from ..slab.builder import SlabStackBuilder
 
 
 class IslandDefectBuilder(SlabStackBuilder):

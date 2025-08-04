@@ -1,5 +1,5 @@
 from .configuration import AdatomDefectConfiguration
-from ..slab.builders import SlabStackBuilder
+from ..slab.builder import SlabStackBuilder
 
 
 class AdatomDefectBuilder(SlabStackBuilder):

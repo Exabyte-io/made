@@ -3,7 +3,7 @@ from ... import MaterialWithBuildMetadata, TConfiguration
 from ...slab.builders import SlabBuilder
 from typing import Type
 from ...slab.configurations import SlabConfiguration
-from ...stack.builders import StackNComponentsBuilder
+from ...stack.builder import StackNComponentsBuilder
 
 
 class SlabStackBuilder(StackNComponentsBuilder):

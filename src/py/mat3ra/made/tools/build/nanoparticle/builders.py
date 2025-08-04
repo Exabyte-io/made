@@ -8,7 +8,7 @@ from mat3ra.made.tools.build.defect.point.vacancy.builder import VacancyDefectBu
 from ..merge import MergeBuilder
 from ..slab.builders import SlabBuilder
 from ..slab.configurations import SlabConfiguration
-from ..void_region.builders import VoidRegionBuilder
+from ..void_region.builder import VoidRegionBuilder
 from ..void_region.configuration import VoidRegionConfiguration
 from ...analyze.other import get_chemical_formula_empirical
 from ...build import BaseSingleBuilder

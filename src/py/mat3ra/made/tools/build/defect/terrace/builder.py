@@ -1,7 +1,7 @@
 from mat3ra.made.tools.modify import rotate, translate_to_z_level
 from mat3ra.made.tools.operations.core.unary import edit_cell
 from .configuration import TerraceDefectConfiguration
-from ..slab.builders import SlabStackBuilder
+from ..slab.builder import SlabStackBuilder
 from ... import MaterialWithBuildMetadata
 from ...defect.terrace.parameters import TerraceBuildParameters
 

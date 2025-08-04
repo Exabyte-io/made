@@ -2,7 +2,7 @@ from typing import Union, TypeVar
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from ..enums import CoordinatesShapeEnum
-from ..slab.helpers import recreate_slab_with_fractional_layers
+from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
 from .builder import IslandDefectBuilder
 from .configuration import IslandDefectConfiguration
 from ... import MaterialWithBuildMetadata
