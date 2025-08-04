@@ -6,6 +6,7 @@ import pytest
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from mat3ra.made.tools.build.slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
+from mat3ra.made.tools.utils import supercell_matrix_2d_schema_to_list, unwrap
 from mat3ra.standata.materials import Materials
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
@@ -89,12 +90,13 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
     substrate_vectors = np.array(analyzer.substrate_slab.lattice.vector_arrays)
 
     film_sl_vectors = (
-        np.array(convert_2x2_to_3x3([row.root for row in film_config.xy_supercell_matrix]))
+        np.array(convert_2x2_to_3x3(supercell_matrix_2d_schema_to_list(film_config.xy_supercell_matrix)))
         @ film_vectors
-        @ np.array([row.root for row in film_config.strain_matrix.root])
+        @ np.array(unwrap(film_config.strain_matrix.root))
     )
     substrate_sl_vectors = (
-        np.array(convert_2x2_to_3x3([row.root for row in sub_config.xy_supercell_matrix])) @ substrate_vectors
+        np.array(convert_2x2_to_3x3(supercell_matrix_2d_schema_to_list(sub_config.xy_supercell_matrix)))
+        @ substrate_vectors
     )
 
     substrate_material = SlabStrainedSupercellBuilder().get_material(sub_config)
