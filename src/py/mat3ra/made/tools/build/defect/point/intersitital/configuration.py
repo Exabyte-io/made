@@ -1,0 +1,29 @@
+from typing import List, Union
+
+# fmt: off
+from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional. \
+    point_defect.interstitial import InterstitialPointDefectSchema
+from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional. \
+    point_defect_site import AtomSchema
+# fmt: on
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+
+from mat3ra.made.material import Material
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
+from mat3ra.made.tools.build.defect.point.base.configuration import PointDefectConfiguration
+from mat3ra.made.tools.build.defect.point.defect_site.configuration import PointDefectSiteConfiguration
+
+
+class InterstitialDefectConfiguration(PointDefectConfiguration, InterstitialPointDefectSchema):
+    type: str = "InterstitialDefectConfiguration"
+
+    @classmethod
+    def from_parameters(
+        cls, crystal: Union[Material, MaterialWithBuildMetadata], coordinate: List[float], element: str, **kwargs
+    ):
+        interstitial_site = PointDefectSiteConfiguration(
+            crystal=crystal,
+            element=AtomSchema(chemical_element=element),
+            coordinate=coordinate,
+        )
+        return cls(merge_components=[crystal, interstitial_site], merge_method=MergeMethodsEnum.ADD, **kwargs)

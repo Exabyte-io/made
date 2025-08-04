@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 
 from mat3ra.made.material import Material
-from .builders import PairDefectBuilder
+from .builder import PairDefectBuilder
 from .configuration import PairDefectConfiguration
 from ..enums import (
     PointDefectTypeEnum,

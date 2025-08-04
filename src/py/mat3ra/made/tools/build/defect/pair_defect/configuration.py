@@ -9,7 +9,10 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 
 from mat3ra.made.material import Material
 from ... import MaterialWithBuildMetadata
-from ...defect.point.configuration import PointDefectSiteConfiguration, PointDefectConfiguration
+from mat3ra.made.tools.build.defect.point.intersitital.configuration import (
+    PointDefectSiteConfiguration,
+    PointDefectConfiguration,
+)
 from ...merge.configuration import MergeConfiguration
 
 

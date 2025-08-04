@@ -7,7 +7,7 @@ from mat3ra.made.tools.analyze.crystal_site.adatom_crystal_site_material_analyze
 )
 from mat3ra.made.tools.analyze.crystal_site.adatom_material_analyzer import AdatomMaterialAnalyzer
 from mat3ra.made.tools.operations.core.binary import merge
-from .builders import AdatomDefectBuilder
+from .builder import AdatomDefectBuilder
 from .configuration import (
     AdatomDefectConfiguration,
 )

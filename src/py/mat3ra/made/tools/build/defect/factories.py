@@ -9,7 +9,7 @@ from ..defect.enums import (
     InterstitialPlacementMethodEnum,
     AtomPlacementMethodEnum,
 )
-from ..defect.point.configuration import (
+from mat3ra.made.tools.build.defect.point.intersitital.configuration import (
     VacancyDefectConfiguration,
     SubstitutionalDefectConfiguration,
     InterstitialDefectConfiguration,

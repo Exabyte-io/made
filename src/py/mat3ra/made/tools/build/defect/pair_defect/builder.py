@@ -1,7 +1,7 @@
 from typing import Type, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.point.builders import (
+from mat3ra.made.tools.build.defect.point.intersitital.builders import (
     PointDefectBuilder,
     VacancyDefectBuilder,
 )

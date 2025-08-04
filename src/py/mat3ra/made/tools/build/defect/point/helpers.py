@@ -2,16 +2,13 @@ from types import SimpleNamespace
 from typing import List, Union
 
 from mat3ra.made.material import Material
-from .builders import (
-    VacancyDefectBuilder,
-    SubstitutionalDefectBuilder,
-    InterstitialDefectBuilder,
-)
-from .configuration import (
-    VacancyDefectConfiguration,
-    SubstitutionalDefectConfiguration,
-    InterstitialDefectConfiguration,
-)
+from .intersitital.builder import InterstitialDefectBuilder
+from .intersitital.configuration import InterstitialDefectConfiguration
+from .substitutional.builder import SubstitutionalDefectBuilder
+from .substitutional.configuration import SubstitutionalDefectConfiguration
+from .vacancy.builder import VacancyDefectBuilder
+from .vacancy.configuration import VacancyDefectConfiguration
+
 from ..enums import (
     PointDefectTypeEnum,
     VacancyPlacementMethodEnum,
