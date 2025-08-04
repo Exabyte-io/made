@@ -4,8 +4,8 @@ from typing import Final
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.slab.builders import SlabStrainedSupercellBuilder
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
+from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
 from mat3ra.standata.materials import Materials
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL

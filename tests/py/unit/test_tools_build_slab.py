@@ -12,18 +12,16 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.utils.vector import align_first_vector_to_x_2d_right_handed
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.slab.builders import (
-    AtomicLayersUniqueRepeatedBuilder,
-    SlabBuilder,
-    SlabBuilderParameters,
-    SlabStrainedSupercellBuilder,
-)
-from mat3ra.made.tools.build.slab.configurations import (
+from mat3ra.made.tools.build.slab.atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
+from mat3ra.made.tools.build.slab.atomic_layers_unique_repeated.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
-    SlabConfiguration,
-    SlabStrainedSupercellConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations
+from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
+from mat3ra.made.tools.build.slab.slab.builder_parameters import SlabBuilderParameters
+from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
+from mat3ra.made.tools.build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 from mat3ra.made.tools.build.slab.termination_utils import select_slab_termination
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP, adjust_material_cell_to_set_gap_along_direction

@@ -17,9 +17,9 @@ from mat3ra.made.tools.build.interface.helpers import (
     create_twisted_interface,
 )
 from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
 from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
+from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from mat3ra.standata.materials import Materials
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 

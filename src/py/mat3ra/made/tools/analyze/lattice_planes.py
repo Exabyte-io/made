@@ -3,10 +3,9 @@ from typing import List, Tuple, Union
 from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab.entities import Termination, TerminationHolder
+from mat3ra.made.tools.build.slab.entities import MillerIndices, Termination, TerminationHolder
 
 from ..build import MaterialWithBuildMetadata
-from ..build.slab.entities import MillerIndices
 from ..convert import from_pymatgen, to_pymatgen
 from ..third_party import PymatgenSlab, PymatgenSlabGenerator, label_pymatgen_slab_termination
 from .lattice import LatticeMaterialAnalyzer
