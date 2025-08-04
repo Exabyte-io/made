@@ -1,4 +1,5 @@
 import warnings
+
 from pydantic.warnings import PydanticDeprecatedSince20
 
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="typing_extensions")
