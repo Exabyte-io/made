@@ -15,8 +15,16 @@ class PairDefectBuilder(VacancyDefectBuilder, PointDefectBuilder):
     ) -> Material:
         host_material = configuration.merge_components[0]
 
-        primary_defect_name = configuration.merge_components[1].element.chemical_element.value if hasattr(configuration.merge_components[1].element.chemical_element, 'value') else configuration.merge_components[1].element.chemical_element
-        secondary_defect_name = configuration.merge_components[2].element.chemical_element.value if hasattr(configuration.merge_components[2].element.chemical_element, 'value') else configuration.merge_components[2].element.chemical_element
+        primary_defect_name = (
+            configuration.merge_components[1].element.chemical_element.value
+            if hasattr(configuration.merge_components[1].element.chemical_element, "value")
+            else configuration.merge_components[1].element.chemical_element
+        )
+        secondary_defect_name = (
+            configuration.merge_components[2].element.chemical_element.value
+            if hasattr(configuration.merge_components[2].element.chemical_element, "value")
+            else configuration.merge_components[2].element.chemical_element
+        )
         if host_material:
             material.name = f"{host_material.name}, Pair Defect: {primary_defect_name} + {secondary_defect_name}"
 

@@ -1,8 +1,11 @@
 from typing import Union, List
 
-from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.base_configuration import (
+# fmt: off
+from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.\
+    point_defect.base_configuration import (
     PointDefectBaseConfigurationSchema,
 )
+# fmt: on
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect.point.defect_site.configuration import PointDefectSiteConfiguration

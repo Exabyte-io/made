@@ -3,7 +3,6 @@ from typing import Union, List
 from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.point_defect.vacancy import (
     VacancyPointDefectSchema,
 )
-from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import ChemicalElement
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.vacancy import VacancySchema
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
