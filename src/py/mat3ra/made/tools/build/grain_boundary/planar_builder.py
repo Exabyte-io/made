@@ -3,7 +3,7 @@ from typing import Type
 from mat3ra.made.material import Material
 from .parameters import GrainBoundaryBuilderParameters
 from .planar_configuration import GrainBoundaryPlanarConfiguration
-from ..interface.builders import InterfaceBuilder
+from ..interface import InterfaceBuilder
 from ...modify import wrap_to_unit_cell
 from ...operations.core.unary import supercell
 

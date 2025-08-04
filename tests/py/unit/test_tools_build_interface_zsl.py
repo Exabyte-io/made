@@ -2,8 +2,12 @@ from types import SimpleNamespace
 
 import pytest
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceConfiguration
-from mat3ra.made.tools.build.interface.helpers import create_zsl_interface, create_zsl_interface_between_slabs
+from mat3ra.made.tools.build.interface import (
+    InterfaceBuilder,
+    InterfaceConfiguration,
+    create_zsl_interface,
+    create_zsl_interface_between_slabs,
+)
 from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
 from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration

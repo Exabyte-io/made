@@ -1,6 +1,6 @@
 from .linear_configuration import GrainBoundaryLinearConfiguration
 from .linear_parameters import GrainBoundaryLinearBuilderParameters
-from ..interface.builders import InterfaceBuilder
+from ..interface import InterfaceBuilder
 
 
 class GrainBoundaryLinearBuilder(InterfaceBuilder):

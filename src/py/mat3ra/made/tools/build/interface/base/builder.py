@@ -1,30 +1,26 @@
 from typing import Optional, Any, Type, Union
 
 import numpy as np
-from mat3ra.code.entity import InMemoryEntityPydantic
 
 from mat3ra.made.material import Material
 from .configuration import InterfaceConfiguration
-from .. import MaterialWithBuildMetadata, TConfiguration
-from mat3ra.made.tools.build.slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
-from mat3ra.made.tools.build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
-from ..stack.builder import StackNComponentsBuilder
-from ..stack.configuration import StackConfiguration
-from ...analyze import BaseMaterialAnalyzer
-from ...analyze.lattice import get_material_with_primitive_lattice
-from ...convert.utils import InterfacePartsEnum
-from ...modify import (
+from .build_parameters import InterfaceBuilderParameters
+from ... import MaterialWithBuildMetadata, TConfiguration
+from ...slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
+from ...slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
+from ...stack.builder import StackNComponentsBuilder
+from ...stack.configuration import StackConfiguration
+from ....analyze import BaseMaterialAnalyzer
+from ....analyze.lattice import get_material_with_primitive_lattice
+from ....convert.utils import InterfacePartsEnum
+from ....modify import (
     translate_by_vector,
     wrap_to_unit_cell,
     translate_to_center,
 )
-from ...operations.core.unary import supercell
-from ...operations.core.utils import should_skip_stacking
-from ....utils import AXIS_TO_INDEX_MAP
-
-
-class InterfaceBuilderParameters(InMemoryEntityPydantic):
-    make_primitive: bool = True
+from ....operations.core.unary import supercell
+from ....operations.core.utils import should_skip_stacking
+from .....utils import AXIS_TO_INDEX_MAP
 
 
 class InterfaceBuilder(StackNComponentsBuilder):

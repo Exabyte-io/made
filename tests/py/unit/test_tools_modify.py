@@ -2,6 +2,7 @@ from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.interface import get_optimal_film_displacement
+from mat3ra.made.tools.calculate.calculators import InterfaceMaterialCalculator
 from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.convert.utils import InterfacePartsEnum
 from mat3ra.made.tools.modify import (
@@ -222,6 +223,7 @@ def test_displace_interface_optimized():
 
     optimal_displacement = get_optimal_film_displacement(
         material,
+        calculator=InterfaceMaterialCalculator(),
         grid_size_xy=(10, 10),
         grid_range_x=(-0.5, 0.5),
         grid_range_y=(-0.5, 0.5),

@@ -6,12 +6,10 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.interface.builders import (
+from mat3ra.made.tools.build.interface import (
     InterfaceBuilder,
     InterfaceBuilderParameters,
     InterfaceConfiguration,
-)
-from mat3ra.made.tools.build.interface.helpers import (
     create_commensurate_interface,
     create_simple_interface_between_slabs,
     create_twisted_interface,

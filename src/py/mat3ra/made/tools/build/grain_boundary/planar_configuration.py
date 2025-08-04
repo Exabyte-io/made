@@ -9,7 +9,7 @@ from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.
 )
 # fmt: on
 
-from mat3ra.made.tools.build.interface.configuration import InterfaceConfiguration
+from mat3ra.made.tools.build.interface import InterfaceConfiguration
 from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from mat3ra.made.tools.build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration

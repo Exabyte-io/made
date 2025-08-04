@@ -1,4 +1,4 @@
-from mat3ra.made.tools.build.interface.builders import InterfaceBuilderParameters
+from mat3ra.made.tools.build.interface import InterfaceBuilderParameters
 
 
 class GrainBoundaryBuilderParameters(InterfaceBuilderParameters):

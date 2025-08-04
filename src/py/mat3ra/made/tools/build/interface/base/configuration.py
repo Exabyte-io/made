@@ -6,10 +6,10 @@ from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dime
 )
 
 from mat3ra.made.tools.utils import unwrap
-from ..slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
-from ..stack.configuration import StackConfiguration
-from ..vacuum.configuration import VacuumConfiguration
-from ...analyze.utils import calculate_von_mises_strain
+from ...slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
+from ...stack.configuration import StackConfiguration
+from ...vacuum.configuration import VacuumConfiguration
+from ....analyze.utils import calculate_von_mises_strain
 
 
 class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):
@@ -43,15 +43,3 @@ class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):
         raw = self.film_configuration.strain_matrix.root
         strain_matrix = np.array(unwrap(raw))
         return calculate_von_mises_strain(strain_matrix)
-
-
-class TwistedNanoribbonsInterfaceConfiguration(InterfaceConfiguration):
-    """
-    Configuration for creating a twisted interface between two nanoribbons with specified twist angle.
-
-    Args:
-        stack_components (List[SlabConfiguration]): List of two nanoribbons as slab configurations.
-        angle (float): Twist angle in degrees for provenance.
-    """
-
-    angle: float = 0.0
