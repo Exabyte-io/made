@@ -16,7 +16,7 @@ from ....utils.coordinate import (
     TriangularPrismCoordinateCondition,
     PlaneCoordinateCondition,
 )
-from ...slab.builders import SlabBuilder
+from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
 from ...vacuum.configuration import VacuumConfiguration
 
 CoordinateConditionType = TypeVar("CoordinateConditionType", bound=CoordinateCondition)

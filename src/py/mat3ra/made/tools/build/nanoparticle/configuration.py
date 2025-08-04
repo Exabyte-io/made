@@ -5,7 +5,7 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 from .enums import NanoparticleShapesEnum
 from .. import BaseConfigurationPydantic
 from ..merge.configuration import MergeConfiguration
-from ..slab.configurations import SlabConfiguration
+from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from ..void_region.configuration import VoidRegionConfiguration
 
 

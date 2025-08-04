@@ -7,7 +7,7 @@ from mat3ra.esse.models.materials_category.defective_structures.one_dimensional.
 
 # fmt: on
 from mat3ra.made.tools.build.interface.configuration import InterfaceConfiguration
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
+from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 
 
 class GrainBoundaryLinearConfiguration(InterfaceConfiguration, GrainBoundaryLinearConfigurationSchema):

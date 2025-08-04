@@ -19,10 +19,8 @@ from .configuration import (
     InterfaceConfiguration,
 )
 from .. import MaterialWithBuildMetadata
-from ..slab.configurations import (
-    SlabConfiguration,
-    SlabStrainedSupercellConfiguration,
-)
+from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 from ..slab.helpers import create_slab
 from ..vacuum.configuration import VacuumConfiguration
 from ...analyze.lattice import get_material_with_conventional_lattice

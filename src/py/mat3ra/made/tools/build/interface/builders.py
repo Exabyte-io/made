@@ -6,8 +6,8 @@ from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.made.material import Material
 from .configuration import InterfaceConfiguration
 from .. import MaterialWithBuildMetadata, TConfiguration
-from ..slab.builders import SlabStrainedSupercellBuilder
-from ..slab.configurations import SlabStrainedSupercellConfiguration
+from mat3ra.made.tools.build.slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
+from mat3ra.made.tools.build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 from ..stack.builder import StackNComponentsBuilder
 from ..stack.configuration import StackConfiguration
 from ...analyze import BaseMaterialAnalyzer

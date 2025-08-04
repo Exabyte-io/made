@@ -1,6 +1,6 @@
 from typing import List
 
-from ...build import BaseBuilderParameters
+from mat3ra.made.tools.build import BaseBuilderParameters
 
 
 class SlabBuilderParameters(BaseBuilderParameters):
