@@ -12,7 +12,7 @@ from .configuration import (
     AdatomDefectConfiguration,
 )
 from ... import MaterialWithBuildMetadata
-from ...defect.enums import AdatomPlacementMethodEnum
+from ..adatom_placement_method_enum import AdatomPlacementMethodEnum
 
 
 def get_adatom_defect_analyzer_cls(

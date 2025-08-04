@@ -9,12 +9,10 @@ from .substitutional.configuration import SubstitutionalDefectConfiguration
 from .vacancy.builder import VacancyDefectBuilder
 from .vacancy.configuration import VacancyDefectConfiguration
 
-from ..enums import (
-    PointDefectTypeEnum,
-    VacancyPlacementMethodEnum,
-    SubstitutionPlacementMethodEnum,
-    InterstitialPlacementMethodEnum,
-)
+from ..point_defect_type_enum import PointDefectTypeEnum
+from ..vacancy_placement_method_enum import VacancyPlacementMethodEnum
+from ..substitution_placement_method_enum import SubstitutionPlacementMethodEnum
+from ..interstitial_placement_method_enum import InterstitialPlacementMethodEnum
 from ... import MaterialWithBuildMetadata
 from ....analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
 from ....analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer

@@ -2,13 +2,11 @@ from typing import List, Dict, Union, Type, Optional
 
 from mat3ra.made.material import Material
 from .. import MaterialWithBuildMetadata
-from ..defect.enums import (
-    PointDefectTypeEnum,
-    VacancyPlacementMethodEnum,
-    SubstitutionPlacementMethodEnum,
-    InterstitialPlacementMethodEnum,
-    AtomPlacementMethodEnum,
-)
+from .point_defect_type_enum import PointDefectTypeEnum
+from .vacancy_placement_method_enum import VacancyPlacementMethodEnum
+from .substitution_placement_method_enum import SubstitutionPlacementMethodEnum
+from .interstitial_placement_method_enum import InterstitialPlacementMethodEnum
+from .atom_placement_method_enum import AtomPlacementMethodEnum
 from mat3ra.made.tools.build.defect.point.vacancy.configuration import VacancyDefectConfiguration
 from mat3ra.made.tools.build.defect.point.substitutional.configuration import SubstitutionalDefectConfiguration
 from mat3ra.made.tools.build.defect.point.intersitital.configuration import InterstitialDefectConfiguration
