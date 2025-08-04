@@ -3,7 +3,7 @@ from typing import Union
 import sympy as sp
 
 from mat3ra.made.material import Material
-from .builders import PerturbationBuilder, IsometricPerturbationBuilder
+from mat3ra.made.tools.build.perturbation.builders import PerturbationBuilder, IsometricPerturbationBuilder
 from .configuration import (
     PerturbationConfiguration,
 )

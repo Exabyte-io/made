@@ -1,10 +1,10 @@
 from typing import Any, Type
 
 from mat3ra.made.tools.build import MaterialWithBuildMetadata, BaseSingleBuilder, TConfiguration
-from .configuration import PerturbationConfiguration
-from .parameters import PerturbationBuildParameters
-from ...modify import wrap_to_unit_cell, translate_to_z_level
-from ...operations.core.unary import perturb, edit_cell
+from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
+from mat3ra.made.tools.build.perturbation.parameters import PerturbationBuildParameters
+from mat3ra.made.tools.modify import wrap_to_unit_cell, translate_to_z_level
+from mat3ra.made.tools.operations.core.unary import perturb
 
 
 class PerturbationBuilder(BaseSingleBuilder):
@@ -29,24 +29,3 @@ class PerturbationBuilder(BaseSingleBuilder):
         perturbation_details = f"Perturbation: {configuration.perturbation_function_holder.function_str}"
         material.name = f"{material.name} ({perturbation_details})"
         return material
-
-
-class IsometricPerturbationBuilder(PerturbationBuilder):
-    def _generate(self, configuration: PerturbationConfiguration) -> MaterialWithBuildMetadata:
-        new_material = configuration.material.clone()
-        renormalized_coordinates = [
-            configuration.perturbation_function_holder.normalize_coordinates(coord)
-            for coord in new_material.basis.coordinates.values
-        ]
-        new_material.set_coordinates(renormalized_coordinates)
-
-        configuration.material = new_material
-
-        new_material = super()._generate(configuration)
-
-        new_lattice_vectors = [
-            configuration.perturbation_function_holder.normalize_coordinates(vector)
-            for vector in new_material.lattice.vector_arrays
-        ]
-        renormalized_material = edit_cell(new_material, new_lattice_vectors)
-        return renormalized_material
