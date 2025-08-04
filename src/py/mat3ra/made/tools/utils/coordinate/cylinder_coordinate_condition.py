@@ -2,8 +2,8 @@ from typing import List
 
 from pydantic import Field
 
-from .coordinate_functions import is_coordinate_in_cylinder
 from .coordinate_condition import CoordinateCondition
+from .coordinate_functions import is_coordinate_in_cylinder
 
 
 class CylinderCoordinateCondition(CoordinateCondition):

@@ -3,6 +3,7 @@ from typing import List
 from mat3ra.made.tools.convert import to_pymatgen
 from mat3ra.made.tools.third_party import PymatgenVoronoiInterstitialGenerator
 from mat3ra.made.tools.utils import get_distance_between_coordinates
+
 from .crystal_site_analyzer import CrystalSiteAnalyzer
 
 

@@ -1,7 +1,7 @@
 from typing import List
 
-from .coordinate_functions import is_coordinate_behind_plane
 from .coordinate_condition import CoordinateCondition
+from .coordinate_functions import is_coordinate_behind_plane
 
 
 class PlaneCoordinateCondition(CoordinateCondition):

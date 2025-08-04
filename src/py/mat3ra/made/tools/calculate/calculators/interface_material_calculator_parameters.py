@@ -1,5 +1,3 @@
-from typing import Callable
-
 from .material_calculator_parameters import MaterialCalculatorParameters
 
 

@@ -1,3 +1,5 @@
+from typing import List
+
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.point_site.adatom_material_analyzer import AdatomMaterialAnalyzer
 from mat3ra.made.tools.analyze.point_site.crystal_site_analyzer import CrystalSiteAnalyzer
@@ -15,7 +17,7 @@ class AdatomCrystalSiteMaterialAnalyzer(AdatomMaterialAnalyzer):
         return recreate_slab_with_fractional_layers(self.material, self.DEFAULT_NUMBER_OF_LAYERS)
 
     @property
-    def coordinate_in_added_component(self) -> list[float]:
+    def coordinate_in_added_component(self) -> List[float]:
         approximate_coordinate_3d = super().coordinate_in_added_component
         crystal_site_analyzer = CrystalSiteAnalyzer(
             material=self.added_component_prototype,

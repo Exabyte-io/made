@@ -1,12 +1,12 @@
 from typing import List
 
-from mat3ra.made.tools.build.supercell.helpers import create_supercell
-from mat3ra.made.utils import get_center_of_coordinates
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
-from mat3ra.made.tools.utils import get_distance_between_coordinates, transform_coordinate_to_supercell
 from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
 from mat3ra.made.tools.analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
 from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate
+from mat3ra.made.tools.build.supercell.helpers import create_supercell
+from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
+from mat3ra.made.tools.utils import transform_coordinate_to_supercell
+from mat3ra.made.utils import get_center_of_coordinates
 
 
 class CrystalSiteAnalyzer(BaseMaterialAnalyzer):

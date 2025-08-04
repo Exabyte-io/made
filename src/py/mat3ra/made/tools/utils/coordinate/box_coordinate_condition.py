@@ -2,8 +2,8 @@ from typing import List
 
 from pydantic import Field
 
-from .coordinate_functions import is_coordinate_in_box
 from .coordinate_condition import CoordinateCondition
+from .coordinate_functions import is_coordinate_in_box
 
 
 class BoxCoordinateCondition(CoordinateCondition):

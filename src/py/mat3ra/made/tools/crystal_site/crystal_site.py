@@ -6,7 +6,6 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_di
     CrystalSiteSchema,
 )
 from mat3ra.made.material import Material
-from typing import Optional
 
 
 class CrystalSite(CrystalSiteSchema, InMemoryEntityPydantic):
