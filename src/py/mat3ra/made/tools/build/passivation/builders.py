@@ -2,10 +2,8 @@ from typing import Dict, Type
 
 from .configuration import PassivationConfiguration
 from .. import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.point.intersitital.builders import (
-    AtomAtCoordinateConfiguration,
-    AtomAtCoordinateBuilder,
-)
+from mat3ra.made.tools.build.defect.point.atom_at_coordinate.builder import AtomAtCoordinateBuilder
+from mat3ra.made.tools.build.defect.point.atom_at_coordinate.configuration import AtomAtCoordinateConfiguration
 from ..merge import MergeBuilder
 
 

@@ -20,7 +20,7 @@ class PointDefectSiteBuilder(BaseSingleBuilder):
         elements = configuration.crystal.basis.elements.values
         new_material.basis.remove_atoms_by_elements(elements)
         new_material.basis.add_atom(
-            element=configuration.element.chemical_element.value,
+            element=configuration.element.chemical_element,
             coordinate=configuration.coordinate,
         )
         return new_material

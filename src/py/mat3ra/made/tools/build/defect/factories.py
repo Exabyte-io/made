@@ -9,12 +9,10 @@ from ..defect.enums import (
     InterstitialPlacementMethodEnum,
     AtomPlacementMethodEnum,
 )
-from mat3ra.made.tools.build.defect.point.intersitital.configuration import (
-    VacancyDefectConfiguration,
-    SubstitutionalDefectConfiguration,
-    InterstitialDefectConfiguration,
-    PointDefectConfiguration,
-)
+from mat3ra.made.tools.build.defect.point.vacancy.configuration import VacancyDefectConfiguration
+from mat3ra.made.tools.build.defect.point.substitutional.configuration import SubstitutionalDefectConfiguration
+from mat3ra.made.tools.build.defect.point.intersitital.configuration import InterstitialDefectConfiguration
+from mat3ra.made.tools.build.defect.point.base.configuration import PointDefectConfiguration
 from ...analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
 from ...analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
 

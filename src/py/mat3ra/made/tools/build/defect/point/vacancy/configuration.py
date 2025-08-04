@@ -20,7 +20,7 @@ class VacancyDefectConfiguration(PointDefectConfiguration, VacancyPointDefectSch
     def from_parameters(cls, crystal: Union[Material, MaterialWithBuildMetadata], coordinate: List[float], **kwargs):
         point_defect_site = PointDefectSiteConfiguration(
             crystal=crystal,
-            element=VacancySchema(chemical_element=ChemicalElement.Vac.value),
+            element=VacancySchema(),
             coordinate=coordinate,
         )
         return cls(merge_components=[crystal, point_defect_site], merge_method=MergeMethodsEnum.REPLACE, **kwargs)

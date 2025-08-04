@@ -1,7 +1,7 @@
 from typing import Type
 
 from .. import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.point.intersitital.builders import PointDefectSiteBuilder
+from mat3ra.made.tools.build.defect.point.defect_site.builder import PointDefectSiteBuilder
 from ..void_region.configuration import VoidRegionConfiguration
 from ...modify import filter_by_condition_on_coordinates
 

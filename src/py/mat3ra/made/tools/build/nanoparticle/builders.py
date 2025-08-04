@@ -4,7 +4,7 @@ from mat3ra.made.material import Material
 from .configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
 from .enums import NanoparticleShapesEnum
 from .. import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.point.intersitital.builders import VacancyDefectBuilder
+from mat3ra.made.tools.build.defect.point.vacancy.builder import VacancyDefectBuilder
 from ..merge import MergeBuilder
 from ..slab.builders import SlabBuilder
 from ..slab.configurations import SlabConfiguration

@@ -1,10 +1,8 @@
 from typing import Type, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.point.intersitital.builders import (
-    PointDefectBuilder,
-    VacancyDefectBuilder,
-)
+from mat3ra.made.tools.build.defect.point.base.builder import PointDefectBuilder
+from mat3ra.made.tools.build.defect.point.vacancy.builder import VacancyDefectBuilder
 from .configuration import PairDefectConfiguration
 from ... import MaterialWithBuildMetadata, TConfiguration
 
@@ -17,8 +15,8 @@ class PairDefectBuilder(VacancyDefectBuilder, PointDefectBuilder):
     ) -> Material:
         host_material = configuration.merge_components[0]
 
-        primary_defect_name = configuration.merge_components[1].element.chemical_element.value
-        secondary_defect_name = configuration.merge_components[2].element.chemical_element.value
+        primary_defect_name = configuration.merge_components[1].element.chemical_element.value if hasattr(configuration.merge_components[1].element.chemical_element, 'value') else configuration.merge_components[1].element.chemical_element
+        secondary_defect_name = configuration.merge_components[2].element.chemical_element.value if hasattr(configuration.merge_components[2].element.chemical_element, 'value') else configuration.merge_components[2].element.chemical_element
         if host_material:
             material.name = f"{host_material.name}, Pair Defect: {primary_defect_name} + {secondary_defect_name}"
 
