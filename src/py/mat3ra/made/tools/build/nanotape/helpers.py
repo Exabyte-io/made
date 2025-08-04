@@ -36,7 +36,7 @@ def create_nanotape(
     Returns:
         Material: The generated nanotape material.
     """
-    lattice_lines_config, lattice_lines_material = create_lattice_lines_config_and_material(
+    lattice_lines_config = create_lattice_lines_config_and_material(
         material=material,
         miller_indices_2d=miller_indices_2d,
         edge_type=edge_type,
@@ -46,7 +46,7 @@ def create_nanotape(
     )
     vacuum_config = VacuumConfiguration(
         size=vacuum_width,
-        crystal=lattice_lines_material,
+        crystal=material,
         direction=AxisEnum.y,
     )
     config = NanoTapeConfiguration(

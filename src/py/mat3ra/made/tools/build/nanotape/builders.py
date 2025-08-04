@@ -2,22 +2,16 @@ from typing import Any, Optional, Union, Type
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata, TConfiguration
-from pydantic import Field
-from ..stack.builder import StackNComponentsBuilder
+from .build_parameters import NanoTapeBuilderParameters
+from .configuration import NanoTapeConfiguration
+from .. import MaterialWithBuildMetadata, TConfiguration
 from ..lattice_lines import (
     CrystalLatticeLinesUniqueRepeatedConfiguration,
     EdgeTypes,
     CrystalLatticeLinesRepeatedBuilder,
 )
-from .configuration import NanoTapeConfiguration
+from ..stack.builder import StackNComponentsBuilder
 from ...modify import wrap_to_unit_cell
-
-
-class NanoTapeBuilderParameters(BaseBuilderParameters):
-    use_rectangular_lattice: bool = Field(
-        True, description="If True, set the XY lattice to be rectangular after stacking."
-    )
 
 
 class NanoTapeBuilder(StackNComponentsBuilder):
