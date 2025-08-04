@@ -1,40 +1,12 @@
-from typing import Callable, Dict, Type, Union
+from typing import Callable, Dict
 
-from mat3ra.made.material import Material
-from .configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
-from .enums import NanoparticleShapesEnum
-from .. import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.point.vacancy.builder import VacancyDefectBuilder
-from ..merge import MergeBuilder
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
-from ..void_region.builder import VoidRegionBuilder
-from ..void_region.configuration import VoidRegionConfiguration
-from ...analyze.other import get_chemical_formula_empirical
-from ...build import BaseSingleBuilder
-from ...build.mixins import ConvertGeneratedItemsASEAtomsMixin
-from ...third_party import ASEAtoms
-
-
-class NanoparticleBuilder(VacancyDefectBuilder, MergeBuilder):
-    """
-    Builder class for creating a nanoparticle by merging a slab with a void region.
-    """
-
-    @property
-    def merge_component_types_conversion_map(self) -> Dict[Type, Type]:
-        return {
-            SlabConfiguration: SlabBuilder,
-            VoidRegionConfiguration: VoidRegionBuilder,
-        }
-
-    def _update_material_name(
-        self, material: Union[Material, MaterialWithBuildMetadata], configuration: NanoparticleConfiguration
-    ) -> Material:
-        formula = get_chemical_formula_empirical(material)
-
-        material.name = f"{formula} {configuration.void_region_configuration.condition_name} Nanoparticle"
-        return material
+from .configuration import ASEBasedNanoparticleConfiguration
+from ..enums import NanoparticleShapesEnum
+from ... import MaterialWithBuildMetadata
+from ...mixins import ConvertGeneratedItemsASEAtomsMixin
+from ....build import BaseSingleBuilder
+from ....third_party import ASEAtoms
+from ....analyze.other import get_chemical_formula_empirical
 
 
 class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseSingleBuilder):
