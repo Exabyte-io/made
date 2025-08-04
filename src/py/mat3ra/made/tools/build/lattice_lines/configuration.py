@@ -1,8 +1,9 @@
 from typing import Tuple, Optional, Union
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseConfigurationPydantic, MaterialWithBuildMetadata
-from ..slab.entities import Termination
 from enum import Enum
+
+from mat3ra.made.tools.entities import Termination
 
 
 class EdgeTypes(str, Enum):

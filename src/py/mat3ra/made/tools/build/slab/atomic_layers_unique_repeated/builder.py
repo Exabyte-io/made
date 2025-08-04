@@ -6,7 +6,7 @@ from mat3ra.made.tools.build.slab.atomic_layers_unique_repeated.configuration im
     AtomicLayersUniqueRepeatedConfiguration,
 )
 from mat3ra.made.tools.build.slab.crystal_lattice_planes.builder import CrystalLatticePlanesBuilder
-from mat3ra.made.tools.build.slab.entities import MillerIndices
+from mat3ra.made.tools.entities import MillerIndices
 from mat3ra.made.tools.modify import wrap_to_unit_cell
 from mat3ra.made.tools.operations.core.unary import supercell, translate
 

@@ -1,7 +1,7 @@
 from typing import List, Tuple, Union, Optional
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab.entities import Termination
+from mat3ra.made.tools.entities import Termination
 from .atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
 from .atomic_layers_unique_repeated.configuration import AtomicLayersUniqueRepeatedConfiguration
 from .slab.builder import SlabBuilder

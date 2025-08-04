@@ -5,7 +5,7 @@ from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.
 )
 
 from mat3ra.made.tools.build.slab.crystal_lattice_planes.configuration import CrystalLatticePlanesConfiguration
-from mat3ra.made.tools.build.slab.entities import Termination
+from mat3ra.made.tools.entities import Termination
 
 
 class AtomicLayersUniqueRepeatedConfiguration(CrystalLatticePlanesConfiguration, AtomicLayersUniqueRepeatedSchema):

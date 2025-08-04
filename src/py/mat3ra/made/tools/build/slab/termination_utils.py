@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from mat3ra.made.tools.build.slab.entities import Termination
+from mat3ra.made.tools.entities import Termination
 
 
 def select_slab_termination(terminations: List[Termination], formula: Optional[str] = None) -> Termination:
