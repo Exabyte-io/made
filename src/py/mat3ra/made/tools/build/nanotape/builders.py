@@ -5,8 +5,11 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata, TConfiguration
 from pydantic import Field
 from ..stack.builder import StackNComponentsBuilder
-from ..lattice_lines.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration, EdgeTypes
-from ..lattice_lines.builders import CrystalLatticeLinesRepeatedBuilder
+from ..lattice_lines import (
+    CrystalLatticeLinesUniqueRepeatedConfiguration,
+    EdgeTypes,
+    CrystalLatticeLinesRepeatedBuilder,
+)
 from .configuration import NanoTapeConfiguration
 from ...modify import wrap_to_unit_cell
 

@@ -7,8 +7,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata
 from . import NanoribbonConfiguration
 from .builders import NanoribbonBuilder, NanoribbonBuilderParameters
-from ..lattice_lines import create_lattice_lines_config_and_material
-from ..lattice_lines.configuration import EdgeTypes
+from ..lattice_lines import create_lattice_lines_config_and_material, EdgeTypes
 from ..nanotape.configuration import NanoTapeConfiguration
 from ..vacuum.configuration import VacuumConfiguration
 

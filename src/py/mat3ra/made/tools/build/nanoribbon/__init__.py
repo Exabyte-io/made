@@ -1,9 +1,7 @@
-from ..lattice_lines.configuration import (
+from ..lattice_lines import (
     CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesUniqueRepeatedConfiguration,
     EdgeTypes,
-)
-from ..lattice_lines.builders import (
     CrystalLatticeLinesBuilder,
     CrystalLatticeLinesRepeatedBuilder,
 )
