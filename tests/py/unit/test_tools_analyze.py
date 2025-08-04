@@ -1,6 +1,12 @@
 import numpy as np
 import pytest
 from mat3ra.made.material import Material, defaultMaterialConfig
+from mat3ra.made.tools.analyze.crystal_site.adatom_crystal_site_material_analyzer import (
+    AdatomCrystalSiteMaterialAnalyzer,
+)
+from mat3ra.made.tools.analyze.crystal_site.adatom_material_analyzer import AdatomMaterialAnalyzer
+from mat3ra.made.tools.analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from mat3ra.made.tools.analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import (
     SurfaceTypesEnum,
@@ -8,10 +14,6 @@ from mat3ra.made.tools.analyze.other import (
     get_surface_area,
     get_surface_atom_indices,
 )
-from mat3ra.made.tools.analyze.point_site.adatom_crystal_site_material_analyzer import AdatomCrystalSiteMaterialAnalyzer
-from mat3ra.made.tools.analyze.point_site.adatom_material_analyzer import AdatomMaterialAnalyzer
-from mat3ra.made.tools.analyze.point_site.crystal_site_analyzer import CrystalSiteAnalyzer
-from mat3ra.made.tools.analyze.point_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.enums import AdatomPlacementMethodEnum, AtomPlacementMethodEnum

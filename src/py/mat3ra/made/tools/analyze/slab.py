@@ -9,7 +9,7 @@ from ..build.slab.builders import SlabBuilderParameters
 from ..build.slab.configurations import SlabConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
 from .build_metadata_analyzer import BuildMetadataAnalyzer
-from .point_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from .crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
 
 
 class SlabMaterialAnalyzer(

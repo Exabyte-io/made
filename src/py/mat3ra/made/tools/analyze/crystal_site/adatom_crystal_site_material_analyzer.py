@@ -1,11 +1,12 @@
 from typing import List
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.point_site.adatom_material_analyzer import AdatomMaterialAnalyzer
-from mat3ra.made.tools.analyze.point_site.crystal_site_analyzer import CrystalSiteAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
 from mat3ra.made.tools.build.slab.builders import SlabBuilder
+
+from .adatom_material_analyzer import AdatomMaterialAnalyzer
+from .crystal_site_analyzer import CrystalSiteAnalyzer
 
 
 class AdatomCrystalSiteMaterialAnalyzer(AdatomMaterialAnalyzer):
