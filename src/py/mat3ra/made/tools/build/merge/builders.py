@@ -1,31 +1,16 @@
-from typing import Any, Optional, List, Dict, Type
+from typing import Optional, Any, Type, List, Dict
 
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from mat3ra.made.tools.build import (
     BaseSingleBuilder,
-    BaseBuilderParameters,
     MaterialWithBuildMetadata,
     TConfiguration,
 )
+from mat3ra.made.tools.build.merge.builder_parameters import MergeBuilderParameters
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import merge
-
-
-class MergeBuilderParameters(BaseBuilderParameters):
-    """
-    Parameters for merging materials.
-
-    Args:
-        material_name: Optional name for the merged material.
-        distance_tolerance: Tolerance for resolving overlapping coordinates.
-        merge_dangerously: If True, allows merging even if lattices are different.
-    """
-
-    material_name: Optional[str] = "New Material"
-    distance_tolerance: float = 0.1
-    merge_dangerously: bool = False
 
 
 class MergeBuilder(BaseSingleBuilder):

@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
@@ -11,7 +11,6 @@ from mat3ra.made.tools.analyze.interface import (
     ZSLInterfaceAnalyzer,
 )
 from mat3ra.made.tools.analyze.interface.twisted_nanoribbons import TwistedNanoribbonsInterfaceAnalyzer
-from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from .builders import (
     InterfaceBuilder,
     InterfaceBuilderParameters,
@@ -27,6 +26,7 @@ from ..slab.configurations import (
 from ..slab.helpers import create_slab
 from ..vacuum.configuration import VacuumConfiguration
 from ...analyze.lattice import get_material_with_conventional_lattice
+from ...analyze.slab import SlabMaterialAnalyzer
 from ...calculate.calculators import InterfaceMaterialCalculator
 from ...modify import interface_displace_part
 from ...optimize import evaluate_calculator_on_xy_grid

@@ -2,7 +2,6 @@
 from typing import Dict, List
 
 import numpy as np
-from pydantic import BaseModel, Field
 
 
 def is_coordinate_in_cylinder(
@@ -157,68 +156,3 @@ def is_coordinate_behind_plane(
     np_plane_normal = np.array(plane_normal)
     np_plane_point = np.array(plane_point_coordinate)
     return np.dot(np_plane_normal, np_coordinate - np_plane_point) < 0
-
-
-class CoordinateCondition(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
-    def condition(self, coordinate: List[float]) -> bool:
-        raise NotImplementedError
-
-    def get_json(self) -> Dict:
-        json = {"type": self.__class__.__name__}
-        json.update(self.model_dump())
-        return json
-
-
-class CylinderCoordinateCondition(CoordinateCondition):
-    center_position: List[float] = Field(default_factory=lambda: [0.5, 0.5])
-    radius: float = 0.25
-    min_z: float = 0
-    max_z: float = 1
-
-    def condition(self, coordinate: List[float]) -> bool:
-        return is_coordinate_in_cylinder(coordinate, self.center_position, self.radius, self.min_z, self.max_z)
-
-
-class SphereCoordinateCondition(CoordinateCondition):
-    center_coordinate: List[float] = Field(default_factory=lambda: [0.5, 0.5, 0.5])
-    radius: float = 0.25
-
-    def condition(self, coordinate: List[float]) -> bool:
-        return is_coordinate_in_sphere(coordinate, self.center_coordinate, self.radius)
-
-
-class BoxCoordinateCondition(CoordinateCondition):
-    min_coordinate: List[float] = Field(default_factory=lambda: [0, 0, 0])
-    max_coordinate: List[float] = Field(default_factory=lambda: [1, 1, 1])
-
-    def condition(self, coordinate: List[float]) -> bool:
-        return is_coordinate_in_box(coordinate, self.min_coordinate, self.max_coordinate)
-
-
-class TriangularPrismCoordinateCondition(CoordinateCondition):
-    position_on_surface_1: List[float] = [0, 0]
-    position_on_surface_2: List[float] = [1, 0]
-    position_on_surface_3: List[float] = [0, 1]
-    min_z: float = 0
-    max_z: float = 1
-
-    def condition(self, coordinate: List[float]) -> bool:
-        return is_coordinate_in_triangular_prism(
-            coordinate,
-            self.position_on_surface_1,
-            self.position_on_surface_2,
-            self.position_on_surface_3,
-            self.min_z,
-            self.max_z,
-        )
-
-
-class PlaneCoordinateCondition(CoordinateCondition):
-    plane_normal: List[float]
-    plane_point_coordinate: List[float]
-
-    def condition(self, coordinate: List[float]) -> bool:
-        return is_coordinate_behind_plane(coordinate, self.plane_normal, self.plane_point_coordinate)

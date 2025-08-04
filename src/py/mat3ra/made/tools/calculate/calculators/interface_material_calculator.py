@@ -2,66 +2,14 @@ from typing import Callable
 
 import numpy as np
 from mat3ra.made.material import Material
-from pydantic import BaseModel
 
-from ..analyze.other import get_surface_atom_indices
-from ..convert.utils import InterfacePartsEnum
-from ..enums import SurfaceTypesEnum
-from ..modify import interface_get_part
-from .interaction_functions import sum_of_inverse_distances_squared
-
-
-class MaterialCalculatorParameters(BaseModel):
-    """
-    Defines the parameters for a material calculator.
-
-    Args:
-        interaction_function (Callable): A function used to calculate the interaction metric between
-        sets of coordinates. The default function is sum_of_inverse_distances_squared.
-    """
-
-    interaction_function: Callable = sum_of_inverse_distances_squared
-
-
-class InterfaceMaterialCalculatorParameters(MaterialCalculatorParameters):
-    """
-    Parameters specific to the calculation of interaction energies between
-    an interface material's film and substrate.
-
-    Args:
-        shadowing_radius (float): Radius used to determine the surface atoms of the film or substrate
-                                  for interaction calculations. Default is 2.5 Å.
-    """
-
-    shadowing_radius: float = 2.5
-
-
-class MaterialCalculator(BaseModel):
-    """
-    A base class for performing calculations on materials.
-
-    This class uses the parameters defined in MaterialCalculatorParameters to calculate
-    interaction metrics between atoms or sets of coordinates within the material.
-
-    Args:
-        calculator_parameters (MaterialCalculatorParameters): Parameters controlling the calculator,
-        including the interaction function.
-    """
-
-    calculator_parameters: MaterialCalculatorParameters = MaterialCalculatorParameters()
-
-    def get_energy(self, material: Material):
-        """
-        Calculate the energy (or other metric) for a material.
-
-        Args:
-            material (Material): The material to calculate the interaction energy for.
-
-        Returns:
-            float: The interaction energy between the coordinates of the material,
-            calculated using the specified interaction function.
-        """
-        return self.calculator_parameters.interaction_function(material.coordinates, material.coordinates)
+from ...analyze.other import get_surface_atom_indices
+from ...convert.utils import InterfacePartsEnum
+from ...enums import SurfaceTypesEnum
+from ...modify import interface_get_part
+from ..interaction_functions import sum_of_inverse_distances_squared
+from .interface_material_calculator_parameters import InterfaceMaterialCalculatorParameters
+from .material_calculator import MaterialCalculator
 
 
 class InterfaceMaterialCalculator(MaterialCalculator):

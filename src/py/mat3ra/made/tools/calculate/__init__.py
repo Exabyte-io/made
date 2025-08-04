@@ -2,12 +2,12 @@ from typing import Optional
 
 from ...material import Material
 from ..analyze.other import get_surface_area
-from ..build import MaterialWithBuildMetadata
 from ..build.interface.configuration import InterfaceConfiguration
 from ..build.interface.utils import get_slab
-from ..build.metadata import MaterialBuildMetadata
+from ..build.metadata import MaterialBuildMetadata, MaterialWithBuildMetadata
 from ..convert import decorator_convert_material_args_kwargs_to_atoms
 from ..third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
+from .calculators import InterfaceMaterialCalculatorParameters
 from .interaction_functions import sum_of_inverse_distances_squared
 
 

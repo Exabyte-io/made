@@ -1,14 +1,12 @@
 from typing import List
 
-from ...utils import get_center_of_coordinates
-from ..build.supercell import create_supercell
-from ..convert import to_pymatgen
-from ..modify import filter_by_condition_on_coordinates
-from ..third_party import PymatgenVoronoiInterstitialGenerator
-from ..utils import get_distance_between_coordinates, transform_coordinate_to_supercell
-from . import BaseMaterialAnalyzer
-from .coordination import get_voronoi_nearest_neighbors_atom_indices
-from .other import get_closest_site_id_from_coordinate
+from mat3ra.made.tools.build.supercell.helpers import create_supercell
+from mat3ra.made.utils import get_center_of_coordinates
+from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
+from mat3ra.made.tools.utils import get_distance_between_coordinates, transform_coordinate_to_supercell
+from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
+from mat3ra.made.tools.analyze.coordination import get_voronoi_nearest_neighbors_atom_indices
+from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate
 
 
 class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
@@ -65,44 +63,3 @@ class CrystalSiteAnalyzer(BaseMaterialAnalyzer):
         return transform_coordinate_to_supercell(
             equidistant_coordinate_in_supercell, scaling_factor, translation_vector, reverse=True
         )
-
-
-class VoronoiCrystalSiteAnalyzer(CrystalSiteAnalyzer):
-    """
-    Attributes:
-       clustering_tol: Tolerance for clustering the Voronoi nodes.
-       min_dist: Minimum distance between an interstitial and the nearest atom.
-       ltol: Tolerance for lattice matching.
-       stol: Tolerance for structure matching.
-       angle_tol: Angle tolerance for structure matching.
-    """
-
-    clustering_tol: float = 0.5
-    min_dist: float = 0.9
-    ltol: float = 0.2
-    stol: float = 0.3
-    angle_tol: float = 5
-
-    @property
-    def voronoi_site_coordinate(self) -> List[float]:
-        pymatgen_structure = to_pymatgen(self.material)
-
-        voronoi_gen = PymatgenVoronoiInterstitialGenerator(
-            clustering_tol=self.clustering_tol,
-            min_dist=self.min_dist,
-            ltol=self.ltol,
-            stol=self.stol,
-            angle_tol=self.angle_tol,
-        )
-
-        interstitials = list(voronoi_gen.generate(structure=pymatgen_structure, insert_species=["Si"]))
-
-        if not interstitials:
-            raise ValueError("No Voronoi interstitial sites found.")
-
-        closest_interstitial = min(
-            interstitials,
-            key=lambda interstitial: get_distance_between_coordinates(interstitial.site.frac_coords, self.coordinate),
-        )
-
-        return closest_interstitial.site.frac_coords.tolist()

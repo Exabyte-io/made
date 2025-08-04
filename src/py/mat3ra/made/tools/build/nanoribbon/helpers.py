@@ -1,4 +1,5 @@
-from typing import Tuple, Optional, TypeVar, Union
+from typing import Optional, Tuple, Union
+from typing import TypeVar
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 

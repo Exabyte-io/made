@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Union
+from typing import Optional, Tuple, Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
@@ -6,8 +6,8 @@ from mat3ra.made.material import Material
 from . import NanoTapeConfiguration
 from .builders import NanoTapeBuilder, NanoTapeBuilderParameters
 from .. import MaterialWithBuildMetadata
-from ..lattice_lines.configuration import EdgeTypes
 from ..lattice_lines import create_lattice_lines_config_and_material
+from ..lattice_lines.configuration import EdgeTypes
 from ..vacuum.configuration import VacuumConfiguration
 
 

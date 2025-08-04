@@ -2,7 +2,6 @@ from typing import List, Dict, Union, Type, Optional
 
 from mat3ra.made.material import Material
 from .. import MaterialWithBuildMetadata
-from ...analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
 from ..defect.enums import (
     PointDefectTypeEnum,
     VacancyPlacementMethodEnum,
@@ -16,6 +15,8 @@ from ..defect.point.configuration import (
     InterstitialDefectConfiguration,
     PointDefectConfiguration,
 )
+from ...analyze.point_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from ...analyze.point_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
 
 
 def resolve_coordinate(

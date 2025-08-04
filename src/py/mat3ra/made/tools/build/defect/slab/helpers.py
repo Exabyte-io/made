@@ -1,13 +1,13 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from sympy import ceiling
 
-from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
 from .builders import SlabStackBuilder
 from .configuration import SlabStackConfiguration
 from ... import MaterialWithBuildMetadata
 from ...slab.builders import SlabBuilder
 from ...slab.helpers import create_slab
 from ...vacuum.configuration import VacuumConfiguration
+from ....analyze.slab import SlabMaterialAnalyzer
 from ....modify import filter_by_box
 
 

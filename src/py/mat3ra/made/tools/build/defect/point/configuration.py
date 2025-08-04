@@ -1,7 +1,7 @@
 from typing import List, Union
 
 # fmt: off
-from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional.\
+from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional. \
     point_defect.base_configuration import PointDefectBaseConfigurationSchema
 from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional. \
     point_defect.interstitial import InterstitialPointDefectSchema
@@ -14,12 +14,14 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_di
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional. \
     vacancy import VacancySchema
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
-# fmt: on
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools import CrystalSite
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
-from mat3ra.made.tools.site import CrystalSite
+
+
+# fmt: on
 
 
 class PointDefectSiteConfiguration(CrystalSite, PointDefectSiteSchema):

@@ -4,7 +4,8 @@ import numpy as np
 
 from mat3ra.made.material import Material
 from .enums import StrainModes
-from ...convert import PymatgenInterface, INTERFACE_LABELS_MAP
+from ...convert import PymatgenInterface
+from ...convert.interface_parts_enum import INTERFACE_LABELS_MAP
 from ...modify import filter_by_label
 
 

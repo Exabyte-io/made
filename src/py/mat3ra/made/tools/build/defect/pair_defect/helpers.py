@@ -1,4 +1,4 @@
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 from mat3ra.made.material import Material
 from .builders import PairDefectBuilder

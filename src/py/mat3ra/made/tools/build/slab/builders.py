@@ -1,5 +1,4 @@
-from typing import List, Optional, Any, Type
-
+from typing import Optional, Any, Type, List
 
 from .configurations import (
     CrystalLatticePlanesConfiguration,

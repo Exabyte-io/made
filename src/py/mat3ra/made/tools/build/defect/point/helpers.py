@@ -19,7 +19,8 @@ from ..enums import (
     InterstitialPlacementMethodEnum,
 )
 from ... import MaterialWithBuildMetadata
-from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
+from ....analyze.point_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from ....analyze.point_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
 
 DEFECT_TYPE_MAPPING = {
     PointDefectTypeEnum.VACANCY: {

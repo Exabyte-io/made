@@ -1,24 +1,17 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 # fmt: off
-from mat3ra.esse.models.materials_category.defective_structures.one_dimensional. \
-    grain_boundary_linear.configuration import (
-    GrainBoundaryLinearConfigurationSchema,
-)
-
 from mat3ra.esse.models.materials_category.defective_structures.two_dimensional. \
     grain_boundary_planar.configuration import (
     GrainBoundaryPlanarConfigurationSchema,
 )
-
-from ..interface.configuration import InterfaceConfiguration
-from ..slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
-from ..vacuum.configuration import VacuumConfiguration
-
-
 # fmt: on
+
+from mat3ra.made.tools.build.interface.configuration import InterfaceConfiguration
+from mat3ra.made.tools.build.slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
+from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 
 
 class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundaryPlanarConfigurationSchema):
@@ -58,33 +51,3 @@ class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundaryPlan
             xy_shift=xy_shift,
             gaps=ArrayWithIds.from_values(gaps),
         )
-
-
-class GrainBoundaryLinearConfiguration(InterfaceConfiguration, GrainBoundaryLinearConfigurationSchema):
-    """
-    Configuration for creating a linear grain boundary.
-
-    Args:
-        stack_components (List): List of configuration objects for grain boundary components.
-        direction (AxisEnum): Direction along which to stack components (x or y).
-    """
-
-    type: str = "GrainBoundaryLinearConfiguration"
-    direction: AxisEnum = AxisEnum.x
-    actual_angle: Optional[float] = None
-
-    @property
-    def phase_1_configuration(self) -> SlabConfiguration:
-        return self.stack_components[0]
-
-    @property
-    def phase_2_configuration(self) -> SlabConfiguration:
-        return self.stack_components[1]
-
-    @property
-    def substrate_configuration(self) -> SlabConfiguration:
-        return self.phase_1_configuration
-
-    @property
-    def film_configuration(self) -> SlabConfiguration:
-        return self.phase_2_configuration

@@ -2,13 +2,8 @@ from typing import List, Optional
 
 from pydantic import Field
 
-from mat3ra.made.material import Material
 from mat3ra.made.metadata import BaseMetadata
-
-
-class BuildMetadata(BaseMetadata):
-    configuration: dict = Field(default_factory=dict)
-    build_parameters: dict = Field(default_factory=dict)
+from mat3ra.made.tools.build.metadata.build_metadata import BuildMetadata
 
 
 class MaterialBuildMetadata(BaseMetadata):
@@ -33,7 +28,3 @@ class MaterialBuildMetadata(BaseMetadata):
     def add_build_metadata_step(self, configuration: dict, build_parameters: Optional[dict] = None) -> None:
         build_metadata = BuildMetadata(configuration=configuration, build_parameters=build_parameters)
         self.build.append(build_metadata)
-
-
-class MaterialWithBuildMetadata(Material):
-    metadata: MaterialBuildMetadata = Field(default_factory=MaterialBuildMetadata)

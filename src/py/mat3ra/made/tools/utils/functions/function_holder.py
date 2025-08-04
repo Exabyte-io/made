@@ -34,7 +34,8 @@ class FunctionHolder(InMemoryEntityPydantic):
 
         self.function_numeric = sp.lambdify(self.symbols, self.function, modules=["numpy"])
         self.derivatives_numeric = {
-            var: sp.lambdify(self.symbols, sp.diff(self.function, var), modules=["numpy"]) for var in self.variables
+            var: sp.lambdify(sp.symbols(variables), sp.diff(self.function, var), modules=["numpy"])
+            for var in self.variables
         }
 
     @staticmethod

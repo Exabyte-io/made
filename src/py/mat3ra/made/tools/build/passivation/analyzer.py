@@ -2,10 +2,10 @@ from typing import List
 
 import numpy as np
 
+from ... import BondDirectionsTemplatesForElement, BondDirections
 from ...analyze.material import MaterialWithCrystalSites
 from ...analyze.other import get_surface_atom_indices
 from ...analyze.slab import SlabMaterialAnalyzer
-from ...bonds import BondDirections, BondDirectionsTemplatesForElement
 from ...enums import SurfaceTypesEnum
 
 

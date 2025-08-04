@@ -1,18 +1,11 @@
-from typing import List, Optional, Union
+from typing import Union, Optional, List
 
 import numpy as np
-from mat3ra.esse.models.materials_category_components.entities.auxiliary.three_dimensional.supercell_matrix_3d import (
-    SupercellMatrix3DSchema,
-)
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import MaterialWithBuildMetadata, BaseConfigurationPydantic
-from ..operations.core.unary import supercell
-
-
-class SupercellConfiguration(BaseConfigurationPydantic):
-    type: str = "SupercellConfiguration"
-    supercell_matrix: SupercellMatrix3DSchema = SupercellMatrix3DSchema(root=np.eye(3).tolist())
+from mat3ra.made.tools.build import MaterialWithBuildMetadata
+from mat3ra.made.tools.build.supercell import SupercellConfiguration
+from mat3ra.made.tools.operations.core.unary import supercell
 
 
 def create_supercell(

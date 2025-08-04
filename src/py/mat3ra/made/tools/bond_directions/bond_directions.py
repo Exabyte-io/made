@@ -1,15 +1,6 @@
-from enum import Enum
 from typing import List
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict
-
-
-class BondDirectionsTemplatesEnum(list, Enum):
-    OCTAHEDRAL = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]
-    TETRAHEDRAL = [[1, 1, 1], [-1, -1, 1], [1, -1, -1], [-1, 1, -1]]
-    PLANAR = [[1, 0, 0], [-1, 2, 0], [-1, -2, 0]]
-    LINEAR = [[1, 0, 0], [-1, 0, 0]]
 
 
 class BondDirections(np.ndarray):
@@ -157,17 +148,3 @@ class BondDirections(np.ndarray):
                 # Otherwise, add the template directly
                 flattened_templates.append(template)
         return flattened_templates
-
-
-class BondDirectionsTemplatesForElement(BaseModel):
-    bond_directions_templates: List[BondDirections]
-    element: str
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    def to_ndarray(self):
-        return [np.array(template) for template in self.bond_directions_templates]
-
-
-class BondDirectionsForElementList(List[BondDirectionsTemplatesForElement]):
-    pass

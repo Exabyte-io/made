@@ -3,7 +3,7 @@ from typing import Optional, Any, TypeVar, Type, Generic
 from mat3ra.code.entity import InMemoryEntityPydantic
 from pydantic import BaseModel
 
-from .metadata import MaterialBuildMetadata, BuildMetadata, MaterialWithBuildMetadata
+from .metadata import BuildMetadata, MaterialBuildMetadata, MaterialWithBuildMetadata
 
 BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound="BaseConfigurationPydantic")
 

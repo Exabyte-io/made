@@ -6,6 +6,7 @@ from ..slab.helpers import recreate_slab_with_fractional_layers
 from .builders import IslandDefectBuilder
 from .configuration import IslandDefectConfiguration
 from ... import MaterialWithBuildMetadata
+from ....analyze.slab import SlabMaterialAnalyzer
 from ....modify import filter_by_condition_on_coordinates
 from ....utils.coordinate import (
     CoordinateCondition,
@@ -15,7 +16,6 @@ from ....utils.coordinate import (
     TriangularPrismCoordinateCondition,
     PlaneCoordinateCondition,
 )
-from ....analyze.slab import SlabMaterialAnalyzer
 from ...slab.builders import SlabBuilder
 from ...vacuum.configuration import VacuumConfiguration
 

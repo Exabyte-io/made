@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union, Type
+from typing import Optional, Any, Type, Union
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_to_center

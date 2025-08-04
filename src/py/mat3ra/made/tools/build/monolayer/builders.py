@@ -1,4 +1,4 @@
-from typing import Tuple, Union, Optional, Any
+from typing import Optional, Any, Union, Tuple
 
 from mat3ra.made.material import Material
 from .configurations import MonolayerConfiguration

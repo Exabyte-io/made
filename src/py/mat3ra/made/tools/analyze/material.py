@@ -5,8 +5,7 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.made.material import Material
 from scipy.spatial._ckdtree import cKDTree
 
-from ..bonds import BondDirections, BondDirectionsTemplatesForElement
-from ..site import CrystalSite, CrystalSiteList
+from .. import BondDirections, BondDirectionsTemplatesForElement, CrystalSite, CrystalSiteList
 from .rdf import RadialDistributionFunction
 from .utils import decorator_handle_periodic_boundary_conditions
 

@@ -1,4 +1,4 @@
-from typing import Type, Union, Optional, Any
+from typing import Optional, Any, Type, Union
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic

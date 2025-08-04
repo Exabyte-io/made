@@ -1,4 +1,5 @@
-from typing import Tuple, Optional
+from typing import Optional
+from typing import Tuple
 
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.miller_indices import (
