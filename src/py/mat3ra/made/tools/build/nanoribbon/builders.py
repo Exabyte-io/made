@@ -1,15 +1,12 @@
 from typing import Optional, Any, Type, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.modify import translate_to_center
+from ...modify import translate_to_center
 from . import NanoribbonConfiguration
+from .build_parameters import NanoribbonBuilderParameters
 from .. import MaterialWithBuildMetadata, TConfiguration
 from ..nanotape import NanoTapeConfiguration
-from ..nanotape.builders import NanoTapeBuilder, NanoTapeBuilderParameters
-
-
-class NanoribbonBuilderParameters(NanoTapeBuilderParameters):
-    pass
+from ..nanotape.builders import NanoTapeBuilder
 
 
 class NanoribbonBuilder(NanoTapeBuilder):

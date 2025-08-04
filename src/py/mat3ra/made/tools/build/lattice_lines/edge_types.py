@@ -22,8 +22,8 @@ def get_miller_indices_from_edge_type(edge_type: EdgeTypes) -> Tuple[int, int]:
         Tuple of (u,v) Miller indices.
     """
     if edge_type == EdgeTypes.zigzag:
-        return (1, 1)
-    elif edge_type == EdgeTypes.armchair:
         return (0, 1)
+    elif edge_type == EdgeTypes.armchair:
+        return (1, 1)
     else:
         raise ValueError(f"Unknown edge type: {edge_type}. Use 'zigzag' or 'armchair'.")

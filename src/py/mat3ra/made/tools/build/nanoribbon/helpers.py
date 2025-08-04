@@ -4,7 +4,7 @@ from typing import TypeVar
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata
+from .. import BaseBuilderParameters, MaterialWithBuildMetadata
 from . import NanoribbonConfiguration
 from .builders import NanoribbonBuilder, NanoribbonBuilderParameters
 from ..lattice_lines import create_lattice_lines_config_and_material, EdgeTypes

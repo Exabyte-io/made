@@ -32,18 +32,24 @@ def create_lattice_lines_config_and_material(
     """
     if miller_indices_2d is None and edge_type is None:
         raise ValueError("Either miller_indices_2d or edge_type must be provided")
-    if miller_indices_2d is None and edge_type is not None:
-        miller_indices_2d = get_miller_indices_from_edge_type(edge_type)
-    else:
-        miller_indices_2d = (1, 0)
 
-    lattice_lines_analyzer = CrystalLatticeLinesMaterialAnalyzer(material=material, miller_indices_2d=miller_indices_2d)
+    resolved_miller_indices: Tuple[int, int]
+    if miller_indices_2d is not None:
+        resolved_miller_indices = miller_indices_2d
+    elif edge_type is not None:
+        resolved_miller_indices = get_miller_indices_from_edge_type(edge_type)
+    else:
+        raise ValueError("Either miller_indices_2d or edge_type must be provided")
+
+    lattice_lines_analyzer = CrystalLatticeLinesMaterialAnalyzer(
+        material=material, miller_indices_2d=resolved_miller_indices
+    )
     terminations = lattice_lines_analyzer.terminations
     termination = select_slab_termination(terminations, termination_formula)
 
     lattice_lines_config = CrystalLatticeLinesUniqueRepeatedConfiguration(
         crystal=material,
-        miller_indices_2d=miller_indices_2d,
+        miller_indices_2d=resolved_miller_indices,
         termination_top=termination,
         number_of_repetitions_width=width,
         number_of_repetitions_length=length,
