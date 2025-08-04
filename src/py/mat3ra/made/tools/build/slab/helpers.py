@@ -1,7 +1,7 @@
 from typing import List, Tuple, Union, Optional
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.entities import Termination
+from ...entities import Termination
 from .atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
 from .atomic_layers_unique_repeated.configuration import AtomicLayersUniqueRepeatedConfiguration
 from .slab.builder import SlabBuilder
@@ -17,7 +17,7 @@ DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 def create_atomic_layers(
     material: Union[Material, MaterialWithBuildMetadata],
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
-    termination: Termination = None,
+    termination: Optional[Termination] = None,
     number_of_layers: int = 1,
 ) -> Material:
     """
@@ -54,7 +54,7 @@ def create_slab(
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
     use_conventional_cell=True,
     use_orthogonal_c: bool = True,
-    termination: Termination = None,
+    termination: Optional[Termination] = None,
     termination_formula: Optional[str] = None,
     number_of_layers=1,
     vacuum=10.0,

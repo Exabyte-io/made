@@ -1,9 +1,9 @@
 from typing import Type
 
-from mat3ra.made.tools.build import TConfiguration, MaterialWithBuildMetadata
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
-from mat3ra.made.tools.operations.core.unary import supercell, strain
+from ... import TConfiguration, MaterialWithBuildMetadata
+from ..slab.builder import SlabBuilder
+from .configuration import SlabStrainedSupercellConfiguration
+from ....operations.core.unary import supercell, strain
 
 
 class SlabStrainedSupercellBuilder(SlabBuilder):

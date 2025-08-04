@@ -7,7 +7,7 @@ from mat3ra.made.tools.build import (
     MaterialWithBuildMetadata,
     TConfiguration,
 )
-from mat3ra.made.tools.build.merge.builder_parameters import MergeBuilderParameters
+from mat3ra.made.tools.build.merge.build_parameters import MergeBuilderParameters
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.operations.core.binary import merge

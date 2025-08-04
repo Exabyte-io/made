@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple, Union
 from mat3ra.code.array_with_ids import ArrayWithIds
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface import ZSLInterfaceAnalyzer
+from ....analyze.interface import ZSLInterfaceAnalyzer
 from ..base.builder import InterfaceBuilder
 from ..base.build_parameters import InterfaceBuilderParameters
 from ..base.configuration import InterfaceConfiguration

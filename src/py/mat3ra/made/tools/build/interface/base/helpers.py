@@ -3,7 +3,7 @@ from typing import List, Optional
 from mat3ra.code.array_with_ids import ArrayWithIds
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
+from ....analyze.interface import InterfaceAnalyzer
 from .builder import InterfaceBuilder
 from .build_parameters import InterfaceBuilderParameters
 from .configuration import InterfaceConfiguration

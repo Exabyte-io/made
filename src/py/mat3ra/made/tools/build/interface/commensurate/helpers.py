@@ -4,7 +4,7 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
+from ....analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from ..base.builder import InterfaceBuilder
 from ..base.configuration import InterfaceConfiguration
 from ... import MaterialWithBuildMetadata

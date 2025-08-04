@@ -1,14 +1,14 @@
 from typing import Type
 
-from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
-from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.slab.atomic_layers_unique_repeated.configuration import (
+from ....analyze import BaseMaterialAnalyzer
+from ... import MaterialWithBuildMetadata
+from .configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
 )
-from mat3ra.made.tools.build.slab.crystal_lattice_planes.builder import CrystalLatticePlanesBuilder
-from mat3ra.made.tools.entities import MillerIndices
-from mat3ra.made.tools.modify import wrap_to_unit_cell
-from mat3ra.made.tools.operations.core.unary import supercell, translate
+from ..crystal_lattice_planes.builder import CrystalLatticePlanesBuilder
+from ....entities import MillerIndices
+from ....modify import wrap_to_unit_cell
+from ....operations.core.unary import supercell, translate
 
 
 class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
