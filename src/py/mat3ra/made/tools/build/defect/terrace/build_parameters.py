@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from mat3ra.made.tools.build import BaseBuilderParameters
+from ... import BaseBuilderParameters
 
 
 class TerraceBuildParameters(BaseBuilderParameters):

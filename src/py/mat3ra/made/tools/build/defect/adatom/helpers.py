@@ -2,11 +2,11 @@ from types import SimpleNamespace
 from typing import List, Optional
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.crystal_site.adatom_crystal_site_material_analyzer import (
+from ....analyze.crystal_site.adatom_crystal_site_material_analyzer import (
     AdatomCrystalSiteMaterialAnalyzer,
 )
-from mat3ra.made.tools.analyze.crystal_site.adatom_material_analyzer import AdatomMaterialAnalyzer
-from mat3ra.made.tools.operations.core.binary import merge
+from ....analyze.crystal_site.adatom_material_analyzer import AdatomMaterialAnalyzer
+from ....operations.core.binary import merge
 from .builder import AdatomDefectBuilder
 from .configuration import (
     AdatomDefectConfiguration,

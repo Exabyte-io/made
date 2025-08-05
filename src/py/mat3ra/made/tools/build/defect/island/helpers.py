@@ -2,13 +2,13 @@ from typing import Union, TypeVar
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from ..coordinates_shape_enum import CoordinatesShapeEnum
-from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
+from ..slab.helpers import recreate_slab_with_fractional_layers
 from .builder import IslandDefectBuilder
 from .configuration import IslandDefectConfiguration
 from ... import MaterialWithBuildMetadata
 from ....analyze.slab import SlabMaterialAnalyzer
 from ....modify import filter_by_condition_on_coordinates
-from mat3ra.made.tools.entities.coordinate import (
+from ....entities.coordinate import (
     CoordinateCondition,
     CylinderCoordinateCondition,
     SphereCoordinateCondition,
@@ -16,7 +16,7 @@ from mat3ra.made.tools.entities.coordinate import (
     TriangularPrismCoordinateCondition,
     PlaneCoordinateCondition,
 )
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
+from ...slab.slab.builder import SlabBuilder
 from ...vacuum.configuration import VacuumConfiguration
 
 CoordinateConditionType = TypeVar("CoordinateConditionType", bound=CoordinateCondition)

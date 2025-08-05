@@ -6,8 +6,8 @@ from mat3ra.esse.models.materials_category.defective_structures.one_dimensional.
     grain_boundary_linear.configuration import GrainBoundaryLinearConfigurationSchema
 
 # fmt: on
-from mat3ra.made.tools.build.interface import InterfaceConfiguration
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
+from ..interface import InterfaceConfiguration
+from ..slab.slab.configuration import SlabConfiguration
 
 
 class GrainBoundaryLinearConfiguration(InterfaceConfiguration, GrainBoundaryLinearConfigurationSchema):

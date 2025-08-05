@@ -3,9 +3,9 @@ from typing import Union, Optional, List
 import numpy as np
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.supercell import SupercellConfiguration
-from mat3ra.made.tools.operations.core.unary import supercell
+from .. import MaterialWithBuildMetadata
+from ..supercell import SupercellConfiguration
+from ...operations.core.unary import supercell
 
 
 def create_supercell(

@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import Field
 
 from mat3ra.made.metadata import BaseMetadata
-from mat3ra.made.tools.build.metadata.build_metadata import BuildMetadata
+from .build_metadata import BuildMetadata
 
 
 class MaterialBuildMetadata(BaseMetadata):

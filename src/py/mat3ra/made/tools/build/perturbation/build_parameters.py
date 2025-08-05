@@ -1,4 +1,4 @@
-from mat3ra.made.tools.build import BaseBuilderParameters
+from .. import BaseBuilderParameters
 
 
 class PerturbationBuildParameters(BaseBuilderParameters):

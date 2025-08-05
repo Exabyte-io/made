@@ -2,7 +2,7 @@ from typing import List
 from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.terrace.configuration import (
     TerraceDefectConfigurationSchema,
 )
-from mat3ra.made.tools.build.defect.slab.configuration import SlabStackConfiguration
+from ..slab.configuration import SlabStackConfiguration
 
 
 class TerraceDefectConfiguration(SlabStackConfiguration, TerraceDefectConfigurationSchema):

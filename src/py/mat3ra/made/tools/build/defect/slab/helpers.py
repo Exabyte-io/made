@@ -4,7 +4,7 @@ from sympy import ceiling
 from .builder import SlabStackBuilder
 from .configuration import SlabStackConfiguration
 from ... import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
+from ...slab.slab.builder import SlabBuilder
 from ...slab.helpers import create_slab
 from ...vacuum.configuration import VacuumConfiguration
 from ....analyze.slab import SlabMaterialAnalyzer

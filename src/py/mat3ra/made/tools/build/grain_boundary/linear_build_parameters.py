@@ -1,6 +1,6 @@
 from typing import Optional
 
-from mat3ra.made.tools.build.grain_boundary.build_parameters import GrainBoundaryBuilderParameters
+from .build_parameters import GrainBoundaryBuilderParameters
 
 
 class GrainBoundaryLinearBuilderParameters(GrainBoundaryBuilderParameters):
