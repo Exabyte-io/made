@@ -5,7 +5,7 @@ from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dime
     InterfaceConfigurationSchema,
 )
 
-from ....utils import unwrap
+from ......utils import unwrap
 from ...slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 from ...stack.configuration import StackConfiguration
 from ...vacuum.configuration import VacuumConfiguration

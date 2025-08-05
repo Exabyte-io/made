@@ -2,8 +2,8 @@ from .bond_directions.bond_directions import BondDirections
 from .bond_directions.bond_directions_for_element_list import BondDirectionsForElementList
 from .bond_directions.bond_directions_templates_enum import BondDirectionsTemplatesEnum
 from .bond_directions.bond_directions_templates_for_element import BondDirectionsTemplatesForElement
-from .crystal_site.crystal_site import CrystalSite
-from .crystal_site.crystal_site_list import CrystalSiteList
+from .build_components.entities.auxiliary.zero_dimensional.crystal_site.crystal_site import CrystalSite
+from .build_components.entities.auxiliary.zero_dimensional.crystal_site.crystal_site_list import CrystalSiteList
 from .modify import (
     add_vacuum,
     add_vacuum_sides,
