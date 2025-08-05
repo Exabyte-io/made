@@ -7,8 +7,8 @@ import { Lattice } from "../lattice";
 import { paths } from "./paths";
 import { symmetryPoints } from "./symmetry_points";
 
-type KPointCoordinates = number[];
-type KPointPath = Array<{
+export type KPointCoordinates = number[];
+export type KPointPath = Array<{
     point: string;
     steps: number;
     coordinates: KPointCoordinates;
