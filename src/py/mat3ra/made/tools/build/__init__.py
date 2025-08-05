@@ -3,7 +3,7 @@ from .base import (
     BaseConfigurationPydantic,
     BaseBuilderParameters,
     BaseSingleBuilder,
-    TConfiguration,
-    TBuildParameters,
+    TypeConfiguration,
+    TypeBuildParameters,
     BaseConfigurationPydanticChild,
 )

@@ -4,7 +4,7 @@ from mat3ra.made.material import Material
 from ...modify import translate_to_center
 from . import NanoribbonConfiguration
 from .build_parameters import NanoribbonBuilderParameters
-from .. import MaterialWithBuildMetadata, TConfiguration
+from .. import MaterialWithBuildMetadata, TypeConfiguration
 from ..nanotape import NanoTapeConfiguration
 from ..nanotape.builders import NanoTapeBuilder
 
@@ -24,7 +24,7 @@ class NanoribbonBuilder(NanoTapeBuilder):
         self,
         item: Material,
         post_process_parameters: Optional[Any] = None,
-        configuration: Optional[TConfiguration] = None,
+        configuration: Optional[TypeConfiguration] = None,
     ) -> Material:
         item = super()._post_process(item, post_process_parameters, configuration)
         item = translate_to_center(item, axes=["x", "y"])

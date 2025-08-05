@@ -1,6 +1,6 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
-from .. import BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
+from .. import BaseSingleBuilder, MaterialWithBuildMetadata, TypeConfiguration
 from typing import Type
 from .configuration import VacuumConfiguration
 from ....utils import AXIS_TO_INDEX_MAP
@@ -9,7 +9,7 @@ from ....utils import AXIS_TO_INDEX_MAP
 class VacuumBuilder(BaseSingleBuilder):
     _ConfigurationType: Type[VacuumConfiguration] = VacuumConfiguration
 
-    def _generate(self, configuration: TConfiguration) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: TypeConfiguration) -> MaterialWithBuildMetadata:
         reference = configuration.crystal
         if reference is None:
             raise ValueError("VacuumConfiguration.crystal must be provided to build a vacuum material.")

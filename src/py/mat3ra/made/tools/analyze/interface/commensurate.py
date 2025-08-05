@@ -8,11 +8,12 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
 )
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.enums import angle_to_supercell_matrix_values_for_hex
-from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from mat3ra.made.utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
 from pydantic import model_validator
+
+from ....utils import create_2d_supercell_matrices, get_angle_from_rotation_matrix_2d
+from .enums import angle_to_supercell_matrix_values_for_hex
+from .simple import InterfaceAnalyzer
+from .utils.holders import MatchedSubstrateFilmConfigurationHolder
 
 
 class CommensurateLatticeMatchHolder(InMemoryEntityPydantic):

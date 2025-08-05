@@ -1,7 +1,8 @@
 from typing import List
 
 import numpy as np
-from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
+
+from .slab import SlabMaterialAnalyzer
 
 
 class TerraceMaterialAnalyzer(SlabMaterialAnalyzer):

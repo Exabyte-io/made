@@ -1,5 +1,5 @@
-from mat3ra.made.tools.build import BaseSingleBuilder, MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.point.defect_site.configuration import PointDefectSiteConfiguration
+from .... import BaseSingleBuilder, MaterialWithBuildMetadata
+from .configuration import PointDefectSiteConfiguration
 
 
 class PointDefectSiteBuilder(BaseSingleBuilder):

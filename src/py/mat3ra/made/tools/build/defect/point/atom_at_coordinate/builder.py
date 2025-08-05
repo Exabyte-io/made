@@ -1,9 +1,9 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
-from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.point.atom_at_coordinate.configuration import AtomAtCoordinateConfiguration
-from mat3ra.made.tools.build.vacuum.builder import VacuumBuilder
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from .... import MaterialWithBuildMetadata
+from .configuration import AtomAtCoordinateConfiguration
+from ....vacuum.builder import VacuumBuilder
+from ....vacuum.configuration import VacuumConfiguration
 
 
 class AtomAtCoordinateBuilder(VacuumBuilder):

@@ -4,7 +4,7 @@ from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from .build_parameters import NanoTapeBuilderParameters
 from .configuration import NanoTapeConfiguration
-from .. import MaterialWithBuildMetadata, TConfiguration
+from .. import MaterialWithBuildMetadata, TypeConfiguration
 from ..lattice_lines import (
     CrystalLatticeLinesUniqueRepeatedConfiguration,
     EdgeTypes,
@@ -76,7 +76,7 @@ class NanoTapeBuilder(StackNComponentsBuilder):
         self,
         item: Material,
         post_process_parameters: Optional[Any] = None,
-        configuration: Optional[TConfiguration] = None,
+        configuration: Optional[TypeConfiguration] = None,
     ) -> Material:
         item = super()._post_process(item, post_process_parameters, configuration)
         params = self.build_parameters or self._DefaultBuildParameters

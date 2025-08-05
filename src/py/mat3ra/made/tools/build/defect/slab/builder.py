@@ -1,8 +1,8 @@
 from .configuration import SlabStackConfiguration
-from ... import MaterialWithBuildMetadata, TConfiguration
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
+from ... import MaterialWithBuildMetadata, TypeConfiguration
+from ...slab.slab.builder import SlabBuilder
 from typing import Type
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
+from ...slab.slab.configuration import SlabConfiguration
 from ...stack.builder import StackNComponentsBuilder
 
 
@@ -24,7 +24,7 @@ class SlabStackBuilder(StackNComponentsBuilder):
         return self.name_suffix
 
     def _update_material_name(
-        self, material: MaterialWithBuildMetadata, configuration: TConfiguration
+        self, material: MaterialWithBuildMetadata, configuration: TypeConfiguration
     ) -> MaterialWithBuildMetadata:
         name_suffix = self.get_name_suffix(configuration) or self.name_suffix
         base_name = material.name

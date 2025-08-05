@@ -5,8 +5,8 @@ from mat3ra.esse.models.materials_category_components.entities.reusable.two_dime
 # fmt: on
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.stack.configuration import StackConfiguration
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from ...stack.configuration import StackConfiguration
+from ...vacuum.configuration import VacuumConfiguration
 
 
 class SlabStackConfiguration(StackConfiguration, SlabStackConfigurationSchema):

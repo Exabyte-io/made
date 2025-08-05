@@ -1,8 +1,8 @@
 from typing import Optional, Any
 
-from mat3ra.made.tools.build import MaterialWithBuildMetadata, TConfiguration
-from mat3ra.made.tools.build.defect.point.base.builder import PointDefectBuilder
-from mat3ra.made.tools.build.defect.point.vacancy.configuration import VacancyDefectConfiguration
+from .... import MaterialWithBuildMetadata, TypeConfiguration
+from ..base.builder import PointDefectBuilder
+from .configuration import VacancyDefectConfiguration
 
 
 class VacancyDefectBuilder(PointDefectBuilder):
@@ -12,7 +12,7 @@ class VacancyDefectBuilder(PointDefectBuilder):
         self,
         material: MaterialWithBuildMetadata,
         post_process_parameters: Optional[Any] = None,
-        configuration: Optional[TConfiguration] = None,
+        configuration: Optional[TypeConfiguration] = None,
     ) -> MaterialWithBuildMetadata:
         material = super()._post_process(material, post_process_parameters, configuration)
         material.basis.remove_atoms_by_elements("Vac")

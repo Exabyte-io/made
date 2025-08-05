@@ -1,16 +1,16 @@
 from typing import Type, Dict, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import MaterialWithBuildMetadata, TConfiguration
+from .... import MaterialWithBuildMetadata, TypeConfiguration
 from .configuration import PointDefectConfiguration
-from mat3ra.made.tools.build.defect.point.defect_site.builder import PointDefectSiteBuilder
-from mat3ra.made.tools.build.defect.point.defect_site.configuration import PointDefectSiteConfiguration
-from mat3ra.made.tools.build.defect.point.intersitital.configuration import (
+from ..defect_site.builder import PointDefectSiteBuilder
+from ..defect_site.configuration import PointDefectSiteConfiguration
+from ..intersitital.configuration import (
     InterstitialDefectConfiguration,
 )
-from mat3ra.made.tools.build.defect.point.substitutional.configuration import SubstitutionalDefectConfiguration
-from mat3ra.made.tools.build.defect.point.vacancy.configuration import VacancyDefectConfiguration
-from mat3ra.made.tools.build.merge import MergeBuilder
+from ..substitutional.configuration import SubstitutionalDefectConfiguration
+from ..vacancy.configuration import VacancyDefectConfiguration
+from ....merge import MergeBuilder
 
 
 class PointDefectBuilder(MergeBuilder):
@@ -26,7 +26,7 @@ class PointDefectBuilder(MergeBuilder):
         }
 
     def _update_material_name(
-        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TConfiguration
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TypeConfiguration
     ) -> MaterialWithBuildMetadata:
         host_material = None
         for component in configuration.merge_components:

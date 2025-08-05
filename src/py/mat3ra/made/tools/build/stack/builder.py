@@ -3,11 +3,11 @@ from typing import Any, Optional, Type
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
-from mat3ra.made.tools.build.stack.configuration import StackConfiguration
-from mat3ra.made.tools.build.vacuum.builder import VacuumBuilder
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
-from mat3ra.made.tools.operations.core.binary import stack
+from .. import BaseSingleBuilder, MaterialWithBuildMetadata, TypeConfiguration
+from .configuration import StackConfiguration
+from ..vacuum.builder import VacuumBuilder
+from ..vacuum.configuration import VacuumConfiguration
+from ...operations.core.binary import stack
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction
 
 
@@ -55,7 +55,7 @@ class StackNComponentsBuilder(BaseSingleBuilder):
         else:
             return stack_component_configuration_or_material
 
-    def _generate(self, configuration: TConfiguration) -> Material:
+    def _generate(self, configuration: TypeConfiguration) -> Material:
         materials = []
         for index, stack_component_config in enumerate(configuration.stack_components):
             material = self._stack_component_to_material(stack_component_config, configuration)

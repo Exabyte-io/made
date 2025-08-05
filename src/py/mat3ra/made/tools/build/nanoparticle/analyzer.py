@@ -3,7 +3,7 @@ from typing import List, Union
 import numpy as np
 
 from ...analyze import BaseMaterialAnalyzer
-from mat3ra.made.tools.entities.coordinate import SphereCoordinateCondition, CoordinateCondition
+from ...entities.coordinate import SphereCoordinateCondition, CoordinateCondition
 
 
 class NanoparticleMaterialAnalyzer(BaseMaterialAnalyzer):

@@ -1,13 +1,15 @@
-from ....modify import rotate, translate_to_z_level
-from ....operations.core.unary import edit_cell
+from typing import Type
+
 from .configuration import TerraceDefectConfiguration
 from ..slab.builder import SlabStackBuilder
 from ... import MaterialWithBuildMetadata
 from ...defect.terrace.build_parameters import TerraceBuildParameters
+from ....modify import rotate, translate_to_z_level
+from ....operations.core.unary import edit_cell
 
 
 class TerraceDefectBuilder(SlabStackBuilder):
-    _BuildParametersType = TerraceBuildParameters
+    _BuildParametersType: Type[TerraceBuildParameters] = TerraceBuildParameters
 
     def get_name_suffix(self, configuration: TerraceDefectConfiguration) -> str:
         return f"Terrace {configuration.cut_direction}"

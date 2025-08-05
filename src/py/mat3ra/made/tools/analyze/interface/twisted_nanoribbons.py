@@ -1,11 +1,12 @@
 from typing import Tuple
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
-from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from mat3ra.made.tools.analyze.other import get_surface_area
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
-from mat3ra.made.tools.modify import rotate, translate_to_center
+
+from ...build.slab.slab.configuration import SlabConfiguration
+from ...modify import rotate, translate_to_center
+from ..other import get_surface_area
+from . import InterfaceAnalyzer
+from .utils.holders import MatchedSubstrateFilmConfigurationHolder
 
 
 class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):

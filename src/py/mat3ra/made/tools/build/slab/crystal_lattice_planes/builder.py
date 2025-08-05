@@ -1,7 +1,7 @@
 from typing import Optional, Any
 
 from ....analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from ... import BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
+from ... import BaseSingleBuilder, MaterialWithBuildMetadata, TypeConfiguration
 from .configuration import CrystalLatticePlanesConfiguration
 from ....modify import translate_to_z_level
 from ....operations.core.unary import supercell
@@ -31,7 +31,7 @@ class CrystalLatticePlanesBuilder(BaseSingleBuilder):
         self,
         item: MaterialWithBuildMetadata,
         post_process_parameters: Optional[Any] = None,
-        configuration: Optional[TConfiguration] = None,
+        configuration: Optional[TypeConfiguration] = None,
     ) -> MaterialWithBuildMetadata:
         item = super()._post_process(item, post_process_parameters, configuration)
         return self._enforce_convention(item)

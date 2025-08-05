@@ -7,10 +7,10 @@ from .vacancy_placement_method_enum import VacancyPlacementMethodEnum
 from .substitution_placement_method_enum import SubstitutionPlacementMethodEnum
 from .interstitial_placement_method_enum import InterstitialPlacementMethodEnum
 from .atom_placement_method_enum import AtomPlacementMethodEnum
-from mat3ra.made.tools.build.defect.point.vacancy.configuration import VacancyDefectConfiguration
-from mat3ra.made.tools.build.defect.point.substitutional.configuration import SubstitutionalDefectConfiguration
-from mat3ra.made.tools.build.defect.point.intersitital.configuration import InterstitialDefectConfiguration
-from mat3ra.made.tools.build.defect.point.base.configuration import PointDefectConfiguration
+from .point.vacancy.configuration import VacancyDefectConfiguration
+from .point.substitutional.configuration import SubstitutionalDefectConfiguration
+from .point.intersitital.configuration import InterstitialDefectConfiguration
+from .point.base.configuration import PointDefectConfiguration
 from ...analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
 from ...analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
 

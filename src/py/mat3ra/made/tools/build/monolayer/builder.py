@@ -2,9 +2,9 @@ from typing import Optional, Any, Union, Tuple
 
 from mat3ra.made.material import Material
 from .configurations import MonolayerConfiguration
-from .. import MaterialWithBuildMetadata, TConfiguration
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
+from .. import MaterialWithBuildMetadata, TypeConfiguration
+from ..slab.slab.builder import SlabBuilder
+from ..slab.slab.configuration import SlabConfiguration
 from ...modify import translate_to_z_level, filter_by_box
 
 
@@ -65,7 +65,7 @@ class MonolayerBuilder(SlabBuilder):
         self,
         item: Material,
         post_process_parameters: Optional[Any] = None,
-        configuration: Optional[TConfiguration] = None,
+        configuration: Optional[TypeConfiguration] = None,
     ) -> Material:
         item = super()._post_process(item, post_process_parameters, configuration)
         return self._enforce_convention(item)

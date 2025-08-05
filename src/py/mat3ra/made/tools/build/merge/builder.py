@@ -2,15 +2,15 @@ from typing import Optional, Any, Type, List, Dict
 
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
-from mat3ra.made.tools.build import (
+from .. import (
     BaseSingleBuilder,
     MaterialWithBuildMetadata,
-    TConfiguration,
+    TypeConfiguration,
 )
-from mat3ra.made.tools.build.merge.build_parameters import MergeBuilderParameters
-from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
-from mat3ra.made.tools.operations.core.binary import merge
+from .build_parameters import MergeBuilderParameters
+from .configuration import MergeConfiguration
+from ..vacuum.configuration import VacuumConfiguration
+from ...operations.core.binary import merge
 
 
 class MergeBuilder(BaseSingleBuilder):
@@ -69,11 +69,15 @@ class MergeBuilder(BaseSingleBuilder):
             merge_dangerously=parameters.merge_dangerously,
         )
 
-    def _generate(self, configuration: TConfiguration) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: TypeConfiguration) -> MaterialWithBuildMetadata:
         materials = []
         for component in configuration.merge_components:
             material = self._merge_component_to_material(component, configuration)
-            materials.append(material)
+            if material is not None:
+                materials.append(material)
+
+        if len(materials) == 0:
+            raise ValueError("No valid materials found after processing merge components")
 
         if len(materials) == 1:
             return materials[0]
