@@ -8,7 +8,7 @@ from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fract
 from ... import MaterialWithBuildMetadata
 from ....analyze.terrace import TerraceMaterialAnalyzer
 from ....modify import filter_by_condition_on_coordinates
-from ....utils.coordinate import PlaneCoordinateCondition
+from mat3ra.made.tools.entities.coordinate import PlaneCoordinateCondition
 
 
 def create_terrace(

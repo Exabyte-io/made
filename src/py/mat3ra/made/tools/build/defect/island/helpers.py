@@ -8,7 +8,7 @@ from .configuration import IslandDefectConfiguration
 from ... import MaterialWithBuildMetadata
 from ....analyze.slab import SlabMaterialAnalyzer
 from ....modify import filter_by_condition_on_coordinates
-from ....utils.coordinate import (
+from mat3ra.made.tools.entities.coordinate import (
     CoordinateCondition,
     CylinderCoordinateCondition,
     SphereCoordinateCondition,

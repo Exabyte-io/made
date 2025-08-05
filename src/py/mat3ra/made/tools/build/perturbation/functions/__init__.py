@@ -4,6 +4,6 @@ from .sine_wave_perturbation_function_holder import SineWavePerturbationFunction
 
 __all__ = [
     "FunctionHolder",
-    "PerturbationFunctionHolder", 
+    "PerturbationFunctionHolder",
     "SineWavePerturbationFunctionHolder",
 ]

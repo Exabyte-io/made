@@ -2,6 +2,6 @@ from .functions import FunctionHolder, PerturbationFunctionHolder, SineWavePertu
 
 __all__ = [
     "FunctionHolder",
-    "PerturbationFunctionHolder", 
+    "PerturbationFunctionHolder",
     "SineWavePerturbationFunctionHolder",
 ]

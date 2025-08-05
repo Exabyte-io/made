@@ -2,7 +2,7 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.defect.island.helpers import create_island_defect
 from mat3ra.made.tools.build.slab.helpers import create_slab
-from mat3ra.made.tools.utils import coordinate as CoordinateCondition
+from mat3ra.made.tools.entities import coordinate as CoordinateCondition
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
 from unit.fixtures.island import ISLAND_SLAB_Si_001_CYLINDER_CONDITION_1_LAYER
 from unit.utils import assert_two_entities_deep_almost_equal

@@ -11,7 +11,7 @@ from .enums import NanoparticleShapesEnum
 from mat3ra.made.tools.build.defect.slab.helpers import create_slab
 from ..void_region.configuration import VoidRegionConfiguration
 from ...analyze.other import get_closest_site_id_from_coordinate
-from ...utils.coordinate import SphereCoordinateCondition
+from mat3ra.made.tools.entities.coordinate import SphereCoordinateCondition
 
 
 def create_nanoparticle_from_material(
