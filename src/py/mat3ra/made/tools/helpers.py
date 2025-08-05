@@ -5,32 +5,50 @@ from .build.defective_structures.two_dimensional.terrace.helpers import create_t
 from .build.defective_structures.two_dimensional.grain_boundary_planar.helpers import create_grain_boundary_planar
 from .build.defective_structures.one_dimensional.grain_boundary_linear.helpers import create_grain_boundary_linear
 from .build.defective_structures.zero_dimensional.point_defect.vacancy.helpers import create_point_defect_vacancy
-from .build.defective_structures.zero_dimensional.point_defect.substitutional.helpers import create_point_defect_substitution
-from .build.defective_structures.zero_dimensional.point_defect.interstitial.helpers import create_point_defect_interstitial
+from .build.defective_structures.zero_dimensional.point_defect.substitutional.helpers import (
+    create_point_defect_substitution,
+)
+from .build.defective_structures.zero_dimensional.point_defect.interstitial.helpers import (
+    create_point_defect_interstitial,
+)
 from .build.defective_structures.zero_dimensional.pair_defect.helpers import create_pair_defect
 
 # Pristine Structures
 from .build.pristine_structures.three_dimensional.ideal_crystal.helpers import create_monolayer
-from .build.pristine_structures.two_dimensional.slab.helpers import create_atomic_layers, create_slab, get_slab_terminations
+from .build.pristine_structures.two_dimensional.slab.helpers import (
+    create_atomic_layers,
+    create_slab,
+    get_slab_terminations,
+)
 from .build.pristine_structures.two_dimensional.slab.termination_utils import select_slab_termination
 from .build.pristine_structures.two_dimensional.nanoribbon.helpers import create_nanoribbon
 from .build.pristine_structures.two_dimensional.nanotape.helpers import create_nanotape
 from .build.pristine_structures.zero_dimensional.nanoparticle.helpers import create_nanoparticle_from_material
 
 # Compound Pristine Structures
-from .build.compound_pristine_structures.two_dimensional.interface.base.helpers import create_simple_interface_between_slabs
-from .build.compound_pristine_structures.two_dimensional.interface.commensurate.helpers import create_commensurate_interface
+from .build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
+    create_simple_interface_between_slabs,
+)
+from .build.compound_pristine_structures.two_dimensional.interface.commensurate.helpers import (
+    create_commensurate_interface,
+)
 from .build.compound_pristine_structures.two_dimensional.interface.twisted.helpers import create_twisted_interface
 from .build.compound_pristine_structures.two_dimensional.interface.utils import get_optimal_film_displacement
-from .build.compound_pristine_structures.two_dimensional.interface.zsl.helpers import create_zsl_interface, create_zsl_interface_between_slabs
+from .build.compound_pristine_structures.two_dimensional.interface.zsl.helpers import (
+    create_zsl_interface,
+    create_zsl_interface_between_slabs,
+)
 
 # Processed Structures
-from .build.processed_structures.two_dimensional.passivation.helpers import get_unique_coordination_numbers, passivate_surface
+from .build.processed_structures.two_dimensional.passivation.helpers import (
+    get_unique_coordination_numbers,
+    passivate_surface,
+)
 
 # Build Components (for operations and utilities)
 from .build_components.entities.reusable.three_dimensional.supercell.helpers import create_supercell
 from .build_components.operations.core.modifications.perturb.helpers import create_perturbation
-from .build_components.defect.slab_stack.helpers import create_slab_stack
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.helpers import create_slab_stack
 
 __all__ = [
     # Core Build Functions

@@ -1,9 +1,9 @@
 from typing import Type
 
 from mat3ra.made.material import Material
+from ....compound_pristine_structures.interface import InterfaceBuilder
 from .build_parameters import GrainBoundaryBuilderParameters
 from .planar_configuration import GrainBoundaryPlanarConfiguration
-from ..interface import InterfaceBuilder
 from ...modify import wrap_to_unit_cell
 from ...operations.core.unary import supercell
 

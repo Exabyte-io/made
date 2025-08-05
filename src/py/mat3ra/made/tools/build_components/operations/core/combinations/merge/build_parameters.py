@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .. import BaseBuilderParameters
+from .....entities.reusable.three_dimensional.crystal_lattice_base import BaseBuilderParameters
 
 
 class MergeBuilderParameters(BaseBuilderParameters):

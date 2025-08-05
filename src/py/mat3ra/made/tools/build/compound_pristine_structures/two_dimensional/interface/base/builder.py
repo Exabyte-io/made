@@ -3,24 +3,23 @@ from typing import Optional, Any, Type, Union
 import numpy as np
 
 from mat3ra.made.material import Material
-from .configuration import InterfaceConfiguration
+from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 from .build_parameters import InterfaceBuilderParameters
-from ... import MaterialWithBuildMetadata, TypeConfiguration
-from ...slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
-from ...slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
-from ...stack.builder import StackNComponentsBuilder
-from ...stack.configuration import StackConfiguration
-from ....analyze import BaseMaterialAnalyzer
-from ....analyze.lattice import get_material_with_primitive_lattice
-from ....convert.interface_parts_enum import InterfacePartsEnum
-from ....modify import (
-    translate_by_vector,
-    wrap_to_unit_cell,
-    translate_to_center,
+from .configuration import InterfaceConfiguration
+from .....pristine_structures.two_dimensional.slab_strained_supercell.builder import SlabStrainedSupercellBuilder
+from .....pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
+    SlabStrainedSupercellConfiguration,
 )
-from ....operations.core.unary import supercell
-from ....operations.core.utils import should_skip_stacking
-from .....utils import AXIS_TO_INDEX_MAP
+from ...... import translate_by_vector, wrap_to_unit_cell, translate_to_center
+from ......analyze import BaseMaterialAnalyzer
+from ......analyze.build_metadata_analyzer import TypeConfiguration
+from ......analyze.lattice import get_material_with_primitive_lattice
+from ......build_components import MaterialWithBuildMetadata
+from ......build_components.operations.core.combinations.stack.builder import StackNComponentsBuilder
+from ......build_components.operations.core.combinations.stack.configuration import StackConfiguration
+from ......convert.interface_parts_enum import InterfacePartsEnum
+from ......operations.core.unary import supercell
+from ......operations.core.utils import should_skip_stacking
 
 
 class InterfaceBuilder(StackNComponentsBuilder):

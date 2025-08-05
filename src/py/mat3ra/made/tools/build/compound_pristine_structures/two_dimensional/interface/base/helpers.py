@@ -3,13 +3,13 @@ from typing import List, Optional
 from mat3ra.code.array_with_ids import ArrayWithIds
 
 from mat3ra.made.material import Material
-from ....analyze.interface import InterfaceAnalyzer
-from .builder import InterfaceBuilder
 from .build_parameters import InterfaceBuilderParameters
+from .builder import InterfaceBuilder
 from .configuration import InterfaceConfiguration
-from ... import MaterialWithBuildMetadata
-from ...vacuum.configuration import VacuumConfiguration
-from ....analyze.slab import SlabMaterialAnalyzer
+from ......analyze.interface import InterfaceAnalyzer
+from ......analyze.slab import SlabMaterialAnalyzer
+from ......build_components import MaterialWithBuildMetadata
+from ......build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 
 
 def create_simple_interface_between_slabs(

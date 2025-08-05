@@ -3,12 +3,12 @@ from sympy import ceiling
 
 from .builder import SlabStackBuilder
 from .configuration import SlabStackConfiguration
-from ... import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
 from ...slab.slab.builder import SlabBuilder
 from ...slab.helpers import create_slab
 from ...vacuum.configuration import VacuumConfiguration
-from ....analyze.slab import SlabMaterialAnalyzer
-from ....modify import filter_by_box
+from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
+from mat3ra.made.tools.modify import filter_by_box
 
 
 def create_slab_stack(

@@ -3,9 +3,9 @@ from typing import Optional, Tuple, Union
 from mat3ra.made.material import Material
 from .edge_types import EdgeTypes, get_miller_indices_from_edge_type
 from .repeated.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration
-from .. import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
 from ..slab.termination_utils import select_slab_termination
-from ...analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
+from mat3ra.made.tools.analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 
 
 def create_lattice_lines_config_and_material(

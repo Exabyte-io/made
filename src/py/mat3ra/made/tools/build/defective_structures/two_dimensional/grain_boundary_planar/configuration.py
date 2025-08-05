@@ -7,9 +7,10 @@ from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.
     grain_boundary_planar.configuration import (
     GrainBoundaryPlanarConfigurationSchema,
 )
+
+from ....compound_pristine_structures.two_dimensional.interface import InterfaceConfiguration
 # fmt: on
 
-from ..interface import InterfaceConfiguration
 from ..slab.slab.configuration import SlabConfiguration
 from ..slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 from ..vacuum.configuration import VacuumConfiguration
