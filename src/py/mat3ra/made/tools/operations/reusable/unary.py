@@ -1,6 +1,7 @@
 import numpy as np
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.made.material import Material
+
 from ..core.unary import strain
 
 

@@ -4,11 +4,11 @@ import numpy as np
 from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.made.material import Material
-from ...modify import translate_by_vector, wrap_to_unit_cell
 
 from ...build import MaterialWithBuildMetadata
 from ...build.perturbation.functions import FunctionHolder
 from ...convert import from_ase, to_ase
+from ...modify import translate_by_vector, wrap_to_unit_cell
 from ...third_party import ase_make_supercell
 from ...utils import decorator_convert_supercell_matrix_2x2_to_3x3
 

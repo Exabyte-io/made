@@ -5,6 +5,7 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.material import Material
+
 from ...build import MaterialWithBuildMetadata
 
 

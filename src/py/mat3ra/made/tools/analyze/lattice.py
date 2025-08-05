@@ -1,8 +1,7 @@
-from . import BaseMaterialAnalyzer
-from ..convert import from_pymatgen, to_pymatgen
-
 from ..build import MaterialWithBuildMetadata
+from ..convert import from_pymatgen, to_pymatgen
 from ..third_party import PymatgenSpacegroupAnalyzer
+from . import BaseMaterialAnalyzer
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):

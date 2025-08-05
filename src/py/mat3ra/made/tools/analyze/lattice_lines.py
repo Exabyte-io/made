@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from mat3ra.made.material import Material
+
 from .lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 
 

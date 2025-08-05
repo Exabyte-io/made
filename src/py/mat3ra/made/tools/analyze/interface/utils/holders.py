@@ -1,6 +1,7 @@
 from typing import Optional
 
 from mat3ra.code.entity import InMemoryEntityPydantic
+
 from ....build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 
 

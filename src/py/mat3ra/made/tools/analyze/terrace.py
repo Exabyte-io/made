@@ -1,6 +1,7 @@
 from typing import List
 
 import numpy as np
+
 from .slab import SlabMaterialAnalyzer
 
 

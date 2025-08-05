@@ -1,9 +1,9 @@
 from typing import List
 
-from .crystal_site_analyzer import CrystalSiteAnalyzer
 from ...convert import to_pymatgen
 from ...third_party import PymatgenVoronoiInterstitialGenerator
 from ...utils import get_distance_between_coordinates
+from .crystal_site_analyzer import CrystalSiteAnalyzer
 
 
 class VoronoiCrystalSiteAnalyzer(CrystalSiteAnalyzer):
