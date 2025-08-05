@@ -4,7 +4,7 @@ import numpy as np
 from mat3ra.made.material import Material
 
 from ...convert import from_ase
-from ...convert.utils import INTERFACE_LABELS_MAP, InterfacePartsEnum
+from ...convert.interface_parts_enum import INTERFACE_LABELS_MAP, InterfacePartsEnum
 from ...third_party import ASEAtoms, ASECalculator, ASEFixAtoms, ASEFixedPlane, ase_all_changes
 from ..calculators import InterfaceMaterialCalculator, MaterialCalculator
 from .constraints import RigidFilmXYInterfaceConstraint
@@ -21,7 +21,7 @@ def get_interface_part_indices(atoms: ASEAtoms, part: InterfacePartsEnum) -> Lis
     Returns:
         List[int]: The indices of the atoms in the interface part.
     """
-    return [i for i, tag in enumerate(atoms.get_tags()) if tag == INTERFACE_LABELS_MAP[part]]
+    return [i for i, tag in enumerate(atoms.get_tags()) if tag == INTERFACE_LABELS_MAP[part.name.lower()]]
 
 
 class FilmSubstrateDistanceASECalculator(ASECalculator):

@@ -1,6 +1,7 @@
 from typing import Optional
 
 from mat3ra.code.entity import InMemoryEntityPydantic
+
 from .termination import Termination
 
 

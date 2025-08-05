@@ -4,6 +4,6 @@ from .coordination_based_passivation_material_analyzer import CoordinationBasedP
 
 __all__ = [
     "PassivationMaterialAnalyzer",
-    "SurfacePassivationMaterialAnalyzer", 
+    "SurfacePassivationMaterialAnalyzer",
     "CoordinationBasedPassivationMaterialAnalyzer",
 ]

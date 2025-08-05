@@ -7,7 +7,7 @@ from mat3ra.made.utils import get_atomic_coordinates_extremum
 from .analyze.other import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
 from .build.metadata import MaterialWithBuildMetadata
 from .convert import from_ase, to_ase
-from .convert.utils import InterfacePartsEnum
+from .convert.interface_parts_enum import InterfacePartsEnum
 from .third_party import ase_add_vacuum
 from .utils.coordinate import (
     is_coordinate_in_box,

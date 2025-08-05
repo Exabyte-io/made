@@ -12,7 +12,7 @@ from ...stack.builder import StackNComponentsBuilder
 from ...stack.configuration import StackConfiguration
 from ....analyze import BaseMaterialAnalyzer
 from ....analyze.lattice import get_material_with_primitive_lattice
-from ....convert.utils import InterfacePartsEnum
+from ....convert.interface_parts_enum import InterfacePartsEnum
 from ....modify import (
     translate_by_vector,
     wrap_to_unit_cell,

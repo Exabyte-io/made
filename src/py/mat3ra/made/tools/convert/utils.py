@@ -1,19 +1,11 @@
 import json
-from enum import Enum
 from typing import Any, Dict, List, Union
 
 from mat3ra.made.utils import map_array_to_array_with_id_value
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
 
 from ..third_party import ASEAtoms, PymatgenInterface, PymatgenStructure
-
-
-class InterfacePartsEnum(str, Enum):
-    SUBSTRATE = 0
-    FILM = 1
-
-
-INTERFACE_LABELS_MAP = {"substrate": 0, "film": 1}
+from .interface_parts_enum import INTERFACE_LABELS_MAP
 
 
 def extract_labels_from_pymatgen_structure(structure: PymatgenStructure) -> List[int]:

@@ -9,7 +9,7 @@ BaseConfigurationPydanticChild = TypeVar("BaseConfigurationPydanticChild", bound
 
 __all__ = [
     "BaseConfigurationPydantic",
-    "BaseBuilderParameters", 
+    "BaseBuilderParameters",
     "BaseSingleBuilder",
     "TConfiguration",
     "TBuildParameters",

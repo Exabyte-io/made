@@ -4,7 +4,7 @@ from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.interface import get_optimal_film_displacement
 from mat3ra.made.tools.calculate.calculators import InterfaceMaterialCalculator
 from mat3ra.made.tools.convert import from_ase
-from mat3ra.made.tools.convert.utils import InterfacePartsEnum
+from mat3ra.made.tools.convert.interface_parts_enum import InterfacePartsEnum
 from mat3ra.made.tools.modify import (
     add_vacuum,
     filter_by_circle_projection,

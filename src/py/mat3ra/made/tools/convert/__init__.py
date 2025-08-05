@@ -12,13 +12,9 @@ from ..third_party import (
     PymatgenInterface,
     PymatgenLattice,
     PymatgenPoscar,
-    PymatgenSlab,
-    PymatgenSlabGenerator,
     PymatgenStructure,
-    label_pymatgen_slab_termination,
 )
 from .utils import (
-    InterfacePartsEnum,
     extract_labels_from_pymatgen_structure,
     extract_metadata_from_pymatgen_structure,
     extract_tags_from_ase_atoms,
