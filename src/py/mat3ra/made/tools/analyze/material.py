@@ -2,12 +2,12 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
-from mat3ra.made.material import Material
 from scipy.spatial._ckdtree import cKDTree
 
-from .. import BondDirections, BondDirectionsTemplatesForElement, CrystalSite, CrystalSiteList
+from mat3ra.made.material import Material
 from .rdf import RadialDistributionFunction
 from .utils import decorator_handle_periodic_boundary_conditions
+from .. import BondDirections, BondDirectionsTemplatesForElement, CrystalSite, CrystalSiteList
 
 
 class MaterialWithCrystalSites(Material):

@@ -8,15 +8,15 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 from pymatgen.analysis.interfaces.coherent_interfaces import ZSLGenerator as PymatgenZSLGenerator
 
-from ...build import MaterialWithBuildMetadata
+from .utils.vector import align_first_vector_to_x_2d_right_handed, are_vectors_colinear, get_global_gcd
 from ..interface.simple import InterfaceAnalyzer
 from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from ..utils import calculate_von_mises_strain
-from .utils.vector import align_first_vector_to_x_2d_right_handed, are_vectors_colinear, get_global_gcd
+from ...build import MaterialWithBuildMetadata
+from ...build.slab.slab.builder import SlabBuilder
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):

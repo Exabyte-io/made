@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import Type
 
-from mat3ra.made.tools.build.slab.slab.build_parameters import SlabBuilderParameters
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction, get_atomic_coordinates_extremum
-
-from ..build import MaterialWithBuildMetadata
-from ..build.vacuum.configuration import VacuumConfiguration
 from .build_metadata_analyzer import BuildMetadataAnalyzer
 from .crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from ..build import MaterialWithBuildMetadata
+from ..build.slab.slab.build_parameters import SlabBuilderParameters
+from ..build.slab.slab.configuration import SlabConfiguration
+from ..build.vacuum.configuration import VacuumConfiguration
 
 
 class SlabMaterialAnalyzer(

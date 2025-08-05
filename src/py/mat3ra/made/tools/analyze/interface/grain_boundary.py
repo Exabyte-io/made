@@ -5,11 +5,12 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
-from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from pydantic import model_validator
+
+from mat3ra.made.material import Material
+from .utils.holders import MatchedSubstrateFilmConfigurationHolder
+from .zsl import ZSLInterfaceAnalyzer
+from ...build.slab.slab.configuration import SlabConfiguration
 
 
 class GrainBoundaryPlanarMatchHolder(InMemoryEntityPydantic):

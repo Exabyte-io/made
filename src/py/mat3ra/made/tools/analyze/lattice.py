@@ -1,5 +1,5 @@
-from mat3ra.made.tools.analyze import BaseMaterialAnalyzer
-from mat3ra.made.tools.convert import from_pymatgen, to_pymatgen
+from . import BaseMaterialAnalyzer
+from ..convert import from_pymatgen, to_pymatgen
 
 from ..build import MaterialWithBuildMetadata
 from ..third_party import PymatgenSpacegroupAnalyzer
