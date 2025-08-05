@@ -3,8 +3,8 @@ from typing import Optional, Any, Union, Tuple
 from mat3ra.made.material import Material
 from .configurations import MonolayerConfiguration
 from .. import MaterialWithBuildMetadata, TConfiguration
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
+from ..slab.slab.builder import SlabBuilder
+from ..slab.slab.configuration import SlabConfiguration
 from ...modify import translate_to_z_level, filter_by_box
 
 

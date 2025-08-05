@@ -3,11 +3,11 @@ from typing import Any, Optional, Type
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
-from mat3ra.made.tools.build.stack.configuration import StackConfiguration
-from mat3ra.made.tools.build.vacuum.builder import VacuumBuilder
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
-from mat3ra.made.tools.operations.core.binary import stack
+from .. import BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
+from .configuration import StackConfiguration
+from ..vacuum.builder import VacuumBuilder
+from ..vacuum.configuration import VacuumConfiguration
+from ...operations.core.binary import stack
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction
 
 

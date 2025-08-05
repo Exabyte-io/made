@@ -2,7 +2,7 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.tools.entities.coordinate import (
+from .entities.coordinate import (
     is_coordinate_in_box,
     is_coordinate_in_cylinder,
     is_coordinate_in_triangular_prism,

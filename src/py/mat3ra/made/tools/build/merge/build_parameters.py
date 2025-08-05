@@ -1,6 +1,6 @@
 from typing import Optional
 
-from mat3ra.made.tools.build import BaseBuilderParameters
+from .. import BaseBuilderParameters
 
 
 class MergeBuilderParameters(BaseBuilderParameters):

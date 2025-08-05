@@ -1,8 +1,8 @@
 from typing import Optional, Any
 
-from mat3ra.made.tools.build import MaterialWithBuildMetadata, TConfiguration
-from mat3ra.made.tools.build.defect.point.base.builder import PointDefectBuilder
-from mat3ra.made.tools.build.defect.point.vacancy.configuration import VacancyDefectConfiguration
+from .... import MaterialWithBuildMetadata, TConfiguration
+from ..base.builder import PointDefectBuilder
+from .configuration import VacancyDefectConfiguration
 
 
 class VacancyDefectBuilder(PointDefectBuilder):

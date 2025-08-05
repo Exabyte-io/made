@@ -1,8 +1,8 @@
 from typing import Type, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.point.base.builder import PointDefectBuilder
-from mat3ra.made.tools.build.defect.point.vacancy.builder import VacancyDefectBuilder
+from ..point.base.builder import PointDefectBuilder
+from ..point.vacancy.builder import VacancyDefectBuilder
 from .configuration import PairDefectConfiguration
 from ... import MaterialWithBuildMetadata, TConfiguration
 

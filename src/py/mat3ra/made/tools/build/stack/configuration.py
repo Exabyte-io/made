@@ -4,7 +4,7 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.stack import StackSchema
 
-from mat3ra.made.tools.build import BaseConfigurationPydantic
+from .. import BaseConfigurationPydantic
 
 
 class StackConfiguration(StackSchema, BaseConfigurationPydantic):
