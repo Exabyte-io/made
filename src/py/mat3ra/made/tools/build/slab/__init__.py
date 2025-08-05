@@ -10,7 +10,7 @@ from .atomic_layers_unique_repeated.configuration import (
 from .slab.configuration import SlabConfiguration
 from .strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 
-from .slab.builder_parameters import SlabBuilderParameters
+from .slab.build_parameters import SlabBuilderParameters
 
 __all__ = [
     "CrystalLatticePlanesBuilder",

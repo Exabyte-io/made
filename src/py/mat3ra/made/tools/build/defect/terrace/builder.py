@@ -3,7 +3,7 @@ from mat3ra.made.tools.operations.core.unary import edit_cell
 from .configuration import TerraceDefectConfiguration
 from ..slab.builder import SlabStackBuilder
 from ... import MaterialWithBuildMetadata
-from ...defect.terrace.parameters import TerraceBuildParameters
+from ...defect.terrace.build_parameters import TerraceBuildParameters
 
 
 class TerraceDefectBuilder(SlabStackBuilder):

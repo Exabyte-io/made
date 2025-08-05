@@ -1,5 +1,5 @@
 from .linear_configuration import GrainBoundaryLinearConfiguration
-from .linear_parameters import GrainBoundaryLinearBuilderParameters
+from .linear_build_parameters import GrainBoundaryLinearBuilderParameters
 from ..interface import InterfaceBuilder
 
 

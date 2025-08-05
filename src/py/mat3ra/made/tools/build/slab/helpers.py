@@ -5,7 +5,7 @@ from ...entities import Termination
 from .atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
 from .atomic_layers_unique_repeated.configuration import AtomicLayersUniqueRepeatedConfiguration
 from .slab.builder import SlabBuilder
-from .slab.builder_parameters import SlabBuilderParameters
+from .slab.build_parameters import SlabBuilderParameters
 from .slab.configuration import SlabConfiguration
 
 from ..metadata import MaterialWithBuildMetadata

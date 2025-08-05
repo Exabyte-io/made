@@ -17,8 +17,8 @@ from mat3ra.made.tools.build.slab.atomic_layers_unique_repeated.configuration im
     AtomicLayersUniqueRepeatedConfiguration,
 )
 from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations
+from mat3ra.made.tools.build.slab.slab.build_parameters import SlabBuilderParameters
 from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.slab.builder_parameters import SlabBuilderParameters
 from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from mat3ra.made.tools.build.slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
 from mat3ra.made.tools.build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration

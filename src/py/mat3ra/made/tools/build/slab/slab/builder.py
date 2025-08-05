@@ -5,7 +5,7 @@ from ..atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBu
 from ..atomic_layers_unique_repeated.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
 )
-from .builder_parameters import SlabBuilderParameters
+from .build_parameters import SlabBuilderParameters
 from .configuration import SlabConfiguration
 from ..utils import get_orthogonal_c_slab
 from ...stack.builder import StackNComponentsBuilder

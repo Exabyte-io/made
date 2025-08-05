@@ -3,7 +3,7 @@ from typing import Optional, Any, TypeVar, Type, Generic
 from pydantic import BaseModel
 
 from .base_configuration_pydantic import BaseConfigurationPydantic
-from .base_builder_parameters import BaseBuilderParameters
+from .build_parameters import BaseBuilderParameters
 from ..metadata import MaterialWithBuildMetadata
 
 TConfiguration = TypeVar("TConfiguration", bound=BaseConfigurationPydantic)

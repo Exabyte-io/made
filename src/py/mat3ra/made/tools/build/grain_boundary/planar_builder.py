@@ -1,7 +1,7 @@
 from typing import Type
 
 from mat3ra.made.material import Material
-from .parameters import GrainBoundaryBuilderParameters
+from .build_parameters import GrainBoundaryBuilderParameters
 from .planar_configuration import GrainBoundaryPlanarConfiguration
 from ..interface import InterfaceBuilder
 from ...modify import wrap_to_unit_cell

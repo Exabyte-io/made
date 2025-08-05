@@ -2,7 +2,7 @@ from typing import Optional, List
 
 from .builder import TerraceDefectBuilder
 from .configuration import TerraceDefectConfiguration
-from .parameters import TerraceBuildParameters
+from .build_parameters import TerraceBuildParameters
 from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
 from mat3ra.made.tools.build.defect.slab.helpers import recreate_slab_with_fractional_layers
 from ... import MaterialWithBuildMetadata

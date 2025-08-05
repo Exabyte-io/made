@@ -2,7 +2,7 @@ from typing import Any, Type
 
 from mat3ra.made.tools.build import MaterialWithBuildMetadata, BaseSingleBuilder, TConfiguration
 from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
-from mat3ra.made.tools.build.perturbation.parameters import PerturbationBuildParameters
+from mat3ra.made.tools.build.perturbation.build_parameters import PerturbationBuildParameters
 from mat3ra.made.tools.modify import wrap_to_unit_cell, translate_to_z_level
 from mat3ra.made.tools.operations.core.unary import perturb
 

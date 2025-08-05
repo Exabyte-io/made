@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Type
 
-from mat3ra.made.tools.build.slab.slab.builder_parameters import SlabBuilderParameters
+from mat3ra.made.tools.build.slab.slab.build_parameters import SlabBuilderParameters
 from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction, get_atomic_coordinates_extremum
 
