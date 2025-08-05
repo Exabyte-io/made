@@ -1,6 +1,8 @@
 from enum import Enum
 
-from mat3ra.made.tools.materials_category_components.defect.atom_placement_method_enum import AtomPlacementMethodEnum
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.atom_placement_method_enum import (
+    AtomPlacementMethodEnum,
+)
 
 
 class InterstitialPlacementMethodEnum(Enum):

@@ -2,25 +2,14 @@ from types import SimpleNamespace
 from typing import List, Union
 
 from mat3ra.made.material import Material
-from .intersitital.builder import InterstitialDefectBuilder
-from .intersitital.configuration import InterstitialDefectConfiguration
-from .substitutional.builder import SubstitutionalDefectBuilder
-from .substitutional.configuration import SubstitutionalDefectConfiguration
-from .vacancy.builder import VacancyDefectBuilder
-from .vacancy.configuration import VacancyDefectConfiguration
-
-from mat3ra.made.tools.materials_category_components.defect.point_defect_type_enum import PointDefectTypeEnum
-from mat3ra.made.tools.materials_category_components.defect.vacancy_placement_method_enum import (
-    VacancyPlacementMethodEnum,
-)
-from mat3ra.made.tools.materials_category_components.defect.substitution_placement_method_enum import (
-    SubstitutionPlacementMethodEnum,
-)
-from mat3ra.made.tools.materials_category_components.defect.interstitial_placement_method_enum import (
-    InterstitialPlacementMethodEnum,
-)
-from mat3ra.made.tools.materials_category_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from .interstitial.helpers import create_point_defect_interstitial
+from .interstitial.interstitial_placement_method_enum import InterstitialPlacementMethodEnum
+from .point_defect_type_enum import PointDefectTypeEnum
+from .substitutional.helpers import create_point_defect_substitution
+from .substitutional.substitution_placement_method_enum import SubstitutionPlacementMethodEnum
+from .vacancy.helpers import create_point_defect_vacancy
+from .vacancy.vacancy_placement_method_enum import VacancyPlacementMethodEnum
+from .....build_components import MaterialWithBuildMetadata
 
 DEFECT_TYPE_MAPPING = {
     PointDefectTypeEnum.VACANCY: {

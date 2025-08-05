@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Callable
-from mat3ra.made.tools.third_party import (
+from ......third_party import (
     ASEAtoms,
     ASESimpleCubic,
     ASEBodyCenteredCubic,

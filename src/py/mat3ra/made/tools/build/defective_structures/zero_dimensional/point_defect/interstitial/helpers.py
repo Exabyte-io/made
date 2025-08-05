@@ -1,3 +1,8 @@
+from typing import Union
+
+from mat3ra.made.material import Material
+
+
 def create_point_defect_interstitial(
     material: Union[Material, MaterialWithBuildMetadata],
     coordinate: List[float],

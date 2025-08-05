@@ -2,14 +2,14 @@ from typing import Dict, Type, Union
 
 from mat3ra.made.material import Material
 from .configuration import NanoparticleConfiguration
-from mat3ra.made.tools.materials_category_components import MaterialWithBuildMetadata
+from ......build_components import MaterialWithBuildMetadata
 from ...defect.point.vacancy.builder import VacancyDefectBuilder
 from ...merge import MergeBuilder
 from ...slab.slab.builder import SlabBuilder
 from ...slab.slab.configuration import SlabConfiguration
 from ...void_region.builder import VoidRegionBuilder
 from ...void_region.configuration import VoidRegionConfiguration
-from mat3ra.made.tools.analyze.other import get_chemical_formula_empirical
+from ......analyze.other import get_chemical_formula_empirical
 
 
 class NanoparticleBuilder(VacancyDefectBuilder, MergeBuilder):

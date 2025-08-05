@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
 from ..enums import NanoparticleShapesEnum
-from mat3ra.made.tools.materials_category_components import BaseConfigurationPydantic
+from ......build_components import BaseConfigurationPydantic
 
 
 class ASEBasedNanoparticleConfiguration(BaseConfigurationPydantic):

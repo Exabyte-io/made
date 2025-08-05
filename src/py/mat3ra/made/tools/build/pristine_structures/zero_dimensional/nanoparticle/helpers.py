@@ -2,16 +2,16 @@ from types import SimpleNamespace
 from typing import Union, List
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.materials_category_components import MaterialWithBuildMetadata
-from ..defect.island.helpers import CoordinateConditionType
-from ..nanoparticle.analyzer import NanoparticleMaterialAnalyzer
+from ......build_components import MaterialWithBuildMetadata
+from ....defective_structures.two_dimensional.island.helpers import CoordinateConditionType
+from .analyzer import NanoparticleMaterialAnalyzer
 from .ase_based import ASEBasedNanoparticleBuilder, ASEBasedNanoparticleConfiguration
 from .merge_based import NanoparticleBuilder, NanoparticleConfiguration
 from .enums import NanoparticleShapesEnum
-from mat3ra.made.tools.materials_category_components.defect.slab.helpers import create_slab
-from ..void_region.configuration import VoidRegionConfiguration
-from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate
-from mat3ra.made.tools.entities.coordinate import SphereCoordinateCondition
+from ....pristine_structures.two_dimensional.slab.helpers import create_slab
+from ......build_components.entities.auxiliary.zero_dimensional.void_region.configuration import VoidRegionConfiguration
+from ......analyze.other import get_closest_site_id_from_coordinate
+from ......entities.coordinate import SphereCoordinateCondition
 
 
 def create_nanoparticle_from_material(

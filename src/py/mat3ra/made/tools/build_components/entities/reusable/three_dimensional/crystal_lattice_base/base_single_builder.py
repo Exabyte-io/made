@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from .base_configuration_pydantic import BaseConfigurationPydantic
 from .build_parameters import BaseBuilderParameters
-from ..metadata import MaterialWithBuildMetadata
+from .....metadata import MaterialWithBuildMetadata
 
 TypeConfiguration = TypeVar("TypeConfiguration", bound=BaseConfigurationPydantic)
 TypeBuildParameters = TypeVar("TypeBuildParameters", bound=BaseBuilderParameters)
