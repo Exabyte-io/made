@@ -5,14 +5,14 @@ from typing import Generic, Type, TypeVar
 from ..build import BuildMetadata, MaterialWithBuildMetadata
 from . import BaseMaterialAnalyzer
 
-TConfiguration = TypeVar("TConfiguration")
-TBuildParameters = TypeVar("TBuildParameters")
+TypeConfiguration = TypeVar("TypeConfiguration")
+TypeBuildParameters = TypeVar("TypeBuildParameters")
 
 
-class BuildMetadataAnalyzer(BaseMaterialAnalyzer, Generic[TConfiguration, TBuildParameters]):
+class BuildMetadataAnalyzer(BaseMaterialAnalyzer, Generic[TypeConfiguration, TypeBuildParameters]):
     material: MaterialWithBuildMetadata
-    configuration_cls: Type[TConfiguration]
-    build_parameters_cls: Type[TBuildParameters]
+    configuration_cls: Type[TypeConfiguration]
+    build_parameters_cls: Type[TypeBuildParameters]
 
     @property
     def build_metadata(self) -> BuildMetadata:
@@ -22,9 +22,9 @@ class BuildMetadataAnalyzer(BaseMaterialAnalyzer, Generic[TConfiguration, TBuild
         return metadata
 
     @property
-    def build_configuration(self) -> TConfiguration:
+    def build_configuration(self) -> TypeConfiguration:
         return self.configuration_cls(**self.build_metadata.configuration)
 
     @property
-    def build_parameters(self) -> TBuildParameters:
+    def build_parameters(self) -> TypeBuildParameters:
         return self.build_parameters_cls(**self.build_metadata.build_parameters)

@@ -96,35 +96,32 @@ def create_grain_boundary_linear(
     use_conventional_cell: bool = True,
 ) -> Material:
     """
-        Create a linear grain boundary from a material with specified twist angle.
+    Create a linear grain boundary from a material with specified twist angle.
 
-        This function creates a grain boundary by:
-        1. Creating a slab configuration from the material
-        2. Finding commensurate lattice matches at the target angle using CommensurateLatticeInterfaceAnalyzer
-        3. Creating strained configurations with directional gaps for both phases
-        4. Stacking them along the specified direction
+    This function creates a grain boundary by:
+    1. Creating a slab configuration from the material
+    2. Finding commensurate lattice matches at the target angle using CommensurateLatticeInterfaceAnalyzer
+    3. Creating strained configurations with directional gaps for both phases
+    4. Stacking them along the specified direction
 
-        Args:
-            material (Material): The material to create the grain boundary from.
-            target_angle (float): The target twist angle in degrees.
-            angle_tolerance (float): Tolerance for matching angles in degrees.
-            from typing import List, Optional, Union
+    Args:
+        material (Material): The material to create the grain boundary from.
+        target_angle (float): The target twist angle in degrees.
+        angle_tolerance (float): Tolerance for matching angles in degrees.
+        max_repetition_int (Optional[int]): Maximum integer for supercell matrix elements.
+        limit_max_int (int): Limit for maximum integer to search for supercell matrices.
+        return_first_match (bool): Whether to return the first match or all matches.
+        direction (AxisEnum): Direction along which to stack components (x or y).
+        gap (float): The gap between the two phases in Angstroms.
+        miller_indices (Tuple[int, int, int]): Miller indices for the slab surface.
+        number_of_layers (int): Number of atomic layers in the slab.
+        vacuum (float): Size of the vacuum layer in Angstroms.
 
-    import numpy as np
-    max_repetition_int (Optional[int]): Maximum integer for supercell matrix elements.
-            limit_max_int (int): Limit for maximum integer to search for supercell matrices.
-            return_first_match (bool): Whether to return the first match or all matches.
-            direction (AxisEnum): Direction along which to stack components (x or y).
-            gap (float): The gap between the two phases in Angstroms.
-            miller_indices (Tuple[int, int, int]): Miller indices for the slab surface.
-            number_of_layers (int): Number of atomic layers in the slab.
-            vacuum (float): Size of the vacuum layer in Angstroms.
+    Returns:
+        Material: The grain boundary material.
 
-        Returns:
-            Material: The grain boundary material.
-
-        Raises:
-            ValueError: If no commensurate lattice matches are found.
+    Raises:
+        ValueError: If no commensurate lattice matches are found.
     """
     if use_conventional_cell:
         material = get_material_with_conventional_lattice(material)
