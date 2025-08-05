@@ -5,7 +5,7 @@ import numpy as np
 from mat3ra.made.material import Material
 from .configuration import InterfaceConfiguration
 from .build_parameters import InterfaceBuilderParameters
-from ... import MaterialWithBuildMetadata, TConfiguration
+from ... import MaterialWithBuildMetadata, TypeConfiguration
 from ...slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
 from ...slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 from ...stack.builder import StackNComponentsBuilder
@@ -40,7 +40,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
             SlabStrainedSupercellConfiguration: SlabStrainedSupercellBuilder,
         }
 
-    def _generate(self, configuration: TConfiguration) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: TypeConfiguration) -> MaterialWithBuildMetadata:
         film_material = self._stack_component_to_material(configuration.film_configuration, configuration)
         substrate_material = self._stack_component_to_material(configuration.substrate_configuration, configuration)
 
@@ -80,7 +80,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
         self,
         material: MaterialWithBuildMetadata,
         post_process_parameters: Optional[Any],
-        configuration: Optional[TConfiguration] = None,
+        configuration: Optional[TypeConfiguration] = None,
     ) -> MaterialWithBuildMetadata:
         if self.build_parameters.make_primitive:
             # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
@@ -115,7 +115,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
         return f"Interface, Strain {strain:.3f}pct"
 
     def _update_material_name(
-        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TConfiguration
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TypeConfiguration
     ) -> MaterialWithBuildMetadata:
         base_name = self.get_base_name_from_configuration(
             configuration.film_configuration, configuration.substrate_configuration

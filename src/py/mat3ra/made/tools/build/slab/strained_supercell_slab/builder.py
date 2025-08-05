@@ -1,6 +1,6 @@
 from typing import Type
 
-from ... import TConfiguration, MaterialWithBuildMetadata
+from ... import TypeConfiguration, MaterialWithBuildMetadata
 from ..slab.builder import SlabBuilder
 from .configuration import SlabStrainedSupercellConfiguration
 from ....operations.core.unary import supercell, strain
@@ -9,7 +9,7 @@ from ....operations.core.unary import supercell, strain
 class SlabStrainedSupercellBuilder(SlabBuilder):
     _ConfigurationType: Type[SlabStrainedSupercellConfiguration] = SlabStrainedSupercellConfiguration
 
-    def _generate(self, configuration: TConfiguration) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: TypeConfiguration) -> MaterialWithBuildMetadata:
         slab_material = super()._generate(configuration)
         if configuration.xy_supercell_matrix:
             slab_material = supercell(slab_material, configuration.xy_supercell_matrix)

@@ -5,7 +5,7 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 from .. import (
     BaseSingleBuilder,
     MaterialWithBuildMetadata,
-    TConfiguration,
+    TypeConfiguration,
 )
 from .build_parameters import MergeBuilderParameters
 from .configuration import MergeConfiguration
@@ -69,11 +69,15 @@ class MergeBuilder(BaseSingleBuilder):
             merge_dangerously=parameters.merge_dangerously,
         )
 
-    def _generate(self, configuration: TConfiguration) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: TypeConfiguration) -> MaterialWithBuildMetadata:
         materials = []
         for component in configuration.merge_components:
             material = self._merge_component_to_material(component, configuration)
-            materials.append(material)
+            if material is not None:
+                materials.append(material)
+
+        if len(materials) == 0:
+            raise ValueError("No valid materials found after processing merge components")
 
         if len(materials) == 1:
             return materials[0]

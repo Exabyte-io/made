@@ -18,6 +18,8 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
         crystal_lattice_planes_material = super()._generate(configuration)
 
         crystal_lattice_planes_material_analyzer = self.get_analyzer(configuration)
+        if configuration.termination_top is None:
+            raise ValueError("termination_top is required for AtomicLayersUniqueRepeatedBuilder")
         translation_vector = (
             crystal_lattice_planes_material_analyzer.get_translation_vector_for_termination_without_vacuum(
                 configuration.termination_top

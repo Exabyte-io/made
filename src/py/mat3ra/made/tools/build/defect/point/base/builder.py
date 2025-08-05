@@ -1,7 +1,7 @@
 from typing import Type, Dict, Union
 
 from mat3ra.made.material import Material
-from .... import MaterialWithBuildMetadata, TConfiguration
+from .... import MaterialWithBuildMetadata, TypeConfiguration
 from .configuration import PointDefectConfiguration
 from ..defect_site.builder import PointDefectSiteBuilder
 from ..defect_site.configuration import PointDefectSiteConfiguration
@@ -26,7 +26,7 @@ class PointDefectBuilder(MergeBuilder):
         }
 
     def _update_material_name(
-        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TConfiguration
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TypeConfiguration
     ) -> MaterialWithBuildMetadata:
         host_material = None
         for component in configuration.merge_components:

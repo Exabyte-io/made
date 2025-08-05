@@ -1,7 +1,7 @@
 from typing import Optional, Any, Union
 
 from mat3ra.made.material import Material
-from ... import BaseSingleBuilder, MaterialWithBuildMetadata, TConfiguration
+from ... import BaseSingleBuilder, MaterialWithBuildMetadata, TypeConfiguration
 from ....analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 from ....modify import translate_to_z_level
 from ....operations.core.unary import supercell
@@ -39,7 +39,7 @@ class CrystalLatticeLinesBuilder(BaseSingleBuilder):
         self,
         item: Material,
         post_process_parameters: Optional[Any],
-        configuration: Optional[TConfiguration] = None,
+        configuration: Optional[TypeConfiguration] = None,
     ) -> Material:
         item = super()._post_process(item, post_process_parameters, configuration)
         return self._enforce_convention(item)

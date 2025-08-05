@@ -4,14 +4,14 @@ from mat3ra.made.material import Material
 from ..point.base.builder import PointDefectBuilder
 from ..point.vacancy.builder import VacancyDefectBuilder
 from .configuration import PairDefectConfiguration
-from ... import MaterialWithBuildMetadata, TConfiguration
+from ... import MaterialWithBuildMetadata, TypeConfiguration
 
 
 class PairDefectBuilder(VacancyDefectBuilder, PointDefectBuilder):
     _ConfigurationType: Type[PairDefectConfiguration] = PairDefectConfiguration
 
     def _update_material_name(
-        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TConfiguration
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TypeConfiguration
     ) -> Material:
         host_material = configuration.merge_components[0]
 
