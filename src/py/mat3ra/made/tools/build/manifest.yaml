@@ -1,0 +1,90 @@
+# This manifest describes the structure of materials categories and their components.
+
+materials_category_components:
+  entities:
+    core:
+      three-dimensional:
+        - crystal
+        - void
+      two-dimensional:
+        - vacuum
+      one-dimensional:
+      # empty directory
+      zero-dimensional:
+        - atom
+        - vacancy
+    auxiliary:
+      three-dimensional:
+        - supercell_matrix_3d
+      two-dimensional:
+        - miller_indices
+        - supercell_matrix_2d
+        - termination
+      one-dimensional:
+        - miller_indices_2d
+      zero-dimensional:
+        - crystal_site
+        - point_defect_site
+        - void_region
+    reusable:
+      three-dimensional:
+        - crystal_lattice_base
+        - repetitions
+        - strained_non_uniform
+        - strained_uniform
+        - supercell
+      two-dimensional:
+        - atomic_layers
+        - atomic_layers_unique
+        - atomic_layers_unique_repeated
+        - crystal_lattice_planes
+        - slab_stack_configuration
+      one-dimensional:
+        - crystal_lattice_lines
+        - crystal_lattice_lines_unique_repeated
+
+  operations:
+    core:
+      modifications:
+        - perturb
+        - repeat
+        - strain
+      combinations:
+        - enums
+        - merge
+        - stack
+
+materials_category:
+  pristine_structures:
+    three-dimensional:
+      - ideal_crystal
+    two-dimensional:
+      - nanoribbon
+      - nanotape
+      - slab
+      - slab_strained_supercell
+    zero-dimensional:
+      - nanoparticle
+
+  compound_pristine_structures:
+    two-dimensional:
+      - interface
+
+  defective_structures:
+    two-dimensional:
+      - adatom
+      - grain_boundary_planar
+      - island
+      - terrace
+    one-dimensional:
+      - grain_boundary_linear
+    zero-dimensional:
+      point_defect:
+        - interstitial
+        - substitutional
+        - vacancy
+      
+
+  processed_structures:
+    two-dimensional:
+      - passivation

@@ -1,4 +1,4 @@
-from .build.defect.adatom.helpers import create_adatom_defect
+from .build.defective_structures.two_dimensional.adatom.helpers import create_adatom_defect
 from .build.defect.island.helpers import create_island_defect, get_coordinate_condition
 from .build.defect.pair_defect.helpers import create_pair_defect
 from .build.defect.point.helpers import (
