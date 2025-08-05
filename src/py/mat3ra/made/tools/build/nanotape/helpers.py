@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Union
+from typing import Optional, Tuple, Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
@@ -6,8 +6,7 @@ from mat3ra.made.material import Material
 from . import NanoTapeConfiguration
 from .builders import NanoTapeBuilder, NanoTapeBuilderParameters
 from .. import MaterialWithBuildMetadata
-from ..lattice_lines.configuration import EdgeTypes
-from ..lattice_lines import create_lattice_lines_config_and_material
+from ..lattice_lines import create_lattice_lines_config_and_material, EdgeTypes
 from ..vacuum.configuration import VacuumConfiguration
 
 
@@ -37,7 +36,7 @@ def create_nanotape(
     Returns:
         Material: The generated nanotape material.
     """
-    lattice_lines_config, lattice_lines_material = create_lattice_lines_config_and_material(
+    lattice_lines_config = create_lattice_lines_config_and_material(
         material=material,
         miller_indices_2d=miller_indices_2d,
         edge_type=edge_type,
@@ -47,7 +46,7 @@ def create_nanotape(
     )
     vacuum_config = VacuumConfiguration(
         size=vacuum_width,
-        crystal=lattice_lines_material,
+        crystal=material,
         direction=AxisEnum.y,
     )
     config = NanoTapeConfiguration(

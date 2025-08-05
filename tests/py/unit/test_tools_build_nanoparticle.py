@@ -2,7 +2,7 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.nanoparticle.enums import NanoparticleShapesEnum
 from mat3ra.made.tools.build.nanoparticle.helpers import create_nanoparticle_by_shape, create_nanoparticle_from_material
-from mat3ra.made.tools.utils.coordinate import SphereCoordinateCondition
+from mat3ra.made.tools.entities.coordinate import SphereCoordinateCondition
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 from unit.fixtures.nanoparticle import SI_NANOPARTICLE_SPHERE
 from unit.utils import assert_two_entities_deep_almost_equal

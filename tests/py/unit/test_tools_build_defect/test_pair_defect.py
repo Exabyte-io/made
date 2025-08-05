@@ -2,10 +2,10 @@ from types import SimpleNamespace
 
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.enums import SubstitutionPlacementMethodEnum
 from mat3ra.made.tools.build.defect.factories import create_defect_configuration
-from mat3ra.made.tools.build.defect.pair_defect.builders import PairDefectBuilder
+from mat3ra.made.tools.build.defect.pair_defect.builder import PairDefectBuilder
 from mat3ra.made.tools.build.defect.pair_defect.configuration import PairDefectConfiguration
+from mat3ra.made.tools.build.defect.substitution_placement_method_enum import SubstitutionPlacementMethodEnum
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 from unit.fixtures.pair_defects import (
     PAIR_DEFECT_SUBSTITUTION_VACANCY_BULK_PRIMITIVE_Si,

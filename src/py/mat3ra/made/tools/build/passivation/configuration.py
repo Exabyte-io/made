@@ -7,7 +7,7 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 
 from mat3ra.made.material import Material
 from .. import MaterialWithBuildMetadata
-from ..defect.point.builders import AtomAtCoordinateConfiguration
+from ..defect.point.atom_at_coordinate.configuration import AtomAtCoordinateConfiguration
 from ..merge.configuration import MergeConfiguration
 
 

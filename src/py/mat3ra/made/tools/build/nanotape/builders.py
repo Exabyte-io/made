@@ -1,27 +1,24 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Type
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseBuilderParameters, MaterialWithBuildMetadata
-from pydantic import Field
-from ..stack.builders import StackNComponentsBuilder
-from ..lattice_lines.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration, EdgeTypes
-from ..lattice_lines.builders import CrystalLatticeLinesRepeatedBuilder
+from .build_parameters import NanoTapeBuilderParameters
 from .configuration import NanoTapeConfiguration
+from .. import MaterialWithBuildMetadata, TypeConfiguration
+from ..lattice_lines import (
+    CrystalLatticeLinesUniqueRepeatedConfiguration,
+    EdgeTypes,
+    CrystalLatticeLinesRepeatedBuilder,
+)
+from ..stack.builder import StackNComponentsBuilder
 from ...modify import wrap_to_unit_cell
 
 
-class NanoTapeBuilderParameters(BaseBuilderParameters):
-    use_rectangular_lattice: bool = Field(
-        True, description="If True, set the XY lattice to be rectangular after stacking."
-    )
-
-
 class NanoTapeBuilder(StackNComponentsBuilder):
-    _ConfigurationType = "NanoTapeConfiguration"  # String type annotation to avoid circular import
-    _GeneratedItemType = Material
-    _BuilderParametersType = NanoTapeBuilderParameters
-    _DefaultBuildParameters = NanoTapeBuilderParameters(
+    _ConfigurationType: Type[NanoTapeConfiguration] = NanoTapeConfiguration
+    _GeneratedItemType: Type[Material] = Material
+    _BuildParametersType: Type[NanoTapeBuilderParameters] = NanoTapeBuilderParameters
+    _DefaultBuildParameters: NanoTapeBuilderParameters = NanoTapeBuilderParameters(
         use_rectangular_lattice=True,
     )
 
@@ -75,8 +72,13 @@ class NanoTapeBuilder(StackNComponentsBuilder):
             return material
         return super()._update_material_name(material, configuration)
 
-    def _post_process(self, item: Material, post_process_parameters: Optional[Any] = None) -> Material:
-        item = super()._post_process(item, post_process_parameters)
+    def _post_process(
+        self,
+        item: Material,
+        post_process_parameters: Optional[Any] = None,
+        configuration: Optional[TypeConfiguration] = None,
+    ) -> Material:
+        item = super()._post_process(item, post_process_parameters, configuration)
         params = self.build_parameters or self._DefaultBuildParameters
         if params.use_rectangular_lattice:
             item = self._make_rectangular_lattice(item)

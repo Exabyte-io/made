@@ -8,8 +8,10 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     SupercellMatrix2DSchema,
 )
 
-from ...build.slab.builders import SlabBuilder, SlabBuilderParameters
-from ...build.slab.configurations import SlabConfiguration, SlabStrainedSupercellConfiguration
+from ...build.slab.slab.build_parameters import SlabBuilderParameters
+from ...build.slab.slab.builder import SlabBuilder
+from ...build.slab.slab.configuration import SlabConfiguration
+from ...build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 
 

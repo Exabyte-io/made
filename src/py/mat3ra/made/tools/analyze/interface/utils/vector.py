@@ -27,10 +27,10 @@ def align_first_vector_to_x_2d_right_handed(vectors: List[Vector2dSchema]):
     vectors: (2, 2) array
     Returns: rotated (2, 2) array
     """
-    vectors = np.array(vectors)
-    if vectors.shape != (2, 2):
+    vectors_np = np.array(vectors)
+    if vectors_np.shape != (2, 2):
         raise ValueError("Input must be two 2D vectors (shape (2, 2)).")
-    v = vectors[0]
+    v = vectors_np[0]
     a = np.linalg.norm(v)
     if a == 0:
         raise ValueError("First lattice vector has zero length.")
@@ -38,7 +38,7 @@ def align_first_vector_to_x_2d_right_handed(vectors: List[Vector2dSchema]):
     angle = np.arctan2(v[1], v[0])
     # 2D rotation matrix to align v with x-axis
     R = np.array([[np.cos(-angle), -np.sin(-angle)], [np.sin(-angle), np.cos(-angle)]])
-    rotated_vectors = vectors @ R.T
+    rotated_vectors = vectors_np @ R.T
     # Set first vector to [a, 0]
     rotated_vectors[0] = np.array([a, 0])
 

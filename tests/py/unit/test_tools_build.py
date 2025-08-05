@@ -2,7 +2,7 @@ import pytest
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import BaseConfigurationPydantic, MaterialWithBuildMetadata
-from mat3ra.made.tools.build.merge.builders import MergeBuilder, MergeBuilderParameters
+from mat3ra.made.tools.build.merge.builder import MergeBuilder, MergeBuilderParameters
 from mat3ra.made.tools.build.merge.configuration import MergeConfiguration
 from mat3ra.made.tools.operations.core.binary import merge
 from mat3ra.utils import assertion as assertion_utils

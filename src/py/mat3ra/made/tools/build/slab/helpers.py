@@ -1,16 +1,13 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.slab.entities import Termination
-from .builders import (
-    SlabBuilder,
-    SlabBuilderParameters,
-    AtomicLayersUniqueRepeatedBuilder,
-)
-from .configurations import (
-    SlabConfiguration,
-    AtomicLayersUniqueRepeatedConfiguration,
-)
+from ...entities import Termination
+from .atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
+from .atomic_layers_unique_repeated.configuration import AtomicLayersUniqueRepeatedConfiguration
+from .slab.builder import SlabBuilder
+from .slab.build_parameters import SlabBuilderParameters
+from .slab.configuration import SlabConfiguration
+
 from ..metadata import MaterialWithBuildMetadata
 from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 
@@ -20,7 +17,7 @@ DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 def create_atomic_layers(
     material: Union[Material, MaterialWithBuildMetadata],
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
-    termination: Termination = None,
+    termination: Optional[Termination] = None,
     number_of_layers: int = 1,
 ) -> Material:
     """
@@ -57,8 +54,8 @@ def create_slab(
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
     use_conventional_cell=True,
     use_orthogonal_c: bool = True,
-    termination: Termination = None,
-    termination_formula: str = None,
+    termination: Optional[Termination] = None,
+    termination_formula: Optional[str] = None,
     number_of_layers=1,
     vacuum=10.0,
     xy_supercell_matrix=DEFAULT_XY_SUPERCELL_MATRIX,

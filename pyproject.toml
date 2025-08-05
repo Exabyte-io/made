@@ -110,3 +110,9 @@ pythonpath = [
 testpaths = [
     "tests/py"
 ]
+filterwarnings = [
+    "ignore:.*:DeprecationWarning:typing_extensions",
+    "ignore:.*:UserWarning:pydantic",
+    "ignore:.*:RuntimeWarning:mat3ra.made",
+    "ignore::pydantic.warnings.PydanticDeprecatedSince20",
+]

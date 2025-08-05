@@ -3,7 +3,7 @@ from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.
     AxisEnum,
 )
 
-from mat3ra.made.tools.build.defect.slab.configuration import SlabStackConfiguration
+from ..slab.configuration import SlabStackConfiguration
 
 
 class AdatomDefectConfiguration(SlabStackConfiguration, AdatomDefectConfigurationSchema):

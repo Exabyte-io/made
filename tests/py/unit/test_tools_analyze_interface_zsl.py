@@ -4,14 +4,15 @@ from typing import Final
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.slab.builders import SlabStrainedSupercellBuilder
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
+from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
+from mat3ra.made.tools.utils import supercell_matrix_2d_schema_to_list, unwrap
 from mat3ra.standata.materials import Materials
 from mat3ra.utils.matrix import convert_2x2_to_3x3
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE
-from .utils import TestPlatform, get_platform_specific_value
+from .utils import OSPlatform, get_platform_specific_value
 
 SUBSTRATE_SI_001: Final = SimpleNamespace(
     bulk_config=BULK_Si_CONVENTIONAL,
@@ -89,12 +90,13 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
     substrate_vectors = np.array(analyzer.substrate_slab.lattice.vector_arrays)
 
     film_sl_vectors = (
-        np.array(convert_2x2_to_3x3([row.root for row in film_config.xy_supercell_matrix]))
+        np.array(convert_2x2_to_3x3(supercell_matrix_2d_schema_to_list(film_config.xy_supercell_matrix)))
         @ film_vectors
-        @ np.array([row.root for row in film_config.strain_matrix.root])
+        @ np.array(unwrap(film_config.strain_matrix.root))
     )
     substrate_sl_vectors = (
-        np.array(convert_2x2_to_3x3([row.root for row in sub_config.xy_supercell_matrix])) @ substrate_vectors
+        np.array(convert_2x2_to_3x3(supercell_matrix_2d_schema_to_list(sub_config.xy_supercell_matrix)))
+        @ substrate_vectors
     )
 
     substrate_material = SlabStrainedSupercellBuilder().get_material(sub_config)
@@ -126,10 +128,10 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
                 vacuum=0.0,
             ),
             {"max_area": 90.0, "max_area_ratio_tol": 0.1, "max_length_tol": 0.1, "max_angle_tol": 0.1},
-            {TestPlatform.DARWIN: 32, TestPlatform.OTHER: 33},
+            {OSPlatform.DARWIN: 32, OSPlatform.OTHER: 33},
             {
-                TestPlatform.DARWIN: {"strain_percentage": 0.474, "match_id": 0},
-                TestPlatform.OTHER: {"strain_percentage": 25.122, "match_id": 0},
+                OSPlatform.DARWIN: {"strain_percentage": 0.474, "match_id": 0},
+                OSPlatform.OTHER: {"strain_percentage": 25.122, "match_id": 0},
             },
             # NOTE: the following values are expected for the DARWIN platform.
             # {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},

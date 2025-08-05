@@ -5,7 +5,7 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
     MergeMethodsEnum,
 )
 
-from mat3ra.made.tools.build import BaseConfigurationPydantic
+from .. import BaseConfigurationPydantic
 
 
 class MergeConfiguration(MergeSchema, BaseConfigurationPydantic):

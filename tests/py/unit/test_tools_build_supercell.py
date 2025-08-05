@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.supercell import create_supercell
+from mat3ra.made.tools.build.supercell.helpers import create_supercell
 from unit.fixtures.supercell import SI_SUPERCELL_2X2X1
 
 from .fixtures.bulk import BULK_Si_PRIMITIVE

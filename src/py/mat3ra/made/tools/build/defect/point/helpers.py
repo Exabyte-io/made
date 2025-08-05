@@ -2,24 +2,20 @@ from types import SimpleNamespace
 from typing import List, Union
 
 from mat3ra.made.material import Material
-from .builders import (
-    VacancyDefectBuilder,
-    SubstitutionalDefectBuilder,
-    InterstitialDefectBuilder,
-)
-from .configuration import (
-    VacancyDefectConfiguration,
-    SubstitutionalDefectConfiguration,
-    InterstitialDefectConfiguration,
-)
-from ..enums import (
-    PointDefectTypeEnum,
-    VacancyPlacementMethodEnum,
-    SubstitutionPlacementMethodEnum,
-    InterstitialPlacementMethodEnum,
-)
+from .intersitital.builder import InterstitialDefectBuilder
+from .intersitital.configuration import InterstitialDefectConfiguration
+from .substitutional.builder import SubstitutionalDefectBuilder
+from .substitutional.configuration import SubstitutionalDefectConfiguration
+from .vacancy.builder import VacancyDefectBuilder
+from .vacancy.configuration import VacancyDefectConfiguration
+
+from ..point_defect_type_enum import PointDefectTypeEnum
+from ..vacancy_placement_method_enum import VacancyPlacementMethodEnum
+from ..substitution_placement_method_enum import SubstitutionPlacementMethodEnum
+from ..interstitial_placement_method_enum import InterstitialPlacementMethodEnum
 from ... import MaterialWithBuildMetadata
-from ....analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
+from ....analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from ....analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
 
 DEFECT_TYPE_MAPPING = {
     PointDefectTypeEnum.VACANCY: {

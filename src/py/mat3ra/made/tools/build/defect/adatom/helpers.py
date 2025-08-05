@@ -2,14 +2,17 @@ from types import SimpleNamespace
 from typing import List, Optional
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.adatom import AdatomCrystalSiteMaterialAnalyzer, AdatomMaterialAnalyzer
-from mat3ra.made.tools.operations.core.binary import merge
-from .builders import AdatomDefectBuilder
+from ....analyze.crystal_site.adatom_crystal_site_material_analyzer import (
+    AdatomCrystalSiteMaterialAnalyzer,
+)
+from ....analyze.crystal_site.adatom_material_analyzer import AdatomMaterialAnalyzer
+from ....operations.core.binary import merge
+from .builder import AdatomDefectBuilder
 from .configuration import (
     AdatomDefectConfiguration,
 )
 from ... import MaterialWithBuildMetadata
-from ...defect.enums import AdatomPlacementMethodEnum
+from ..adatom_placement_method_enum import AdatomPlacementMethodEnum
 
 
 def get_adatom_defect_analyzer_cls(
@@ -87,6 +90,9 @@ def create_multiple_adatom_defects(
     if placement_method not in [e.value for e in AdatomPlacementMethodEnum]:
         raise ValueError(f"Unsupported placement method: {placement_method}")
 
+    if not defect_dicts:
+        return slab
+
     all_adatom_configs = []
     analyzer_cls = get_adatom_defect_analyzer_cls(placement_method)
 
@@ -112,6 +118,9 @@ def create_multiple_adatom_defects(
         )
         last_analyzer = analyzer
         all_adatom_configs.append(analyzer.added_component)
+
+    if not last_analyzer:
+        return slab
 
     vacuum_configuration = last_analyzer.get_slab_vacuum_configuration()
 

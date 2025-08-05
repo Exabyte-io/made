@@ -1,9 +1,9 @@
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
-from mat3ra.made.tools.build.grain_boundary.builders import GrainBoundaryPlanarBuilder
-from mat3ra.made.tools.build.grain_boundary.configuration import GrainBoundaryPlanarConfiguration
 from mat3ra.made.tools.build.grain_boundary.helpers import create_grain_boundary_linear, create_grain_boundary_planar
+from mat3ra.made.tools.build.grain_boundary.planar_builder import GrainBoundaryPlanarBuilder
+from mat3ra.made.tools.build.grain_boundary.planar_configuration import GrainBoundaryPlanarConfiguration
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL
 from .fixtures.grain_boundary import GRAIN_BOUNDARY_LINEAR_SI, GRAIN_BOUNDARY_SI_001_011

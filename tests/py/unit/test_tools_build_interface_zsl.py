@@ -2,10 +2,14 @@ from types import SimpleNamespace
 
 import pytest
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.interface.builders import InterfaceBuilder, InterfaceConfiguration
-from mat3ra.made.tools.build.interface.helpers import create_zsl_interface, create_zsl_interface_between_slabs
-from mat3ra.made.tools.build.slab.builders import SlabBuilder
-from mat3ra.made.tools.build.slab.configurations import SlabConfiguration
+from mat3ra.made.tools.build.interface import (
+    InterfaceBuilder,
+    InterfaceConfiguration,
+    create_zsl_interface,
+    create_zsl_interface_between_slabs,
+)
+from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
+from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
 from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.standata.materials import Materials
 
@@ -14,7 +18,7 @@ from .fixtures.interface.gr_ni_111_top_hcp import (
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
 )
 from .fixtures.monolayer import GRAPHENE
-from .utils import TestPlatform, assert_two_entities_deep_almost_equal, get_platform_specific_value
+from .utils import OSPlatform, assert_two_entities_deep_almost_equal, get_platform_specific_value
 
 GRAPHENE_NICKEL_TEST_CASE = (
     SimpleNamespace(
@@ -33,8 +37,8 @@ GRAPHENE_NICKEL_TEST_CASE = (
     10.0,  # vacuum
     90,  # max area
     {
-        TestPlatform.DARWIN: GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
-        TestPlatform.OTHER: GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
+        OSPlatform.DARWIN: GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
+        OSPlatform.OTHER: GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
     },
 )
 

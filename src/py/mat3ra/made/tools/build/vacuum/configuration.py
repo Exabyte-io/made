@@ -1,4 +1,5 @@
-from typing import Optional, Union
+from typing import Optional
+from typing import Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category_components.entities.core.two_dimensional.vacuum import (
@@ -6,7 +7,7 @@ from mat3ra.esse.models.materials_category_components.entities.core.two_dimensio
 )
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build import BaseConfigurationPydantic, MaterialWithBuildMetadata
+from .. import BaseConfigurationPydantic, MaterialWithBuildMetadata
 
 
 class VacuumConfiguration(VacuumConfigurationSchema, BaseConfigurationPydantic):

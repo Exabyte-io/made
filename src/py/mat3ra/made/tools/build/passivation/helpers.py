@@ -3,16 +3,16 @@ from typing import List, Dict
 
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import AtomSchema
 
-from mat3ra.made.tools.analyze.material import MaterialWithCrystalSites
-from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.point.builders import AtomAtCoordinateConfiguration
-from mat3ra.made.tools.build.passivation.analyzer import (
+from ...analyze.material import MaterialWithCrystalSites
+from .. import MaterialWithBuildMetadata
+from ..defect.point.atom_at_coordinate.configuration import AtomAtCoordinateConfiguration
+from .analyzers import (
     SurfacePassivationMaterialAnalyzer,
     CoordinationBasedPassivationMaterialAnalyzer,
 )
-from mat3ra.made.tools.build.passivation.builders import PassivationBuilder
-from mat3ra.made.tools.build.passivation.configuration import PassivationConfiguration
-from mat3ra.made.tools.enums import SurfaceTypesEnum
+from .builder import PassivationBuilder
+from .configuration import PassivationConfiguration
+from ...enums import SurfaceTypesEnum
 
 
 def passivate_surface(

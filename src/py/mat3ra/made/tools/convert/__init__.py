@@ -3,7 +3,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.utils import map_array_with_id_value_to_array
+from mat3ra.made.utils import map_array_to_array_with_id_value, map_array_with_id_value_to_array
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 
 from ..third_party import (
@@ -12,16 +12,12 @@ from ..third_party import (
     PymatgenInterface,
     PymatgenLattice,
     PymatgenPoscar,
-    PymatgenSlab,
     PymatgenStructure,
-    label_pymatgen_slab_termination,
 )
 from .utils import (
-    INTERFACE_LABELS_MAP,
     extract_labels_from_pymatgen_structure,
     extract_metadata_from_pymatgen_structure,
     extract_tags_from_ase_atoms,
-    map_array_to_array_with_id_value,
 )
 
 

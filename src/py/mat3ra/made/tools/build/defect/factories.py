@@ -1,21 +1,18 @@
-from typing import List, Dict, Union, Type
+from typing import List, Dict, Union, Type, Optional
 
 from mat3ra.made.material import Material
 from .. import MaterialWithBuildMetadata
-from ...analyze.crystal_site import CrystalSiteAnalyzer, VoronoiCrystalSiteAnalyzer
-from ..defect.enums import (
-    PointDefectTypeEnum,
-    VacancyPlacementMethodEnum,
-    SubstitutionPlacementMethodEnum,
-    InterstitialPlacementMethodEnum,
-    AtomPlacementMethodEnum,
-)
-from ..defect.point.configuration import (
-    VacancyDefectConfiguration,
-    SubstitutionalDefectConfiguration,
-    InterstitialDefectConfiguration,
-    PointDefectConfiguration,
-)
+from .point_defect_type_enum import PointDefectTypeEnum
+from .vacancy_placement_method_enum import VacancyPlacementMethodEnum
+from .substitution_placement_method_enum import SubstitutionPlacementMethodEnum
+from .interstitial_placement_method_enum import InterstitialPlacementMethodEnum
+from .atom_placement_method_enum import AtomPlacementMethodEnum
+from .point.vacancy.configuration import VacancyDefectConfiguration
+from .point.substitutional.configuration import SubstitutionalDefectConfiguration
+from .point.intersitital.configuration import InterstitialDefectConfiguration
+from .point.base.configuration import PointDefectConfiguration
+from ...analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from ...analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
 
 
 def resolve_coordinate(
@@ -57,9 +54,12 @@ def create_defect_configuration(
     material: Union[Material, MaterialWithBuildMetadata],
     defect_type: PointDefectTypeEnum,
     coordinate: List[float],
-    element: str = None,
+    element: Optional[str] = None,
     placement_method: Union[
-        VacancyPlacementMethodEnum, SubstitutionPlacementMethodEnum, InterstitialPlacementMethodEnum
+        VacancyPlacementMethodEnum,
+        SubstitutionPlacementMethodEnum,
+        InterstitialPlacementMethodEnum,
+        AtomPlacementMethodEnum,
     ] = AtomPlacementMethodEnum.EXACT_COORDINATE,
     use_cartesian_coordinates: bool = False,
 ) -> PointDefectConfiguration:

@@ -1,7 +1,8 @@
 from typing import Optional
 
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.made.tools.build.slab.configurations import SlabStrainedSupercellConfiguration
+
+from ....build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
 
 
 class MatchedSubstrateFilmConfigurationHolder(InMemoryEntityPydantic):

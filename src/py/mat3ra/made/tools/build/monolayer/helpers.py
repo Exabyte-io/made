@@ -1,7 +1,7 @@
 from typing import Union
 
 from mat3ra.made.material import Material
-from .builders import MonolayerBuilder
+from .builder import MonolayerBuilder
 from .configurations import MonolayerConfiguration
 from .. import MaterialWithBuildMetadata
 

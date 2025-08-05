@@ -1,4 +1,4 @@
-from unit.utils import TestPlatform
+from unit.utils import OSPlatform
 
 VACANCY_DEFECT_BULK_PRIMITIVE_Si = {
     "name": "Silicon FCC with vacancy defect",
@@ -68,7 +68,7 @@ INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si = {
 }
 
 INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si = {
-    TestPlatform.DARWIN: {
+    OSPlatform.DARWIN: {
         "name": "Silicon FCC with interstitial defect",
         "basis": {
             "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}, {"id": 2, "value": "Ge"}],
@@ -92,7 +92,7 @@ INTERSTITIAL_VORONOI_DEFECT_BULK_PRIMITIVE_Si = {
             "type": "FCC",
         },
     },
-    TestPlatform.OTHER: {
+    OSPlatform.OTHER: {
         "name": "Silicon FCC with interstitial defect",
         "basis": {
             "elements": [{"id": 0, "value": "Si"}, {"id": 1, "value": "Si"}, {"id": 2, "value": "Ge"}],

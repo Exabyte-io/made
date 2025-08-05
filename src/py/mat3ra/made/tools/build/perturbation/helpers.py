@@ -7,8 +7,8 @@ from .builders import PerturbationBuilder, IsometricPerturbationBuilder
 from .configuration import (
     PerturbationConfiguration,
 )
+from .functions import PerturbationFunctionHolder
 from .. import MaterialWithBuildMetadata
-from ...utils.perturbation import PerturbationFunctionHolder
 
 
 def create_perturbation(

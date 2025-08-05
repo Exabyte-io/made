@@ -1,34 +1,21 @@
+from __future__ import annotations
+
 from typing import Type
 
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction, get_atomic_coordinates_extremum
 
-from ..build import BuildMetadata, MaterialWithBuildMetadata
-from ..build.slab.builders import SlabBuilderParameters
-from ..build.slab.configurations import SlabConfiguration
+from ..build import MaterialWithBuildMetadata
+from ..build.slab.slab.build_parameters import SlabBuilderParameters
+from ..build.slab.slab.configuration import SlabConfiguration
 from ..build.vacuum.configuration import VacuumConfiguration
-from . import BaseMaterialAnalyzer
-from .crystal_site import CrystalSiteAnalyzer
+from .build_metadata_analyzer import BuildMetadataAnalyzer
+from .crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
 
 
-class BuildMetadataAnalyzer(BaseMaterialAnalyzer):
-    material: MaterialWithBuildMetadata
-    configuration_cls: None
-    build_parameters_cls: None
-
-    @property
-    def build_metadata(self) -> BuildMetadata:
-        return self.material.metadata.get_build_metadata_of_type(self.configuration_cls.__name__)
-
-    @property
-    def build_configuration(self) -> "configuration_cls":
-        return self.configuration_cls(**self.build_metadata.configuration)
-
-    @property
-    def build_parameters(self) -> "configuration_cls":
-        return self.build_parameters_cls(**self.build_metadata.build_parameters)
-
-
-class SlabMaterialAnalyzer(BuildMetadataAnalyzer, CrystalSiteAnalyzer):
+class SlabMaterialAnalyzer(
+    BuildMetadataAnalyzer[SlabConfiguration, SlabBuilderParameters],
+    CrystalSiteAnalyzer,
+):
     configuration_cls: Type[SlabConfiguration] = SlabConfiguration
     build_parameters_cls: Type[SlabBuilderParameters] = SlabBuilderParameters
 

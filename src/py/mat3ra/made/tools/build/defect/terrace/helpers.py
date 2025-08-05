@@ -1,14 +1,14 @@
 from typing import Optional, List
 
-from .builders import TerraceDefectBuilder
+from .builder import TerraceDefectBuilder
 from .configuration import TerraceDefectConfiguration
-from .parameters import TerraceBuildParameters
-from ..slab.builders import SlabBuilder
+from .build_parameters import TerraceBuildParameters
+from ...slab.slab.builder import SlabBuilder
 from ..slab.helpers import recreate_slab_with_fractional_layers
 from ... import MaterialWithBuildMetadata
 from ....analyze.terrace import TerraceMaterialAnalyzer
 from ....modify import filter_by_condition_on_coordinates
-from ....utils.coordinate import PlaneCoordinateCondition
+from ....entities.coordinate import PlaneCoordinateCondition
 
 
 def create_terrace(

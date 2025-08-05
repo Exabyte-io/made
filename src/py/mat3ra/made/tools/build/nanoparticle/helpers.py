@@ -5,13 +5,13 @@ from mat3ra.made.material import Material
 from .. import MaterialWithBuildMetadata
 from ..defect.island.helpers import CoordinateConditionType
 from ..nanoparticle.analyzer import NanoparticleMaterialAnalyzer
-from ..nanoparticle.builders import ASEBasedNanoparticleBuilder, NanoparticleBuilder
-from ..nanoparticle.configuration import ASEBasedNanoparticleConfiguration, NanoparticleConfiguration
-from ..nanoparticle.enums import NanoparticleShapesEnum
-from ..slab.helpers import create_slab
+from .ase_based import ASEBasedNanoparticleBuilder, ASEBasedNanoparticleConfiguration
+from .merge_based import NanoparticleBuilder, NanoparticleConfiguration
+from .enums import NanoparticleShapesEnum
+from ..defect.slab.helpers import create_slab
 from ..void_region.configuration import VoidRegionConfiguration
 from ...analyze.other import get_closest_site_id_from_coordinate
-from ...utils.coordinate import SphereCoordinateCondition
+from ...entities.coordinate import SphereCoordinateCondition
 
 
 def create_nanoparticle_from_material(
@@ -50,9 +50,11 @@ def create_nanoparticle_from_material(
     repetitions_z = analyzer.number_of_layers_to_fit_nanoparticle
     xy_supercell = analyzer.xy_supercell_matrix_to_fit_nanoparticle
 
+    if len(orientation_z) != 3:
+        raise ValueError("orientation_z must have exactly three elements.")
     slab = create_slab(
         material,
-        miller_indices=orientation_z,
+        miller_indices=tuple(orientation_z),  # type: ignore
         number_of_layers=repetitions_z,
         xy_supercell_matrix=xy_supercell,
         vacuum=0,
@@ -115,5 +117,5 @@ def create_nanoparticle_by_shape_from_element(
 
     config = ASEBasedNanoparticleConfiguration(shape=shape, parameters=parameters.__dict__, element=element)
     builder = ASEBasedNanoparticleBuilder()
-    nanoparticles = builder.get_materials(config)
-    return nanoparticles[0]
+    nanoparticles = builder.get_material(config)
+    return nanoparticles
