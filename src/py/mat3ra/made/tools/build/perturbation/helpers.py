@@ -8,7 +8,7 @@ from .configuration import (
     PerturbationConfiguration,
 )
 from .. import MaterialWithBuildMetadata
-from ...utils.perturbation import PerturbationFunctionHolder
+from .functions import PerturbationFunctionHolder
 
 
 def create_perturbation(

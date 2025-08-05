@@ -7,10 +7,10 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.modify import translate_by_vector, wrap_to_unit_cell
 
 from ...build import MaterialWithBuildMetadata
+from ...build.perturbation.functions import FunctionHolder
 from ...convert import from_ase, to_ase
 from ...third_party import ase_make_supercell
 from ...utils import decorator_convert_supercell_matrix_2x2_to_3x3
-from ...utils.functions import FunctionHolder
 
 
 def translate(material: Material, vector: Vector3D) -> Material:

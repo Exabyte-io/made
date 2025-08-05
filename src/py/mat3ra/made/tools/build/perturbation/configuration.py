@@ -2,8 +2,7 @@ from typing import Union
 
 from mat3ra.made.material import Material
 from .. import BaseConfigurationPydantic, MaterialWithBuildMetadata
-from ...utils.functions import FunctionHolder
-from ...utils.perturbation import SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
+from .functions import FunctionHolder, SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
 
 
 class PerturbationConfiguration(BaseConfigurationPydantic):
