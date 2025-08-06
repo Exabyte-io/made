@@ -1,12 +1,14 @@
 import pytest
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.perturbation.builders import PerturbationBuilder
-from mat3ra.made.tools.build.perturbation.configuration import PerturbationConfiguration
-from mat3ra.made.tools.build.perturbation.functions import SineWavePerturbationFunctionHolder
-from mat3ra.made.tools.build.perturbation.helpers import create_perturbation
-from mat3ra.made.tools.build.supercell.helpers import create_supercell
 from mat3ra.utils import assertion as assertion_utils
 
+from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.supercell.helpers import create_supercell
+from mat3ra.made.tools.build_components.operations.core.modifications.perturb import SineWavePerturbationFunctionHolder
+from mat3ra.made.tools.build_components.operations.core.modifications.perturb.builders.base import PerturbationBuilder
+from mat3ra.made.tools.build_components.operations.core.modifications.perturb.configuration import (
+    PerturbationConfiguration,
+)
+from mat3ra.made.tools.build_components.operations.core.modifications.perturb.helpers import create_perturbation
 from .fixtures.monolayer import GRAPHENE
 from .fixtures.nanoribbon.armchair import GRAPHENE_NANORIBBON_ARMCHAIR
 

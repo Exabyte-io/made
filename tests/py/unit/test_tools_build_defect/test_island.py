@@ -1,7 +1,7 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.island.helpers import create_island_defect
-from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.made.tools.build.defective_structures.two_dimensional.island.helpers import create_island_defect
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from mat3ra.made.tools.entities import coordinate as CoordinateCondition
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
 from unit.fixtures.island import ISLAND_SLAB_Si_001_CYLINDER_CONDITION_1_LAYER

@@ -1,7 +1,7 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.terrace.helpers import create_terrace
-from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.made.tools.build.defective_structures.two_dimensional.terrace.helpers import create_terrace
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
 from unit.fixtures.terrace import TERRACE_SLAB_Si_001_3x3
 from unit.utils import assert_two_entities_deep_almost_equal
