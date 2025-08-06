@@ -1,7 +1,7 @@
 from typing import Optional
 
-from ....entities import Termination
-from ..base.configuration import CrystalLatticeLinesConfiguration
+from ....auxiliary.two_dimensional.termination import Termination
+from ..crystal_lattice_lines.configuration import CrystalLatticeLinesConfiguration
 
 
 class CrystalLatticeLinesUniqueRepeatedConfiguration(CrystalLatticeLinesConfiguration):

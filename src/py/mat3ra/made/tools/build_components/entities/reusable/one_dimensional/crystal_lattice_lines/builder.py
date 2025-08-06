@@ -1,14 +1,15 @@
 from typing import Any, Optional, Union
 
 from mat3ra.made.material import Material
-from .....build_components import MaterialWithBuildMetadata
+from ..... import MaterialWithBuildMetadata
 
-from ....analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
-from ....modify import translate_to_z_level
-from ....operations.core.unary import supercell
-from ...slab.utils import get_orthogonal_c_slab
+from ......analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
+from ......modify import translate_to_z_level
+from ......operations.core.unary import supercell
+from .....utils import get_orthogonal_c_slab
 from ...three_dimensional.crystal_lattice_base.base_single_builder import (
     BaseSingleBuilder,
+    TypeConfiguration,
 )
 from .configuration import CrystalLatticeLinesConfiguration
 

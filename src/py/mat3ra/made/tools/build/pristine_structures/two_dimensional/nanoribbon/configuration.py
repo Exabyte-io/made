@@ -5,9 +5,9 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.n
     NanoribbonConfigurationSchema,
 )
 
-from .build.pristine_structures.two_dimensional.nanotape import NanoTapeConfiguration
-from ...build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
-from ...build_components.operations.core.combinations.stack.configuration import StackConfiguration
+from ..nanotape.configuration import NanoTapeConfiguration
+from .....build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from .....build_components.operations.core.combinations.stack.configuration import StackConfiguration
 
 
 class NanoribbonConfiguration(NanoribbonConfigurationSchema, StackConfiguration):

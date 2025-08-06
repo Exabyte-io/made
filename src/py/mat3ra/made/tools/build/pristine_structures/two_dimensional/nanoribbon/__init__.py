@@ -1,16 +1,7 @@
-from ...build_components.entities.reusable.one_dimensional.crystal_lattice_lines import \
-    CrystalLatticeLinesBuilder, CrystalLatticeLinesConfiguration
-from ...build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import \
-    EdgeTypes
-from ...build_components.operations.core.modifications.repeat import CrystalLatticeLinesRepeatedBuilder, \
-    CrystalLatticeLinesUniqueRepeatedConfiguration
-from ..lattice_lines import (
-    CrystalLatticeLinesConfiguration,
-    CrystalLatticeLinesUniqueRepeatedConfiguration,
-    EdgeTypes,
-    CrystalLatticeLinesBuilder,
-    CrystalLatticeLinesRepeatedBuilder,
-)
+from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines import CrystalLatticeLinesBuilder, CrystalLatticeLinesConfiguration
+from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import EdgeTypes
+from .....build_components.operations.core.modifications.repeat import CrystalLatticeLinesRepeatedBuilder, CrystalLatticeLinesUniqueRepeatedConfiguration
+# Duplicates removed - using imports from build_components above
 from .configuration import NanoribbonConfiguration
 from .helpers import (
     create_nanoribbon,

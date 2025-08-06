@@ -1,12 +1,11 @@
 from typing import Type
 
 from mat3ra.made.material import Material
-
-from ....analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
-from ....modify import wrap_to_unit_cell
-from ....operations.core.unary import supercell, translate
-from ..base.builder import CrystalLatticeLinesBuilder
 from .configuration import CrystalLatticeLinesUniqueRepeatedConfiguration
+from ..crystal_lattice_lines.builder import CrystalLatticeLinesBuilder
+from ......analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
+from ......modify import wrap_to_unit_cell
+from ......operations.core.unary import supercell, translate
 
 
 class CrystalLatticeLinesRepeatedBuilder(CrystalLatticeLinesBuilder):
@@ -15,9 +14,9 @@ class CrystalLatticeLinesRepeatedBuilder(CrystalLatticeLinesBuilder):
     This is similar to AtomicLayersUniqueRepeatedBuilder but for 1D lines.
     """
 
-    _ConfigurationType: Type[
+    _ConfigurationType: Type[CrystalLatticeLinesUniqueRepeatedConfiguration] = (
         CrystalLatticeLinesUniqueRepeatedConfiguration
-    ] = CrystalLatticeLinesUniqueRepeatedConfiguration
+    )
 
     def _generate(self, configuration: CrystalLatticeLinesUniqueRepeatedConfiguration) -> Material:
         crystal_lattice_lines_material = super()._generate(configuration)
