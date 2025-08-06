@@ -28,11 +28,11 @@ from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic
 from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import (
     SlabConfiguration,
 )
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated import (
+    AtomicLayersUniqueRepeatedConfiguration,
+)
 from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.builder import (
     AtomicLayersUniqueRepeatedBuilder,
-)
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.configuration import (
-    AtomicLayersUniqueRepeatedConfiguration,
 )
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP, adjust_material_cell_to_set_gap_along_direction
 from mat3ra.utils import assertion

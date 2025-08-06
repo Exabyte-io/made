@@ -7,7 +7,7 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.n
 
 from .....build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from .....build_components.operations.core.combinations.stack.configuration import StackConfiguration
-from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines_unique_repeated.configuration import (
+from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines_unique_repeated import (
     CrystalLatticeLinesUniqueRepeatedConfiguration,
 )
 

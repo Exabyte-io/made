@@ -2,10 +2,11 @@ from typing import Union
 
 import numpy as np
 
+from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from ...build_components import MaterialWithBuildMetadata
-from ...modify import wrap_to_unit_cell
-from ...operations.core.unary import edit_cell
+from .....build_components import MaterialWithBuildMetadata
+from .....modify import wrap_to_unit_cell
+from .....operations.core.unary import edit_cell
 
 
 def get_orthogonal_c_slab(material: Union[Material, MaterialWithBuildMetadata]) -> Material:

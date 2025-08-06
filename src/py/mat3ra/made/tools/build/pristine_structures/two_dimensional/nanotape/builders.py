@@ -9,7 +9,7 @@ from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lin
 from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines_unique_repeated.builder import (
     CrystalLatticeLinesRepeatedBuilder,
 )
-from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines_unique_repeated.configuration import (
+from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines_unique_repeated import (
     CrystalLatticeLinesUniqueRepeatedConfiguration,
 )
 from .....build_components.operations.core.combinations.stack.builder import StackNComponentsBuilder

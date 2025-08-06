@@ -1,13 +1,10 @@
-# fmt: off
-from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.slab_stack_configuration import (
+from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.slab_stack_configuration import (  # noqa: E501
     SlabStackConfigurationSchema,
 )
 from mat3ra.made.material import Material
 
 from .....operations.core.combinations.stack.configuration import StackConfiguration
 from ....core.two_dimensional.vacuum.configuration import VacuumConfiguration
-
-# fmt: on
 
 
 class SlabStackConfiguration(StackConfiguration, SlabStackConfigurationSchema):

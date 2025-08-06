@@ -6,11 +6,9 @@ from mat3ra.made.tools.build.defective_structures.zero_dimensional.pair_defect.b
 from mat3ra.made.tools.build.defective_structures.zero_dimensional.pair_defect.configuration import (
     PairDefectConfiguration,
 )
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.factories import (
-    create_defect_configuration,
-)
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.substitutional.substitution_placement_method_enum import (
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect import (
     SubstitutionPlacementMethodEnum,
+    create_defect_configuration,
 )
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 from unit.fixtures.pair_defects import (
