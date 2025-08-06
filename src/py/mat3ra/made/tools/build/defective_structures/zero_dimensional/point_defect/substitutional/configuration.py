@@ -9,7 +9,9 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 from mat3ra.made.material import Material
 from ..base.configuration import PointDefectConfiguration
 from ......build_components import MaterialWithBuildMetadata
-from ......build_components.entities.auxiliary.zero_dimensional.point_defect_site.configuration import PointDefectSiteConfiguration
+from ......build_components.entities.auxiliary.zero_dimensional.point_defect_site.configuration import (
+    PointDefectSiteConfiguration,
+)
 
 
 class SubstitutionalDefectConfiguration(PointDefectConfiguration, SubstitutionalPointDefectSchema):

@@ -2,15 +2,13 @@ from typing import Callable
 
 import numpy as np
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.processed_structures.two_dimensional.passivation.enums import SurfaceTypesEnum
 
 from ...analyze.other import get_surface_atom_indices
 from ...convert.interface_parts_enum import InterfacePartsEnum
-from mat3ra.made.tools.build.processed_structures.two_dimensional.passivation.enums import SurfaceTypesEnum
 from ...modify import interface_get_part
 from ..interaction_functions import sum_of_inverse_distances_squared
-from .interface_material_calculator_parameters import (
-    InterfaceMaterialCalculatorParameters,
-)
+from .interface_material_calculator_parameters import InterfaceMaterialCalculatorParameters
 from .material_calculator import MaterialCalculator
 
 

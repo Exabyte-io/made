@@ -5,10 +5,9 @@ from mat3ra.esse.models.materials_category_components.entities.core.two_dimensio
     VacuumConfigurationSchema,
 )
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseConfigurationPydantic
+
 from ..... import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.base_builder import (
-    BaseConfigurationPydantic,
-)
 
 
 class VacuumConfiguration(VacuumConfigurationSchema, BaseConfigurationPydantic):

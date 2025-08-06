@@ -4,8 +4,8 @@ from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.
     AtomicLayersUniqueRepeatedSchema,
 )
 
-from ..crystal_lattice_planes.configuration import CrystalLatticePlanesConfiguration
 from ....auxiliary.two_dimensional.termination import Termination
+from ..crystal_lattice_planes.configuration import CrystalLatticePlanesConfiguration
 
 
 class AtomicLayersUniqueRepeatedConfiguration(CrystalLatticePlanesConfiguration, AtomicLayersUniqueRepeatedSchema):

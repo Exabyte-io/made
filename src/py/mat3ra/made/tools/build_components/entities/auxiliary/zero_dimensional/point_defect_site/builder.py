@@ -1,6 +1,6 @@
-from .configuration import PointDefectSiteConfiguration
-from ..... import BaseSingleBuilder
 from ......build_components import MaterialWithBuildMetadata
+from ..... import BaseSingleBuilder
+from .configuration import PointDefectSiteConfiguration
 
 
 class PointDefectSiteBuilder(BaseSingleBuilder):

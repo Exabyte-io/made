@@ -1,7 +1,4 @@
-from .commensurate import (
-    CommensurateLatticeInterfaceAnalyzer,
-    CommensurateLatticeMatchHolder,
-)
+from .commensurate import CommensurateLatticeInterfaceAnalyzer, CommensurateLatticeMatchHolder
 from .grain_boundary import GrainBoundaryPlanarAnalyzer, GrainBoundaryPlanarMatchHolder
 from .simple import InterfaceAnalyzer
 from .twisted_nanoribbons import TwistedNanoribbonsInterfaceAnalyzer

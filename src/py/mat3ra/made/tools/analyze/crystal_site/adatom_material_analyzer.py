@@ -1,15 +1,13 @@
 from typing import List
 
-from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import (
-    AtomSchema,
-)
+from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import AtomSchema
 
-from ..slab import SlabMaterialAnalyzer
 from ...build_components.entities.core.two_dimensional.vacuum.builder import VacuumBuilder
 from ...build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from ...build_components.entities.core.zero_dimensional.atom.builder import AtomAtCoordinateBuilder
 from ...build_components.entities.core.zero_dimensional.atom.configuration import AtomAtCoordinateConfiguration
 from ...build_components.metadata import MaterialWithBuildMetadata
+from ..slab import SlabMaterialAnalyzer
 
 
 class AdatomMaterialAnalyzer(SlabMaterialAnalyzer):

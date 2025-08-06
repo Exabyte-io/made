@@ -1,8 +1,6 @@
 from typing import List
 
-from mat3ra.made.tools.build_components.entities.reusable.base_builder import (
-    BaseBuilderParameters,
-)
+from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseBuilderParameters
 
 
 class SlabBuilderParameters(BaseBuilderParameters):

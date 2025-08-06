@@ -2,10 +2,10 @@ from typing import List, Optional, Union
 
 import numpy as np
 from mat3ra.made.material import Material
-from ....auxiliary.three_dimensional.supercell_matrix_3d import SupercellConfiguration
-from ..... import MaterialWithBuildMetadata
 
 from ......operations.core.unary import supercell
+from ..... import MaterialWithBuildMetadata
+from ....auxiliary.three_dimensional.supercell_matrix_3d import SupercellConfiguration
 
 
 def create_supercell(

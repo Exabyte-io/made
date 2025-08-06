@@ -3,15 +3,21 @@ from types import SimpleNamespace
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.interstitial.interstitial_placement_method_enum import InterstitialPlacementMethodEnum
 from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.helpers import (
     create_multiple_defects,
     create_point_defect_interstitial,
     create_point_defect_substitution,
     create_point_defect_vacancy,
 )
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.substitutional.substitution_placement_method_enum import SubstitutionPlacementMethodEnum
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.vacancy.vacancy_placement_method_enum import VacancyPlacementMethodEnum
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.interstitial.interstitial_placement_method_enum import (
+    InterstitialPlacementMethodEnum,
+)
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.substitutional.substitution_placement_method_enum import (
+    SubstitutionPlacementMethodEnum,
+)
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.vacancy.vacancy_placement_method_enum import (
+    VacancyPlacementMethodEnum,
+)
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.point_defects import (
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,

@@ -1,10 +1,10 @@
 import pytest
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.processed_structures.two_dimensional.passivation.helpers import (
-    passivate_surface,
-    get_unique_coordination_numbers,
     get_coordination_numbers_distribution,
+    get_unique_coordination_numbers,
     passivate_dangling_bonds,
+    passivate_surface,
 )
 
 from .fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON

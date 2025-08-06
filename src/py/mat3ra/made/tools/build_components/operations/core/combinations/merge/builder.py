@@ -1,15 +1,10 @@
 from typing import Any, Dict, List, Optional, Type
 
-from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import (
-    MergeMethodsEnum,
-)
-from ..... import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.base_builder import (
-    BaseSingleBuilder,
-    TypeConfiguration,
-)
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
+from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseSingleBuilder, TypeConfiguration
 
 from ......operations.core.binary import merge
+from ..... import MaterialWithBuildMetadata
 from .....entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from .build_parameters import MergeBuilderParameters
 from .configuration import MergeConfiguration

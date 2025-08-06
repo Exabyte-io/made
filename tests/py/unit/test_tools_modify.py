@@ -1,7 +1,7 @@
 from ase.build import bulk
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components.metadata import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface import get_optimal_film_displacement
+from mat3ra.made.tools.build_components.metadata import MaterialWithBuildMetadata
 from mat3ra.made.tools.calculate.calculators import InterfaceMaterialCalculator
 from mat3ra.made.tools.convert import from_ase
 from mat3ra.made.tools.convert.interface_parts_enum import InterfacePartsEnum
@@ -18,9 +18,9 @@ from mat3ra.made.tools.modify import (
     remove_vacuum,
     translate_to_z_level,
 )
+from mat3ra.made.tools.operations.core.unary import rotate
 from mat3ra.utils import assertion as assertion_utils
 
-from mat3ra.made.tools.operations.core.unary import rotate
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_CONVENTIONAL_FILTERED
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_SLAB_001_2_ATOMS, SI_SLAB_001_WITH_VACUUM

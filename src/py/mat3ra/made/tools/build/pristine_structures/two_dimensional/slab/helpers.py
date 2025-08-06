@@ -7,8 +7,12 @@ from .....build_components.entities.auxiliary.two_dimensional.termination import
 from .....build_components.entities.reusable.two_dimensional.atomic_layers.build_parameters import SlabBuilderParameters
 from .....build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
 from .....build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
-from .....build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
-from .....build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.configuration import AtomicLayersUniqueRepeatedConfiguration
+from .....build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.builder import (
+    AtomicLayersUniqueRepeatedBuilder,
+)
+from .....build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.configuration import (
+    AtomicLayersUniqueRepeatedConfiguration,
+)
 
 DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 

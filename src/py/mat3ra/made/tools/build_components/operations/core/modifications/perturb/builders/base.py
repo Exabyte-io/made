@@ -1,12 +1,13 @@
 from typing import Any, Type
 
-from ..build_parameters import PerturbationBuildParameters
-from ..configuration import PerturbationConfiguration
-from ...... import MaterialWithBuildMetadata
 from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseSingleBuilder
+
 from .......analyze.build_metadata_analyzer import TypeConfiguration
 from .......modify import translate_to_z_level, wrap_to_unit_cell
 from .......operations.core.unary import perturb
+from ...... import MaterialWithBuildMetadata
+from ..build_parameters import PerturbationBuildParameters
+from ..configuration import PerturbationConfiguration
 
 
 class PerturbationBuilder(BaseSingleBuilder):

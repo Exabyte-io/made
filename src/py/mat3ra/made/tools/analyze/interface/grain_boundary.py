@@ -8,9 +8,9 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
 from mat3ra.made.material import Material
 from pydantic import model_validator
 
+from ...build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
 from .utils.holders import MatchedSubstrateFilmConfigurationHolder
 from .zsl import ZSLInterfaceAnalyzer
-from ...build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
 
 
 class GrainBoundaryPlanarMatchHolder(InMemoryEntityPydantic):

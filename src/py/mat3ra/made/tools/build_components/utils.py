@@ -1,16 +1,14 @@
 from typing import List, Optional, Union
 
 import numpy as np
-
-from mat3ra.made.material import Material
 from mat3ra.made.lattice import Lattice
-from ..modify import wrap_to_unit_cell
-from ..operations.core.unary import edit_cell
+from mat3ra.made.material import Material
 
-from ..modify import filter_by_box
+from ..modify import filter_by_box, wrap_to_unit_cell
+from ..operations.core.unary import edit_cell
 from . import MaterialWithBuildMetadata
-from .entities.reusable.three_dimensional.supercell.helpers import create_supercell
 from .entities.auxiliary.two_dimensional.termination import Termination
+from .entities.reusable.three_dimensional.supercell.helpers import create_supercell
 
 
 def select_slab_termination(terminations: List[Termination], formula: Optional[str] = None) -> Termination:
@@ -22,6 +20,7 @@ def select_slab_termination(terminations: List[Termination], formula: Optional[s
         if termination.formula == formula:
             return termination
     raise ValueError(f"Termination with formula {formula} not found in available terminations: {terminations}")
+
 
 def get_orthogonal_c_slab(material: Union[Material, MaterialWithBuildMetadata]) -> Material:
     """

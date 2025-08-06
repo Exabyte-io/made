@@ -1,9 +1,9 @@
 from typing import Type
 
-from ..point_defect_site.builder import PointDefectSiteBuilder
-from ..void_region.configuration import VoidRegionConfiguration
 from ......build_components import MaterialWithBuildMetadata
 from ......modify import filter_by_condition_on_coordinates
+from ..point_defect_site.builder import PointDefectSiteBuilder
+from ..void_region.configuration import VoidRegionConfiguration
 
 
 class VoidRegionBuilder(PointDefectSiteBuilder):

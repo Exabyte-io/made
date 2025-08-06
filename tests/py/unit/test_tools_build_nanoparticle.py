@@ -1,9 +1,9 @@
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.pristine_structures.zero_dimensional.nanoparticle import (
-    create_nanoparticle_from_material,
     NanoparticleShapesEnum,
     create_nanoparticle_by_shape,
+    create_nanoparticle_from_material,
 )
 from mat3ra.made.tools.entities.coordinate import SphereCoordinateCondition
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE

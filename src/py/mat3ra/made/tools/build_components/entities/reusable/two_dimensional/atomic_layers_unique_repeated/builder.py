@@ -1,11 +1,10 @@
 from typing import Type
 
-from ..... import MaterialWithBuildMetadata
-
 from ......analyze import BaseMaterialAnalyzer
-from ....auxiliary.two_dimensional.miller_indices import MillerIndices
 from ......modify import wrap_to_unit_cell
 from ......operations.core.unary import supercell, translate
+from ..... import MaterialWithBuildMetadata
+from ....auxiliary.two_dimensional.miller_indices import MillerIndices
 from ..crystal_lattice_planes.builder import CrystalLatticePlanesBuilder
 from .configuration import AtomicLayersUniqueRepeatedConfiguration
 

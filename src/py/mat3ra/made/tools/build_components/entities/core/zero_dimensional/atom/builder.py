@@ -1,6 +1,6 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from ..... import MaterialWithBuildMetadata
 
+from ..... import MaterialWithBuildMetadata
 from ...two_dimensional.vacuum.builder import VacuumBuilder
 from ...two_dimensional.vacuum.configuration import VacuumConfiguration
 from .configuration import AtomAtCoordinateConfiguration

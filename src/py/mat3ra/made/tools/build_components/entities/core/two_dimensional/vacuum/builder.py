@@ -1,11 +1,11 @@
-from typing import Type, Optional, Any
+from typing import Any, Optional, Type
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
-from .configuration import VacuumConfiguration
-from ....reusable.base_builder import BaseSingleBuilder, TypeConfiguration
+
 from ..... import MaterialWithBuildMetadata
+from ....reusable.base_builder import BaseSingleBuilder, TypeConfiguration
+from .configuration import VacuumConfiguration
 
 
 class VacuumBuilder(BaseSingleBuilder):

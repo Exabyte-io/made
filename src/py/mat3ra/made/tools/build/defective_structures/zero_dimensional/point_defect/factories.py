@@ -15,7 +15,6 @@ from .vacancy.configuration import VacancyDefectConfiguration
 from .vacancy.vacancy_placement_method_enum import VacancyPlacementMethodEnum
 
 
-
 def resolve_coordinate(
     material: Union[Material, MaterialWithBuildMetadata],
     coordinate: List[float],

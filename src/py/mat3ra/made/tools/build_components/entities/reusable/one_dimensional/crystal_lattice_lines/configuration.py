@@ -1,8 +1,9 @@
 from typing import Tuple, Union
 
 from mat3ra.made.material import Material
-from ..... import MaterialWithBuildMetadata
 from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseConfigurationPydantic
+
+from ..... import MaterialWithBuildMetadata
 
 
 class CrystalLatticeLinesConfiguration(BaseConfigurationPydantic):

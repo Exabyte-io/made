@@ -1,13 +1,10 @@
 from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
-
 from mat3ra.made.material import Material
 from mat3ra.made.utils import get_atomic_coordinates_extremum
-from .analyze.other import (
-    get_atom_indices_with_condition_on_coordinates,
-    get_atom_indices_within_radius_pbc,
-)
+
+from .analyze.other import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
 from .build_components import MaterialWithBuildMetadata
 from .convert import from_ase, to_ase
 from .convert.interface_parts_enum import InterfacePartsEnum

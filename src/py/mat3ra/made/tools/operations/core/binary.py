@@ -2,9 +2,7 @@ from typing import List, Optional
 
 import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import (
-    MergeMethodsEnum,
-)
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 from mat3ra.made.material import Material
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 

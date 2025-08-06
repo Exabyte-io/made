@@ -8,7 +8,9 @@ from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional
 # fmt: on
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components.entities.auxiliary.zero_dimensional.point_defect_site.configuration import PointDefectSiteConfiguration
+from mat3ra.made.tools.build_components.entities.auxiliary.zero_dimensional.point_defect_site.configuration import (
+    PointDefectSiteConfiguration,
+)
 from mat3ra.made.tools.build_components.operations.core.combinations.merge.configuration import MergeConfiguration
 
 

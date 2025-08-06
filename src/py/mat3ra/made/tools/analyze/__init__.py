@@ -2,12 +2,10 @@ from typing import Union
 
 import numpy as np
 from mat3ra.made.material import Material
-from ..build_components.metadata.material_with_build_metadata import (
-    MaterialWithBuildMetadata,
-)
 from pydantic import BaseModel
 from scipy.spatial.distance import pdist
 
+from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
 from .other import get_chemical_formula_empirical
 from .utils import decorator_perform_operation_in_cartesian_coordinates
 

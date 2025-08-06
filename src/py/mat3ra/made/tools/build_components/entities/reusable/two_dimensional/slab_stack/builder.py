@@ -1,11 +1,11 @@
 from typing import Type
 
-from ..... import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.reusable.base_builder import TypeConfiguration
 
+from ..... import MaterialWithBuildMetadata
+from .....operations.core.combinations.stack.builder import StackNComponentsBuilder
 from ..atomic_layers.builder import SlabBuilder
 from ..atomic_layers.configuration import SlabConfiguration
-from .....operations.core.combinations.stack.builder import StackNComponentsBuilder
-from mat3ra.made.tools.build_components.entities.reusable.base_builder import TypeConfiguration
 from .configuration import SlabStackConfiguration
 
 

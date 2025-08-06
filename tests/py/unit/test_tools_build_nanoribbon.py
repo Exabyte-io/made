@@ -2,8 +2,8 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon import create_nanoribbon
 from mat3ra.made.tools.build_components.entities.reusable.one_dimensional.crystal_lattice_lines import (
-    CrystalLatticeLinesConfiguration,
     CrystalLatticeLinesBuilder,
+    CrystalLatticeLinesConfiguration,
 )
 
 from .fixtures.monolayer import GRAPHENE

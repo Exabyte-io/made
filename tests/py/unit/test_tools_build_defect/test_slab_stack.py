@@ -1,6 +1,9 @@
 import pytest
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.helpers import create_slab_stack, recreate_slab_with_fractional_layers
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.helpers import (
+    create_slab_stack,
+    recreate_slab_with_fractional_layers,
+)
 from unit.fixtures.slab import SI_CONVENTIONAL_SLAB_001, SI_SLAB_001_ADDED_FRACTIONAL_LAYER, SI_SLAB_001_ADDED_LAYER
 from unit.utils import assert_two_entities_deep_almost_equal
 

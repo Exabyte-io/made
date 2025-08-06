@@ -1,14 +1,10 @@
 from typing import Union
 
 from mat3ra.made.material import Material
-from ..... import MaterialWithBuildMetadata
 from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseConfigurationPydantic
 
-from .functions import (
-    FunctionHolder,
-    PerturbationFunctionHolder,
-    SineWavePerturbationFunctionHolder,
-)
+from ..... import MaterialWithBuildMetadata
+from .functions import FunctionHolder, PerturbationFunctionHolder, SineWavePerturbationFunctionHolder
 
 
 class PerturbationConfiguration(BaseConfigurationPydantic):
