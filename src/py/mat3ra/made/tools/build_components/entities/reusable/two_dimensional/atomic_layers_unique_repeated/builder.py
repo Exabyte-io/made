@@ -19,9 +19,10 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
 
         if configuration.termination_top is not None:
             termination = configuration.termination_top
+            should_rotate = False
         elif configuration.termination_bottom is not None:
-            crystal_lattice_planes_material = rotate(crystal_lattice_planes_material, angle=180, axis=[1, 0, 0])
             termination = configuration.termination_bottom
+            should_rotate = True
         else:
             raise ValueError(
                 "Either termination_top or termination_bottom is required for AtomicLayersUniqueRepeatedBuilder"
@@ -32,6 +33,9 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
         )
         material_translated = translate(crystal_lattice_planes_material, translation_vector)
         material_translated_wrapped = wrap_to_unit_cell(material_translated)
+        
+        if should_rotate:
+            material_translated_wrapped = rotate(material_translated_wrapped, angle=180, axis=[1, 0, 0])
         material_translated_wrapped_layered = supercell(
             material_translated_wrapped, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
         )
