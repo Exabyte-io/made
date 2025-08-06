@@ -1,10 +1,10 @@
 # Defective Structures
-from build_components.entities.reusable.two_dimensional.slab_stack.helpers import create_slab_stack
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab, get_slab_terminations
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.termination_utils import select_slab_termination
 
 # Compound Pristine Structures
 from .build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
+    create_interface_simple,
     create_interface_simple_between_slabs,
 )
 from .build.compound_pristine_structures.two_dimensional.interface.commensurate.helpers import (
@@ -47,6 +47,7 @@ from .build_components.entities.reusable.three_dimensional.supercell.helpers imp
 from .build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.helpers import (
     create_atomic_layers,
 )
+from .build_components.entities.reusable.two_dimensional.slab_stack import create_slab_stack
 from .build_components.operations.core.modifications.perturb.helpers import create_perturbation
 
 __all__ = [
@@ -75,6 +76,7 @@ __all__ = [
     "create_pair_defect",
     "create_slab_stack",
     # Interface Functions
+    "create_interface_simple",
     "create_interface_simple_between_slabs",
     "create_interface_zsl",
     "create_interface_zsl_between_slabs",

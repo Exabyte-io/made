@@ -13,10 +13,6 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.configuration import (
     InterfaceConfiguration,
 )
-from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
-    create_interface_simple,
-    create_interface_simple_between_slabs,
-)
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.commensurate.helpers import (
     create_interface_commensurate,
 )
@@ -26,6 +22,7 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon.helpers import create_nanoribbon
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
+from mat3ra.made.tools.helpers import create_interface_simple, create_interface_simple_between_slabs
 from mat3ra.standata.materials import Materials
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
