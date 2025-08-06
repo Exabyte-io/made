@@ -7,7 +7,7 @@ from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab_strained_supercell.builder import (
     SlabStrainedSupercellBuilder,
 )
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import (
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import (
     SlabConfiguration,
 )
 from mat3ra.made.tools.utils import supercell_matrix_2d_schema_to_list, unwrap

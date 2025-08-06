@@ -2,8 +2,8 @@ from typing import Optional, Any, Union, Tuple
 
 from mat3ra.made.material import Material
 from .....build_components import MaterialWithBuildMetadata, TypeConfiguration
-from .....build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from .....build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 from .....modify import translate_to_z_level, filter_by_box
 from .configurations import MonolayerConfiguration
 

@@ -12,7 +12,7 @@ from mat3ra.utils.matrix import convert_2x2_to_3x3
 from pymatgen.analysis.interfaces.coherent_interfaces import ZSLGenerator as PymatgenZSLGenerator
 
 from ...build_components import MaterialWithBuildMetadata
-from ...build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
 from ..interface.simple import InterfaceAnalyzer
 from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 from ..utils import calculate_von_mises_strain

@@ -5,7 +5,7 @@ from .builder import TerraceDefectBuilder
 from .configuration import TerraceDefectConfiguration
 from .....analyze.terrace import TerraceMaterialAnalyzer
 from .....build_components import MaterialWithBuildMetadata
-from .....build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
 from .....build_components.entities.reusable.two_dimensional.slab_stack.helpers import (
     recreate_slab_with_fractional_layers,
 )

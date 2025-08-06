@@ -12,8 +12,13 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.utils.vector import align_first_vector_to_x_2d_right_handed
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab, get_slab_terminations
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.termination_utils import select_slab_termination
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import (
+    create_slab,
+    get_slab_terminations,
+)
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.termination_utils import (
+    select_slab_termination,
+)
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab_strained_supercell.builder import (
     SlabStrainedSupercellBuilder,
 )
@@ -21,17 +26,15 @@ from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab_strained_s
     SlabStrainedSupercellConfiguration,
 )
 from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.build_parameters import (
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import (
     SlabBuilderParameters,
 )
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import (
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import (
     SlabConfiguration,
 )
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated import (
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional import (
     AtomicLayersUniqueRepeatedConfiguration,
-)
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.builder import (
     AtomicLayersUniqueRepeatedBuilder,
 )
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP, adjust_material_cell_to_set_gap_along_direction

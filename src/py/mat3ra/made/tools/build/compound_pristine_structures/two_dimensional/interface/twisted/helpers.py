@@ -8,7 +8,7 @@ from .. import InterfaceBuilder, InterfaceConfiguration
 from ......analyze.interface import TwistedNanoribbonsInterfaceAnalyzer
 from ......analyze.lattice import get_material_with_conventional_lattice
 from ......build_components import MaterialWithBuildMetadata
-from ......build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 
 
 def create_twisted_interface(

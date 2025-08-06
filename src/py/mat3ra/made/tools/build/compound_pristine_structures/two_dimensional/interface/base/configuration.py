@@ -23,6 +23,10 @@ class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):
         ]
     ]
     xy_shift: List[float] = InterfaceConfigurationSchema.model_fields["xy_shift"].default  # in Angstroms
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
     type: str = "InterfaceConfiguration"
 
     @property

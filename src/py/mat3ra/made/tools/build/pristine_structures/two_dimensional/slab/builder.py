@@ -1,13 +1,16 @@
 from typing import Type, cast
 
-from ......operations.core.unary import supercell
-from ..... import MaterialWithBuildMetadata
-from .....operations.core.combinations.stack.builder import StackNComponentsBuilder
-from .....utils import get_orthogonal_c_slab
-from ..atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
-from ..atomic_layers_unique_repeated.configuration import AtomicLayersUniqueRepeatedConfiguration
 from .build_parameters import SlabBuilderParameters
 from .configuration import SlabConfiguration
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.reusable.two_dimensional import (
+    AtomicLayersUniqueRepeatedConfiguration,
+    AtomicLayersUniqueRepeatedBuilder,
+)
+
+from .....build_components.operations.core.combinations.stack.builder import StackNComponentsBuilder
+from .....build_components.utils import get_orthogonal_c_slab
+from .....operations.core.unary import supercell
 
 
 class SlabBuilder(StackNComponentsBuilder):

@@ -4,8 +4,7 @@ from mat3ra.made.tools.build_components.entities.reusable.base_builder import Ty
 
 from ..... import MaterialWithBuildMetadata
 from .....operations.core.combinations.stack.builder import StackNComponentsBuilder
-from ..atomic_layers.builder import SlabBuilder
-from ..atomic_layers.configuration import SlabConfiguration
+from ......build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 from .configuration import SlabStackConfiguration
 
 
@@ -14,6 +13,7 @@ class SlabStackBuilder(StackNComponentsBuilder):
 
     @property
     def stack_component_types_conversion_map(self):
+        from ......build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
         return {
             **super().stack_component_types_conversion_map,
             SlabConfiguration: SlabBuilder,

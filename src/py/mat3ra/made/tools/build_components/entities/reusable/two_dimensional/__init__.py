@@ -1,4 +1,3 @@
-from .atomic_layers import SlabBuilder, SlabBuilderParameters, SlabConfiguration
 from .atomic_layers_unique_repeated import AtomicLayersUniqueRepeatedBuilder, AtomicLayersUniqueRepeatedConfiguration
 from .crystal_lattice_planes import CrystalLatticePlanesBuilder, CrystalLatticePlanesConfiguration
 from .slab_stack import (
@@ -10,9 +9,6 @@ from .slab_stack import (
 
 __all__ = [
     # atomic_layers
-    "SlabBuilder",
-    "SlabBuilderParameters",
-    "SlabConfiguration",
     # atomic_layers_unique_repeated
     "AtomicLayersUniqueRepeatedBuilder",
     "AtomicLayersUniqueRepeatedConfiguration",

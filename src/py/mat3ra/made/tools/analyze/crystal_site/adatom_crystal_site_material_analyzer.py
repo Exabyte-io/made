@@ -2,7 +2,7 @@ from typing import List
 
 from mat3ra.made.material import Material
 
-from ...build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
 from ...build_components.entities.reusable.two_dimensional.slab_stack.helpers import (
     recreate_slab_with_fractional_layers,
 )

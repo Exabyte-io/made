@@ -11,8 +11,8 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
     create_zsl_interface_between_slabs,
 )
 from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import (
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import (
     SlabConfiguration,
 )
 from mat3ra.standata.materials import Materials

@@ -1,8 +1,8 @@
 from typing import Type
 
 from .configuration import SlabStrainedSupercellConfiguration
+from ..slab import SlabBuilder
 from .....build_components import MaterialWithBuildMetadata
-from .....build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
 from .....operations.core.unary import strain, supercell
 
 

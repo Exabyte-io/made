@@ -24,8 +24,8 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
 )
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon.helpers import create_nanoribbon
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import (
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import (
     SlabConfiguration,
 )
 from mat3ra.standata.materials import Materials

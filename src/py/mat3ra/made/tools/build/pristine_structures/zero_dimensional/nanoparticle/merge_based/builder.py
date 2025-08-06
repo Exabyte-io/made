@@ -7,8 +7,8 @@ from ......analyze import get_chemical_formula_empirical
 from ......build_components import MaterialWithBuildMetadata
 from ......build_components.entities.auxiliary.zero_dimensional.void_region.builder import VoidRegionBuilder
 from ......build_components.entities.auxiliary.zero_dimensional.void_region.configuration import VoidRegionConfiguration
-from ......build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from ......build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 from ......build_components.operations.core.combinations.merge import MergeBuilder
 
 
