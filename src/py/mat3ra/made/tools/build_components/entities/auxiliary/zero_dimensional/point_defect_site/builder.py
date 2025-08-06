@@ -11,6 +11,9 @@ class PointDefectSiteBuilder(BaseSingleBuilder):
     _ConfigurationType = PointDefectSiteConfiguration
 
     def _generate(self, configuration: PointDefectSiteConfiguration) -> MaterialWithBuildMetadata:
+        if configuration.crystal is None:
+            raise ValueError("Crystal configuration is required for PointDefectSiteBuilder")
+
         new_material = MaterialWithBuildMetadata.create(
             {
                 "name": configuration.crystal.name,
