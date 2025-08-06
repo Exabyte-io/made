@@ -14,7 +14,7 @@ from .....build_components.operations.core.combinations.stack.configuration impo
 from .....build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 
 
-class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
+class SlabConfiguration(StackConfiguration, SlabConfigurationSchema):
     type: str = "SlabConfiguration"
     stack_components: List[Union[AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]]  # No Materials!
     direction: AxisEnum = AxisEnum.z
