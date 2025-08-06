@@ -18,7 +18,7 @@ class TerraceDefectBuilder(SlabStackBuilder):
 
     def _generate(self, configuration: TerraceDefectConfiguration) -> MaterialWithBuildMetadata:
         material = super()._generate(configuration)
-        build_params = self._build_parameters
+        build_params = self._build_parameters if self._build_parameters else self._DefaultBuildParameters
         if self.build_params.rotate_to_match_pbc:
             axis = build_params.axis
             angle = build_params.angle

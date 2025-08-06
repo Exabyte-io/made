@@ -2,7 +2,6 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from sympy import ceiling
 
 from ......analyze.slab import SlabMaterialAnalyzer
-from ......build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from ......modify import filter_by_box
 from ..... import MaterialWithBuildMetadata
 from ....core.two_dimensional.vacuum.configuration import VacuumConfiguration
@@ -58,6 +57,8 @@ def recreate_slab_with_fractional_layers(
     analyzer = SlabMaterialAnalyzer(material=slab)
     slab_without_vacuum = analyzer.slab_configuration_with_no_vacuum
     build_parameters = analyzer.build_parameters
+
+    from ......build.pristine_structures.two_dimensional.slab.helpers import create_slab
 
     ceiling_number_of_layers = int(ceiling(number_of_layers))
     slab_with_int_layers_without_vacuum = create_slab(
