@@ -1,10 +1,10 @@
 from typing import Type, Union
 
 from mat3ra.made.material import Material
-from ...build_components import MaterialWithBuildMetadata
-from ..point.base.builder import PointDefectBuilder
-from ..point.vacancy.builder import VacancyDefectBuilder
 from .configuration import PairDefectConfiguration
+from ..point_defect.base.builder import PointDefectBuilder
+from ..point_defect.vacancy.builder import VacancyDefectBuilder
+from .....build_components import MaterialWithBuildMetadata, TypeConfiguration
 
 
 class PairDefectBuilder(VacancyDefectBuilder, PointDefectBuilder):

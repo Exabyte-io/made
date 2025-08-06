@@ -2,8 +2,8 @@ from typing import List, Union
 
 import numpy as np
 
-from ...analyze import BaseMaterialAnalyzer
-from ...entities.coordinate import SphereCoordinateCondition, CoordinateCondition
+from .....analyze import BaseMaterialAnalyzer
+from .....entities.coordinate import SphereCoordinateCondition, CoordinateCondition
 
 
 class NanoparticleMaterialAnalyzer(BaseMaterialAnalyzer):

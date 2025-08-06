@@ -1,18 +1,15 @@
-from inspect import stack
 from typing import Any, Optional, Type
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
+from .....entities.reusable.base_builder import BaseSingleBuilder, TypeConfiguration
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction
 from .configuration import StackConfiguration
 from .....entities.core.two_dimensional.vacuum.builder import VacuumBuilder
 from .....entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from ......build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.base_builder import (
-    BaseSingleBuilder,
-    TypeConfiguration,
-)
+from ......operations.core.binary import stack
 
 
 class StackNComponentsBuilder(BaseSingleBuilder):

@@ -1,12 +1,11 @@
+from typing import Union, List
+
 from mat3ra.made.material import Material
-from ...analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
-from .build.defective_structures.zero_dimensional.point_defect.substitutional.builder import \
-    SubstitutionalDefectBuilder
-from .build.defective_structures.zero_dimensional.point_defect.substitutional.configuration import \
-    SubstitutionalDefectConfiguration
-from .build.defective_structures.zero_dimensional.point_defect.substitutional.substitution_placement_method_enum import \
-    SubstitutionPlacementMethodEnum
-from ...build_components import MaterialWithBuildMetadata
+from .builder import SubstitutionalDefectBuilder
+from .configuration import SubstitutionalDefectConfiguration
+from .substitution_placement_method_enum import SubstitutionPlacementMethodEnum
+from ......analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from ......build_components import MaterialWithBuildMetadata
 
 
 def create_point_defect_substitution(

@@ -1,19 +1,20 @@
 from typing import List, Union
+
 # fmt: off
 from mat3ra.esse.models.materials_category.defective_structures.zero_dimensional. \
     point_defect.base_configuration import (
     PointDefectBaseConfigurationSchema,
 )
-from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 # fmt: on
+from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from mat3ra.made.material import Material
-from ...build_components import MaterialWithBuildMetadata
-from ..point.intersitital.configuration import (
+from ..point_defect.base.configuration import PointDefectConfiguration
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.auxiliary.zero_dimensional.point_defect_site.configuration import (
     PointDefectSiteConfiguration,
-    PointDefectConfiguration,
 )
-from ...merge.configuration import MergeConfiguration
+from .....build_components.operations.core.combinations.merge.configuration import MergeConfiguration
 
 
 class PairDefectConfiguration(MergeConfiguration, PointDefectBaseConfigurationSchema):

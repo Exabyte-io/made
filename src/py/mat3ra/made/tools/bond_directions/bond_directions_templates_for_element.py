@@ -1,8 +1,9 @@
 from typing import List
 
 import numpy as np
-from ..bond_directions import BondDirections
 from pydantic import BaseModel, ConfigDict
+
+from .bond_directions import BondDirections
 
 
 class BondDirectionsTemplatesForElement(BaseModel):

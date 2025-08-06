@@ -1,10 +1,9 @@
 import numpy as np
 
-from ...analyze.other import get_surface_atom_indices
-from .enums import SurfaceTypesEnum
+from ......analyze.other import get_surface_atom_indices
+from ..enums import SurfaceTypesEnum
 
 from .passivation_material_analyzer import PassivationMaterialAnalyzer
-
 
 
 class SurfacePassivationMaterialAnalyzer(PassivationMaterialAnalyzer):

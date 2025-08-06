@@ -2,13 +2,11 @@ from typing import List
 
 import numpy as np
 
-from ...analyze.material import MaterialWithCrystalSites
-from .bond_directions.bond_directions import BondDirections
-from .bond_directions.bond_directions_templates_for_element import BondDirectionsTemplatesForElement
+from ......analyze.material import MaterialWithCrystalSites
+from ......bond_directions.bond_directions import BondDirections
+from ......bond_directions.bond_directions_templates_for_element import BondDirectionsTemplatesForElement
 
 from .surface_passivation_material_analyzer import SurfacePassivationMaterialAnalyzer
-
-
 
 
 class CoordinationBasedPassivationMaterialAnalyzer(SurfacePassivationMaterialAnalyzer):

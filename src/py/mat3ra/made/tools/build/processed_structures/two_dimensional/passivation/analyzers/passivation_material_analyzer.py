@@ -1,7 +1,7 @@
 from typing import List
 
-from ...analyze.slab import SlabMaterialAnalyzer
-from .enums import SurfaceTypesEnum
+from ......analyze.slab import SlabMaterialAnalyzer
+from ..enums import SurfaceTypesEnum
 
 
 class PassivationMaterialAnalyzer(SlabMaterialAnalyzer):

@@ -1,14 +1,11 @@
 from typing import Callable, Dict
 
-from ...analyze import get_chemical_formula_empirical
-from ...build_components import MaterialWithBuildMetadata
-from ...build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import \
-    BaseSingleBuilder
-from ...build_components.mixins import ConvertGeneratedItemsASEAtomsMixin
-
 from .configuration import ASEBasedNanoparticleConfiguration
 from ..enums import NanoparticleShapesEnum
-
+from ......analyze import get_chemical_formula_empirical
+from ......build_components import MaterialWithBuildMetadata, BaseSingleBuilder
+from ......build_components.mixins import ConvertGeneratedItemsASEAtomsMixin
+from ......third_party import ASEAtoms
 
 
 class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseSingleBuilder):

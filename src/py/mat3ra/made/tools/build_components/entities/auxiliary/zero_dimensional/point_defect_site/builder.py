@@ -1,9 +1,6 @@
-from .....build_components import MaterialWithBuildMetadata
-from .....build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
-    BaseSingleBuilder,
-)
-
 from .configuration import PointDefectSiteConfiguration
+from ..... import BaseSingleBuilder
+from ......build_components import MaterialWithBuildMetadata
 
 
 class PointDefectSiteBuilder(BaseSingleBuilder):

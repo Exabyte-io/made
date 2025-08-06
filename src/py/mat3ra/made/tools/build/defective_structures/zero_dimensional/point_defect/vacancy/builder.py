@@ -1,8 +1,8 @@
 from typing import Optional, Any
 
-from ...build_components import MaterialWithBuildMetadata
-from ..base.builder import PointDefectBuilder
 from .configuration import VacancyDefectConfiguration
+from ..base.builder import PointDefectBuilder
+from ......build_components import MaterialWithBuildMetadata, TypeConfiguration
 
 
 class VacancyDefectBuilder(PointDefectBuilder):

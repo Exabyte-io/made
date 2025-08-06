@@ -1,18 +1,21 @@
 from types import SimpleNamespace
-from typing import Union, List
+from typing import Union
 
 from mat3ra.made.material import Material
-from ...analyze.other import get_closest_site_id_from_coordinate
-from .build.defective_structures.two_dimensional.island.helpers import CoordinateConditionType
-from .build.pristine_structures.two_dimensional.slab.helpers import create_slab
-from .build.pristine_structures.zero_dimensional.nanoparticle import ASEBasedNanoparticleBuilder, \
-    ASEBasedNanoparticleConfiguration, NanoparticleShapesEnum, NanoparticleBuilder, NanoparticleConfiguration
-from .build.pristine_structures.zero_dimensional.nanoparticle.analyzer import \
-    NanoparticleMaterialAnalyzer
-from ...build_components import MaterialWithBuildMetadata
-from ...build_components.entities.auxiliary.zero_dimensional.void_region.configuration import \
-    VoidRegionConfiguration
-from ...entities.coordinate import SphereCoordinateCondition
+from . import (
+    NanoparticleConfiguration,
+    NanoparticleBuilder,
+    NanoparticleShapesEnum,
+    ASEBasedNanoparticleConfiguration,
+    ASEBasedNanoparticleBuilder,
+)
+from .analyzer import NanoparticleMaterialAnalyzer
+from ...two_dimensional.slab.helpers import create_slab
+from ....defective_structures.two_dimensional.island.helpers import CoordinateConditionType
+from .....analyze.other import get_closest_site_id_from_coordinate
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.auxiliary.zero_dimensional.void_region.configuration import VoidRegionConfiguration
+from .....entities.coordinate import SphereCoordinateCondition
 
 
 def create_nanoparticle_from_material(
@@ -21,7 +24,7 @@ def create_nanoparticle_from_material(
         SphereCoordinateCondition,
         CoordinateConditionType,
     ] = SphereCoordinateCondition(),
-    orientation_z: List[int] = [0, 0, 1],
+    orientation_z=None,
     center_around_atom: bool = True,
     use_cartesian_coordinates: bool = True,
     vacuum_padding: float = 10.0,
@@ -41,6 +44,8 @@ def create_nanoparticle_from_material(
         MaterialWithBuildMetadata: The nanoparticle material with build metadata.
     """
 
+    if orientation_z is None:
+        orientation_z = [0, 0, 1]
     analyzer = NanoparticleMaterialAnalyzer(
         material=material,
         orientation_z=orientation_z,
