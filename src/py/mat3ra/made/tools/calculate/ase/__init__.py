@@ -5,7 +5,13 @@ from mat3ra.made.material import Material
 
 from ...convert import from_ase
 from ...convert.interface_parts_enum import INTERFACE_LABELS_MAP, InterfacePartsEnum
-from ...third_party import ASEAtoms, ASECalculator, ASEFixAtoms, ASEFixedPlane, ase_all_changes
+from ...third_party import (
+    ASEAtoms,
+    ASECalculator,
+    ASEFixAtoms,
+    ASEFixedPlane,
+    ase_all_changes,
+)
 from ..calculators import InterfaceMaterialCalculator, MaterialCalculator
 from .constraints import RigidFilmXYInterfaceConstraint
 

@@ -1,10 +1,10 @@
 from typing import Type
 
 from mat3ra.made.material import Material
+
 from ....analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 from ....modify import wrap_to_unit_cell
 from ....operations.core.unary import supercell, translate
-
 from ..base.builder import CrystalLatticeLinesBuilder
 from .configuration import CrystalLatticeLinesUniqueRepeatedConfiguration
 

@@ -2,19 +2,20 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.utils import get_atomic_coordinates_extremum
-
-from .analyze.other import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
-from .build.metadata import MaterialWithBuildMetadata
-from .convert import from_ase, to_ase
-from .convert.interface_parts_enum import InterfacePartsEnum
-from .entities.coordinate import (
+from mat3ra.made.tools.analyze.other import (
+    get_atom_indices_with_condition_on_coordinates,
+    get_atom_indices_within_radius_pbc,
+)
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.convert import from_ase, to_ase
+from mat3ra.made.tools.convert.interface_parts_enum import InterfacePartsEnum
+from mat3ra.made.tools.entities.coordinate import (
     is_coordinate_in_box,
     is_coordinate_in_cylinder,
     is_coordinate_in_triangular_prism,
     is_coordinate_within_layer,
 )
-from .third_party import ase_add_vacuum
+from mat3ra.made.utils import get_atomic_coordinates_extremum
 
 
 def filter_by_label(material: Material, label: Union[int, str]) -> Material:

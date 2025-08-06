@@ -4,7 +4,7 @@ from ...material import Material
 from ..analyze.other import get_surface_area
 from ..build.interface import InterfaceConfiguration
 from ..build.interface.utils import get_slab
-from ..build.metadata import MaterialBuildMetadata, MaterialWithBuildMetadata
+from ..build_components import MaterialBuildMetadata, MaterialWithBuildMetadata
 from ..convert import decorator_convert_material_args_kwargs_to_atoms
 from ..third_party import ASEAtoms, ASECalculator, ASECalculatorEMT
 from .calculators import InterfaceMaterialCalculatorParameters

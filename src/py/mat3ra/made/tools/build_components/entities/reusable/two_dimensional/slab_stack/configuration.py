@@ -1,12 +1,13 @@
 # fmt: off
-from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.\
-    slab_stack_configuration import    SlabStackConfigurationSchema
-
-# fmt: on
-
+from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.slab_stack_configuration import (
+    SlabStackConfigurationSchema,
+)
 from mat3ra.made.material import Material
+
 from ...stack.configuration import StackConfiguration
 from ...vacuum.configuration import VacuumConfiguration
+
+# fmt: on
 
 
 class SlabStackConfiguration(StackConfiguration, SlabStackConfigurationSchema):

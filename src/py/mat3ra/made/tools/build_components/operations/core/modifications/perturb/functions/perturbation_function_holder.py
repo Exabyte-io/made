@@ -1,10 +1,11 @@
 from typing import List
 
 import numpy as np
-from .function_holder import FunctionHolder
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 from scipy.integrate import quad
 from scipy.optimize import root_scalar
+
+from .function_holder import FunctionHolder
 
 EQUATION_RANGE_COEFFICIENT = 5
 

@@ -1,9 +1,9 @@
 from typing import Union
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
 from .builder import MonolayerBuilder
 from .configurations import MonolayerConfiguration
-from .. import MaterialWithBuildMetadata
 
 
 def create_monolayer(

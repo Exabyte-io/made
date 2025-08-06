@@ -1,4 +1,4 @@
-from ..build import MaterialWithBuildMetadata
+from ..build_components.metadata import MaterialWithBuildMetadata
 from ..convert import from_pymatgen, to_pymatgen
 from ..third_party import PymatgenSpacegroupAnalyzer
 from . import BaseMaterialAnalyzer

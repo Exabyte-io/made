@@ -2,8 +2,9 @@ import numpy as np
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.three_dimensional.supercell_matrix_3d import (
     SupercellMatrix3DSchema,
 )
-
-from .. import BaseConfigurationPydantic
+from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_configuration_pydantic import (
+    BaseConfigurationPydantic,
+)
 
 
 class SupercellConfiguration(BaseConfigurationPydantic):

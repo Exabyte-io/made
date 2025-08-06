@@ -1,17 +1,16 @@
 from typing import List, Optional, Tuple, Union
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import SlabConfigurationSchema
-
+from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.slab import (
+    SlabConfigurationSchema,
+)
 from mat3ra.made.material import Material
-from ....analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from ... import MaterialWithBuildMetadata
+from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+from mat3ra.made.tools.build_components.metadata import MaterialWithBuildMetadata
+
 from ..atomic_layers_unique_repeated.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
 )
-from ..termination_utils import select_slab_termination
-from ...stack.configuration import StackConfiguration
-from ...vacuum.configuration import VacuumConfiguration
 
 
 class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):

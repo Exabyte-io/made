@@ -8,12 +8,12 @@ from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.
     GrainBoundaryPlanarConfigurationSchema,
 )
 
-from ....compound_pristine_structures.two_dimensional.interface import InterfaceConfiguration
-# fmt: on
-
-from ..slab.slab.configuration import SlabConfiguration
-from ..slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
-from ..vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface import InterfaceConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab_strained_supercell.configuration import \
+    SlabStrainedSupercellConfiguration
+from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
+    SlabConfiguration
 
 
 class GrainBoundaryPlanarConfiguration(InterfaceConfiguration, GrainBoundaryPlanarConfigurationSchema):

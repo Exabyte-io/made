@@ -1,3 +1,14 @@
+from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.substitutional.builder import \
+    SubstitutionalDefectBuilder
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.substitutional.configuration import \
+    SubstitutionalDefectConfiguration
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.substitutional.substitution_placement_method_enum import \
+    SubstitutionPlacementMethodEnum
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+
+
 def create_point_defect_substitution(
     material: Union[Material, MaterialWithBuildMetadata],
     coordinate: List[float],

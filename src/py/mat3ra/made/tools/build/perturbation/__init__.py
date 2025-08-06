@@ -7,6 +7,6 @@ from ...build_components.operations.core.modifications.perturb.functions import 
 
 __all__ = [
     "FunctionHolder",
-    "PerturbationFunctionHolder", 
+    "PerturbationFunctionHolder",
     "SineWavePerturbationFunctionHolder",
 ]

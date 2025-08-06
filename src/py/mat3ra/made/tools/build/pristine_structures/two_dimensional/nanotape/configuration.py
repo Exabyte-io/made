@@ -5,9 +5,10 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.n
     NanoTapeConfigurationSchema,
 )
 
-from ..lattice_lines import CrystalLatticeLinesUniqueRepeatedConfiguration
-from ..stack.configuration import StackConfiguration
-from ..vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.build_components.operations.core.combinations.stack.configuration import StackConfiguration
+from mat3ra.made.tools.build_components.operations.core.modifications.repeat import \
+    CrystalLatticeLinesUniqueRepeatedConfiguration
 
 
 class NanoTapeConfiguration(NanoTapeConfigurationSchema, StackConfiguration):

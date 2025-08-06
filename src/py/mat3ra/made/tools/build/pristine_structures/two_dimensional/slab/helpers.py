@@ -1,15 +1,18 @@
 from typing import List, Tuple, Union, Optional
 
 from mat3ra.made.material import Material
-from ...entities import Termination
-from .atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
-from .atomic_layers_unique_repeated.configuration import AtomicLayersUniqueRepeatedConfiguration
-from .slab.builder import SlabBuilder
-from .slab.build_parameters import SlabBuilderParameters
-from .slab.configuration import SlabConfiguration
-
-from ..metadata import MaterialWithBuildMetadata
-from ...analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.auxiliary.two_dimensional.termination import Termination
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.build_parameters import \
+    SlabBuilderParameters
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
+    SlabConfiguration
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.builder import \
+    AtomicLayersUniqueRepeatedBuilder
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.configuration import \
+    AtomicLayersUniqueRepeatedConfiguration
 
 DEFAULT_XY_SUPERCELL_MATRIX = ([1, 0], [0, 1])
 

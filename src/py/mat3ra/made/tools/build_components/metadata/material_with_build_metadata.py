@@ -1,6 +1,5 @@
-from pydantic import Field
-
 from mat3ra.made.material import Material
+from pydantic import Field
 
 from .material_build_metadata import MaterialBuildMetadata
 

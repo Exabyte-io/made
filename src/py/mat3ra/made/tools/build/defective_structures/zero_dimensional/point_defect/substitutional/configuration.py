@@ -7,9 +7,11 @@ from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensi
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from mat3ra.made.material import Material
-from .... import MaterialWithBuildMetadata
-from ..base.configuration import PointDefectConfiguration
-from ..defect_site.configuration import PointDefectSiteConfiguration
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.base.configuration import \
+    PointDefectConfiguration
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.auxiliary.zero_dimensional.point_defect_site.configuration import \
+    PointDefectSiteConfiguration
 
 
 class SubstitutionalDefectConfiguration(PointDefectConfiguration, SubstitutionalPointDefectSchema):

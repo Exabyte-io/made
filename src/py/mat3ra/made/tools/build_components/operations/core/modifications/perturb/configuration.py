@@ -1,8 +1,16 @@
 from typing import Union
 
 from mat3ra.made.material import Material
-from .. import BaseConfigurationPydantic, MaterialWithBuildMetadata
-from .functions import FunctionHolder, SineWavePerturbationFunctionHolder, PerturbationFunctionHolder
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_configuration_pydantic import (
+    BaseConfigurationPydantic,
+)
+
+from .functions import (
+    FunctionHolder,
+    PerturbationFunctionHolder,
+    SineWavePerturbationFunctionHolder,
+)
 
 
 class PerturbationConfiguration(BaseConfigurationPydantic):

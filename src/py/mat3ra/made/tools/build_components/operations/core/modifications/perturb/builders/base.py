@@ -1,10 +1,14 @@
 from typing import Any, Type
 
-from ... import MaterialWithBuildMetadata, BaseSingleBuilder, TypeConfiguration
-from ..configuration import PerturbationConfiguration
-from ..build_parameters import PerturbationBuildParameters
-from ....modify import wrap_to_unit_cell, translate_to_z_level
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
+    BaseSingleBuilder,
+)
+
+from ....modify import translate_to_z_level, wrap_to_unit_cell
 from ....operations.core.unary import perturb
+from ..build_parameters import PerturbationBuildParameters
+from ..configuration import PerturbationConfiguration
 
 
 class PerturbationBuilder(BaseSingleBuilder):

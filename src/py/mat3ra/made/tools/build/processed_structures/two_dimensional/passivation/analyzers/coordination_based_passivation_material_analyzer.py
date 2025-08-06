@@ -2,9 +2,13 @@ from typing import List
 
 import numpy as np
 
+from mat3ra.made.tools.analyze.material import MaterialWithCrystalSites
+from mat3ra.made.tools.bond_directions.bond_directions import BondDirections
+from mat3ra.made.tools.bond_directions.bond_directions_templates_for_element import BondDirectionsTemplatesForElement
+
 from .surface_passivation_material_analyzer import SurfacePassivationMaterialAnalyzer
-from .... import BondDirectionsTemplatesForElement, BondDirections
-from ....analyze.material import MaterialWithCrystalSites
+
+
 
 
 class CoordinationBasedPassivationMaterialAnalyzer(SurfacePassivationMaterialAnalyzer):

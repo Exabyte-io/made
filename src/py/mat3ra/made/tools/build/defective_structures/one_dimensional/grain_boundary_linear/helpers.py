@@ -4,16 +4,15 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.materials_category.defective_structures import MaterialWithBuildMetadata
-from mat3ra.made.tools.materials_category.defective_structures.common import (
-    GrainBoundaryPlanarConfiguration,
-    GrainBoundaryPlanarBuilder,
-)
+from mat3ra.made.tools.analyze.lattice import get_material_with_conventional_lattice
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface import \
+    get_commensurate_strained_configurations
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+
+# MaterialWithBuildMetadata and GrainBoundaryPlanar imports removed - use PyCharm auto-import
 from .linear_builder import GrainBoundaryLinearBuilder
 from .linear_configuration import GrainBoundaryLinearConfiguration
-from ..interface import get_commensurate_strained_configurations
-from ...analyze.interface.grain_boundary import GrainBoundaryPlanarAnalyzer
-from ...analyze.lattice import get_material_with_conventional_lattice
+
 
 
 def create_grain_boundary_linear(

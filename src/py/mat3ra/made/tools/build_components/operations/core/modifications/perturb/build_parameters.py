@@ -1,4 +1,6 @@
-from .. import BaseBuilderParameters
+from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.build_parameters import (
+    BaseBuilderParameters,
+)
 
 
 class PerturbationBuildParameters(BaseBuilderParameters):

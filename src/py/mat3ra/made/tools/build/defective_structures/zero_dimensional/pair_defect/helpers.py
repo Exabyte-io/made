@@ -1,6 +1,7 @@
 from typing import List, Optional, Union
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
 from .builder import PairDefectBuilder
 from .configuration import PairDefectConfiguration
 from ..point_defect_type_enum import PointDefectTypeEnum
@@ -9,7 +10,6 @@ from ..substitution_placement_method_enum import SubstitutionPlacementMethodEnum
 from ..interstitial_placement_method_enum import InterstitialPlacementMethodEnum
 from ..atom_placement_method_enum import AtomPlacementMethodEnum
 from ..factories import create_defect_configuration
-from ... import MaterialWithBuildMetadata
 
 
 def create_pair_defect(

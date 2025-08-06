@@ -1,8 +1,8 @@
 from typing import List, Optional
 
+from mat3ra.made.metadata import BaseMetadata
 from pydantic import Field
 
-from mat3ra.made.metadata import BaseMetadata
 from .build_metadata import BuildMetadata
 
 

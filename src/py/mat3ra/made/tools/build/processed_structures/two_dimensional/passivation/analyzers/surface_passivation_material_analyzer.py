@@ -1,8 +1,10 @@
 import numpy as np
 
+from mat3ra.made.tools.analyze.other import get_surface_atom_indices
+from mat3ra.made.tools.enums import SurfaceTypesEnum
+
 from .passivation_material_analyzer import PassivationMaterialAnalyzer
-from ....analyze.other import get_surface_atom_indices
-from ....enums import SurfaceTypesEnum
+
 
 
 class SurfacePassivationMaterialAnalyzer(PassivationMaterialAnalyzer):

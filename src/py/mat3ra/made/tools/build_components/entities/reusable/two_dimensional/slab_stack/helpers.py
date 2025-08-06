@@ -1,14 +1,23 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from sympy import ceiling
-
-from .builder import SlabStackBuilder
-from .configuration import SlabStackConfiguration
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from ...slab.slab.builder import SlabBuilder
-from ...slab.helpers import create_slab
-from ...vacuum.configuration import VacuumConfiguration
 from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import (
+    create_slab,
+)
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import (
+    VacuumConfiguration,
+)
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import (
+    SlabBuilder,
+)
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.builder import (
+    SlabStackBuilder,
+)
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.configuration import (
+    SlabStackConfiguration,
+)
 from mat3ra.made.tools.modify import filter_by_box
+from sympy import ceiling
 
 
 def create_slab_stack(

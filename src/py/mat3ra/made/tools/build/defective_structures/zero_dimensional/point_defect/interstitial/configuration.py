@@ -7,7 +7,7 @@ from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensi
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from mat3ra.made.material import Material
-from .... import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
 from ..base.configuration import PointDefectConfiguration
 from ..defect_site.configuration import PointDefectSiteConfiguration
 

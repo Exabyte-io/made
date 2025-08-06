@@ -1,15 +1,19 @@
 from typing import Dict, Type, Union
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze import get_chemical_formula_empirical
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.vacancy.builder import \
+    VacancyDefectBuilder
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.auxiliary.zero_dimensional.void_region.builder import VoidRegionBuilder
+from mat3ra.made.tools.build_components.entities.auxiliary.zero_dimensional.void_region.configuration import \
+    VoidRegionConfiguration
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
+    SlabConfiguration
+from mat3ra.made.tools.build_components.operations.core.combinations.merge import MergeBuilder
 from .configuration import NanoparticleConfiguration
-from ......build_components import MaterialWithBuildMetadata
-from ...defect.point.vacancy.builder import VacancyDefectBuilder
-from ...merge import MergeBuilder
-from ...slab.slab.builder import SlabBuilder
-from ...slab.slab.configuration import SlabConfiguration
-from ...void_region.builder import VoidRegionBuilder
-from ...void_region.configuration import VoidRegionConfiguration
-from ......analyze.other import get_chemical_formula_empirical
+
 
 
 class NanoparticleBuilder(VacancyDefectBuilder, MergeBuilder):

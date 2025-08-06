@@ -1,5 +1,5 @@
-from typing import Tuple
 from enum import Enum
+from typing import Tuple
 
 
 class EdgeTypes(str, Enum):

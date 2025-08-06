@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Generic, Type, TypeVar
 
-from ..build import BuildMetadata, MaterialWithBuildMetadata
 from . import BaseMaterialAnalyzer
+from ..build_components.metadata import MaterialWithBuildMetadata, BuildMetadata
 
 TypeConfiguration = TypeVar("TypeConfiguration")
 TypeBuildParameters = TypeVar("TypeBuildParameters")

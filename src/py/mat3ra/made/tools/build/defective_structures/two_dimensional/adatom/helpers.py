@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from typing import List, Optional
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
 from ....analyze.crystal_site.adatom_crystal_site_material_analyzer import (
     AdatomCrystalSiteMaterialAnalyzer,
 )
@@ -11,7 +12,6 @@ from .builder import AdatomDefectBuilder
 from .configuration import (
     AdatomDefectConfiguration,
 )
-from ... import MaterialWithBuildMetadata
 from ..adatom_placement_method_enum import AdatomPlacementMethodEnum
 
 

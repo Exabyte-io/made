@@ -1,9 +1,13 @@
-from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-
-from .. import BaseSingleBuilder, MaterialWithBuildMetadata, TypeConfiguration
 from typing import Type
-from .configuration import VacuumConfiguration
+
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+
+from ....reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
+    BaseSingleBuilder,
+)
 from ....utils import AXIS_TO_INDEX_MAP
+from .configuration import VacuumConfiguration
 
 
 class VacuumBuilder(BaseSingleBuilder):

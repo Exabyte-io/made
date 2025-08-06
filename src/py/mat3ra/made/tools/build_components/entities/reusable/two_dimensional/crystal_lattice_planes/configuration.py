@@ -1,11 +1,15 @@
 from typing import Union
 
-from ....entities import MillerIndices
 from mat3ra.esse.models.materials_category_components.entities.reusable.two_dimensional.crystal_lattice_planes import (
     CrystalLatticePlanesSchema,
 )
 from mat3ra.made.material import Material
-from ... import MaterialWithBuildMetadata, BaseConfigurationPydantic
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+
+from ....entities import MillerIndices
+from ...three_dimensional.crystal_lattice_base.base_configuration_pydantic import (
+    BaseConfigurationPydantic,
+)
 
 
 class CrystalLatticePlanesConfiguration(CrystalLatticePlanesSchema, BaseConfigurationPydantic):

@@ -1,6 +1,6 @@
 from typing import Optional, Any
 
-from .... import MaterialWithBuildMetadata, TypeConfiguration
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
 from ..base.builder import PointDefectBuilder
 from .configuration import VacancyDefectConfiguration
 

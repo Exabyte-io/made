@@ -1,9 +1,11 @@
-from .configuration import SlabStackConfiguration
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata, TypeConfiguration
-from ...slab.slab.builder import SlabBuilder
 from typing import Type
+
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+
+from ...slab.slab.builder import SlabBuilder
 from ...slab.slab.configuration import SlabConfiguration
 from ...stack.builder import StackNComponentsBuilder
+from .configuration import SlabStackConfiguration
 
 
 class SlabStackBuilder(StackNComponentsBuilder):

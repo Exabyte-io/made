@@ -4,13 +4,14 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from ....analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
-from ..base.builder import InterfaceBuilder
-from ..base.configuration import InterfaceConfiguration
-from ... import MaterialWithBuildMetadata
-from ...slab.slab.configuration import SlabConfiguration
-from ...slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
-from ....analyze.lattice import get_material_with_conventional_lattice
+from .. import InterfaceBuilder, InterfaceConfiguration
+from .....pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
+    SlabStrainedSupercellConfiguration,
+)
+from ......analyze.interface import CommensurateLatticeInterfaceAnalyzer
+from ......analyze.lattice import get_material_with_conventional_lattice
+from ......build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
+from ......build_components.metadata import MaterialWithBuildMetadata
 
 
 def get_commensurate_strained_configurations(

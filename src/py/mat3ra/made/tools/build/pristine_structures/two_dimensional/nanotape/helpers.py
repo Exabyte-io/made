@@ -3,11 +3,15 @@ from typing import Optional, Tuple, Union
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import \
+    EdgeTypes
+from mat3ra.made.tools.build_components.entities.reusable.one_dimensional.crystal_lattice_lines.helpers import \
+    create_lattice_lines_config_and_material
 from . import NanoTapeConfiguration
 from .builders import NanoTapeBuilder, NanoTapeBuilderParameters
-from .. import MaterialWithBuildMetadata
-from ..lattice_lines import create_lattice_lines_config_and_material, EdgeTypes
-from ..vacuum.configuration import VacuumConfiguration
+
 
 
 def create_nanotape(

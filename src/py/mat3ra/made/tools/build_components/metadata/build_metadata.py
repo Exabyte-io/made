@@ -1,6 +1,5 @@
-from pydantic import Field
-
 from mat3ra.made.metadata import BaseMetadata
+from pydantic import Field
 
 
 class BuildMetadata(BaseMetadata):

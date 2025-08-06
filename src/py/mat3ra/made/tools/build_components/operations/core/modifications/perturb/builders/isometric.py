@@ -1,7 +1,8 @@
-from .base import PerturbationBuilder
-from ..configuration import PerturbationConfiguration
-from ... import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+
 from ....operations.core.unary import edit_cell
+from ..configuration import PerturbationConfiguration
+from .base import PerturbationBuilder
 
 
 class IsometricPerturbationBuilder(PerturbationBuilder):

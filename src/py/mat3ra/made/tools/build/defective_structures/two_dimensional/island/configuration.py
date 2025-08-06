@@ -2,7 +2,8 @@ from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.
     IslandDefectConfigurationSchema,
 )
 
-from ..slab.configuration import SlabStackConfiguration
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.configuration import \
+    SlabStackConfiguration
 
 
 class IslandDefectConfiguration(SlabStackConfiguration, IslandDefectConfigurationSchema):

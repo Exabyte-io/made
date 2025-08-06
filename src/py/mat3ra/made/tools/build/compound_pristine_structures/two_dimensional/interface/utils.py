@@ -3,12 +3,11 @@ from typing import List, Tuple, Union
 import numpy as np
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.convert.interface_parts_enum import INTERFACE_LABELS_MAP
+from mat3ra.made.tools.modify import interface_displace_part, filter_by_label
+from mat3ra.made.tools.optimize import evaluate_calculator_on_xy_grid
 from .enums import StrainModes
-from ...convert import PymatgenInterface
-from ...convert.interface_parts_enum import INTERFACE_LABELS_MAP
-from ...modify import filter_by_label, interface_displace_part
-from ...optimize import evaluate_calculator_on_xy_grid
-from .. import MaterialWithBuildMetadata
 
 
 def remove_duplicate_interfaces(

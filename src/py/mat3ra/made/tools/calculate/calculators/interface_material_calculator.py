@@ -8,7 +8,9 @@ from ...convert.interface_parts_enum import InterfacePartsEnum
 from ...enums import SurfaceTypesEnum
 from ...modify import interface_get_part
 from ..interaction_functions import sum_of_inverse_distances_squared
-from .interface_material_calculator_parameters import InterfaceMaterialCalculatorParameters
+from .interface_material_calculator_parameters import (
+    InterfaceMaterialCalculatorParameters,
+)
 from .material_calculator import MaterialCalculator
 
 

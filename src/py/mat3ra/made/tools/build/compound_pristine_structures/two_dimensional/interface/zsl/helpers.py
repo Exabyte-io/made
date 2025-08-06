@@ -3,15 +3,14 @@ from typing import List, Optional, Tuple, Union
 from mat3ra.code.array_with_ids import ArrayWithIds
 
 from mat3ra.made.material import Material
-from ....analyze.interface import ZSLInterfaceAnalyzer
-from ..base.builder import InterfaceBuilder
-from ..base.build_parameters import InterfaceBuilderParameters
-from ..base.configuration import InterfaceConfiguration
-from ... import MaterialWithBuildMetadata
-from ...slab.helpers import create_slab
-from ...vacuum.configuration import VacuumConfiguration
-from ....analyze.lattice import get_material_with_conventional_lattice
-from ....analyze.slab import SlabMaterialAnalyzer
+from mat3ra.made.tools.analyze.interface import ZSLInterfaceAnalyzer
+from mat3ra.made.tools.analyze.lattice import get_material_with_conventional_lattice
+from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface import InterfaceBuilderParameters, \
+    InterfaceBuilder, InterfaceConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 
 
 def create_zsl_interface(

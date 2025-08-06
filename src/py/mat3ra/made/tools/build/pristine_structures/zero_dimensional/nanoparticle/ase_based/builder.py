@@ -1,12 +1,14 @@
 from typing import Callable, Dict
 
+from mat3ra.made.tools.analyze import get_chemical_formula_empirical
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import \
+    BaseSingleBuilder
+from mat3ra.made.tools.build_components.mixins import ConvertGeneratedItemsASEAtomsMixin
+
 from .configuration import ASEBasedNanoparticleConfiguration
 from ..enums import NanoparticleShapesEnum
-from ......build_components import MaterialWithBuildMetadata
-from ......build_components.mixins import ConvertGeneratedItemsASEAtomsMixin
-from ....build import BaseSingleBuilder
-from ......third_party import ASEAtoms
-from ......analyze.other import get_chemical_formula_empirical
+
 
 
 class ASEBasedNanoparticleBuilder(ConvertGeneratedItemsASEAtomsMixin, BaseSingleBuilder):

@@ -1,9 +1,10 @@
 from typing import List, Union
 
 from mat3ra.made.material import Material
+
+from ..modify import filter_by_box
 from . import MaterialWithBuildMetadata
 from .supercell.helpers import create_supercell
-from ..modify import filter_by_box
 
 
 def double_and_filter_material(

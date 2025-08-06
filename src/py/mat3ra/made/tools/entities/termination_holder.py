@@ -2,7 +2,9 @@ from typing import Optional
 
 from mat3ra.code.entity import InMemoryEntityPydantic
 
-from ..build_components.entities.auxiliary.two_dimensional.termination import Termination
+from ..build_components.entities.auxiliary.two_dimensional.termination import (
+    Termination,
+)
 
 
 class TerminationHolder(InMemoryEntityPydantic):

@@ -3,7 +3,10 @@ from functools import wraps
 from typing import Any, Callable, Dict, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.utils import map_array_to_array_with_id_value, map_array_with_id_value_to_array
+from mat3ra.made.utils import (
+    map_array_to_array_with_id_value,
+    map_array_with_id_value_to_array,
+)
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 
 from ..third_party import (

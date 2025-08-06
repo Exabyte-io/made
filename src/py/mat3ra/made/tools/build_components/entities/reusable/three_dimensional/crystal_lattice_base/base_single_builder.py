@@ -1,10 +1,10 @@
-from typing import Optional, Any, TypeVar, Type, Generic
+from typing import Any, Generic, Optional, Type, TypeVar
 
 from pydantic import BaseModel
 
+from .....metadata import MaterialWithBuildMetadata
 from .base_configuration_pydantic import BaseConfigurationPydantic
 from .build_parameters import BaseBuilderParameters
-from .....metadata import MaterialWithBuildMetadata
 
 TypeConfiguration = TypeVar("TypeConfiguration", bound=BaseConfigurationPydantic)
 TypeBuildParameters = TypeVar("TypeBuildParameters", bound=BaseBuilderParameters)

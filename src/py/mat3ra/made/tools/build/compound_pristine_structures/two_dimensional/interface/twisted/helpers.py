@@ -4,12 +4,13 @@ from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from ....analyze.interface.twisted_nanoribbons import TwistedNanoribbonsInterfaceAnalyzer
-from ..base.builder import InterfaceBuilder
-from ..base.configuration import InterfaceConfiguration
-from ... import MaterialWithBuildMetadata
-from ...slab.slab.configuration import SlabConfiguration
-from ....analyze.lattice import get_material_with_conventional_lattice
+from mat3ra.made.tools.analyze.interface import TwistedNanoribbonsInterfaceAnalyzer
+from mat3ra.made.tools.analyze.lattice import get_material_with_conventional_lattice
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface import InterfaceBuilder, \
+    InterfaceConfiguration
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
+    SlabConfiguration
 
 
 def create_twisted_interface(

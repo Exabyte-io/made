@@ -1,4 +1,8 @@
-from .... import BaseSingleBuilder, MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
+    BaseSingleBuilder,
+)
+
 from .configuration import PointDefectSiteConfiguration
 
 

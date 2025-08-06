@@ -1,16 +1,6 @@
 from enum import Enum
 from typing import Callable
-from ......third_party import (
-    ASEAtoms,
-    ASESimpleCubic,
-    ASEBodyCenteredCubic,
-    ASEFaceCenteredCubic,
-    ASEIcosahedron,
-    ASEOctahedron,
-    ASEDecahedron,
-    ASEHexagonalClosedPacked,
-    ASEWulffConstruction,
-)
+
 
 
 class NanoparticleShapesEnum(str, Enum):
