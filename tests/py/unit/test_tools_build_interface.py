@@ -14,6 +14,7 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
     InterfaceConfiguration,
 )
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
+    create_interface_simple,
     create_interface_simple_between_slabs,
 )
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.commensurate.helpers import (
@@ -129,6 +130,23 @@ def test_create_simple_interface_between_slabs(substrate, film, expected_interfa
     interface = create_interface_simple_between_slabs(
         substrate_slab=substrate_slab,
         film_slab=film_slab,
+        gap=None,
+        vacuum=0.0,
+        xy_shift=[0, 0],
+    )
+    interface.metadata.build = []
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
+
+
+@pytest.mark.parametrize("substrate, film, expected_interface", [Si_Ge_SIMPLE_INTERFACE_TEST_CASE])
+def test_create_simple_interface(substrate, film, expected_interface):
+    interface = create_interface_simple(
+        substrate_crystal=substrate.bulk_config,
+        film_crystal=film.bulk_config,
+        substrate_miller_indices=substrate.miller_indices,
+        film_miller_indices=film.miller_indices,
+        substrate_number_of_layers=substrate.number_of_layers,
+        film_number_of_layers=film.number_of_layers,
         gap=None,
         vacuum=0.0,
         xy_shift=[0, 0],
