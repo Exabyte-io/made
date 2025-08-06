@@ -19,9 +19,6 @@ class SlabConfiguration(SlabConfigurationSchema, StackConfiguration):
     stack_components: List[Union[AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]]  # No Materials!
     direction: AxisEnum = AxisEnum.z
 
-    def __init__(self, **data):
-        super().__init__(**data)
-
     @property
     def number_of_layers(self):
         return self.atomic_layers.number_of_repetitions

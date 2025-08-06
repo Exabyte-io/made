@@ -16,9 +16,6 @@ class SlabStackConfiguration(StackConfiguration, SlabStackConfigurationSchema):
         direction: Direction of stacking (default: z).
     """
 
-    def __init__(self, **data):
-        super().__init__(**data)
-
     type: str = "SlabStackConfiguration"
 
     @property

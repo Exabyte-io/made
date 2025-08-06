@@ -20,9 +20,6 @@ class NanoribbonConfiguration(NanoribbonConfigurationSchema, StackConfiguration)
         direction: Direction along which to stack components.
     """
 
-    def __init__(self, **data):
-        super().__init__(**data)
-
     type: str = "NanoribbonConfiguration"
     stack_components: List[Union[NanoTapeConfiguration, VacuumConfiguration]]
     direction: AxisEnum = AxisEnum.x

@@ -22,9 +22,6 @@ class NanoTapeConfiguration(NanoTapeConfigurationSchema, StackConfiguration):
         direction: Direction along which to stack components.
     """
 
-    def __init__(self, **data):
-        super().__init__(**data)
-
     type: str = "NanoTapeConfiguration"
     stack_components: List[Union[CrystalLatticeLinesUniqueRepeatedConfiguration, VacuumConfiguration]]
     direction: AxisEnum = AxisEnum.y
