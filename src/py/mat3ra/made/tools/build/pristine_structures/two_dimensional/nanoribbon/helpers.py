@@ -9,7 +9,7 @@ from .....build_components.entities.core.two_dimensional.vacuum.configuration im
 from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.helpers import (
     create_lattice_lines_config_and_material,
 )
-from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import BaseBuilderParameters
+from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseBuilderParameters
 from . import NanoribbonConfiguration
 from .builders import NanoribbonBuilder, NanoribbonBuilderParameters
 from ..nanotape import NanoTapeConfiguration

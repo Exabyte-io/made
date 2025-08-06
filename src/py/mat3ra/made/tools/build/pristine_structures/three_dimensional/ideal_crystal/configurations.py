@@ -2,7 +2,7 @@ from typing import Union
 
 from mat3ra.made.material import Material
 from .....build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import BaseConfigurationPydantic
+from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseConfigurationPydantic
 
 
 class MonolayerConfiguration(BaseConfigurationPydantic):

@@ -9,7 +9,7 @@ from .configuration import StackConfiguration
 from .....entities.core.two_dimensional.vacuum.builder import VacuumBuilder
 from .....entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from ......build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import (
+from mat3ra.made.tools.build_components.entities.reusable.base_builder import (
     BaseSingleBuilder,
     TypeConfiguration,
 )

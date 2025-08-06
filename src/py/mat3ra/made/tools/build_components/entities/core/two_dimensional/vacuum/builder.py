@@ -3,7 +3,7 @@ from typing import Type
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from ..... import MaterialWithBuildMetadata
 
-from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import (
+from mat3ra.made.tools.build_components.entities.reusable.base_builder import (
     BaseSingleBuilder,
     TypeConfiguration,
 )

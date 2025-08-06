@@ -2,7 +2,7 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defective_structures.two_dimensional.adatom.helpers import create_adatom_defect, create_multiple_adatom_defects
-from mat3ra.made.tools.build_components.defect.atom_placement_method_enum import AdatomPlacementMethodEnum
+from mat3ra.made.tools.build_components.operations.core.combinations.enums import AdatomPlacementMethodEnum
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.adatom import SLAB_Si_3_ADATOMS
