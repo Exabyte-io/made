@@ -39,6 +39,7 @@ from unit.fixtures.slab import (
     SI_PRIMITIVE_SLAB_001,
     SLAB_SI_CONVENTIONAL_001_NO_VACUUM,
     SLAB_SrTiO3_011_TERMINATION_O2,
+    SLAB_SrTiO3_011_TERMINATION_O2_BOTTOM,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
 )
 
@@ -79,6 +80,7 @@ PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_SrTiO: Final = (
     BULK_SrTiO3,
     (0, 1, 1),
     "SrTiO",
+    None,
     2,
     5.0,
     [[1, 0], [0, 1]],
@@ -87,6 +89,18 @@ PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_SrTiO: Final = (
 PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2: Final = (
     BULK_SrTiO3,
     (0, 1, 1),
+    "O2",
+    None,
+    2,
+    5.0,
+    [[1, 0], [0, 1]],
+)
+
+
+PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2_BOTTOM: Final = (
+    BULK_SrTiO3,
+    (0, 1, 1),
+    None,
     "O2",
     2,
     5.0,
@@ -118,8 +132,14 @@ def get_slab_with_builder(
         material=material, miller_indices=miller_indices
     )
     terminations = crystal_lattice_planes_analyzer.terminations
-    termination_top = select_slab_termination(terminations, termination_top_formula)
-    termination_bottom = select_slab_termination(terminations, termination_bottom_formula)
+    termination_top = (
+        select_slab_termination(terminations, termination_top_formula) if termination_top_formula is not None else None
+    )
+    termination_bottom = (
+        select_slab_termination(terminations, termination_bottom_formula)
+        if termination_bottom_formula is not None
+        else None
+    )
 
     atomic_layers_repeated_configuration = AtomicLayersUniqueRepeatedConfiguration(
         crystal=material,
@@ -212,7 +232,7 @@ def test_build_slab_conventional(
 
 
 @pytest.mark.parametrize(
-    "material_config, miller_indices, termination_formula, number_of_layers,"
+    "material_config, miller_indices, termination_top_formula,termination_bottom_formula, number_of_layers,"
     + " vacuum, xy_supercell_matrix, expected_slab_config",
     [
         (
@@ -223,12 +243,17 @@ def test_build_slab_conventional(
             *PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2,
             SLAB_SrTiO3_011_TERMINATION_O2,
         ),
+        (
+            *PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2_BOTTOM,
+            SLAB_SrTiO3_011_TERMINATION_O2_BOTTOM,
+        ),
     ],
 )
 def test_build_slab_conventional_with_multiple_terminations(
     material_config,
     miller_indices,
-    termination_formula,
+    termination_top_formula,
+    termination_bottom_formula,
     number_of_layers,
     vacuum,
     xy_supercell_matrix,
@@ -241,8 +266,8 @@ def test_build_slab_conventional_with_multiple_terminations(
     slab = get_slab_with_builder(
         conventional_material,
         miller_indices,
-        termination_formula,
-        None,
+        termination_top_formula,
+        termination_bottom_formula,
         number_of_layers,
         vacuum,
         xy_supercell_matrix,
