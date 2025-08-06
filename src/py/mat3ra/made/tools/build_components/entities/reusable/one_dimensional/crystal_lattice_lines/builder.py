@@ -7,7 +7,7 @@ from ......analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 from ......modify import translate_to_z_level
 from ......operations.core.unary import supercell
 from .....utils import get_orthogonal_c_slab
-from ...three_dimensional.crystal_lattice_base.base_single_builder import (
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import (
     BaseSingleBuilder,
     TypeConfiguration,
 )

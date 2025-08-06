@@ -3,13 +3,14 @@ from typing import Any, Dict, List, Optional, Type
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import (
     MergeMethodsEnum,
 )
-from .... import MaterialWithBuildMetadata
-from ....entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
+from ..... import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import (
     BaseSingleBuilder,
+    TypeConfiguration,
 )
 
 from ......operations.core.binary import merge
-from ....entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from .....entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from .build_parameters import MergeBuilderParameters
 from .configuration import MergeConfiguration
 

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .....build_components.entities.reusable.three_dimensional.crystal_lattice_base.build_parameters import (
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import (
     BaseBuilderParameters,
 )
 

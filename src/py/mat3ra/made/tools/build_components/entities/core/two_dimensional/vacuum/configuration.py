@@ -6,7 +6,7 @@ from mat3ra.esse.models.materials_category_components.entities.core.two_dimensio
 )
 from mat3ra.made.material import Material
 from ..... import MaterialWithBuildMetadata
-from ....reusable.three_dimensional.crystal_lattice_base.base_configuration_pydantic import (
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import (
     BaseConfigurationPydantic,
 )
 

@@ -6,7 +6,7 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
     StackSchema,
 )
 
-from .....entities.reusable.three_dimensional.crystal_lattice_base.base_configuration_pydantic import (
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import (
     BaseConfigurationPydantic,
 )
 

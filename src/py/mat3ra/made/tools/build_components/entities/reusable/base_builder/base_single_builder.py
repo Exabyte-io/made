@@ -2,7 +2,7 @@ from typing import Any, Generic, Optional, Type, TypeVar
 
 from pydantic import BaseModel
 
-from .....metadata import MaterialWithBuildMetadata
+from mat3ra.made.tools.build_components.metadata import MaterialWithBuildMetadata
 from .base_configuration_pydantic import BaseConfigurationPydantic
 from .build_parameters import BaseBuilderParameters
 

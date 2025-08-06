@@ -1,6 +1,6 @@
 from enum import Enum
 
-from .atom_placement_method_enum import AtomPlacementMethodEnum
+from .....build.defective_structures.zero_dimensional.point_defect.atom_placement_method_enum import AtomPlacementMethodEnum
 
 
 class AdatomPlacementMethodEnum(Enum):

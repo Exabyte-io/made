@@ -3,7 +3,7 @@ from typing import Any, Optional
 from ......analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from ......build_components import MaterialWithBuildMetadata
 
-from ...three_dimensional.crystal_lattice_base.base_single_builder import (
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import (
     BaseSingleBuilder,
     TypeConfiguration,
 )

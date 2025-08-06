@@ -2,7 +2,7 @@ from typing import Union
 
 from mat3ra.made.material import Material
 from ..... import MaterialWithBuildMetadata
-from .....entities.reusable.three_dimensional.crystal_lattice_base import BaseConfigurationPydantic
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import BaseConfigurationPydantic
 
 from .functions import (
     FunctionHolder,

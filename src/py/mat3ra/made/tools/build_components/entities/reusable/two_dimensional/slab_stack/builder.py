@@ -1,10 +1,11 @@
 from typing import Type
 
-from .... import MaterialWithBuildMetadata
+from ..... import MaterialWithBuildMetadata
 
 from ..atomic_layers.builder import SlabBuilder
 from ..atomic_layers.configuration import SlabConfiguration
 from .....operations.core.combinations.stack.builder import StackNComponentsBuilder
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import TypeConfiguration
 from .configuration import SlabStackConfiguration
 
 

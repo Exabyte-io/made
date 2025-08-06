@@ -2,7 +2,7 @@ from typing import Tuple, Union
 
 from mat3ra.made.material import Material
 from ..... import MaterialWithBuildMetadata
-from ...three_dimensional.crystal_lattice_base.base_configuration_pydantic import BaseConfigurationPydantic
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import BaseConfigurationPydantic
 
 
 class CrystalLatticeLinesConfiguration(BaseConfigurationPydantic):

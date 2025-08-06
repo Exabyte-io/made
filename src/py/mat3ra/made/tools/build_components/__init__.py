@@ -3,7 +3,7 @@ from .metadata import (
     MaterialBuildMetadata,
     MaterialWithBuildMetadata,
 )
-from .entities.reusable.three_dimensional.crystal_lattice_base import (
+from mat3ra.made.tools.build_components.entities.reusable.crystal_lattice_base import (
     BaseBuilderParameters,
     BaseConfigurationPydantic,
     BaseConfigurationPydanticChild,
