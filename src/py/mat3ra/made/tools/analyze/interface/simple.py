@@ -8,13 +8,13 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     SupercellMatrix2DSchema,
 )
 
-from ...build.slab.slab.build_parameters import SlabBuilderParameters
-from ...build.slab.slab.builder import SlabBuilder
-from ...build.slab.slab.configuration import SlabConfiguration
-from ...build.slab.strained_supercell_slab.configuration import (
+from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from ...build.pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
     SlabStrainedSupercellConfiguration,
 )
-from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from ...build_components.entities.reusable.two_dimensional.atomic_layers.build_parameters import SlabBuilderParameters
+from ...build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from ...build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
 
 
 class InterfaceAnalyzer(InMemoryEntityPydantic):

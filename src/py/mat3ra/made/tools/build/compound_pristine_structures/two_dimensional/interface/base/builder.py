@@ -10,7 +10,6 @@ from .....pristine_structures.two_dimensional.slab_strained_supercell.builder im
 from .....pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
     SlabStrainedSupercellConfiguration,
 )
-from ...... import translate_by_vector, wrap_to_unit_cell, translate_to_center
 from ......analyze import BaseMaterialAnalyzer
 from ......analyze.build_metadata_analyzer import TypeConfiguration
 from ......analyze.lattice import get_material_with_primitive_lattice
@@ -18,6 +17,7 @@ from ......build_components import MaterialWithBuildMetadata
 from ......build_components.operations.core.combinations.stack.builder import StackNComponentsBuilder
 from ......build_components.operations.core.combinations.stack.configuration import StackConfiguration
 from ......convert.interface_parts_enum import InterfacePartsEnum
+from ......modify import translate_by_vector, translate_to_center, wrap_to_unit_cell
 from ......operations.core.unary import supercell
 from ......operations.core.utils import should_skip_stacking
 

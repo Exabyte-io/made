@@ -13,16 +13,16 @@ from pymatgen.analysis.interfaces.coherent_interfaces import (
     ZSLGenerator as PymatgenZSLGenerator,
 )
 
-from ...build.slab.slab.builder import SlabBuilder
-from ...build_components import MaterialWithBuildMetadata
-from ..interface.simple import InterfaceAnalyzer
-from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
-from ..utils import calculate_von_mises_strain
 from .utils.vector import (
     align_first_vector_to_x_2d_right_handed,
     are_vectors_colinear,
     get_global_gcd,
 )
+from ..interface.simple import InterfaceAnalyzer
+from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from ..utils import calculate_von_mises_strain
+from ...build_components import MaterialWithBuildMetadata
+from ...build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
 
 
 class ZSLMatchHolder(InMemoryEntityPydantic):

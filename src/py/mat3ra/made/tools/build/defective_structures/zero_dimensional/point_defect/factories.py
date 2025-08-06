@@ -1,9 +1,9 @@
 from typing import List, Dict, Union, Type, Optional
 
 from mat3ra.made.material import Material
-from ...analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
-from ...analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
-from ...build_components import MaterialWithBuildMetadata
+from .....analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from .....analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
+from .....build_components import MaterialWithBuildMetadata
 from .atom_placement_method_enum import AtomPlacementMethodEnum
 from .base.configuration import PointDefectConfiguration
 from .interstitial.configuration import InterstitialDefectConfiguration

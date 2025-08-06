@@ -1,10 +1,10 @@
 from typing import Type
 
-from .....build_components import MaterialWithBuildMetadata
+from .... import MaterialWithBuildMetadata
 
-from ...slab.slab.builder import SlabBuilder
-from ...slab.slab.configuration import SlabConfiguration
-from ...stack.builder import StackNComponentsBuilder
+from ..atomic_layers.builder import SlabBuilder
+from ..atomic_layers.configuration import SlabConfiguration
+from .....operations.core.combinations.stack.builder import StackNComponentsBuilder
 from .configuration import SlabStackConfiguration
 
 

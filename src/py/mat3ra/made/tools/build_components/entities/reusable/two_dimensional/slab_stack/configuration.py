@@ -4,8 +4,8 @@ from mat3ra.esse.models.materials_category_components.entities.reusable.two_dime
 )
 from mat3ra.made.material import Material
 
-from ...stack.configuration import StackConfiguration
-from ...vacuum.configuration import VacuumConfiguration
+from .....operations.core.combinations.stack.configuration import StackConfiguration
+from ....core.two_dimensional.vacuum.configuration import VacuumConfiguration
 
 # fmt: on
 

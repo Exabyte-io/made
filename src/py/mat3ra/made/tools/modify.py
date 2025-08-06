@@ -16,6 +16,7 @@ from .entities.coordinate import (
     is_coordinate_within_layer,
 )
 from mat3ra.made.utils import get_atomic_coordinates_extremum
+from .third_party import ase_add_vacuum
 
 
 def filter_by_label(material: Material, label: Union[int, str]) -> Material:

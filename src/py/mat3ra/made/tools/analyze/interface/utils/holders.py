@@ -2,7 +2,7 @@ from typing import Optional
 
 from mat3ra.code.entity import InMemoryEntityPydantic
 
-from ....build.slab.strained_supercell_slab.configuration import (
+from ....build.pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
     SlabStrainedSupercellConfiguration,
 )
 

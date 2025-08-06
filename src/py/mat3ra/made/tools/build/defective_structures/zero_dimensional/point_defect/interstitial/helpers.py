@@ -1,15 +1,12 @@
-from typing import Union
+from typing import Union, List
 
 from mat3ra.made.material import Material
-from ...analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
-from ...analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
-from .build.defective_structures.zero_dimensional.point_defect.interstitial.builder import \
-    InterstitialDefectBuilder
-from .build.defective_structures.zero_dimensional.point_defect.interstitial.configuration import \
-    InterstitialDefectConfiguration
-from .build.defective_structures.zero_dimensional.point_defect.interstitial.interstitial_placement_method_enum import \
-    InterstitialPlacementMethodEnum
-from ...build_components import MaterialWithBuildMetadata
+from ......analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from ......analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
+from .builder import InterstitialDefectBuilder
+from .configuration import InterstitialDefectConfiguration
+from .interstitial_placement_method_enum import InterstitialPlacementMethodEnum
+from ......build_components import MaterialWithBuildMetadata
 
 
 def create_point_defect_interstitial(

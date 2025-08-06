@@ -1,16 +1,14 @@
 from typing import Type, Dict, Union
 
 from mat3ra.made.material import Material
-from ...build_components import MaterialWithBuildMetadata
+from ......build_components import MaterialWithBuildMetadata
 from .configuration import PointDefectConfiguration
-from ..defect_site.builder import PointDefectSiteBuilder
-from ..defect_site.configuration import PointDefectSiteConfiguration
-from ..intersitital.configuration import (
-    InterstitialDefectConfiguration,
-)
+from ......build_components.entities.auxiliary.zero_dimensional.point_defect_site.builder import PointDefectSiteBuilder
+from ......build_components.entities.auxiliary.zero_dimensional.point_defect_site.configuration import PointDefectSiteConfiguration
+from ..interstitial.configuration import InterstitialDefectConfiguration
 from ..substitutional.configuration import SubstitutionalDefectConfiguration
 from ..vacancy.configuration import VacancyDefectConfiguration
-from ....merge import MergeBuilder
+from ......build_components.operations.core.combinations.merge.builder import MergeBuilder
 
 
 class PointDefectBuilder(MergeBuilder):

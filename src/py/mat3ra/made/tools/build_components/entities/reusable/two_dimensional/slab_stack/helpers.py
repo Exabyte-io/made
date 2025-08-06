@@ -1,22 +1,12 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from .analyze.slab import SlabMaterialAnalyzer
-from .build.pristine_structures.two_dimensional.slab.helpers import (
-    create_slab,
-)
-from .....build_components import MaterialWithBuildMetadata
-from .....build_components.entities.core.two_dimensional.vacuum.configuration import (
-    VacuumConfiguration,
-)
-from .....build_components.entities.reusable.two_dimensional.atomic_layers.builder import (
-    SlabBuilder,
-)
-from .....build_components.entities.reusable.two_dimensional.slab_stack.builder import (
-    SlabStackBuilder,
-)
-from .....build_components.entities.reusable.two_dimensional.slab_stack.configuration import (
-    SlabStackConfiguration,
-)
-from .modify import filter_by_box
+from ......analyze.slab import SlabMaterialAnalyzer
+from ......build.pristine_structures.two_dimensional.slab.helpers import create_slab
+from .... import MaterialWithBuildMetadata
+from ....entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from ..atomic_layers.builder import SlabBuilder
+from .builder import SlabStackBuilder
+from .configuration import SlabStackConfiguration
+from ......modify import filter_by_box
 from sympy import ceiling
 
 
