@@ -1,14 +1,14 @@
 from typing import Type
 
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from ..... import MaterialWithBuildMetadata
 
-from ....operations.core.unary import supercell
-from ...stack.builder import StackNComponentsBuilder
+from ......operations.core.unary import supercell
+from .....operations.core.combinations.stack.builder import StackNComponentsBuilder
 from ..atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
 from ..atomic_layers_unique_repeated.configuration import (
     AtomicLayersUniqueRepeatedConfiguration,
 )
-from ..utils import get_orthogonal_c_slab
+from .....utils import get_orthogonal_c_slab
 from .build_parameters import SlabBuilderParameters
 from .configuration import SlabConfiguration
 

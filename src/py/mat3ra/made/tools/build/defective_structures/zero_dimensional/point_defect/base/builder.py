@@ -1,7 +1,7 @@
 from typing import Type, Dict, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from ...build_components import MaterialWithBuildMetadata
 from .configuration import PointDefectConfiguration
 from ..defect_site.builder import PointDefectSiteBuilder
 from ..defect_site.configuration import PointDefectSiteConfiguration

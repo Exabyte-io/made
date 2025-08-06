@@ -1,17 +1,16 @@
 from typing import Optional, List
 
-from mat3ra.made.tools.analyze.terrace import TerraceMaterialAnalyzer
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.helpers import \
-    recreate_slab_with_fractional_layers
-from mat3ra.made.tools.entities.coordinate import PlaneCoordinateCondition
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
-
+from .build_parameters import TerraceBuildParameters
 from .builder import TerraceDefectBuilder
 from .configuration import TerraceDefectConfiguration
-from .build_parameters import TerraceBuildParameters
-
+from .....analyze.terrace import TerraceMaterialAnalyzer
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from .....build_components.entities.reusable.two_dimensional.slab_stack.helpers import (
+    recreate_slab_with_fractional_layers,
+)
+from .....entities.coordinate import PlaneCoordinateCondition
+from .....modify import filter_by_condition_on_coordinates
 
 
 def create_terrace(

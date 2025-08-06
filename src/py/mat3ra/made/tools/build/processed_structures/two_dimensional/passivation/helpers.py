@@ -6,7 +6,7 @@ from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensi
 from ...analyze.material import MaterialWithCrystalSites
 from .. import MaterialWithBuildMetadata
 from ..defect.point.atom_at_coordinate.configuration import AtomAtCoordinateConfiguration
-from .analyzers import (
+from ...analyzers import (
     SurfacePassivationMaterialAnalyzer,
     CoordinationBasedPassivationMaterialAnalyzer,
 )

@@ -9,7 +9,7 @@ from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensi
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.vacancy import (
     VacancySchema,
 )
-from mat3ra.made.tools.build_components.entities.auxiliary.zero_dimensional.crystal_site import (
+from .....build_components.entities.auxiliary.zero_dimensional.crystal_site import (
     CrystalSite,
 )
 

@@ -2,21 +2,21 @@ from types import SimpleNamespace
 from typing import List, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.interstitial.helpers import \
+from .build.defective_structures.zero_dimensional.point_defect.interstitial.helpers import \
     create_point_defect_interstitial
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.interstitial.interstitial_placement_method_enum import \
+from .build.defective_structures.zero_dimensional.point_defect.interstitial.interstitial_placement_method_enum import \
     InterstitialPlacementMethodEnum
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.point_defect_type_enum import \
+from .build.defective_structures.zero_dimensional.point_defect.point_defect_type_enum import \
     PointDefectTypeEnum
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.substitutional.helpers import \
+from .build.defective_structures.zero_dimensional.point_defect.substitutional.helpers import \
     create_point_defect_substitution
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.substitutional.substitution_placement_method_enum import \
+from .build.defective_structures.zero_dimensional.point_defect.substitutional.substitution_placement_method_enum import \
     SubstitutionPlacementMethodEnum
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.vacancy.helpers import \
+from .build.defective_structures.zero_dimensional.point_defect.vacancy.helpers import \
     create_point_defect_vacancy
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.vacancy.vacancy_placement_method_enum import \
+from .build.defective_structures.zero_dimensional.point_defect.vacancy.vacancy_placement_method_enum import \
     VacancyPlacementMethodEnum
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from ...build_components import MaterialWithBuildMetadata
 
 DEFECT_TYPE_MAPPING = {
     PointDefectTypeEnum.VACANCY: {

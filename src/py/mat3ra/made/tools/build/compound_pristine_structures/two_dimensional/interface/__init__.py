@@ -4,24 +4,20 @@ from .base import (
     InterfaceBuilderParameters,
     create_simple_interface_between_slabs,
 )
-from .zsl import (
-    create_zsl_interface,
-    create_zsl_interface_between_slabs,
-)
 from .commensurate import (
     create_commensurate_interface,
     get_commensurate_strained_configurations,
 )
+from .enums import StrainModes
 from .twisted import (
     TwistedNanoribbonsInterfaceConfiguration,
     create_twisted_interface,
 )
-from .utils import (
-    get_optimal_film_displacement,
-    get_slab,
-    remove_duplicate_interfaces,
+from .utils import get_optimal_film_displacement, get_slab, remove_duplicate_interfaces
+from .zsl import (
+    create_zsl_interface,
+    create_zsl_interface_between_slabs,
 )
-from .enums import StrainModes
 
 __all__ = [
     # Base interface classes

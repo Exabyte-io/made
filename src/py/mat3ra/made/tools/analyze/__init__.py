@@ -2,7 +2,7 @@ from typing import Union
 
 import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components.metadata.material_with_build_metadata import (
+from ..build_components.metadata.material_with_build_metadata import (
     MaterialWithBuildMetadata,
 )
 from pydantic import BaseModel

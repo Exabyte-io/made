@@ -1,6 +1,6 @@
 from typing import Type
 
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from .....build_components import MaterialWithBuildMetadata
 
 from ...slab.slab.builder import SlabBuilder
 from ...slab.slab.configuration import SlabConfiguration

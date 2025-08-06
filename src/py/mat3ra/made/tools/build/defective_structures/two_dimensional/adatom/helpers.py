@@ -2,17 +2,17 @@ from types import SimpleNamespace
 from typing import List, Optional
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from ....analyze.crystal_site.adatom_crystal_site_material_analyzer import (
-    AdatomCrystalSiteMaterialAnalyzer,
-)
-from ....analyze.crystal_site.adatom_material_analyzer import AdatomMaterialAnalyzer
-from ....operations.core.binary import merge
 from .builder import AdatomDefectBuilder
 from .configuration import (
     AdatomDefectConfiguration,
 )
-from ..adatom_placement_method_enum import AdatomPlacementMethodEnum
+from .....analyze.crystal_site.adatom_crystal_site_material_analyzer import (
+    AdatomCrystalSiteMaterialAnalyzer,
+)
+from .....analyze.crystal_site.adatom_material_analyzer import AdatomMaterialAnalyzer
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.operations.core.combinations.enums import AdatomPlacementMethodEnum
+from .....operations.core.binary import merge
 
 
 def get_adatom_defect_analyzer_cls(

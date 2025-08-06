@@ -1,11 +1,11 @@
 from typing import Type
 
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from ..... import MaterialWithBuildMetadata
 
-from ....analyze import BaseMaterialAnalyzer
-from ....entities import MillerIndices
-from ....modify import wrap_to_unit_cell
-from ....operations.core.unary import supercell, translate
+from ......analyze import BaseMaterialAnalyzer
+from ....auxiliary.two_dimensional.miller_indices import MillerIndices
+from ......modify import wrap_to_unit_cell
+from ......operations.core.unary import supercell, translate
 from ..crystal_lattice_planes.builder import CrystalLatticePlanesBuilder
 from .configuration import AtomicLayersUniqueRepeatedConfiguration
 

@@ -1,7 +1,7 @@
 from typing import Any, Type
 
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
     BaseSingleBuilder,
 )
 

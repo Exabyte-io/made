@@ -1,8 +1,8 @@
-from mat3ra.made.tools.build_components.entities.reusable.one_dimensional.crystal_lattice_lines import \
+from ...build_components.entities.reusable.one_dimensional.crystal_lattice_lines import \
     CrystalLatticeLinesBuilder, CrystalLatticeLinesConfiguration
-from mat3ra.made.tools.build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import \
+from ...build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import \
     EdgeTypes
-from mat3ra.made.tools.build_components.operations.core.modifications.repeat import CrystalLatticeLinesRepeatedBuilder, \
+from ...build_components.operations.core.modifications.repeat import CrystalLatticeLinesRepeatedBuilder, \
     CrystalLatticeLinesUniqueRepeatedConfiguration
 from ..lattice_lines import (
     CrystalLatticeLinesConfiguration,

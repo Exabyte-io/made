@@ -1,13 +1,11 @@
 from typing import Type
 
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.builder import SlabStackBuilder
-from mat3ra.made.tools.modify import translate_to_z_level
-from mat3ra.made.tools.operations.core.unary import edit_cell
 from .build_parameters import TerraceBuildParameters
-
 from .configuration import TerraceDefectConfiguration
-
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.reusable.two_dimensional.slab_stack.builder import SlabStackBuilder
+from .....modify import translate_to_z_level, rotate
+from .....operations.core.unary import edit_cell
 
 
 class TerraceDefectBuilder(SlabStackBuilder):

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface import InterfaceBuilderParameters
+from ....compound_pristine_structures.two_dimensional.interface import InterfaceBuilderParameters
 
 
 class GrainBoundaryLinearBuilderParameters(InterfaceBuilderParameters):

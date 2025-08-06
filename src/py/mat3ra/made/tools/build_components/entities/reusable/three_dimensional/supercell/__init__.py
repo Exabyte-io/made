@@ -1,1 +1,1 @@
-from .supercell_configuration import SupercellConfiguration
+# Empty init - direct import from helpers.py

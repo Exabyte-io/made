@@ -1,4 +1,4 @@
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from .....build_components import MaterialWithBuildMetadata
 
 from ....operations.core.unary import edit_cell
 from ..configuration import PerturbationConfiguration

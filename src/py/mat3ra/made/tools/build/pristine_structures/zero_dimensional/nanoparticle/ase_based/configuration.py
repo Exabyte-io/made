@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_configuration_pydantic import \
+from ...build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_configuration_pydantic import \
     BaseConfigurationPydantic
 from ..enums import NanoparticleShapesEnum
 

@@ -1,7 +1,7 @@
 from typing import Any, Optional, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from .....build_components import MaterialWithBuildMetadata
 
 from ....analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 from ....modify import translate_to_z_level

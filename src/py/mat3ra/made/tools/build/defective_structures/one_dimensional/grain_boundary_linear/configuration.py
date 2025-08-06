@@ -5,13 +5,9 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.esse.models.materials_category.defective_structures.one_dimensional. \
     grain_boundary_linear.configuration import GrainBoundaryLinearConfigurationSchema
 
-from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface import InterfaceConfiguration
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
-    SlabConfiguration
-
-
 # fmt: on
-
+from ....compound_pristine_structures.two_dimensional.interface import InterfaceConfiguration
+from .....build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
 
 
 class GrainBoundaryLinearConfiguration(InterfaceConfiguration, GrainBoundaryLinearConfigurationSchema):

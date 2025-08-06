@@ -1,5 +1,5 @@
 # Defective Structures
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.helpers import (
+from build_components.entities.reusable.two_dimensional.slab_stack.helpers import (
     create_slab_stack,
 )
 

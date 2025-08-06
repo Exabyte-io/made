@@ -6,10 +6,10 @@ from mat3ra.esse.models.materials_category.processed_structures.two_dimensional.
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.core.zero_dimensional.atom.configuration import \
+from ...build_components import MaterialWithBuildMetadata
+from ...build_components.entities.core.zero_dimensional.atom.configuration import \
     AtomAtCoordinateConfiguration
-from mat3ra.made.tools.build_components.operations.core.combinations.merge.configuration import MergeConfiguration
+from ...build_components.operations.core.combinations.merge.configuration import MergeConfiguration
 
 
 class PassivationConfiguration(MergeConfiguration, PassivationConfigurationSchema):

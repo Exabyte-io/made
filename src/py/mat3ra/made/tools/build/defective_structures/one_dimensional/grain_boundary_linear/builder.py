@@ -1,6 +1,6 @@
-from .linear_configuration import GrainBoundaryLinearConfiguration
-from .linear_build_parameters import GrainBoundaryLinearBuilderParameters
-from ..interface import InterfaceBuilder
+from .build_parameters import GrainBoundaryLinearBuilderParameters
+from .configuration import GrainBoundaryLinearConfiguration
+from ....compound_pristine_structures.two_dimensional.interface import InterfaceBuilder
 
 
 class GrainBoundaryLinearBuilder(InterfaceBuilder):

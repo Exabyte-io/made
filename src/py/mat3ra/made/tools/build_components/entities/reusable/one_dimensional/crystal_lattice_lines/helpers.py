@@ -1,8 +1,8 @@
 from typing import Optional, Tuple, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from .analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
+from .....build_components import MaterialWithBuildMetadata
 
 from ..slab.termination_utils import select_slab_termination
 from .edge_types import EdgeTypes, get_miller_indices_from_edge_type

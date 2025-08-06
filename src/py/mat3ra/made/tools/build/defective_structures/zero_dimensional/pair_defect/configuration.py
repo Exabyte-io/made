@@ -8,7 +8,7 @@ from mat3ra.esse.models.materials_category_components.operations.core.combinatio
 # fmt: on
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from ...build_components import MaterialWithBuildMetadata
 from ..point.intersitital.configuration import (
     PointDefectSiteConfiguration,
     PointDefectConfiguration,

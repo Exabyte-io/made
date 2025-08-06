@@ -2,16 +2,16 @@ from typing import Any, Optional, Union, Type
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.auxiliary.one_dimensional.miller_indices_2d import (
+from ...build_components import MaterialWithBuildMetadata
+from ...build_components.entities.auxiliary.one_dimensional.miller_indices_2d import (
     NanoTapeBuilderParameters,
 )
-from mat3ra.made.tools.build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import \
+from ...build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import \
     EdgeTypes
-from mat3ra.made.tools.build_components.operations.core.combinations.stack.builder import StackNComponentsBuilder
-from mat3ra.made.tools.build_components.operations.core.modifications.repeat import CrystalLatticeLinesRepeatedBuilder, \
+from ...build_components.operations.core.combinations.stack.builder import StackNComponentsBuilder
+from ...build_components.operations.core.modifications.repeat import CrystalLatticeLinesRepeatedBuilder, \
     CrystalLatticeLinesUniqueRepeatedConfiguration
-from mat3ra.made.tools.modify import wrap_to_unit_cell
+from ...modify import wrap_to_unit_cell
 from .configuration import NanoTapeConfiguration
 
 

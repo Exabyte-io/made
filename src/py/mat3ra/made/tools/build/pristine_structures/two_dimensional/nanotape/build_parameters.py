@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.build_parameters import \
+from ...build_components.entities.reusable.three_dimensional.crystal_lattice_base.build_parameters import \
     BaseBuilderParameters
 
 

@@ -3,9 +3,9 @@ from typing import Union
 import numpy as np
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.modify import wrap_to_unit_cell
-from mat3ra.made.tools.operations.core.unary import edit_cell
+from ...build_components import MaterialWithBuildMetadata
+from ...modify import wrap_to_unit_cell
+from ...operations.core.unary import edit_cell
 
 
 def get_orthogonal_c_slab(material: Union[Material, MaterialWithBuildMetadata]) -> Material:

@@ -3,7 +3,7 @@ from typing import Union
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.zero_dimensional.void_region import (
     VoidRegionSchema,
 )
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from .....build_components import MaterialWithBuildMetadata
 
 from ...entities.coordinate import (
     BoxCoordinateCondition,

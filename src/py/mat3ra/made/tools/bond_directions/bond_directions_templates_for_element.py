@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from mat3ra.made.tools.bond_directions.bond_directions import BondDirections
+from ...bond_directions.bond_directions import BondDirections
 from pydantic import BaseModel, ConfigDict
 
 

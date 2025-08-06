@@ -1,7 +1,7 @@
 from typing import List
 
-from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
-from mat3ra.made.tools.enums import SurfaceTypesEnum
+from ...analyze.slab import SlabMaterialAnalyzer
+from .enums import SurfaceTypesEnum
 
 
 class PassivationMaterialAnalyzer(SlabMaterialAnalyzer):

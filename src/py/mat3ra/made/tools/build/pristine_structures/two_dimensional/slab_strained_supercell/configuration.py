@@ -9,8 +9,7 @@ from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dim
     SupercellMatrix2DSchema,
 )
 
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
-    SlabConfiguration
+from .....build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
 
 
 class SlabStrainedSupercellConfiguration(SlabConfiguration, SlabStrainedSupercellConfigurationSchema):

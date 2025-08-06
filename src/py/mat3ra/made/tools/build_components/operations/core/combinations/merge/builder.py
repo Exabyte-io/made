@@ -3,8 +3,8 @@ from typing import Any, Dict, List, Optional, Type
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import (
     MergeMethodsEnum,
 )
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
     BaseSingleBuilder,
 )
 

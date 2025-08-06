@@ -1,14 +1,15 @@
 from typing import Any, Optional
 
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from ......analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
+from ......build_components import MaterialWithBuildMetadata
 
-from ....analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from ....modify import translate_to_z_level
-from ....operations.core.unary import supercell
 from ...three_dimensional.crystal_lattice_base.base_single_builder import (
     BaseSingleBuilder,
+    TypeConfiguration,
 )
 from .configuration import CrystalLatticePlanesConfiguration
+from ......modify import translate_to_z_level
+from ......operations.core.unary import supercell
 
 
 class CrystalLatticePlanesBuilder(BaseSingleBuilder):

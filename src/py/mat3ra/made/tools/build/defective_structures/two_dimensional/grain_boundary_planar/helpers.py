@@ -1,15 +1,11 @@
 from typing import Optional, List, Tuple, Union
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.interface import GrainBoundaryPlanarAnalyzer
-from mat3ra.made.tools.analyze.lattice import get_material_with_conventional_lattice
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
 from .builder import GrainBoundaryPlanarBuilder
 from .configuration import GrainBoundaryPlanarConfiguration
-
-from .linear_builder import GrainBoundaryLinearBuilder
-from .linear_configuration import GrainBoundaryLinearConfiguration
-
+from .....analyze.interface import GrainBoundaryPlanarAnalyzer
+from .....analyze.lattice import get_material_with_conventional_lattice
+from .....build_components import MaterialWithBuildMetadata
 
 
 def create_grain_boundary_planar(

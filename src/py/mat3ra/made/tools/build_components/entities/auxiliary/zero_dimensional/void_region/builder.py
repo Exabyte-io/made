@@ -1,6 +1,6 @@
 from typing import Type
 
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from .....build_components import MaterialWithBuildMetadata
 
 from ...modify import filter_by_condition_on_coordinates
 from ..defect.point.defect_site.builder import PointDefectSiteBuilder

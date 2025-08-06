@@ -2,19 +2,25 @@ from typing import Union, TypeVar
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
-from mat3ra.made.tools.analyze.slab import SlabMaterialAnalyzer
-from mat3ra.made.tools.build.defective_structures.two_dimensional.island.builder import IslandDefectBuilder
-from mat3ra.made.tools.build.defective_structures.two_dimensional.island.configuration import IslandDefectConfiguration
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.slab_stack.helpers import \
-    recreate_slab_with_fractional_layers
-from mat3ra.made.tools.build_components.entities.reusable.zero_dimensional.coordinates_shape_enum import \
-    CoordinatesShapeEnum
-from mat3ra.made.tools.entities.coordinate import TriangularPrismCoordinateCondition, BoxCoordinateCondition, \
-    SphereCoordinateCondition, CylinderCoordinateCondition, PlaneCoordinateCondition, CoordinateCondition
-from mat3ra.made.tools.modify import filter_by_condition_on_coordinates
+from .builder import IslandDefectBuilder
+from .configuration import IslandDefectConfiguration
+from .....analyze.slab import SlabMaterialAnalyzer
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from .....build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from .....build_components.entities.reusable.two_dimensional.slab_stack.helpers import (
+    recreate_slab_with_fractional_layers,
+)
+from .....build_components.entities.reusable.zero_dimensional.coordinates_shape_enum import CoordinatesShapeEnum
+from .....entities.coordinate import (
+    CoordinateCondition,
+    CylinderCoordinateCondition,
+    SphereCoordinateCondition,
+    BoxCoordinateCondition,
+    TriangularPrismCoordinateCondition,
+    PlaneCoordinateCondition,
+)
+from .....modify import filter_by_condition_on_coordinates
 
 CoordinateConditionType = TypeVar("CoordinateConditionType", bound=CoordinateCondition)
 

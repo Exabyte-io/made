@@ -1,11 +1,11 @@
 from typing import Optional, Any, Union, Tuple
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
+from ...build_components import MaterialWithBuildMetadata
+from ...build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from ...build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
     SlabConfiguration
-from mat3ra.made.tools.modify import translate_to_z_level, filter_by_box
+from ...modify import translate_to_z_level, filter_by_box
 from .configurations import MonolayerConfiguration
 
 

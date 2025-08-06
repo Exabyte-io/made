@@ -1,16 +1,18 @@
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.build_parameters import \
-    SlabBuilderParameters
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
-    SlabConfiguration
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.builder import \
-    AtomicLayersUniqueRepeatedBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.configuration import \
-    AtomicLayersUniqueRepeatedConfiguration
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.crystal_lattice_planes.builder import \
-    CrystalLatticePlanesBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.crystal_lattice_planes.configuration import \
-    CrystalLatticePlanesConfiguration
+from .....build_components.entities.reusable.two_dimensional.atomic_layers.build_parameters import SlabBuilderParameters
+from .....build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from .....build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
+from .....build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.builder import (
+    AtomicLayersUniqueRepeatedBuilder,
+)
+from .....build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.configuration import (
+    AtomicLayersUniqueRepeatedConfiguration,
+)
+from .....build_components.entities.reusable.two_dimensional.crystal_lattice_planes.builder import (
+    CrystalLatticePlanesBuilder,
+)
+from .....build_components.entities.reusable.two_dimensional.crystal_lattice_planes.configuration import (
+    CrystalLatticePlanesConfiguration,
+)
 from .crystal_lattice_planes.builder import CrystalLatticePlanesBuilder
 from .atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
 from .slab.builder import SlabBuilder

@@ -1,12 +1,12 @@
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.vacancy.builder import \
+from ...analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
+from .build.defective_structures.zero_dimensional.point_defect.vacancy.builder import \
     VacancyDefectBuilder
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.vacancy.configuration import \
+from .build.defective_structures.zero_dimensional.point_defect.vacancy.configuration import \
     VacancyDefectConfiguration
-from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.vacancy.vacancy_placement_method_enum import \
+from .build.defective_structures.zero_dimensional.point_defect.vacancy.vacancy_placement_method_enum import \
     VacancyPlacementMethodEnum
-from mat3ra.made.tools.build_components import MaterialWithBuildMetadata
+from ...build_components import MaterialWithBuildMetadata
 
 
 def create_point_defect_vacancy(

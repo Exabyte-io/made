@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from mat3ra.made.tools.build_components.entities.reusable.three_dimensional.crystal_lattice_base.build_parameters import \
-    BaseBuilderParameters
+from .....build_components.entities.reusable.three_dimensional.crystal_lattice_base import BaseBuilderParameters
 
 
 class TerraceBuildParameters(BaseBuilderParameters):
