@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, cast
 
 from ......operations.core.unary import supercell
 from ..... import MaterialWithBuildMetadata
@@ -23,8 +23,9 @@ class SlabBuilder(StackNComponentsBuilder):
 
     def _generate(self, configuration: SlabConfiguration) -> MaterialWithBuildMetadata:
         stack_as_material = super()._generate(configuration)
-        supercell_slab = supercell(stack_as_material, self.build_parameters.xy_supercell_matrix)
-        if self.build_parameters.use_orthogonal_c:
+        build_params = cast(SlabBuilderParameters, self.build_parameters)
+        supercell_slab = supercell(stack_as_material, build_params.xy_supercell_matrix)
+        if build_params.use_orthogonal_c:
             supercell_slab = get_orthogonal_c_slab(supercell_slab)
         return supercell_slab
 

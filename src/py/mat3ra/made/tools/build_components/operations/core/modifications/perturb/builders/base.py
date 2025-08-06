@@ -2,7 +2,6 @@ from typing import Any, Type
 
 from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseSingleBuilder
 
-from .......analyze.build_metadata_analyzer import TypeConfiguration
 from .......modify import translate_to_z_level, wrap_to_unit_cell
 from .......operations.core.unary import perturb
 from ...... import MaterialWithBuildMetadata
@@ -27,7 +26,7 @@ class PerturbationBuilder(BaseSingleBuilder):
         return new_material
 
     def _update_material_name(
-        self, material: MaterialWithBuildMetadata, configuration: TypeConfiguration
+        self, material: MaterialWithBuildMetadata, configuration: PerturbationConfiguration
     ) -> MaterialWithBuildMetadata:
         perturbation_details = f"Perturbation: {configuration.perturbation_function_holder.function_str}"
         material.name = f"{material.name} ({perturbation_details})"

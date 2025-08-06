@@ -9,17 +9,20 @@ from .....operations.core.unary import edit_cell, rotate
 
 
 class TerraceDefectBuilder(SlabStackBuilder):
+    _ConfigurationType: Type[TerraceDefectConfiguration] = TerraceDefectConfiguration
     _BuildParametersType: Type[TerraceBuildParameters] = TerraceBuildParameters
+    _DefaultBuildParameters: TerraceBuildParameters = TerraceBuildParameters()
 
     def get_name_suffix(self, configuration: TerraceDefectConfiguration) -> str:
         return f"Terrace {configuration.cut_direction}"
 
     def _generate(self, configuration: TerraceDefectConfiguration) -> MaterialWithBuildMetadata:
         material = super()._generate(configuration)
-        if self.build_parameters.rotate_to_match_pbc:
-            axis = self.build_parameters.axis
-            angle = self.build_parameters.angle
-            new_lattice_vectors = self.build_parameters.new_lattice_vectors
+        build_params = self._build_parameters
+        if self.build_params.rotate_to_match_pbc:
+            axis = build_params.axis
+            angle = build_params.angle
+            new_lattice_vectors = build_params.new_lattice_vectors
             translated_material = translate_to_z_level(material, "center")
             adjusted_material = edit_cell(translated_material, new_lattice_vectors)
             material = rotate(adjusted_material, axis, angle)
