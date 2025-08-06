@@ -1,9 +1,9 @@
 from typing import Optional, Any, Type, Union
 
 from mat3ra.made.material import Material
-from ...build_components import MaterialWithBuildMetadata
+from .....build_components import MaterialWithBuildMetadata
 from ..nanotape import NanoTapeBuilder, NanoTapeConfiguration
-from ...modify import translate_to_center
+from .....modify import translate_to_center
 from . import NanoribbonConfiguration
 from .build_parameters import NanoribbonBuilderParameters
 

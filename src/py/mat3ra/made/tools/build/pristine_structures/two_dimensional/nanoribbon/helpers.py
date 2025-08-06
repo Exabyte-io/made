@@ -4,12 +4,10 @@ from typing import TypeVar
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
-from ...build_components import MaterialWithBuildMetadata
-from ...build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
-from ...build_components.entities.reusable.one_dimensional.crystal_lattice_lines.helpers import \
-    create_lattice_lines_config_and_material
-from ...build_components.entities.reusable.three_dimensional.crystal_lattice_base.build_parameters import \
-    BaseBuilderParameters
+from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.helpers import create_lattice_lines_config_and_material
+from .....build_components.entities.reusable.three_dimensional.crystal_lattice_base.build_parameters import BaseBuilderParameters
 from . import NanoribbonConfiguration
 from .builders import NanoribbonBuilder, NanoribbonBuilderParameters
 from ..nanotape import NanoTapeConfiguration

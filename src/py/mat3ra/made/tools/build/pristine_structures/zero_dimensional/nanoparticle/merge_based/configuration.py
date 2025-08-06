@@ -2,11 +2,9 @@ from typing import List
 
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
-from ...build_components.entities.auxiliary.zero_dimensional.void_region.configuration import \
-    VoidRegionConfiguration
-from ...build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
-    SlabConfiguration
-from ...build_components.operations.core.combinations.merge.configuration import MergeConfiguration
+from ......build_components.entities.auxiliary.zero_dimensional.void_region.configuration import VoidRegionConfiguration
+from ......build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
+from ......build_components.operations.core.combinations.merge.configuration import MergeConfiguration
 
 
 class NanoparticleConfiguration(MergeConfiguration):

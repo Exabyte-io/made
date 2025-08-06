@@ -1,12 +1,12 @@
 from typing import Optional, Tuple, Union
 
 from mat3ra.made.material import Material
-from .analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
-from .....build_components import MaterialWithBuildMetadata
+from ......analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
+from ..... import MaterialWithBuildMetadata
 
-from ..slab.termination_utils import select_slab_termination
+from .....utils import select_slab_termination
 from .edge_types import EdgeTypes, get_miller_indices_from_edge_type
-from .repeated.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration
+from ..crystal_lattice_lines_unique_repeated.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration
 
 
 def create_lattice_lines_config_and_material(

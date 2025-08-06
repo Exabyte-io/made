@@ -1,7 +1,6 @@
 from pydantic import Field
 
-from ...build_components.entities.reusable.three_dimensional.crystal_lattice_base.build_parameters import \
-    BaseBuilderParameters
+from .....build_components.entities.reusable.three_dimensional.crystal_lattice_base.build_parameters import BaseBuilderParameters
 
 
 class NanoTapeBuilderParameters(BaseBuilderParameters):
