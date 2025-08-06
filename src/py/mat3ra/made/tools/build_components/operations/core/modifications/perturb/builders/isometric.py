@@ -1,6 +1,5 @@
-from .....build_components import MaterialWithBuildMetadata
-
-from ....operations.core.unary import edit_cell
+from .......operations.core.unary import edit_cell
+from ...... import MaterialWithBuildMetadata
 from ..configuration import PerturbationConfiguration
 from .base import PerturbationBuilder
 

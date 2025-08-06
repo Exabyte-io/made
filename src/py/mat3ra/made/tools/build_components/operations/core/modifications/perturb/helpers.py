@@ -1,13 +1,13 @@
 from typing import Union
 
 import sympy as sp
-from mat3ra.made.material import Material
-from .....build_components import MaterialWithBuildMetadata
 
+from mat3ra.made.material import Material
 from .builders.base import PerturbationBuilder
 from .builders.isometric import IsometricPerturbationBuilder
 from .configuration import PerturbationConfiguration
 from .functions import PerturbationFunctionHolder
+from ..... import MaterialWithBuildMetadata
 
 
 def create_perturbation(

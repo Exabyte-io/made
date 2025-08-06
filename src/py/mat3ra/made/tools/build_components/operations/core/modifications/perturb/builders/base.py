@@ -1,14 +1,12 @@
 from typing import Any, Type
 
-from .....build_components import MaterialWithBuildMetadata
-from .....build_components.entities.reusable.three_dimensional.crystal_lattice_base.base_single_builder import (
-    BaseSingleBuilder,
-)
-
-from ....modify import translate_to_z_level, wrap_to_unit_cell
-from ....operations.core.unary import perturb
 from ..build_parameters import PerturbationBuildParameters
 from ..configuration import PerturbationConfiguration
+from ...... import MaterialWithBuildMetadata
+from ......entities.reusable.three_dimensional.crystal_lattice_base import BaseSingleBuilder
+from .......analyze.build_metadata_analyzer import TypeConfiguration
+from .......modify import translate_to_z_level, wrap_to_unit_cell
+from .......operations.core.unary import perturb
 
 
 class PerturbationBuilder(BaseSingleBuilder):
