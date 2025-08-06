@@ -63,7 +63,10 @@ def recreate_slab_with_fractional_layers(
     slab_with_int_layers_without_vacuum = create_slab(
         crystal=slab_without_vacuum.atomic_layers.crystal,
         miller_indices=slab_without_vacuum.atomic_layers.miller_indices,
-        termination=slab_without_vacuum.atomic_layers.termination_top,
+        termination_top_formula=slab_without_vacuum.atomic_layers.termination_top.formula
+        if slab_without_vacuum.atomic_layers.termination_top
+        else None,
+        termination_bottom_formula=None,
         number_of_layers=ceiling_number_of_layers,
         vacuum=0,
         xy_supercell_matrix=build_parameters.xy_supercell_matrix,

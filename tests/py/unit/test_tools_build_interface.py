@@ -84,10 +84,20 @@ PRECISION = 1e-3
 def test_simple_interface_builder(substrate, film, expected_interface):
     builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters(make_primitive=False))
     substrate_slab_config = SlabConfiguration.from_parameters(
-        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
+        substrate.bulk_config,
+        substrate.miller_indices,
+        substrate.number_of_layers,
+        vacuum=substrate.vacuum,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
     film_slab_config = SlabConfiguration.from_parameters(
-        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
+        film.bulk_config,
+        film.miller_indices,
+        film.number_of_layers,
+        vacuum=film.vacuum,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
 
     analyzer = InterfaceAnalyzer(
@@ -113,14 +123,16 @@ def test_create_simple_interface_between_slabs(substrate, film, expected_interfa
         miller_indices=substrate.miller_indices,
         number_of_layers=substrate.number_of_layers,
         vacuum=0,
-        termination_formula=None,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
     film_slab_config = SlabConfiguration.from_parameters(
         material_or_dict=film.bulk_config,
         miller_indices=film.miller_indices,
         number_of_layers=film.number_of_layers,
         vacuum=0,
-        termination_formula=None,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
 
     substrate_slab = SlabBuilder().get_material(substrate_slab_config)
@@ -214,6 +226,8 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
         use_orthogonal_c=True,
         number_of_layers=1,
         vacuum=0.0,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
 
     interface = create_commensurate_interface(

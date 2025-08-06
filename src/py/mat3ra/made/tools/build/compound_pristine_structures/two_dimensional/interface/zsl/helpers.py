@@ -46,7 +46,7 @@ def create_zsl_interface(
         miller_indices=substrate_miller_indices,
         number_of_layers=substrate_number_of_layers,
         vacuum=0,
-        termination_formula=substrate_termination_formula,
+        termination_bottom_formula=substrate_termination_formula,
         use_conventional_cell=use_conventional_cell,
     )
     film_slab = create_slab(
@@ -54,7 +54,7 @@ def create_zsl_interface(
         miller_indices=film_miller_indices,
         number_of_layers=film_number_of_layers,
         vacuum=0,
-        termination_formula=film_termination_formula,
+        termination_top_formula=film_termination_formula,
         use_conventional_cell=use_conventional_cell,
     )
 

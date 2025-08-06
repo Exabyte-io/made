@@ -129,7 +129,7 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         miller_indices=substrate.miller_indices,
         number_of_layers=substrate.number_of_layers,
         vacuum=0.0,
-        termination_formula=None,
+        termination_top_formula=None,
         use_conventional_cell=True,
     )
     film_slab_config = SlabConfiguration.from_parameters(
@@ -137,7 +137,7 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         miller_indices=film.miller_indices,
         number_of_layers=film.number_of_layers,
         vacuum=0.0,
-        termination_formula=None,
+        termination_bottom_formula=None,
         use_conventional_cell=True,
     )
 

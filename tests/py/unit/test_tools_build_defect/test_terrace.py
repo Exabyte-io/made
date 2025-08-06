@@ -30,6 +30,8 @@ def test_create_terrace(
         Material.create(slab_parameters["crystal"]),
         number_of_layers=slab_parameters["number_of_layers"],
         xy_supercell_matrix=slab_parameters["xy_supercell_matrix"],
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
     terrace = create_terrace(
         slab=slab,

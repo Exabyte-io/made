@@ -2,7 +2,7 @@ from typing import Type
 
 from ......analyze import BaseMaterialAnalyzer
 from ......modify import wrap_to_unit_cell
-from ......operations.core.unary import supercell, translate
+from ......operations.core.unary import rotate, supercell, translate
 from ..... import MaterialWithBuildMetadata
 from ....auxiliary.two_dimensional.miller_indices import MillerIndices
 from ..crystal_lattice_planes.builder import CrystalLatticePlanesBuilder
@@ -16,12 +16,19 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
         crystal_lattice_planes_material = super()._generate(configuration)
 
         crystal_lattice_planes_material_analyzer = self.get_analyzer(configuration)
-        if configuration.termination_top is None:
-            raise ValueError("termination_top is required for AtomicLayersUniqueRepeatedBuilder")
-        translation_vector = (
-            crystal_lattice_planes_material_analyzer.get_translation_vector_for_termination_without_vacuum(
-                configuration.termination_top
+
+        if configuration.termination_top is not None:
+            termination = configuration.termination_top
+        elif configuration.termination_bottom is not None:
+            crystal_lattice_planes_material = rotate(crystal_lattice_planes_material, angle=180, axis=[1, 0, 0])
+            termination = configuration.termination_bottom
+        else:
+            raise ValueError(
+                "Either termination_top or termination_bottom is required for AtomicLayersUniqueRepeatedBuilder"
             )
+
+        translation_vector = (
+            crystal_lattice_planes_material_analyzer.get_translation_vector_for_termination_without_vacuum(termination)
         )
         material_translated = translate(crystal_lattice_planes_material, translation_vector)
         material_translated_wrapped = wrap_to_unit_cell(material_translated)
@@ -35,9 +42,15 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
     ) -> MaterialWithBuildMetadata:
         material_analyzer = BaseMaterialAnalyzer(material=material)
         material.formula = material_analyzer.formula
-        termination = configuration.termination_top
         miller_indices_str = str(MillerIndices(root=configuration.miller_indices))
-        # for example: "Si(001), termination Si_P4/mmm_1"
-        new_name = f"{material.formula}{miller_indices_str}, termination {termination}"
+
+        if configuration.termination_top is not None:
+            termination_str = f"termination {configuration.termination_top}"
+        elif configuration.termination_bottom is not None:
+            termination_str = f"bottom termination {configuration.termination_bottom}"
+        else:
+            termination_str = ""
+
+        new_name = f"{material.formula}{miller_indices_str}, {termination_str}"
         material.name = new_name
         return material

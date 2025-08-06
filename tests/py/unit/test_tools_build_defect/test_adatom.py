@@ -47,6 +47,8 @@ def test_create_adatom(
         crystal=Material.create(crystal_config),
         number_of_layers=2,
         xy_supercell_matrix=[[2, 0], [0, 2]],
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
     defect = create_adatom_defect(slab, position_on_surface, distance_z, adatom_placement_method, chemical_element)
 

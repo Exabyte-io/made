@@ -12,12 +12,16 @@ from .....build_components.metadata import MaterialWithBuildMetadata
 from .....build_components import select_slab_termination
 from .....build_components.operations.core.combinations.stack.configuration import StackConfiguration
 from .....build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from .....build_components.entities.auxiliary.two_dimensional.termination import Termination
 
 
 class SlabConfiguration(StackConfiguration, SlabConfigurationSchema):
     type: str = "SlabConfiguration"
     stack_components: List[Union[AtomicLayersUniqueRepeatedConfiguration, VacuumConfiguration]]  # No Materials!
     direction: AxisEnum = AxisEnum.z
+
+    termination_top: Optional[Termination] = None
+    termination_bottom: Optional[Termination] = None
 
     @property
     def number_of_layers(self):
@@ -46,7 +50,8 @@ class SlabConfiguration(StackConfiguration, SlabConfigurationSchema):
         material_or_dict: Union[Material, dict],
         miller_indices: Tuple[int, int, int],
         number_of_layers: int,
-        termination_formula: Optional[str] = None,
+        termination_top_formula: Optional[str] = None,
+        termination_bottom_formula: Optional[str] = None,
         vacuum: float = 10.0,
         use_conventional_cell: bool = True,
     ) -> "SlabConfiguration":
@@ -71,14 +76,16 @@ class SlabConfiguration(StackConfiguration, SlabConfigurationSchema):
             material=material, miller_indices=miller_indices
         )
         terminations = crystal_lattice_planes_analyzer.terminations
-        termination = select_slab_termination(terminations, termination_formula)
+        termination_top = select_slab_termination(terminations, termination_top_formula)
+        termination_bottom = select_slab_termination(terminations, termination_bottom_formula)
 
         if use_conventional_cell:
             material = crystal_lattice_planes_analyzer.material_with_conventional_lattice
         atomic_layers_repeated_configuration = AtomicLayersUniqueRepeatedConfiguration(
             crystal=material,
             miller_indices=miller_indices,
-            termination_top=termination,
+            termination_top=termination_top,
+            termination_bottom=termination_bottom,
             number_of_repetitions=number_of_layers,
         )
 
