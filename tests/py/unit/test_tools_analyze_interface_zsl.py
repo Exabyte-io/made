@@ -4,11 +4,9 @@ from typing import Final
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabConfiguration
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab_strained_supercell.builder import (
     SlabStrainedSupercellBuilder,
-)
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import (
-    SlabConfiguration,
 )
 from mat3ra.made.tools.utils import supercell_matrix_2d_schema_to_list, unwrap
 from mat3ra.standata.materials import Materials

@@ -7,15 +7,13 @@ from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.materials_category_components.entities.auxiliary.two_dimensional.supercell_matrix_2d import (
     SupercellMatrix2DSchema,
 )
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.build_parameters import SlabBuilderParameters
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 
 from ...build.pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
     SlabStrainedSupercellConfiguration,
 )
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.build_parameters import (
-    SlabBuilderParameters,
-)
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
 
 

@@ -5,7 +5,9 @@ from mat3ra.esse.models.materials_category.pristine_structures.two_dimensional.s
 from mat3ra.made.material import Material
 
 from .....analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
-from .....build_components.entities.reusable.two_dimensional import AtomicLayersUniqueRepeatedConfiguration
+from .....build_components.entities.reusable.two_dimensional.atomic_layers_unique_repeated.configuration import (
+    AtomicLayersUniqueRepeatedConfiguration,
+)
 from .....build_components.metadata import MaterialWithBuildMetadata
 from .....build_components import select_slab_termination
 from .....build_components.operations.core.combinations.stack.configuration import StackConfiguration

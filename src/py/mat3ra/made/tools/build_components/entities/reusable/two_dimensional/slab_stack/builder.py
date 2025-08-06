@@ -2,9 +2,10 @@ from typing import Type
 
 from mat3ra.made.tools.build_components.entities.reusable.base_builder import TypeConfiguration
 
+from ......build.pristine_structures.two_dimensional.slab import SlabBuilder
+from ......build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 from ..... import MaterialWithBuildMetadata
 from .....operations.core.combinations.stack.builder import StackNComponentsBuilder
-from ......build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 from .configuration import SlabStackConfiguration
 
 
@@ -13,7 +14,6 @@ class SlabStackBuilder(StackNComponentsBuilder):
 
     @property
     def stack_component_types_conversion_map(self):
-        from ......build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
         return {
             **super().stack_component_types_conversion_map,
             SlabConfiguration: SlabBuilder,

@@ -1,9 +1,10 @@
-from typing import Union, Tuple, Optional
+from typing import Optional, Tuple, Union
 
 from mat3ra.made.material import Material
-from .. import AtomicLayersUniqueRepeatedConfiguration, AtomicLayersUniqueRepeatedBuilder
-from ....auxiliary.two_dimensional.termination import Termination
+
 from ..... import MaterialWithBuildMetadata
+from ....auxiliary.two_dimensional.termination import Termination
+from .. import AtomicLayersUniqueRepeatedBuilder, AtomicLayersUniqueRepeatedConfiguration
 
 
 def create_atomic_layers(
