@@ -5,7 +5,7 @@ from mat3ra.made.material import Material
 
 from ......operations.core.unary import supercell
 from ..... import MaterialWithBuildMetadata
-from ....auxiliary.three_dimensional.supercell_matrix_3d import SupercellConfiguration
+from .configuration import SupercellConfiguration
 
 
 def create_supercell(

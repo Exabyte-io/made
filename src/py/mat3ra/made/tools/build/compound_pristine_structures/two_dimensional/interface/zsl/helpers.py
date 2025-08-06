@@ -11,7 +11,7 @@ from ......build.compound_pristine_structures.two_dimensional.interface import (
     InterfaceBuilder,
     InterfaceConfiguration,
 )
-from ......build.pristine_structures.two_dimensional.slab.helpers import create_slab
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from ......build_components import MaterialWithBuildMetadata
 from ......build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 

@@ -7,7 +7,7 @@ from mat3ra.esse.models.materials_category.defective_structures.one_dimensional.
 
 # fmt: on
 from ....compound_pristine_structures.two_dimensional.interface import InterfaceConfiguration
-from .....build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 
 
 class GrainBoundaryLinearConfiguration(InterfaceConfiguration, GrainBoundaryLinearConfigurationSchema):

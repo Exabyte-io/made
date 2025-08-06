@@ -2,10 +2,10 @@ from typing import Type
 
 from mat3ra.made.tools.build_components.entities.reusable.base_builder import TypeConfiguration
 
+from ......build.pristine_structures.two_dimensional.slab import SlabBuilder
+from ......build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 from ..... import MaterialWithBuildMetadata
 from .....operations.core.combinations.stack.builder import StackNComponentsBuilder
-from ..atomic_layers.builder import SlabBuilder
-from ..atomic_layers.configuration import SlabConfiguration
 from .configuration import SlabStackConfiguration
 
 

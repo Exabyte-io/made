@@ -12,7 +12,7 @@ from ....compound_pristine_structures.two_dimensional.interface import Interface
 from ....pristine_structures.two_dimensional.slab_strained_supercell.configuration import \
     SlabStrainedSupercellConfiguration
 from .....build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
-from .....build_components.entities.reusable.two_dimensional.atomic_layers.configuration import \
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import \
     SlabConfiguration
 
 

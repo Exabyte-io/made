@@ -23,11 +23,8 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
     create_twisted_interface,
 )
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon.helpers import create_nanoribbon
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import (
-    SlabConfiguration,
-)
 from mat3ra.standata.materials import Materials
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 

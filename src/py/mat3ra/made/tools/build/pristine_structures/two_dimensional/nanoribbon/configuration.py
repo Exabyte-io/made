@@ -10,7 +10,7 @@ from .....build_components.entities.core.two_dimensional.vacuum.configuration im
 from .....build_components.operations.core.combinations.stack.configuration import StackConfiguration
 
 
-class NanoribbonConfiguration(NanoribbonConfigurationSchema, StackConfiguration):
+class NanoribbonConfiguration(StackConfiguration, NanoribbonConfigurationSchema):
     """
     Configuration for building a nanoribbon from a nanotape.
     Nanoribbon = [NanoTape, vacuum] stacked in X or Y direction.

@@ -5,9 +5,7 @@ import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
-from mat3ra.made.tools.build_components.entities.reusable.two_dimensional.atomic_layers.configuration import (
-    SlabConfiguration,
-)
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabConfiguration
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE

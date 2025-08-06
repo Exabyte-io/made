@@ -1,4 +1,4 @@
-from typing import Optional, Any, Type, Union
+from typing import Optional, Any, Type, Union, cast
 
 import numpy as np
 
@@ -11,7 +11,6 @@ from .....pristine_structures.two_dimensional.slab_strained_supercell.configurat
     SlabStrainedSupercellConfiguration,
 )
 from ......analyze import BaseMaterialAnalyzer
-from ......analyze.build_metadata_analyzer import TypeConfiguration
 from ......analyze.lattice import get_material_with_primitive_lattice
 from ......build_components import MaterialWithBuildMetadata
 from ......build_components.operations.core.combinations.stack.builder import StackNComponentsBuilder
@@ -39,7 +38,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
             SlabStrainedSupercellConfiguration: SlabStrainedSupercellBuilder,
         }
 
-    def _generate(self, configuration: TypeConfiguration) -> MaterialWithBuildMetadata:
+    def _generate(self, configuration: InterfaceConfiguration) -> MaterialWithBuildMetadata:
         film_material = self._stack_component_to_material(configuration.film_configuration, configuration)
         substrate_material = self._stack_component_to_material(configuration.substrate_configuration, configuration)
 
@@ -79,9 +78,10 @@ class InterfaceBuilder(StackNComponentsBuilder):
         self,
         material: MaterialWithBuildMetadata,
         post_process_parameters: Optional[Any],
-        configuration: Optional[TypeConfiguration] = None,
+        configuration: Optional[InterfaceConfiguration] = None,
     ) -> MaterialWithBuildMetadata:
-        if self.build_parameters.make_primitive:
+        build_params = cast(InterfaceBuilderParameters, self.build_parameters)
+        if build_params.make_primitive:
             # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
             primitive_material = get_material_with_primitive_lattice(material, return_original_if_not_reduced=True)
 
@@ -114,7 +114,7 @@ class InterfaceBuilder(StackNComponentsBuilder):
         return f"Interface, Strain {strain:.3f}pct"
 
     def _update_material_name(
-        self, material: Union[Material, MaterialWithBuildMetadata], configuration: TypeConfiguration
+        self, material: Union[Material, MaterialWithBuildMetadata], configuration: InterfaceConfiguration
     ) -> MaterialWithBuildMetadata:
         base_name = self.get_base_name_from_configuration(
             configuration.film_configuration, configuration.substrate_configuration

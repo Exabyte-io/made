@@ -7,7 +7,7 @@ from .configuration import IslandDefectConfiguration
 from .....analyze.slab import SlabMaterialAnalyzer
 from .....build_components import MaterialWithBuildMetadata
 from .....build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
-from .....build_components.entities.reusable.two_dimensional.atomic_layers.builder import SlabBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
 from .....build_components.entities.reusable.two_dimensional.slab_stack.helpers import (
     recreate_slab_with_fractional_layers,
 )

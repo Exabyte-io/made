@@ -12,7 +12,7 @@ from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lin
 )
 
 
-class NanoTapeConfiguration(NanoTapeConfigurationSchema, StackConfiguration):
+class NanoTapeConfiguration(StackConfiguration, NanoTapeConfigurationSchema):
     """
     Configuration for building a nanotape from crystal lattice lines.
     NanoTape = [CrystalLatticeLinesUniqueRepeatedConfiguration, vacuum] stacked in X or Y direction.

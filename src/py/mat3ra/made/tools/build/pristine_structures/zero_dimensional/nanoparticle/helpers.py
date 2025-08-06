@@ -10,7 +10,7 @@ from . import (
     ASEBasedNanoparticleBuilder,
 )
 from .analyzer import NanoparticleMaterialAnalyzer
-from ...two_dimensional.slab.helpers import create_slab
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from ....defective_structures.two_dimensional.island.helpers import CoordinateConditionType
 from .....analyze.other import get_closest_site_id_from_coordinate
 from .....build_components import MaterialWithBuildMetadata

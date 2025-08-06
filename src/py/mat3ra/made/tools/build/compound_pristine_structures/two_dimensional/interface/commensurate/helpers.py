@@ -10,7 +10,7 @@ from .....pristine_structures.two_dimensional.slab_strained_supercell.configurat
 )
 from ......analyze.interface import CommensurateLatticeInterfaceAnalyzer
 from ......analyze.lattice import get_material_with_conventional_lattice
-from ......build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 from ......build_components.metadata import MaterialWithBuildMetadata
 
 

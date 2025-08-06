@@ -1,8 +1,8 @@
 from typing import Tuple
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 
-from ...build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
 from ...modify import translate_to_center
 from ...operations.core.unary import rotate
 from ..other import get_surface_area
