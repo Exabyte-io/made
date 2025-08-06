@@ -5,12 +5,13 @@ from mat3ra.esse.models.materials_category.compound_pristine_structures.two_dime
     InterfaceConfigurationSchema,
 )
 
-from ......analyze.utils import calculate_von_mises_strain
 from .....pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
     SlabStrainedSupercellConfiguration,
 )
+from ......analyze.utils import calculate_von_mises_strain
 from ......build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from ......build_components.operations.core.combinations.stack.configuration import StackConfiguration
+from ......utils import unwrap
 
 
 class InterfaceConfiguration(StackConfiguration, InterfaceConfigurationSchema):

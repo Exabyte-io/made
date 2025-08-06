@@ -1,18 +1,24 @@
-from typing import Type
+from typing import Type, Optional, Any
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
-from ..... import MaterialWithBuildMetadata
 
-from mat3ra.made.tools.build_components.entities.reusable.base_builder import (
-    BaseSingleBuilder,
-    TypeConfiguration,
-)
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 from .configuration import VacuumConfiguration
+from ....reusable.base_builder import BaseSingleBuilder, TypeConfiguration
+from ..... import MaterialWithBuildMetadata
 
 
 class VacuumBuilder(BaseSingleBuilder):
     _ConfigurationType: Type[VacuumConfiguration] = VacuumConfiguration
+
+    def get_material(
+        self,
+        configuration: TypeConfiguration,
+        post_process_parameters: Optional[Any] = None,
+    ) -> Optional[MaterialWithBuildMetadata]:
+        if configuration.size == 0.0:
+            return None
+        return super().get_material(configuration, post_process_parameters)
 
     def _generate(self, configuration: TypeConfiguration) -> MaterialWithBuildMetadata:
         reference = configuration.crystal

@@ -4,8 +4,8 @@ from .build_parameters import TerraceBuildParameters
 from .configuration import TerraceDefectConfiguration
 from .....build_components import MaterialWithBuildMetadata
 from .....build_components.entities.reusable.two_dimensional.slab_stack.builder import SlabStackBuilder
-from .....modify import translate_to_z_level, rotate
-from .....operations.core.unary import edit_cell
+from .....modify import translate_to_z_level
+from .....operations.core.unary import edit_cell, rotate
 
 
 class TerraceDefectBuilder(SlabStackBuilder):

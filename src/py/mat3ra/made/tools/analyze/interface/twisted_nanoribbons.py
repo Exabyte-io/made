@@ -5,7 +5,8 @@ from . import InterfaceAnalyzer
 from .utils.holders import MatchedSubstrateFilmConfigurationHolder
 from ..other import get_surface_area
 from ...build_components.entities.reusable.two_dimensional.atomic_layers.configuration import SlabConfiguration
-from ...modify import rotate, translate_to_center
+from ...modify import translate_to_center
+from ...operations.core.unary import rotate
 
 
 class TwistedNanoribbonsInterfaceAnalyzer(InterfaceAnalyzer):
