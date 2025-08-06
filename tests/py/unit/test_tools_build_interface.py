@@ -14,13 +14,13 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
     InterfaceConfiguration,
 )
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
-    create_simple_interface_between_slabs,
+    create_interface_simple_between_slabs,
 )
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.commensurate.helpers import (
-    create_commensurate_interface,
+    create_interface_commensurate,
 )
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.twisted.helpers import (
-    create_twisted_interface,
+    create_interface_twisted,
 )
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon.helpers import create_nanoribbon
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
@@ -126,7 +126,7 @@ def test_create_simple_interface_between_slabs(substrate, film, expected_interfa
     substrate_slab = SlabBuilder().get_material(substrate_slab_config)
     film_slab = SlabBuilder().get_material(film_slab_config)
 
-    interface = create_simple_interface_between_slabs(
+    interface = create_interface_simple_between_slabs(
         substrate_slab=substrate_slab,
         film_slab=film_slab,
         gap=None,
@@ -173,7 +173,7 @@ def test_create_twisted_interface(material_config, config_params, expected_inter
         vacuum_length=15.0,
     )
 
-    interface = create_twisted_interface(
+    interface = create_interface_twisted(
         material1=nanoribbon1,
         material2=nanoribbon2,
         angle=config_params["twist_angle"],
@@ -216,7 +216,7 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
         vacuum=0.0,
     )
 
-    interface = create_commensurate_interface(
+    interface = create_interface_commensurate(
         material=slab,
         target_angle=analyzer_params["target_angle"],
         angle_tolerance=analyzer_params["angle_tolerance"],

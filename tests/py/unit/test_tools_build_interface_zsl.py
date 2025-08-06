@@ -7,8 +7,8 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
     InterfaceConfiguration,
 )
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.zsl.helpers import (
-    create_zsl_interface,
-    create_zsl_interface_between_slabs,
+    create_interface_zsl,
+    create_interface_zsl_between_slabs,
 )
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
 from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
@@ -97,7 +97,7 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
 
 @pytest.mark.parametrize("substrate, film,gap, vacuum, max_area,  expected_interface", [GRAPHENE_NICKEL_TEST_CASE])
 def test_create_zsl_interface(substrate, film, gap, vacuum, max_area, expected_interface):
-    interface = create_zsl_interface(
+    interface = create_interface_zsl(
         substrate_crystal=substrate.bulk_config,
         film_crystal=film.bulk_config,
         substrate_miller_indices=substrate.miller_indices,
@@ -144,7 +144,7 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
     substrate_slab = SlabBuilder().get_material(substrate_slab_config)
     film_slab = SlabBuilder().get_material(film_slab_config)
 
-    interface = create_zsl_interface_between_slabs(
+    interface = create_interface_zsl_between_slabs(
         substrate_slab=substrate_slab,
         film_slab=film_slab,
         gap=gap,

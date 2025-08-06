@@ -12,7 +12,7 @@ from ......build_components import MaterialWithBuildMetadata
 from ......build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 
 
-def create_simple_interface_between_slabs(
+def create_interface_simple_between_slabs(
     substrate_slab: MaterialWithBuildMetadata,
     film_slab: MaterialWithBuildMetadata,
     gap: Optional[float] = None,

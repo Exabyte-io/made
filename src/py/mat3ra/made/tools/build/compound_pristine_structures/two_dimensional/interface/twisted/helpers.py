@@ -11,7 +11,7 @@ from ......build_components import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configuration import SlabConfiguration
 
 
-def create_twisted_interface(
+def create_interface_twisted(
     material1: Union[Material, MaterialWithBuildMetadata],
     material2: Union[Material, MaterialWithBuildMetadata],
     angle: float = 0.0,
