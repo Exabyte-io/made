@@ -2,7 +2,10 @@ from types import SimpleNamespace
 
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.heterostructure import create_heterostructure
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.heterostructure import (
+    StackComponentDict,
+    create_heterostructure,
+)
 from mat3ra.standata.materials import Materials
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL
@@ -29,14 +32,19 @@ Si_SiO2_Hf2O_HETEROSTRUCTURE_TEST_CASE = (
 
 @pytest.mark.parametrize("layers, gaps, vacuum", [Si_SiO2_Hf2O_HETEROSTRUCTURE_TEST_CASE])
 def test_create_heterostructure_simple(layers, gaps, vacuum):
-    crystals = [Material.create(layer.bulk_config) for layer in layers]
-    miller_indices = [layer.miller_indices for layer in layers]
-    thicknesses = [layer.number_of_layers for layer in layers]
+    # Convert raw test data to Pydantic models
+    stack_components = []
+    for layer in layers:
+        component_data = {
+            "crystal": Material.create(layer.bulk_config),
+            "miller_indices": layer.miller_indices,
+            "thickness": layer.number_of_layers,
+        }
+        component = StackComponentDict(**component_data)
+        stack_components.append(component)
 
     heterostructure = create_heterostructure(
-        crystals=crystals,
-        miller_indices=miller_indices,
-        thicknesses=thicknesses,
+        stack_component_dicts=stack_components,
         gaps=gaps,
         vacuum=vacuum,
     )

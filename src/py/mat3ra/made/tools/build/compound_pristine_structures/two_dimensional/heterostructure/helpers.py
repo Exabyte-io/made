@@ -1,8 +1,8 @@
-from typing import List, Tuple, Union
+from typing import List
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
-from mat3ra.made.material import Material
+from .types import StackComponentDict
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction
 from ....pristine_structures.two_dimensional.slab.helpers import create_slab
 from ....pristine_structures.two_dimensional.slab_strained_supercell.builder import SlabStrainedSupercellBuilder
@@ -14,9 +14,7 @@ from .....operations.core.binary import stack
 
 
 def create_heterostructure(
-    crystals: List[Union[Material, MaterialWithBuildMetadata]],
-    miller_indices: List[Tuple[int, int, int]],
-    thicknesses: List[int],
+    stack_component_dicts: List[StackComponentDict],
     gaps: List[float],
     vacuum: float = 10.0,
     use_conventional_cell: bool = True,
@@ -24,12 +22,9 @@ def create_heterostructure(
 ) -> MaterialWithBuildMetadata:
     """
     Create a heterostructure by stacking multiple slabs, while applying strain to each slab relative to the first slab.
-    If `optimize_layer_supercells` is True, it will find larger supercells for strained layers to match the substrate.
 
     Args:
-        crystals: List of crystal materials to create slabs from
-        miller_indices: List of Miller indices for each slab surface
-        thicknesses: List of layer thicknesses for each slab
+        stack_component_dicts: List of validated stack component configurations
         gaps: List of gaps between adjacent slabs (in Angstroms)
         vacuum: Size of vacuum layer in Angstroms
         use_conventional_cell: Whether to use conventional cell
@@ -38,26 +33,21 @@ def create_heterostructure(
     Returns:
         Heterostructure material with stacked strained slabs
     """
-    if len(crystals) < 2:
-        raise ValueError("At least 2 crystals are required for a heterostructure")
+    if len(stack_component_dicts) < 2:
+        raise ValueError("At least 2 stack components are required for a heterostructure")
 
-    if len(miller_indices) != len(crystals):
-        raise ValueError("Number of Miller indices must match number of crystals")
-
-    if len(thicknesses) != len(crystals):
-        raise ValueError("Number of thicknesses must match number of crystals")
-
-    if len(gaps) != len(crystals) - 1:
-        raise ValueError("Number of gaps must be one less than number of crystals")
+    if len(gaps) != len(stack_component_dicts) - 1:
+        raise ValueError("Number of gaps must be one less than number of stack components")
 
     slabs = []
-    for i, (crystal, miller, thickness) in enumerate(zip(crystals, miller_indices, thicknesses)):
+    for i, component in enumerate(stack_component_dicts):
         slab = create_slab(
-            crystal=crystal,
-            miller_indices=miller,
-            number_of_layers=thickness,
-            vacuum=0.0 if i < len(crystals) - 1 else vacuum,
+            crystal=component.crystal,
+            miller_indices=component.miller_indices,
+            number_of_layers=component.thickness,
+            vacuum=0.0 if i < len(stack_component_dicts) - 1 else vacuum,
             use_conventional_cell=use_conventional_cell,
+            xy_supercell_matrix=component.xy_supercell or [[1, 0], [0, 1]],
         )
         slabs.append(slab)
 
@@ -93,19 +83,19 @@ def create_heterostructure(
             stacked_materials.append(slab)
 
     heterostructure = stack(stacked_materials, AxisEnum.z)
-    heterostructure.name = generate_heterostructure_name(crystals, miller_indices)
+    heterostructure.name = generate_heterostructure_name(stack_component_dicts)
 
     return heterostructure
 
 
-def generate_heterostructure_name(crystals, miller_indices):
+def generate_heterostructure_name(stack_component_dicts: List[StackComponentDict]):
     """Generate a descriptive name for the heterostructure."""
 
     components = []
-    for crystal, miller in zip(crystals, miller_indices):
-        analyzer = BaseMaterialAnalyzer(material=crystal)
+    for component in stack_component_dicts:
+        analyzer = BaseMaterialAnalyzer(material=component.crystal)
         formula = analyzer.formula
-        miller_str = "".join(map(str, miller))
+        miller_str = "".join(map(str, component.miller_indices))
         components.append(f"{formula}({miller_str})")
 
     return f"Heterostructure [{'/'.join(components)}]"

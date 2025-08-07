@@ -1,5 +1,6 @@
 # Defective Structures
 from .build.compound_pristine_structures.two_dimensional.heterostructure import create_heterostructure
+from .build.compound_pristine_structures.two_dimensional.heterostructure.types import StackComponentDict
 
 # Compound Pristine Structures
 from .build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
@@ -135,6 +136,7 @@ __all__ = [
     # Type Definitions
     "AdatomDefectDict",
     "PointDefectDict",
+    "StackComponentDict",
 ]
 
 # Aliases

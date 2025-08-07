@@ -55,7 +55,7 @@ def create_defect_adatom(
             AdatomDefectDict(
                 **{
                     "element": element or "Si",  # Default to Silicon if no element provided
-                    "coordinate": position_on_surface,
+                    "coordinate_2d": position_on_surface,
                     "distance_z": distance_z,
                     "use_cartesian_coordinates": use_cartesian_coordinates,
                 }
