@@ -88,9 +88,17 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
         a = np.linalg.norm(vectors[0])
         b = np.linalg.norm(vectors[1])
         c = np.linalg.norm(vectors[2])
-        alpha = np.degrees(np.arccos(np.dot(vectors[1], vectors[2]) / (b * c)))
-        beta = np.degrees(np.arccos(np.dot(vectors[0], vectors[2]) / (a * c)))
-        gamma = np.degrees(np.arccos(np.dot(vectors[0], vectors[1]) / (a * b)))
+        bc = b * c
+        ac = a * c
+        ab = a * b
+
+        if bc == 0 or ac == 0 or ab == 0:
+            print("Vectors:", vectors)
+            raise ValueError("Vectors must not be zero vectors.")
+
+        alpha = np.degrees(np.arccos(np.dot(vectors[1], vectors[2]) / bc))
+        beta = np.degrees(np.arccos(np.dot(vectors[0], vectors[2]) / ac))
+        gamma = np.degrees(np.arccos(np.dot(vectors[0], vectors[1]) / ab))
 
         return cls(
             a=float(a),

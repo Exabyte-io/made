@@ -5,8 +5,8 @@ from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.made.material import Material
 
-from ...build import MaterialWithBuildMetadata
-from ...build.perturbation.functions import FunctionHolder
+from ...build_components import MaterialWithBuildMetadata
+from ...build_components.operations.core.modifications.perturb import FunctionHolder
 from ...convert import from_ase, to_ase
 from ...modify import translate_by_vector, wrap_to_unit_cell
 from ...third_party import ase_make_supercell
@@ -98,4 +98,29 @@ def perturb(
     new_material.set_coordinates(perturbed_coordinates)
     if use_cartesian_coordinates:
         new_material.to_crystal()
+    return new_material
+
+
+def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True, rotate_cell=False) -> Material:
+    """
+    Rotate the material around a given axis by a specified angle.
+
+    Args:
+        material (Material): The material to rotate.
+        axis (List[int]): The axis to rotate around, expressed as [x, y, z].
+        angle (float): The angle of rotation in degrees.
+        wrap (bool): Whether to wrap the material to the unit cell.
+        rotate_cell (bool): Whether to rotate the cell.
+    Returns:
+        Atoms: The rotated material.
+    """
+    original_is_in_cartesian_units = material.basis.is_in_cartesian_units
+    material.to_crystal()
+    atoms = to_ase(material)
+    atoms.rotate(v=axis, a=angle, center="COU", rotate_cell=rotate_cell)
+    if wrap:
+        atoms.wrap()
+    new_material = MaterialWithBuildMetadata.create(from_ase(atoms))
+    if original_is_in_cartesian_units:
+        new_material.to_cartesian()
     return new_material

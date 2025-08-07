@@ -2,15 +2,16 @@ from types import SimpleNamespace
 
 import pytest
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.interface import (
-    InterfaceBuilder,
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.builder import InterfaceBuilder
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.configuration import (
     InterfaceConfiguration,
+)
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.zsl.helpers import (
     create_zsl_interface,
     create_zsl_interface_between_slabs,
 )
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
+from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from mat3ra.standata.materials import Materials
 
 from .fixtures.interface.gr_ni_111_top_hcp import (

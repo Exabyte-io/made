@@ -1,6 +1,6 @@
 import pytest
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.passivation.helpers import (
+from mat3ra.made.tools.build.processed_structures.two_dimensional.passivation.helpers import (
     get_coordination_numbers_distribution,
     get_unique_coordination_numbers,
     passivate_dangling_bonds,

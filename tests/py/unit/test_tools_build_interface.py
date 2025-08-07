@@ -6,18 +6,25 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.interface import (
-    InterfaceBuilder,
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.build_parameters import (
     InterfaceBuilderParameters,
+)
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.builder import InterfaceBuilder
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.configuration import (
     InterfaceConfiguration,
-    create_commensurate_interface,
+)
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
     create_simple_interface_between_slabs,
+)
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.commensurate.helpers import (
+    create_commensurate_interface,
+)
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.twisted.helpers import (
     create_twisted_interface,
 )
-from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
-from mat3ra.made.tools.build.slab.helpers import create_slab
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon.helpers import create_nanoribbon
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from mat3ra.standata.materials import Materials
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
