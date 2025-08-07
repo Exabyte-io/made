@@ -14,7 +14,7 @@ from ..point_defect import (
 from .....build_components import MaterialWithBuildMetadata
 
 
-def create_pair_defect(
+def create_defect_pair(
     material: Union[Material, MaterialWithBuildMetadata],
     defect_type_1: Optional[PointDefectTypeEnum] = None,
     coordinate_1: Optional[List[float]] = None,

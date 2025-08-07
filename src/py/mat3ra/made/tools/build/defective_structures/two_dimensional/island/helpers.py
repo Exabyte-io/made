@@ -25,7 +25,7 @@ from .....modify import filter_by_condition_on_coordinates
 CoordinateConditionType = TypeVar("CoordinateConditionType", bound=CoordinateCondition)
 
 
-def create_island_defect(
+def create_defect_island(
     slab: MaterialWithBuildMetadata,
     condition: Union[
         CylinderCoordinateCondition,

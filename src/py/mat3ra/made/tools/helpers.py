@@ -17,18 +17,18 @@ from .build.compound_pristine_structures.two_dimensional.interface.zsl.helpers i
     create_interface_zsl_between_slabs,
 )
 from .build.defective_structures.one_dimensional.grain_boundary_linear.helpers import create_grain_boundary_linear
-from .build.defective_structures.two_dimensional.adatom.helpers import create_adatom_defect
+from .build.defective_structures.two_dimensional.adatom.helpers import create_defect_adatom
 from .build.defective_structures.two_dimensional.grain_boundary_planar.helpers import create_grain_boundary_planar
-from .build.defective_structures.two_dimensional.island.helpers import create_island_defect, get_coordinate_condition
-from .build.defective_structures.two_dimensional.terrace.helpers import create_terrace_defect
-from .build.defective_structures.zero_dimensional.pair_defect.helpers import create_pair_defect
+from .build.defective_structures.two_dimensional.island.helpers import create_defect_island, get_coordinate_condition
+from .build.defective_structures.two_dimensional.terrace.helpers import create_defect_terrace
+from .build.defective_structures.zero_dimensional.pair_defect.helpers import create_defect_pair
 from .build.defective_structures.zero_dimensional.point_defect.interstitial.helpers import (
-    create_point_defect_interstitial,
+    create_defect_point_interstitial,
 )
 from .build.defective_structures.zero_dimensional.point_defect.substitutional.helpers import (
-    create_point_defect_substitution,
+    create_defect_point_substitution,
 )
-from .build.defective_structures.zero_dimensional.point_defect.vacancy.helpers import create_point_defect_vacancy
+from .build.defective_structures.zero_dimensional.point_defect.vacancy.helpers import create_defect_point_vacancy
 
 # Pristine Structures
 from .build.pristine_structures.three_dimensional.ideal_crystal.helpers import create_monolayer
@@ -64,16 +64,16 @@ __all__ = [
     "create_nanoribbon",
     "create_nanotape",
     # Point Defect Functions
-    "create_point_defect_vacancy",
-    "create_point_defect_substitution",
-    "create_point_defect_interstitial",
+    "create_defect_point_vacancy",
+    "create_defect_point_substitution",
+    "create_defect_point_interstitial",
     # Surface Defect Functions
-    "create_adatom_defect",
-    "create_island_defect",
+    "create_defect_adatom",
+    "create_defect_island",
     "get_coordinate_condition",
-    "create_terrace_defect",
+    "create_defect_terrace",
     # Complex Defect Functions
-    "create_pair_defect",
+    "create_defect_pair",
     "create_slab_stack",
     # Interface Functions
     "create_interface_simple",

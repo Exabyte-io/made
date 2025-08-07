@@ -13,7 +13,7 @@ from .....entities.coordinate import PlaneCoordinateCondition
 from .....modify import filter_by_condition_on_coordinates
 
 
-def create_terrace_defect(
+def create_defect_terrace(
     slab: MaterialWithBuildMetadata,
     cut_direction: Optional[List[int]] = None,
     pivot_coordinate: Optional[List[float]] = None,

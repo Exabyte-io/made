@@ -8,7 +8,7 @@ from ......analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
 from ......build_components import MaterialWithBuildMetadata
 
 
-def create_point_defect_substitution(
+def create_defect_point_substitution(
     material: Union[Material, MaterialWithBuildMetadata],
     coordinate: List[float],
     element: str,

@@ -5,14 +5,14 @@ from .complex_defect_type_enum import ComplexDefectTypeEnum
 from .factories import PointDefectConfigurationFactory, create_defect_configuration, resolve_coordinate
 from .helpers import create_multiple_defects
 from .interstitial.configuration import InterstitialDefectConfiguration
-from .interstitial.helpers import create_point_defect_interstitial
+from .interstitial.helpers import create_defect_point_interstitial
 from .interstitial.interstitial_placement_method_enum import InterstitialPlacementMethodEnum
 from .point_defect_type_enum import PointDefectTypeEnum
 from .substitutional.configuration import SubstitutionalDefectConfiguration
-from .substitutional.helpers import create_point_defect_substitution
+from .substitutional.helpers import create_defect_point_substitution
 from .substitutional.substitution_placement_method_enum import SubstitutionPlacementMethodEnum
 from .vacancy.configuration import VacancyDefectConfiguration
-from .vacancy.helpers import create_point_defect_vacancy
+from .vacancy.helpers import create_defect_point_vacancy
 from .vacancy.vacancy_placement_method_enum import VacancyPlacementMethodEnum
 
 __all__ = [
@@ -34,7 +34,7 @@ __all__ = [
     "create_defect_configuration",
     "resolve_coordinate",
     "create_multiple_defects",
-    "create_point_defect_interstitial",
-    "create_point_defect_substitution",
-    "create_point_defect_vacancy",
+    "create_defect_point_interstitial",
+    "create_defect_point_substitution",
+    "create_defect_point_vacancy",
 ]
