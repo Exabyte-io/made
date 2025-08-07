@@ -1,18 +1,20 @@
 from typing import List, Optional, Union
 
 from mat3ra.made.material import Material
-from ...build_components import MaterialWithBuildMetadata
 from .builder import PairDefectBuilder
 from .configuration import PairDefectConfiguration
-from ..point_defect_type_enum import PointDefectTypeEnum
-from ..vacancy_placement_method_enum import VacancyPlacementMethodEnum
-from ..substitution_placement_method_enum import SubstitutionPlacementMethodEnum
-from ..interstitial_placement_method_enum import InterstitialPlacementMethodEnum
-from ..atom_placement_method_enum import AtomPlacementMethodEnum
-from ..factories import create_defect_configuration
+from ..point_defect import (
+    PointDefectTypeEnum,
+    VacancyPlacementMethodEnum,
+    SubstitutionPlacementMethodEnum,
+    InterstitialPlacementMethodEnum,
+    AtomPlacementMethodEnum,
+    create_defect_configuration,
+)
+from .....build_components import MaterialWithBuildMetadata
 
 
-def create_pair_defect(
+def create_defect_pair(
     material: Union[Material, MaterialWithBuildMetadata],
     defect_type_1: Optional[PointDefectTypeEnum] = None,
     coordinate_1: Optional[List[float]] = None,

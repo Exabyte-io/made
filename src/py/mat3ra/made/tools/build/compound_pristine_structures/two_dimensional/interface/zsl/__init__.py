@@ -1,6 +1,6 @@
-from .helpers import create_zsl_interface, create_zsl_interface_between_slabs
+from .helpers import create_interface_zsl, create_interface_zsl_between_slabs
 
 __all__ = [
-    "create_zsl_interface",
-    "create_zsl_interface_between_slabs",
+    "create_interface_zsl",
+    "create_interface_zsl_between_slabs",
 ]

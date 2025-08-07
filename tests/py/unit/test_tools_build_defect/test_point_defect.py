@@ -9,10 +9,10 @@ from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect 
     VacancyPlacementMethodEnum,
 )
 from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.helpers import (
+    create_defect_point_interstitial,
+    create_defect_point_substitution,
+    create_defect_point_vacancy,
     create_multiple_defects,
-    create_point_defect_interstitial,
-    create_point_defect_substitution,
-    create_point_defect_vacancy,
 )
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.point_defects import (
@@ -73,13 +73,13 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
     crystal = Material.create(material_config)
 
     if defect_params.type == "vacancy":
-        defect = create_point_defect_vacancy(crystal, defect_params.coordinate, defect_params.placement_method)
+        defect = create_defect_point_vacancy(crystal, defect_params.coordinate, defect_params.placement_method)
     elif defect_params.type == "substitution":
-        defect = create_point_defect_substitution(
+        defect = create_defect_point_substitution(
             crystal, defect_params.coordinate, defect_params.element, defect_params.placement_method
         )
     elif defect_params.type == "interstitial":
-        defect = create_point_defect_interstitial(
+        defect = create_defect_point_interstitial(
             crystal, defect_params.coordinate, defect_params.element, defect_params.placement_method
         )
     else:

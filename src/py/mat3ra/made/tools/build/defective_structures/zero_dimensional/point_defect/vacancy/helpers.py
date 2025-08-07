@@ -10,7 +10,7 @@ from .....defective_structures.zero_dimensional.point_defect.vacancy.vacancy_pla
 from ......build_components import MaterialWithBuildMetadata
 
 
-def create_point_defect_vacancy(
+def create_defect_point_vacancy(
     material: Union[Material, MaterialWithBuildMetadata],
     coordinate: List[float],
     placement_method: str,

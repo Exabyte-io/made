@@ -9,7 +9,7 @@ from .interstitial_placement_method_enum import InterstitialPlacementMethodEnum
 from ......build_components import MaterialWithBuildMetadata
 
 
-def create_point_defect_interstitial(
+def create_defect_point_interstitial(
     material: Union[Material, MaterialWithBuildMetadata],
     coordinate: List[float],
     element: str,

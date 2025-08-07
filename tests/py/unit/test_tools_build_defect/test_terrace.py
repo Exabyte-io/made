@@ -1,6 +1,6 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defective_structures.two_dimensional.terrace.helpers import create_terrace
+from mat3ra.made.tools.build.defective_structures.two_dimensional.terrace.helpers import create_defect_terrace
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
 from unit.fixtures.terrace import TERRACE_SLAB_Si_001_3x3
@@ -31,7 +31,7 @@ def test_create_terrace(
         number_of_layers=slab_parameters["number_of_layers"],
         xy_supercell_matrix=slab_parameters["xy_supercell_matrix"],
     )
-    terrace = create_terrace(
+    terrace = create_defect_terrace(
         slab=slab,
         cut_direction=cut_direction,
         pivot_coordinate=pivot_coordinate,

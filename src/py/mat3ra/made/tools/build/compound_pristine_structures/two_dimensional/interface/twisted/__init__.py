@@ -1,7 +1,7 @@
 from .configuration import TwistedNanoribbonsInterfaceConfiguration
-from .helpers import create_twisted_interface
+from .helpers import create_interface_twisted
 
 __all__ = [
     "TwistedNanoribbonsInterfaceConfiguration",
-    "create_twisted_interface",
+    "create_interface_twisted",
 ]

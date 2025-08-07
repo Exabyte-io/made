@@ -2,12 +2,12 @@ from types import SimpleNamespace
 from typing import List, Union
 
 from mat3ra.made.material import Material
-from .interstitial.helpers import create_point_defect_interstitial
+from .interstitial.helpers import create_defect_point_interstitial
 from .interstitial.interstitial_placement_method_enum import InterstitialPlacementMethodEnum
 from .point_defect_type_enum import PointDefectTypeEnum
-from .substitutional.helpers import create_point_defect_substitution
+from .substitutional.helpers import create_defect_point_substitution
 from .substitutional.substitution_placement_method_enum import SubstitutionPlacementMethodEnum
-from .vacancy.helpers import create_point_defect_vacancy
+from .vacancy.helpers import create_defect_point_vacancy
 from .vacancy.vacancy_placement_method_enum import VacancyPlacementMethodEnum
 from .....build_components import MaterialWithBuildMetadata
 
@@ -65,7 +65,7 @@ def create_multiple_defects(
         use_cartesian = getattr(defect_configuration, "use_cartesian_coordinates", False)
 
         if defect_type == "vacancy":
-            current_material = create_point_defect_vacancy(
+            current_material = create_defect_point_vacancy(
                 current_material,
                 coordinate=defect_configuration.coordinate,
                 placement_method=defect_configuration.placement_method or VacancyPlacementMethodEnum.CLOSEST_SITE.value,
@@ -73,7 +73,7 @@ def create_multiple_defects(
             )
 
         elif defect_type == "substitution":
-            current_material = create_point_defect_substitution(
+            current_material = create_defect_point_substitution(
                 current_material,
                 coordinate=defect_configuration.coordinate,
                 element=defect_configuration.element,
@@ -83,7 +83,7 @@ def create_multiple_defects(
             )
 
         elif defect_type == "interstitial":
-            current_material = create_point_defect_interstitial(
+            current_material = create_defect_point_interstitial(
                 current_material,
                 coordinate=defect_configuration.coordinate,
                 element=defect_configuration.element,

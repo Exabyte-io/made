@@ -2,7 +2,7 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defective_structures.two_dimensional.adatom.helpers import (
-    create_adatom_defect,
+    create_defect_adatom,
     create_multiple_adatom_defects,
 )
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
@@ -48,7 +48,7 @@ def test_create_adatom(
         number_of_layers=2,
         xy_supercell_matrix=[[2, 0], [0, 2]],
     )
-    defect = create_adatom_defect(slab, position_on_surface, distance_z, adatom_placement_method, chemical_element)
+    defect = create_defect_adatom(slab, position_on_surface, distance_z, adatom_placement_method, chemical_element)
 
     assertion_utils.assert_deep_almost_equal(expected_last_coord, defect.basis.coordinates.values[-1], atol=1e-4)
 
