@@ -1,6 +1,5 @@
 # Defective Structures
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab, get_slab_terminations
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.termination_utils import select_slab_termination
+from .build.compound_pristine_structures.two_dimensional.heterostructure import create_heterostructure
 
 # Compound Pristine Structures
 from .build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
@@ -34,6 +33,8 @@ from .build.defective_structures.zero_dimensional.point_defect.vacancy.helpers i
 from .build.pristine_structures.three_dimensional.ideal_crystal.helpers import create_monolayer
 from .build.pristine_structures.two_dimensional.nanoribbon.helpers import create_nanoribbon
 from .build.pristine_structures.two_dimensional.nanotape.helpers import create_nanotape
+from .build.pristine_structures.two_dimensional.slab.helpers import create_slab, get_slab_terminations
+from .build.pristine_structures.two_dimensional.slab.termination_utils import select_slab_termination
 from .build.pristine_structures.zero_dimensional.nanoparticle.helpers import create_nanoparticle_from_material
 
 # Processed Structures
@@ -67,6 +68,8 @@ __all__ = [
     "create_supercell",
     "create_monolayer",
     "create_perturbation",
+    # heterostructure Functions
+    "create_heterostructure",
     # Nanostructure Functions
     "create_nanoparticle_from_material",
     "create_nanoribbon",
