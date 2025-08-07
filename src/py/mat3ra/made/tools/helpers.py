@@ -1,7 +1,4 @@
 # Defective Structures
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab, get_slab_terminations
-from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.termination_utils import select_slab_termination
-
 # Compound Pristine Structures
 from .build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
     create_interface_simple,
@@ -34,6 +31,8 @@ from .build.defective_structures.zero_dimensional.point_defect.vacancy.helpers i
 from .build.pristine_structures.three_dimensional.ideal_crystal.helpers import create_monolayer
 from .build.pristine_structures.two_dimensional.nanoribbon.helpers import create_nanoribbon
 from .build.pristine_structures.two_dimensional.nanotape.helpers import create_nanotape
+from .build.pristine_structures.two_dimensional.slab.helpers import create_slab, get_slab_terminations
+from .build.pristine_structures.two_dimensional.slab.termination_utils import select_slab_termination
 from .build.pristine_structures.zero_dimensional.nanoparticle.helpers import create_nanoparticle_from_material
 
 # Processed Structures
@@ -49,14 +48,6 @@ from .build_components.entities.reusable.two_dimensional.atomic_layers_unique_re
 )
 from .build_components.entities.reusable.two_dimensional.slab_stack import create_slab_stack
 from .build_components.operations.core.modifications.perturb.helpers import create_perturbation
-
-# Aliases
-create_vacancy = create_defect_point_vacancy
-create_substitution = create_defect_point_substitution
-create_interstitial = create_defect_point_interstitial
-create_adatom = create_defect_adatom
-create_island = create_defect_island
-create_terrace = create_defect_terrace
 
 __all__ = [
     # Slab and related Functions
@@ -75,17 +66,11 @@ __all__ = [
     "create_defect_point_vacancy",
     "create_defect_point_substitution",
     "create_defect_point_interstitial",
-    "create_vacancy",
-    "create_substitution",
-    "create_interstitial",
     # Surface Defect Functions
     "create_defect_adatom",
     "create_defect_island",
     "get_coordinate_condition",
     "create_defect_terrace",
-    "create_adatom",
-    "create_island",
-    "create_terrace",
     # Complex Defect Functions
     "create_defect_pair",
     "create_slab_stack",
@@ -105,3 +90,11 @@ __all__ = [
     # Utility Functions
     "get_optimal_film_displacement",
 ]
+
+# Aliases
+create_vacancy = create_defect_point_vacancy
+create_substitution = create_defect_point_substitution
+create_interstitial = create_defect_point_interstitial
+create_adatom = create_defect_adatom
+create_island = create_defect_island
+create_terrace = create_defect_terrace
