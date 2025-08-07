@@ -1,10 +1,11 @@
-from typing import List, TypedDict
-from typing_extensions import NotRequired
+from typing import List
+
+from pydantic import BaseModel, Field
 
 
-class AdatomDefectDict(TypedDict):
+class AdatomDefectDict(BaseModel):
     """
-    TypedDict for adatom defect configurations used with create_multiple_adatom_defects.
+    Pydantic model for adatom defect configurations used with create_multiple_adatom_defects.
 
     Required fields:
         element: Chemical element for the adatom
@@ -15,7 +16,7 @@ class AdatomDefectDict(TypedDict):
         use_cartesian_coordinates: Whether coordinates are in Cartesian units
     """
 
-    element: str
-    coordinate: List[float]  # [x, y] position on surface
-    distance_z: float
-    use_cartesian_coordinates: NotRequired[bool]  # defaults to False
+    element: str = Field(..., description="Chemical element for the adatom")
+    coordinate: List[float] = Field(..., min_items=2, max_items=2, description="Position on surface as [x, y]")
+    distance_z: float = Field(..., gt=0, description="Distance above surface in Angstroms")
+    use_cartesian_coordinates: bool = False

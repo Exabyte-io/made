@@ -35,11 +35,11 @@ def create_multiple_defects(
     defect_dicts: List[PointDefectDict],
 ) -> Material:
     """
-    Create multiple point defects from a list of dictionaries.
+    Create multiple point defects from a list of PointDefectDict.
 
     Args:
         material (Material): The host material.
-        defect_dicts (List[dict]): List of defect dictionaries with keys:
+        defect_dicts (List[PointDefectDict]): List of defect dictionaries with keys:
             - type: str ("vacancy", "substitution", "interstitial")
             - coordinate: List[float]
             - element: str (required for substitution and interstitial)
@@ -75,7 +75,7 @@ def create_multiple_defects(
             current_material = create_defect_point_substitution(
                 current_material,
                 coordinate=defect_dict.coordinate,
-                element=defect_dict.element,
+                element=defect_dict.element,  # type: ignore # Pydantic validates this at creation
                 placement_method=defect_dict.placement_method or SubstitutionPlacementMethodEnum.CLOSEST_SITE.value,
                 use_cartesian_coordinates=use_cartesian,
             )
@@ -84,7 +84,7 @@ def create_multiple_defects(
             current_material = create_defect_point_interstitial(
                 current_material,
                 coordinate=defect_dict.coordinate,
-                element=defect_dict.element,
+                element=defect_dict.element,  # type: ignore # Pydantic validates this at creation
                 placement_method=defect_dict.placement_method or InterstitialPlacementMethodEnum.EXACT_COORDINATE.value,
                 use_cartesian_coordinates=use_cartesian,
             )
