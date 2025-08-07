@@ -6,6 +6,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction
 from ....pristine_structures.two_dimensional.slab.helpers import create_slab
 from ....pristine_structures.two_dimensional.slab_strained_supercell.builder import SlabStrainedSupercellBuilder
+from .....analyze import BaseMaterialAnalyzer
 from .....analyze.interface import InterfaceAnalyzer
 from .....analyze.slab import SlabMaterialAnalyzer
 from .....build_components import MaterialWithBuildMetadata
@@ -19,20 +20,20 @@ def create_heterostructure(
     gaps: List[float],
     vacuum: float = 10.0,
     use_conventional_cell: bool = True,
-    **analyzer_kwargs,
+    optimize_layer_supercells: bool = True,
 ) -> MaterialWithBuildMetadata:
     """
-    Create a heterostructure by stacking multiple strained slabs with specified gaps.
+    Create a heterostructure by stacking multiple slabs, while applying strain to each slab relative to the first slab.
+    If `optimize_layer_supercells` is True, it will find larger supercells for strained layers to match the substrate.
 
     Args:
         crystals: List of crystal materials to create slabs from
         miller_indices: List of Miller indices for each slab surface
         thicknesses: List of layer thicknesses for each slab
         gaps: List of gaps between adjacent slabs (in Angstroms)
-        analyzer_type: Type of analyzer to use ("simple", "zsl", etc.)
         vacuum: Size of vacuum layer in Angstroms
         use_conventional_cell: Whether to use conventional cell
-        **analyzer_kwargs: Additional arguments for the analyzer
+        optimize_layer_supercells: Whether to find optimal supercells for strained layers
 
     Returns:
         Heterostructure material with stacked strained slabs
@@ -74,8 +75,7 @@ def create_heterostructure(
             film_slab_configuration=film_analyzer.build_configuration,
             substrate_build_parameters=substrate_analyzer.build_parameters,
             film_build_parameters=film_analyzer.build_parameters,
-            optimize_film_supercell=True,
-            **analyzer_kwargs,
+            optimize_film_supercell=optimize_layer_supercells,
         )
 
         strained_film_config = analyzer.film_strained_configuration
@@ -93,5 +93,19 @@ def create_heterostructure(
             stacked_materials.append(slab)
 
     heterostructure = stack(stacked_materials, AxisEnum.z)
+    heterostructure.name = generate_heterostructure_name(crystals, miller_indices)
 
     return heterostructure
+
+
+def generate_heterostructure_name(crystals, miller_indices):
+    """Generate a descriptive name for the heterostructure."""
+
+    components = []
+    for crystal, miller in zip(crystals, miller_indices):
+        analyzer = BaseMaterialAnalyzer(material=crystal)
+        formula = analyzer.formula
+        miller_str = "".join(map(str, miller))
+        components.append(f"{formula}({miller_str})")
+
+    return f"Heterostructure [{'/'.join(components)}]"
