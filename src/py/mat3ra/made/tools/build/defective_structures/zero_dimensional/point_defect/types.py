@@ -1,10 +1,11 @@
-from typing import List, Literal, TypedDict
-from typing_extensions import NotRequired
+from typing import List, Literal, Optional
+
+from pydantic import BaseModel, Field
 
 
-class PointDefectDict(TypedDict):
+class PointDefectDict(BaseModel):
     """
-    TypedDict for point defect configurations used with create_multiple_defects.
+    Pydantic model for point defect configurations used with create_multiple_defects.
 
     Required fields:
         type: The type of defect ("vacancy", "substitution", "interstitial")
@@ -17,7 +18,7 @@ class PointDefectDict(TypedDict):
     """
 
     type: Literal["vacancy", "substitution", "interstitial"]
-    coordinate: List[float]
-    element: NotRequired[str]  # Required for substitution and interstitial
-    placement_method: NotRequired[str]  # "CLOSEST_SITE", "EXACT_COORDINATE", "VORONOI_SITE"
-    use_cartesian_coordinates: NotRequired[bool]  # defaults to False
+    coordinate: List[float] = Field(..., min_items=3, max_items=3, description="Position coordinates as [x, y, z]")
+    element: Optional[str] = None
+    placement_method: Optional[Literal["closest_site", "exact_coordinate", "voronoi_site"]] = None
+    use_cartesian_coordinates: bool = False

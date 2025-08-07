@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from typing import List, Union
 
 from mat3ra.made.material import Material
@@ -57,39 +56,36 @@ def create_multiple_defects(
     current_material = material
 
     for defect_dict in defect_dicts:
-        defect_configuration = SimpleNamespace(**defect_dict)
-        defect_type = defect_configuration.type
+        defect_type = defect_dict.type
 
         if defect_type not in [e.value for e in PointDefectTypeEnum]:
-            raise ValueError(f"Unsupported defect type: {defect_configuration.type}")
+            raise ValueError(f"Unsupported defect type: {defect_dict.type}")
 
-        use_cartesian = getattr(defect_configuration, "use_cartesian_coordinates", False)
+        use_cartesian = getattr(defect_dict, "use_cartesian_coordinates", False)
 
         if defect_type == "vacancy":
             current_material = create_defect_point_vacancy(
                 current_material,
-                coordinate=defect_configuration.coordinate,
-                placement_method=defect_configuration.placement_method or VacancyPlacementMethodEnum.CLOSEST_SITE.value,
+                coordinate=defect_dict.coordinate,
+                placement_method=defect_dict.placement_method or VacancyPlacementMethodEnum.CLOSEST_SITE.value,
                 use_cartesian_coordinates=use_cartesian,
             )
 
         elif defect_type == "substitution":
             current_material = create_defect_point_substitution(
                 current_material,
-                coordinate=defect_configuration.coordinate,
-                element=defect_configuration.element,
-                placement_method=defect_configuration.placement_method
-                or SubstitutionPlacementMethodEnum.CLOSEST_SITE.value,
+                coordinate=defect_dict.coordinate,
+                element=defect_dict.element,
+                placement_method=defect_dict.placement_method or SubstitutionPlacementMethodEnum.CLOSEST_SITE.value,
                 use_cartesian_coordinates=use_cartesian,
             )
 
         elif defect_type == "interstitial":
             current_material = create_defect_point_interstitial(
                 current_material,
-                coordinate=defect_configuration.coordinate,
-                element=defect_configuration.element,
-                placement_method=defect_configuration.placement_method
-                or InterstitialPlacementMethodEnum.EXACT_COORDINATE.value,
+                coordinate=defect_dict.coordinate,
+                element=defect_dict.element,
+                placement_method=defect_dict.placement_method or InterstitialPlacementMethodEnum.EXACT_COORDINATE.value,
                 use_cartesian_coordinates=use_cartesian,
             )
 

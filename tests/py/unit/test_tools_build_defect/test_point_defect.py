@@ -14,6 +14,7 @@ from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.
     create_defect_point_vacancy,
     create_multiple_defects,
 )
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.types import PointDefectDict
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.point_defects import (
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
@@ -123,12 +124,14 @@ def test_create_multiple_defects(material_config, defect_params_list, expected_m
 
     defect_dicts = []
     for defect_params in defect_params_list:
-        defect_dict = {
+        defect_data = {
             "type": defect_params.defect_type,
             "coordinate": defect_params.coordinate,
             "placement_method": defect_params.placement_method if hasattr(defect_params, "placement_method") else None,
             "element": defect_params.element if hasattr(defect_params, "element") else None,
         }
+
+        defect_dict = PointDefectDict(**defect_data)
 
         defect_dicts.append(defect_dict)
 
