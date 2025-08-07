@@ -50,8 +50,16 @@ from .build_components.entities.reusable.two_dimensional.atomic_layers_unique_re
 from .build_components.entities.reusable.two_dimensional.slab_stack import create_slab_stack
 from .build_components.operations.core.modifications.perturb.helpers import create_perturbation
 
+# Aliases
+create_vacancy = create_defect_point_vacancy
+create_substitution = create_defect_point_substitution
+create_interstitial = create_defect_point_interstitial
+create_adatom = create_defect_adatom
+create_island = create_defect_island
+create_terrace = create_defect_terrace
+
 __all__ = [
-    # Core Build Functions
+    # Slab and related Functions
     "create_slab",
     "create_atomic_layers",
     "get_slab_terminations",
@@ -67,11 +75,17 @@ __all__ = [
     "create_defect_point_vacancy",
     "create_defect_point_substitution",
     "create_defect_point_interstitial",
+    "create_vacancy",
+    "create_substitution",
+    "create_interstitial",
     # Surface Defect Functions
     "create_defect_adatom",
     "create_defect_island",
     "get_coordinate_condition",
     "create_defect_terrace",
+    "create_adatom",
+    "create_island",
+    "create_terrace",
     # Complex Defect Functions
     "create_defect_pair",
     "create_slab_stack",
