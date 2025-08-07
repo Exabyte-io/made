@@ -80,7 +80,7 @@ def get_commensurate_strained_configurations(
     return [selected_config.substrate_configuration, selected_config.film_configuration], actual_angle
 
 
-def create_commensurate_interface(
+def create_interface_commensurate(
     material: Union[Material, MaterialWithBuildMetadata],
     target_angle: float = 0.0,
     angle_tolerance: float = 0.1,

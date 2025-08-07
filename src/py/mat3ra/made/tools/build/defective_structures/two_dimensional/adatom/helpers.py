@@ -26,7 +26,7 @@ def get_adatom_defect_analyzer_cls(
         raise ValueError(f"Unsupported placement method: {placement_method}")
 
 
-def create_adatom_defect(
+def create_defect_adatom(
     slab: MaterialWithBuildMetadata,
     position_on_surface: List[float],
     distance_z: float = 1.0,

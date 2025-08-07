@@ -16,7 +16,7 @@ from ......build_components import MaterialWithBuildMetadata
 from ......build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 
 
-def create_zsl_interface(
+def create_interface_zsl(
     substrate_crystal: Union[Material, MaterialWithBuildMetadata],
     film_crystal: Union[Material, MaterialWithBuildMetadata],
     substrate_miller_indices: Tuple[int, int, int] = (0, 0, 1),
@@ -58,7 +58,7 @@ def create_zsl_interface(
         use_conventional_cell=use_conventional_cell,
     )
 
-    return create_zsl_interface_between_slabs(
+    return create_interface_zsl_between_slabs(
         substrate_slab=substrate_slab,
         film_slab=film_slab,
         gap=gap,
@@ -74,7 +74,7 @@ def create_zsl_interface(
     )
 
 
-def create_zsl_interface_between_slabs(
+def create_interface_zsl_between_slabs(
     substrate_slab: MaterialWithBuildMetadata,
     film_slab: MaterialWithBuildMetadata,
     gap: Optional[float] = None,
