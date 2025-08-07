@@ -61,7 +61,9 @@ class SlabConfiguration(StackConfiguration, SlabConfigurationSchema):
             material_or_dict (Union[Material, dict]): Material or dictionary representation of the material.
             miller_indices (Tuple[int, int, int]): Miller indices for the slab surface.
             number_of_layers (int): Number of atomic layers in the slab, in the number of unit cells.
-            termination_formula (Optional[str]): Formula of the termination to use for the slab (i.e. "SrTiO").
+            termination_top_formula (Optional[str]): Formula of the top termination to use for the slab (i.e. "SrTiO").
+            termination_bottom_formula (Optional[str]): Formula of the bottom termination to use for the slab.
+
             vacuum (float): Size of the vacuum layer in Angstroms.
 
         Returns:
