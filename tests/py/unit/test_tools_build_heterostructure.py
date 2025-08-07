@@ -11,18 +11,18 @@ PRECISION = 1e-3
 
 Si_SiO2_Hf2O_HETEROSTRUCTURE_TEST_CASE = (
     [
-        SimpleNamespace(bulk_config=BULK_Si_CONVENTIONAL, miller_indices=(0, 0, 1), number_of_layers=2),
+        SimpleNamespace(bulk_config=BULK_Si_CONVENTIONAL, miller_indices=(0, 0, 1), number_of_layers=3),
         SimpleNamespace(
-            bulk_config=Materials.get_by_name_first_match("SiO2"), miller_indices=(1, 1, 1), number_of_layers=3
+            bulk_config=Materials.get_by_name_first_match("SiO2"), miller_indices=(1, 1, 1), number_of_layers=4
         ),
         SimpleNamespace(
             bulk_config=Materials.get_by_name_first_match("Hafnium.*MCL"), miller_indices=(0, 0, 1), number_of_layers=2
         ),
         SimpleNamespace(
-            bulk_config=Materials.get_by_name_first_match("TiN"), miller_indices=(1, 1, 1), number_of_layers=3
+            bulk_config=Materials.get_by_name_first_match("TiN"), miller_indices=(1, 1, 1), number_of_layers=5
         ),
     ],
-    [2.0, 2.0, 2.0],  # gaps
+    [1.5, 1.0, 1.0],  # gaps
     10.0,  # vacuum
 )
 
@@ -42,7 +42,9 @@ def test_create_heterostructure_simple(layers, gaps, vacuum):
     )
 
     assert isinstance(heterostructure, Material)
-    assert heterostructure.lattice is not None
-    assert heterostructure.basis is not None
+    elements = set()
+    for layer in layers:
+        elements.update(Material.create(layer.bulk_config).basis.elements.values)
+    assert set(heterostructure.basis.elements.values) == elements
 
     assert len(heterostructure.basis.elements.values) > 0
