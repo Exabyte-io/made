@@ -5,6 +5,7 @@ from mat3ra.made.tools.build.defective_structures.two_dimensional.adatom.helpers
     create_defect_adatom,
     create_multiple_adatom_defects,
 )
+from mat3ra.made.tools.build.defective_structures.two_dimensional.adatom.types import AdatomDefectDict
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from mat3ra.made.tools.build_components.operations.core.combinations.enums import AdatomPlacementMethodEnum
 from mat3ra.utils import assertion as assertion_utils
@@ -61,9 +62,9 @@ def test_create_adatom(
         (
             SI_CONVENTIONAL_SLAB_001,
             [
-                {"element": "Si", "coordinate": [0.5, 0.5], "distance_z": 2.0},
-                {"element": "C", "coordinate": [0.25, 0.25], "distance_z": 1.5},
-                {"element": "N", "coordinate": [0.75, 0.75], "distance_z": 1.0},
+                {"element": "Si", "coordinate_2d": [0.5, 0.5], "distance_z": 2.0},
+                {"element": "C", "coordinate_2d": [0.25, 0.25], "distance_z": 1.5},
+                {"element": "N", "coordinate_2d": [0.75, 0.75], "distance_z": 1.0},
             ],
             AdatomPlacementMethodEnum.EXACT_COORDINATE.value,
             SLAB_Si_3_ADATOMS,
@@ -72,6 +73,12 @@ def test_create_adatom(
 )
 def test_create_multiple_adatom_defects(crystal_config, adatom_dicts, placement_method, expected_material_config):
     slab = MaterialWithBuildMetadata.create(crystal_config)
-    defects = create_multiple_adatom_defects(slab, adatom_dicts, placement_method)
+
+    defect_models = []
+    for adatom_data in adatom_dicts:
+        defect_dict = AdatomDefectDict(**adatom_data)
+        defect_models.append(defect_dict)
+
+    defects = create_multiple_adatom_defects(slab, defect_models, placement_method)
     defects.metadata.build = []
     assert_two_entities_deep_almost_equal(defects, expected_material_config)

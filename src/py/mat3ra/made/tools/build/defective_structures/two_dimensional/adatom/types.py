@@ -17,6 +17,6 @@ class AdatomDefectDict(BaseModel):
     """
 
     element: str = Field(..., description="Chemical element for the adatom")
-    coordinate: List[float] = Field(..., min_items=2, max_items=2, description="Position on surface as [x, y]")
+    coordinate_2d: List[float] = Field(..., min_items=2, max_items=2, description="Position on surface as [x, y]")
     distance_z: float = Field(..., gt=0, description="Distance above surface in Angstroms")
     use_cartesian_coordinates: bool = False
