@@ -3,7 +3,7 @@ from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lin
     CrystalLatticeLinesConfiguration,
 )
 from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import (
-    EdgeTypes,
+    EdgeTypesEnum,
 )
 from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines_unique_repeated import (
     CrystalLatticeLinesRepeatedBuilder,
@@ -25,5 +25,5 @@ __all__ = [
     "CrystalLatticeLinesBuilder",
     "CrystalLatticeLinesRepeatedBuilder",
     "create_nanoribbon",
-    "EdgeTypes",
+    "EdgeTypesEnum",
 ]

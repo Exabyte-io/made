@@ -6,13 +6,13 @@ from ......analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
 from ..... import MaterialWithBuildMetadata
 from .....utils import select_slab_termination
 from ..crystal_lattice_lines_unique_repeated.configuration import CrystalLatticeLinesUniqueRepeatedConfiguration
-from .edge_types import EdgeTypes, get_miller_indices_from_edge_type
+from .edge_types import EdgeTypesEnum, get_miller_indices_from_edge_type
 
 
 def create_lattice_lines_config_and_material(
     material: Union[Material, MaterialWithBuildMetadata],
     miller_indices_2d: Optional[Tuple[int, int]],
-    edge_type: Optional[EdgeTypes],
+    edge_type: Optional[EdgeTypesEnum],
     width: int,
     length: int,
     termination_formula: Optional[str] = None,

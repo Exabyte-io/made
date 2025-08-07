@@ -57,6 +57,9 @@ from .build.pristine_structures.zero_dimensional.nanoparticle.helpers import (
     create_nanoparticle_from_material,
 )
 
+# Enums
+from .build.processed_structures.two_dimensional.passivation.enums import SurfaceTypesEnum
+
 # Processed Structures
 from .build.processed_structures.two_dimensional.passivation.helpers import (
     get_coordination_numbers_distribution,
@@ -64,6 +67,7 @@ from .build.processed_structures.two_dimensional.passivation.helpers import (
     passivate_dangling_bonds,
     passivate_surface,
 )
+from .build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import EdgeTypesEnum
 from .build_components.entities.reusable.one_dimensional.crystal_lattice_lines.helpers import (
     create_lattice_lines_config_and_material,
 )
@@ -78,6 +82,9 @@ from .build_components.entities.reusable.two_dimensional.slab_stack.helpers impo
     recreate_slab_with_fractional_layers,
 )
 from .build_components.operations.core.modifications.perturb.helpers import create_perturbation
+
+# Entities
+from .entities.coordinate import CoordinateCondition
 
 __all__ = [
     # Slab and related Functions
@@ -137,6 +144,11 @@ __all__ = [
     "AdatomDefectDict",
     "PointDefectDict",
     "StackComponentDict",
+    # Entities
+    "CoordinateCondition",
+    # Enums
+    "EdgeTypesEnum",
+    "SurfaceTypesEnum",
 ]
 
 # Aliases

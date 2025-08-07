@@ -47,7 +47,7 @@ def create_heterostructure(
             number_of_layers=component.thickness,
             vacuum=0.0 if i < len(stack_component_dicts) - 1 else vacuum,
             use_conventional_cell=use_conventional_cell,
-            xy_supercell_matrix=component.xy_supercell or [[1, 0], [0, 1]],
+            xy_supercell_matrix=component.xy_supercell_matrix or [[1, 0], [0, 1]],
         )
         slabs.append(slab)
 
