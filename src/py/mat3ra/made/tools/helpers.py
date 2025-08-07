@@ -24,6 +24,7 @@ from .build.defective_structures.two_dimensional.adatom.helpers import (
     create_multiple_adatom_defects,
     get_adatom_defect_analyzer_cls,
 )
+from .build.defective_structures.two_dimensional.adatom.types import AdatomDefectDict
 from .build.defective_structures.two_dimensional.grain_boundary_planar.helpers import create_grain_boundary_planar
 from .build.defective_structures.two_dimensional.island.helpers import create_defect_island, get_coordinate_condition
 from .build.defective_structures.two_dimensional.terrace.helpers import create_defect_terrace
@@ -35,6 +36,7 @@ from .build.defective_structures.zero_dimensional.point_defect.interstitial.help
 from .build.defective_structures.zero_dimensional.point_defect.substitutional.helpers import (
     create_defect_point_substitution,
 )
+from .build.defective_structures.zero_dimensional.point_defect.types import PointDefectDict
 from .build.defective_structures.zero_dimensional.point_defect.vacancy.helpers import create_defect_point_vacancy
 
 # Pristine Structures
@@ -130,6 +132,9 @@ __all__ = [
     "get_coordination_numbers_distribution",
     # Utility Functions
     "get_optimal_film_displacement",
+    # Type Definitions
+    "AdatomDefectDict",
+    "PointDefectDict",
 ]
 
 # Aliases

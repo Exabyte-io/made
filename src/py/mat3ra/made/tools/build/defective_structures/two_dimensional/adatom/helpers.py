@@ -6,6 +6,7 @@ from .builder import AdatomDefectBuilder
 from .configuration import (
     AdatomDefectConfiguration,
 )
+from .types import AdatomDefectDict
 from .....analyze.crystal_site.adatom_crystal_site_material_analyzer import (
     AdatomCrystalSiteMaterialAnalyzer,
 )
@@ -65,7 +66,7 @@ def create_defect_adatom(
 
 
 def create_multiple_adatom_defects(
-    slab: MaterialWithBuildMetadata, defect_dicts: List[dict], placement_method: str
+    slab: MaterialWithBuildMetadata, defect_dicts: List[AdatomDefectDict], placement_method: str
 ) -> Material:
     """
     Create multiple adatom defects (at once) from a list of dictionaries.

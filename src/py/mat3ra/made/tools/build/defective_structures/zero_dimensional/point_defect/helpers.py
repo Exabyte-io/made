@@ -7,6 +7,7 @@ from .interstitial.interstitial_placement_method_enum import InterstitialPlaceme
 from .point_defect_type_enum import PointDefectTypeEnum
 from .substitutional.helpers import create_defect_point_substitution
 from .substitutional.substitution_placement_method_enum import SubstitutionPlacementMethodEnum
+from .types import PointDefectDict
 from .vacancy.helpers import create_defect_point_vacancy
 from .vacancy.vacancy_placement_method_enum import VacancyPlacementMethodEnum
 from .....build_components import MaterialWithBuildMetadata
@@ -32,7 +33,7 @@ DEFECT_TYPE_MAPPING = {
 
 def create_multiple_defects(
     material: Union[Material, MaterialWithBuildMetadata],
-    defect_dicts: List[dict],
+    defect_dicts: List[PointDefectDict],
 ) -> Material:
     """
     Create multiple point defects from a list of dictionaries.
