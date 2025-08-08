@@ -4,10 +4,10 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.build_components.entities.reusable.base_builder import BaseSingleBuilder, TypeConfiguration
 
 from ......analyze.lattice_lines import CrystalLatticeLinesMaterialAnalyzer
+from ......build.pristine_structures.two_dimensional.slab.utils import get_orthogonal_c_slab
 from ......modify import translate_to_z_level
 from ......operations.core.unary import supercell
 from ..... import MaterialWithBuildMetadata
-from .....utils import get_orthogonal_c_slab
 from .configuration import CrystalLatticeLinesConfiguration
 
 
