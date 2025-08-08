@@ -6,6 +6,7 @@ import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabConfiguration
+from mat3ra.standata.materials import Materials
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE
@@ -33,6 +34,25 @@ EXPECTED_PROPERTIES_SI_GE_001: Final = SimpleNamespace(
 )
 
 TEST_CASES = [(SUBSTRATE_SI_001, FILM_GE_001, EXPECTED_PROPERTIES_SI_GE_001)]
+
+
+SUBSTRATE_SI_111: Final = SimpleNamespace(
+    bulk_config=BULK_Si_CONVENTIONAL,
+    miller_indices=(1, 1, 1),
+    number_of_layers=2,
+    vacuum=0.0,
+)
+
+FILM_GRAPHENE_001: Final = SimpleNamespace(
+    bulk_config=Materials.get_by_name_first_match("Graphene"),
+    miller_indices=(0, 0, 1),
+    number_of_layers=1,
+    vacuum=0.0,
+)
+
+OPTIMAL_SUPERCELL_TEST_CASES = [
+    (SUBSTRATE_SI_111, FILM_GRAPHENE_001, 4, 4),  # n, m
+]
 
 
 @pytest.mark.parametrize("substrate, film, expected", TEST_CASES)
@@ -143,3 +163,36 @@ def test_commensurate_analyzer_functionality(
         # Test negative match ID
         with pytest.raises(ValueError, match="Match ID .* out of range"):
             analyzer.get_strained_configuration_by_match_id(-1)
+
+
+@pytest.mark.parametrize("substrate, film, expected_n, expected_m", OPTIMAL_SUPERCELL_TEST_CASES)
+def test_optimal_supercell_functions(substrate, film, expected_n, expected_m):
+    """Test the optimal supercell functions with Si/Ge fixtures."""
+    substrate_slab_config = SlabConfiguration.from_parameters(
+        substrate.bulk_config,
+        substrate.miller_indices,
+        substrate.number_of_layers,
+        vacuum=substrate.vacuum,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
+    )
+    film_slab_config = SlabConfiguration.from_parameters(
+        film.bulk_config,
+        film.miller_indices,
+        film.number_of_layers,
+        vacuum=film.vacuum,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
+    )
+
+    analyzer = InterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
+        optimize_film_supercell=True,
+    )
+
+    # Test find_optimal_film_supercell
+    optimal_n, optimal_m = analyzer.find_optimal_film_supercell()
+
+    assert optimal_n == expected_n
+    assert optimal_m == expected_m
