@@ -2,9 +2,9 @@ from typing import Callable, List, Literal, Optional
 
 import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.processed_structures.two_dimensional.passivation.enums import SurfaceTypesEnum
 from scipy.spatial import cKDTree
 
+from ..build.processed_structures.two_dimensional.passivation.enums import SurfaceTypesEnum
 from ..convert import decorator_convert_material_args_kwargs_to_atoms, to_pymatgen
 from ..third_party import ASEAtoms, PymatgenIStructure
 from ..utils import decorator_convert_position_to_coordinate

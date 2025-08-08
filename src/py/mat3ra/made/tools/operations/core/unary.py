@@ -5,7 +5,7 @@ from mat3ra.code.vector import Vector3D
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.made.material import Material
 
-from ...build_components import MaterialWithBuildMetadata
+from ...build_components.metadata import MaterialWithBuildMetadata
 from ...build_components.operations.core.modifications.perturb import FunctionHolder
 from ...convert import from_ase, to_ase
 from ...modify import translate_by_vector, wrap_to_unit_cell
