@@ -15,8 +15,10 @@ def create_slab(
     miller_indices: Tuple[int, int, int] = (0, 0, 1),
     use_conventional_cell=True,
     use_orthogonal_c: bool = True,
-    termination: Optional[Termination] = None,
-    termination_formula: Optional[str] = None,
+    termination_top: Optional[Termination] = None,
+    termination_bottom: Optional[Termination] = None,
+    termination_top_formula: Optional[str] = None,
+    termination_bottom_formula: Optional[str] = None,
     number_of_layers=1,
     vacuum=10.0,
     xy_supercell_matrix=DEFAULT_XY_SUPERCELL_MATRIX,
@@ -46,8 +48,10 @@ def create_slab(
         )
         material_to_use = crystal_lattice_planes_analyzer.material_with_conventional_lattice
 
-    if termination is not None:
-        termination_formula = termination.formula
+    if termination_top is not None:
+        termination_top_formula = termination_top.formula
+    if termination_bottom is not None:
+        termination_bottom_formula = termination_bottom.formula
 
     slab_builder_parameters = SlabBuilderParameters(
         xy_supercell_matrix=xy_supercell_matrix,
@@ -57,7 +61,8 @@ def create_slab(
         material_or_dict=material_to_use,
         miller_indices=miller_indices,
         number_of_layers=number_of_layers,
-        termination_formula=termination_formula,
+        termination_top_formula=termination_top_formula,
+        termination_bottom_formula=termination_bottom_formula,
         vacuum=vacuum,
         use_conventional_cell=use_conventional_cell,
     )

@@ -67,7 +67,12 @@ EXPECTED_PROPERTIES_SI_GE_001: Final = SimpleNamespace(
 )
 def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_min):
     substrate_slab_config = SlabConfiguration.from_parameters(
-        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=0.0
+        substrate.bulk_config,
+        substrate.miller_indices,
+        substrate.number_of_layers,
+        vacuum=0.0,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
     film_slab_config = SlabConfiguration.from_parameters(
         film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=0.0
@@ -150,7 +155,12 @@ def test_zsl_interface_analyzer_sort_by_strain_then_area(
 
     analyzer = ZSLInterfaceAnalyzer(
         substrate_slab_configuration=SlabConfiguration.from_parameters(
-            substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=0.0
+            substrate.bulk_config,
+            substrate.miller_indices,
+            substrate.number_of_layers,
+            vacuum=0.0,
+            termination_top_formula=None,
+            termination_bottom_formula=None,
         ),
         film_slab_configuration=SlabConfiguration.from_parameters(
             film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=0.0

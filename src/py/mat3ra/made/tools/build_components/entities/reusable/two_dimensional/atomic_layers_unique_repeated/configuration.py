@@ -9,5 +9,6 @@ from ..crystal_lattice_planes.configuration import CrystalLatticePlanesConfigura
 
 
 class AtomicLayersUniqueRepeatedConfiguration(CrystalLatticePlanesConfiguration, AtomicLayersUniqueRepeatedSchema):
-    termination_top: Optional[Termination]
+    termination_top: Optional[Termination] = None
+    termination_bottom: Optional[Termination] = None
     number_of_repetitions: int

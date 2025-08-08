@@ -110,7 +110,7 @@ def create_interface_simple(
         miller_indices=substrate_miller_indices,
         number_of_layers=substrate_number_of_layers,
         vacuum=0,
-        termination_formula=substrate_termination_formula,
+        termination_top_formula=substrate_termination_formula,
         xy_supercell_matrix=substrate_xy_supercell_matrix,
         use_conventional_cell=use_conventional_cell,
     )
@@ -119,7 +119,7 @@ def create_interface_simple(
         miller_indices=film_miller_indices,
         number_of_layers=film_number_of_layers,
         vacuum=0,
-        termination_formula=film_termination_formula,
+        termination_top_formula=film_termination_formula,
         xy_supercell_matrix=film_xy_supercell_matrix,
         use_conventional_cell=use_conventional_cell,
     )
