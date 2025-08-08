@@ -15,7 +15,6 @@ class StackConfiguration(StackSchema, BaseConfigurationPydantic):
     direction: AxisEnum = AxisEnum.z
 
     def __init__(self, **data):
-        # Convert gaps to ArrayWithIds if not already
         gaps = data.get("gaps", [])
         if not isinstance(gaps, ArrayWithIds):
             data["gaps"] = ArrayWithIds.from_values(gaps)
