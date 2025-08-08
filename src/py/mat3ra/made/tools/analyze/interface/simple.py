@@ -114,17 +114,20 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
 
         return calculate_von_mises_strain(np.array(unwrap(strain_matrix.root)))
 
-    def _find_optimal_supercell_factor_for_direction(
-        self, substrate_length: float, film_length: float
-    ) -> Tuple[int, int]:
-        max_multiplier = max(1, int(np.ceil(substrate_length / film_length)) + 1)
+    def _find_optimal_supercell_factor_for_direction(self, substrate_length: float, film_length: float) -> int:
+        """
+        Finds a multiplier for the component of diagonal supercell matrix
+            that will get film supercell lattice vector length around substrate length.
+            The N leads to the film supercell vector length being shorter than substrate length,
+            and N+1 leads to the film supercell vector length being longer than substrate length.
+        """
 
         # Find optimal: when n*film_length < substrate_length < (n+1)*film_length
         optimal = max(1, int(substrate_length / film_length))
         if (optimal + 1) * film_length - substrate_length < substrate_length - optimal * film_length:
             optimal += 1
 
-        return optimal, max_multiplier
+        return optimal
 
     def find_optimal_film_supercell(self) -> Tuple[int, int]:
         """
@@ -140,14 +143,11 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
         film_lengths = [np.linalg.norm(film_vectors[i, :2]) for i in range(2)]
 
         optimal_values = []
-        max_values = []
-        for substrate_len, film_len in zip(substrate_lengths, film_lengths):
-            optimal, max_val = self._find_optimal_supercell_factor_for_direction(substrate_len, film_len)
+        for substrate_length, film_length in zip(substrate_lengths, film_lengths):
+            optimal = self._find_optimal_supercell_factor_for_direction(substrate_length, film_length)
             optimal_values.append(optimal)
-            max_values.append(max_val)
 
         n_optimal, m_optimal = optimal_values
-        max_n, max_m = max_values
 
         # Test neighboring values to find minimum strain
         candidates = [
@@ -161,11 +161,10 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
         best_n, best_m = n_optimal, m_optimal
 
         for n, m in candidates:
-            if n > 0 and m > 0 and n <= max_n and m <= max_m:
-                strain = self._calculate_strain_for_film_supercell(n, m)
-                if strain < min_strain:
-                    min_strain = strain
-                    best_n, best_m = n, m
+            strain = self._calculate_strain_for_film_supercell(n, m)
+            if strain < min_strain:
+                min_strain = strain
+                best_n, best_m = n, m
 
         return best_n, best_m
 
