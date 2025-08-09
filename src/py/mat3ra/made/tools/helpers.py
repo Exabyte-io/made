@@ -1,3 +1,7 @@
+# Defective Structures
+from .build.compound_pristine_structures.two_dimensional.heterostructure import create_heterostructure
+from .build.compound_pristine_structures.two_dimensional.heterostructure.types import StackComponentDict
+
 # Compound Pristine Structures
 from .build.compound_pristine_structures.two_dimensional.interface.base.helpers import (
     create_interface_simple,
@@ -21,6 +25,7 @@ from .build.defective_structures.two_dimensional.adatom.helpers import (
     create_multiple_adatom_defects,
     get_adatom_defect_analyzer_cls,
 )
+from .build.defective_structures.two_dimensional.adatom.types import AdatomDefectDict
 from .build.defective_structures.two_dimensional.grain_boundary_planar.helpers import create_grain_boundary_planar
 from .build.defective_structures.two_dimensional.island.helpers import create_defect_island, get_coordinate_condition
 from .build.defective_structures.two_dimensional.terrace.helpers import create_defect_terrace
@@ -32,6 +37,7 @@ from .build.defective_structures.zero_dimensional.point_defect.interstitial.help
 from .build.defective_structures.zero_dimensional.point_defect.substitutional.helpers import (
     create_defect_point_substitution,
 )
+from .build.defective_structures.zero_dimensional.point_defect.types import PointDefectDict
 from .build.defective_structures.zero_dimensional.point_defect.vacancy.helpers import create_defect_point_vacancy
 
 # Pristine Structures
@@ -51,6 +57,9 @@ from .build.pristine_structures.zero_dimensional.nanoparticle.helpers import (
     create_nanoparticle_from_material,
 )
 
+# Enums
+from .build.processed_structures.two_dimensional.passivation.enums import SurfaceTypesEnum
+
 # Processed Structures
 from .build.processed_structures.two_dimensional.passivation.helpers import (
     get_coordination_numbers_distribution,
@@ -58,6 +67,7 @@ from .build.processed_structures.two_dimensional.passivation.helpers import (
     passivate_dangling_bonds,
     passivate_surface,
 )
+from .build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import EdgeTypesEnum
 from .build_components.entities.reusable.one_dimensional.crystal_lattice_lines.helpers import (
     create_lattice_lines_config_and_material,
 )
@@ -73,6 +83,9 @@ from .build_components.entities.reusable.two_dimensional.slab_stack.helpers impo
 )
 from .build_components.operations.core.modifications.perturb.helpers import create_perturbation
 
+# Entities
+from .entities.coordinate import CoordinateCondition
+
 __all__ = [
     # Slab and related Functions
     "create_slab",
@@ -84,6 +97,8 @@ __all__ = [
     "create_supercell",
     "create_monolayer",
     "create_perturbation",
+    # heterostructure Functions
+    "create_heterostructure",
     "create_lattice_lines_config_and_material",
     # Nanostructure Functions
     "create_nanoparticle_from_material",
@@ -125,6 +140,15 @@ __all__ = [
     "get_coordination_numbers_distribution",
     # Utility Functions
     "get_optimal_film_displacement",
+    # Type Definitions
+    "AdatomDefectDict",
+    "PointDefectDict",
+    "StackComponentDict",
+    # Entities
+    "CoordinateCondition",
+    # Enums
+    "EdgeTypesEnum",
+    "SurfaceTypesEnum",
 ]
 
 # Aliases

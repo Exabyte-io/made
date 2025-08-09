@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from typing import List, Optional
 
 from mat3ra.made.material import Material
@@ -6,6 +5,7 @@ from .builder import AdatomDefectBuilder
 from .configuration import (
     AdatomDefectConfiguration,
 )
+from .types import AdatomDefectDict
 from .....analyze.crystal_site.adatom_crystal_site_material_analyzer import (
     AdatomCrystalSiteMaterialAnalyzer,
 )
@@ -52,12 +52,14 @@ def create_defect_adatom(
     slab_with_adatom = create_multiple_adatom_defects(
         slab,
         defect_dicts=[
-            {
-                "element": element or "Si",  # Default to Silicon if no element provided
-                "coordinate": position_on_surface,
-                "distance_z": distance_z,
-                "use_cartesian_coordinates": use_cartesian_coordinates,
-            }
+            AdatomDefectDict(
+                **{
+                    "element": element or "Si",  # Default to Silicon if no element provided
+                    "coordinate_2d": position_on_surface,
+                    "distance_z": distance_z,
+                    "use_cartesian_coordinates": use_cartesian_coordinates,
+                }
+            )
         ],
         placement_method=placement_method,
     )
@@ -65,10 +67,10 @@ def create_defect_adatom(
 
 
 def create_multiple_adatom_defects(
-    slab: MaterialWithBuildMetadata, defect_dicts: List[dict], placement_method: str
+    slab: MaterialWithBuildMetadata, defect_dicts: List[AdatomDefectDict], placement_method: str
 ) -> Material:
     """
-    Create multiple adatom defects (at once) from a list of dictionaries.
+    Create multiple adatom defects from a list of AdatomDefectDict.
 
     Args:
         slab: The slab material.
@@ -99,10 +101,8 @@ def create_multiple_adatom_defects(
     last_analyzer = None
 
     for defect_dict in defect_dicts:
-        defect_configuration = SimpleNamespace(**defect_dict)
-
-        coordinate_2d = defect_configuration.coordinate
-        use_cartesian = getattr(defect_configuration, "use_cartesian_coordinates", False)
+        coordinate_2d = defect_dict.coordinate_2d
+        use_cartesian = defect_dict.use_cartesian_coordinates
 
         if use_cartesian:
             coordinate_3d = coordinate_2d + [0.0]
@@ -112,9 +112,9 @@ def create_multiple_adatom_defects(
         analyzer = analyzer_cls(
             material=slab,
             coordinate_2d=coordinate_2d,
-            distance_z=defect_configuration.distance_z,
+            distance_z=defect_dict.distance_z,
             placement_method=placement_method,
-            element=defect_configuration.element,
+            element=defect_dict.element,
         )
         last_analyzer = analyzer
         all_adatom_configs.append(analyzer.added_component)

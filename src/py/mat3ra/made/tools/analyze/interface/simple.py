@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 from mat3ra.code.entity import InMemoryEntityPydantic
@@ -14,7 +14,10 @@ from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.configurat
 from ...build.pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
     SlabStrainedSupercellConfiguration,
 )
+from ...operations.core.unary import supercell
+from ...utils import unwrap
 from ..interface.utils.holders import MatchedSubstrateFilmConfigurationHolder
+from ..utils import calculate_von_mises_strain
 
 
 class InterfaceAnalyzer(InMemoryEntityPydantic):
@@ -30,6 +33,7 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
     film_slab_configuration: SlabConfiguration
     substrate_build_parameters: Optional[SlabBuilderParameters] = None
     film_build_parameters: Optional[SlabBuilderParameters] = None
+    optimize_film_supercell: bool = False
 
     def get_component_material(self, configuration: SlabConfiguration):
         return SlabBuilder().get_material(configuration)
@@ -86,6 +90,83 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
 
     def get_substrate_strain_matrix(self) -> Matrix3x3Schema:
         return self._no_strain_matrix
+
+    def _calculate_strain_for_film_supercell(self, film_n: int, film_m: int) -> float:
+        """
+        Calculate strain for given film supercell configuration against unchanged substrate.
+
+        Args:
+            film_n: Film supercell multiplier in a direction
+            film_m: Film supercell multiplier in b direction
+
+        Returns:
+            Von Mises strain percentage
+        """
+
+        # Apply supercell to film material
+        supercell_matrix = [[film_n, 0], [0, film_m]]
+        film_with_supercell = supercell(self.film_material, supercell_matrix)
+
+        # Use existing get_film_strain_matrix with supercelled film
+        strain_matrix = self.get_film_strain_matrix(
+            self.substrate_material.lattice.vector_arrays, film_with_supercell.lattice.vector_arrays
+        )
+
+        return calculate_von_mises_strain(np.array(unwrap(strain_matrix.root)))
+
+    def _find_optimal_supercell_factor_for_direction(self, substrate_length: float, film_length: float) -> int:
+        """
+        Finds a multiplier for the component of diagonal supercell matrix
+            that will get film supercell lattice vector length around substrate length.
+            The N leads to the film supercell vector length being shorter than substrate length,
+            and N+1 leads to the film supercell vector length being longer than substrate length.
+        """
+
+        # Find optimal: when n*film_length < substrate_length < (n+1)*film_length
+        optimal = max(1, int(substrate_length / film_length))
+        if (optimal + 1) * film_length - substrate_length < substrate_length - optimal * film_length:
+            optimal += 1
+
+        return optimal
+
+    def find_optimal_film_supercell(self) -> Tuple[int, int]:
+        """
+        Find optimal (n, m) supercell multipliers for film that minimize strain.
+
+        Returns:
+            Tuple of (n, m) supercell multipliers that minimize strain
+        """
+        substrate_vectors = np.array(self.substrate_material.lattice.vector_arrays[:2])
+        film_vectors = np.array(self.film_material.lattice.vector_arrays[:2])
+
+        substrate_lengths = [np.linalg.norm(substrate_vectors[i, :2]) for i in range(2)]
+        film_lengths = [np.linalg.norm(film_vectors[i, :2]) for i in range(2)]
+
+        optimal_values = []
+        for substrate_length, film_length in zip(substrate_lengths, film_lengths):
+            optimal = self._find_optimal_supercell_factor_for_direction(substrate_length, film_length)
+            optimal_values.append(optimal)
+
+        n_optimal, m_optimal = optimal_values
+
+        # Test neighboring values to find minimum strain
+        candidates = [
+            (n_optimal, m_optimal),
+            (n_optimal + 1, m_optimal),
+            (n_optimal, m_optimal + 1),
+            (n_optimal + 1, m_optimal + 1),
+        ]
+
+        min_strain = float("inf")
+        best_n, best_m = n_optimal, m_optimal
+
+        for n, m in candidates:
+            strain = self._calculate_strain_for_film_supercell(n, m)
+            if strain < min_strain:
+                min_strain = strain
+                best_n, best_m = n, m
+
+        return best_n, best_m
 
     def get_component_strained_configuration(
         self,
@@ -146,7 +227,10 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
 
     @property
     def film_supercell_matrix(self) -> SupercellMatrix2DSchema:
-        if self.film_build_parameters and self.film_build_parameters.xy_supercell_matrix:
+        if self.optimize_film_supercell:
+            n, m = self.find_optimal_film_supercell()
+            return SupercellMatrix2DSchema(root=[[n, 0], [0, m]])
+        elif self.film_build_parameters and self.film_build_parameters.xy_supercell_matrix:
             return SupercellMatrix2DSchema(root=self.film_build_parameters.xy_supercell_matrix)
         return self.identity_supercell
 

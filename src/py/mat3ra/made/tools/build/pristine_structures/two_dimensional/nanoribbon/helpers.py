@@ -10,7 +10,7 @@ from ..nanotape import NanoTapeConfiguration
 from .....build_components import MaterialWithBuildMetadata
 from .....build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from .....build_components.entities.reusable.base_builder import BaseBuilderParameters
-from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import EdgeTypes
+from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import EdgeTypesEnum
 from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.helpers import (
     create_lattice_lines_config_and_material,
 )
@@ -21,7 +21,7 @@ P = TypeVar("P", bound=BaseBuilderParameters)
 def create_nanoribbon(
     material: Union[Material, MaterialWithBuildMetadata],
     miller_indices_2d: Optional[Tuple[int, int]] = None,
-    edge_type: EdgeTypes = EdgeTypes.zigzag,
+    edge_type: EdgeTypesEnum = EdgeTypesEnum.zigzag,
     width: int = 2,
     length: int = 2,
     vacuum_width: float = 10.0,

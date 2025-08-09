@@ -1,12 +1,24 @@
-from typing import Union
+from typing import Union, Optional, List
 
 import numpy as np
 
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from .....build_components import MaterialWithBuildMetadata
+from .....build_components.entities.auxiliary.two_dimensional.termination import Termination
 from .....modify import wrap_to_unit_cell
 from .....operations.core.unary import edit_cell
+
+
+def select_slab_termination(terminations: List[Termination], formula: Optional[str] = None) -> Termination:
+    if not terminations:
+        raise ValueError("No terminations available.")
+    if formula is None:
+        return terminations[0]
+    for termination in terminations:
+        if termination.formula == formula:
+            return termination
+    raise ValueError(f"Termination with formula {formula} not found in available terminations: {terminations}")
 
 
 def get_orthogonal_c_slab(material: Union[Material, MaterialWithBuildMetadata]) -> Material:

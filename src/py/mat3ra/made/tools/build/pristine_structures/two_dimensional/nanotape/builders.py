@@ -5,7 +5,7 @@ from mat3ra.made.material import Material
 from . import NanoTapeBuilderParameters
 from .configuration import NanoTapeConfiguration
 from .....build_components import MaterialWithBuildMetadata, TypeConfiguration
-from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import EdgeTypes
+from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import EdgeTypesEnum
 from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines_unique_repeated.builder import (
     CrystalLatticeLinesRepeatedBuilder,
 )
@@ -44,9 +44,9 @@ class NanoTapeBuilder(StackNComponentsBuilder):
 
     def _get_edge_type_from_miller_indices(self, miller_indices_2d: tuple) -> str:
         if miller_indices_2d == (1, 1):
-            return EdgeTypes.armchair.value.capitalize()
+            return EdgeTypesEnum.armchair.value.capitalize()
         elif miller_indices_2d == (0, 1):
-            return EdgeTypes.zigzag.value.capitalize()
+            return EdgeTypesEnum.zigzag.value.capitalize()
         else:
             miller_str = f"{miller_indices_2d[0]}{miller_indices_2d[1]}"
             return f"({miller_str})"
