@@ -12,8 +12,8 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
 )
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
 from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
-from mat3ra.standata.materials import Materials
 
+from .fixtures.bulk import BULK_Ni_PRIMITIVE
 from .fixtures.interface.gr_ni_111_top_hcp import (
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
@@ -23,7 +23,7 @@ from .utils import OSPlatform, assert_two_entities_deep_almost_equal, get_platfo
 
 GRAPHENE_NICKEL_TEST_CASE = (
     SimpleNamespace(
-        bulk_config=Materials.get_by_name_first_match("Nickel"),
+        bulk_config=BULK_Ni_PRIMITIVE,
         miller_indices=(1, 1, 1),
         number_of_layers=3,
         vacuum=0.0,

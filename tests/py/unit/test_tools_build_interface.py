@@ -23,8 +23,7 @@ from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon.help
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from mat3ra.made.tools.helpers import create_interface_simple, create_interface_simple_between_slabs
-from mat3ra.standata.materials import Materials
-from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Ni_PRIMITIVE, BULK_Si_CONVENTIONAL
 
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
 from .fixtures.interface.gr_ni_111_top_hcp import (
@@ -55,7 +54,7 @@ Si_Ge_SIMPLE_INTERFACE_TEST_CASE = (
 
 GRAPHENE_NICKEL_TEST_CASE = (
     SimpleNamespace(
-        bulk_config=Materials.get_by_name_first_match("Nickel"),
+        bulk_config=BULK_Ni_PRIMITIVE,
         miller_indices=(1, 1, 1),
         number_of_layers=3,
         vacuum=0.0,

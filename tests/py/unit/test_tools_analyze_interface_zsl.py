@@ -9,9 +9,8 @@ from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab_strained_s
     SlabStrainedSupercellBuilder,
 )
 from mat3ra.made.tools.utils import supercell_matrix_2d_schema_to_list, unwrap
-from mat3ra.standata.materials import Materials
 from mat3ra.utils.matrix import convert_2x2_to_3x3
-from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Ni_PRIMITIVE, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE
 from .utils import OSPlatform, get_platform_specific_value
@@ -49,7 +48,7 @@ EXPECTED_PROPERTIES_SI_GE_001: Final = SimpleNamespace(
         ),
         (
             SimpleNamespace(
-                bulk_config=Materials.get_by_name_first_match("Nickel"),
+                bulk_config=BULK_Ni_PRIMITIVE,
                 miller_indices=(0, 0, 1),
                 number_of_layers=2,
                 vacuum=0.0,
@@ -123,7 +122,7 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
     [
         (
             SimpleNamespace(
-                bulk_config=Materials.get_by_name_first_match("Nickel"),
+                bulk_config=BULK_Ni_PRIMITIVE,
                 miller_indices=(1, 1, 1),
                 number_of_layers=3,
                 vacuum=0.0,

@@ -6,8 +6,7 @@ import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabConfiguration
-from mat3ra.standata.materials import Materials
-from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+from unit.fixtures.bulk import BULK_GRAPHENE, BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE
 from .utils import assert_two_entities_deep_almost_equal
@@ -44,7 +43,7 @@ SUBSTRATE_SI_111: Final = SimpleNamespace(
 )
 
 FILM_GRAPHENE_001: Final = SimpleNamespace(
-    bulk_config=Materials.get_by_name_first_match("Graphene"),
+    bulk_config=BULK_GRAPHENE,
     miller_indices=(0, 0, 1),
     number_of_layers=1,
     vacuum=0.0,
