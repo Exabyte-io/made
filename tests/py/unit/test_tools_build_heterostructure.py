@@ -2,21 +2,18 @@ from types import SimpleNamespace
 
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.heterostructure import (
-    StackComponentDict,
-    create_heterostructure,
-)
+from mat3ra.made.tools.helpers import StackComponentDict, create_heterostructure
 from mat3ra.standata.materials import Materials
-
-from .fixtures.bulk import BULK_Si_CONVENTIONAL
 
 PRECISION = 1e-3
 
 Si_SiO2_Hf2O_HETEROSTRUCTURE_TEST_CASE = (
     [
-        SimpleNamespace(bulk_config=BULK_Si_CONVENTIONAL, miller_indices=(0, 0, 1), number_of_layers=3),
         SimpleNamespace(
-            bulk_config=Materials.get_by_name_first_match("SiO2"), miller_indices=(1, 1, 1), number_of_layers=4
+            bulk_config=Materials.get_by_name_first_match("Silicon"), miller_indices=(0, 0, 1), number_of_layers=4
+        ),
+        SimpleNamespace(
+            bulk_config=Materials.get_by_name_first_match("SiO2"), miller_indices=(1, 1, 1), number_of_layers=5
         ),
         SimpleNamespace(
             bulk_config=Materials.get_by_name_first_match("Hafnium.*MCL"), miller_indices=(0, 0, 1), number_of_layers=2
