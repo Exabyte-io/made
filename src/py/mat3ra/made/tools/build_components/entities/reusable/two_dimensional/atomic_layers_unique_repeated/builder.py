@@ -35,6 +35,8 @@ class AtomicLayersUniqueRepeatedBuilder(CrystalLatticePlanesBuilder):
         material_translated_wrapped = wrap_to_unit_cell(material_translated)
 
         if should_rotate:
+            # Rotation of basis around [1,0,0] yielded the same material, probably due to the symmetry of unit cell.
+            # rotation around X and Z simultaneously gives the mirroring effect. (x,y,z) ⟶ (z,−y,x)
             material_translated_wrapped = rotate(material_translated_wrapped, angle=180, axis=[1, 0, 1])
         material_translated_wrapped_layered = supercell(
             material_translated_wrapped, [[1, 0, 0], [0, 1, 0], [0, 0, configuration.number_of_repetitions]]
