@@ -5,6 +5,7 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from mat3ra.made.material import Material
 from .. import InterfaceBuilder, InterfaceConfiguration
+from ......build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 from .....pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
     SlabStrainedSupercellConfiguration,
 )
@@ -142,8 +143,9 @@ def create_interface_commensurate(
         use_conventional_cell=use_conventional_cell,
     )
 
+    vacuum_config = VacuumConfiguration(size=vacuum, crystal=None, direction=direction)
     interface_config = InterfaceConfiguration(
-        stack_components=strained_configs,
+        stack_components=strained_configs + [vacuum_config],
         gaps=ArrayWithIds.from_values([gap, gap]),
         direction=direction,
     )
