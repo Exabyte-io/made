@@ -184,8 +184,16 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         self.coordinates.filter_by_ids(ids)
         return self
 
-    def set_labels_from_list(self, labels: List[Union[int, str]]) -> None:
+    def set_labels_from_list(self, labels: Optional[List[Union[int, str]]]) -> None:
+        """
+        Set the labels of the basis from a list of labels (i. e. [1,1,1] for a 3-atom basis).
+            If None or [] are passed, the labels are removed (set to an empty array).
+        """
         num_atoms = len(self.elements.values)
+
+        if labels is None or len(labels) == 0:
+            self.labels = ArrayWithIds.from_values([])
+            return
 
         if len(labels) != num_atoms:
             raise ValueError(f"Number of labels ({len(labels)}) must match number of atoms ({num_atoms})")
