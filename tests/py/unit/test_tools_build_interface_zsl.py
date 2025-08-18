@@ -2,17 +2,18 @@ from types import SimpleNamespace
 
 import pytest
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.interface import (
-    InterfaceBuilder,
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.builder import InterfaceBuilder
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.configuration import (
     InterfaceConfiguration,
-    create_zsl_interface,
-    create_zsl_interface_between_slabs,
 )
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
-from mat3ra.standata.materials import Materials
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.zsl.helpers import (
+    create_interface_zsl,
+    create_interface_zsl_between_slabs,
+)
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
+from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
 
+from .fixtures.bulk import BULK_Ni_PRIMITIVE
 from .fixtures.interface.gr_ni_111_top_hcp import (
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
@@ -22,7 +23,7 @@ from .utils import OSPlatform, assert_two_entities_deep_almost_equal, get_platfo
 
 GRAPHENE_NICKEL_TEST_CASE = (
     SimpleNamespace(
-        bulk_config=Materials.get_by_name_first_match("Nickel"),
+        bulk_config=BULK_Ni_PRIMITIVE,
         miller_indices=(1, 1, 1),
         number_of_layers=3,
         vacuum=0.0,
@@ -96,7 +97,7 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
 
 @pytest.mark.parametrize("substrate, film,gap, vacuum, max_area,  expected_interface", [GRAPHENE_NICKEL_TEST_CASE])
 def test_create_zsl_interface(substrate, film, gap, vacuum, max_area, expected_interface):
-    interface = create_zsl_interface(
+    interface = create_interface_zsl(
         substrate_crystal=substrate.bulk_config,
         film_crystal=film.bulk_config,
         substrate_miller_indices=substrate.miller_indices,
@@ -128,7 +129,7 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         miller_indices=substrate.miller_indices,
         number_of_layers=substrate.number_of_layers,
         vacuum=0.0,
-        termination_formula=None,
+        termination_top_formula=None,
         use_conventional_cell=True,
     )
     film_slab_config = SlabConfiguration.from_parameters(
@@ -136,14 +137,14 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         miller_indices=film.miller_indices,
         number_of_layers=film.number_of_layers,
         vacuum=0.0,
-        termination_formula=None,
+        termination_bottom_formula=None,
         use_conventional_cell=True,
     )
 
     substrate_slab = SlabBuilder().get_material(substrate_slab_config)
     film_slab = SlabBuilder().get_material(film_slab_config)
 
-    interface = create_zsl_interface_between_slabs(
+    interface = create_interface_zsl_between_slabs(
         substrate_slab=substrate_slab,
         film_slab=film_slab,
         gap=gap,

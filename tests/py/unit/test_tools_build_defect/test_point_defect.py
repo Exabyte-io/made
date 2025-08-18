@@ -3,15 +3,18 @@ from types import SimpleNamespace
 import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.interstitial_placement_method_enum import InterstitialPlacementMethodEnum
-from mat3ra.made.tools.build.defect.point.helpers import (
-    create_multiple_defects,
-    create_point_defect_interstitial,
-    create_point_defect_substitution,
-    create_point_defect_vacancy,
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect import (
+    InterstitialPlacementMethodEnum,
+    SubstitutionPlacementMethodEnum,
+    VacancyPlacementMethodEnum,
 )
-from mat3ra.made.tools.build.defect.substitution_placement_method_enum import SubstitutionPlacementMethodEnum
-from mat3ra.made.tools.build.defect.vacancy_placement_method_enum import VacancyPlacementMethodEnum
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.helpers import (
+    create_defect_point_interstitial,
+    create_defect_point_substitution,
+    create_defect_point_vacancy,
+    create_multiple_defects,
+)
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.types import PointDefectDict
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from unit.fixtures.point_defects import (
     INTERSTITIAL_DEFECT_BULK_PRIMITIVE_Si,
@@ -71,13 +74,13 @@ def test_point_defect_helpers(material_config, defect_params, expected_material_
     crystal = Material.create(material_config)
 
     if defect_params.type == "vacancy":
-        defect = create_point_defect_vacancy(crystal, defect_params.coordinate, defect_params.placement_method)
+        defect = create_defect_point_vacancy(crystal, defect_params.coordinate, defect_params.placement_method)
     elif defect_params.type == "substitution":
-        defect = create_point_defect_substitution(
+        defect = create_defect_point_substitution(
             crystal, defect_params.coordinate, defect_params.element, defect_params.placement_method
         )
     elif defect_params.type == "interstitial":
-        defect = create_point_defect_interstitial(
+        defect = create_defect_point_interstitial(
             crystal, defect_params.coordinate, defect_params.element, defect_params.placement_method
         )
     else:
@@ -121,12 +124,14 @@ def test_create_multiple_defects(material_config, defect_params_list, expected_m
 
     defect_dicts = []
     for defect_params in defect_params_list:
-        defect_dict = {
+        defect_data = {
             "type": defect_params.defect_type,
             "coordinate": defect_params.coordinate,
             "placement_method": defect_params.placement_method if hasattr(defect_params, "placement_method") else None,
             "element": defect_params.element if hasattr(defect_params, "element") else None,
         }
+
+        defect_dict = PointDefectDict(**defect_data)
 
         defect_dicts.append(defect_dict)
 

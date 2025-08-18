@@ -1,7 +1,7 @@
 from typing import List
 
 from ....utils import get_center_of_coordinates
-from ...build.supercell.helpers import create_supercell
+from ...build_components.entities.reusable.three_dimensional.supercell.helpers import create_supercell
 from ...modify import filter_by_condition_on_coordinates
 from ...utils import transform_coordinate_to_supercell
 from .. import BaseMaterialAnalyzer

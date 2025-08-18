@@ -4,12 +4,13 @@ from typing import Final
 import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
-from mat3ra.made.tools.build.slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab_strained_supercell.builder import (
+    SlabStrainedSupercellBuilder,
+)
 from mat3ra.made.tools.utils import supercell_matrix_2d_schema_to_list, unwrap
-from mat3ra.standata.materials import Materials
 from mat3ra.utils.matrix import convert_2x2_to_3x3
-from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Ni_PRIMITIVE, BULK_Si_CONVENTIONAL
 
 from .fixtures.monolayer import GRAPHENE
 from .utils import OSPlatform, get_platform_specific_value
@@ -47,7 +48,7 @@ EXPECTED_PROPERTIES_SI_GE_001: Final = SimpleNamespace(
         ),
         (
             SimpleNamespace(
-                bulk_config=Materials.get_by_name_first_match("Nickel"),
+                bulk_config=BULK_Ni_PRIMITIVE,
                 miller_indices=(0, 0, 1),
                 number_of_layers=2,
                 vacuum=0.0,
@@ -65,7 +66,12 @@ EXPECTED_PROPERTIES_SI_GE_001: Final = SimpleNamespace(
 )
 def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_min):
     substrate_slab_config = SlabConfiguration.from_parameters(
-        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=0.0
+        substrate.bulk_config,
+        substrate.miller_indices,
+        substrate.number_of_layers,
+        vacuum=0.0,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
     film_slab_config = SlabConfiguration.from_parameters(
         film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=0.0
@@ -116,7 +122,7 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
     [
         (
             SimpleNamespace(
-                bulk_config=Materials.get_by_name_first_match("Nickel"),
+                bulk_config=BULK_Ni_PRIMITIVE,
                 miller_indices=(1, 1, 1),
                 number_of_layers=3,
                 vacuum=0.0,
@@ -148,7 +154,12 @@ def test_zsl_interface_analyzer_sort_by_strain_then_area(
 
     analyzer = ZSLInterfaceAnalyzer(
         substrate_slab_configuration=SlabConfiguration.from_parameters(
-            substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=0.0
+            substrate.bulk_config,
+            substrate.miller_indices,
+            substrate.number_of_layers,
+            vacuum=0.0,
+            termination_top_formula=None,
+            termination_bottom_formula=None,
         ),
         film_slab_configuration=SlabConfiguration.from_parameters(
             film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=0.0

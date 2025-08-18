@@ -6,20 +6,24 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.interface import (
-    InterfaceBuilder,
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.build_parameters import (
     InterfaceBuilderParameters,
-    InterfaceConfiguration,
-    create_commensurate_interface,
-    create_simple_interface_between_slabs,
-    create_twisted_interface,
 )
-from mat3ra.made.tools.build.nanoribbon import create_nanoribbon
-from mat3ra.made.tools.build.slab.helpers import create_slab
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
-from mat3ra.standata.materials import Materials
-from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.builder import InterfaceBuilder
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.configuration import (
+    InterfaceConfiguration,
+)
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.commensurate.helpers import (
+    create_interface_commensurate,
+)
+from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.twisted.helpers import (
+    create_interface_twisted,
+)
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon.helpers import create_nanoribbon
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
+from mat3ra.made.tools.helpers import create_interface_simple, create_interface_simple_between_slabs
+from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Ni_PRIMITIVE, BULK_Si_CONVENTIONAL
 
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
 from .fixtures.interface.gr_ni_111_top_hcp import (
@@ -50,7 +54,7 @@ Si_Ge_SIMPLE_INTERFACE_TEST_CASE = (
 
 GRAPHENE_NICKEL_TEST_CASE = (
     SimpleNamespace(
-        bulk_config=Materials.get_by_name_first_match("Nickel"),
+        bulk_config=BULK_Ni_PRIMITIVE,
         miller_indices=(1, 1, 1),
         number_of_layers=3,
         vacuum=0.0,
@@ -77,10 +81,16 @@ PRECISION = 1e-3
 def test_simple_interface_builder(substrate, film, expected_interface):
     builder = InterfaceBuilder(build_parameters=InterfaceBuilderParameters(make_primitive=False))
     substrate_slab_config = SlabConfiguration.from_parameters(
-        substrate.bulk_config, substrate.miller_indices, substrate.number_of_layers, vacuum=substrate.vacuum
+        substrate.bulk_config,
+        substrate.miller_indices,
+        substrate.number_of_layers,
+        vacuum=substrate.vacuum,
     )
     film_slab_config = SlabConfiguration.from_parameters(
-        film.bulk_config, film.miller_indices, film.number_of_layers, vacuum=film.vacuum
+        film.bulk_config,
+        film.miller_indices,
+        film.number_of_layers,
+        vacuum=film.vacuum,
     )
 
     analyzer = InterfaceAnalyzer(
@@ -106,22 +116,37 @@ def test_create_simple_interface_between_slabs(substrate, film, expected_interfa
         miller_indices=substrate.miller_indices,
         number_of_layers=substrate.number_of_layers,
         vacuum=0,
-        termination_formula=None,
     )
     film_slab_config = SlabConfiguration.from_parameters(
         material_or_dict=film.bulk_config,
         miller_indices=film.miller_indices,
         number_of_layers=film.number_of_layers,
         vacuum=0,
-        termination_formula=None,
     )
 
     substrate_slab = SlabBuilder().get_material(substrate_slab_config)
     film_slab = SlabBuilder().get_material(film_slab_config)
 
-    interface = create_simple_interface_between_slabs(
+    interface = create_interface_simple_between_slabs(
         substrate_slab=substrate_slab,
         film_slab=film_slab,
+        gap=None,
+        vacuum=0.0,
+        xy_shift=[0, 0],
+    )
+    interface.metadata.build = []
+    assert_two_entities_deep_almost_equal(interface, expected_interface)
+
+
+@pytest.mark.parametrize("substrate, film, expected_interface", [Si_Ge_SIMPLE_INTERFACE_TEST_CASE])
+def test_create_simple_interface(substrate, film, expected_interface):
+    interface = create_interface_simple(
+        substrate_crystal=substrate.bulk_config,
+        film_crystal=film.bulk_config,
+        substrate_miller_indices=substrate.miller_indices,
+        film_miller_indices=film.miller_indices,
+        substrate_number_of_layers=substrate.number_of_layers,
+        film_number_of_layers=film.number_of_layers,
         gap=None,
         vacuum=0.0,
         xy_shift=[0, 0],
@@ -166,7 +191,7 @@ def test_create_twisted_interface(material_config, config_params, expected_inter
         vacuum_length=15.0,
     )
 
-    interface = create_twisted_interface(
+    interface = create_interface_twisted(
         material1=nanoribbon1,
         material2=nanoribbon2,
         angle=config_params["twist_angle"],
@@ -209,7 +234,7 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
         vacuum=0.0,
     )
 
-    interface = create_commensurate_interface(
+    interface = create_interface_commensurate(
         material=slab,
         target_angle=analyzer_params["target_angle"],
         angle_tolerance=analyzer_params["angle_tolerance"],

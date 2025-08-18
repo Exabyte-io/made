@@ -2,11 +2,11 @@ from typing import List
 
 from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensional.atom import AtomSchema
 
-from ...build import MaterialWithBuildMetadata
-from ...build.defect.point.atom_at_coordinate.builder import AtomAtCoordinateBuilder
-from ...build.defect.point.atom_at_coordinate.configuration import AtomAtCoordinateConfiguration
-from ...build.vacuum.builder import VacuumBuilder
-from ...build.vacuum.configuration import VacuumConfiguration
+from ...build_components.entities.core.two_dimensional.vacuum.builder import VacuumBuilder
+from ...build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from ...build_components.entities.core.zero_dimensional.atom.builder import AtomAtCoordinateBuilder
+from ...build_components.entities.core.zero_dimensional.atom.configuration import AtomAtCoordinateConfiguration
+from ...build_components.metadata import MaterialWithBuildMetadata
 from ..slab import SlabMaterialAnalyzer
 
 

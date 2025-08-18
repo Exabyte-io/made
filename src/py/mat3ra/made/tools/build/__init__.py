@@ -1,5 +1,9 @@
-from .metadata import BuildMetadata, MaterialBuildMetadata, MaterialWithBuildMetadata
-from .base import (
+from ..build_components.metadata import (
+    BuildMetadata,
+    MaterialBuildMetadata,
+    MaterialWithBuildMetadata,
+)
+from ..build_components import (
     BaseConfigurationPydantic,
     BaseBuilderParameters,
     BaseSingleBuilder,
@@ -7,3 +11,15 @@ from .base import (
     TypeBuildParameters,
     BaseConfigurationPydanticChild,
 )
+
+__all__ = [
+    "BuildMetadata",
+    "MaterialBuildMetadata",
+    "MaterialWithBuildMetadata",
+    "BaseConfigurationPydantic",
+    "BaseBuilderParameters",
+    "BaseSingleBuilder",
+    "TypeConfiguration",
+    "TypeBuildParameters",
+    "BaseConfigurationPydanticChild",
+]

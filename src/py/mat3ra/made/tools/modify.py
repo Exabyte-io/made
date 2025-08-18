@@ -5,7 +5,7 @@ from mat3ra.made.material import Material
 from mat3ra.made.utils import get_atomic_coordinates_extremum
 
 from .analyze.other import get_atom_indices_with_condition_on_coordinates, get_atom_indices_within_radius_pbc
-from .build.metadata import MaterialWithBuildMetadata
+from .build_components.metadata import MaterialWithBuildMetadata
 from .convert import from_ase, to_ase
 from .convert.interface_parts_enum import InterfacePartsEnum
 from .entities.coordinate import (
@@ -575,31 +575,6 @@ def remove_vacuum(material: Material, from_top=True, from_bottom=True, fixed_pad
         new_material = translate_to_z_level(new_material, z_level="top")
     if from_bottom and not from_top:
         new_material = translate_to_z_level(new_material, z_level="bottom")
-    return new_material
-
-
-def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True, rotate_cell=False) -> Material:
-    """
-    Rotate the material around a given axis by a specified angle.
-
-    Args:
-        material (Material): The material to rotate.
-        axis (List[int]): The axis to rotate around, expressed as [x, y, z].
-        angle (float): The angle of rotation in degrees.
-        wrap (bool): Whether to wrap the material to the unit cell.
-        rotate_cell (bool): Whether to rotate the cell.
-    Returns:
-        Atoms: The rotated material.
-    """
-    original_is_in_cartesian_units = material.basis.is_in_cartesian_units
-    material.to_crystal()
-    atoms = to_ase(material)
-    atoms.rotate(v=axis, a=angle, center="COU", rotate_cell=rotate_cell)
-    if wrap:
-        atoms.wrap()
-    new_material = MaterialWithBuildMetadata.create(from_ase(atoms))
-    if original_is_in_cartesian_units:
-        new_material.to_cartesian()
     return new_material
 
 

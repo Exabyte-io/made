@@ -16,8 +16,10 @@ from mat3ra.made.tools.analyze.other import (
 )
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.defect.adatom_placement_method_enum import AdatomPlacementMethodEnum
-from mat3ra.made.tools.build.defect.atom_placement_method_enum import AtomPlacementMethodEnum
+from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.atom_placement_method_enum import (
+    AtomPlacementMethodEnum,
+)
+from mat3ra.made.tools.build_components.operations.core.combinations.enums import AdatomPlacementMethodEnum
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from unit.utils import OSPlatform, get_platform_specific_value
 

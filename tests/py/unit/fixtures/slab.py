@@ -560,3 +560,47 @@ SLAB_SrTiO3_011_TERMINATION_SrTiO = {
         "type": "TRI",
     },
 }
+
+
+SLAB_SrTiO3_011_TERMINATION_O2_BOTTOM = {
+    "name": "O3SrTi(011), bottom termination O2_Pmmm_2, Slab",
+    "basis": {
+        "elements": [
+            {"id": 0, "value": "Sr"},
+            {"id": 1, "value": "Ti"},
+            {"id": 2, "value": "O"},
+            {"id": 3, "value": "O"},
+            {"id": 4, "value": "O"},
+            {"id": 5, "value": "Sr"},
+            {"id": 6, "value": "Ti"},
+            {"id": 7, "value": "O"},
+            {"id": 8, "value": "O"},
+            {"id": 9, "value": "O"},
+        ],
+        "coordinates": [
+            {"id": 0, "value": [0.5, 0.749999, 0.152537778]},
+            {"id": 1, "value": [0, 0.249999, 0.152537778]},
+            {"id": 2, "value": [0.5, 0.249999, 0.152537778]},
+            {"id": 3, "value": [0, 0.999999, 6.1e-7]},
+            {"id": 4, "value": [0, 0.499999, 6.1e-7]},
+            {"id": 5, "value": [0.5, 0.249999, 0.457612114]},
+            {"id": 6, "value": [0, 0.749999, 0.457612114]},
+            {"id": 7, "value": [0.5, 0.749999, 0.457612114]},
+            {"id": 8, "value": [0, 0.499999, 0.305074946]},
+            {"id": 9, "value": [0, 0.999999, 0.305074946]},
+        ],
+        "units": "crystal",
+        "labels": [],
+        "constraints": [],
+    },
+    "lattice": {
+        "a": 3.912701,
+        "b": 5.53339482,
+        "c": 9.068928726,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "units": {"length": "angstrom", "angle": "degree"},
+        "type": "TRI",
+    },
+}

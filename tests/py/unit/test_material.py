@@ -1,8 +1,10 @@
 import numpy as np
+import pytest
 from mat3ra.made.basis import Basis, Coordinates
 from mat3ra.made.lattice import Lattice
 from mat3ra.made.material import Material
 from mat3ra.utils import assertion as assertion_utils
+from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 from unit.fixtures.slab import BULK_Si_CONVENTIONAL
 from unit.utils import assert_two_entities_deep_almost_equal
 
@@ -91,3 +93,28 @@ def test_basis_cell_lattice_sync():
     assertion_utils.assert_deep_almost_equal(new_vectors, material.basis.cell.vector_arrays)
     assertion_utils.assert_deep_almost_equal(new_vectors, material.lattice.vector_arrays)
     # Verify basis coordinates are still correct
+
+
+@pytest.mark.parametrize(
+    "initial_labels, reset_labels, expected_final",
+    [
+        # Test resetting with empty list
+        ([1, 2], [], []),
+        # Test resetting with None
+        ([1, 2], None, []),
+        # Test normal behavior with non-empty lists
+        ([], [1, 2], [1, 2]),
+    ],
+)
+def test_set_labels_from_list(initial_labels, reset_labels, expected_final):
+    material = Material.create(BULK_Si_PRIMITIVE)
+
+    if initial_labels:
+        material.basis.set_labels_from_list(initial_labels)
+        assert len(material.basis.labels.values) == len(initial_labels)
+        assert material.basis.labels.values == initial_labels
+
+    material.basis.set_labels_from_list(reset_labels)
+
+    assert len(material.basis.labels.values) == len(expected_final)
+    assert material.basis.labels.values == expected_final

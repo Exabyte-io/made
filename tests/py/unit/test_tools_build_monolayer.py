@@ -2,7 +2,7 @@ import sys
 
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.monolayer.helpers import create_monolayer
+from mat3ra.made.tools.build.pristine_structures.three_dimensional.ideal_crystal.helpers import create_monolayer
 
 from .fixtures.bulk import BULK_GRAPHITE, BULK_Si_PRIMITIVE
 from .fixtures.monolayer import GRAPHENE, SILICENE

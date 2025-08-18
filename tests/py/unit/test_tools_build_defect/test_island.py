@@ -1,7 +1,7 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.build.defect.island.helpers import create_island_defect
-from mat3ra.made.tools.build.slab.helpers import create_slab
+from mat3ra.made.tools.build.defective_structures.two_dimensional.island.helpers import create_defect_island
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from mat3ra.made.tools.entities import coordinate as CoordinateCondition
 from unit.fixtures.bulk import BULK_Si_CONVENTIONAL
 from unit.fixtures.island import ISLAND_SLAB_Si_001_CYLINDER_CONDITION_1_LAYER
@@ -25,6 +25,8 @@ def test_create_island_defect(slab_parameters, condition_class, condition_params
         Material.create(slab_parameters["crystal"]),
         number_of_layers=slab_parameters["number_of_layers"],
         xy_supercell_matrix=slab_parameters["xy_supercell_matrix"],
+        termination_top_formula=None,
+        termination_bottom_formula=None,
     )
     condition = condition_class(
         center_position=condition_params["center_position"],
@@ -33,7 +35,7 @@ def test_create_island_defect(slab_parameters, condition_class, condition_params
         max_z=condition_params["max_z"],
     )
 
-    defect = create_island_defect(
+    defect = create_defect_island(
         slab=slab,
         condition=condition,
         use_cartesian_coordinates=False,

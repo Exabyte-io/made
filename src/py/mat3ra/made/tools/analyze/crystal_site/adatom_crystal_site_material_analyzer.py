@@ -1,10 +1,12 @@
 from typing import List
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.builder import SlabBuilder
 
-from ...build import MaterialWithBuildMetadata
-from ...build.defect.slab.helpers import recreate_slab_with_fractional_layers
-from ...build.slab.slab.builder import SlabBuilder
+from ...build_components.entities.reusable.two_dimensional.slab_stack.helpers import (
+    recreate_slab_with_fractional_layers,
+)
+from ...build_components.metadata import MaterialWithBuildMetadata
 from .adatom_material_analyzer import AdatomMaterialAnalyzer
 from .crystal_site_analyzer import CrystalSiteAnalyzer
 

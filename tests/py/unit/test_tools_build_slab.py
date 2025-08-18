@@ -12,18 +12,24 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.utils.vector import align_first_vector_to_x_2d_right_handed
 from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
-from mat3ra.made.tools.build.slab.atomic_layers_unique_repeated.builder import AtomicLayersUniqueRepeatedBuilder
-from mat3ra.made.tools.build.slab.atomic_layers_unique_repeated.configuration import (
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import (
+    SlabBuilder,
+    SlabBuilderParameters,
+    SlabConfiguration,
+)
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.termination_utils import select_slab_termination
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab_strained_supercell.builder import (
+    SlabStrainedSupercellBuilder,
+)
+from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
+    SlabStrainedSupercellConfiguration,
+)
+from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from mat3ra.made.tools.build_components.entities.reusable.two_dimensional import (
+    AtomicLayersUniqueRepeatedBuilder,
     AtomicLayersUniqueRepeatedConfiguration,
 )
-from mat3ra.made.tools.build.slab.helpers import create_slab, get_slab_terminations
-from mat3ra.made.tools.build.slab.slab.build_parameters import SlabBuilderParameters
-from mat3ra.made.tools.build.slab.slab.builder import SlabBuilder
-from mat3ra.made.tools.build.slab.slab.configuration import SlabConfiguration
-from mat3ra.made.tools.build.slab.strained_supercell_slab.builder import SlabStrainedSupercellBuilder
-from mat3ra.made.tools.build.slab.strained_supercell_slab.configuration import SlabStrainedSupercellConfiguration
-from mat3ra.made.tools.build.slab.termination_utils import select_slab_termination
-from mat3ra.made.tools.build.vacuum.configuration import VacuumConfiguration
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP, adjust_material_cell_to_set_gap_along_direction
 from mat3ra.utils import assertion
 from mat3ra.utils.matrix import convert_2x2_to_3x3
@@ -33,6 +39,7 @@ from unit.fixtures.slab import (
     SI_PRIMITIVE_SLAB_001,
     SLAB_SI_CONVENTIONAL_001_NO_VACUUM,
     SLAB_SrTiO3_011_TERMINATION_O2,
+    SLAB_SrTiO3_011_TERMINATION_O2_BOTTOM,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
 )
 
@@ -73,6 +80,7 @@ PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_SrTiO: Final = (
     BULK_SrTiO3,
     (0, 1, 1),
     "SrTiO",
+    None,
     2,
     5.0,
     [[1, 0], [0, 1]],
@@ -81,6 +89,18 @@ PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_SrTiO: Final = (
 PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2: Final = (
     BULK_SrTiO3,
     (0, 1, 1),
+    "O2",
+    None,
+    2,
+    5.0,
+    [[1, 0], [0, 1]],
+)
+
+
+PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2_BOTTOM: Final = (
+    BULK_SrTiO3,
+    (0, 1, 1),
+    None,
     "O2",
     2,
     5.0,
@@ -91,6 +111,7 @@ PARAMS_CREATE_SLAB: Final = (
     BULK_Si_CONVENTIONAL,
     (0, 0, 1),
     "Si",
+    None,
     2,
     5,
     [[1, 0], [0, 1]],
@@ -101,7 +122,8 @@ PARAMS_CREATE_SLAB: Final = (
 def get_slab_with_builder(
     material: Material,
     miller_indices: Tuple[int, int, int],
-    termination_formula: str,
+    termination_top_formula: str,
+    termination_bottom_formula: str,
     number_of_layers: int,
     vacuum: float,
     xy_supercell_matrix: list,
@@ -110,12 +132,20 @@ def get_slab_with_builder(
         material=material, miller_indices=miller_indices
     )
     terminations = crystal_lattice_planes_analyzer.terminations
-    termination = select_slab_termination(terminations, termination_formula)
+    termination_top = (
+        select_slab_termination(terminations, termination_top_formula) if termination_top_formula is not None else None
+    )
+    termination_bottom = (
+        select_slab_termination(terminations, termination_bottom_formula)
+        if termination_bottom_formula is not None
+        else None
+    )
 
     atomic_layers_repeated_configuration = AtomicLayersUniqueRepeatedConfiguration(
         crystal=material,
         miller_indices=miller_indices,
-        termination_top=termination,
+        termination_top=termination_top,
+        termination_bottom=termination_bottom,
         number_of_repetitions=number_of_layers,
     )
     atomic_layers_repeated_orthogonal_c = AtomicLayersUniqueRepeatedBuilder().get_material(
@@ -153,7 +183,7 @@ def test_build_slab_primitive(
 ):
     material = MaterialWithBuildMetadata.create(material_config)
     slab = get_slab_with_builder(
-        material, miller_indices, termination_formula, number_of_layers, vacuum, xy_supercell_matrix
+        material, miller_indices, termination_formula, None, number_of_layers, vacuum, xy_supercell_matrix
     )
     slab.metadata.build = []  # Remove build metadata for comparison
     expected_slab_config.get("metadata", {}).pop("build", None)  # Remove build metadata for comparison
@@ -192,6 +222,7 @@ def test_build_slab_conventional(
         conventional_material,
         miller_indices,
         termination_formula,
+        None,
         number_of_layers,
         vacuum,
         xy_supercell_matrix,
@@ -201,7 +232,7 @@ def test_build_slab_conventional(
 
 
 @pytest.mark.parametrize(
-    "material_config, miller_indices, termination_formula, number_of_layers,"
+    "material_config, miller_indices, termination_top_formula,termination_bottom_formula, number_of_layers,"
     + " vacuum, xy_supercell_matrix, expected_slab_config",
     [
         (
@@ -212,12 +243,17 @@ def test_build_slab_conventional(
             *PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2,
             SLAB_SrTiO3_011_TERMINATION_O2,
         ),
+        (
+            *PARAMS_BUILD_SLAB_CONVENTIONAL_SrTiO_O2_BOTTOM,
+            SLAB_SrTiO3_011_TERMINATION_O2_BOTTOM,
+        ),
     ],
 )
 def test_build_slab_conventional_with_multiple_terminations(
     material_config,
     miller_indices,
-    termination_formula,
+    termination_top_formula,
+    termination_bottom_formula,
     number_of_layers,
     vacuum,
     xy_supercell_matrix,
@@ -230,7 +266,8 @@ def test_build_slab_conventional_with_multiple_terminations(
     slab = get_slab_with_builder(
         conventional_material,
         miller_indices,
-        termination_formula,
+        termination_top_formula,
+        termination_bottom_formula,
         number_of_layers,
         vacuum,
         xy_supercell_matrix,
@@ -242,7 +279,7 @@ def test_build_slab_conventional_with_multiple_terminations(
 
 
 @pytest.mark.parametrize(
-    "material_config, miller_indices, termination_formula, number_of_layers,"
+    "material_config, miller_indices, termination_top_formula, termination_bottom_formula, number_of_layers,"
     + " vacuum, xy_supercell, use_conventional_cell, expected_slab_config",
     [
         (
@@ -254,7 +291,8 @@ def test_build_slab_conventional_with_multiple_terminations(
 def test_create_slab(
     material_config,
     miller_indices,
-    termination_formula,
+    termination_top_formula,
+    termination_bottom_formula,
     number_of_layers,
     vacuum,
     xy_supercell,
@@ -262,13 +300,12 @@ def test_create_slab(
     expected_slab_config,
 ):
     crystal = Material.create(material_config)
-    terminations = get_slab_terminations(material=crystal, miller_indices=miller_indices)
-    termination = select_slab_termination(terminations, termination_formula)
     slab = create_slab(
         crystal=crystal,
         miller_indices=miller_indices,
         use_conventional_cell=use_conventional_cell,
-        termination=termination,
+        termination_top_formula=termination_top_formula,
+        termination_bottom_formula=termination_bottom_formula,
         number_of_layers=number_of_layers,
         vacuum=vacuum,
         xy_supercell_matrix=xy_supercell,
@@ -320,7 +357,7 @@ def test_build_slab_strained(
     config = SlabStrainedSupercellConfiguration.from_parameters(
         material_or_dict=material,
         miller_indices=miller_indices,
-        termination_formula=termination_formula,
+        termination_top_formula=termination_formula,
         number_of_layers=number_of_layers,
         vacuum=vacuum,
     )
