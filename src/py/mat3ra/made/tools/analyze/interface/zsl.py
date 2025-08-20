@@ -90,21 +90,46 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         return match_holders
 
     def convert_generated_match_to_match_holder(self, match_id: int, match_pymatgen) -> Optional[ZSLMatchHolder]:
-        film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
-        substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
+        N = 6
+        film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2]).round(N)[:, :2]
+        substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2]).round(N)[:, :2]
 
-        pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
-        pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
+        pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors.round(N)[:, :2]
+        pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors.round(N)[:, :2]
 
-        # Calculate supercell matrices directly from Pymatgen's vectors
-        # This preserves the optimal non-diagonal solutions that alignment would destroy
-        try:
-            film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
-            substrate_supercell_matrix = np.rint(
-                np.linalg.solve(substrate_slab_vectors, pymatgen_substrate_sl_vectors)
-            ).astype(int)
-        except np.linalg.LinAlgError:
-            return None
+        a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
+        b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
+        if not (a_colinear and b_colinear):
+            print(
+                f"\n{match_id}:❌ Non colinear SL vectors: \n{pymatgen_film_sl_vectors} vs \n{pymatgen_substrate_sl_vectors}"
+            )
+        else:
+            print(
+                f"\n{match_id}:✅ Colinear SL vectors: \n{pymatgen_film_sl_vectors} vs \n{pymatgen_substrate_sl_vectors}"
+            )
+
+        pymatgen_substrate_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(
+            pymatgen_substrate_sl_vectors
+        ).round(N)
+        pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors).round(N)
+
+        a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[0], pymatgen_substrate_sl_vectors_aligned[0])
+        b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[1], pymatgen_substrate_sl_vectors_aligned[1])
+        if a_colinear and b_colinear:
+            print(
+                f"{match_id}: 🔄 ✅ Colinear after alignment: \n{pymatgen_film_sl_vectors_aligned} vs \n{pymatgen_substrate_sl_vectors_aligned}"
+            )
+        else:
+            print(
+                f"{match_id}: 🔄 ❌ Non colinear after alignment: \n{pymatgen_film_sl_vectors_aligned} vs \n{pymatgen_substrate_sl_vectors_aligned}"
+            )
+        pymatgen_substrate_sl_vectors = pymatgen_substrate_sl_vectors_aligned
+        pymatgen_film_sl_vectors = pymatgen_film_sl_vectors_aligned
+
+        film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
+        substrate_supercell_matrix = np.rint(
+            np.linalg.solve(substrate_slab_vectors, pymatgen_substrate_sl_vectors)
+        ).astype(int)
 
         area = match_pymatgen.match_area
         if self.reduce_result_cell:
@@ -123,19 +148,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         ):
             return None
 
-        # Use Pymatgen's original superlattice vectors for strain calculation
-        # These are the actual matched vectors that should be used for strain
-
-        # Ensure both vector systems have the same handedness before calculating strain
-        film_det = np.linalg.det(pymatgen_film_sl_vectors)
-        substrate_det = np.linalg.det(pymatgen_substrate_sl_vectors)
-
-        # If handedness differs, flip the film vectors to match substrate handedness
-        if (film_det > 0) != (substrate_det > 0):
-            pymatgen_film_sl_vectors = pymatgen_film_sl_vectors.copy()
-            pymatgen_film_sl_vectors[1] = -pymatgen_film_sl_vectors[1]
-
-        real_strain_matrix = np.linalg.solve(pymatgen_film_sl_vectors, pymatgen_substrate_sl_vectors)
+        real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
 
         real_strain_matrix = convert_2x2_to_3x3(real_strain_matrix.tolist())
         strain_percentage = self.calculate_total_strain_percentage(real_strain_matrix)
