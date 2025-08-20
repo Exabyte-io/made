@@ -94,20 +94,17 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
 
         pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
-        pymatgen_film_sl_vectors = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
-
         pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
-        pymatgen_substrate_sl_vectors = align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
 
-        a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
-        b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
-        if not (a_colinear and b_colinear):
+        # Calculate supercell matrices directly from Pymatgen's vectors
+        # This preserves the optimal non-diagonal solutions that alignment would destroy
+        try:
+            film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
+            substrate_supercell_matrix = np.rint(
+                np.linalg.solve(substrate_slab_vectors, pymatgen_substrate_sl_vectors)
+            ).astype(int)
+        except np.linalg.LinAlgError:
             return None
-
-        film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
-        substrate_supercell_matrix = np.rint(
-            np.linalg.solve(substrate_slab_vectors, pymatgen_substrate_sl_vectors)
-        ).astype(int)
 
         area = match_pymatgen.match_area
         if self.reduce_result_cell:
