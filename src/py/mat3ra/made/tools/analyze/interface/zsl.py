@@ -123,7 +123,19 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         ):
             return None
 
-        real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
+        # Use Pymatgen's original superlattice vectors for strain calculation
+        # These are the actual matched vectors that should be used for strain
+
+        # Ensure both vector systems have the same handedness before calculating strain
+        film_det = np.linalg.det(pymatgen_film_sl_vectors)
+        substrate_det = np.linalg.det(pymatgen_substrate_sl_vectors)
+
+        # If handedness differs, flip the film vectors to match substrate handedness
+        if (film_det > 0) != (substrate_det > 0):
+            pymatgen_film_sl_vectors = pymatgen_film_sl_vectors.copy()
+            pymatgen_film_sl_vectors[1] = -pymatgen_film_sl_vectors[1]
+
+        real_strain_matrix = np.linalg.solve(pymatgen_film_sl_vectors, pymatgen_substrate_sl_vectors)
 
         real_strain_matrix = convert_2x2_to_3x3(real_strain_matrix.tolist())
         strain_percentage = self.calculate_total_strain_percentage(real_strain_matrix)
