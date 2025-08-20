@@ -101,30 +101,55 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
         if not (a_colinear and b_colinear):
             print(
-                f"\n{match_id}:❌ Non colinear SL vectors: \n{pymatgen_film_sl_vectors} vs \n{pymatgen_substrate_sl_vectors}"
+                f"\n{match_id}:❌ Non colinear SL vectors: \n{pymatgen_film_sl_vectors} vs"
+                + "\n{pymatgen_substrate_sl_vectors}"
             )
-        else:
-            print(
-                f"\n{match_id}:✅ Colinear SL vectors: \n{pymatgen_film_sl_vectors} vs \n{pymatgen_substrate_sl_vectors}"
+            pymatgen_substrate_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(
+                pymatgen_substrate_sl_vectors
+            ).round(N)
+            pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors).round(
+                N
             )
 
-        pymatgen_substrate_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(
-            pymatgen_substrate_sl_vectors
-        ).round(N)
-        pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors).round(N)
-
-        a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[0], pymatgen_substrate_sl_vectors_aligned[0])
-        b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[1], pymatgen_substrate_sl_vectors_aligned[1])
-        if a_colinear and b_colinear:
-            print(
-                f"{match_id}: 🔄 ✅ Colinear after alignment: \n{pymatgen_film_sl_vectors_aligned} vs \n{pymatgen_substrate_sl_vectors_aligned}"
+            a_colinear_after = are_vectors_colinear(
+                pymatgen_film_sl_vectors_aligned[0], pymatgen_substrate_sl_vectors_aligned[0]
             )
+            b_colinear_after = are_vectors_colinear(
+                pymatgen_film_sl_vectors_aligned[1], pymatgen_substrate_sl_vectors_aligned[1]
+            )
+            if a_colinear_after and b_colinear_after:
+                print(
+                    f"{match_id}: 🔄 ✅ Colinear after alignment: \n{pymatgen_film_sl_vectors_aligned} vs"
+                    + "\n{pymatgen_substrate_sl_vectors_aligned}"
+                )
+                # Check if the aligned matrices are diagonal
+                is_film_diag = np.allclose(
+                    pymatgen_film_sl_vectors_aligned, np.diag(np.diag(pymatgen_film_sl_vectors_aligned))
+                )
+                is_substrate_diag = np.allclose(
+                    pymatgen_substrate_sl_vectors_aligned, np.diag(np.diag(pymatgen_substrate_sl_vectors_aligned))
+                )
+
+                if is_film_diag and is_substrate_diag:
+                    # Use original vectors as per user request for diagonal cases (Diamond/GaAs)
+                    pass
+                else:
+                    # Use aligned vectors for non-diagonal cases (Graphene/Ni)
+                    film_slab_vectors = align_first_vector_to_x_2d_right_handed(film_slab_vectors)
+                    substrate_slab_vectors = align_first_vector_to_x_2d_right_handed(substrate_slab_vectors)
+                    pymatgen_film_sl_vectors = pymatgen_film_sl_vectors_aligned
+                    pymatgen_substrate_sl_vectors = pymatgen_substrate_sl_vectors_aligned
+            else:
+                print(
+                    f"{match_id}: 🔄 ❌ Non colinear after alignment: \n{pymatgen_film_sl_vectors_aligned} vs"
+                    + "\n{pymatgen_substrate_sl_vectors_aligned}"
+                )
+                return None
         else:
             print(
-                f"{match_id}: 🔄 ❌ Non colinear after alignment: \n{pymatgen_film_sl_vectors_aligned} vs \n{pymatgen_substrate_sl_vectors_aligned}"
+                f"\n{match_id}:✅ Colinear SL vectors: \n{pymatgen_film_sl_vectors} vs"
+                + "\n{pymatgen_substrate_sl_vectors}"
             )
-        pymatgen_substrate_sl_vectors = pymatgen_substrate_sl_vectors_aligned
-        pymatgen_film_sl_vectors = pymatgen_film_sl_vectors_aligned
 
         film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
         substrate_supercell_matrix = np.rint(
