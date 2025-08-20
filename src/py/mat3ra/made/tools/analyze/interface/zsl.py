@@ -90,26 +90,19 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         return match_holders
 
     def convert_generated_match_to_match_holder(self, match_id: int, match_pymatgen) -> Optional[ZSLMatchHolder]:
-        N = 6
-        film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2]).round(N)[:, :2]
-        substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2]).round(N)[:, :2]
+        film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
+        substrate_slab_vectors = np.array(self.substrate_slab.lattice.vector_arrays[0:2])[:, :2]
 
-        pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors.round(N)[:, :2]
-        pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors.round(N)[:, :2]
+        pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
+        pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
 
         a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
         b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
         if not (a_colinear and b_colinear):
-            print(
-                f"\n{match_id}:❌ Non colinear SL vectors: \n{pymatgen_film_sl_vectors} vs"
-                + "\n{pymatgen_substrate_sl_vectors}"
-            )
             pymatgen_substrate_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(
                 pymatgen_substrate_sl_vectors
-            ).round(N)
-            pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors).round(
-                N
             )
+            pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
 
             a_colinear_after = are_vectors_colinear(
                 pymatgen_film_sl_vectors_aligned[0], pymatgen_substrate_sl_vectors_aligned[0]
@@ -118,10 +111,6 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
                 pymatgen_film_sl_vectors_aligned[1], pymatgen_substrate_sl_vectors_aligned[1]
             )
             if a_colinear_after and b_colinear_after:
-                print(
-                    f"{match_id}: 🔄 ✅ Colinear after alignment: \n{pymatgen_film_sl_vectors_aligned} vs"
-                    + "\n{pymatgen_substrate_sl_vectors_aligned}"
-                )
                 # Check if the aligned matrices are diagonal
                 is_film_diag = np.allclose(
                     pymatgen_film_sl_vectors_aligned, np.diag(np.diag(pymatgen_film_sl_vectors_aligned))
@@ -135,21 +124,12 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
                     pass
                 else:
                     # Use aligned vectors for non-diagonal cases (Graphene/Ni)
-                    film_slab_vectors = align_first_vector_to_x_2d_right_handed(film_slab_vectors)
-                    substrate_slab_vectors = align_first_vector_to_x_2d_right_handed(substrate_slab_vectors)
+                    # film_slab_vectors = align_first_vector_to_x_2d_right_handed(film_slab_vectors)
+                    # substrate_slab_vectors = align_first_vector_to_x_2d_right_handed(substrate_slab_vectors)
                     pymatgen_film_sl_vectors = pymatgen_film_sl_vectors_aligned
                     pymatgen_substrate_sl_vectors = pymatgen_substrate_sl_vectors_aligned
             else:
-                print(
-                    f"{match_id}: 🔄 ❌ Non colinear after alignment: \n{pymatgen_film_sl_vectors_aligned} vs"
-                    + "\n{pymatgen_substrate_sl_vectors_aligned}"
-                )
                 return None
-        else:
-            print(
-                f"\n{match_id}:✅ Colinear SL vectors: \n{pymatgen_film_sl_vectors} vs"
-                + "\n{pymatgen_substrate_sl_vectors}"
-            )
 
         film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
         substrate_supercell_matrix = np.rint(
