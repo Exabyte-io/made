@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.csl import CSLInterfaceAnalyzer
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabConfiguration
 from unit.fixtures.bulk import BULK_GRAPHENE, BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
@@ -195,3 +196,113 @@ def test_optimal_supercell_functions(substrate, film, expected_n, expected_m):
 
     assert optimal_n == expected_n
     assert optimal_m == expected_m
+
+
+@pytest.mark.parametrize(
+    "substrate_config, film_config, analyzer_params, expected_min_matches",
+    [
+        (
+            SUBSTRATE_SI_111,
+            FILM_GRAPHENE_001,
+            {
+                "max_area": 50.0,
+                "length_tolerance": 0.1,
+                "angle_step": 15.0,
+                "max_rotation_angle": 60.0,
+                "max_supercell_size": 5,
+                "strain_tolerance": 20.0,
+            },
+            1,
+        )
+    ],
+)
+def test_csl_analyzer_functionality(substrate_config, film_config, analyzer_params, expected_min_matches):
+    """Test the CSL analyzer functionality with Si/Graphene fixtures."""
+    substrate_slab_config = SlabConfiguration.from_parameters(
+        substrate_config.bulk_config,
+        substrate_config.miller_indices,
+        substrate_config.number_of_layers,
+        vacuum=substrate_config.vacuum,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
+    )
+    film_slab_config = SlabConfiguration.from_parameters(
+        film_config.bulk_config,
+        film_config.miller_indices,
+        film_config.number_of_layers,
+        vacuum=film_config.vacuum,
+        termination_top_formula=None,
+        termination_bottom_formula=None,
+    )
+
+    analyzer = CSLInterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config, film_slab_configuration=film_slab_config, **analyzer_params
+    )
+
+    # Test lattice type validation
+    assert analyzer._validate_same_lattice_type()
+
+    # Test match generation
+    match_holders = analyzer.csl_match_holders
+    assert len(match_holders) >= expected_min_matches
+
+    for match in match_holders:
+        assert isinstance(match.match_id, int)
+        assert match.match_id >= 0
+        assert isinstance(match.total_strain_percentage, float)
+        assert match.total_strain_percentage >= 0
+        assert isinstance(match.match_area, float)
+        assert match.match_area > 0
+        assert isinstance(match.film_rotation_angle, float)
+        assert 0 <= match.film_rotation_angle <= analyzer_params["max_rotation_angle"]
+        assert hasattr(match, "substrate_supercell_matrix")
+        assert hasattr(match, "film_supercell_matrix")
+        assert hasattr(match, "film_strain_matrix")
+
+    # Test configuration generation
+    if len(match_holders) > 0:
+        selected_config = analyzer.get_strained_configuration_by_match_id(0)
+        assert selected_config.match_id == 0
+        assert hasattr(selected_config, "substrate_configuration")
+        assert hasattr(selected_config, "film_configuration")
+
+        # Test invalid match ID
+        with pytest.raises(ValueError, match="Match ID .* out of range"):
+            analyzer.get_strained_configuration_by_match_id(999)
+
+        # Test negative match ID
+        with pytest.raises(ValueError, match="Match ID .* out of range"):
+            analyzer.get_strained_configuration_by_match_id(-1)
+
+    # Test get_strained_configurations
+    interface_configurations = analyzer.get_strained_configurations()
+    assert len(interface_configurations) == len(match_holders)
+
+
+def test_csl_analyzer_lattice_type_validation():
+    """Test that CSL analyzer validates lattice types correctly."""
+    # Create configs with different lattice types (this should fail)
+    substrate_slab_config = SlabConfiguration.from_parameters(
+        BULK_Si_CONVENTIONAL,  # Cubic
+        (0, 0, 1),
+        2,
+        vacuum=0.0,
+    )
+    film_slab_config = SlabConfiguration.from_parameters(
+        BULK_GRAPHENE,  # Hexagonal
+        (0, 0, 1),
+        1,
+        vacuum=0.0,
+    )
+
+    analyzer = CSLInterfaceAnalyzer(
+        substrate_slab_configuration=substrate_slab_config,
+        film_slab_configuration=film_slab_config,
+    )
+
+    # This should return False since lattice types are different
+    assert not analyzer._validate_same_lattice_type()
+
+    # Attempting to generate matches should raise an error
+    with pytest.raises(ValueError, match="Substrate and film must have the same lattice type"):
+        _ = analyzer.csl_match_holders

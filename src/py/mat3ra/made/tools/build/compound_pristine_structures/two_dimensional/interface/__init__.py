@@ -8,6 +8,10 @@ from .commensurate import (
     create_interface_commensurate,
     get_commensurate_strained_configurations,
 )
+from .csl import (
+    create_interface_csl,
+    get_csl_strained_configurations,
+)
 from .enums import StrainModes
 from .twisted import (
     TwistedNanoribbonsInterfaceConfiguration,
@@ -32,6 +36,9 @@ __all__ = [
     # Commensurate interface
     "create_interface_commensurate",
     "get_commensurate_strained_configurations",
+    # CSL interface
+    "create_interface_csl",
+    "get_csl_strained_configurations",
     # Twisted interface
     "TwistedNanoribbonsInterfaceConfiguration",
     "create_interface_twisted",

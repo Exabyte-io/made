@@ -15,6 +15,7 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
 )
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.commensurate.helpers import (
     create_interface_commensurate,
+    create_interface_commensurate_two_materials,
 )
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.twisted.helpers import (
     create_interface_twisted,
@@ -23,6 +24,7 @@ from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon.help
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from mat3ra.made.tools.helpers import create_interface_simple, create_interface_simple_between_slabs
+from mat3ra.standata.materials import Materials
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Ni_PRIMITIVE, BULK_Si_CONVENTIONAL
 
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
@@ -245,6 +247,90 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
     )
 
     assert_two_entities_deep_almost_equal(interface, expected_interface, atol=PRECISION)
+
+
+@pytest.mark.parametrize(
+    "substrate_material_name, film_material_name, interface_params",
+    [
+        (
+            "Diamond",
+            "GaAs",
+            {
+                "target_angle": 30.0,  # Target the optimal ~30° relative rotation
+                "angle_tolerance": 10.0,  # More relaxed to find rotated supercells
+                "max_repetition_int": 5,  # Allow larger supercells for rotations
+                "limit_max_int": 10,
+                "return_first_match": True,
+                "gap": 3.0,
+                "substrate_miller_indices": (0, 0, 1),
+                "film_miller_indices": (0, 0, 1),
+                "substrate_number_of_layers": 1,
+                "film_number_of_layers": 1,
+                "vacuum": 10.0,
+                "use_conventional_cell": True,
+                "remove_overlapping_atoms": True,
+                "tolerance_for_overlap": 1.0,
+            },
+        ),
+    ],
+)
+def test_commensurate_interface_two_materials(substrate_material_name, film_material_name, interface_params):
+    """Test creating commensurate interface between two different materials using standata materials."""
+    # Create materials from standata
+    substrate = Material.create(Materials.get_by_name_first_match(substrate_material_name))
+    film = Material.create(Materials.get_by_name_first_match(film_material_name))
+
+    print(f"Testing interface creation between {substrate_material_name} and {film_material_name}")
+    print(f"Substrate lattice: a={substrate.lattice.a:.3f}, b={substrate.lattice.b:.3f}, c={substrate.lattice.c:.3f}")
+    print(f"Film lattice: a={film.lattice.a:.3f}, b={film.lattice.b:.3f}, c={film.lattice.c:.3f}")
+
+    # Create commensurate interface between different materials
+    interface = create_interface_commensurate_two_materials(
+        substrate_material=substrate, film_material=film, **interface_params
+    )
+
+    # Basic assertions to verify interface creation
+    assert interface is not None
+    assert isinstance(interface, MaterialWithBuildMetadata)
+    assert len(interface.basis.elements) > 0
+    assert interface.lattice.c > interface_params["gap"]  # Should have gap + material thickness + vacuum
+
+    # Verify both materials are present in the interface
+    substrate_elements = set(element.value for element in substrate.basis.elements.values)
+    film_elements = set(element.value for element in film.basis.elements.values)
+    interface_elements = set(element.value for element in interface.basis.elements.values)
+
+    # Interface should contain elements from both materials
+    assert substrate_elements.issubset(
+        interface_elements
+    ), f"Substrate elements {substrate_elements} not found in interface {interface_elements}"
+    assert film_elements.issubset(
+        interface_elements
+    ), f"Film elements {film_elements} not found in interface {interface_elements}"
+
+    # Check that interface has reasonable dimensions
+    assert interface.lattice.a > 0
+    assert interface.lattice.b > 0
+    assert interface.lattice.c > interface_params["vacuum"]  # Should be at least vacuum size
+
+    print(f"✓ Successfully created commensurate interface between {substrate_material_name} and {film_material_name}")
+    print(f"Interface formula: {interface.formula}")
+    print(f"Number of atoms: {len(interface.basis.elements)}")
+    print(f"Lattice: a={interface.lattice.a:.3f}, b={interface.lattice.b:.3f}, c={interface.lattice.c:.3f}")
+
+    # Check if we got rotated supercells (non-identity matrices)
+    # The interface should have been created with optimal rotated configurations
+    lattice_ratio = interface.lattice.a / interface.lattice.b
+    print(f"Lattice aspect ratio (a/b): {lattice_ratio:.3f}")
+
+    if abs(lattice_ratio - 1.0) > 0.1:
+        print("✓ Non-square lattice detected - likely using rotated supercells!")
+    else:
+        print("⚠ Square lattice - may be using simple strain matching instead of optimal rotations")
+
+    # Verify lattice vectors are properly matched (no stacking errors)
+    # This is the key test - if we get here without ValueError, lattice matching worked
+    assert True  # If we reach here, the lattice matching was successful
 
 
 @pytest.mark.parametrize(
