@@ -153,6 +153,15 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         ):
             return None
 
+        # Ensure both vector systems have the same handedness before calculating strain
+        film_det = np.linalg.det(film_sl_supercell_vectors)
+        substrate_det = np.linalg.det(substrate_sl_supercell_vectors)
+
+        # If handedness differs, flip the film vectors to match substrate handedness
+        if (film_det > 0) != (substrate_det > 0):
+            film_sl_supercell_vectors = film_sl_supercell_vectors.copy()
+            film_sl_supercell_vectors[1] = -film_sl_supercell_vectors[1]
+
         real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
 
         real_strain_matrix = convert_2x2_to_3x3(real_strain_matrix.tolist())
