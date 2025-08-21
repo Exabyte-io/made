@@ -1,6 +1,8 @@
 from mat3ra.code.vector import RoundedVector3D
 from mat3ra.made.lattice import Lattice
 from mat3ra.utils import assertion as assertion_utils
+from unit.fixtures.bulk import BULK_Si_PRIMITIVE
+from unit.fixtures.interface.gr_ni_111_top_hcp import GRAPHENE_NICKEL_INTERFACE_TOP_HCP
 
 DEFAULT_UNITS = Lattice.__units_default__
 DEFAULT_TYPE = Lattice.__type_default__
