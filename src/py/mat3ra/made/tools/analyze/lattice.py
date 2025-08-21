@@ -9,6 +9,23 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
     def spacegroup_analyzer(self):
         return PymatgenSpacegroupAnalyzer(to_pymatgen(self.material))
 
+    def detect_lattice_type(self, tolerance=0.2, angle_tolerance=5):
+        """
+        Detects the lattice type of the material.
+
+        Args:
+            tolerance (float): Tolerance for lattice parameter comparisons.
+            angle_tolerance (float): Tolerance for angle comparisons.
+
+        Returns:
+            str: The detected lattice type.
+        """
+        return PymatgenSpacegroupAnalyzer(
+            to_pymatgen(self.material),
+            symprec=tolerance,
+            angle_tolerance=angle_tolerance,
+        ).get_lattice_type()
+
     @property
     def material_with_primitive_lattice(self: MaterialWithBuildMetadata) -> MaterialWithBuildMetadata:
         """
@@ -46,3 +63,19 @@ def get_material_with_primitive_lattice(
             return material
     # Reduced, return the primitive structure
     return material_with_primitive_lattice
+
+
+def get_lattice_type(material: MaterialWithBuildMetadata, tolerance=0.2, angle_tolerance=5) -> str:
+    """
+    Detects the lattice type of the material.
+
+    Args:
+        material (MaterialWithBuildMetadata): The material to analyze.
+        tolerance (float): Tolerance for lattice parameter comparisons.
+        angle_tolerance (float): Tolerance for angle comparisons.
+
+    Returns:
+        str: The detected lattice type.
+    """
+    analyzer = LatticeMaterialAnalyzer(material=material)
+    return analyzer.detect_lattice_type(tolerance=tolerance, angle_tolerance=angle_tolerance)
