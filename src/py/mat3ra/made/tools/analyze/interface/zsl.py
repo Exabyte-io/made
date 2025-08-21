@@ -96,40 +96,28 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
         pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
 
-        a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[0], pymatgen_substrate_sl_vectors[0])
-        b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors[1], pymatgen_substrate_sl_vectors[1])
+        pymatgen_substrate_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
+        pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
+
+        a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[0], pymatgen_substrate_sl_vectors_aligned[0])
+        b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[1], pymatgen_substrate_sl_vectors_aligned[1])
+
         if not (a_colinear and b_colinear):
-            pymatgen_substrate_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(
-                pymatgen_substrate_sl_vectors
-            )
-            pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
+            return None
 
-            a_colinear_after = are_vectors_colinear(
-                pymatgen_film_sl_vectors_aligned[0], pymatgen_substrate_sl_vectors_aligned[0]
-            )
-            b_colinear_after = are_vectors_colinear(
-                pymatgen_film_sl_vectors_aligned[1], pymatgen_substrate_sl_vectors_aligned[1]
-            )
-            if a_colinear_after and b_colinear_after:
-                # Check if the aligned matrices are diagonal
-                is_film_diag = np.allclose(
-                    pymatgen_film_sl_vectors_aligned, np.diag(np.diag(pymatgen_film_sl_vectors_aligned))
-                )
-                is_substrate_diag = np.allclose(
-                    pymatgen_substrate_sl_vectors_aligned, np.diag(np.diag(pymatgen_substrate_sl_vectors_aligned))
-                )
+        # Check if the aligned matrices are diagonal
+        is_film_diag = np.allclose(pymatgen_film_sl_vectors_aligned, np.diag(np.diag(pymatgen_film_sl_vectors_aligned)))
+        is_substrate_diag = np.allclose(
+            pymatgen_substrate_sl_vectors_aligned, np.diag(np.diag(pymatgen_substrate_sl_vectors_aligned))
+        )
 
-                if is_film_diag and is_substrate_diag:
-                    # Use original vectors as per user request for diagonal cases (Diamond/GaAs)
-                    pass
-                else:
-                    # Use aligned vectors for non-diagonal cases (Graphene/Ni)
-                    # film_slab_vectors = align_first_vector_to_x_2d_right_handed(film_slab_vectors)
-                    # substrate_slab_vectors = align_first_vector_to_x_2d_right_handed(substrate_slab_vectors)
-                    pymatgen_film_sl_vectors = pymatgen_film_sl_vectors_aligned
-                    pymatgen_substrate_sl_vectors = pymatgen_substrate_sl_vectors_aligned
-            else:
-                return None
+        if is_film_diag and is_substrate_diag:
+            # Use original vectors for diagonal cases (Diamond/GaAs)
+            pass
+        else:
+            # Use aligned vectors for non-diagonal cases (Graphene/Ni)
+            pymatgen_film_sl_vectors = pymatgen_film_sl_vectors_aligned
+            pymatgen_substrate_sl_vectors = pymatgen_substrate_sl_vectors_aligned
 
         film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
         substrate_supercell_matrix = np.rint(
@@ -158,6 +146,7 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         substrate_det = np.linalg.det(substrate_sl_supercell_vectors)
 
         # If handedness differs, flip the film vectors to match substrate handedness
+        # (otherwise strain calculation will be giving 2 * 100% strain)
         if (film_det > 0) != (substrate_det > 0):
             film_sl_supercell_vectors = film_sl_supercell_vectors.copy()
             film_sl_supercell_vectors[1] = -film_sl_supercell_vectors[1]
