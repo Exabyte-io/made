@@ -96,41 +96,19 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         pymatgen_film_sl_vectors = match_pymatgen.film_sl_vectors[:, :2]
         pymatgen_substrate_sl_vectors = match_pymatgen.substrate_sl_vectors[:, :2]
 
-        pymatgen_substrate_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
-        pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
-
-        a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[0], pymatgen_substrate_sl_vectors_aligned[0])
-        b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[1], pymatgen_substrate_sl_vectors_aligned[1])
-
-        if not (a_colinear and b_colinear):
+        film_sl_vectors, substrate_sl_vectors = self._get_sl_vectors_for_supercell_calculation(
+            pymatgen_film_sl_vectors, pymatgen_substrate_sl_vectors
+        )
+        if film_sl_vectors is None:
             return None
 
-        # Check if the aligned matrices are diagonal
-        is_film_diag = np.allclose(pymatgen_film_sl_vectors_aligned, np.diag(np.diag(pymatgen_film_sl_vectors_aligned)))
-        is_substrate_diag = np.allclose(
-            pymatgen_substrate_sl_vectors_aligned, np.diag(np.diag(pymatgen_substrate_sl_vectors_aligned))
+        film_supercell_matrix, substrate_supercell_matrix, area = self._calculate_and_reduce_supercell_matrices(
+            film_slab_vectors,
+            substrate_slab_vectors,
+            film_sl_vectors,
+            substrate_sl_vectors,
+            match_pymatgen.match_area,
         )
-
-        if is_film_diag and is_substrate_diag:
-            # Use original vectors for diagonal cases (Diamond/GaAs)
-            pass
-        else:
-            # Use aligned vectors for non-diagonal cases (Graphene/Ni)
-            pymatgen_film_sl_vectors = pymatgen_film_sl_vectors_aligned
-            pymatgen_substrate_sl_vectors = pymatgen_substrate_sl_vectors_aligned
-
-        film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, pymatgen_film_sl_vectors)).astype(int)
-        substrate_supercell_matrix = np.rint(
-            np.linalg.solve(substrate_slab_vectors, pymatgen_substrate_sl_vectors)
-        ).astype(int)
-
-        area = match_pymatgen.match_area
-        if self.reduce_result_cell:
-            # If possible, reduce supercell matrices by their GCD
-            g = get_global_gcd(film_supercell_matrix, substrate_supercell_matrix)
-            film_supercell_matrix = film_supercell_matrix // g
-            substrate_supercell_matrix = substrate_supercell_matrix // g
-            area = area / g**2
 
         film_sl_supercell_vectors = film_supercell_matrix @ film_slab_vectors
         substrate_sl_supercell_vectors = substrate_supercell_matrix @ substrate_slab_vectors
@@ -141,20 +119,9 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         ):
             return None
 
-        # Ensure both vector systems have the same handedness before calculating strain
-        film_det = np.linalg.det(film_sl_supercell_vectors)
-        substrate_det = np.linalg.det(substrate_sl_supercell_vectors)
-
-        # If handedness differs, flip the film vectors to match substrate handedness
-        # (otherwise strain calculation will be giving 2 * 100% strain)
-        if (film_det > 0) != (substrate_det > 0):
-            film_sl_supercell_vectors = film_sl_supercell_vectors.copy()
-            film_sl_supercell_vectors[1] = -film_sl_supercell_vectors[1]
-
-        real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
-
-        real_strain_matrix = convert_2x2_to_3x3(real_strain_matrix.tolist())
-        strain_percentage = self.calculate_total_strain_percentage(real_strain_matrix)
+        real_strain_matrix, strain_percentage = self._calculate_strain(
+            film_sl_supercell_vectors, substrate_sl_supercell_vectors
+        )
 
         return ZSLMatchHolder(
             match_id=match_id,
@@ -164,6 +131,54 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
             match_area=area,
             total_strain_percentage=strain_percentage,
         )
+
+    def _get_sl_vectors_for_supercell_calculation(self, pymatgen_film_sl_vectors, pymatgen_substrate_sl_vectors):
+        pymatgen_substrate_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
+        pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
+
+        a_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[0], pymatgen_substrate_sl_vectors_aligned[0])
+        b_colinear = are_vectors_colinear(pymatgen_film_sl_vectors_aligned[1], pymatgen_substrate_sl_vectors_aligned[1])
+
+        if not (a_colinear and b_colinear):
+            return None, None
+
+        is_film_diag = np.allclose(pymatgen_film_sl_vectors_aligned, np.diag(np.diag(pymatgen_film_sl_vectors_aligned)))
+        is_substrate_diag = np.allclose(
+            pymatgen_substrate_sl_vectors_aligned, np.diag(np.diag(pymatgen_substrate_sl_vectors_aligned))
+        )
+
+        if is_film_diag and is_substrate_diag:
+            return pymatgen_film_sl_vectors, pymatgen_substrate_sl_vectors
+        else:
+            return pymatgen_film_sl_vectors_aligned, pymatgen_substrate_sl_vectors_aligned
+
+    def _calculate_and_reduce_supercell_matrices(
+        self, film_slab_vectors, substrate_slab_vectors, film_sl_vectors, substrate_sl_vectors, match_area
+    ):
+        film_supercell_matrix = np.rint(np.linalg.solve(film_slab_vectors, film_sl_vectors)).astype(int)
+        substrate_supercell_matrix = np.rint(np.linalg.solve(substrate_slab_vectors, substrate_sl_vectors)).astype(int)
+
+        area = match_area
+        if self.reduce_result_cell:
+            g = get_global_gcd(film_supercell_matrix, substrate_supercell_matrix)
+            film_supercell_matrix = film_supercell_matrix // g
+            substrate_supercell_matrix = substrate_supercell_matrix // g
+            area = area / g**2
+
+        return film_supercell_matrix, substrate_supercell_matrix, area
+
+    def _calculate_strain(self, film_sl_supercell_vectors, substrate_sl_supercell_vectors):
+        film_det = np.linalg.det(film_sl_supercell_vectors)
+        substrate_det = np.linalg.det(substrate_sl_supercell_vectors)
+
+        if (film_det > 0) != (substrate_det > 0):
+            film_sl_supercell_vectors = film_sl_supercell_vectors.copy()
+            film_sl_supercell_vectors[1] = -film_sl_supercell_vectors[1]
+
+        real_strain_matrix = np.linalg.solve(film_sl_supercell_vectors, substrate_sl_supercell_vectors)
+        real_strain_matrix = convert_2x2_to_3x3(real_strain_matrix.tolist())
+        strain_percentage = self.calculate_total_strain_percentage(real_strain_matrix)
+        return real_strain_matrix, strain_percentage
 
     def get_strained_configuration_by_match_id(self, match_id: int) -> MatchedSubstrateFilmConfigurationHolder:
         match_holders = self.zsl_match_holders
