@@ -40,3 +40,44 @@ class LayeredFingerprintAlongAxis(BaseModel):
     def get_non_empty_element_sequence(self) -> List[List[str]]:
         """Get element lists for non-empty layers only."""
         return [layer.elements for layer in self.layers if layer.elements]
+
+    def get_similarity_score(self, other: "LayeredFingerprintAlongAxis") -> float:
+        """
+        Calculate Jaccard similarity score between this and another fingerprint.
+
+        Args:
+            other: Another LayeredFingerprintAlongAxis to compare with
+
+        Returns:
+            float: Average Jaccard similarity score (0.0 to 1.0)
+        """
+        if not self.layers or not other.layers:
+            return 0.0
+
+        # Take the minimum length to avoid index errors
+        min_length = min(len(self.layers), len(other.layers))
+        if min_length == 0:
+            return 0.0
+
+        total_score = 0.0
+
+        for i in range(min_length):
+            elements1 = self.layers[i].elements
+            elements2 = other.layers[i].elements
+
+            # Handle empty layers
+            if len(elements1) == 0 and len(elements2) == 0:
+                layer_score = 1.0
+            elif len(elements1) == 0 or len(elements2) == 0:
+                layer_score = 0.0
+            else:
+                # Calculate Jaccard similarity
+                set1 = set(elements1)
+                set2 = set(elements2)
+                intersection = len(set1.intersection(set2))
+                union = len(set1.union(set2))
+                layer_score = intersection / union if union > 0 else 0.0
+
+            total_score += layer_score
+
+        return total_score / min_length

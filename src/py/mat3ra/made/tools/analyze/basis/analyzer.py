@@ -74,8 +74,8 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
         current_fingerprint = self.get_layer_fingerprint(layer_thickness)
 
         # Compare fingerprints using similarity scores
-        normal_score = self._compare_fingerprints(original_fingerprint, current_fingerprint)
-        flipped_score = self._compare_fingerprints(original_fingerprint, self._reverse_fingerprint(current_fingerprint))
+        normal_score = original_fingerprint.get_similarity_score(current_fingerprint)
+        flipped_score = original_fingerprint.get_similarity_score(self._reverse_fingerprint(current_fingerprint))
 
         # If flipped orientation has significantly higher similarity, material is flipped
         threshold = 0.1  # 10% difference threshold
@@ -87,45 +87,3 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
         return LayeredFingerprintAlongAxis(
             layers=reversed_layers, axis=fingerprint.axis, layer_thickness=fingerprint.layer_thickness
         )
-
-    def _compare_fingerprints(self, fp1: LayeredFingerprintAlongAxis, fp2: LayeredFingerprintAlongAxis) -> float:
-        """
-        Compare two fingerprints using Jaccard similarity.
-
-        Args:
-            fp1: First fingerprint
-            fp2: Second fingerprint
-
-        Returns:
-            float: Average Jaccard similarity score (0.0 to 1.0)
-        """
-        if not fp1.layers or not fp2.layers:
-            return 0.0
-
-        # Take the minimum length to avoid index errors
-        min_length = min(len(fp1.layers), len(fp2.layers))
-        if min_length == 0:
-            return 0.0
-
-        total_score = 0.0
-
-        for i in range(min_length):
-            elements1 = fp1.layers[i].elements
-            elements2 = fp2.layers[i].elements
-
-            # Handle empty layers
-            if len(elements1) == 0 and len(elements2) == 0:
-                layer_score = 1.0
-            elif len(elements1) == 0 or len(elements2) == 0:
-                layer_score = 0.0
-            else:
-                # Calculate Jaccard similarity
-                set1 = set(elements1)
-                set2 = set(elements2)
-                intersection = len(set1.intersection(set2))
-                union = len(set1.union(set2))
-                layer_score = intersection / union if union > 0 else 0.0
-
-            total_score += layer_score
-
-        return total_score / min_length

@@ -64,7 +64,7 @@ DIAMOND_GAAS_CSL_TEST_CASE = (
     ),
     1.5,  # gap between diamond and gaas
     10.0,  # vacuum
-    100.0,  # max area - reduced to find simpler interfaces
+    150.0,  # max area - reduced to find simpler interfaces
     DIAMOND_GaAs_INTERFACE,
 )
 
@@ -76,10 +76,7 @@ MAX_ANGLE_TOL = 0.02
 
 @pytest.mark.parametrize(
     "substrate, film,gap, vacuum, max_area, expected_interface",
-    [
-        # GRAPHENE_NICKEL_TEST_CASE,
-        DIAMOND_GAAS_CSL_TEST_CASE
-    ],
+    [GRAPHENE_NICKEL_TEST_CASE, DIAMOND_GAAS_CSL_TEST_CASE],
 )
 def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_interface):
     """Test creating Si/Ge interface using ZSL approach."""
