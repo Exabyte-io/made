@@ -84,10 +84,28 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
                 continue
             match_holders.append(match_holder)
 
+        match_holders = self.purge_equivalent_matches(match_holders)
+
         # sort matches by strain in ascending order, then for each equal strain by area in ascending order
         match_holders = self.sort_by_strain_then_area(match_holders)
 
         return match_holders
+
+    def purge_equivalent_matches(self, match_holders: List[ZSLMatchHolder]) -> List[ZSLMatchHolder]:
+        unique_matches = []
+        seen_matches = set()
+
+        for holder in match_holders:
+            match_key = (
+                round(holder.match_area / self.math_precision) * self.math_precision,
+                round(holder.total_strain_percentage / self.math_precision) * self.math_precision,
+            )
+
+            if match_key not in seen_matches:
+                seen_matches.add(match_key)
+                unique_matches.append(holder)
+
+        return unique_matches
 
     def convert_generated_match_to_match_holder(self, match_id: int, match_pymatgen) -> Optional[ZSLMatchHolder]:
         film_slab_vectors = np.array(self.film_slab.lattice.vector_arrays[0:2])[:, :2]
