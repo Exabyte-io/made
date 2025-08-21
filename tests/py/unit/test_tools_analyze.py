@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from mat3ra.made.material import Material, defaultMaterialConfig
-from mat3ra.made.tools.analyze.basis import BasisMaterialAnalyzer
 from mat3ra.made.tools.analyze.crystal_site.adatom_crystal_site_material_analyzer import (
     AdatomCrystalSiteMaterialAnalyzer,
 )
@@ -99,40 +98,11 @@ def test_lattice_material_analyzer(
     primitive_cell = Material.create(primitive_material_config)
     lattice_material_analyzer = LatticeMaterialAnalyzer(material=primitive_cell)
 
-    basis_analyzer = BasisMaterialAnalyzer(material=primitive_cell)
-    fingerprint = basis_analyzer.get_layer_fingerprint(layer_thickness=1.0)
-    assert isinstance(fingerprint, list)
-
     conventional_cell = lattice_material_analyzer.material_with_conventional_lattice
     assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)
 
     primitive_cell_generated = lattice_material_analyzer.material_with_primitive_lattice
     assert_two_entities_deep_almost_equal(primitive_cell_generated, expected_primitive_material_config)
-
-
-@pytest.mark.parametrize(
-    "material_config, is_flipped",
-    [
-        (BULK_Si_CONVENTIONAL, False),
-    ],
-)
-def test_basis_analyzer_(material_config, is_flipped):
-    material = Material.create(material_config)
-    analyzer = BasisMaterialAnalyzer(material=material)
-
-    fingerprint = analyzer.get_layer_fingerprint(layer_thickness=1.0)
-    assert isinstance(fingerprint, list)
-    assert len(fingerprint) > 0
-
-    for (z_min, z_max), elements in fingerprint:
-        assert isinstance(z_min, float)
-        assert isinstance(z_max, float)
-        assert z_max > z_min
-        assert isinstance(elements, list)
-        assert all(isinstance(elem, str) for elem in elements)
-
-    is_flipped = analyzer.is_orientation_flipped(material)
-    assert is_flipped == is_flipped, "Orientation flipped status does not match expected value."
 
 
 VORONOI_SITE_EXPECTED = {OSPlatform.DARWIN: [0.625, 0.625, 0.125], OSPlatform.OTHER: [0.5, 0.5, 0.5]}

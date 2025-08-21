@@ -1,22 +1,25 @@
-from typing import List, Tuple
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
-from ..build_components.metadata import MaterialWithBuildMetadata
-from . import BaseMaterialAnalyzer
+from ...build_components.metadata import MaterialWithBuildMetadata
+from .. import BaseMaterialAnalyzer
+from .fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint
 
 
 class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
     """Analyzer for material basis (atomic positions and elements)."""
 
-    def get_layer_fingerprint(self, layer_thickness: float = 1.0) -> List[Tuple[Tuple[float, float], List[str]]]:
+    def get_layer_fingerprint(
+        self, layer_thickness: float = 1.0, axis: AxisEnum = AxisEnum.z
+    ) -> LayeredFingerprintAlongAxis:
         """
-        Create a fingerprint of the material by analyzing layers along the z-axis.
+        Create a fingerprint of the material by analyzing layers along the specified axis.
 
         Args:
-            layer_thickness (float): Thickness of each layer in Angstroms
+            layer_thickness: Thickness of each layer in Angstroms
+            axis: Axis along which to compute the fingerprint
 
         Returns:
-            List[Tuple[Tuple[float, float], List[str]]]: List of ((min_z, max_z), elements) for each layer
-            Elements list contains sorted unique species in the layer, or [] if empty
+            LayeredFingerprintAlongAxis: Structured fingerprint with layer information
         """
         material_cartesian = self.material.clone()
         material_cartesian.to_cartesian()
@@ -24,30 +27,33 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
         coordinates = material_cartesian.basis.coordinates.values
         elements = material_cartesian.basis.elements.values
 
-        z_coords = [coord[2] for coord in coordinates]
-        min_z, max_z = min(z_coords), max(z_coords)
+        # Get coordinates along the specified axis
+        axis_index = {"x": 0, "y": 1, "z": 2}[axis.value]
+        axis_coords = [coord[axis_index] for coord in coordinates]
+        min_coord, max_coord = min(axis_coords), max(axis_coords)
 
-        layers = []
-        current_z = min_z
+        # Create fingerprint
+        fingerprint = LayeredFingerprintAlongAxis(axis=axis, layer_thickness=layer_thickness)
 
-        while current_z < max_z:
-            layer_min = current_z
-            layer_max = current_z + layer_thickness
+        current_coord = min_coord
+        while current_coord < max_coord:
+            layer_min = current_coord
+            layer_max = current_coord + layer_thickness
 
+            # Find all atoms in this layer
             layer_elements = []
-            for i, z in enumerate(z_coords):
-                if layer_min <= z < layer_max:
+            for i, coord_val in enumerate(axis_coords):
+                if layer_min <= coord_val < layer_max:
                     layer_elements.append(elements[i])
 
-            if layer_elements:
-                unique_elements = sorted(list(set(layer_elements)))
-            else:
-                unique_elements = []  # Empty layer
+            # Create layer fingerprint
+            unique_elements = sorted(list(set(layer_elements))) if layer_elements else []
+            layer = LayerFingerprint(min_coord=layer_min, max_coord=layer_max, elements=unique_elements)
+            fingerprint.layers.append(layer)
 
-            layers.append(((layer_min, layer_max), unique_elements))
-            current_z += layer_thickness
+            current_coord += layer_thickness
 
-        return layers
+        return fingerprint
 
     def is_orientation_flipped(
         self, original_material: MaterialWithBuildMetadata, layer_thickness: float = 1.0
@@ -69,16 +75,20 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
 
         # Compare fingerprints using similarity scores
         normal_score = self._compare_fingerprints(original_fingerprint, current_fingerprint)
-        flipped_score = self._compare_fingerprints(original_fingerprint, list(reversed(current_fingerprint)))
+        flipped_score = self._compare_fingerprints(original_fingerprint, self._reverse_fingerprint(current_fingerprint))
 
         # If flipped orientation has significantly higher similarity, material is flipped
-        # Use a threshold to determine if the difference is significant enough
         threshold = 0.1  # 10% difference threshold
         return flipped_score > normal_score + threshold
 
-    def _compare_fingerprints(
-        self, fp1: List[Tuple[Tuple[float, float], List[str]]], fp2: List[Tuple[Tuple[float, float], List[str]]]
-    ) -> float:
+    def _reverse_fingerprint(self, fingerprint: LayeredFingerprintAlongAxis) -> LayeredFingerprintAlongAxis:
+        """Create a reversed copy of the fingerprint."""
+        reversed_layers = list(reversed(fingerprint.layers))
+        return LayeredFingerprintAlongAxis(
+            layers=reversed_layers, axis=fingerprint.axis, layer_thickness=fingerprint.layer_thickness
+        )
+
+    def _compare_fingerprints(self, fp1: LayeredFingerprintAlongAxis, fp2: LayeredFingerprintAlongAxis) -> float:
         """
         Compare two fingerprints using Jaccard similarity.
 
@@ -89,19 +99,19 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
         Returns:
             float: Average Jaccard similarity score (0.0 to 1.0)
         """
-        if not fp1 or not fp2:
+        if not fp1.layers or not fp2.layers:
             return 0.0
 
         # Take the minimum length to avoid index errors
-        min_length = min(len(fp1), len(fp2))
+        min_length = min(len(fp1.layers), len(fp2.layers))
         if min_length == 0:
             return 0.0
 
         total_score = 0.0
 
         for i in range(min_length):
-            _, elements1 = fp1[i]
-            _, elements2 = fp2[i]
+            elements1 = fp1.layers[i].elements
+            elements2 = fp2.layers[i].elements
 
             # Handle empty layers
             if len(elements1) == 0 and len(elements2) == 0:
