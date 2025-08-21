@@ -2,6 +2,7 @@ from ..build_components.metadata import MaterialWithBuildMetadata
 from ..convert import from_pymatgen, to_pymatgen
 from ..third_party import PymatgenSpacegroupAnalyzer
 from . import BaseMaterialAnalyzer
+from ...lattice import LatticeTypeEnum
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -9,7 +10,7 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
     def spacegroup_analyzer(self):
         return PymatgenSpacegroupAnalyzer(to_pymatgen(self.material))
 
-    def detect_lattice_type(self, tolerance=0.2, angle_tolerance=5):
+    def detect_lattice_type(self, tolerance=0.2, angle_tolerance=5) -> LatticeTypeEnum:
         """
         Detects the lattice type of the material.
 
@@ -18,13 +19,26 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
             angle_tolerance (float): Tolerance for angle comparisons.
 
         Returns:
-            str: The detected lattice type.
+            LatticeTypeEnum: The detected lattice type.
         """
-        return PymatgenSpacegroupAnalyzer(
+        lattice_type_str = PymatgenSpacegroupAnalyzer(
             to_pymatgen(self.material),
             symprec=tolerance,
             angle_tolerance=angle_tolerance,
         ).get_lattice_type()
+        
+        # Map pymatgen string output to LatticeTypeEnum
+        mapping = {
+            "cubic": LatticeTypeEnum.CUB,
+            "hexagonal": LatticeTypeEnum.HEX,
+            "tetragonal": LatticeTypeEnum.TET,
+            "rhombohedral": LatticeTypeEnum.RHL,
+            "orthorhombic": LatticeTypeEnum.ORC,
+            "monoclinic": LatticeTypeEnum.MCL,
+            "triclinic": LatticeTypeEnum.TRI,
+        }
+        return mapping.get(lattice_type_str, LatticeTypeEnum.TRI)
+
 
     @property
     def material_with_primitive_lattice(self: MaterialWithBuildMetadata) -> MaterialWithBuildMetadata:
@@ -65,7 +79,7 @@ def get_material_with_primitive_lattice(
     return material_with_primitive_lattice
 
 
-def get_lattice_type(material: MaterialWithBuildMetadata, tolerance=0.2, angle_tolerance=5) -> str:
+def get_lattice_type(material: MaterialWithBuildMetadata, tolerance=0.2, angle_tolerance=5) -> LatticeTypeEnum:
     """
     Detects the lattice type of the material.
 
@@ -75,7 +89,7 @@ def get_lattice_type(material: MaterialWithBuildMetadata, tolerance=0.2, angle_t
         angle_tolerance (float): Tolerance for angle comparisons.
 
     Returns:
-        str: The detected lattice type.
+        LatticeTypeEnum: The detected lattice type.
     """
     analyzer = LatticeMaterialAnalyzer(material=material)
     return analyzer.detect_lattice_type(tolerance=tolerance, angle_tolerance=angle_tolerance)

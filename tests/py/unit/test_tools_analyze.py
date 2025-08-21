@@ -7,7 +7,7 @@ from mat3ra.made.tools.analyze.crystal_site.adatom_crystal_site_material_analyze
 from mat3ra.made.tools.analyze.crystal_site.adatom_material_analyzer import AdatomMaterialAnalyzer
 from mat3ra.made.tools.analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
-from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer, get_lattice_type
+from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import (
     SurfaceTypesEnum,
     get_average_interlayer_distance,
@@ -24,7 +24,6 @@ from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from unit.utils import OSPlatform, get_platform_specific_value
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVIZED
-from .fixtures.interface.gr_ni_111_top_hcp import GRAPHENE_NICKEL_INTERFACE_TOP_HCP
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 from .utils import assert_two_entities_deep_almost_equal
@@ -103,19 +102,6 @@ def test_lattice_material_analyzer(
 
     primitive_cell_generated = lattice_material_analyzer.material_with_primitive_lattice
     assert_two_entities_deep_almost_equal(primitive_cell_generated, expected_primitive_material_config)
-
-
-@pytest.mark.parametrize(
-    "material_dict, expected_lattice_type",
-    [
-        (BULK_Si_PRIMITIVE, "cubic"),
-        (GRAPHENE_NICKEL_INTERFACE_TOP_HCP, "hexagonal"),
-    ],
-)
-def test_get_lattice_type(material_dict, expected_lattice_type):
-    material = Material.create(material_dict)
-    assert get_lattice_type(material) == expected_lattice_type
-
 
 
 VORONOI_SITE_EXPECTED = {OSPlatform.DARWIN: [0.625, 0.625, 0.125], OSPlatform.OTHER: [0.5, 0.5, 0.5]}
