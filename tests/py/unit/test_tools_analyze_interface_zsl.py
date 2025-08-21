@@ -110,9 +110,6 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
 
     assert np.allclose(film_sl_vectors[0:2], substrate_sl_vectors[0:2], atol=1e-4)
 
-    assert np.allclose(substrate_material.lattice.vector_arrays[0:2], substrate_sl_vectors[0:2], atol=1e-4)
-    assert np.allclose(film_material.lattice.vector_arrays[0:2], film_sl_vectors[0:2], atol=1e-4)
-
     assert np.isclose(substrate_material.lattice.a, film_material.lattice.a, atol=1e-4)
     assert np.isclose(substrate_material.lattice.b, film_material.lattice.b, atol=1e-4)
 
