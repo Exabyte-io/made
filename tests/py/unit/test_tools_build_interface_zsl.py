@@ -64,7 +64,7 @@ DIAMOND_GAAS_CSL_TEST_CASE = (
     ),
     1.5,  # gap between diamond and gaas
     10.0,  # vacuum
-    150.0,  # max area - reduced to find simpler interfaces
+    70.0,  # max area
     DIAMOND_GaAs_INTERFACE,
 )
 
