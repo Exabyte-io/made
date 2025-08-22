@@ -29,7 +29,7 @@ from .utils import assert_two_entities_deep_almost_equal
             (0, 1, 1),
             2.0,
             [2.0, 1.0],
-            450,
+            450,  # 220
             GRAIN_BOUNDARY_SI_001_011,
         ),
     ],
@@ -62,7 +62,7 @@ def test_create_grain_boundary_planar(
             (0, 1, 1),
             2.0,
             [2.0, 1.0],
-            220,
+            220,  # 220
             GRAIN_BOUNDARY_SI_001_011,
         ),
     ],
