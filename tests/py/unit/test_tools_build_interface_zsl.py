@@ -64,7 +64,7 @@ DIAMOND_GAAS_CSL_TEST_CASE = (
     ),
     1.5,  # gap between diamond and gaas
     10.0,  # vacuum
-    70.0,  # max area
+    160.0,  # max area
     DIAMOND_GaAs_INTERFACE,
 )
 
@@ -121,7 +121,6 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
 
     assert interface.basis.number_of_atoms == expected_interface.basis.number_of_atoms
 
-    print(interface.to_dict())
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
@@ -190,5 +189,6 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         reduce_result_cell=False,
         reduce_result_cell_to_primitive=True,
     )
+    print("TEST GH INTERFACE\n", interface.to_dict())
     expected_interface = get_platform_specific_value(expected_interface)
     assert_two_entities_deep_almost_equal(interface, expected_interface)
