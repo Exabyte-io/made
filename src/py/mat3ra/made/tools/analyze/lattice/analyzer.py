@@ -1,19 +1,8 @@
-from ....lattice import LatticeTypeEnum
+from .. import BaseMaterialAnalyzer
 from ...build_components.metadata import MaterialWithBuildMetadata
 from ...convert import from_pymatgen, to_pymatgen
 from ...third_party import PymatgenSpacegroupAnalyzer
-from .. import BaseMaterialAnalyzer
-from .utils import detect_lattice_type_from_vectors
-
-PYMATGEN_LATTICE_TYPE_MAP = {
-    "cubic": LatticeTypeEnum.CUB,
-    "hexagonal": LatticeTypeEnum.HEX,
-    "tetragonal": LatticeTypeEnum.TET,
-    "rhombohedral": LatticeTypeEnum.RHL,
-    "orthorhombic": LatticeTypeEnum.ORC,
-    "monoclinic": LatticeTypeEnum.MCL,
-    "triclinic": LatticeTypeEnum.TRI,
-}
+from ....lattice import LatticeTypeEnum
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -32,27 +21,50 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         Returns:
             LatticeTypeEnum: The detected lattice type.
         """
-        # First try vector-based detection for more accurate primitive cell identification
         try:
-            vector_based_type = detect_lattice_type_from_vectors(
-                self.material.lattice.vector_arrays, tolerance=tolerance, angle_tolerance=angle_tolerance
+            analyzer = PymatgenSpacegroupAnalyzer(
+                to_pymatgen(self.material),
+                symprec=tolerance,
+                angle_tolerance=angle_tolerance,
             )
+            lattice_type = analyzer.get_lattice_type()
+            spg_symbol = analyzer.get_space_group_symbol()
+            
+            # Enhanced detection using space group symbol
+            if lattice_type == "cubic":
+                if "P" in spg_symbol:
+                    return LatticeTypeEnum.CUB
+                elif "F" in spg_symbol:
+                    return LatticeTypeEnum.FCC
+                elif "I" in spg_symbol:
+                    return LatticeTypeEnum.BCC
+            elif lattice_type == "tetragonal":
+                if "P" in spg_symbol:
+                    return LatticeTypeEnum.TET
+                elif "I" in spg_symbol:
+                    return LatticeTypeEnum.BCT
+            elif lattice_type == "orthorhombic":
+                if "P" in spg_symbol:
+                    return LatticeTypeEnum.ORC
+                elif "F" in spg_symbol:
+                    return LatticeTypeEnum.ORCF
+                elif "I" in spg_symbol:
+                    return LatticeTypeEnum.ORCI
+                elif "C" in spg_symbol:
+                    return LatticeTypeEnum.ORCC
+            elif lattice_type == "hexagonal":
+                return LatticeTypeEnum.HEX
+            elif lattice_type == "rhombohedral":
+                return LatticeTypeEnum.RHL
+            elif lattice_type == "monoclinic":
+                if "P" in spg_symbol:
+                    return LatticeTypeEnum.MCL
+                elif "C" in spg_symbol:
+                    return LatticeTypeEnum.MCLC
 
-            # If vector-based detection gives a specific result (not TRI), use it
-            if vector_based_type != LatticeTypeEnum.TRI:
-                return vector_based_type
+            
         except Exception:
-            # Fall back to pymatgen if vector-based detection fails
-            pass
-
-        # Fallback to pymatgen spacegroup analyzer
-        lattice_type_str = PymatgenSpacegroupAnalyzer(
-            to_pymatgen(self.material),
-            symprec=tolerance,
-            angle_tolerance=angle_tolerance,
-        ).get_lattice_type()
-
-        return PYMATGEN_LATTICE_TYPE_MAP.get(lattice_type_str, LatticeTypeEnum.TRI)
+            return LatticeTypeEnum.TRI
 
     @property
     def material_with_primitive_lattice(self: MaterialWithBuildMetadata) -> MaterialWithBuildMetadata:

@@ -27,7 +27,7 @@ def test_lattice_material_analyzer(
     "material, expected_lattice_type",
     [
         (BULK_Si_PRIMITIVE, "FCC"),
-        (BULK_Si_CONVENTIONAL, "CUB"),
+        (BULK_Si_CONVENTIONAL, "FCC"),
         (GRAPHENE_NICKEL_INTERFACE_TOP_HCP, "HEX"),
         (BULK_Hf2O_MCL, "MCL"),
         (BULK_GRAPHITE, "HEX"),
