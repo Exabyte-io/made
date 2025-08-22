@@ -1,8 +1,18 @@
+from ...lattice import LatticeTypeEnum
 from ..build_components.metadata import MaterialWithBuildMetadata
 from ..convert import from_pymatgen, to_pymatgen
 from ..third_party import PymatgenSpacegroupAnalyzer
 from . import BaseMaterialAnalyzer
-from ...lattice import LatticeTypeEnum
+
+PYMATGEN_LATTICE_TYPE_MAP = {
+    "cubic": LatticeTypeEnum.CUB,
+    "hexagonal": LatticeTypeEnum.HEX,
+    "tetragonal": LatticeTypeEnum.TET,
+    "rhombohedral": LatticeTypeEnum.RHL,
+    "orthorhombic": LatticeTypeEnum.ORC,
+    "monoclinic": LatticeTypeEnum.MCL,
+    "triclinic": LatticeTypeEnum.TRI,
+}
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -10,13 +20,13 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
     def spacegroup_analyzer(self):
         return PymatgenSpacegroupAnalyzer(to_pymatgen(self.material))
 
-    def detect_lattice_type(self, tolerance=0.2, angle_tolerance=5) -> LatticeTypeEnum:
+    def detect_lattice_type(self, tolerance=0.1, angle_tolerance=5) -> LatticeTypeEnum:
         """
         Detects the lattice type of the material.
 
         Args:
-            tolerance (float): Tolerance for lattice parameter comparisons.
-            angle_tolerance (float): Tolerance for angle comparisons.
+            tolerance (float): Tolerance for lattice parameter comparison, in Angstroms.
+            angle_tolerance (float): Tolerance for angle comparisons, in degrees.
 
         Returns:
             LatticeTypeEnum: The detected lattice type.
@@ -26,19 +36,8 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
             symprec=tolerance,
             angle_tolerance=angle_tolerance,
         ).get_lattice_type()
-        
-        # Map pymatgen string output to LatticeTypeEnum
-        mapping = {
-            "cubic": LatticeTypeEnum.CUB,
-            "hexagonal": LatticeTypeEnum.HEX,
-            "tetragonal": LatticeTypeEnum.TET,
-            "rhombohedral": LatticeTypeEnum.RHL,
-            "orthorhombic": LatticeTypeEnum.ORC,
-            "monoclinic": LatticeTypeEnum.MCL,
-            "triclinic": LatticeTypeEnum.TRI,
-        }
-        return mapping.get(lattice_type_str, LatticeTypeEnum.TRI)
 
+        return PYMATGEN_LATTICE_TYPE_MAP.get(lattice_type_str, LatticeTypeEnum.TRI)
 
     @property
     def material_with_primitive_lattice(self: MaterialWithBuildMetadata) -> MaterialWithBuildMetadata:
