@@ -22,10 +22,9 @@ from mat3ra.made.tools.build_components.operations.core.combinations.enums impor
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from unit.utils import OSPlatform, get_platform_specific_value
 
-from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVIZED
+from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
-from .utils import assert_two_entities_deep_almost_equal
 
 COMPARISON_PRECISION = 1e-4
 

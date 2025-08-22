@@ -1,6 +1,2 @@
 from .analyzer import LatticeMaterialAnalyzer
-from .helpers import (
-    get_lattice_type,
-    get_material_with_conventional_lattice,
-    get_material_with_primitive_lattice,
-)
+from .helpers import get_lattice_type, get_material_with_conventional_lattice, get_material_with_primitive_lattice

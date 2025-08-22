@@ -35,18 +35,16 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         # First try vector-based detection for more accurate primitive cell identification
         try:
             vector_based_type = detect_lattice_type_from_vectors(
-                self.material.lattice.vector_arrays, 
-                tolerance=tolerance, 
-                angle_tolerance=angle_tolerance
+                self.material.lattice.vector_arrays, tolerance=tolerance, angle_tolerance=angle_tolerance
             )
-            
+
             # If vector-based detection gives a specific result (not TRI), use it
             if vector_based_type != LatticeTypeEnum.TRI:
                 return vector_based_type
         except Exception:
             # Fall back to pymatgen if vector-based detection fails
             pass
-        
+
         # Fallback to pymatgen spacegroup analyzer
         lattice_type_str = PymatgenSpacegroupAnalyzer(
             to_pymatgen(self.material),

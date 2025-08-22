@@ -1,8 +1,8 @@
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.lattice import get_lattice_type, LatticeMaterialAnalyzer
+from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer, get_lattice_type
 
-from .fixtures.bulk import BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVIZED, BULK_Hf2O_MCL, BULK_GRAPHITE
+from .fixtures.bulk import BULK_GRAPHITE, BULK_Hf2O_MCL, BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVIZED
 from .fixtures.interface.gr_ni_111_top_hcp import GRAPHENE_NICKEL_INTERFACE_TOP_HCP
 from .utils import assert_two_entities_deep_almost_equal
 
@@ -21,7 +21,6 @@ def test_lattice_material_analyzer(
 
     primitive_cell_generated = lattice_material_analyzer.material_with_primitive_lattice
     assert_two_entities_deep_almost_equal(primitive_cell_generated, expected_primitive_material_config)
-
 
 
 @pytest.mark.parametrize(
