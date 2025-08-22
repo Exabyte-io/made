@@ -36,4 +36,4 @@ def get_lattice_type(material: MaterialWithBuildMetadata, tolerance=0.2, angle_t
         LatticeTypeEnum: The detected lattice type.
     """
     analyzer = LatticeMaterialAnalyzer(material=material)
-    return analyzer.detect_lattice_type(tolerance=tolerance, angle_tolerance=angle_tolerance)
+    return analyzer.detect_lattice_type(precision=tolerance, angle_tolerance=angle_tolerance)

@@ -1,35 +1,37 @@
-from .. import BaseMaterialAnalyzer
+from ....lattice import LatticeTypeEnum
 from ...build_components.metadata import MaterialWithBuildMetadata
 from ...convert import from_pymatgen, to_pymatgen
 from ...third_party import PymatgenSpacegroupAnalyzer
-from ....lattice import LatticeTypeEnum
+from .. import BaseMaterialAnalyzer
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
+    precision: float = 0.1
+    angle_tolerance: float = 5.0
+
     @property
     def spacegroup_analyzer(self):
-        return PymatgenSpacegroupAnalyzer(to_pymatgen(self.material))
+        return PymatgenSpacegroupAnalyzer(
+            to_pymatgen(self.material), symprec=self.precision, angle_tolerance=self.angle_tolerance
+        )
 
-    def detect_lattice_type(self, tolerance=0.1, angle_tolerance=5) -> LatticeTypeEnum:
+    def detect_lattice_type(self, precision=0.1, angle_tolerance=5) -> LatticeTypeEnum:
         """
         Detects the lattice type of the material.
 
         Args:
-            tolerance (float): Tolerance for lattice parameter comparison, in Angstroms.
+            precision (float): Tolerance for lattice parameter comparison, in Angstroms.
             angle_tolerance (float): Tolerance for angle comparisons, in degrees.
 
         Returns:
             LatticeTypeEnum: The detected lattice type.
         """
+        self.precision = precision
+        self.angle_tolerance = angle_tolerance
         try:
-            analyzer = PymatgenSpacegroupAnalyzer(
-                to_pymatgen(self.material),
-                symprec=tolerance,
-                angle_tolerance=angle_tolerance,
-            )
-            lattice_type = analyzer.get_lattice_type()
-            spg_symbol = analyzer.get_space_group_symbol()
-            
+            lattice_type = self.spacegroup_analyzer.get_lattice_type()
+            spg_symbol = self.spacegroup_analyzer.get_space_group_symbol()
+
             # Enhanced detection using space group symbol
             if lattice_type == "cubic":
                 if "P" in spg_symbol:
@@ -62,7 +64,6 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
                 elif "C" in spg_symbol:
                     return LatticeTypeEnum.MCLC
 
-            
         except Exception:
             return LatticeTypeEnum.TRI
 
