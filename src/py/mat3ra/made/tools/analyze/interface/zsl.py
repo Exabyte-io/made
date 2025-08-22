@@ -151,6 +151,14 @@ class ZSLInterfaceAnalyzer(InterfaceAnalyzer):
         )
 
     def _get_sl_vectors_for_supercell_calculation(self, pymatgen_film_sl_vectors, pymatgen_substrate_sl_vectors):
+        """
+        Determine which superlattice vectors to use for supercell matrix calculation.
+
+        Calculating the supercell transformation matrix requires that corresponding
+        superlattice vectors of film and substrate are colinear. Non-colinear vectors
+        cannot be used to derive a valid integer transformation matrix from original to supercell.
+        While diagonal matrices can be used, and can give smaller area match, so they should be preserved.
+        """
         pymatgen_substrate_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_substrate_sl_vectors)
         pymatgen_film_sl_vectors_aligned = align_first_vector_to_x_2d_right_handed(pymatgen_film_sl_vectors)
 
