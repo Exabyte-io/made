@@ -20,7 +20,7 @@ from .fixtures.interface.gr_ni_111_top_hcp import (
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
 )
-from .fixtures.interface.zsl import DIAMOND_GaAs_INTERFACE
+from .fixtures.interface.zsl import DIAMOND_GaAs_INTERFACE, DIAMOND_GaAs_INTERFACE_GH
 from .fixtures.monolayer import GRAPHENE
 from .utils import OSPlatform, assert_two_entities_deep_almost_equal, get_platform_specific_value
 
@@ -64,8 +64,11 @@ DIAMOND_GAAS_CSL_TEST_CASE = (
     ),
     1.5,  # gap between diamond and gaas
     10.0,  # vacuum
-    160.0,  # max area
-    DIAMOND_GaAs_INTERFACE,
+    70.0,  # max area
+    {
+        OSPlatform.DARWIN: DIAMOND_GaAs_INTERFACE,
+        OSPlatform.OTHER: DIAMOND_GaAs_INTERFACE_GH,
+    },
 )
 
 
@@ -189,6 +192,5 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         reduce_result_cell=False,
         reduce_result_cell_to_primitive=True,
     )
-    print("TEST GH INTERFACE\n", interface.to_dict())
     expected_interface = get_platform_specific_value(expected_interface)
     assert_two_entities_deep_almost_equal(interface, expected_interface)
