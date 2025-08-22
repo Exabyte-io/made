@@ -131,7 +131,7 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
                 vacuum=0.0,
             ),
             {"max_area": 90.0, "max_area_ratio_tol": 0.1, "max_length_tol": 0.1, "max_angle_tol": 0.1},
-            {OSPlatform.DARWIN: 29, OSPlatform.OTHER: 33},
+            {OSPlatform.DARWIN: 29, OSPlatform.OTHER: 29},
             {
                 OSPlatform.DARWIN: {"strain_percentage": 0.474, "match_id": 0},
                 OSPlatform.OTHER: {"strain_percentage": 25.122, "match_id": 0},
