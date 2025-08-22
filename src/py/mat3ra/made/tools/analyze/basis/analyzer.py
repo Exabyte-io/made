@@ -1,4 +1,5 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
+from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
 from ...build_components.metadata import MaterialWithBuildMetadata
 from .. import BaseMaterialAnalyzer
@@ -6,8 +7,6 @@ from .fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint
 
 
 class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
-    """Analyzer for material basis (atomic positions and elements)."""
-
     def get_layer_fingerprint(
         self, layer_thickness: float = 1.0, axis: AxisEnum = AxisEnum.z
     ) -> LayeredFingerprintAlongAxis:
@@ -27,12 +26,10 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
         coordinates = material_cartesian.basis.coordinates.values
         elements = material_cartesian.basis.elements.values
 
-        # Get coordinates along the specified axis
-        axis_index = {"x": 0, "y": 1, "z": 2}[axis.value]
+        axis_index = AXIS_TO_INDEX_MAP[axis.value]
         axis_coords = [coord[axis_index] for coord in coordinates]
         min_coord, max_coord = min(axis_coords), max(axis_coords)
 
-        # Create fingerprint
         fingerprint = LayeredFingerprintAlongAxis(axis=axis, layer_thickness=layer_thickness)
 
         current_coord = min_coord
@@ -40,13 +37,11 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
             layer_min = current_coord
             layer_max = current_coord + layer_thickness
 
-            # Find all atoms in this layer
             layer_elements = []
             for i, coord_val in enumerate(axis_coords):
                 if layer_min <= coord_val < layer_max:
                     layer_elements.append(elements[i])
 
-            # Create layer fingerprint
             unique_elements = sorted(list(set(layer_elements))) if layer_elements else []
             layer = LayerFingerprint(min_coord=layer_min, max_coord=layer_max, elements=unique_elements)
             fingerprint.layers.append(layer)
@@ -73,16 +68,14 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
         original_fingerprint = original_analyzer.get_layer_fingerprint(layer_thickness)
         current_fingerprint = self.get_layer_fingerprint(layer_thickness)
 
-        # Compare fingerprints using similarity scores
         normal_score = original_fingerprint.get_similarity_score(current_fingerprint)
         flipped_score = original_fingerprint.get_similarity_score(self._reverse_fingerprint(current_fingerprint))
 
         # If flipped orientation has significantly higher similarity, material is flipped
-        threshold = 0.1  # 10% difference threshold
+        threshold = 0.1
         return flipped_score > normal_score + threshold
 
     def _reverse_fingerprint(self, fingerprint: LayeredFingerprintAlongAxis) -> LayeredFingerprintAlongAxis:
-        """Create a reversed copy of the fingerprint."""
         reversed_layers = list(reversed(fingerprint.layers))
         return LayeredFingerprintAlongAxis(
             layers=reversed_layers, axis=fingerprint.axis, layer_thickness=fingerprint.layer_thickness

@@ -23,22 +23,19 @@ class LayeredFingerprintAlongAxis(BaseModel):
     axis: AxisEnum = Field(default=AxisEnum.z, description="Axis along which the fingerprint is computed")
     layer_thickness: float = Field(default=1.0, gt=0, description="Thickness of each layer in Angstroms")
 
-    class Config:
-        """Pydantic configuration."""
-
-        use_enum_values = True
-        validate_assignment = True
+    # class Config:
+    #     """Pydantic configuration."""
+    #
+    #     use_enum_values = True
+    #     validate_assignment = True
 
     def get_non_empty_layers(self) -> List[LayerFingerprint]:
-        """Get only layers that contain chemical elements."""
         return [layer for layer in self.layers if layer.elements]
 
     def get_element_sequence(self) -> List[List[str]]:
-        """Get element lists for all layers (including empty)."""
         return [layer.elements for layer in self.layers]
 
     def get_non_empty_element_sequence(self) -> List[List[str]]:
-        """Get element lists for non-empty layers only."""
         return [layer.elements for layer in self.layers if layer.elements]
 
     def get_similarity_score(self, other: "LayeredFingerprintAlongAxis") -> float:
@@ -54,7 +51,6 @@ class LayeredFingerprintAlongAxis(BaseModel):
         if not self.layers or not other.layers:
             return 0.0
 
-        # Take the minimum length to avoid index errors
         min_length = min(len(self.layers), len(other.layers))
         if min_length == 0:
             return 0.0

@@ -26,7 +26,7 @@ def test_basis_analyzer_fingerprint(original_material_config, another_material_c
     fingerprint = analyzer.get_layer_fingerprint(layer_thickness=1.0)
     assert isinstance(fingerprint, LayeredFingerprintAlongAxis)
     assert len(fingerprint.layers) > 0
-    assert fingerprint.axis == "z"
+    assert fingerprint.axis == AxisEnum.z
     assert fingerprint.layer_thickness == 1.0
 
     for layer in fingerprint.layers:
