@@ -116,7 +116,6 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
 
     builder = InterfaceBuilder()
     interface = builder.get_material(interface_config)
-    # interface = get_material_with_primitive_lattice(interface)
 
     # remove metadata
     interface.metadata.build = []
