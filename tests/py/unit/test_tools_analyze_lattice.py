@@ -2,7 +2,7 @@ import pytest
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice import get_lattice_type, LatticeMaterialAnalyzer
 
-from .fixtures.bulk import BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVIZED
+from .fixtures.bulk import BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVIZED, BULK_Hf2O_MCL, BULK_GRAPHITE
 from .fixtures.interface.gr_ni_111_top_hcp import GRAPHENE_NICKEL_INTERFACE_TOP_HCP
 from .utils import assert_two_entities_deep_almost_equal
 
@@ -30,6 +30,8 @@ def test_lattice_material_analyzer(
         (BULK_Si_PRIMITIVE, "FCC"),
         (BULK_Si_CONVENTIONAL, "CUB"),
         (GRAPHENE_NICKEL_INTERFACE_TOP_HCP, "HEX"),
+        (BULK_Hf2O_MCL, "MCL"),
+        (BULK_GRAPHITE, "HEX"),
     ],
 )
 def test_analyze_lattice_type(material, expected_lattice_type):
