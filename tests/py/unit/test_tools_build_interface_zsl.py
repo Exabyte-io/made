@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 import pytest
+from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.zsl import ZSLInterfaceAnalyzer
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.builder import InterfaceBuilder
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.configuration import (
@@ -12,12 +13,14 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
 )
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
 from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
+from mat3ra.standata.materials import Materials
 
 from .fixtures.bulk import BULK_Ni_PRIMITIVE
 from .fixtures.interface.gr_ni_111_top_hcp import (
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP,
     GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF,
 )
+from .fixtures.interface.zsl import DIAMOND_GaAs_INTERFACE, DIAMOND_GaAs_INTERFACE_GH
 from .fixtures.monolayer import GRAPHENE
 from .utils import OSPlatform, assert_two_entities_deep_almost_equal, get_platform_specific_value
 
@@ -43,6 +46,32 @@ GRAPHENE_NICKEL_TEST_CASE = (
     },
 )
 
+BULK_DIAMOND = Materials.get_by_name_first_match("Diamond")
+BULK_GaAs = Materials.get_by_name_first_match("GaAs")
+
+DIAMOND_GAAS_CSL_TEST_CASE = (
+    SimpleNamespace(
+        bulk_config=BULK_DIAMOND,
+        miller_indices=(0, 0, 1),
+        number_of_layers=1,
+        vacuum=0.0,
+    ),
+    SimpleNamespace(
+        bulk_config=BULK_GaAs,
+        miller_indices=(0, 0, 1),
+        number_of_layers=1,
+        vacuum=0.0,
+    ),
+    1.5,  # gap between diamond and gaas
+    10.0,  # vacuum
+    70.0,  # max area
+    {
+        OSPlatform.DARWIN: DIAMOND_GaAs_INTERFACE,
+        OSPlatform.OTHER: DIAMOND_GaAs_INTERFACE_GH,
+    },
+)
+
+
 MAX_AREA_RATIO_TOL = 0.09
 MAX_LENGTH_TOL = 0.05
 MAX_ANGLE_TOL = 0.02
@@ -50,7 +79,7 @@ MAX_ANGLE_TOL = 0.02
 
 @pytest.mark.parametrize(
     "substrate, film,gap, vacuum, max_area, expected_interface",
-    [GRAPHENE_NICKEL_TEST_CASE],
+    [GRAPHENE_NICKEL_TEST_CASE, DIAMOND_GAAS_CSL_TEST_CASE],
 )
 def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_interface):
     """Test creating Si/Ge interface using ZSL approach."""
@@ -90,8 +119,10 @@ def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_
 
     # remove metadata
     interface.metadata.build = []
-    expected_interface = get_platform_specific_value(expected_interface)
-    print(interface.to_dict())
+    expected_interface = Material.create(get_platform_specific_value(expected_interface))
+
+    assert interface.basis.number_of_atoms == expected_interface.basis.number_of_atoms
+
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
@@ -122,7 +153,10 @@ def test_create_zsl_interface(substrate, film, gap, vacuum, max_area, expected_i
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
-@pytest.mark.parametrize("substrate, film, gap, vacuum, max_area, expected_interface", [GRAPHENE_NICKEL_TEST_CASE])
+@pytest.mark.parametrize(
+    "substrate, film, gap, vacuum, max_area, expected_interface",
+    [GRAPHENE_NICKEL_TEST_CASE, DIAMOND_GAAS_CSL_TEST_CASE],
+)
 def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_area, expected_interface):
     substrate_slab_config = SlabConfiguration.from_parameters(
         material_or_dict=substrate.bulk_config,
