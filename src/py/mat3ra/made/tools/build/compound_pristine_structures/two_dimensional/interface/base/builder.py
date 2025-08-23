@@ -82,8 +82,9 @@ class InterfaceBuilder(StackNComponentsBuilder):
     ) -> MaterialWithBuildMetadata:
         build_params = cast(InterfaceBuilderParameters, self.build_parameters)
         if build_params.make_primitive:
-            # TODO: check that this doesn't warp material or flip it -- otherwise raise and skip
-            primitive_material = get_material_with_primitive_lattice(material, return_original_if_not_reduced=True)
+            primitive_material = get_material_with_primitive_lattice(
+                material, return_original_if_not_reduced=True, keep_orientation=True
+            )
 
             if primitive_material != material:
                 if configuration is None:

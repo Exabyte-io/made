@@ -97,6 +97,7 @@ def test_lattice_material_analyzer(
 ):
     primitive_cell = Material.create(primitive_material_config)
     lattice_material_analyzer = LatticeMaterialAnalyzer(material=primitive_cell)
+
     conventional_cell = lattice_material_analyzer.material_with_conventional_lattice
     assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)
 
