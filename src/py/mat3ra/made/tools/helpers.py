@@ -1,3 +1,6 @@
+# Analyzers
+from .analyze.lattice import get_material_with_conventional_lattice, get_material_with_primitive_lattice
+
 # Defective Structures
 from .build.compound_pristine_structures.two_dimensional.heterostructure import create_heterostructure
 from .build.compound_pristine_structures.two_dimensional.heterostructure.types import StackComponentDict
@@ -87,6 +90,9 @@ from .build_components.operations.core.modifications.perturb.helpers import crea
 from .entities.coordinate import CoordinateCondition
 
 __all__ = [
+    # Crystal and related analyzer functions
+    "get_material_with_primitive_lattice",
+    "get_material_with_conventional_lattice",
     # Slab and related Functions
     "create_slab",
     "create_slab_if_not",

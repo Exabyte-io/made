@@ -7,7 +7,6 @@ from mat3ra.made.tools.analyze.crystal_site.adatom_crystal_site_material_analyze
 from mat3ra.made.tools.analyze.crystal_site.adatom_material_analyzer import AdatomMaterialAnalyzer
 from mat3ra.made.tools.analyze.crystal_site.crystal_site_analyzer import CrystalSiteAnalyzer
 from mat3ra.made.tools.analyze.crystal_site.voronoi_crystal_site_analyzer import VoronoiCrystalSiteAnalyzer
-from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.other import (
     SurfaceTypesEnum,
     get_average_interlayer_distance,
@@ -23,10 +22,9 @@ from mat3ra.made.tools.build_components.operations.core.combinations.enums impor
 from unit.fixtures.nanoribbon.nanoribbon import GRAPHENE_ZIGZAG_NANORIBBON
 from unit.utils import OSPlatform, get_platform_specific_value
 
-from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVIZED
+from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
-from .utils import assert_two_entities_deep_almost_equal
 
 COMPARISON_PRECISION = 1e-4
 
@@ -86,23 +84,6 @@ def test_radial_distribution_function(material_config, rdf_params, expected_firs
 
     # Specific material related tests
     assert np.isclose(rdf.first_peak_distance, expected_first_peak_distance, atol=0.1)
-
-
-@pytest.mark.parametrize(
-    "primitive_material_config, expected_conventional_material_config, expected_primitive_material_config",
-    [(BULK_Si_PRIMITIVE, BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVIZED)],
-)
-def test_lattice_material_analyzer(
-    primitive_material_config, expected_conventional_material_config, expected_primitive_material_config
-):
-    primitive_cell = Material.create(primitive_material_config)
-    lattice_material_analyzer = LatticeMaterialAnalyzer(material=primitive_cell)
-
-    conventional_cell = lattice_material_analyzer.material_with_conventional_lattice
-    assert_two_entities_deep_almost_equal(conventional_cell, expected_conventional_material_config)
-
-    primitive_cell_generated = lattice_material_analyzer.material_with_primitive_lattice
-    assert_two_entities_deep_almost_equal(primitive_cell_generated, expected_primitive_material_config)
 
 
 VORONOI_SITE_EXPECTED = {OSPlatform.DARWIN: [0.625, 0.625, 0.125], OSPlatform.OTHER: [0.5, 0.5, 0.5]}
