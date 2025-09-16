@@ -7,6 +7,8 @@ from mat3ra.esse.models.material import MaterialSchema
 from .basis import Basis
 from .lattice import Lattice
 
+from pydantic import SkipValidation
+
 defaultMaterialConfig = {
     "name": "Silicon FCC",
     "basis": {
