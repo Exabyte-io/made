@@ -57,6 +57,8 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
 
     basis: Basis
     lattice: Lattice
+    # TODO: Fix discriminator in ESSE and remove this:
+    derivedProperties: Optional[SkipValidation[object]] = None
 
     def model_post_init(self, __context: Any) -> None:
         if not self.name and self.formula:
