@@ -3,6 +3,7 @@ from typing import Any, List, Optional, Union
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
 from mat3ra.esse.models.material import MaterialSchema
+from pydantic import SkipValidation
 
 from .basis import Basis
 from .lattice import Lattice
@@ -57,6 +58,8 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
 
     basis: Basis
     lattice: Lattice
+    # TODO: Fix discriminator in ESSE and remove this:
+    derivedProperties: Optional[SkipValidation[object]] = None
 
     def model_post_init(self, __context: Any) -> None:
         if not self.name and self.formula:
