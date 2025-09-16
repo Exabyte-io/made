@@ -3,11 +3,10 @@ from typing import Any, List, Optional, Union
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
 from mat3ra.esse.models.material import MaterialSchema
+from pydantic import SkipValidation
 
 from .basis import Basis
 from .lattice import Lattice
-
-from pydantic import SkipValidation
 
 defaultMaterialConfig = {
     "name": "Silicon FCC",
