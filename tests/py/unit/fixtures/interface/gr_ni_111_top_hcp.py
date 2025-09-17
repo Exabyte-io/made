@@ -1,5 +1,5 @@
 GRAPHENE_NICKEL_INTERFACE_TOP_HCP = {
-    "name": "C(001)-Ni(111), Interface, Strain 0.474pct",
+    "name": "C(001)-Ni(111), Interface, Strain 0.475pct",
     "basis": {
         "elements": [
             {"id": 0, "value": "Ni"},

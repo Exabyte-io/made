@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Union
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds, RoundedArrayWithIds
 from mat3ra.made.material import Material
+from mat3ra.utils.matrix import convert_2x2_to_3x3
 
 if TYPE_CHECKING:
     from .material import MaterialWithCrystalSites
@@ -125,10 +126,11 @@ def calculate_von_mises_strain(strain_matrix: np.ndarray) -> float:
         float: The von Mises strain in percentage.
     """
     # allow passing a Python list
-    E = np.array(strain_matrix, dtype=float)
+    strain_matrix_2x2 = np.array(strain_matrix, dtype=float)[:2, :2]
+    E = 0.5 * (strain_matrix_2x2.T @ strain_matrix_2x2 - np.eye(2))
 
-    exx = E[0, 0] - 1.0
-    eyy = E[1, 1] - 1.0
+    exx = E[0, 0]
+    eyy = E[1, 1]
     exy = 0.5 * (E[0, 1] + E[1, 0])
 
     e_von_mises = np.sqrt(exx**2 - exx * eyy + eyy**2 + 3 * exy**2)

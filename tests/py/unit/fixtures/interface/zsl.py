@@ -540,7 +540,7 @@ GRAPHENE_NICKEL_INTERFACE = {
 }
 
 DIAMOND_GaAs_INTERFACE = {
-    "name": "AsGa(001)-C(001), Interface, Strain 7.114pct",
+    "name": "AsGa(001)-C(001), Interface, Strain 2.068pct",
     "basis": {
         "elements": [
             {"id": 0, "value": "Ga"},
