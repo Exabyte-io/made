@@ -244,4 +244,30 @@ describe("Basis", () => {
         basis.translateByVector(translationVector);
         assertDeepAlmostEqual(basis.coordinates, C2H4Translated.basis.coordinates);
     });
+
+    it("should strip label and return atomic symbol", () => {
+        expect(Basis.stripLabelToGetElementSymbol("Fe1")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("Fe11")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("fe_a")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("Fe-a1")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("FE1")).to.be.equal("Fe");
+        expect(Basis.stripLabelToGetElementSymbol("c_a")).to.be.equal("C");
+    });
+
+    it("should determine the labels from stripLabelToGetElementSymbol", () => {
+        const getLabel = (elementWithLabel: string) => {
+            const symbol = Basis.stripLabelToGetElementSymbol(elementWithLabel);
+            const re = new RegExp(`^${symbol}`, "i");
+            return elementWithLabel.replace(re, "");
+        };
+
+        expect(getLabel("Fe1")).to.be.equal("1");
+        expect(getLabel("Fe11")).to.be.equal("11");
+        expect(getLabel("fe_a")).to.be.equal("_a");
+        expect(getLabel("Fe-a1")).to.be.equal("-a1");
+        expect(getLabel("FE1")).to.be.equal("1");
+        expect(getLabel("c_a")).to.be.equal("_a");
+        expect(getLabel("Fe_Fe")).to.be.equal("_Fe");
+        expect(getLabel("C_c")).to.be.equal("_c");
+    });
 });
