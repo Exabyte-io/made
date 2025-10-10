@@ -64,7 +64,8 @@ function materialMixin(item) {
             };
         },
         get name() {
-            return item.prop("name", "") || this.formula;
+            var _a;
+            return (_a = item.prop("name")) !== null && _a !== void 0 ? _a : this.formula; // if name is not set, use formula, but keep empty string
         },
         set name(name) {
             item.setProp("name", name);

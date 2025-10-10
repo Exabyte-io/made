@@ -59,7 +59,7 @@ const math_1 = __importDefault(require("../math"));
 // eslint-disable-next-line max-len
 const LINE_REGEX = /^([A-Z][a-z]?\/?,?)+\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s+(-?\d+\.?\d*|\.\d+)\s*$/gi;
 // vacancy characters will be used to create vacancies on basis generation
-const VACANCY_CHARACTER = "VAC";
+const VACANCY_CHARACTER = "Vac";
 const COMBINATION_DELIMITER = ",";
 const PERMUTATION_DELIMITER = "/";
 /**

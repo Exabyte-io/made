@@ -95,7 +95,7 @@ export function materialMixin<T extends Base = Base>(item: T) {
         },
 
         get name() {
-            return item.prop("name", "") || this.formula;
+            return item.prop("name") ?? this.formula; // if name is not set, use formula, but keep empty string
         },
 
         set name(name: string) {
