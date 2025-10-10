@@ -62,8 +62,8 @@ export interface ParsedObject {
  */
 function _parseXYZLineAsWords(line: string): ParsedObject {
     const words = s.words(line);
-    const elementWithOptionalLabel: AtomicElementValue = words[0];
-    const element: AtomicElementValue = elementWithOptionalLabel.replace(/\d$/, ""); // Fe1 => Fe
+    const elementWithOptionalLabel = words[0];
+    const element = elementWithOptionalLabel.replace(/\d$/, "") as AtomicElementValue; // Fe1 => Fe
     const generateConstraintValue = (n: number) => parseInt(`${n}`, 10) !== 0;
 
     const basisLineConfig: ParsedObject = {
