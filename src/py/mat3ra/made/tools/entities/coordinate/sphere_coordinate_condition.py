@@ -1,6 +1,6 @@
 from typing import List
 
-from mat3ra.esse.models.core.reusable.coordinate_conditions import SphereCoordinateConditionSchema
+from mat3ra.esse.models.core.reusable.coordinate_conditions.sphere import SphereCoordinateConditionSchema
 from pydantic import Field
 
 from .coordinate_condition import CoordinateCondition
