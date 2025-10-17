@@ -26,7 +26,7 @@ function scaleLatticeToMakeNonPeriodic(material) {
     material.lattice = lattice_1.Lattice.fromConfigPartial({
         a: material.Basis.getMinimumLatticeSize(),
         type: "CUB",
-    });
+    }).toJSON();
 }
 /**
  * Updates the basis of a material by translating the coordinates

@@ -31,7 +31,7 @@ function scaleLatticeToMakeNonPeriodic(material: Material) {
     material.lattice = Lattice.fromConfigPartial({
         a: material.Basis.getMinimumLatticeSize(),
         type: "CUB",
-    } as LatticeSchema);
+    } as LatticeSchema).toJSON();
 }
 
 /**
