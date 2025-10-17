@@ -44,7 +44,7 @@ export declare class Lattice extends InMemoryEntity implements LatticeSchema {
      * Calculate the volume of the lattice cell.
      */
     get volume(): number;
-    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: LatticeSchema): Lattice & {
+    static getDefaultPrimitiveLatticeConfigByType(latticeConfig: LatticeSchema): LatticeSchema & {
         a: unknown;
         b: unknown;
         c: unknown;

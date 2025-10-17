@@ -15,7 +15,7 @@ function scaleOneLatticeVector(material, key = "a", factor = 1.0) {
         throw new Error("Lattice vectors are undefined");
     }
     lattice.vectors[key] = lattice.vectors[key].map((v) => v * factor);
-    material.lattice = lattice_1.Lattice.fromVectors(lattice.vectors);
+    material.lattice = lattice_1.Lattice.fromVectors(lattice.vectors).toJSON();
 }
 /**
  * Updates the size of a materials lattice using the minimumLatticeSize function.
