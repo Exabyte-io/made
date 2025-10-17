@@ -1,6 +1,6 @@
 from typing import List
 
-from mat3ra.esse.models.core.reusable.coordinate_conditions import PlaneCoordinateConditionSchema
+from mat3ra.esse.models.core.reusable.coordinate_conditions.plane import PlaneCoordinateConditionSchema
 
 from .coordinate_condition import CoordinateCondition
 from .coordinate_functions import is_coordinate_behind_plane

@@ -1,6 +1,6 @@
 from typing import List
 
-from mat3ra.esse.models.core.reusable.coordinate_conditions import CylinderCoordinateConditionSchema
+from mat3ra.esse.models.core.reusable.coordinate_conditions.cylinder import CylinderCoordinateConditionSchema
 from pydantic import Field
 
 from .coordinate_condition import CoordinateCondition

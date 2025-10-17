@@ -1,6 +1,8 @@
 from typing import List
 
-from mat3ra.esse.models.core.reusable.coordinate_conditions import TriangularPrismCoordinateConditionSchema
+from mat3ra.esse.models.core.reusable.coordinate_conditions.triangular_prism import (
+    TriangularPrismCoordinateConditionSchema,
+)
 
 from .coordinate_condition import CoordinateCondition
 from .coordinate_functions import is_coordinate_in_triangular_prism

@@ -1,6 +1,6 @@
 from typing import List
 
-from mat3ra.esse.models.core.reusable.coordinate_conditions import BoxCoordinateConditionSchema
+from mat3ra.esse.models.core.reusable.coordinate_conditions.box import BoxCoordinateConditionSchema
 from pydantic import Field
 
 from .coordinate_condition import CoordinateCondition
