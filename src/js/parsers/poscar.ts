@@ -100,9 +100,9 @@ function fromPoscar(fileContent: string): object {
         startLine = 8;
     }
 
-    const elements: AtomicElementValue[] = atomSymbols
+    const elements = atomSymbols
         .map((symbol: string, i: number): string[] => Array(atomCounts[i]).fill(symbol))
-        .reduce((a, b) => a.concat(b), []);
+        .reduce((a, b) => a.concat(b), []) as AtomicElementValue[];
 
     // Atom coordinates and constraints
     const coordinates: AtomicCoordinateValue[] = [];

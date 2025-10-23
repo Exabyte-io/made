@@ -19,7 +19,7 @@ function scaleOneLatticeVector(material: Material, key: "a" | "b" | "c" = "a", f
     }
     lattice.vectors[key] = lattice.vectors![key].map((v) => v * factor) as Vector3DSchema;
 
-    material.lattice = Lattice.fromVectors(lattice.vectors);
+    material.lattice = Lattice.fromVectors(lattice.vectors).toJSON();
 }
 
 /**
@@ -31,7 +31,7 @@ function scaleLatticeToMakeNonPeriodic(material: Material) {
     material.lattice = Lattice.fromConfigPartial({
         a: material.Basis.getMinimumLatticeSize(),
         type: "CUB",
-    } as LatticeSchema);
+    } as LatticeSchema).toJSON();
 }
 
 /**
