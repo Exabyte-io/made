@@ -23,6 +23,10 @@ from mat3ra.made.tools.build.pristine_structures.two_dimensional.nanoribbon.help
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab.helpers import create_slab
 from mat3ra.made.tools.helpers import create_interface_simple, create_interface_simple_between_slabs
+
+from mat3ra.made.tools.build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import (
+    EdgeTypesEnum,
+)
 from unit.fixtures.bulk import BULK_Ge_CONVENTIONAL, BULK_Ni_PRIMITIVE, BULK_Si_CONVENTIONAL
 
 from .fixtures.interface.commensurate import INTERFACE_GRAPHENE_GRAPHENE_X, INTERFACE_GRAPHENE_GRAPHENE_Z
@@ -181,6 +185,7 @@ def test_create_twisted_interface(material_config, config_params, expected_inter
         length=3,
         vacuum_width=15.0,
         vacuum_length=15.0,
+        edge_type=EdgeTypesEnum.armchair,
     )
 
     nanoribbon2 = create_nanoribbon(
@@ -189,6 +194,7 @@ def test_create_twisted_interface(material_config, config_params, expected_inter
         length=3,
         vacuum_width=15.0,
         vacuum_length=15.0,
+        edge_type=EdgeTypesEnum.armchair,
     )
 
     interface = create_interface_twisted(

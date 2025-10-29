@@ -5,6 +5,9 @@ from . import NanoribbonConfiguration
 from .build_parameters import NanoribbonBuilderParameters
 from ..nanotape import NanoTapeBuilder, NanoTapeConfiguration
 from .....build_components import MaterialWithBuildMetadata, TypeConfiguration
+from .....build_components.entities.reusable.one_dimensional.crystal_lattice_lines.edge_types import (
+    get_edge_type_from_miller_indices,
+)
 from .....modify import translate_to_center
 
 
@@ -47,7 +50,7 @@ class NanoribbonBuilder(NanoTapeBuilder):
         miller_indices_2d: tuple,
         structure_type: str,
     ) -> Material:
-        edge_type = self._get_edge_type_from_miller_indices(miller_indices_2d)
+        edge_type = get_edge_type_from_miller_indices(miller_indices_2d)
         miller_str = f"{miller_indices_2d[0]}{miller_indices_2d[1]}"
         material.name = f"{crystal_name} - {edge_type} {structure_type} ({miller_str})"
         return material
