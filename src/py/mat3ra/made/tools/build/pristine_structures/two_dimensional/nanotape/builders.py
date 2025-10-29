@@ -45,9 +45,6 @@ class NanoTapeBuilder(StackNComponentsBuilder):
         item.set_lattice(new_lattice)
         return item
 
-    def _get_edge_type_from_miller_indices(self, miller_indices_2d: tuple) -> str:
-        return get_edge_type_from_miller_indices(miller_indices_2d)
-
     def _update_material_name_with_edge_type(
         self,
         material: Union[Material, MaterialWithBuildMetadata],
@@ -55,7 +52,7 @@ class NanoTapeBuilder(StackNComponentsBuilder):
         miller_indices_2d: tuple,
         structure_type: str,
     ) -> Material:
-        edge_type = self._get_edge_type_from_miller_indices(miller_indices_2d)
+        edge_type = get_edge_type_from_miller_indices(miller_indices_2d)
         miller_str = f"{miller_indices_2d[0]}{miller_indices_2d[1]}"
         material.name = f"{crystal_name} - {edge_type} {structure_type} ({miller_str})"
         return material
