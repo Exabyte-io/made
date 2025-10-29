@@ -75,6 +75,7 @@ class NanoTapeBuilder(StackNComponentsBuilder):
         configuration: Optional[TypeConfiguration] = None,
     ) -> Material:
         item = super()._post_process(item, post_process_parameters, configuration)
+        # wrapping before changing lattice to avoid singular atoms beyond the boundaries
         item = wrap_to_unit_cell(item)
         params = self.build_parameters or self._DefaultBuildParameters
         if params.use_rectangular_lattice:
