@@ -1,7 +1,7 @@
 import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import { Lattice } from "../lattice";
-type KPointCoordinates = number[];
-type KPointPath = Array<{
+export type KPointCoordinates = number[];
+export type KPointPath = Array<{
     point: string;
     steps: number;
     coordinates: KPointCoordinates;

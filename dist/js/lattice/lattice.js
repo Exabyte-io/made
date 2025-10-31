@@ -193,7 +193,7 @@ class Lattice extends entity_1.InMemoryEntity {
         const newLattice = Lattice.fromVectorsArray(vectors, undefined, latticeConfig.type);
         // preserve the new type and scale back the lattice parameters
         const k = latticeConfig.a / newLattice.a;
-        return Object.assign(newLattice, {
+        return Object.assign(newLattice.toJSON(), {
             a: f_(newLattice.a * k),
             b: f_(newLattice.b * k),
             c: f_(newLattice.c * k),
