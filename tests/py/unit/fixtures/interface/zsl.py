@@ -501,7 +501,7 @@ GRAPHENE_NICKEL_INTERFACE = {
         ],
         "boundaryConditions": {"type": "pbc", "offset": 0},
     },
-    "name": "C(001)-Ni(111), Interface, Strain 0.335pct",
+    "name": "C(001)-Ni(111), Interface, Strain 0.474pct",
     "basis": {
         "elements": [
             {"id": 0, "value": "Ni"},
@@ -648,7 +648,7 @@ DIAMOND_GaAs_INTERFACE = {
 }
 
 DIAMOND_GaAs_INTERFACE_GH = {
-    "name": "AsGa(001)-C(001), Interface, Strain 69.038pct",
+    "name": "AsGa(001)-C(001), Interface, Strain 2.068pct",
     "basis": {
         "elements": [
             {"id": 0, "value": "Ga"},
