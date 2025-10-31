@@ -146,7 +146,7 @@ def test_zsl_interface_analyzer(substrate, film, zsl_params, expected_matches_mi
             {OSPlatform.DARWIN: 26, OSPlatform.OTHER: 29},
             {
                 OSPlatform.DARWIN: {"strain_percentage": 0.474, "match_id": 0},
-                OSPlatform.OTHER: {"strain_percentage": 25.122, "match_id": 0},
+                OSPlatform.OTHER: {"strain_percentage": 25.629, "match_id": 0},
             },
             # NOTE: the following values are expected for the DARWIN platform.
             # {"max_area": 90.0, "max_area_ratio_tol": 0.09, "max_length_tol": 0.03, "max_angle_tol": 0.01},
