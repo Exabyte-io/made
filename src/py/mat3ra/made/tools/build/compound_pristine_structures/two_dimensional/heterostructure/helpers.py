@@ -1,11 +1,14 @@
 from typing import List
 
+import numpy as np
+from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 
 from .types import StackComponentDict
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction
 from ....pristine_structures.two_dimensional.slab.helpers import create_slab
 from ....pristine_structures.two_dimensional.slab_strained_supercell.builder import SlabStrainedSupercellBuilder
+from ....pristine_structures.two_dimensional.slab_strained_supercell.configuration import SlabStrainedSupercellConfiguration
 from .....analyze import BaseMaterialAnalyzer
 from .....analyze.interface import InterfaceAnalyzer
 from .....analyze.slab import SlabMaterialAnalyzer
@@ -51,13 +54,16 @@ def create_heterostructure(
         )
         slabs.append(slab)
 
-    strained_slabs = [slabs[0]]  # First slab is the substrate, not strained
+    # Process all materials to find a common supercell that works for all
+    # We'll use the first material as the reference substrate
+    reference_substrate = slabs[0]
+    strained_slabs = []
+    common_supercell_matrix = None
 
     for i in range(1, len(slabs)):
-        substrate_slab = strained_slabs[0]
         film_slab = slabs[i]
 
-        substrate_analyzer = SlabMaterialAnalyzer(material=substrate_slab)
+        substrate_analyzer = SlabMaterialAnalyzer(material=reference_substrate)
         film_analyzer = SlabMaterialAnalyzer(material=film_slab)
 
         analyzer = InterfaceAnalyzer(
@@ -68,11 +74,48 @@ def create_heterostructure(
             optimize_film_supercell=optimize_layer_supercells,
         )
 
-        strained_film_config = analyzer.film_strained_configuration
+        film_config = analyzer.film_strained_configuration
+        if common_supercell_matrix is None:
+            common_supercell_matrix = film_config.xy_supercell_matrix
 
-        builder = SlabStrainedSupercellBuilder()
-        strained_slab = builder.get_material(strained_film_config)
-        strained_slabs.append(strained_slab)
+    # Second pass: create all materials with the common supercell
+    substrate_analyzer = SlabMaterialAnalyzer(material=reference_substrate)
+
+    # Create substrate with common supercell
+    substrate_config = SlabStrainedSupercellConfiguration(
+        **substrate_analyzer.build_configuration.model_dump(),
+        strain_matrix=Matrix3x3Schema(root=np.eye(3).tolist()),
+        xy_supercell_matrix=common_supercell_matrix,
+    )
+
+    builder = SlabStrainedSupercellBuilder()
+    strained_substrate = builder.get_material(substrate_config)
+    strained_slabs.append(strained_substrate)
+
+    # Create all films with strain to match the substrate
+    for i in range(1, len(slabs)):
+        film_slab = slabs[i]
+
+        substrate_analyzer = SlabMaterialAnalyzer(material=reference_substrate)
+        film_analyzer = SlabMaterialAnalyzer(material=film_slab)
+
+        analyzer = InterfaceAnalyzer(
+            substrate_slab_configuration=substrate_analyzer.build_configuration,
+            film_slab_configuration=film_analyzer.build_configuration,
+            substrate_build_parameters=substrate_analyzer.build_parameters,
+            film_build_parameters=film_analyzer.build_parameters,
+            optimize_film_supercell=optimize_layer_supercells,
+        )
+
+        film_config = analyzer.film_strained_configuration
+
+        # Override the supercell matrix to use the common one
+        film_config_dict = film_config.model_dump()
+        film_config_dict['xy_supercell_matrix'] = common_supercell_matrix
+        film_config_common = SlabStrainedSupercellConfiguration(**film_config_dict)
+
+        strained_film = builder.get_material(film_config_common)
+        strained_slabs.append(strained_film)
 
     stacked_materials = []
     for i, slab in enumerate(strained_slabs):
