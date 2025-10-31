@@ -11,7 +11,9 @@ from .types import StackComponentDict
 from mat3ra.made.utils import adjust_material_cell_to_set_gap_along_direction
 from ....pristine_structures.two_dimensional.slab.helpers import create_slab
 from ....pristine_structures.two_dimensional.slab_strained_supercell.builder import SlabStrainedSupercellBuilder
-from ....pristine_structures.two_dimensional.slab_strained_supercell.configuration import SlabStrainedSupercellConfiguration
+from ....pristine_structures.two_dimensional.slab_strained_supercell.configuration import (
+    SlabStrainedSupercellConfiguration,
+)
 from .....analyze.interface import InterfaceAnalyzer
 from .....analyze.slab import SlabMaterialAnalyzer
 from .....build_components import MaterialWithBuildMetadata

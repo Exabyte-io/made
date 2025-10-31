@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Union
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds, RoundedArrayWithIds
 from mat3ra.made.material import Material
-from mat3ra.utils.matrix import convert_2x2_to_3x3
 
 if TYPE_CHECKING:
     from .material import MaterialWithCrystalSites
