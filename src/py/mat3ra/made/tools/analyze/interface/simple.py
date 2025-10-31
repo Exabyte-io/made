@@ -78,11 +78,9 @@ class InterfaceAnalyzer(InMemoryEntityPydantic):
         film_2d_vectors = film_vectors[:2, :2]
 
         try:
-            inv_film = np.linalg.inv(film_2d_vectors)
+            strain_2d = np.linalg.solve(film_2d_vectors, substrate_2d_vectors)
         except np.linalg.LinAlgError:
             raise ValueError("Film lattice vectors are not linearly independent.")
-
-        strain_2d = inv_film @ substrate_2d_vectors
 
         strain_3d = np.eye(3)
         strain_3d[:2, :2] = strain_2d
