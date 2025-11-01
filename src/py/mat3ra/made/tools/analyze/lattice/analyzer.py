@@ -125,8 +125,15 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
                     rotate_cell=False
                 )
                 
-                axis_str = f"[{rotation_info['rotation_axis'][0]}, {rotation_info['rotation_axis'][1]}, {rotation_info['rotation_axis'][2]}]"
-                print(f"Orientation corrected after primitive conversion: {rotation_info['rotation_angle']:.0f}° "
-                      f"rotation around {axis_str} detected with confidence {rotation_info['confidence']:.3f}")
+                axis_str = (
+                    f"[{rotation_info['rotation_axis'][0]}, "
+                    f"{rotation_info['rotation_axis'][1]}, "
+                    f"{rotation_info['rotation_axis'][2]}]"
+                )
+                print(
+                    f"Orientation corrected after primitive conversion: "
+                    f"{rotation_info['rotation_angle']:.0f}° rotation around {axis_str} "
+                    f"detected with confidence {rotation_info['confidence']:.3f}"
+                )
 
         return material_with_primitive_lattice

@@ -5,7 +5,7 @@ Tests for BasisMaterialAnalyzer class.
 import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.basis import BasisMaterialAnalyzer, LayeredFingerprintAlongAxis, MaterialFingerprint
+from mat3ra.made.tools.analyze.basis import BasisMaterialAnalyzer, LayeredFingerprintAlongAxis
 from mat3ra.made.tools.operations.core.unary import rotate
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL
@@ -62,7 +62,7 @@ def test_basis_analyzer_fingerprint(original_material_config, another_material_c
     assert 'is_rotated' in rotation_info
     
     # The expected behavior based on the is_flipped parameter
-    assert rotation_info['is_rotated'] == is_flipped, f"Rotation detection status does not match expected value."
+    assert rotation_info['is_rotated'] == is_flipped, "Rotation detection status does not match expected value."
 
 
 def test_get_layer_fingerprint():

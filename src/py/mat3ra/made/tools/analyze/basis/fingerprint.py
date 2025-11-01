@@ -78,7 +78,8 @@ class MaterialFingerprint(BaseModel):
     layer_thickness: float = Field(default=1.0, gt=0, description="Thickness of each layer in Angstroms")
 
     ALL_AXES: ClassVar[List[AxisEnum]] = [AxisEnum.x, AxisEnum.y, AxisEnum.z]
-    ROTATION_AXIS_SIGNIFICANCE_THRESHOLD: ClassVar[float] = 0.5  # Minimum component magnitude to consider axis mapping significant
+    # Minimum component magnitude to consider axis mapping significant
+    ROTATION_AXIS_SIGNIFICANCE_THRESHOLD: ClassVar[float] = 0.5
 
     def get_fingerprint_for_axis(self, axis: AxisEnum) -> LayeredFingerprintAlongAxis:
         axis_map = {
@@ -156,7 +157,9 @@ class MaterialFingerprint(BaseModel):
         
         return best_info
 
-    def _calculate_alignment_score(self, fingerprint_to_compare: "MaterialFingerprint", rotation_matrix: np.ndarray) -> float:
+    def _calculate_alignment_score(
+        self, fingerprint_to_compare: "MaterialFingerprint", rotation_matrix: np.ndarray
+    ) -> float:
         """
         Calculate alignment score between fingerprints with rotation.
         
