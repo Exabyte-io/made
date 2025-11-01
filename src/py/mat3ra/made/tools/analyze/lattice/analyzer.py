@@ -111,10 +111,15 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
 
         if keep_orientation:
             basis_analyzer = BasisMaterialAnalyzer(material=material_with_primitive_lattice)
-            if basis_analyzer.is_orientation_flipped(self.material, layer_thickness):
-                material_with_primitive_lattice = rotate(
-                    material_with_primitive_lattice, axis=[1, 0, 0], angle=180, rotate_cell=False
+            
+            rotation_info = basis_analyzer.detect_rotation_from_original(self.material, layer_thickness)
+            
+            if rotation_info['is_rotated']:
+                material_with_primitive_lattice = basis_analyzer.apply_corrective_rotation(
+                    self.material, layer_thickness
                 )
-                print("Orientation corrected after primitive conversion.")
+                axis_str = f"[{rotation_info['rotation_axis'][0]:.0f}, {rotation_info['rotation_axis'][1]:.0f}, {rotation_info['rotation_axis'][2]:.0f}]"
+                print(f"Orientation corrected after primitive conversion: {rotation_info['rotation_angle']:.0f}° "
+                      f"rotation around {axis_str} detected with confidence {rotation_info['confidence']:.3f}")
 
         return material_with_primitive_lattice
