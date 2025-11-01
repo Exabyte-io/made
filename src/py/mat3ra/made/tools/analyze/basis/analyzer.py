@@ -2,8 +2,9 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
 from ...build_components.metadata import MaterialWithBuildMetadata
+from ...operations.core.unary import rotate
 from .. import BaseMaterialAnalyzer
-from .fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint
+from .fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint, MaterialFingerprint
 
 
 class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -50,33 +51,75 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
 
         return fingerprint
 
-    def is_orientation_flipped(
-        self, original_material: MaterialWithBuildMetadata, layer_thickness: float = 1.0
-    ) -> bool:
+    def get_material_fingerprint(self, layer_thickness: float = 1.0) -> MaterialFingerprint:
         """
-        Detect if the material orientation is flipped compared to the original.
-        Uses Jaccard similarity to compare fingerprints in normal and flipped orientations.
+        Create a complete fingerprint of the material across all three axes.
 
         Args:
-            original_material: The original material before primitivization
-            layer_thickness: Thickness of layers for fingerprint comparison
+            layer_thickness: Thickness of each layer in Angstroms
 
         Returns:
-            bool: True if orientation is flipped, False otherwise
+            MaterialFingerprint: Complete fingerprint with layer information for all axes
+        """
+        x_fingerprint = self.get_layer_fingerprint(layer_thickness, AxisEnum.x)
+        y_fingerprint = self.get_layer_fingerprint(layer_thickness, AxisEnum.y)
+        z_fingerprint = self.get_layer_fingerprint(layer_thickness, AxisEnum.z)
+
+        return MaterialFingerprint(
+            x_axis=x_fingerprint,
+            y_axis=y_fingerprint,
+            z_axis=z_fingerprint,
+            layer_thickness=layer_thickness
+        )
+
+    def detect_rotation_from_original(
+        self, original_material: MaterialWithBuildMetadata, layer_thickness: float = 1.0, threshold: float = 0.1
+    ) -> dict:
+        """
+        Detect rotation of the current material compared to the original material.
+        
+        Args:
+            original_material: The original material before transformation
+            layer_thickness: Thickness of layers for fingerprint comparison
+            threshold: Minimum improvement threshold to consider a rotation detected
+            
+        Returns:
+            dict: Rotation detection results with rotation type, axis, and confidence
         """
         original_analyzer = BasisMaterialAnalyzer(material=original_material)
-        original_fingerprint = original_analyzer.get_layer_fingerprint(layer_thickness)
-        current_fingerprint = self.get_layer_fingerprint(layer_thickness)
+        original_fingerprint = original_analyzer.get_material_fingerprint(layer_thickness)
+        current_fingerprint = self.get_material_fingerprint(layer_thickness)
+        
+        return original_fingerprint.detect_rotation(current_fingerprint, threshold)
 
-        normal_score = original_fingerprint.get_similarity_score(current_fingerprint)
-        flipped_score = original_fingerprint.get_similarity_score(self._reverse_fingerprint(current_fingerprint))
-
-        # If flipped orientation has significantly higher similarity, material is flipped
-        threshold = 0.1
-        return flipped_score > normal_score + threshold
-
-    def _reverse_fingerprint(self, fingerprint: LayeredFingerprintAlongAxis) -> LayeredFingerprintAlongAxis:
-        reversed_layers = list(reversed(fingerprint.layers))
-        return LayeredFingerprintAlongAxis(
-            layers=reversed_layers, axis=fingerprint.axis, layer_thickness=fingerprint.layer_thickness
+    def apply_corrective_rotation(
+        self, original_material: MaterialWithBuildMetadata, layer_thickness: float = 1.0
+    ) -> MaterialWithBuildMetadata:
+        """
+        Apply corrective rotation to align the material with the original orientation.
+        
+        Args:
+            original_material: The original material before transformation
+            layer_thickness: Thickness of layers for fingerprint comparison
+            
+        Returns:
+            MaterialWithBuildMetadata: Material with corrective rotation applied
+        """
+        rotation_info = self.detect_rotation_from_original(original_material, layer_thickness)
+        
+        if not rotation_info['is_rotated']:
+            return self.material
+            
+        # Apply the inverse rotation to correct the orientation
+        rotation_axis = rotation_info['rotation_axis']
+        rotation_angle = -rotation_info['rotation_angle']  # Inverse rotation
+        
+        corrected_material = rotate(
+            self.material, 
+            axis=rotation_axis.tolist(), 
+            angle=rotation_angle, 
+            rotate_cell=False
         )
+                
+        return corrected_material
+
