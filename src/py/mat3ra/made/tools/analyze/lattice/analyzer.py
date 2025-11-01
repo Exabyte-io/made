@@ -1,10 +1,10 @@
-from ....lattice import LatticeTypeEnum
+from .. import BaseMaterialAnalyzer
+from ..basis import BasisMaterialAnalyzer
 from ...build_components.metadata import MaterialWithBuildMetadata
 from ...convert import from_pymatgen, to_pymatgen
 from ...operations.core.unary import rotate
 from ...third_party import PymatgenSpacegroupAnalyzer
-from .. import BaseMaterialAnalyzer
-from ..basis import BasisMaterialAnalyzer
+from ....lattice import LatticeTypeEnum
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -115,10 +115,17 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
             rotation_info = basis_analyzer.detect_rotation_from_original(self.material, layer_thickness)
             
             if rotation_info['is_rotated']:
-                material_with_primitive_lattice = basis_analyzer.apply_corrective_rotation(
-                    self.material, layer_thickness
+                rotation_axis = rotation_info['rotation_axis']
+                rotation_angle = -rotation_info['rotation_angle']
+                
+                material_with_primitive_lattice = rotate(
+                    material_with_primitive_lattice,
+                    axis=rotation_axis,
+                    angle=rotation_angle,
+                    rotate_cell=False
                 )
-                axis_str = f"[{rotation_info['rotation_axis'][0]:.0f}, {rotation_info['rotation_axis'][1]:.0f}, {rotation_info['rotation_axis'][2]:.0f}]"
+                
+                axis_str = f"[{rotation_info['rotation_axis'][0]}, {rotation_info['rotation_axis'][1]}, {rotation_info['rotation_axis'][2]}]"
                 print(f"Orientation corrected after primitive conversion: {rotation_info['rotation_angle']:.0f}° "
                       f"rotation around {axis_str} detected with confidence {rotation_info['confidence']:.3f}")
 

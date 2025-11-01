@@ -124,7 +124,7 @@ class MaterialFingerprint(BaseModel):
                 'is_rotated': bool,
                 'rotation_matrix': np.ndarray or None,  # 3x3 rotation matrix
                 'rotation_angle': float or None,        # rotation angle in degrees
-                'rotation_axis': np.ndarray or None,    # rotation axis vector
+                'rotation_axis': List[int] or None,     # rotation axis as [x, y, z] for rotate() function
                 'confidence': float                     # confidence score of the detection
             }
         """
@@ -206,12 +206,12 @@ class MaterialFingerprint(BaseModel):
             layer_thickness=fingerprint.layer_thickness
         )
 
-    def _generate_rotation_candidates(self) -> List[Tuple[np.ndarray, float, np.ndarray]]:
+    def _generate_rotation_candidates(self) -> List[Tuple[np.ndarray, float, List[int]]]:
         """
         Generate common rotation matrices for testing.
         
         Returns:
-            List of tuples (rotation_matrix, angle_degrees, axis_vector)
+            List of tuples (rotation_matrix, angle_degrees, axis_list)
         """
         candidates = []
         
@@ -221,7 +221,9 @@ class MaterialFingerprint(BaseModel):
                 axis_vector = np.zeros(3)
                 axis_vector[axis_idx] = 1.0
                 
+                axis_list = [int(axis_vector[0]), int(axis_vector[1]), int(axis_vector[2])]
+                
                 rotation_matrix = Rotation.from_rotvec(axis_vector * np.radians(angle)).as_matrix()
-                candidates.append((rotation_matrix, angle, axis_vector))
+                candidates.append((rotation_matrix, angle, axis_list))
         
         return candidates

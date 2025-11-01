@@ -2,7 +2,6 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
 from ...build_components.metadata import MaterialWithBuildMetadata
-from ...operations.core.unary import rotate
 from .. import BaseMaterialAnalyzer
 from .fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint, MaterialFingerprint
 
@@ -92,34 +91,4 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
         
         return original_fingerprint.detect_rotation(current_fingerprint, threshold)
 
-    def apply_corrective_rotation(
-        self, original_material: MaterialWithBuildMetadata, layer_thickness: float = 1.0
-    ) -> MaterialWithBuildMetadata:
-        """
-        Apply corrective rotation to align the material with the original orientation.
-        
-        Args:
-            original_material: The original material before transformation
-            layer_thickness: Thickness of layers for fingerprint comparison
-            
-        Returns:
-            MaterialWithBuildMetadata: Material with corrective rotation applied
-        """
-        rotation_info = self.detect_rotation_from_original(original_material, layer_thickness)
-        
-        if not rotation_info['is_rotated']:
-            return self.material
-            
-        # Apply the inverse rotation to correct the orientation
-        rotation_axis = rotation_info['rotation_axis']
-        rotation_angle = -rotation_info['rotation_angle']  # Inverse rotation
-        
-        corrected_material = rotate(
-            self.material, 
-            axis=rotation_axis.tolist(), 
-            angle=rotation_angle, 
-            rotate_cell=False
-        )
-                
-        return corrected_material
 
