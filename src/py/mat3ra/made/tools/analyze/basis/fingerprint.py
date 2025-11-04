@@ -68,10 +68,11 @@ class LayeredFingerprintAlongAxis(BaseModel):
         return total_score / min_length
 
 
-class MaterialFingerprint(BaseModel):
+class MaterialFingerprintAllAxes(BaseModel):
     """
     Complete fingerprint of a material across all three axes.
     """
+
     x_axis: LayeredFingerprintAlongAxis = Field(..., description="Fingerprint along x-axis")
     y_axis: LayeredFingerprintAlongAxis = Field(..., description="Fingerprint along y-axis")
     z_axis: LayeredFingerprintAlongAxis = Field(..., description="Fingerprint along z-axis")
@@ -89,37 +90,40 @@ class MaterialFingerprint(BaseModel):
         }
         return axis_map[axis]
 
-
-    def get_similarity_matrix(self, fingerprint_to_compare: "MaterialFingerprint") -> Dict[str, Dict[str, float]]:
+    def get_similarity_matrix(
+        self, fingerprint_to_compare: "MaterialFingerprintAllAxes"
+    ) -> Dict[str, Dict[str, float]]:
         """
         Calculate similarity matrix between this and another material fingerprint.
-        
+
         Args:
             fingerprint_to_compare: Another MaterialFingerprint to compare with
-            
+
         Returns:
             Dict: Nested dictionary with similarity scores between all axis combinations
         """
         similarity_matrix = {}
-        
+
         for self_axis in self.ALL_AXES:
             similarity_matrix[self_axis.value] = {}
             self_fp = self.get_fingerprint_for_axis(self_axis)
-            
+
             for other_axis in self.ALL_AXES:
                 other_fp = fingerprint_to_compare.get_fingerprint_for_axis(other_axis)
                 similarity_matrix[self_axis.value][other_axis.value] = self_fp.get_similarity_score(other_fp)
-                
+
         return similarity_matrix
 
-    def detect_rotation(self, fingerprint_to_compare: "MaterialFingerprint", threshold: float = 0.1) -> Dict[str, any]:
+    def detect_rotation(
+        self, fingerprint_to_compare: "MaterialFingerprintAllAxes", threshold: float = 0.1
+    ) -> Dict[str, any]:
         """
         Detect rotation between this and another material fingerprint.
-        
+
         Args:
             fingerprint_to_compare: Another MaterialFingerprint to compare with
             threshold: Minimum improvement threshold to consider a rotation detected
-            
+
         Returns:
             Dict containing rotation information: {
                 'is_rotated': bool,
@@ -130,43 +134,43 @@ class MaterialFingerprint(BaseModel):
             }
         """
         direct_score = self._calculate_alignment_score(fingerprint_to_compare, rotation_matrix=np.eye(3))
-        
+
         rotation_candidates = self._generate_rotation_candidates()
-        
+
         best_score = direct_score
         best_info = {
-            'is_rotated': False,
-            'rotation_matrix': None,
-            'rotation_angle': None,
-            'rotation_axis': None,
-            'confidence': direct_score
+            "is_rotated": False,
+            "rotation_matrix": None,
+            "rotation_angle": None,
+            "rotation_axis": None,
+            "confidence": direct_score,
         }
-        
+
         for rotation_matrix, angle, axis in rotation_candidates:
             score = self._calculate_alignment_score(fingerprint_to_compare, rotation_matrix=rotation_matrix)
-            
+
             if score > best_score + threshold:
                 best_score = score
                 best_info = {
-                    'is_rotated': True,
-                    'rotation_matrix': rotation_matrix,
-                    'rotation_angle': angle,
-                    'rotation_axis': axis,
-                    'confidence': score
+                    "is_rotated": True,
+                    "rotation_matrix": rotation_matrix,
+                    "rotation_angle": angle,
+                    "rotation_axis": axis,
+                    "confidence": score,
                 }
-        
+
         return best_info
 
     def _calculate_alignment_score(
-        self, fingerprint_to_compare: "MaterialFingerprint", rotation_matrix: np.ndarray
+        self, fingerprint_to_compare: "MaterialFingerprintAllAxes", rotation_matrix: np.ndarray
     ) -> float:
         """
         Calculate alignment score between fingerprints with rotation.
-        
+
         Args:
             fingerprint_to_compare: Another MaterialFingerprint to compare with
             rotation_matrix: Rotation matrix to apply before comparison (use np.eye(3) for no rotation)
-            
+
         Returns:
             float: Alignment score (0.0 to 1.0)
         """
@@ -182,7 +186,7 @@ class MaterialFingerprint(BaseModel):
             if np.abs(row[max_idx]) > self.ROTATION_AXIS_SIGNIFICANCE_THRESHOLD:
                 other_axis = self.ALL_AXES[max_idx]
                 other_fp = fingerprint_to_compare.get_fingerprint_for_axis(other_axis)
-                
+
                 # If the component is negative, we need to reverse the fingerprint
                 if row[max_idx] < 0:
                     other_fp = self._reverse_axis_fingerprint(other_fp)
@@ -195,38 +199,36 @@ class MaterialFingerprint(BaseModel):
     def _reverse_axis_fingerprint(self, fingerprint: LayeredFingerprintAlongAxis) -> LayeredFingerprintAlongAxis:
         """
         Reverse a fingerprint along its axis (for 180-degree rotations).
-        
+
         Args:
             fingerprint: Fingerprint to reverse
-            
+
         Returns:
             LayeredFingerprintAlongAxis: Reversed fingerprint
         """
         reversed_layers = list(reversed(fingerprint.layers))
         return LayeredFingerprintAlongAxis(
-            layers=reversed_layers, 
-            axis=fingerprint.axis, 
-            layer_thickness=fingerprint.layer_thickness
+            layers=reversed_layers, axis=fingerprint.axis, layer_thickness=fingerprint.layer_thickness
         )
 
     def _generate_rotation_candidates(self) -> List[Tuple[np.ndarray, float, List[int]]]:
         """
         Generate common rotation matrices for testing.
-        
+
         Returns:
             List of tuples (rotation_matrix, angle_degrees, axis_list)
         """
         candidates = []
-        
+
         for axis_enum in self.ALL_AXES:
             axis_idx = AXIS_TO_INDEX_MAP[axis_enum.value]
             for angle in [90, -90, 180]:
                 axis_vector = np.zeros(3)
                 axis_vector[axis_idx] = 1.0
-                
+
                 axis_list = [int(axis_vector[0]), int(axis_vector[1]), int(axis_vector[2])]
-                
+
                 rotation_matrix = Rotation.from_rotvec(axis_vector * np.radians(angle)).as_matrix()
                 candidates.append((rotation_matrix, angle, axis_list))
-        
+
         return candidates

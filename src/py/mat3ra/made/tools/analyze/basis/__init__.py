@@ -1,4 +1,4 @@
 from .analyzer import BasisMaterialAnalyzer
-from .fingerprint import LayeredFingerprintAlongAxis, MaterialFingerprint
+from .fingerprint import LayeredFingerprintAlongAxis, MaterialFingerprintAllAxes
 
-__all__ = ["BasisMaterialAnalyzer", "LayeredFingerprintAlongAxis", "MaterialFingerprint"]
+__all__ = ["BasisMaterialAnalyzer", "LayeredFingerprintAlongAxis", "MaterialFingerprintAllAxes"]
