@@ -1,9 +1,8 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
-from ...build_components.metadata import MaterialWithBuildMetadata
 from .. import BaseMaterialAnalyzer
-from .fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint, MaterialFingerprintAllAxes
+from ..fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint, MaterialFingerprintAllAxes
 
 
 class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -67,23 +66,3 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
         return MaterialFingerprintAllAxes(
             x_axis=x_fingerprint, y_axis=y_fingerprint, z_axis=z_fingerprint, layer_thickness=layer_thickness
         )
-
-    def detect_rotation_from_original(
-        self, original_material: MaterialWithBuildMetadata, layer_thickness: float = 1.0, threshold: float = 0.1
-    ) -> dict:
-        """
-        Detect rotation of the current material compared to the original material.
-
-        Args:
-            original_material: The original material before transformation
-            layer_thickness: Thickness of layers for fingerprint comparison
-            threshold: Minimum improvement threshold to consider a rotation detected
-
-        Returns:
-            dict: Rotation detection results with rotation type, axis, and confidence
-        """
-        original_analyzer = BasisMaterialAnalyzer(material=original_material)
-        original_fingerprint = original_analyzer.get_material_fingerprint(layer_thickness)
-        current_fingerprint = self.get_material_fingerprint(layer_thickness)
-
-        return original_fingerprint.detect_rotation(current_fingerprint, threshold)

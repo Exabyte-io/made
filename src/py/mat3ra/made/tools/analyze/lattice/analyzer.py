@@ -1,5 +1,5 @@
 from .. import BaseMaterialAnalyzer
-from ..basis import BasisMaterialAnalyzer
+from ..rotation_analyzer import MaterialRotationAnalyzer
 from ...build_components.metadata import MaterialWithBuildMetadata
 from ...convert import from_pymatgen, to_pymatgen
 from ...operations.core.unary import rotate
@@ -110,9 +110,8 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
                 return self.material
 
         if keep_orientation:
-            basis_analyzer = BasisMaterialAnalyzer(material=material_with_primitive_lattice)
-            
-            rotation_info = basis_analyzer.detect_rotation_from_original(self.material, layer_thickness)
+            rotation_analyzer = MaterialRotationAnalyzer(material=material_with_primitive_lattice)
+            rotation_info = rotation_analyzer.detect_rotation_from_original(self.material, layer_thickness)
             
             if rotation_info['is_rotated']:
                 rotation_axis = rotation_info['rotation_axis']
