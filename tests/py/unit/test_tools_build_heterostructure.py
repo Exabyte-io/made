@@ -6,8 +6,6 @@ from mat3ra.made.tools.helpers import StackComponentDict, create_heterostructure
 
 from .fixtures.bulk import BULK_Hf2O_MCL, BULK_Si_CONVENTIONAL, BULK_SiO2, BULK_TiN
 
-PRECISION = 1e-3
-
 Si_SiO2_Hf2O_HETEROSTRUCTURE_TEST_CASE = (
     [
         SimpleNamespace(bulk_config=BULK_Si_CONVENTIONAL, miller_indices=(0, 0, 1), number_of_layers=4),

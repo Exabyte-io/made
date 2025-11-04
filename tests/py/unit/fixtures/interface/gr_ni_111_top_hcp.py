@@ -1,5 +1,5 @@
 GRAPHENE_NICKEL_INTERFACE_TOP_HCP = {
-    "name": "C(001)-Ni(111), Interface, Strain 0.474pct",
+    "name": "C(001)-Ni(111), Interface, Strain 0.475pct",
     "basis": {
         "elements": [
             {"id": 0, "value": "Ni"},
@@ -39,7 +39,7 @@ GRAPHENE_NICKEL_INTERFACE_TOP_HCP = {
 
 # This configuration is used for testing purposes, specifically for the GitHub Workflow.
 GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF = {
-    "name": "C(001)-Ni(111), Interface, Strain 25.123pct",
+    "name": "C(001)-Ni(111), Interface, Strain 25.629pct",
     "basis": {
         "elements": [
             {"id": 0, "value": "Ni"},

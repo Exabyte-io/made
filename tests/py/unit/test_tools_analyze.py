@@ -14,6 +14,7 @@ from mat3ra.made.tools.analyze.other import (
     get_surface_atom_indices,
 )
 from mat3ra.made.tools.analyze.rdf import RadialDistributionFunction
+from mat3ra.made.tools.analyze.utils import calculate_von_mises_strain
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.defective_structures.zero_dimensional.point_defect.atom_placement_method_enum import (
     AtomPlacementMethodEnum,
@@ -191,3 +192,22 @@ def test_get_surface_atom_indices_top_and_bottom(material_config, expected_indic
     bottom_indices = get_surface_atom_indices(material, SurfaceTypesEnum.BOTTOM)
     assert set(top_indices) == set(expected_indices_top)
     assert set(bottom_indices) == set(expected_indices_bottom)
+
+
+@pytest.mark.parametrize(
+    "strain_matrix, expected_strain",
+    [
+        # Identity matrix - no strain
+        ([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], 0.0),
+        # Uniaxial compression (5% x only)
+        ([[0.95, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], 4.875),
+        # Biaxial compression (5% x and y)
+        ([[0.95, 0.0, 0.0], [0.0, 0.95, 0.0], [0.0, 0.0, 1.0]], 4.875),
+        # Shear strain
+        ([[1.0, 0.1, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], 8.675),
+    ],
+)
+def test_calculate_von_mises_strain(strain_matrix, expected_strain):
+    """Test von Mises strain calculation used in ZSL interface analysis."""
+    strain_percentage = calculate_von_mises_strain(np.array(strain_matrix))
+    assert np.isclose(strain_percentage, expected_strain, atol=0.01)
