@@ -20,7 +20,17 @@ def create_heterostructure(
     use_conventional_cell: bool = True,
     optimize_layer_supercells: bool = True,
 ) -> MaterialWithBuildMetadata:
-    """Create a heterostructure by stacking multiple slabs with strain matching."""
+    """
+    Create a heterostructure by stacking multiple slabs, while applying strain to each slab relative to the first slab.
+    Args:
+        stack_component_dicts: List of stack component configurations
+        gaps: List of gaps between adjacent slabs (in Angstroms)
+        vacuum: Size of vacuum layer over the last slab (in Angstroms)
+        use_conventional_cell: Whether to use conventional cell
+        optimize_layer_supercells: Whether to find optimal supercells for strained layers
+    Returns:
+        Heterostructure material with stacked strained slabs
+    """
     validate_heterostructure_inputs(stack_component_dicts, gaps)
 
     slabs = create_initial_slabs(stack_component_dicts, vacuum, use_conventional_cell)
