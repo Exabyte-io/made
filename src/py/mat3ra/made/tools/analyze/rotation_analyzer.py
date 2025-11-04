@@ -1,14 +1,28 @@
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from scipy.spatial.transform import Rotation
 
 from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
 from .basis.analyzer import BasisMaterialAnalyzer
 from .fingerprint import LayeredFingerprintAlongAxis, MaterialFingerprintAllAxes
+
+
+class RotationDetectionResult(BaseModel):
+    model_config = {"arbitrary_types_allowed": True}
+
+    is_rotated: bool = Field(..., description="Whether a rotation was detected")
+    rotation_matrix: Optional[np.ndarray] = Field(
+        None, description="3x3 rotation matrix if rotation detected, None otherwise"
+    )
+    rotation_angle: Optional[float] = Field(None, description="Rotation angle in degrees if detected, None otherwise")
+    rotation_axis: Optional[List[int]] = Field(
+        None, description="Rotation axis as [x, y, z] for rotate() function if detected, None otherwise"
+    )
+    confidence: float = Field(..., description="Confidence score of the detection (0.0 to 1.0)")
 
 
 class MaterialRotationAnalyzer(BaseModel):
@@ -17,7 +31,7 @@ class MaterialRotationAnalyzer(BaseModel):
 
     def detect_rotation_from_original(
         self, original_material: MaterialWithBuildMetadata, layer_thickness: float = 1.0, threshold: float = 0.1
-    ) -> dict:
+    ) -> RotationDetectionResult:
         """
         Detect rotation of the current material compared to the original material.
 
@@ -27,11 +41,11 @@ class MaterialRotationAnalyzer(BaseModel):
             threshold: Minimum improvement threshold to consider a rotation detected
 
         Returns:
-            dict: Rotation detection results with rotation type, axis, and confidence
+            RotationDetectionResult: Rotation detection results with rotation type, axis, and confidence
         """
         original_analyzer = BasisMaterialAnalyzer(material=original_material)
         original_fingerprint = original_analyzer.get_material_fingerprint(layer_thickness)
-        
+
         current_analyzer = BasisMaterialAnalyzer(material=self.material)
         current_fingerprint = current_analyzer.get_material_fingerprint(layer_thickness)
 
@@ -42,7 +56,7 @@ class MaterialRotationAnalyzer(BaseModel):
         original_fingerprint: MaterialFingerprintAllAxes,
         current_fingerprint: MaterialFingerprintAllAxes,
         threshold: float = 0.1,
-    ) -> dict:
+    ) -> RotationDetectionResult:
         """
         Detect rotation between two material fingerprints.
 
@@ -52,7 +66,7 @@ class MaterialRotationAnalyzer(BaseModel):
             threshold: Minimum improvement threshold to consider a rotation detected
 
         Returns:
-            Dict containing rotation information
+            RotationDetectionResult: Rotation detection results
         """
         direct_score = self._calculate_alignment_score(
             original_fingerprint, current_fingerprint, rotation_matrix=np.eye(3)
@@ -61,28 +75,28 @@ class MaterialRotationAnalyzer(BaseModel):
         rotation_candidates = self._generate_rotation_candidates()
 
         best_score = direct_score
-        best_info = {
-            "is_rotated": False,
-            "rotation_matrix": None,
-            "rotation_angle": None,
-            "rotation_axis": None,
-            "confidence": direct_score,
-        }
+        best_result = RotationDetectionResult(
+            is_rotated=False,
+            rotation_matrix=None,
+            rotation_angle=None,
+            rotation_axis=None,
+            confidence=direct_score,
+        )
 
         for rotation_matrix, angle, axis in rotation_candidates:
             score = self._calculate_alignment_score(original_fingerprint, current_fingerprint, rotation_matrix)
 
             if score > best_score + threshold:
                 best_score = score
-                best_info = {
-                    "is_rotated": True,
-                    "rotation_matrix": rotation_matrix,
-                    "rotation_angle": angle,
-                    "rotation_axis": axis,
-                    "confidence": score,
-                }
+                best_result = RotationDetectionResult(
+                    is_rotated=True,
+                    rotation_matrix=rotation_matrix,
+                    rotation_angle=angle,
+                    rotation_axis=axis,
+                    confidence=score,
+                )
 
-        return best_info
+        return best_result
 
     def _calculate_alignment_score(
         self,
@@ -158,4 +172,3 @@ class MaterialRotationAnalyzer(BaseModel):
                 candidates.append((rotation_matrix, angle, axis_list))
 
         return candidates
-
