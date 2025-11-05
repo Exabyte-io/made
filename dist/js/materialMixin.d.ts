@@ -108,6 +108,7 @@ export declare function materialMixin<T extends Base = Base>(item: T): {
      * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
      */
     readonly scaledHash: string;
+    external: undefined;
     /**
      * Converts basis to crystal/fractional coordinates.
      */
