@@ -7,10 +7,10 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.rotation_analyzer import MaterialRotationAnalyzer, RotationDetectionResult
 from mat3ra.made.tools.operations.core.unary import rotate
 
+from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001
 from .fixtures.slab import (
     SLAB_SrTiO3_011_TERMINATION_O2,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
-    SI_CONVENTIONAL_SLAB_001,
 )
 
 
@@ -51,7 +51,7 @@ def test_rotation_detection_between_materials(original_material_config, another_
 )
 def test_rotation_detection_and_correction(rotation_angle, rotation_axis):
     """Test that rotation detection runs without errors for various rotations."""
-    material = Material.create(SI_CONVENTIONAL_SLAB_001)
+    material = Material.create(INTERFACE_Si_001_Ge_001)
 
     rotated_material = rotate(material, axis=rotation_axis, angle=rotation_angle, rotate_cell=False)
 

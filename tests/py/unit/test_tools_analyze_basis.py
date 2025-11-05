@@ -8,6 +8,7 @@ from mat3ra.made.tools.analyze.basis import BasisMaterialAnalyzer
 from mat3ra.made.tools.analyze.fingerprint import LayeredFingerprintAlongAxis
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL
+from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001
 from .fixtures.slab import SLAB_SrTiO3_011_TERMINATION_O2
 
 
@@ -65,19 +66,20 @@ def test_get_layer_fingerprint():
 
 def test_get_material_fingerprint():
     """Test BasisMaterialAnalyzer.get_material_fingerprint method for all axes."""
-    material = Material.create(BULK_Si_CONVENTIONAL)
+    material = Material.create(INTERFACE_Si_001_Ge_001)
     analyzer = BasisMaterialAnalyzer(material=material)
 
     # Test full material fingerprint across all axes
     material_fingerprint = analyzer.get_material_fingerprint(layer_thickness=1.0)
-    
+
     assert hasattr(material_fingerprint, "x_axis")
     assert hasattr(material_fingerprint, "y_axis")
     assert hasattr(material_fingerprint, "z_axis")
     assert material_fingerprint.layer_thickness == 1.0
-    
+
     # Verify each axis fingerprint
     for axis_name in ["x_axis", "y_axis", "z_axis"]:
         axis_fingerprint = getattr(material_fingerprint, axis_name)
+        print(axis_name, axis_fingerprint)
         assert isinstance(axis_fingerprint, LayeredFingerprintAlongAxis)
         assert len(axis_fingerprint.layers) > 0
