@@ -8,7 +8,7 @@ from scipy.spatial.transform import Rotation
 
 from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
 from .basis.analyzer import BasisMaterialAnalyzer
-from .fingerprint import LayeredFingerprintAlongAxis, MaterialFingerprintAllAxes
+from .fingerprint import MaterialFingerprintAllAxes
 
 
 class RotationDetectionResult(BaseModel):
@@ -129,27 +129,12 @@ class MaterialRotationAnalyzer(BaseModel):
                 other_fp = current_fingerprint.get_fingerprint_for_axis(other_axis)
 
                 if row[max_idx] < 0:
-                    other_fp = self._reverse_axis_fingerprint(other_fp)
+                    other_fp = MaterialFingerprintAllAxes.reverse_axis_fingerprint(other_fp)
 
                 total_score += self_fp.get_similarity_score(other_fp)
                 count += 1
 
         return total_score / count if count > 0 else 0.0
-
-    def _reverse_axis_fingerprint(self, fingerprint: LayeredFingerprintAlongAxis) -> LayeredFingerprintAlongAxis:
-        """
-        Reverse a fingerprint along its axis (for 180-degree rotations).
-
-        Args:
-            fingerprint: Fingerprint to reverse
-
-        Returns:
-            LayeredFingerprintAlongAxis: Reversed fingerprint
-        """
-        reversed_layers = list(reversed(fingerprint.layers))
-        return LayeredFingerprintAlongAxis(
-            layers=reversed_layers, axis=fingerprint.axis, layer_thickness=fingerprint.layer_thickness
-        )
 
     def _generate_rotation_candidates(self) -> List[Tuple[np.ndarray, float, List[int]]]:
         """

@@ -108,3 +108,19 @@ class MaterialFingerprintAllAxes(BaseModel):
                 similarity_matrix[self_axis.value][other_axis.value] = self_fp.get_similarity_score(other_fp)
 
         return similarity_matrix
+
+    @staticmethod
+    def reverse_axis_fingerprint(fingerprint: LayeredFingerprintAlongAxis) -> LayeredFingerprintAlongAxis:
+        """
+        Reverse a fingerprint along its axis (for 180-degree rotations).
+
+        Args:
+            fingerprint: Fingerprint to reverse
+
+        Returns:
+            LayeredFingerprintAlongAxis: Reversed fingerprint
+        """
+        reversed_layers = list(reversed(fingerprint.layers))
+        return LayeredFingerprintAlongAxis(
+            layers=reversed_layers, axis=fingerprint.axis, layer_thickness=fingerprint.layer_thickness
+        )
