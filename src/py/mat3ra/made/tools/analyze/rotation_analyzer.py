@@ -1,6 +1,7 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
+from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from pydantic import BaseModel, Field
 from scipy.spatial.transform import Rotation
@@ -118,23 +119,43 @@ class MaterialRotationAnalyzer(BaseModel):
         total_score = 0.0
         count = 0
 
-        for i, self_axis in enumerate(MaterialFingerprintAllAxes.ALL_AXES):
-            self_fp = original_fingerprint.get_fingerprint_for_axis(self_axis)
+        for axis_index, axis_name in enumerate(MaterialFingerprintAllAxes.ALL_AXES):
+            axis_score = self._calculate_axis_alignment_score(
+                axis_index,
+                axis_name,
+                original_fingerprint,
+                current_fingerprint,
+                rotation_matrix,
+            )
 
-            row = rotation_matrix[i, :]
-            max_idx = np.argmax(np.abs(row))
-
-            if np.abs(row[max_idx]) > self.rotation_axis_significance_threshold:
-                other_axis = MaterialFingerprintAllAxes.ALL_AXES[max_idx]
-                other_fp = current_fingerprint.get_fingerprint_for_axis(other_axis)
-
-                if row[max_idx] < 0:
-                    other_fp = MaterialFingerprintAllAxes.reverse_axis_fingerprint(other_fp)
-
-                total_score += self_fp.get_similarity_score(other_fp)
+            if axis_score is not None:
+                total_score += axis_score
                 count += 1
 
         return total_score / count if count > 0 else 0.0
+
+    def _calculate_axis_alignment_score(
+        self,
+        axis_index: int,
+        axis_name: AxisEnum,
+        original_fingerprint: MaterialFingerprintAllAxes,
+        current_fingerprint: MaterialFingerprintAllAxes,
+        rotation_matrix: np.ndarray,
+    ) -> Optional[float]:
+        row = rotation_matrix[axis_index, :]
+        max_idx = int(np.argmax(np.abs(row)))
+
+        if np.abs(row[max_idx]) <= self.rotation_axis_significance_threshold:
+            return None
+
+        reference_fingerprint = original_fingerprint.get_fingerprint_for_axis(axis_name)
+        target_axis = MaterialFingerprintAllAxes.ALL_AXES[max_idx]
+        target_fingerprint = current_fingerprint.get_fingerprint_for_axis(target_axis)
+
+        if row[max_idx] < 0:
+            target_fingerprint = MaterialFingerprintAllAxes.reverse_axis_fingerprint(target_fingerprint)
+
+        return reference_fingerprint.get_similarity_score(target_fingerprint)
 
     def _generate_rotation_candidates(self) -> List[RotationParameters]:
         """
