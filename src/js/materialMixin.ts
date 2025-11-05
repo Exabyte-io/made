@@ -291,9 +291,9 @@ export function materialMixin<T extends Base = Base>(item: T) {
         },
 
         get external() {
-            return item.prop("external");
+            return item.prop<MaterialSchema["external"]>("external");
         },
-        set external(external) {
+        set external(external: MaterialSchema["external"]) {
             item.setProp("external", external);
         },
 
