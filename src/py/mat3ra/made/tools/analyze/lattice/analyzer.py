@@ -114,8 +114,8 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
             rotation_info = rotation_analyzer.detect_rotation_from_original(self.material, layer_thickness)
 
             if rotation_info.is_rotated:
-                rotation_axis = rotation_info.rotation_axis
-                rotation_angle = -rotation_info.rotation_angle
+                rotation_axis = rotation_info.axis
+                rotation_angle = -rotation_info.angle
 
                 material_with_primitive_lattice = rotate(
                     material_with_primitive_lattice, axis=rotation_axis, angle=rotation_angle, rotate_cell=False

@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import List, Union
 
 import numpy as np
 from mat3ra.made.material import Material
@@ -6,22 +6,21 @@ from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 from pydantic import BaseModel, Field
 from scipy.spatial.transform import Rotation
 
-from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
 from .basis.analyzer import BasisMaterialAnalyzer
 from .fingerprint import MaterialFingerprintAllAxes
+from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
 
 
-class RotationDetectionResult(BaseModel):
+class RotationParameters(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
+    rotation_matrix: np.ndarray = Field(..., description="3x3 rotation matrix")
+    angle: float = Field(..., description="Rotation angle in degrees")
+    axis: List[int] = Field(..., description="Rotation axis as [x, y, z] for rotate() function")
+
+
+class RotationDetectionResult(RotationParameters):
     is_rotated: bool = Field(..., description="Whether a rotation was detected")
-    rotation_matrix: Optional[np.ndarray] = Field(
-        None, description="3x3 rotation matrix if rotation detected, None otherwise"
-    )
-    rotation_angle: Optional[float] = Field(None, description="Rotation angle in degrees if detected, None otherwise")
-    rotation_axis: Optional[List[int]] = Field(
-        None, description="Rotation axis as [x, y, z] for rotate() function if detected, None otherwise"
-    )
     confidence: float = Field(..., description="Confidence score of the detection (0.0 to 1.0)")
 
 
@@ -77,22 +76,24 @@ class MaterialRotationAnalyzer(BaseModel):
         best_score = direct_score
         best_result = RotationDetectionResult(
             is_rotated=False,
-            rotation_matrix=None,
-            rotation_angle=None,
-            rotation_axis=None,
+            rotation_matrix=np.eye(3),
+            angle=0.0,
+            axis=[0, 0, 0],
             confidence=direct_score,
         )
 
-        for rotation_matrix, angle, axis in rotation_candidates:
-            score = self._calculate_alignment_score(original_fingerprint, current_fingerprint, rotation_matrix)
+        for rotation_params in rotation_candidates:
+            score = self._calculate_alignment_score(
+                original_fingerprint, current_fingerprint, rotation_params.rotation_matrix
+            )
 
             if score > best_score + threshold:
                 best_score = score
                 best_result = RotationDetectionResult(
                     is_rotated=True,
-                    rotation_matrix=rotation_matrix,
-                    rotation_angle=angle,
-                    rotation_axis=axis,
+                    rotation_matrix=rotation_params.rotation_matrix,
+                    angle=rotation_params.angle,
+                    axis=rotation_params.axis,
                     confidence=score,
                 )
 
@@ -136,12 +137,12 @@ class MaterialRotationAnalyzer(BaseModel):
 
         return total_score / count if count > 0 else 0.0
 
-    def _generate_rotation_candidates(self) -> List[Tuple[np.ndarray, float, List[int]]]:
+    def _generate_rotation_candidates(self) -> List[RotationParameters]:
         """
         Generate common rotation matrices for testing.
 
         Returns:
-            List of tuples (rotation_matrix, angle_degrees, axis_list)
+            List of RotationParameters with rotation matrix, angle, and axis
         """
         candidates = []
 
@@ -154,6 +155,6 @@ class MaterialRotationAnalyzer(BaseModel):
                 axis_list = [int(axis_vector[0]), int(axis_vector[1]), int(axis_vector[2])]
 
                 rotation_matrix = Rotation.from_rotvec(axis_vector * np.radians(angle)).as_matrix()
-                candidates.append((rotation_matrix, angle, axis_list))
+                candidates.append(RotationParameters(rotation_matrix=rotation_matrix, angle=angle, axis=axis_list))
 
         return candidates

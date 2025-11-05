@@ -32,8 +32,8 @@ def test_rotation_detection_between_materials(original_material_config, another_
     assert isinstance(rotation_info, RotationDetectionResult)
     assert hasattr(rotation_info, "is_rotated")
     assert hasattr(rotation_info, "rotation_matrix")
-    assert hasattr(rotation_info, "rotation_angle")
-    assert hasattr(rotation_info, "rotation_axis")
+    assert hasattr(rotation_info, "angle")
+    assert hasattr(rotation_info, "axis")
     assert hasattr(rotation_info, "confidence")
 
     assert rotation_info.is_rotated == is_flipped, "Rotation detection status does not match expected value."
@@ -53,14 +53,14 @@ def test_rotation_detection_and_correction():
     # Should detect some rotation (may not always be exactly 180° due to material symmetry)
     if rotation_info.is_rotated:
         assert rotation_info.rotation_matrix is not None
-        assert rotation_info.rotation_angle is not None
-        assert rotation_info.rotation_axis is not None
+        assert rotation_info.angle is not None
+        assert rotation_info.axis is not None
         assert isinstance(rotation_info.confidence, float)
         assert 0.0 <= rotation_info.confidence <= 1.0
 
         # Test corrective rotation using operations module
-        rotation_axis = rotation_info.rotation_axis
-        rotation_angle = -rotation_info.rotation_angle
+        rotation_axis = rotation_info.axis
+        rotation_angle = -rotation_info.angle
 
         corrected_material = rotate(rotated_material_180, axis=rotation_axis, angle=rotation_angle, rotate_cell=False)
         assert isinstance(corrected_material, Material)
