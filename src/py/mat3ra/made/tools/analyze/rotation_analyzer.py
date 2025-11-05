@@ -2,7 +2,6 @@ from typing import List, Union
 
 import numpy as np
 from mat3ra.made.material import Material
-from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 from pydantic import BaseModel, Field
 from scipy.spatial.transform import Rotation
 
@@ -145,16 +144,13 @@ class MaterialRotationAnalyzer(BaseModel):
             List of RotationParameters with rotation matrix, angle, and axis
         """
         candidates = []
+        angles = [90, -90, 180]
+        axes = np.eye(3, dtype=int)
 
-        for axis_enum in MaterialFingerprintAllAxes.ALL_AXES:
-            axis_idx = AXIS_TO_INDEX_MAP[axis_enum.value]
-            for angle in [90, -90, 180]:
-                axis_vector = np.zeros(3)
-                axis_vector[axis_idx] = 1.0
-
-                axis_list = [int(axis_vector[0]), int(axis_vector[1]), int(axis_vector[2])]
-
+        for axis_vector in axes:
+            for angle in angles:
                 rotation_matrix = Rotation.from_rotvec(axis_vector * np.radians(angle)).as_matrix()
-                candidates.append(RotationParameters(rotation_matrix=rotation_matrix, angle=angle, axis=axis_list))
-
+                candidates.append(
+                    RotationParameters(rotation_matrix=rotation_matrix, angle=angle, axis=axis_vector.tolist())
+                )
         return candidates
