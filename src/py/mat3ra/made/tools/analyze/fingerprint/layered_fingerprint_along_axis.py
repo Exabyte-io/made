@@ -24,6 +24,15 @@ class LayeredFingerprintAlongAxis(BaseModel):
         """
         Calculate Jaccard similarity score between this and another fingerprint.
 
+        The Jaccard similarity coefficient measures the similarity between two sets by comparing
+        the size of their intersection to the size of their union: J(A, B) = |A ∩ B| / |A ∪ B|.
+        In this implementation, we compare the sets of chemical elements in corresponding layers
+        between two fingerprints. For example, if layer 1 contains {Si, O} and the corresponding
+        layer contains {Si, Ge}, the Jaccard score is 1/3 (one common element divided by three
+        unique elements total). The final score is the average across all layers, providing a
+        measure of compositional similarity along the axis (0.0 = completely different,
+        1.0 = identical composition in all layers).
+
         Args:
             other: Another LayeredFingerprintAlongAxis to compare with
 
