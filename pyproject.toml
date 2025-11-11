@@ -48,7 +48,7 @@ tests = [
     "gradio",
     "pydantic",
     "mat3ra-made[tools]",
-    "mat3ra-standata"
+    "mat3ra-standata@git+https://github.com/Exabyte-io/standata.git@27360bbca2940d8419d3fc39fcee5372ee6938c0"
 ]
 all = [
     "mat3ra-made[tests]",
