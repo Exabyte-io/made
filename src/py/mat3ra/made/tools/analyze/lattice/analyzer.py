@@ -1,10 +1,9 @@
 from .. import BaseMaterialAnalyzer
-from ..rotation_analyzer import MaterialRotationAnalyzer
 from ...build_components.metadata import MaterialWithBuildMetadata
 from ...convert import from_pymatgen, to_pymatgen
-from ...operations.core.unary import rotate
 from ...third_party import PymatgenSpacegroupAnalyzer
 from ....lattice import LatticeTypeEnum
+from ..lattice_swap_analyzer import MaterialLatticeSwapAnalyzer
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -95,13 +94,13 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         rotation_detection_threshold: float = 0.05,
     ) -> MaterialWithBuildMetadata:
         """
-        Get material with primitive lattice and optional orientation correction to be standardized.
+        Get material with primitive lattice standardized according to IUCr conventions.
 
         Args:
             return_original_if_not_reduced: If True, return original material when no reduction occurs
-            keep_orientation: If True, correct orientation after primitive conversion
-            layer_thickness: Thickness of layers for orientation detection
-            rotation_detection_threshold: Threshold for corrective rotation detection confidence
+            keep_orientation: If True, detect and reverse lattice parameter swaps to preserve original orientation
+            layer_thickness: Unused (kept for compatibility)
+            rotation_detection_threshold: Unused (kept for compatibility)
 
         Returns:
             MaterialWithBuildMetadata: Material with primitive lattice
@@ -115,17 +114,12 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
                 return self.material
 
         if keep_orientation:
-            rotation_analyzer = MaterialRotationAnalyzer(material=material_with_primitive_lattice)
-            rotation_info = rotation_analyzer.detect_rotation_from_original(
-                self.material, layer_thickness, threshold=rotation_detection_threshold
+
+            swap_analyzer = MaterialLatticeSwapAnalyzer(material=material_with_primitive_lattice)
+            swap_info = swap_analyzer.detect_swap_from_original(
+                material_with_primitive_lattice, layer_thickness=layer_thickness
             )
 
-            if rotation_info.is_rotated:
-                rotation_axis = rotation_info.axis
-                rotation_angle = -rotation_info.angle
-
-                material_with_primitive_lattice = rotate(
-                    material_with_primitive_lattice, axis=rotation_axis, angle=rotation_angle
-                )
-
+            if swap_info.is_swapped:
+                material_with_primitive_lattice.set_lattice(swap_info.new_lattice)
         return material_with_primitive_lattice
