@@ -232,6 +232,12 @@ function materialMixin(item) {
         get scaledHash() {
             return this.calculateHash("", true);
         },
+        get external() {
+            return item.prop("external");
+        },
+        set external(external) {
+            item.setProp("external", external);
+        },
         /**
          * Converts basis to crystal/fractional coordinates.
          */

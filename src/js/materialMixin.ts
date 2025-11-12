@@ -290,6 +290,13 @@ export function materialMixin<T extends Base = Base>(item: T) {
             return this.calculateHash("", true);
         },
 
+        get external() {
+            return item.prop<MaterialSchema["external"]>("external");
+        },
+        set external(external: MaterialSchema["external"]) {
+            item.setProp("external", external);
+        },
+
         /**
          * Converts basis to crystal/fractional coordinates.
          */
