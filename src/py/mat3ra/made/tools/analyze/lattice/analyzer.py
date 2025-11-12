@@ -1,9 +1,9 @@
 from .. import BaseMaterialAnalyzer
+from ..lattice_swap_analyzer import MaterialLatticeSwapAnalyzer
 from ...build_components.metadata import MaterialWithBuildMetadata
 from ...convert import from_pymatgen, to_pymatgen
 from ...third_party import PymatgenSpacegroupAnalyzer
 from ....lattice import LatticeTypeEnum
-from ..lattice_swap_analyzer import MaterialLatticeSwapAnalyzer
 
 
 class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -114,12 +114,9 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
                 return self.material
 
         if keep_orientation:
-
             swap_analyzer = MaterialLatticeSwapAnalyzer(material=material_with_primitive_lattice)
-            swap_info = swap_analyzer.detect_swap_from_original(
-                material_with_primitive_lattice, layer_thickness=layer_thickness
+            corrected_lattice = swap_analyzer.correct_lattice_to_match_original(
+                self.material, layer_thickness=layer_thickness, threshold=rotation_detection_threshold
             )
-
-            if swap_info.is_swapped:
-                material_with_primitive_lattice.set_lattice(swap_info.new_lattice)
+            material_with_primitive_lattice.set_lattice(corrected_lattice)
         return material_with_primitive_lattice
