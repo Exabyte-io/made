@@ -3,9 +3,13 @@ Tests for MaterialRotationAnalyzer class.
 """
 
 import pytest
+from mat3ra.utils.assertion import assert_deep_almost_equal
+
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.rotation_analyzer import MaterialRotationAnalyzer, RotationDetectionResult
 from mat3ra.made.tools.operations.core.unary import rotate
+from .fixtures.interface.gaas_dia import GALLIUM_ARSENIDE_DIAMOND_INTERFACE
 
 from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001
 from .fixtures.slab import (
@@ -21,7 +25,7 @@ from .fixtures.slab import (
         (SLAB_SrTiO3_011_TERMINATION_O2, SLAB_SrTiO3_011_TERMINATION_SrTiO, True),
     ],
 )
-def test_rotation_detection_between_materials(original_material_config, another_material_config, is_flipped):
+def test_flip_detection_between_materials(original_material_config, another_material_config, is_flipped):
     """Test rotation detection between different materials."""
     original_material = Material.create(original_material_config)
     another_material = Material.create(another_material_config)
@@ -39,6 +43,25 @@ def test_rotation_detection_between_materials(original_material_config, another_
     assert rotation_info.is_rotated == is_flipped, "Rotation detection status does not match expected value."
 
 
+def test_rotation_detection_between_materials():
+    original_material = Material.create(GALLIUM_ARSENIDE_DIAMOND_INTERFACE)
+    raw_primitive_material = LatticeMaterialAnalyzer(material=original_material).material_with_primitive_lattice
+    corrected_primitive_material = LatticeMaterialAnalyzer(
+        material=original_material
+    ).get_material_with_primitive_lattice_standard()
+
+    rotation_analyzer = MaterialRotationAnalyzer(material=raw_primitive_material)
+    rotation_info = rotation_analyzer.detect_rotation_from_original(original_material=original_material, threshold=0.05)
+
+    rotated_material = rotate(raw_primitive_material, axis=rotation_info.axis, angle=-rotation_info.angle)
+
+    assert rotation_info.is_rotated is True
+    assert rotation_info.angle == -90
+    assert rotation_info.axis == [1, 0, 0]
+
+    assert rotated_material.lattice.vectors.c.value == original_material.lattice.vectors.c.value
+
+
 @pytest.mark.parametrize(
     "rotation_angle, rotation_axis",
     [
@@ -53,7 +76,7 @@ def test_rotation_detection_and_correction(rotation_angle, rotation_axis):
     """Test that rotation detection runs without errors for various rotations."""
     material = Material.create(INTERFACE_Si_001_Ge_001)
 
-    rotated_material = rotate(material, axis=rotation_axis, angle=rotation_angle, rotate_cell=False)
+    rotated_material = rotate(material, axis=rotation_axis, angle=rotation_angle)
 
     rotation_analyzer = MaterialRotationAnalyzer(material=rotated_material)
 
@@ -70,6 +93,6 @@ def test_rotation_detection_and_correction(rotation_angle, rotation_axis):
         detected_axis = rotation_info.axis
         detected_angle = -rotation_info.angle
 
-        corrected_material = rotate(rotated_material, axis=detected_axis, angle=detected_angle, rotate_cell=False)
+        corrected_material = rotate(rotated_material, axis=detected_axis, angle=detected_angle)
         assert isinstance(corrected_material, Material)
         assert corrected_material.basis.number_of_atoms == material.basis.number_of_atoms

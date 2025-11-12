@@ -21,7 +21,7 @@ from mat3ra.made.tools.modify import (
 from mat3ra.made.tools.operations.core.unary import rotate
 from mat3ra.utils import assertion as assertion_utils
 
-from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_CONVENTIONAL_FILTERED
+from .fixtures.bulk import BULK_Si_CONVENTIONAL, BULK_Si_CONVENTIONAL_FILTERED, BULK_Si_PRIMITIVIZED
 from .fixtures.interface.zsl import GRAPHENE_NICKEL_INTERFACE
 from .fixtures.slab import SI_SLAB_001_2_ATOMS, SI_SLAB_001_WITH_VACUUM
 from .utils import assert_two_entities_deep_almost_equal
@@ -184,6 +184,16 @@ def test_rotate():
     # Rotation around Z and X axis will be equivalent for the original material for hist basis in terms of coordinates
     rotated_material = rotate(material, [0, 0, 1], 180)
     rotated_material = rotate(rotated_material, [1, 0, 0], 180)
+    assertion_utils.assert_deep_almost_equal(
+        material.basis.coordinates.values.sort(), rotated_material.basis.coordinates.values.sort()
+    )
+    assertion_utils.assert_deep_almost_equal(material.lattice, rotated_material.lattice)
+
+
+def test_rotate_90():
+    material = Material.create(SI_SLAB_001_WITH_VACUUM)
+    # Rotation around Z and X axis will be equivalent for the original material for hist basis in terms of coordinates
+    rotated_material = rotate(material, [1, 0, 0], 10)
     assertion_utils.assert_deep_almost_equal(
         material.basis.coordinates.values.sort(), rotated_material.basis.coordinates.values.sort()
     )

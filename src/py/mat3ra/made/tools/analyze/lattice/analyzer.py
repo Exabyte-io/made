@@ -88,7 +88,11 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         )
 
     def get_material_with_primitive_lattice_standard(
-        self, return_original_if_not_reduced: bool = False, keep_orientation: bool = True, layer_thickness: float = 1.0
+        self,
+        return_original_if_not_reduced: bool = False,
+        keep_orientation: bool = True,
+        layer_thickness: float = 1.0,
+        rotation_detection_threshold: float = 0.05,
     ) -> MaterialWithBuildMetadata:
         """
         Get material with primitive lattice and optional orientation correction to be standardized.
@@ -97,6 +101,7 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
             return_original_if_not_reduced: If True, return original material when no reduction occurs
             keep_orientation: If True, correct orientation after primitive conversion
             layer_thickness: Thickness of layers for orientation detection
+            rotation_detection_threshold: Threshold for corrective rotation detection confidence
 
         Returns:
             MaterialWithBuildMetadata: Material with primitive lattice
@@ -111,14 +116,16 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
 
         if keep_orientation:
             rotation_analyzer = MaterialRotationAnalyzer(material=material_with_primitive_lattice)
-            rotation_info = rotation_analyzer.detect_rotation_from_original(self.material, layer_thickness)
+            rotation_info = rotation_analyzer.detect_rotation_from_original(
+                self.material, layer_thickness, threshold=rotation_detection_threshold
+            )
 
             if rotation_info.is_rotated:
                 rotation_axis = rotation_info.axis
                 rotation_angle = -rotation_info.angle
 
                 material_with_primitive_lattice = rotate(
-                    material_with_primitive_lattice, axis=rotation_axis, angle=rotation_angle, rotate_cell=False
+                    material_with_primitive_lattice, axis=rotation_axis, angle=rotation_angle
                 )
 
         return material_with_primitive_lattice
