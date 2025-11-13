@@ -118,4 +118,7 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
             material_with_primitive_lattice = swap_analyzer.correct_material_to_match_target(
                 self.material, layer_thickness=layer_thickness, threshold=rotation_detection_threshold
             )
+
+        material_with_primitive_lattice.metadata = self.material.metadata
+
         return material_with_primitive_lattice
