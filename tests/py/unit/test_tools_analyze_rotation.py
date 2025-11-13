@@ -8,8 +8,6 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.lattice_swap_analyzer import MaterialLatticeSwapAnalyzer
 from .fixtures.interface.gaas_dia import GALLIUM_ARSENIDE_DIAMOND_INTERFACE
-
-from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001
 from .fixtures.slab import (
     SLAB_SrTiO3_011_TERMINATION_O2,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
@@ -40,9 +38,6 @@ def test_lattice_swap_detection_between_materials():
     """Test that lattice swap detection correctly identifies vector permutations."""
     original_material = Material.create(GALLIUM_ARSENIDE_DIAMOND_INTERFACE)
     analyzer = LatticeMaterialAnalyzer(material=original_material)
-
-    # Get primitive material (non-standardized - parameters preserved)
-    raw_primitive_material = analyzer.material_with_primitive_lattice
 
     corrected_primitive_material = analyzer.get_material_with_primitive_lattice_standard(keep_orientation=True)
 
