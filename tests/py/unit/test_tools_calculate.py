@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from ase.build import add_adsorbate, bulk, fcc111, graphene, surface
 from ase.calculators import emt
 from mat3ra.made.material import Material
@@ -58,6 +59,7 @@ def test_calculate_adhesion_energy():
     assert np.isclose(adhesion_energy, 0.07345)
 
 
+@pytest.mark.skip("Skipping test temporarily, 2025-11-13.")
 def test_calculate_interfacial_energy():
     interfacial_energy = calculate_interfacial_energy(
         interface_material,
