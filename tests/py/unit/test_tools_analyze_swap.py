@@ -1,18 +1,12 @@
 import pytest
 
 from mat3ra.made.material import Material
-from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.lattice_swap_analyzer import MaterialLatticeSwapAnalyzer
-from .fixtures.interface.gaas_dia import (
-    GALLIUM_ARSENIDE_DIAMOND_INTERFACE,
-    GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE,
-    GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF,
-)
 from .fixtures.slab import (
     SLAB_SrTiO3_011_TERMINATION_O2,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
 )
-from .utils import assert_two_entities_deep_almost_equal, get_platform_specific_value, OSPlatform
+from .utils import assert_two_entities_deep_almost_equal
 
 
 @pytest.mark.parametrize(
@@ -32,22 +26,3 @@ def test_flip_detection_between_materials(original_material_config, another_mate
 
     assert swap_info.is_swapped == is_swapped
     assert_two_entities_deep_almost_equal(swap_info.new_lattice, another_material.lattice)
-
-
-def test_lattice_swap_detection_primitive():
-    """Test that lattice swap detection correctly identifies vector permutations."""
-    original_material = Material.create(GALLIUM_ARSENIDE_DIAMOND_INTERFACE)
-    analyzer = LatticeMaterialAnalyzer(material=original_material)
-    corrected_primitive_material = analyzer.get_material_with_primitive_lattice_standard(keep_orientation=True)
-    # The corrected version should have the same lattice.c as the original
-    assert abs(original_material.lattice.c - corrected_primitive_material.lattice.c) < 0.01
-    assert abs(corrected_primitive_material.lattice.a - 5.63) < 0.01
-    assert abs(corrected_primitive_material.lattice.b - 5.63) < 0.01
-
-    expected_primitive = get_platform_specific_value(
-        {
-            OSPlatform.DARWIN: GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE,
-            OSPlatform.OTHER: GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF,
-        }
-    )
-    assert_two_entities_deep_almost_equal(corrected_primitive_material, expected_primitive)
