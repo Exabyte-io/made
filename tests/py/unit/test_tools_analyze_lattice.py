@@ -29,11 +29,6 @@ def test_get_primitive_lattice(
 
 
 def test_get_primitive_lattice_standard():
-    """
-    We test that the lattice swap detection correctly identifies the transformation needed to convert
-    primitive cell that is returned with swapped lattice vectors (rotated) to the correct orientation.
-    Size of original and primitive materials is different, so fingerprint comparison is used.
-    """
     original_material = Material.create(GALLIUM_ARSENIDE_DIAMOND_INTERFACE)
     analyzer = LatticeMaterialAnalyzer(material=original_material)
     corrected_primitive_material = analyzer.get_material_with_primitive_lattice_standard(keep_orientation=True)
