@@ -8,6 +8,7 @@ from .fixtures.interface.gaas_dia import (
     GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE,
     GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF,
 )
+from .fixtures.interface.gr_ni_111_top_hcp import GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF
 from .fixtures.slab import (
     SLAB_SrTiO3_011_TERMINATION_O2,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
@@ -40,6 +41,7 @@ def test_swap_detection():
     primitive cell that is returned with swapped lattice vectors (rotated) to the correct orientation.
     Size of original and primitive materials is different, so fingerprint comparison is used.
     """
+    # Case 1: Primitive material here will be "rotated" 90 degrees around X axis compared to original
     original_material = Material.create(GALLIUM_ARSENIDE_DIAMOND_INTERFACE)
     primitive_material = LatticeMaterialAnalyzer(material=original_material).material_with_primitive_lattice
 
@@ -56,3 +58,17 @@ def test_swap_detection():
         }
     )
     assert_two_entities_deep_almost_equal(corrected_primitive_material, expected_primitive)
+
+    # Case 2: Primitive material "rotated" 180 degrees around X axis, or mirrored along z, compared to original
+    original_material = Material.create(GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF)
+    primitive_material = LatticeMaterialAnalyzer(material=original_material).material_with_primitive_lattice
+
+    analyzer = MaterialLatticeSwapAnalyzer(material=primitive_material)
+    swap_info = analyzer.detect_swap_from_original(original_material)
+    assert swap_info.is_swapped is True
+
+    original_material.basis.set_labels_from_list([])
+
+    corrected_primitive_material = analyzer.correct_material_to_match_target(original_material)
+    assert_two_entities_deep_almost_equal(corrected_primitive_material.basis, original_material.basis)
+    assert_two_entities_deep_almost_equal(corrected_primitive_material.lattice, original_material.lattice)
