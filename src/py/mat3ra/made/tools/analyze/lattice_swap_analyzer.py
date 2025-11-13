@@ -1,24 +1,52 @@
-from typing import List, Tuple, Union
+from typing import List, Union
 
 import numpy as np
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from pydantic import BaseModel, Field
 
 from mat3ra.made.material import Material
-
 from .basis import BasisMaterialAnalyzer
 from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
 from ..modify import wrap_to_unit_cell
 from ...lattice import Lattice
 
+POSSIBLE_TRANSFORMATION_MATRICES = [
+    [[1, 0, 0], [0, 1, 0], [0, 0, 1]],  # Identity - no transformation
+    # Direct swaps: new[i] = old[j]
+    [[0, 1, 0], [1, 0, 0], [0, 0, 1]],
+    [[0, 0, 1], [0, 1, 0], [1, 0, 0]],
+    [[1, 0, 0], [0, 0, 1], [0, 1, 0]],
+    # Swaps with sign flips
+    [[0, 0, 1], [1, 0, 0], [0, -1, 0]],
+    [[0, 0, -1], [1, 0, 0], [0, 1, 0]],
+    [[0, 1, 0], [0, 0, 1], [-1, 0, 0]],
+    [[0, -1, 0], [0, 0, 1], [1, 0, 0]],
+    # Inverted swaps
+    [[0, -1, 0], [-1, 0, 0], [0, 0, 1]],
+    [[0, 0, -1], [0, 1, 0], [-1, 0, 0]],
+    [[1, 0, 0], [0, 0, -1], [0, -1, 0]],
+    # Rotations around x-axis: -90 and +90 degrees
+    [[1, 0, 0], [0, 0, 1], [0, -1, 0]],  # -90° around x
+    [[1, 0, 0], [0, 0, -1], [0, 1, 0]],  # +90° around x
+    # Rotations around y-axis: -90 and +90 degrees
+    [[0, 0, -1], [0, 1, 0], [1, 0, 0]],  # -90° around y
+    [[0, 0, 1], [0, 1, 0], [-1, 0, 0]],  # +90° around y
+    # Rotations around z-axis: -90 and +90 degrees
+    [[0, 1, 0], [-1, 0, 0], [0, 0, 1]],  # -90° around z
+    [[0, -1, 0], [1, 0, 0], [0, 0, 1]],  # +90° around z
+    # 180° rotations around axes
+    [[1, 0, 0], [0, -1, 0], [0, 0, -1]],  # 180° around x
+    [[-1, 0, 0], [0, 1, 0], [0, 0, -1]],  # 180° around y
+    [[-1, 0, 0], [0, -1, 0], [0, 0, 1]],  # 180° around z
+    # Mirrors (reflections)
+    [[1, 0, 0], [0, 1, 0], [0, 0, -1]],  # Mirror along z
+    [[1, 0, 0], [0, -1, 0], [0, 0, 1]],  # Mirror along y
+    [[-1, 0, 0], [0, 1, 0], [0, 0, 1]],  # Mirror along x
+]
 
-class LatticeSwapParameters(BaseModel):
+
+class LatticeSwapDetectionResult(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
-
-    permutation: List[Tuple[int, int]] = Field(..., description="List of (source_idx, sign) tuples for each new vector")
-
-
-class LatticeSwapDetectionResult(LatticeSwapParameters):
     is_swapped: bool = Field(..., description="Whether a lattice swap was detected")
     permutation: Matrix3x3Schema = Field(..., description="Transformation matrix representing the swap")
     new_lattice_vectors: List = Field(..., description="New lattice vectors")
@@ -27,11 +55,6 @@ class LatticeSwapDetectionResult(LatticeSwapParameters):
 
     @property
     def new_lattice(self) -> Lattice:
-        """Create a Lattice object from the new_lattice_vectors for backward compatibility.
-
-        Note: This returns the lattice that would result from applying the transformation,
-        which for detection purposes should match the current material's lattice.
-        """
         return Lattice.from_vectors_array(vectors=self.new_lattice_vectors)
 
 
@@ -65,40 +88,7 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
         Returns:
             LatticeSwapDetectionResult: Swap detection results with permutation and new lattice
         """
-
-        possible_transformation_matrices = [
-            np.eye(3),  # Identity - no transformation
-            # Direct swaps: new[i] = old[j]
-            np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]]),
-            np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]]),
-            np.array([[1, 0, 0], [0, 0, 1], [0, 1, 0]]),
-            # Swaps with sign flips
-            np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]]),
-            np.array([[0, 0, -1], [1, 0, 0], [0, 1, 0]]),
-            np.array([[0, 1, 0], [0, 0, 1], [-1, 0, 0]]),
-            np.array([[0, -1, 0], [0, 0, 1], [1, 0, 0]]),
-            # Inverted swaps
-            np.array([[0, -1, 0], [-1, 0, 0], [0, 0, 1]]),
-            np.array([[0, 0, -1], [0, 1, 0], [-1, 0, 0]]),
-            np.array([[1, 0, 0], [0, 0, -1], [0, -1, 0]]),
-            # Rotations around x-axis: -90 and +90 degrees
-            np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]]),  # -90° around x
-            np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]]),  # +90° around x
-            # Rotations around y-axis: -90 and +90 degrees
-            np.array([[0, 0, -1], [0, 1, 0], [1, 0, 0]]),  # -90° around y
-            np.array([[0, 0, 1], [0, 1, 0], [-1, 0, 0]]),  # +90° around y
-            # Rotations around z-axis: -90 and +90 degrees
-            np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]]),  # -90° around z
-            np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]]),  # +90° around z
-            # 180° rotations around axes
-            np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]]),  # 180° around x
-            np.array([[-1, 0, 0], [0, 1, 0], [0, 0, -1]]),  # 180° around y
-            np.array([[-1, 0, 0], [0, -1, 0], [0, 0, 1]]),  # 180° around z
-            # Mirrors (reflections)
-            np.array([[1, 0, 0], [0, 1, 0], [0, 0, -1]]),  # Mirror along z
-            np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]]),  # Mirror along y
-            np.array([[-1, 0, 0], [0, 1, 0], [0, 0, 1]]),  # Mirror along x
-        ]
+        possible_transformation_matrices = list(map(np.array, POSSIBLE_TRANSFORMATION_MATRICES))
 
         max_score = 0
         best_match = None

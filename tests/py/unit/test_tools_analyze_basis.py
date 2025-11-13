@@ -1,7 +1,3 @@
-"""
-Tests for BasisMaterialAnalyzer class.
-"""
-
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.basis import BasisMaterialAnalyzer
