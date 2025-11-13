@@ -115,8 +115,7 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
 
         if keep_orientation:
             swap_analyzer = MaterialLatticeSwapAnalyzer(material=material_with_primitive_lattice)
-            corrected_lattice = swap_analyzer.correct_lattice_to_match_original(
+            material_with_primitive_lattice = swap_analyzer.correct_material_to_match_original(
                 self.material, layer_thickness=layer_thickness, threshold=rotation_detection_threshold
             )
-            material_with_primitive_lattice.set_lattice(corrected_lattice)
         return material_with_primitive_lattice
