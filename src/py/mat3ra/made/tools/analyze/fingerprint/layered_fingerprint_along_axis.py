@@ -1,4 +1,5 @@
-from typing import List
+from itertools import cycle, islice
+from typing import List, Sequence
 
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from pydantic import BaseModel, Field
@@ -6,19 +7,48 @@ from pydantic import BaseModel, Field
 from .layer_fingerprint import LayerFingerprint
 
 
+def _jaccard(a: Sequence[str], b: Sequence[str]) -> float:
+    """
+    Compute the Jaccard similarity coefficient between two sequences of elements.
+
+    The Jaccard coefficient measures the similarity between two sets A and B as:
+        J(A, B) = |A ∩ B| / |A ∪ B|
+
+    where |A ∩ B| is the number of shared elements, and |A ∪ B| is the total number
+    of unique elements across both sets. The score ranges from 0.0 (no overlap) to 1.0
+    (identical sets). Empty layers are treated specially:
+      - Both empty → score = 1.0
+      - One empty → score = 0.0
+
+    Args:
+        a: Sequence of element symbols for the first layer
+        b: Sequence of element symbols for the second layer
+
+    Returns:
+        float: Jaccard similarity coefficient between 0.0 and 1.0
+    """
+    if not a and not b:
+        return 1.0
+    if not a or not b:
+        return 0.0
+
+    set_a, set_b = set(a), set(b)
+    union_size = len(set_a | set_b)
+    return len(set_a & set_b) / union_size if union_size else 0.0
+
+
 class LayeredFingerprintAlongAxis(BaseModel):
     layers: List[LayerFingerprint] = Field(default_factory=list, description="List of layer fingerprints")
     axis: AxisEnum = Field(default=AxisEnum.z, description="Axis along which the fingerprint is computed")
     layer_thickness: float = Field(default=1.0, gt=0, description="Thickness of each layer in Angstroms")
 
-    def get_non_empty_layers(self) -> List[LayerFingerprint]:
+    @property
+    def non_empty_layers(self) -> List[LayerFingerprint]:
         return [layer for layer in self.layers if layer.elements]
 
-    def get_element_sequence(self) -> List[List[str]]:
+    @property
+    def element_sequence(self) -> List[List[str]]:
         return [layer.elements for layer in self.layers]
-
-    def get_non_empty_element_sequence(self) -> List[List[str]]:
-        return [layer.elements for layer in self.layers if layer.elements]
 
     def get_similarity_score(self, other: "LayeredFingerprintAlongAxis") -> float:
         """
@@ -37,33 +67,47 @@ class LayeredFingerprintAlongAxis(BaseModel):
             other: Another LayeredFingerprintAlongAxis to compare with
 
         Returns:
-            float: Average Jaccard similarity score (0.0 to 1.0)
+            float: Average Jaccard similarity score (0.0 to 1.0). Returns 0.0 if the number of layers doesn't match.
+        """
+        if not self.layers or not other.layers:
+            return 0.0
+        if len(self.layers) != len(other.layers):
+            return 0.0
+
+        seq1, seq2 = self.element_sequence, other.element_sequence
+        return sum(_jaccard(a, b) for a, b in zip(seq1, seq2)) / len(seq1)
+
+    def get_similarity_score_ignore_periodicity(self, other: "LayeredFingerprintAlongAxis") -> float:
+        """
+        Calculate Jaccard similarity score ignoring periodicity differences.
+
+        Handles cases where one fingerprint is a periodic repetition of another.
+        For example, if self has 6 layers and other has 2 layers, this method checks if
+        self.layers is a 3× repetition of other.layers (i.e., layers 0–1 match other,
+        layers 2–3 match other, etc.).
+
+        Args:
+            other: Another LayeredFingerprintAlongAxis to compare with
+
+        Returns:
+            float: Average Jaccard similarity score (0.0 to 1.0). Returns 0.0 if the number
+                   of layers is not a multiple relationship or if fingerprints don't match.
         """
         if not self.layers or not other.layers:
             return 0.0
 
-        min_length = min(len(self.layers), len(other.layers))
-        if min_length == 0:
+        len_a, len_b = len(self.layers), len(other.layers)
+        if len_a == len_b:
+            return self.get_similarity_score(other)
+
+        # Identify shorter/longer and ensure multiplicity
+        if len_a < len_b:
+            short_seq, long_seq = self.element_sequence, other.element_sequence
+        else:
+            short_seq, long_seq = other.element_sequence, self.element_sequence
+
+        if len(long_seq) % len(short_seq) != 0:
             return 0.0
 
-        total_score = 0.0
-
-        for i in range(min_length):
-            elements1 = self.layers[i].elements
-            elements2 = other.layers[i].elements
-
-            if len(elements1) == 0 and len(elements2) == 0:
-                layer_score = 1.0
-            elif len(elements1) == 0 or len(elements2) == 0:
-                layer_score = 0.0
-            else:
-                set1 = set(elements1)
-                set2 = set(elements2)
-                intersection = len(set1.intersection(set2))
-                union = len(set1.union(set2))
-                layer_score = intersection / union if union > 0 else 0.0
-
-            total_score += layer_score
-
-        return total_score / min_length
-
+        cycled_short = islice(cycle(short_seq), len(long_seq))
+        return sum(_jaccard(a, b) for a, b in zip(cycled_short, long_seq)) / len(short_seq)

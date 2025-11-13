@@ -131,9 +131,7 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
                     new_lattice_vectors=(
                         self.material.lattice.vector_arrays if not is_identity else new_lattice_vectors
                     ),
-                    new_coordinates=(
-                        self.material.basis.coordinates.values if not is_identity else new_coordinates
-                    ),
+                    new_coordinates=(self.material.basis.coordinates.values if not is_identity else new_coordinates),
                     confidence=score,
                 )
                 max_score = score

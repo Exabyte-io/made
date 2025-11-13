@@ -114,9 +114,10 @@ def rotate(material: Material, axis: List[int], angle: float, wrap: bool = True)
     Returns:
         Atoms: The rotated material.
     """
-    original_is_in_cartesian_units = material.basis.is_in_cartesian_units
-    material.to_crystal()
-    atoms = to_ase(material)
+    new_material = material.clone()
+    original_is_in_cartesian_units = new_material.basis.is_in_cartesian_units
+    new_material.to_crystal()
+    atoms = to_ase(new_material)
     atoms.rotate(v=axis, a=angle, center="COU", rotate_cell=False)
     if wrap:
         atoms.wrap()
