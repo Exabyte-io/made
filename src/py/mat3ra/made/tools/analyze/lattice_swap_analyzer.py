@@ -3,7 +3,7 @@ from typing import List, Tuple, Union
 import numpy as np
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.rotation_analyzer import MaterialRotationAnalyzer
-from mat3ra.made.tools.modify import wrap_to_unit_cell
+from mat3ra.made.tools.modify import wrap_to_unit_cell, translate_to_z_level
 from pydantic import BaseModel, Field
 
 from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
@@ -188,16 +188,18 @@ class MaterialLatticeSwapAnalyzer(MaterialRotationAnalyzer):
             MaterialWithBuildMetadata: Material with corrected lattice and transformed basis
         """
         corrected_material = self.material.clone()
-        swap_info = self.detect_swap_from_original(original_material, layer_thickness, threshold)
+        rotation_result = self.detect_rotation_from_original(original_material, layer_thickness, threshold)
 
-        if not swap_info.is_swapped:
+        if not rotation_result.is_rotated:
             return corrected_material
 
-        inverse_permutation = self._invert_permutation(swap_info.permutation)
+        inverse_permutation = self._invert_permutation(
+            self._rotation_matrix_to_permutation(rotation_result.rotation_matrix)
+        )
         corrected_lattice = self._apply_permutation_to_lattice(self.material.lattice, inverse_permutation)
 
         corrected_material.set_lattice(corrected_lattice)
-        corrected_material = rotate(corrected_material, axis=[1, 0, 0], angle=-90.0)
+        corrected_material = rotate(corrected_material, axis=rotation_result.axis, angle=rotation_result.angle)
         corrected_material = wrap_to_unit_cell(corrected_material)
 
         return corrected_material
