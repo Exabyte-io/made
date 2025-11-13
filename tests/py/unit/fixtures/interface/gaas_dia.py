@@ -1,8 +1,5 @@
 GALLIUM_ARSENIDE_DIAMOND_INTERFACE = {
     "name": "AsGa(001)-C(001), Interface, Strain 2.068pct",
-    "isDefault": False,
-    "formula": None,
-    "unitCellFormula": None,
     "basis": {
         "elements": [
             {"id": 0, "value": "C"},

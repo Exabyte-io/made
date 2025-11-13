@@ -43,5 +43,7 @@ def test_lattice_swap_detection_primitive():
     assert abs(corrected_primitive_material.lattice.a - 5.63) < 0.01
     assert abs(corrected_primitive_material.lattice.b - 5.63) < 0.01
 
+    print(corrected_primitive_material.to_json())
+
     expected_primitive = Material.create(GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE)
     assert_two_entities_deep_almost_equal(corrected_primitive_material, expected_primitive)
