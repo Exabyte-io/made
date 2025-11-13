@@ -1,5 +1,4 @@
 import pytest
-from mat3ra.utils.assertion import assert_deep_almost_equal
 
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
