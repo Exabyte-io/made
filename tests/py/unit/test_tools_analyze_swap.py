@@ -6,12 +6,13 @@ from mat3ra.made.tools.analyze.lattice_swap_analyzer import MaterialLatticeSwapA
 from .fixtures.interface.gaas_dia import (
     GALLIUM_ARSENIDE_DIAMOND_INTERFACE,
     GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE,
+    GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF,
 )
 from .fixtures.slab import (
     SLAB_SrTiO3_011_TERMINATION_O2,
     SLAB_SrTiO3_011_TERMINATION_SrTiO,
 )
-from .utils import assert_two_entities_deep_almost_equal
+from .utils import assert_two_entities_deep_almost_equal, get_platform_specific_value, OSPlatform
 
 
 @pytest.mark.parametrize(
@@ -43,7 +44,10 @@ def test_lattice_swap_detection_primitive():
     assert abs(corrected_primitive_material.lattice.a - 5.63) < 0.01
     assert abs(corrected_primitive_material.lattice.b - 5.63) < 0.01
 
-    print(corrected_primitive_material.to_json())
-
-    expected_primitive = Material.create(GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE)
+    expected_primitive = get_platform_specific_value(
+        {
+            OSPlatform.DARWIN: GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE,
+            OSPlatform.OTHER: GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF,
+        }
+    )
     assert_two_entities_deep_almost_equal(corrected_primitive_material, expected_primitive)
