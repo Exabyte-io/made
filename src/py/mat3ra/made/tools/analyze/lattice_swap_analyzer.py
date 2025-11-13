@@ -90,10 +90,19 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
             # Rotations around z-axis: -90 and +90 degrees
             np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]]),  # -90° around z
             np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]]),  # +90° around z
+            # 180° rotations around axes
+            np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]]),  # 180° around x
+            np.array([[-1, 0, 0], [0, 1, 0], [0, 0, -1]]),  # 180° around y
+            np.array([[-1, 0, 0], [0, -1, 0], [0, 0, 1]]),  # 180° around z
+            # Mirrors (reflections)
+            np.array([[1, 0, 0], [0, 1, 0], [0, 0, -1]]),  # Mirror along z
+            np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]]),  # Mirror along y
+            np.array([[-1, 0, 0], [0, 1, 0], [0, 0, 1]]),  # Mirror along x
         ]
 
         max_score = 0
         best_match = None
+        identity_score = 0.0
 
         target_analyzer = BasisMaterialAnalyzer(material=original_material)
         target_fingerprint = target_analyzer.get_layer_fingerprint(layer_thickness)
@@ -114,18 +123,30 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
             new_fingerprint = new_analyzer.get_layer_fingerprint(layer_thickness)
             score = target_fingerprint.get_similarity_score(new_fingerprint)
 
+            is_identity = np.allclose(matrix, np.eye(3), atol=self.tolerance)
+            if is_identity:
+                identity_score = score
+
             if score > max_score:
-                is_identity = np.allclose(matrix, np.eye(3), atol=self.tolerance)
                 best_match = LatticeSwapDetectionResult(
                     is_swapped=not is_identity,
                     permutation=Matrix3x3Schema(root=matrix.tolist()),
-                    new_lattice_vectors=new_lattice_vectors,
-                    new_coordinates=new_coordinates,
+                    new_lattice_vectors=self.material.lattice.vector_arrays if not is_identity else new_lattice_vectors,
+                    new_coordinates=self.material.basis.coordinates.values if not is_identity else new_coordinates,
                     confidence=score,
                 )
                 max_score = score
 
+        if best_match and best_match.is_swapped and best_match.confidence >= threshold and best_match.confidence > identity_score:
             return best_match
+
+        return best_match if best_match else LatticeSwapDetectionResult(
+            is_swapped=False,
+            permutation=Matrix3x3Schema(root=np.eye(3).tolist()),
+            new_lattice_vectors=self.material.lattice.vector_arrays,
+            new_coordinates=self.material.basis.coordinates.values,
+            confidence=0.0,
+        )
 
     def correct_material_to_match_target(
         self,

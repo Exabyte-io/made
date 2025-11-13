@@ -48,11 +48,10 @@ def test_lattice_swap_detection_primitive():
     corrected_primitive_material = analyzer.get_material_with_primitive_lattice_standard(keep_orientation=True)
     # The corrected version should have the same lattice.c as the original
     assert abs(original_material.lattice.c - corrected_primitive_material.lattice.c) < 0.01
-    assert abs(corrected_primitive_material.lattice.a - 5.44) < 0.1
-    assert abs(corrected_primitive_material.lattice.b - 5.44) < 0.1
+    assert abs(corrected_primitive_material.lattice.a - 5.63) < 0.01
+    assert abs(corrected_primitive_material.lattice.b - 5.63) < 0.01
 
 
-#
 # @pytest.mark.parametrize(
 #     "original_material_config, material_with_swapped_lattice_config, expected_permutation",
 #     [(DIAMOND_GaAs_INTERFACE, DIAMOND_GaAs_INTERFACE, [(2, 1), (0, 1), (1, -1)])],
