@@ -9,6 +9,7 @@ from mat3ra.made.material import Material
 from .basis import BasisMaterialAnalyzer
 from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
 from ..modify import wrap_to_unit_cell
+from ...lattice import Lattice
 
 
 class LatticeSwapParameters(BaseModel):
@@ -23,6 +24,15 @@ class LatticeSwapDetectionResult(LatticeSwapParameters):
     new_lattice_vectors: List = Field(..., description="New lattice vectors")
     new_coordinates: List = Field(..., description="New lattice coordinates")
     confidence: float = Field(..., description="Confidence score (0.0 to 1.0)")
+
+    @property
+    def new_lattice(self) -> Lattice:
+        """Create a Lattice object from the new_lattice_vectors for backward compatibility.
+
+        Note: This returns the lattice that would result from applying the transformation,
+        which for detection purposes should match the current material's lattice.
+        """
+        return Lattice.from_vectors_array(vectors=self.new_lattice_vectors)
 
 
 class MaterialLatticeSwapAnalyzer(BaseModel):
@@ -57,45 +67,57 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
         """
 
         possible_transformation_matrices = [
-            # np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]) / 2,
-            # np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]) / 2,
-            # np.array([[1, 1, 0], [-1, 1, 0], [0, 0, 2]]) / 2,
-            # np.array([[1, -1, 0], [1, 1, 0], [0, 0, 2]]) / 2,
-            # Direct swaps
+            np.eye(3),  # Identity - no transformation
+            # Direct swaps: new[i] = old[j]
             np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]]),
             np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]]),
             np.array([[1, 0, 0], [0, 0, 1], [0, 1, 0]]),
+            # Swaps with sign flips
+            np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]]),
+            np.array([[0, 0, -1], [1, 0, 0], [0, 1, 0]]),
+            np.array([[0, 1, 0], [0, 0, 1], [-1, 0, 0]]),
+            np.array([[0, -1, 0], [0, 0, 1], [1, 0, 0]]),
             # Inverted swaps
             np.array([[0, -1, 0], [-1, 0, 0], [0, 0, 1]]),
             np.array([[0, 0, -1], [0, 1, 0], [-1, 0, 0]]),
             np.array([[1, 0, 0], [0, 0, -1], [0, -1, 0]]),
+            # Rotations around x-axis: -90 and +90 degrees
+            np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]]),  # -90° around x
+            np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]]),  # +90° around x
+            # Rotations around y-axis: -90 and +90 degrees
+            np.array([[0, 0, -1], [0, 1, 0], [1, 0, 0]]),  # -90° around y
+            np.array([[0, 0, 1], [0, 1, 0], [-1, 0, 0]]),  # +90° around y
+            # Rotations around z-axis: -90 and +90 degrees
+            np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]]),  # -90° around z
+            np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]]),  # +90° around z
         ]
 
         max_score = 0
         best_match = None
 
-        lattice_vectors = original_material.lattice.vector_arrays
-        coordinates = original_material.basis.coordinates.values
-        original_analyzer = BasisMaterialAnalyzer(material=original_material)
-        original_fingerprint = original_analyzer.get_layer_fingerprint(layer_thickness)
+        target_analyzer = BasisMaterialAnalyzer(material=original_material)
+        target_fingerprint = target_analyzer.get_layer_fingerprint(layer_thickness)
+
+        current_lattice_vectors = np.array(self.material.lattice.vector_arrays)
+        current_coordinates = self.material.basis.coordinates.values
 
         for matrix in possible_transformation_matrices:
-            new_lattice_vectors = matrix @ lattice_vectors
-            new_coordinates = np.linalg.inv(matrix) @ np.array(coordinates).T
-            new_coordinates = new_coordinates.T.tolist()
+            new_lattice_vectors = (matrix @ current_lattice_vectors.T).tolist()
+            new_coordinates = (np.linalg.inv(matrix) @ np.array(current_coordinates).T).T.tolist()
 
-            transformed_material = original_material.clone()
-            transformed_material.set_lattice_vectors_from_array(new_lattice_vectors.tolist())
+            transformed_material = self.material.clone()
+            transformed_material.set_lattice_vectors_from_array(new_lattice_vectors)
             transformed_material.basis.coordinates.values = new_coordinates
             transformed_material = wrap_to_unit_cell(transformed_material)
 
             new_analyzer = BasisMaterialAnalyzer(material=transformed_material)
             new_fingerprint = new_analyzer.get_layer_fingerprint(layer_thickness)
-            score = original_fingerprint.get_similarity_score(new_fingerprint)
+            score = target_fingerprint.get_similarity_score(new_fingerprint)
 
             if score > max_score:
+                is_identity = np.allclose(matrix, np.eye(3), atol=self.tolerance)
                 best_match = LatticeSwapDetectionResult(
-                    is_swapped=True,
+                    is_swapped=not is_identity,
                     permutation=Matrix3x3Schema(root=matrix.tolist()),
                     new_lattice_vectors=new_lattice_vectors,
                     new_coordinates=new_coordinates,
@@ -103,16 +125,7 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
                 )
                 max_score = score
 
-        if best_match and best_match.confidence >= threshold:
             return best_match
-
-        return LatticeSwapDetectionResult(
-            is_swapped=False,
-            permutation=Matrix3x3Schema(root=np.eye(3).tolist()),
-            new_lattice_vectors=self.material.lattice.vector_arrays,
-            new_coordinates=self.material.basis.coordinates.values,
-            confidence=0.0,
-        )
 
     def correct_material_to_match_target(
         self,
@@ -133,8 +146,18 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
         """
         swap_info = self.detect_swap_from_original(target, layer_thickness, threshold)
         if swap_info.is_swapped:
-            corrected_material = target.clone()
-            corrected_material.set_lattice_vectors_from_array(swap_info.new_lattice_vectors)
-            corrected_material.basis.coordinates.values = swap_info.new_coordinates
+            # Apply the detected transformation to self.material to match target
+            matrix_list = [list(row.root) if hasattr(row, "root") else row for row in swap_info.permutation.root]
+            matrix_array = np.array(matrix_list)
+            current_lattice_vectors = np.array(self.material.lattice.vector_arrays)
+            current_coordinates = self.material.basis.coordinates.values
+
+            corrected_lattice_vectors = (matrix_array @ current_lattice_vectors.T).tolist()
+            corrected_coordinates = (np.linalg.inv(matrix_array) @ np.array(current_coordinates).T).T.tolist()
+
+            corrected_material = self.material.clone()
+            corrected_material.set_lattice_vectors_from_array(corrected_lattice_vectors)
+            corrected_material.basis.coordinates.values = corrected_coordinates
+            corrected_material = wrap_to_unit_cell(corrected_material)
             return corrected_material
         return self.material
