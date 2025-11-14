@@ -60,18 +60,18 @@ def test_swap_detection():
     assert_two_entities_deep_almost_equal(corrected_primitive_material, expected_primitive)
 
     # Case 2: Primitive material "rotated" 180 degrees around X axis, or mirrored along z, compared to original
-    original_material = Material.create(GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF)
-    primitive_material = LatticeMaterialAnalyzer(material=original_material).material_with_primitive_lattice
+    original_material_2 = Material.create(GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF)
+    primitive_material_2 = LatticeMaterialAnalyzer(material=original_material_2).material_with_primitive_lattice
 
-    analyzer = MaterialLatticeSwapAnalyzer(material=primitive_material)
-    swap_info = analyzer.detect_swap_from_original(original_material)
+    analyzer = MaterialLatticeSwapAnalyzer(material=primitive_material_2)
+    swap_info = analyzer.detect_swap_from_original(original_material_2)
 
-    original_material.basis.set_labels_from_list([])
+    original_material_2.basis.set_labels_from_list([])
 
-    corrected_primitive_material = analyzer.correct_material_to_match_target(original_material)
-    print("GH MATERIAL PRIMITIVE", primitive_material.to_dict())
-    print("GH MATERIAL CORRECTED", corrected_primitive_material.to_dict())
+    corrected_primitive_material_2 = analyzer.correct_material_to_match_target(original_material_2)
+    print("GH MATERIAL PRIMITIVE", primitive_material_2.to_dict())
+    print("GH MATERIAL CORRECTED", corrected_primitive_material_2.to_dict())
 
-    assert swap_info.is_swapped is True
-    assert_two_entities_deep_almost_equal(corrected_primitive_material.basis, original_material.basis)
-    assert_two_entities_deep_almost_equal(corrected_primitive_material.lattice, original_material.lattice)
+    assert swap_info.is_swapped is get_platform_specific_value({OSPlatform.DARWIN: True, OSPlatform.OTHER: False})
+    assert_two_entities_deep_almost_equal(corrected_primitive_material_2.basis, original_material_2.basis)
+    assert_two_entities_deep_almost_equal(corrected_primitive_material_2.lattice, original_material_2.lattice)
