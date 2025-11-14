@@ -1,3 +1,4 @@
+import pytest
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface import get_optimal_film_displacement
@@ -179,11 +180,24 @@ def test_remove_vacuum():
     assert_two_entities_deep_almost_equal(expected_material, reference_material_translated_down, atol=1e-3)
 
 
-def test_rotate():
-    material = Material.create(SI_SLAB_001_2_ATOMS)
-    # Rotation around Z and X axis will be equivalent for the original material for hist basis in terms of coordinates
-    rotated_material = rotate(material, [0, 0, 1], 180)
-    rotated_material = rotate(rotated_material, [1, 0, 0], 180)
+@pytest.mark.parametrize(
+    "material_config, rotations",
+    [
+        (
+            SI_SLAB_001_2_ATOMS,
+            [([0, 0, 1], 180), ([1, 0, 0], 180)],
+        ),
+        (
+            SI_SLAB_001_WITH_VACUUM,
+            [([1, 0, 0], 10)],
+        ),
+    ],
+)
+def test_rotate(material_config, rotations):
+    material = Material.create(material_config)
+    rotated_material = material
+    for axis, angle in rotations:
+        rotated_material = rotate(rotated_material, axis, angle)
     assertion_utils.assert_deep_almost_equal(
         material.basis.coordinates.values.sort(), rotated_material.basis.coordinates.values.sort()
     )

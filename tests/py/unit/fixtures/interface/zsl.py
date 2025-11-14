@@ -34,7 +34,7 @@ GRAPHENE_NICKEL_INTERFACE = {
                                         },
                                         "external": {
                                             "id": "mp-23",
-                                            "source": "Materials Project",
+                                            "source": "MaterialsProject",
                                             "origin": True,
                                             "doi": "10.17188/1199153",
                                             "url": "https://next-gen.materialsproject.org/materials/mp-23",
@@ -80,7 +80,7 @@ GRAPHENE_NICKEL_INTERFACE = {
                                                             },
                                                             "external": {
                                                                 "id": "mp-23",
-                                                                "source": "Materials Project",
+                                                                "source": "MaterialsProject",
                                                                 "origin": True,
                                                                 "doi": "10.17188/1199153",
                                                                 "url": "https://next-gen.materialsproject.org/materials/mp-23",
@@ -293,7 +293,7 @@ GRAPHENE_NICKEL_INTERFACE = {
                                                     },
                                                     "external": {
                                                         "id": "mp-23",
-                                                        "source": "Materials Project",
+                                                        "source": "MaterialsProject",
                                                         "origin": True,
                                                         "doi": "10.17188/1199153",
                                                         "url": "https://next-gen.materialsproject.org/materials/mp-23",
@@ -339,7 +339,7 @@ GRAPHENE_NICKEL_INTERFACE = {
                                                             },
                                                             "external": {
                                                                 "id": "mp-23",
-                                                                "source": "Materials Project",
+                                                                "source": "MaterialsProject",
                                                                 "origin": True,
                                                                 "doi": "10.17188/1199153",
                                                                 "url": "https://next-gen.materialsproject.org/materials/mp-23",
@@ -393,7 +393,7 @@ GRAPHENE_NICKEL_INTERFACE = {
                                                                                 "derivedProperties": None,
                                                                                 "external": {
                                                                                     "id": "mp-23",
-                                                                                    "source": "Materials Project",
+                                                                                    "source": "MaterialsProject",
                                                                                     "origin": True,
                                                                                     "data": None,
                                                                                     "doi": "10.17188/1199153",
