@@ -33,7 +33,7 @@ class MaterialFingerprintAllAxes(BaseModel):
         Calculate similarity matrix between this and another material fingerprint.
 
         Args:
-            fingerprint_to_compare: Another MaterialFingerprint to compare with
+            fingerprint_to_compare: Another MaterialFingerprintAllAxes to compare with
 
         Returns:
             Dict: Nested dictionary with similarity scores between all axis combinations

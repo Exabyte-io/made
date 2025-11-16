@@ -1,4 +1,3 @@
-import pytest
 from ase.build import bulk
 from mat3ra.made.material import Material
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface import get_optimal_film_displacement
@@ -180,28 +179,35 @@ def test_remove_vacuum():
     assert_two_entities_deep_almost_equal(expected_material, reference_material_translated_down, atol=1e-3)
 
 
-@pytest.mark.parametrize(
-    "material_config, rotations",
-    [
-        (
-            SI_SLAB_001_2_ATOMS,
-            [([0, 0, 1], 180), ([1, 0, 0], 180)],
-        ),
-        (
-            SI_SLAB_001_WITH_VACUUM,
-            [([1, 0, 0], 10)],
-        ),
-    ],
-)
-def test_rotate(material_config, rotations):
-    material = Material.create(material_config)
-    rotated_material = material
-    for axis, angle in rotations:
-        rotated_material = rotate(rotated_material, axis, angle)
-    assertion_utils.assert_deep_almost_equal(
-        material.basis.coordinates.values.sort(), rotated_material.basis.coordinates.values.sort()
-    )
+def test_rotate():
+    """Test that rotation works and produces valid materials."""
+    material = Material.create(SI_SLAB_001_2_ATOMS)
+    
+    # Test 180° rotation around Z-axis
+    rotated_z = rotate(material, [0, 0, 1], 180)
+    assert len(rotated_z.basis.coordinates.values) == len(material.basis.coordinates.values)
+    assertion_utils.assert_deep_almost_equal(material.lattice, rotated_z.lattice)
+    
+    # Test additional 180° rotation around X-axis
+    rotated_zx = rotate(rotated_z, [1, 0, 0], 180)
+    assert len(rotated_zx.basis.coordinates.values) == len(material.basis.coordinates.values)
+    assertion_utils.assert_deep_almost_equal(material.lattice, rotated_zx.lattice)
+    
+    # Material should be valid
+    assert isinstance(rotated_zx, Material)
+
+
+def test_rotate_arbitrary_angle():
+    """Test that arbitrary rotations work and produce valid materials."""
+    material = Material.create(SI_SLAB_001_WITH_VACUUM)
+    rotated_material = rotate(material, [1, 0, 0], 10)
+    
+    # After rotation, should have same number of atoms
+    assert len(rotated_material.basis.coordinates.values) == len(material.basis.coordinates.values)
+    # Lattice should be unchanged (rotate_cell=False)
     assertion_utils.assert_deep_almost_equal(material.lattice, rotated_material.lattice)
+    # Material should be valid
+    assert isinstance(rotated_material, Material)
 
 
 def test_displace_interface():
