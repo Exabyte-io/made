@@ -5,7 +5,6 @@ from mat3ra.made.tools.analyze.fingerprint import LayeredFingerprintAlongAxis
 from mat3ra.made.tools.operations.core.unary import supercell
 
 from .fixtures.bulk import BULK_Si_CONVENTIONAL
-from .fixtures.interface.simple import INTERFACE_Si_001_Ge_001
 from .fixtures.slab import SLAB_SrTiO3_011_TERMINATION_O2
 
 
