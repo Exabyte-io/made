@@ -2,7 +2,7 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
 from .. import BaseMaterialAnalyzer
-from ..fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint
+from ..fingerprint import LayeredFingerprintAlongAxis, UniqueElementStringsPerLayer
 
 
 class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -42,7 +42,7 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
                     layer_elements.append(elements[i])
 
             unique_elements = sorted(list(set(layer_elements))) if layer_elements else []
-            layer = LayerFingerprint(min_coord=layer_min, max_coord=layer_max, elements=unique_elements)
+            layer = UniqueElementStringsPerLayer(min_coord=layer_min, max_coord=layer_max, elements=unique_elements)
             fingerprint.layers.append(layer)
 
             current_coord += layer_thickness

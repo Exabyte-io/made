@@ -5,7 +5,7 @@ import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from pydantic import BaseModel, Field
 
-from .layer_fingerprint import LayerFingerprint
+from mat3ra.made.tools.analyze.fingerprint.layers.unique_element_string_per_layer import UniqueElementStringsPerLayer
 
 
 def jaccard_similarity_for_strings(a: Sequence[str], b: Sequence[str]) -> float:
@@ -38,12 +38,12 @@ def jaccard_similarity_for_strings(a: Sequence[str], b: Sequence[str]) -> float:
 
 
 class LayeredFingerprintAlongAxis(BaseModel):
-    layers: List[LayerFingerprint] = Field(default_factory=list, description="List of layer fingerprints")
+    layers: List[UniqueElementStringsPerLayer] = Field(default_factory=list, description="List of layer fingerprints")
     axis: AxisEnum = Field(default=AxisEnum.z, description="Axis along which the fingerprint is computed")
     layer_thickness: float = Field(default=1.0, gt=0, description="Thickness of each layer in Angstroms")
 
     @property
-    def non_empty_layers(self) -> List[LayerFingerprint]:
+    def non_empty_layers(self) -> List[UniqueElementStringsPerLayer]:
         return [layer for layer in self.layers if layer.elements]
 
     @property
