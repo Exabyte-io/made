@@ -1,40 +1,11 @@
 from itertools import cycle, islice
-from typing import List, Sequence
+from typing import List
 
-import numpy as np
+from mat3ra.utils.array import jaccard_similarity_for_strings
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from pydantic import BaseModel, Field
 
 from mat3ra.made.tools.analyze.fingerprint.layers.unique_element_string_per_layer import UniqueElementStringsPerLayer
-
-
-def jaccard_similarity_for_strings(a: Sequence[str], b: Sequence[str]) -> float:
-    """
-    Compute the Jaccard similarity coefficient between two sequences of elements.
-
-    The Jaccard coefficient measures the similarity between two sets A and B as:
-        J(A, B) = |A ∩ B| / |A ∪ B|
-
-    where |A ∩ B| is the number of shared elements, and |A ∪ B| is the total number
-    of unique elements across both sets. The score ranges from 0.0 (no overlap) to 1.0
-    (identical sets). Empty layers are treated specially:
-      - Both empty → score = 1.0
-      - One empty → score = 0.0
-
-    Args:
-        a: Sequence of element symbols for the first layer
-        b: Sequence of element symbols for the second layer
-
-    Returns:
-        float: Jaccard similarity coefficient between 0.0 and 1.0
-    """
-    intersection = np.intersect1d(a, b)
-    union = np.union1d(a, b)
-
-    if union.size == 0:
-        return 1.0
-
-    return float(intersection.size / union.size)
 
 
 class LayeredFingerprintAlongAxis(BaseModel):
