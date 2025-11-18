@@ -61,27 +61,6 @@ def test_get_layer_fingerprint():
         assert len(fingerprint.layers) > 0
 
 
-def test_get_material_fingerprint():
-    """Test BasisMaterialAnalyzer.get_material_fingerprint method for all axes."""
-    material = Material.create(INTERFACE_Si_001_Ge_001)
-    analyzer = BasisMaterialAnalyzer(material=material)
-
-    # Test full material fingerprint across all axes
-    material_fingerprint = analyzer.get_material_fingerprint(layer_thickness=1.0)
-
-    assert hasattr(material_fingerprint, "x_axis")
-    assert hasattr(material_fingerprint, "y_axis")
-    assert hasattr(material_fingerprint, "z_axis")
-    assert material_fingerprint.layer_thickness == 1.0
-
-    # Verify each axis fingerprint
-    for axis_name in ["x_axis", "y_axis", "z_axis"]:
-        axis_fingerprint = getattr(material_fingerprint, axis_name)
-        print(axis_name, axis_fingerprint)
-        assert isinstance(axis_fingerprint, LayeredFingerprintAlongAxis)
-        assert len(axis_fingerprint.layers) > 0
-
-
 def test_fingerprint_similarity_scores():
     """Test get_similarity_score and get_similarity_score_ignore_periodicity methods with real materials."""
     slab = Material.create(SLAB_SrTiO3_011_TERMINATION_O2)

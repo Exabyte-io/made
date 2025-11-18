@@ -2,7 +2,7 @@ from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
 from .. import BaseMaterialAnalyzer
-from ..fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint, MaterialFingerprintAllAxes
+from ..fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint
 
 
 class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -48,21 +48,3 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
             current_coord += layer_thickness
 
         return fingerprint
-
-    def get_material_fingerprint(self, layer_thickness: float = 1.0) -> MaterialFingerprintAllAxes:
-        """
-        Create a complete fingerprint of the material across all three axes.
-
-        Args:
-            layer_thickness: Thickness of each layer in Angstroms
-
-        Returns:
-            MaterialFingerprintAllAxes: Complete fingerprint with layer information for all axes
-        """
-        x_fingerprint = self.get_layer_fingerprint(layer_thickness, AxisEnum.x)
-        y_fingerprint = self.get_layer_fingerprint(layer_thickness, AxisEnum.y)
-        z_fingerprint = self.get_layer_fingerprint(layer_thickness, AxisEnum.z)
-
-        return MaterialFingerprintAllAxes(
-            x_axis=x_fingerprint, y_axis=y_fingerprint, z_axis=z_fingerprint, layer_thickness=layer_thickness
-        )
