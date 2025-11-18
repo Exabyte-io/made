@@ -24,7 +24,6 @@ from .utils import assert_two_entities_deep_almost_equal, get_platform_specific_
     ],
 )
 def test_flip_detection_between_materials(original_material_config, another_material_config, is_swapped):
-    """Test rotation detection between different materials."""
     original_material = Material.create(original_material_config)
     another_material = Material.create(another_material_config)
 
@@ -37,41 +36,39 @@ def test_flip_detection_between_materials(original_material_config, another_mate
     assert_two_entities_deep_almost_equal(new_lattice, another_material.lattice)
 
 
-def test_swap_detection():
-    """
-    We test that the lattice swap detection correctly identifies the transformation needed to convert
-    primitive cell that is returned with swapped lattice vectors (rotated) to the correct orientation.
-    Size of original and primitive materials is different, so fingerprint comparison is used.
-    """
-    # Case 1: Primitive material here will be "rotated" 90 degrees around X axis compared to original
-    original_material = Material.create(GALLIUM_ARSENIDE_DIAMOND_INTERFACE)
+@pytest.mark.parametrize(
+    "original_material_config, expected_swapped, expected_primitive, clear_labels",
+    [
+        (
+            GALLIUM_ARSENIDE_DIAMOND_INTERFACE,
+            {OSPlatform.DARWIN: True, OSPlatform.OTHER: True},
+            {
+                OSPlatform.DARWIN: GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE,
+                OSPlatform.OTHER: GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF,
+            },
+            False,
+        ),
+        (GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF, {OSPlatform.DARWIN: True, OSPlatform.OTHER: False}, None, True),
+    ],
+)
+def test_swap_detection(original_material_config, expected_swapped, expected_primitive, clear_labels):
+    original_material = Material.create(original_material_config)
     primitive_material = LatticeMaterialAnalyzer(material=original_material).material_with_primitive_lattice
 
     analyzer = MaterialLatticeSwapAnalyzer(material=primitive_material)
     swap_info = analyzer.detect_swap_from_original(original_material)
-    assert swap_info.is_swapped is True
+
+    expected_is_swapped = get_platform_specific_value(expected_swapped)
+    assert swap_info.is_swapped is expected_is_swapped
+
+    if clear_labels:
+        original_material.basis.set_labels_from_list([])
 
     corrected_primitive_material = analyzer.get_corrected_material(original_material)
 
-    expected_primitive = get_platform_specific_value(
-        {
-            OSPlatform.DARWIN: GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE,
-            OSPlatform.OTHER: GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF,
-        }
-    )
-    assert_two_entities_deep_almost_equal(corrected_primitive_material, expected_primitive)
-
-    # Case 2: Primitive material "rotated" 180 degrees around X axis, or mirrored along z, compared to original
-    original_material_2 = Material.create(GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF)
-    primitive_material_2 = LatticeMaterialAnalyzer(material=original_material_2).material_with_primitive_lattice
-
-    analyzer = MaterialLatticeSwapAnalyzer(material=primitive_material_2)
-    swap_info = analyzer.detect_swap_from_original(original_material_2)
-
-    original_material_2.basis.set_labels_from_list([])
-
-    corrected_primitive_material_2 = analyzer.get_corrected_material(original_material_2)
-
-    assert swap_info.is_swapped is get_platform_specific_value({OSPlatform.DARWIN: True, OSPlatform.OTHER: False})
-    assert_two_entities_deep_almost_equal(corrected_primitive_material_2.basis, original_material_2.basis)
-    assert_two_entities_deep_almost_equal(corrected_primitive_material_2.lattice, original_material_2.lattice)
+    if expected_primitive is not None:
+        expected_primitive_material = get_platform_specific_value(expected_primitive)
+        assert_two_entities_deep_almost_equal(corrected_primitive_material, expected_primitive_material)
+    else:
+        assert_two_entities_deep_almost_equal(corrected_primitive_material.basis, original_material.basis)
+        assert_two_entities_deep_almost_equal(corrected_primitive_material.lattice, original_material.lattice)
