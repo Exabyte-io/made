@@ -1,8 +1,32 @@
 import numpy as np
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
-from mat3ra.made.material import Material
 
+from mat3ra.made.material import Material
 from ..core.unary import strain
+from ...modify import wrap_to_unit_cell
+
+
+def transform_material_by_matrix(material: Material, matrix: np.ndarray) -> Material:
+    """
+    Transforms a material by applying a transformation matrix to lattice vectors and coordinates.
+
+    Args:
+        material: The material to be transformed.
+        matrix: The 3x3 transformation matrix as a numpy array.
+
+    Returns:
+        A new material instance with transformed lattice and coordinates, wrapped to unit cell.
+    """
+    current_lattice_vectors = np.array(material.lattice.vector_arrays)
+    current_coordinates = material.basis.coordinates.values
+
+    new_lattice_vectors = (matrix @ current_lattice_vectors.T).tolist()
+    new_coordinates = (np.linalg.inv(matrix) @ np.array(current_coordinates).T).T.tolist()
+
+    transformed_material = material.clone()
+    transformed_material.set_lattice_vectors_from_array(new_lattice_vectors)
+    transformed_material.basis.coordinates.values = new_coordinates
+    return wrap_to_unit_cell(transformed_material)
 
 
 def strain_to_match_lattice(material_to_strain: Material, target_material: Material) -> Material:

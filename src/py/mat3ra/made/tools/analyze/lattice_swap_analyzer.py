@@ -8,7 +8,7 @@ from mat3ra.made.material import Material
 from .basis import BasisMaterialAnalyzer
 from .enums import POSSIBLE_TRANSFORMATION_MATRICES
 from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
-from ..modify import wrap_to_unit_cell
+from ..operations.reusable.unary import transform_material_by_matrix
 from ...lattice import Lattice
 
 
@@ -63,17 +63,10 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
         target_analyzer = BasisMaterialAnalyzer(material=original_material)
         target_fingerprint = target_analyzer.get_layer_fingerprint(layer_thickness)
 
-        current_lattice_vectors = np.array(self.material.lattice.vector_arrays)
-        current_coordinates = self.material.basis.coordinates.values
-
         for matrix in possible_transformation_matrices:
-            new_lattice_vectors = (matrix @ current_lattice_vectors.T).tolist()
-            new_coordinates = (np.linalg.inv(matrix) @ np.array(current_coordinates).T).T.tolist()
-
-            transformed_material = self.material.clone()
-            transformed_material.set_lattice_vectors_from_array(new_lattice_vectors)
-            transformed_material.basis.coordinates.values = new_coordinates
-            transformed_material = wrap_to_unit_cell(transformed_material)
+            transformed_material = transform_material_by_matrix(self.material, matrix)
+            new_lattice_vectors = transformed_material.lattice.vector_arrays
+            new_coordinates = transformed_material.basis.coordinates.values
 
             new_analyzer = BasisMaterialAnalyzer(material=transformed_material)
             new_fingerprint = new_analyzer.get_layer_fingerprint(layer_thickness)
@@ -117,18 +110,7 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
         """
         swap_info = self.detect_swap_from_original(target, layer_thickness, threshold)
         if swap_info.is_swapped:
-            # Apply the detected transformation to self.material to match target
             matrix_list = [list(row.root) if hasattr(row, "root") else row for row in swap_info.permutation.root]
             matrix_array = np.array(matrix_list)
-            current_lattice_vectors = np.array(self.material.lattice.vector_arrays)
-            current_coordinates = self.material.basis.coordinates.values
-
-            corrected_lattice_vectors = (matrix_array @ current_lattice_vectors.T).tolist()
-            corrected_coordinates = (np.linalg.inv(matrix_array) @ np.array(current_coordinates).T).T.tolist()
-
-            corrected_material = self.material.clone()
-            corrected_material.set_lattice_vectors_from_array(corrected_lattice_vectors)
-            corrected_material.basis.coordinates.values = corrected_coordinates
-            corrected_material = wrap_to_unit_cell(corrected_material)
-            return corrected_material
+            return transform_material_by_matrix(self.material, matrix_array)
         return self.material
