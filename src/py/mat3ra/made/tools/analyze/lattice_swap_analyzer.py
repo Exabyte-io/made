@@ -29,6 +29,20 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
     material: Union[Material, MaterialWithBuildMetadata]
     tolerance: float = 0.01
 
+    def _compute_transformation_score(self, matrix: np.ndarray, target_fingerprint) -> float:
+        transformed_material = transform_material_by_matrix(self.material, matrix)
+        new_analyzer = BasisMaterialAnalyzer(material=transformed_material)
+        new_fingerprint = new_analyzer.get_layer_fingerprint(target_fingerprint.layer_thickness)
+        return target_fingerprint.get_similarity_score(new_fingerprint)
+
+    def _create_detection_result(self, matrix: np.ndarray, score: float) -> LatticeSwapDetectionResult:
+        is_identity = np.allclose(matrix, np.eye(3), atol=self.tolerance)
+        return LatticeSwapDetectionResult(
+            is_swapped=not is_identity,
+            permutation=Matrix3x3Schema(root=matrix.tolist()),
+            confidence=score,
+        )
+
     def detect_swap_from_original(
         self, original_material: MaterialWithBuildMetadata, layer_thickness: float = 1.0, threshold: float = 0.1
     ) -> LatticeSwapDetectionResult:
@@ -48,34 +62,21 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
         Returns:
             LatticeSwapDetectionResult: Swap detection results with permutation and new lattice
         """
-        possible_transformation_matrices = list(map(np.array, POSSIBLE_TRANSFORMATION_MATRICES))
-
-        max_score = 0
-        best_match = None
-
         target_analyzer = BasisMaterialAnalyzer(material=original_material)
         target_fingerprint = target_analyzer.get_layer_fingerprint(layer_thickness)
+        possible_matrices = list(map(np.array, POSSIBLE_TRANSFORMATION_MATRICES))
 
-        for matrix in possible_transformation_matrices:
-            transformed_material = transform_material_by_matrix(self.material, matrix)
+        best_match = None
+        max_score = 0
 
-            new_analyzer = BasisMaterialAnalyzer(material=transformed_material)
-            new_fingerprint = new_analyzer.get_layer_fingerprint(layer_thickness)
-            score = target_fingerprint.get_similarity_score(new_fingerprint)
-
-            is_identity = np.allclose(matrix, np.eye(3), atol=self.tolerance)
-
+        for matrix in possible_matrices:
+            score = self._compute_transformation_score(matrix, target_fingerprint)
             if score > max_score:
-                best_match = LatticeSwapDetectionResult(
-                    is_swapped=not is_identity,
-                    permutation=Matrix3x3Schema(root=matrix.tolist()),
-                    confidence=score,
-                )
+                best_match = self._create_detection_result(matrix, score)
                 max_score = score
 
         if best_match and best_match.is_swapped and best_match.confidence >= threshold:
             return best_match
-
         return best_match
 
     def get_corrected_material(
