@@ -49,7 +49,7 @@ def test_swap_detection():
     swap_info = analyzer.detect_swap_from_original(original_material)
     assert swap_info.is_swapped is True
 
-    corrected_primitive_material = analyzer.correct_material_to_match_target(original_material)
+    corrected_primitive_material = analyzer.get_corrected_material(original_material)
 
     expected_primitive = get_platform_specific_value(
         {
@@ -68,7 +68,7 @@ def test_swap_detection():
 
     original_material_2.basis.set_labels_from_list([])
 
-    corrected_primitive_material_2 = analyzer.correct_material_to_match_target(original_material_2)
+    corrected_primitive_material_2 = analyzer.get_corrected_material(original_material_2)
 
     assert swap_info.is_swapped is get_platform_specific_value({OSPlatform.DARWIN: True, OSPlatform.OTHER: False})
     assert_two_entities_deep_almost_equal(corrected_primitive_material_2.basis, original_material_2.basis)
