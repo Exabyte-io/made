@@ -31,8 +31,10 @@ def test_flip_detection_between_materials(original_material_config, another_mate
     rotation_analyzer = MaterialLatticeSwapAnalyzer(material=another_material)
     swap_info = rotation_analyzer.detect_swap_from_original(original_material)
 
+    new_lattice = rotation_analyzer.get_corrected_material(another_material).lattice
+
     assert swap_info.is_swapped == is_swapped
-    assert_two_entities_deep_almost_equal(swap_info.new_lattice, another_material.lattice)
+    assert_two_entities_deep_almost_equal(new_lattice, another_material.lattice)
 
 
 def test_swap_detection():

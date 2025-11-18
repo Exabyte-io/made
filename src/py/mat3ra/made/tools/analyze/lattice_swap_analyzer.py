@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
@@ -9,20 +9,13 @@ from .basis import BasisMaterialAnalyzer
 from .enums import POSSIBLE_TRANSFORMATION_MATRICES
 from ..build_components.metadata.material_with_build_metadata import MaterialWithBuildMetadata
 from ..operations.reusable.unary import transform_material_by_matrix
-from ...lattice import Lattice
 
 
 class LatticeSwapDetectionResult(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
     is_swapped: bool = Field(..., description="Whether a lattice swap was detected")
     permutation: Matrix3x3Schema = Field(..., description="Transformation matrix representing the swap")
-    new_lattice_vectors: List = Field(..., description="New lattice vectors")
-    new_coordinates: List = Field(..., description="New lattice coordinates")
     confidence: float = Field(..., description="Confidence score (0.0 to 1.0)")
-
-    @property
-    def new_lattice(self) -> Lattice:
-        return Lattice.from_vectors_array(vectors=self.new_lattice_vectors)
 
 
 class MaterialLatticeSwapAnalyzer(BaseModel):
@@ -65,8 +58,6 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
 
         for matrix in possible_transformation_matrices:
             transformed_material = transform_material_by_matrix(self.material, matrix)
-            new_lattice_vectors = transformed_material.lattice.vector_arrays
-            new_coordinates = transformed_material.basis.coordinates.values
 
             new_analyzer = BasisMaterialAnalyzer(material=transformed_material)
             new_fingerprint = new_analyzer.get_layer_fingerprint(layer_thickness)
@@ -78,10 +69,6 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
                 best_match = LatticeSwapDetectionResult(
                     is_swapped=not is_identity,
                     permutation=Matrix3x3Schema(root=matrix.tolist()),
-                    new_lattice_vectors=(
-                        self.material.lattice.vector_arrays if not is_identity else new_lattice_vectors
-                    ),
-                    new_coordinates=(self.material.basis.coordinates.values if not is_identity else new_coordinates),
                     confidence=score,
                 )
                 max_score = score
