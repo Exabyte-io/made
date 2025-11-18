@@ -1,13 +1,14 @@
 from itertools import cycle, islice
 from typing import List, Sequence
 
+import numpy as np
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from pydantic import BaseModel, Field
 
 from .layer_fingerprint import LayerFingerprint
 
 
-def _jaccard(a: Sequence[str], b: Sequence[str]) -> float:
+def jaccard_similarity_for_strings(a: Sequence[str], b: Sequence[str]) -> float:
     """
     Compute the Jaccard similarity coefficient between two sequences of elements.
 
@@ -27,14 +28,13 @@ def _jaccard(a: Sequence[str], b: Sequence[str]) -> float:
     Returns:
         float: Jaccard similarity coefficient between 0.0 and 1.0
     """
-    if not a and not b:
-        return 1.0
-    if not a or not b:
-        return 0.0
+    intersection = np.intersect1d(a, b)
+    union = np.union1d(a, b)
 
-    set_a, set_b = set(a), set(b)
-    union_size = len(set_a | set_b)
-    return len(set_a & set_b) / union_size if union_size else 0.0
+    if union.size == 0:
+        return 1.0
+
+    return float(intersection.size / union.size)
 
 
 class LayeredFingerprintAlongAxis(BaseModel):
@@ -75,7 +75,7 @@ class LayeredFingerprintAlongAxis(BaseModel):
             return 0.0
 
         seq1, seq2 = self.element_sequence, other.element_sequence
-        return sum(_jaccard(a, b) for a, b in zip(seq1, seq2)) / len(seq1)
+        return sum(jaccard_similarity_for_strings(a, b) for a, b in zip(seq1, seq2)) / len(seq1)
 
     def get_similarity_score_ignore_periodicity(self, other: "LayeredFingerprintAlongAxis") -> float:
         """
@@ -110,4 +110,4 @@ class LayeredFingerprintAlongAxis(BaseModel):
             return 0.0
 
         cycled_short = islice(cycle(short_seq), len(long_seq))
-        return sum(_jaccard(a, b) for a, b in zip(cycled_short, long_seq)) / len(short_seq)
+        return sum(jaccard_similarity_for_strings(a, b) for a, b in zip(cycled_short, long_seq)) / len(short_seq)
