@@ -90,7 +90,8 @@ extend-exclude = '''
 # Exclude a variety of commonly ignored directories.
 extend-exclude = [
     "src/js",
-    "tests/fixtures"
+    "tests/fixtures",
+    "tests/py/unit/fixtures"
 ]
 line-length = 120
 target-version = "py38"

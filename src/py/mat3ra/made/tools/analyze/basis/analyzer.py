@@ -1,9 +1,8 @@
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.utils import AXIS_TO_INDEX_MAP
 
-from ...build_components.metadata import MaterialWithBuildMetadata
 from .. import BaseMaterialAnalyzer
-from .fingerprint import LayeredFingerprintAlongAxis, LayerFingerprint
+from ..fingerprint import LayeredFingerprintAlongAxis, UniqueElementStringsPerLayer
 
 
 class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
@@ -43,40 +42,9 @@ class BasisMaterialAnalyzer(BaseMaterialAnalyzer):
                     layer_elements.append(elements[i])
 
             unique_elements = sorted(list(set(layer_elements))) if layer_elements else []
-            layer = LayerFingerprint(min_coord=layer_min, max_coord=layer_max, elements=unique_elements)
+            layer = UniqueElementStringsPerLayer(min_coord=layer_min, max_coord=layer_max, elements=unique_elements)
             fingerprint.layers.append(layer)
 
             current_coord += layer_thickness
 
         return fingerprint
-
-    def is_orientation_flipped(
-        self, original_material: MaterialWithBuildMetadata, layer_thickness: float = 1.0
-    ) -> bool:
-        """
-        Detect if the material orientation is flipped compared to the original.
-        Uses Jaccard similarity to compare fingerprints in normal and flipped orientations.
-
-        Args:
-            original_material: The original material before primitivization
-            layer_thickness: Thickness of layers for fingerprint comparison
-
-        Returns:
-            bool: True if orientation is flipped, False otherwise
-        """
-        original_analyzer = BasisMaterialAnalyzer(material=original_material)
-        original_fingerprint = original_analyzer.get_layer_fingerprint(layer_thickness)
-        current_fingerprint = self.get_layer_fingerprint(layer_thickness)
-
-        normal_score = original_fingerprint.get_similarity_score(current_fingerprint)
-        flipped_score = original_fingerprint.get_similarity_score(self._reverse_fingerprint(current_fingerprint))
-
-        # If flipped orientation has significantly higher similarity, material is flipped
-        threshold = 0.1
-        return flipped_score > normal_score + threshold
-
-    def _reverse_fingerprint(self, fingerprint: LayeredFingerprintAlongAxis) -> LayeredFingerprintAlongAxis:
-        reversed_layers = list(reversed(fingerprint.layers))
-        return LayeredFingerprintAlongAxis(
-            layers=reversed_layers, axis=fingerprint.axis, layer_thickness=fingerprint.layer_thickness
-        )
