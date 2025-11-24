@@ -66,7 +66,7 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
         target_fingerprint = target_analyzer.get_layer_fingerprint(layer_thickness)
         possible_matrices = list(map(np.array, POSSIBLE_TRANSFORMATION_MATRICES))
 
-        best_match = self._create_detection_result(np.eye(3), 1.0)
+        best_match = None
         max_score = 0
 
         for matrix in possible_matrices:
@@ -77,7 +77,8 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
 
         if best_match and best_match.is_swapped and best_match.confidence >= threshold:
             return best_match
-        return best_match
+        # If no swap detected, return identity result
+        return self._create_detection_result(np.eye(3), 1.0)
 
     def get_corrected_material(
         self,
