@@ -66,7 +66,7 @@ class MaterialLatticeSwapAnalyzer(BaseModel):
         target_fingerprint = target_analyzer.get_layer_fingerprint(layer_thickness)
         possible_matrices = list(map(np.array, POSSIBLE_TRANSFORMATION_MATRICES))
 
-        best_match = None
+        best_match = self._create_detection_result(np.eye(3), 1.0)
         max_score = 0
 
         for matrix in possible_matrices:
