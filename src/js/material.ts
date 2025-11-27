@@ -19,10 +19,9 @@ type MaterialSchemaWithConsistencyChecksAsString = Omit<MaterialSchema, "consist
     consistencyChecks?: ConsistencyCheck[];
 };
 
-export class Material
-    extends (BaseInMemoryEntity as BaseMaterial)
-    implements MaterialSchemaWithConsistencyChecksAsString
-{
+type Schema = MaterialSchemaWithConsistencyChecksAsString;
+
+export class Material extends (BaseInMemoryEntity as BaseMaterial) implements Schema {
     constructor(config: MaterialSchema) {
         super(config);
         materialMixin(this);

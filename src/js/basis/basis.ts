@@ -7,7 +7,7 @@ import { chain, toPairs, uniq, values } from "lodash";
 import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
 import { nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
-import math from "../math";
+import { math } from "@mat3ra/code/dist/js/math";
 import { AtomicCoordinateValue, Coordinates } from "./coordinates";
 import { AtomicElementValue, Elements } from "./elements";
 import { AtomicLabelValue, Labels } from "./labels";

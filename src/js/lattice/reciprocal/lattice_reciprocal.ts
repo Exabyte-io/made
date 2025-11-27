@@ -1,8 +1,8 @@
 import { ATOMIC_COORD_UNITS, units as UNITS } from "@mat3ra/code/dist/js/constants";
+import { math } from "@mat3ra/code/dist/js/math";
 import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import lodash from "lodash";
 
-import math from "../../math";
 import { Lattice } from "../lattice";
 import { paths } from "./paths";
 import { symmetryPoints } from "./symmetry_points";

@@ -1,7 +1,4 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Basis = void 0;
 // @ts-ignore
@@ -11,7 +8,7 @@ const lodash_1 = require("lodash");
 const cell_1 = require("../cell/cell");
 const constants_1 = require("../constants");
 const lattice_1 = require("../lattice/lattice");
-const math_1 = __importDefault(require("../math"));
+const math_1 = require("@mat3ra/code/dist/js/math");
 const coordinates_1 = require("./coordinates");
 const elements_1 = require("./elements");
 const labels_1 = require("./labels");
@@ -166,7 +163,7 @@ class Basis extends entity_1.InMemoryEntity {
     }
     toStandardRepresentation() {
         this.toCrystal();
-        this._coordinates.mapArrayInPlace((point) => point.map((x) => math_1.default.mod(x)));
+        this._coordinates.mapArrayInPlace((point) => point.map((x) => math_1.math.mod(x)));
     }
     /** A representation where all coordinates are within 0 and 1 in crystal units */
     get standardRepresentation() {
@@ -240,7 +237,7 @@ class Basis extends entity_1.InMemoryEntity {
     get formula() {
         const counts = this.uniqueElementCountsSortedByElectronegativity;
         const countsValues = (0, lodash_1.values)(counts);
-        const gcd = countsValues.length > 1 ? math_1.default.gcd(...countsValues) : countsValues[0];
+        const gcd = countsValues.length > 1 ? math_1.math.gcd(...countsValues) : countsValues[0];
         return (0, lodash_1.toPairs)(counts)
             .map(([element, count]) => element + (count / gcd === 1 ? "" : count / gcd))
             .reduce((acc, part) => acc + part, "");
@@ -293,7 +290,7 @@ class Basis extends entity_1.InMemoryEntity {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
-            const toleratedCoordinate = coordinate.map((x) => math_1.default.round(x, constants_1.HASH_TOLERANCE));
+            const toleratedCoordinate = coordinate.map((x) => math_1.math.round(x, constants_1.HASH_TOLERANCE));
             return `${element}${atomicLabel} ${toleratedCoordinate.join()}`;
         });
         return `${standardRep.sort().join(";")};`;
@@ -364,7 +361,7 @@ class Basis extends entity_1.InMemoryEntity {
     hasEquivalentCellTo(anotherBasisClsInstance) {
         return !this.cell.vectorArrays
             .map((vector, idx) => {
-            return math_1.default.vEqualWithTolerance(vector, anotherBasisClsInstance.cell.vectorArrays[idx]);
+            return math_1.math.vEqualWithTolerance(vector, anotherBasisClsInstance.cell.vectorArrays[idx]);
         })
             .some((x) => !x);
     }
@@ -401,7 +398,7 @@ class Basis extends entity_1.InMemoryEntity {
                 const tolerance = overlapCoefficient *
                     ((0, periodic_table_js_1.getElementAtomicRadius)(el1) + (0, periodic_table_js_1.getElementAtomicRadius)(el2)); // in angstroms
                 // @ts-ignore
-                const distance = math_1.default.vDist(entry1.value, entry2.value);
+                const distance = math_1.math.vDist(entry1.value, entry2.value);
                 if (distance < tolerance) {
                     overlaps.push({
                         id1: i,
@@ -437,7 +434,7 @@ class Basis extends entity_1.InMemoryEntity {
         if (this._elements.values.length >= 2) {
             for (let i = 0; i < this._elements.values.length; i++) {
                 for (let j = i + 1; j < this._elements.values.length; j++) {
-                    const distance = math_1.default.vDist(this._coordinates.getElementValueByIndex(i), this._coordinates.getElementValueByIndex(j));
+                    const distance = math_1.math.vDist(this._coordinates.getElementValueByIndex(i), this._coordinates.getElementValueByIndex(j));
                     if (distance && distance > maxDistance) {
                         maxDistance = distance;
                     }

@@ -3,14 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const math_1 = require("@mat3ra/code/dist/js/math");
 const lattice_1 = require("../lattice/lattice");
-const math_1 = __importDefault(require("../math"));
 const supercell_1 = __importDefault(require("./supercell"));
-const MULT = math_1.default.multiply;
-const ADD = math_1.default.add;
-const DOT = math_1.default.product;
+const MULT = math_1.math.multiply;
+const ADD = math_1.math.add;
+const DOT = math_1.math.product;
 const getMatrixInLeftHandedRepresentation = (matrix) => {
-    return math_1.default.det(matrix) < 0 ? MULT(matrix, -1) : matrix;
+    return math_1.math.det(matrix) < 0 ? MULT(matrix, -1) : matrix;
 };
 /**
  * Helper function for extended GCD.
@@ -22,10 +22,10 @@ const getMatrixInLeftHandedRepresentation = (matrix) => {
 function extGCD(a, b) {
     if (b === 0)
         return [1, 0];
-    if (math_1.default.mod(a, b) === 0)
+    if (math_1.math.mod(a, b) === 0)
         return [0, 1];
-    const [x, y] = extGCD(b, math_1.default.mod(a, b));
-    return [y, x - y * math_1.default.floor(a / b)];
+    const [x, y] = extGCD(b, math_1.math.mod(a, b));
+    return [y, x - y * math_1.math.floor(a / b)];
 }
 /**
  * Generates a slab scaling matrix for the specified cell based on miller indices.
@@ -36,7 +36,7 @@ function extGCD(a, b) {
  * @return {Number[][]}
  */
 function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
-    if (!millerIndices.reduce((a, b) => math_1.default.abs(a) + math_1.default.abs(b)))
+    if (!millerIndices.reduce((a, b) => math_1.math.abs(a) + math_1.math.abs(b)))
         throw new Error("Miller indices are zeros.");
     let scalingMatrix;
     const [h, k, l] = millerIndices;
@@ -78,19 +78,19 @@ function getMillerScalingMatrix(cell, millerIndices, tol = 1e-8) {
         const k1 = DOT(ADD(MULT(p, z1), MULT(q, z2)), z3);
         // @ts-ignore
         const k2 = DOT(ADD(MULT(l, z1), -MULT(k, z2)), z3);
-        if (math_1.default.abs(k2) > tol) {
+        if (math_1.math.abs(k2) > tol) {
             // For mathjs version 3.20: round(-0.5) = -0
             // For mathjs version 5.10: round(-0.5) = -1
             // Here we specify rounding method to Bankers
             // For Python 3.11: round(-0.5) = 0
             const value = k1 / k2;
-            const roundedValue = math_1.default.roundCustom(value, 0, math_1.default.RoundingMethod.Bankers);
+            const roundedValue = math_1.math.roundCustom(value, 0, math_1.math.RoundingMethod.Bankers);
             const i = -roundedValue;
             [p, q] = [p + i * l, q - i * k];
         }
         const [a, b] = extGCD(p * k + q * l, h);
         const c1 = [p * k + q * l, -p * h, -q * h];
-        const c2 = [0, l, -k].map((c) => math_1.default.trunc(c / math_1.default.gcd(l, k))); // floor division
+        const c2 = [0, l, -k].map((c) => math_1.math.trunc(c / math_1.math.gcd(l, k))); // floor division
         const c3 = [b, a * p, a * q];
         scalingMatrix = [c1, c2, c3];
     }

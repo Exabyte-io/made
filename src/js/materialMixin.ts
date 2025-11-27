@@ -1,5 +1,5 @@
 import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import type { NamedInMemoryEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
+import type { NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type {
@@ -78,7 +78,7 @@ export type MaterialMixinConstructor = Constructor<MaterialMixinProps> & Materia
 export type OptionallyConstrainedBasisConfig = BasisConfig &
     Partial<Pick<ConstrainedBasisConfig, "constraints">>;
 
-type Base = InMemoryEntity & NamedInMemoryEntity;
+type Base = InMemoryEntity & NamedEntity;
 
 export function materialMixin<T extends Base = Base>(item: T) {
     const originalToJSON = item.toJSON.bind(item);

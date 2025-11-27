@@ -5,8 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReciprocalLattice = void 0;
 const constants_1 = require("@mat3ra/code/dist/js/constants");
+const math_1 = require("@mat3ra/code/dist/js/math");
 const lodash_1 = __importDefault(require("lodash"));
-const math_1 = __importDefault(require("../../math"));
 const lattice_1 = require("../lattice");
 const paths_1 = require("./paths");
 const symmetry_points_1 = require("./symmetry_points");
@@ -17,12 +17,12 @@ class ReciprocalLattice extends lattice_1.Lattice {
      */
     get reciprocalVectors() {
         const vectors_ = this.vectors.vectorArrays;
-        const a = math_1.default.vlen(vectors_[0]);
-        const divider = math_1.default.multiply(vectors_[0], math_1.default.cross(vectors_[1], vectors_[2])) / a;
+        const a = math_1.math.vlen(vectors_[0]);
+        const divider = math_1.math.multiply(vectors_[0], math_1.math.cross(vectors_[1], vectors_[2])) / a;
         return [
-            math_1.default.multiply(math_1.default.cross(vectors_[1], vectors_[2]), 1 / divider),
-            math_1.default.multiply(math_1.default.cross(vectors_[2], vectors_[0]), 1 / divider),
-            math_1.default.multiply(math_1.default.cross(vectors_[0], vectors_[1]), 1 / divider),
+            math_1.math.multiply(math_1.math.cross(vectors_[1], vectors_[2]), 1 / divider),
+            math_1.math.multiply(math_1.math.cross(vectors_[2], vectors_[0]), 1 / divider),
+            math_1.math.multiply(math_1.math.cross(vectors_[0], vectors_[1]), 1 / divider),
         ];
     }
     /**
@@ -30,7 +30,7 @@ class ReciprocalLattice extends lattice_1.Lattice {
      * @return {number[]}
      */
     get reciprocalVectorNorms() {
-        return this.reciprocalVectors.map((vec) => math_1.default.norm(vec));
+        return this.reciprocalVectors.map((vec) => math_1.math.norm(vec));
     }
     /**
      * Ratio of reciprocal vector norms scaled by the inverse of the largest component.
@@ -38,7 +38,7 @@ class ReciprocalLattice extends lattice_1.Lattice {
      */
     get reciprocalVectorRatios() {
         const norms = this.reciprocalVectorNorms;
-        const maxNorm = math_1.default.max(...norms);
+        const maxNorm = math_1.math.max(...norms);
         return norms.map((n) => n / maxNorm);
     }
     /**
@@ -47,7 +47,7 @@ class ReciprocalLattice extends lattice_1.Lattice {
      * @return {KPointCoordinates}
      */
     getCartesianCoordinates(point) {
-        return math_1.default.multiply(point, this.reciprocalVectors);
+        return math_1.math.multiply(point, this.reciprocalVectors);
     }
     /**
      * Get the list of high-symmetry points for the current lattice.
@@ -74,7 +74,7 @@ class ReciprocalLattice extends lattice_1.Lattice {
         const symmPoints = this.symmetryPoints;
         dataPoints.forEach((point, index) => {
             const symmPoint = symmPoints.find((x) => {
-                return math_1.default.vEqualWithTolerance(x.coordinates, point, 1e-4);
+                return math_1.math.vEqualWithTolerance(x.coordinates, point, 1e-4);
             });
             if (symmPoint) {
                 kpointPath.push({
@@ -96,8 +96,8 @@ class ReciprocalLattice extends lattice_1.Lattice {
     calculateDimension(nPoints, index) {
         const norms = this.reciprocalVectorNorms;
         const [j, k] = [0, 1, 2].filter((i) => i !== index); // get indices of other two dimensions
-        const N = math_1.default.cbrt((nPoints * norms[index] ** 2) / (norms[j] * norms[k]));
-        return math_1.default.max(1, math_1.default.ceil(N));
+        const N = math_1.math.cbrt((nPoints * norms[index] ** 2) / (norms[j] * norms[k]));
+        return math_1.math.max(1, math_1.math.ceil(N));
     }
     /**
      * Calculate grid dimensions from total number of k-points.
@@ -112,10 +112,10 @@ class ReciprocalLattice extends lattice_1.Lattice {
         const { a } = this;
         return {
             [constants_1.ATOMIC_COORD_UNITS.cartesian]: {
-                [constants_1.units.angstrom]: (2 * math_1.default.PI) / a,
+                [constants_1.units.angstrom]: (2 * math_1.math.PI) / a,
             },
             [constants_1.units.angstrom]: {
-                [constants_1.ATOMIC_COORD_UNITS.cartesian]: a / (2 * math_1.default.PI),
+                [constants_1.ATOMIC_COORD_UNITS.cartesian]: a / (2 * math_1.math.PI),
             },
         };
     }
@@ -130,7 +130,7 @@ class ReciprocalLattice extends lattice_1.Lattice {
     getDimensionsFromSpacing(spacing, units = constants_1.ATOMIC_COORD_UNITS.cartesian) {
         const factor = this.conversionTable[units][constants_1.ATOMIC_COORD_UNITS.cartesian] || 1;
         return this.reciprocalVectorNorms.map((norm) => {
-            return math_1.default.max(1, math_1.default.ceil(lodash_1.default.round(norm / (spacing * factor), 4)));
+            return math_1.math.max(1, math_1.math.ceil(lodash_1.default.round(norm / (spacing * factor), 4)));
         });
     }
     /**
@@ -143,7 +143,7 @@ class ReciprocalLattice extends lattice_1.Lattice {
         const factor = this.conversionTable[constants_1.ATOMIC_COORD_UNITS.cartesian][units] || 1;
         const norms = this.reciprocalVectorNorms;
         return (factor *
-            math_1.default.mean(dimensions.map((dim, i) => norms[i] / math_1.default.max(1, dim))));
+            math_1.math.mean(dimensions.map((dim, i) => norms[i] / math_1.math.max(1, dim))));
     }
 }
 exports.ReciprocalLattice = ReciprocalLattice;

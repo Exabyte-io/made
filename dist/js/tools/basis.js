@@ -1,13 +1,10 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+const math_1 = require("@mat3ra/code/dist/js/math");
 const lodash_1 = require("lodash");
 const coordinates_1 = require("../basis/coordinates");
-const math_1 = __importDefault(require("../math"));
-const ADD = math_1.default.add;
-const MULT = math_1.default.multiply;
+const ADD = math_1.math.add;
+const MULT = math_1.math.multiply;
 /**
  * Returns a repeated basis of a crystal.
  * @param basis {Basis} Original basis.

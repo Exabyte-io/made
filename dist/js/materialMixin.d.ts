@@ -1,5 +1,5 @@
 import type { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import type { NamedInMemoryEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
+import type { NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { Constructor } from "@mat3ra/code/dist/js/utils/types";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { AtomicConstraintsSchema, ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
@@ -15,7 +15,7 @@ type MaterialMixinStaticProps = ReturnType<typeof materialMixinStaticProps>;
 export type MaterialInMemoryEntity = InMemoryEntity & MaterialMixinProps;
 export type MaterialMixinConstructor = Constructor<MaterialMixinProps> & MaterialMixinStaticProps;
 export type OptionallyConstrainedBasisConfig = BasisConfig & Partial<Pick<ConstrainedBasisConfig, "constraints">>;
-type Base = InMemoryEntity & NamedInMemoryEntity;
+type Base = InMemoryEntity & NamedEntity;
 export declare function materialMixin<T extends Base = Base>(item: T): {
     toJSON(): MaterialSchema;
     name: string;
@@ -110,7 +110,7 @@ export declare function materialMixin<T extends Base = Base>(item: T): {
     readonly scaledHash: string;
     external: {
         id: string | number;
-        source: string;
+        source: "MaterialsProject" | "MaterialsProjectLegacy" | "ICSD" | "2dmatpedia";
         origin: boolean;
         data?: {} | undefined;
         doi?: string | undefined;

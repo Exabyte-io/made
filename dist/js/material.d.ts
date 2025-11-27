@@ -7,7 +7,8 @@ type BaseMaterial = MaterialMixinConstructor & typeof BaseInMemoryEntity;
 type MaterialSchemaWithConsistencyChecksAsString = Omit<MaterialSchema, "consistencyChecks"> & {
     consistencyChecks?: ConsistencyCheck[];
 };
+type Schema = MaterialSchemaWithConsistencyChecksAsString;
 declare const Material_base: BaseMaterial;
-export declare class Material extends Material_base implements MaterialSchemaWithConsistencyChecksAsString {
+export declare class Material extends Material_base implements Schema {
     constructor(config: MaterialSchema);
 }
