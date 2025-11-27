@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.materialMixinStaticProps = exports.materialMixin = exports.defaultMaterialConfig = void 0;
+exports.materialMixin = exports.defaultMaterialConfig = void 0;
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const constrained_basis_1 = require("./basis/constrained_basis");
 const conventional_cell_1 = require("./cell/conventional_cell");
@@ -51,8 +51,9 @@ exports.defaultMaterialConfig = {
         },
     },
 };
-function materialMixin(item) {
+function materialPropertiesMixin(item) {
     const originalToJSON = item.toJSON.bind(item);
+    // @ts-expect-error
     const properties = {
         toJSON() {
             return {
@@ -340,9 +341,7 @@ function materialMixin(item) {
         },
     };
     Object.defineProperties(item, Object.getOwnPropertyDescriptors(properties));
-    return properties;
 }
-exports.materialMixin = materialMixin;
 function materialMixinStaticProps(item) {
     const properties = {
         get defaultConfig() {
@@ -358,6 +357,9 @@ function materialMixinStaticProps(item) {
         },
     };
     Object.defineProperties(item, Object.getOwnPropertyDescriptors(properties));
-    return properties;
 }
-exports.materialMixinStaticProps = materialMixinStaticProps;
+function materialMixin(item) {
+    materialPropertiesMixin(item.prototype);
+    materialMixinStaticProps(item);
+}
+exports.materialMixin = materialMixin;

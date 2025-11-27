@@ -4,11 +4,11 @@ exports.Basis = void 0;
 // @ts-ignore
 const periodic_table_js_1 = require("@exabyte-io/periodic-table.js");
 const entity_1 = require("@mat3ra/code/dist/js/entity");
+const math_1 = require("@mat3ra/code/dist/js/math");
 const lodash_1 = require("lodash");
 const cell_1 = require("../cell/cell");
 const constants_1 = require("../constants");
 const lattice_1 = require("../lattice/lattice");
-const math_1 = require("@mat3ra/code/dist/js/math");
 const coordinates_1 = require("./coordinates");
 const elements_1 = require("./elements");
 const labels_1 = require("./labels");

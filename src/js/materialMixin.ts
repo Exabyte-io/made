@@ -15,6 +15,7 @@ import CryptoJS from "crypto-js";
 
 import type { BasisConfig } from "./basis/basis";
 import { type ConstrainedBasisConfig, ConstrainedBasis } from "./basis/constrained_basis";
+import type { AtomicElementValue } from "./basis/elements";
 import {
     isConventionalCellSameAsPrimitiveForLatticeType,
     PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES,
@@ -68,23 +69,63 @@ export const defaultMaterialConfig: MaterialSchema = {
 
 export interface MaterialSchemaJSON extends MaterialSchema, AnyObject {}
 
-export type MaterialMixinProps = ReturnType<typeof materialMixin>;
-type MaterialMixinStaticProps = ReturnType<typeof materialMixinStaticProps>;
+export type MaterialMixinProps<T extends Base = Base> = {
+    toJSON(): MaterialSchema & AnyObject;
+    name: string;
+    src: FileSourceSchema | undefined;
+    updateFormula(): void;
+    isNonPeriodic: boolean;
+    getDerivedPropertyByName(name: string): DerivedPropertiesSchema[0] | undefined;
+    getDerivedProperties(): DerivedPropertiesSchema;
+    formula: string;
+    unitCellFormula: string;
+    unsetFileProps(): void;
+    setBasis(textOrObject: string | BasisConfig, format?: string, unitz?: string): void;
+    setBasisConstraints(constraints: Constraint[]): void;
+    setBasisConstraintsFromArrayOfObjects(constraints: AtomicConstraintsSchema): void;
+    basis: OptionallyConstrainedBasisConfig;
+    Basis: ConstrainedBasis;
+    uniqueElements: AtomicElementValue[];
+    lattice: LatticeSchema;
+    Lattice: Lattice;
+    getInchiStringForHash(): string;
+    calculateHash(salt?: string, isScaled?: boolean, bypassNonPeriodicCheck?: boolean): string;
+    hash: string;
+    get scaledHash(): string;
+    external: MaterialSchema["external"];
+    toCrystal(): void;
+    toCartesian(): void;
+    getBasisAsXyz(fractional?: boolean): string;
+    getAsQEFormat(): string;
+    getAsPOSCAR(ignoreOriginal?: boolean, omitConstraints?: boolean): string;
+    getACopyWithConventionalCell(): T;
+    getConsistencyChecks(): ConsistencyCheck[];
+    getBasisConsistencyChecks(): ConsistencyCheck[];
+};
+type MaterialMixinStaticProps = {
+    defaultConfig: MaterialSchema;
+    constructMaterialFileSource(
+        fileName: string,
+        fileContent: string,
+        fileExtension: string,
+    ): FileSourceSchema;
+};
 
 export type MaterialInMemoryEntity = InMemoryEntity & MaterialMixinProps;
 
 export type MaterialMixinConstructor = Constructor<MaterialMixinProps> & MaterialMixinStaticProps;
 
-export type OptionallyConstrainedBasisConfig = BasisConfig &
+type OptionallyConstrainedBasisConfig = BasisConfig &
     Partial<Pick<ConstrainedBasisConfig, "constraints">>;
 
 type Base = InMemoryEntity & NamedEntity;
 
-export function materialMixin<T extends Base = Base>(item: T) {
+function materialPropertiesMixin<T extends Base = Base>(item: T) {
     const originalToJSON = item.toJSON.bind(item);
 
-    const properties = {
-        toJSON(): MaterialSchema {
+    // @ts-expect-error
+    const properties: MaterialMixinProps<T> & InMemoryEntity & NamedEntity = {
+        toJSON(): MaterialSchema & AnyObject {
             return {
                 ...originalToJSON(),
                 lattice: this.Lattice.toJSON(),
@@ -423,11 +464,9 @@ export function materialMixin<T extends Base = Base>(item: T) {
     };
 
     Object.defineProperties(item, Object.getOwnPropertyDescriptors(properties));
-
-    return properties as typeof properties & { _json: MaterialSchemaJSON };
 }
 
-export function materialMixinStaticProps<T extends Constructor<Base>>(item: T) {
+function materialMixinStaticProps<T extends Constructor<Base>>(item: T) {
     const properties = {
         get defaultConfig() {
             return defaultMaterialConfig;
@@ -448,6 +487,9 @@ export function materialMixinStaticProps<T extends Constructor<Base>>(item: T) {
     };
 
     Object.defineProperties(item, Object.getOwnPropertyDescriptors(properties));
+}
 
-    return properties;
+export function materialMixin<T extends Constructor<Base>>(item: T) {
+    materialPropertiesMixin(item.prototype);
+    materialMixinStaticProps(item);
 }
