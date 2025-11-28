@@ -39,7 +39,9 @@ type MaterialSchemaWithConsistencyChecksAsString = Omit<MaterialSchema, "consist
 
 type Schema = MaterialSchemaWithConsistencyChecksAsString;
 
-export class Material extends (InMemoryEntity as BaseMaterial) implements Schema {}
+export class Material extends (InMemoryEntity as BaseMaterial) implements Schema {
+    declare static createDefault: () => Material;
+}
 
 namedEntityMixin(Material.prototype);
 defaultableEntityMixin(Material);

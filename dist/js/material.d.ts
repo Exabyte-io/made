@@ -13,4 +13,5 @@ type MaterialSchemaWithConsistencyChecksAsString = Omit<MaterialSchema, "consist
 type Schema = MaterialSchemaWithConsistencyChecksAsString;
 declare const Material_base: BaseMaterial;
 export declare class Material extends Material_base implements Schema {
+    static createDefault: () => Material;
 }
