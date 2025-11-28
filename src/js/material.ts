@@ -28,7 +28,7 @@ export { defaultMaterialConfig };
 type BaseMaterial = typeof InMemoryEntity &
     HasConsistencyChecksInMemoryEntityConstructor &
     DefaultableInMemoryEntityConstructor &
-    HasMetadataInMemoryEntityConstructor &
+    HasMetadataInMemoryEntityConstructor<MaterialSchema["metadata"]> &
     NamedInMemoryEntityConstructor &
     MaterialMixinConstructor;
 

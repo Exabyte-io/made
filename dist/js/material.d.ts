@@ -6,7 +6,7 @@ import { type NamedInMemoryEntityConstructor } from "@mat3ra/code/dist/js/entity
 import type { ConsistencyCheck, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 import { type MaterialMixinConstructor, defaultMaterialConfig } from "./materialMixin";
 export { defaultMaterialConfig };
-type BaseMaterial = typeof InMemoryEntity & HasConsistencyChecksInMemoryEntityConstructor & DefaultableInMemoryEntityConstructor & HasMetadataInMemoryEntityConstructor & NamedInMemoryEntityConstructor & MaterialMixinConstructor;
+type BaseMaterial = typeof InMemoryEntity & HasConsistencyChecksInMemoryEntityConstructor & DefaultableInMemoryEntityConstructor & HasMetadataInMemoryEntityConstructor<MaterialSchema["metadata"]> & NamedInMemoryEntityConstructor & MaterialMixinConstructor;
 type MaterialSchemaWithConsistencyChecksAsString = Omit<MaterialSchema, "consistencyChecks"> & {
     consistencyChecks?: ConsistencyCheck[];
 };
