@@ -2,9 +2,17 @@ import inspect
 from functools import wraps
 from typing import Any, Callable, Dict, Union
 
+import numpy as np
+from ase import io
+
 from mat3ra.made.material import Material
-from mat3ra.made.utils import map_array_to_array_with_id_value, map_array_with_id_value_to_array
+from mat3ra.made.utils import (
+    get_center_of_coordinates,
+    map_array_to_array_with_id_value,
+    map_array_with_id_value_to_array,
+)
 from mat3ra.utils.mixins import RoundNumericValuesMixin
+from scipy.spatial.distance import pdist
 
 from ..third_party import (
     ASEAtoms,
@@ -161,6 +169,21 @@ def from_poscar(poscar: str) -> Dict[str, Any]:
     return from_pymatgen(structure)
 
 
+def from_mol(mol_file_path: str) -> Dict[str, Any]:
+    """
+    Converts a mol file to a material object in ESSE format.
+
+    Args:
+        mol_file_path (str): Path to a mol file.
+
+    Returns:
+        dict: A dictionary containing the material information in ESSE format.
+    """
+
+    ase_atoms = io.read(mol_file_path)
+    return from_ase(ase_atoms)
+
+
 def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAtoms:
     """
     Converts material object in ESSE format to an ASE Atoms object.
@@ -188,6 +211,33 @@ def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAto
     return atoms
 
 
+def _create_pymatgen_structure_from_molecule(ase_atoms: ASEAtoms) -> PymatgenStructure:
+    """
+    Creates a pymatgen Structure from a molecule (non-periodic ASE Atoms).
+
+    Args:
+        ase_atoms (Atoms): An ASE Atoms object with PBC=False.
+
+    Returns:
+        Structure: A pymatgen Structure with CUB lattice sized to contain the molecule, centered.
+    """
+    positions = ase_atoms.get_positions()
+    max_distance = np.max(pdist(positions)) if len(positions) >= 2 else 10.0
+    lattice_size = 2.0 * max_distance
+
+    molecule_center = get_center_of_coordinates(positions.tolist())
+    lattice_center = [lattice_size / 2.0, lattice_size / 2.0, lattice_size / 2.0]
+    translation_vector = np.array(lattice_center) - np.array(molecule_center)
+    centered_positions = positions + translation_vector
+
+    pymatgen_lattice = PymatgenLattice.from_parameters(
+        a=lattice_size, b=lattice_size, c=lattice_size, alpha=90, beta=90, gamma=90
+    )
+    elements = ase_atoms.get_chemical_symbols()
+    coordinates_cartesian = centered_positions.tolist()
+    return PymatgenStructure(pymatgen_lattice, elements, coordinates_cartesian, coords_are_cartesian=True)
+
+
 def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     """
     Converts an ASE Atoms object to a material object in ESSE format.
@@ -198,9 +248,19 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     Returns:
         dict: A dictionary containing the material information in ESSE format.
     """
-    # TODO: check that atomic labels/tags are properly handled
-    structure = PymatgenAseAtomsAdaptor.get_structure(ase_atoms)
+    is_molecule = not any(ase_atoms.pbc)
+
+    if is_molecule:
+        structure = _create_pymatgen_structure_from_molecule(ase_atoms)
+    else:
+        # TODO: check that atomic labels/tags are properly handled
+        structure = PymatgenAseAtomsAdaptor.get_structure(ase_atoms)
+
     material = from_pymatgen(structure)
+    material["isNonPeriodic"] = is_molecule
+    if is_molecule:
+        material["lattice"]["type"] = "CUB"
+
     ase_tags = extract_tags_from_ase_atoms(ase_atoms)
     material["basis"]["labels"] = ase_tags
     ase_metadata = ase_atoms.info.get("metadata", {})
