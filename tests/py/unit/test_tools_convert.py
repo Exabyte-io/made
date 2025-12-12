@@ -120,7 +120,7 @@ def test_to_ase():
             ASE_H2O_MOLECULE,
             None,
             None,
-            [{"id": 0, "value": 0}, {"id": 1, "value": 1}, {"id": 2, "value": 2}],
+            [],
             True,
             "CUB",
         ),

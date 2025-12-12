@@ -10,6 +10,5 @@ atoms.set_tags([0, 1])
 ASE_BULK_SI = atoms
 
 atoms = molecule("H2O")
-atoms.set_tags([0, 1, 2])
 atoms.set_pbc(False)
 ASE_H2O_MOLECULE = atoms
