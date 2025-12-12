@@ -1,20 +1,11 @@
 import pytest
-from mat3ra.code.entity import InMemoryEntity, InMemoryEntityPydantic
+from mat3ra.code.entity import InMemoryEntityPydantic
+
 from mat3ra.made.tools.build_components.metadata import BuildMetadata, MaterialBuildMetadata
-from pydantic import BaseModel
 
 
 class ConfigWithToDict(InMemoryEntityPydantic):
     value: str = "test_dict"
-
-
-# TODO: Remove this class when all configurations moved to Pydantic
-class ConfigWithToJsonReturnsDict(BaseModel, InMemoryEntity):
-    value: str = "test_json_dict"
-
-    @property
-    def _json(self):
-        return {"value": self.value}
 
 
 class ConfigWithToJsonReturnsStr(InMemoryEntityPydantic):
@@ -42,7 +33,6 @@ def test_metadata_empty_initialization():
     "config_object, expected_dict",
     [
         (ConfigWithToDict(), {"value": "test_dict"}),
-        (ConfigWithToJsonReturnsDict(), {"value": "test_json_dict"}),
         (ConfigWithToJsonReturnsStr(), {"value": "test_json_str"}),
     ],
 )
