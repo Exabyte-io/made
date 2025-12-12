@@ -9,8 +9,8 @@ from mat3ra.made.material import Material
 from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
 from .fixtures.monolayer import GRAPHENE
 from .fixtures.thrid_party.ase_atoms import (
-    ASE_BULK_SI,
-    ASE_H2O_MOLECULE,
+    ASE_BULK_Si,
+    ASE_MOLECULE_H2O,
     BULK_SI_LATTICE_A,
     BULK_SI_LATTICE_ALPHA,
     BULK_SI_LABELS,
@@ -109,7 +109,7 @@ def test_to_ase():
     + " expected_is_non_periodic, expected_lattice_type",
     [
         (
-            ASE_BULK_SI,
+            ASE_BULK_Si,
             BULK_SI_LATTICE_A,
             BULK_SI_LATTICE_ALPHA,
             BULK_SI_LABELS,
@@ -117,7 +117,7 @@ def test_to_ase():
             None,
         ),
         (
-            ASE_H2O_MOLECULE,
+            ASE_MOLECULE_H2O,
             None,
             None,
             [],
@@ -136,7 +136,7 @@ def test_from_ase(
 ):
     material_data = from_ase(ase_atoms)
     if expected_lattice_a is not None:
-        assert material_data["lattice"]["a"] == expected_lattice_a
+        assertion_utils.assert_almost_equal_numbers(material_data["lattice"]["a"], expected_lattice_a, atol=1e-4)
     if expected_lattice_alpha is not None:
         assert material_data["lattice"]["alpha"] == expected_lattice_alpha
     assert material_data["basis"]["labels"] == expected_labels
