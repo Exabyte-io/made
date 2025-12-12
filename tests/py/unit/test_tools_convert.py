@@ -105,7 +105,8 @@ def test_to_ase():
 
 
 @pytest.mark.parametrize(
-    "ase_atoms, expected_lattice_a, expected_lattice_alpha, expected_labels, expected_is_non_periodic, expected_lattice_type",
+    "ase_atoms, expected_lattice_a, expected_lattice_alpha, expected_labels,"
+    + " expected_is_non_periodic, expected_lattice_type",
     [
         (
             ASE_BULK_SI,

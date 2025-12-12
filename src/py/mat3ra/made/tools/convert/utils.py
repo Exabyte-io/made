@@ -2,15 +2,12 @@ import json
 from typing import Any, Dict, List, Union
 
 import numpy as np
+from mat3ra.utils.object import NumpyNDArrayRoundEncoder
 from scipy.spatial.distance import pdist
 
 from mat3ra.made.utils import map_array_to_array_with_id_value, get_center_of_coordinates
-from mat3ra.utils.object import NumpyNDArrayRoundEncoder
-
-from ..third_party import ASEAtoms, PymatgenInterface, PymatgenStructure, PymatgenLattice
 from .interface_parts_enum import INTERFACE_LABELS_MAP
-from ...basis import Coordinates
-from ...cell import Cell
+from ..third_party import ASEAtoms, PymatgenInterface, PymatgenStructure
 
 
 def extract_labels_from_pymatgen_structure(structure: PymatgenStructure) -> List[int]:
