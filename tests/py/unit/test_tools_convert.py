@@ -1,14 +1,20 @@
 import numpy as np
 import pytest
 from ase import Atoms
-from ase.build import bulk
 from mat3ra.code.array_with_ids import ArrayWithIds
-from mat3ra.made.material import Material
-from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
 from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Element, Lattice, Structure
 
+from mat3ra.made.material import Material
+from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
 from .fixtures.monolayer import GRAPHENE
+from .fixtures.thrid_party.ase_atoms import (
+    ASE_BULK_SI,
+    ASE_H2O_MOLECULE,
+    BULK_SI_LATTICE_A,
+    BULK_SI_LATTICE_ALPHA,
+    BULK_SI_LABELS,
+)
 
 PYMATGEN_LATTICE = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120, beta=90, gamma=60)
 PYMATGEN_STRUCTURE = Structure(PYMATGEN_LATTICE, ["Si", "Si"], [[0, 0, 0], [0.75, 0.5, 0.75]])
@@ -98,10 +104,41 @@ def test_to_ase():
     assert ase_atoms.get_tags().tolist() == [0, 1]
 
 
-def test_from_ase():
-    ase_atoms = bulk("Si")
-    ase_atoms.set_tags([0, 1])
+@pytest.mark.parametrize(
+    "ase_atoms, expected_lattice_a, expected_lattice_alpha, expected_labels, expected_is_non_periodic, expected_lattice_type",
+    [
+        (
+            ASE_BULK_SI,
+            BULK_SI_LATTICE_A,
+            BULK_SI_LATTICE_ALPHA,
+            BULK_SI_LABELS,
+            False,
+            None,
+        ),
+        (
+            ASE_H2O_MOLECULE,
+            None,
+            None,
+            [{"id": 0, "value": 0}, {"id": 1, "value": 1}, {"id": 2, "value": 2}],
+            True,
+            "CUB",
+        ),
+    ],
+)
+def test_from_ase(
+    ase_atoms,
+    expected_lattice_a,
+    expected_lattice_alpha,
+    expected_labels,
+    expected_is_non_periodic,
+    expected_lattice_type,
+):
     material_data = from_ase(ase_atoms)
-    assert material_data["lattice"]["a"] == 3.839589822
-    assert material_data["lattice"]["alpha"] == 60
-    assert material_data["basis"]["labels"] == [{"id": 0, "value": 0}, {"id": 1, "value": 1}]
+    if expected_lattice_a is not None:
+        assert material_data["lattice"]["a"] == expected_lattice_a
+    if expected_lattice_alpha is not None:
+        assert material_data["lattice"]["alpha"] == expected_lattice_alpha
+    assert material_data["basis"]["labels"] == expected_labels
+    assert material_data["isNonPeriodic"] == expected_is_non_periodic
+    if expected_lattice_type is not None:
+        assert material_data["lattice"]["type"] == expected_lattice_type
