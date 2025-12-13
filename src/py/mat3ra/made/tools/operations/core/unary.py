@@ -7,6 +7,7 @@ from mat3ra.made.material import Material
 
 from ...build_components.metadata import MaterialWithBuildMetadata
 from ...build_components.operations.core.modifications.perturb import FunctionHolder
+from ...build_components.operations.core.modifications.perturb.functions import ElementalFunctionHolder
 from ...convert import from_ase, to_ase
 from ...modify import translate_by_vector, wrap_to_unit_cell
 from ...third_party import ase_make_supercell
@@ -83,9 +84,15 @@ def perturb(
     original_coordinates = new_material.basis.coordinates.values
     perturbed_coordinates: List[List[float]] = []
 
-    for coordinate in original_coordinates:
-        # If func_holder returns a scalar, assume z-axis; otherwise vector
-        displacement = perturbation_function.apply_function(coordinate)
+    is_elemental = isinstance(perturbation_function, ElementalFunctionHolder)
+
+    for atom_index, coordinate in enumerate(original_coordinates):
+        if is_elemental:
+            displacement = perturbation_function.apply_function(coordinate, atom_index)
+        else:
+            # If func_holder returns a scalar, assume z-axis; otherwise vector
+            displacement = perturbation_function.apply_function(coordinate)
+
         if isinstance(displacement, (list, tuple, np.ndarray)):
             delta = np.array(displacement)
         else:
