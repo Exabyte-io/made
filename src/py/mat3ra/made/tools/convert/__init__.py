@@ -2,7 +2,6 @@ import inspect
 from functools import wraps
 from typing import Any, Callable, Dict, Union
 
-from ase import io
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 
 from mat3ra.made.material import Material
@@ -164,21 +163,6 @@ def from_poscar(poscar: str) -> Dict[str, Any]:
     """
     structure = PymatgenStructure.from_str(poscar, "poscar")
     return from_pymatgen(structure)
-
-
-def from_mol(mol_file_path: str) -> Dict[str, Any]:
-    """
-    Converts a mol file to a material object in ESSE format.
-
-    Args:
-        mol_file_path (str): Path to a mol file.
-
-    Returns:
-        dict: A dictionary containing the material information in ESSE format.
-    """
-
-    ase_atoms = io.read(mol_file_path)
-    return from_ase(ase_atoms)
 
 
 def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAtoms:
