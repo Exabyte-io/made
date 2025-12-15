@@ -1,14 +1,6 @@
 import numpy as np
 import pytest
 
-
-try:
-    from mat3ra.periodic_table import PERIODIC_TABLE
-
-    PERIODIC_TABLE_AVAILABLE = True
-except ImportError:
-    PERIODIC_TABLE_AVAILABLE = False
-
 from mat3ra.made.material import Material
 from mat3ra.made.periodic_table import get_atomic_mass_from_element
 from mat3ra.made.tools.build_components.operations.core.modifications.perturb.functions.maxwell_boltzmann import (
@@ -43,10 +35,10 @@ NUM_SAMPLES_FOR_MSD = 1000
 def test_maxwell_displacement_deterministic(random_seed):
     material = Material.create(BULK_Si_PRIMITIVE)
     displacement_func1 = create_maxwell_displacement_function(
-        material, temperature_in_kelvin=TEMPERATURE_K, random_seed=random_seed
+        material, disorder_parameter=TEMPERATURE_K, random_seed=random_seed
     )
     displacement_func2 = create_maxwell_displacement_function(
-        material, temperature_in_kelvin=TEMPERATURE_K, random_seed=random_seed
+        material, disorder_parameter=TEMPERATURE_K, random_seed=random_seed
     )
 
     if random_seed is not None:
@@ -66,7 +58,7 @@ def test_maxwell_displacement_perturb_integration():
     original_coords = [coord[:] for coord in material.basis.coordinates.values]
 
     displacement_func = create_maxwell_displacement_function(
-        material, temperature_in_kelvin=TEMPERATURE_K, random_seed=RANDOM_SEED
+        material, disorder_parameter=TEMPERATURE_K, random_seed=RANDOM_SEED
     )
 
     perturbed_material = perturb(material, displacement_func, use_cartesian_coordinates=True)
@@ -88,7 +80,7 @@ def test_maxwell_displacement_msd_expectation():
     displacements = []
     for _ in range(NUM_SAMPLES_FOR_MSD):
         displacement_func = create_maxwell_displacement_function(
-            material, temperature_in_kelvin=temperature, random_seed=None
+            material, disorder_parameter=temperature, random_seed=None
         )
         coord = [0.0, 0.0, 0.0]
         disp = displacement_func.apply_function(coord, atom_index=0)
@@ -107,10 +99,6 @@ def test_maxwell_displacement_msd_expectation():
         (SI_CONVENTIONAL_SLAB_001, 1300.0, 42),
     ],
 )
-@pytest.mark.skipif(
-    not PERIODIC_TABLE_AVAILABLE,
-    reason="mat3ra-periodic-table not installed",
-)
 def test_maxwell_boltzmann_on_slab(slab_config, temperature_k, random_seed):
     material = Material.create(slab_config)
     material = create_supercell(material, scaling_factor=[4, 4, 1])
@@ -118,7 +106,7 @@ def test_maxwell_boltzmann_on_slab(slab_config, temperature_k, random_seed):
     original_lattice = material.lattice.vector_arrays.copy()
 
     displacement_func = create_maxwell_displacement_function(
-        material, temperature_in_kelvin=temperature_k, random_seed=random_seed
+        material, disorder_parameter=temperature_k, random_seed=random_seed
     )
 
     perturbed_material = perturb(material, displacement_func, use_cartesian_coordinates=True)
