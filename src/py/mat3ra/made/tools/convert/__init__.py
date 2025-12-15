@@ -13,7 +13,7 @@ from .utils import (
     extract_labels_from_pymatgen_structure,
     extract_metadata_from_pymatgen_structure,
     extract_tags_from_ase_atoms,
-    calculate_molecule_padding_cell,
+    calculate_padded_cell_simple_cubic,
 )
 from ..third_party import (
     ASEAtoms,
@@ -205,7 +205,7 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     is_molecule = not any(ase_atoms.pbc)
 
     if is_molecule:
-        lattice_vectors = calculate_molecule_padding_cell(ase_atoms.get_positions())
+        lattice_vectors = calculate_padded_cell_simple_cubic(ase_atoms.get_positions())
         ase_atoms.set_cell(lattice_vectors)
         ase_atoms.center()
 

@@ -41,7 +41,9 @@ def extract_tags_from_ase_atoms(atoms: ASEAtoms) -> List[Union[str, int]]:
     return result
 
 
-def calculate_molecule_padding_cell(coordinates: List[List[float]], padding_factor: float = 2.0) -> List[List[float]]:
+def calculate_padded_cell_simple_cubic(
+    coordinates: List[List[float]], padding_factor: float = 2.0
+) -> List[List[float]]:
     """
     Calculate values for a padded cell for a molecule based on its coordinates.
     Args:
