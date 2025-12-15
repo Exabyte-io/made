@@ -1,14 +1,16 @@
 from .functions import (
     ElementalFunctionHolder,
     FunctionHolder,
+    MaxwellBoltzmannDisplacementHolder,
     PerturbationFunctionHolder,
     SineWavePerturbationFunctionHolder,
+    create_maxwell_displacement_function,
 )
-from .maxwell_boltzmann import create_maxwell_displacement_function
 
 __all__ = [
     "ElementalFunctionHolder",
     "FunctionHolder",
+    "MaxwellBoltzmannDisplacementHolder",
     "PerturbationFunctionHolder",
     "SineWavePerturbationFunctionHolder",
     "create_maxwell_displacement_function",

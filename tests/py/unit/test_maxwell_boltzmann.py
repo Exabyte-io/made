@@ -11,7 +11,7 @@ except ImportError:
 
 from mat3ra.made.material import Material
 from mat3ra.made.periodic_table import get_atomic_mass_from_element
-from mat3ra.made.tools.build_components.operations.core.modifications.perturb.maxwell_boltzmann import (
+from mat3ra.made.tools.build_components.operations.core.modifications.perturb.functions.maxwell_boltzmann import (
     BOLTZMANN_CONSTANT_EV_PER_K,
     create_maxwell_displacement_function,
 )
