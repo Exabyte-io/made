@@ -1,3 +1,4 @@
+import { math } from "@mat3ra/code/dist/js/math";
 import { Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
 
 import { Basis } from "../basis/basis";
@@ -5,7 +6,6 @@ import { ConstrainedBasis } from "../basis/constrained_basis";
 import { Cell } from "../cell/cell";
 import { Lattice } from "../lattice/lattice";
 import type { Material } from "../material";
-import math from "../math";
 import cellTools from "./cell";
 
 const ADD = math.add;
