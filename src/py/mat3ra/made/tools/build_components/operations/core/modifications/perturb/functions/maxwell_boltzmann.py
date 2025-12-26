@@ -8,12 +8,9 @@ from pydantic import Field
 
 from .elemental_function_holder import AtomicMassDependentFunctionHolder
 
-BOLTZMANN_CONSTANT_EV_PER_K = 8.617333262145e-5
-
 
 class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
     disorder_parameter: float = Field(exclude=True)
-    kT: float = Field(exclude=True)
     random_state: Any = Field(default=None, exclude=True)
     is_mass_used: bool = Field(default=True, exclude=True)
 
@@ -27,7 +24,6 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
         if random_seed is not None:
             np.random.seed(random_seed)
 
-        kT = BOLTZMANN_CONSTANT_EV_PER_K * disorder_parameter
         random_state = np.random.RandomState(random_seed) if random_seed is not None else np.random
 
         function_expr = sp.Symbol("f")
@@ -35,7 +31,6 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
             function=function_expr,
             atom_masses=atom_masses,
             disorder_parameter=disorder_parameter,
-            kT=kT,
             random_state=random_state,
             is_mass_used=is_mass_used,
         )
@@ -53,45 +48,3 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
         std_dev = np.sqrt(variance)
         displacement = self.random_state.normal(0.0, std_dev, size=3)
         return displacement.tolist()
-
-
-def create_maxwell_displacement_function(
-    material: Material,
-    disorder_parameter: float,
-    random_seed: Optional[int] = None,
-    is_mass_used: bool = True,
-) -> MaxwellBoltzmannDisplacementHolder:
-    """
-    Create a Maxwell-Boltzmann displacement function for thermal perturbations.
-
-    The function generates random 3D displacement vectors where each component
-    follows a normal distribution with variance proportional to kT/m (if is_mass_used=True)
-    or kT (if is_mass_used=False), where k is Boltzmann's constant, T is the disorder
-    parameter, and m is atomic mass.
-
-    Args:
-        material: The material containing atoms to be perturbed.
-        disorder_parameter: Disorder parameter (typically temperature in Kelvin for
-                            Maxwell-Boltzmann distribution).
-        random_seed: Optional random seed for deterministic behavior.
-        is_mass_used: If True, displacement variance is kT/m (mass-dependent).
-                     If False, displacement variance is kT (mass-independent).
-
-    Returns:
-        MaxwellBoltzmannDisplacementHolder that generates Maxwell-Boltzmann displacements.
-    """
-    atom_masses = []
-    if is_mass_used:
-        for element_value in material.basis.elements.values:
-            atomic_mass = get_atomic_mass_from_element(element_value)
-            atom_masses.append(atomic_mass)
-    else:
-        atom_masses = [1.0] * len(material.basis.elements.values)
-
-    return MaxwellBoltzmannDisplacementHolder(
-        atom_masses=atom_masses,
-        disorder_parameter=disorder_parameter,
-        random_seed=random_seed,
-        is_mass_used=is_mass_used,
-    )
-
