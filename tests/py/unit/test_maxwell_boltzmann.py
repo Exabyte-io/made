@@ -3,9 +3,11 @@ import pytest
 
 from mat3ra.made.material import Material
 from mat3ra.made.periodic_table import get_atomic_mass_from_element
+from mat3ra.made.tools.build_components.operations.core.modifications.perturb import (
+    create_maxwell_displacement,
+)
 from mat3ra.made.tools.build_components.operations.core.modifications.perturb.functions.maxwell_boltzmann import (
-    BOLTZMANN_CONSTANT_EV_PER_K,
-    create_maxwell_displacement_function,
+    MaxwellBoltzmannDisplacementHolder,
 )
 from mat3ra.made.tools.helpers import create_supercell
 from mat3ra.made.tools.operations.core.unary import perturb
@@ -34,22 +36,23 @@ NUM_SAMPLES_FOR_MSD = 1000
 @pytest.mark.parametrize("random_seed", [None, 42, 123, 999])
 def test_maxwell_displacement_deterministic(random_seed):
     material = Material.create(BULK_Si_PRIMITIVE)
-    displacement_func1 = create_maxwell_displacement_function(
-        material, disorder_parameter=TEMPERATURE_K, random_seed=random_seed
+    displacement_func1 = MaxwellBoltzmannDisplacementHolder(
+        disorder_parameter=TEMPERATURE_K, random_seed=random_seed
     )
-    displacement_func2 = create_maxwell_displacement_function(
-        material, disorder_parameter=TEMPERATURE_K, random_seed=random_seed
+    displacement_func2 = MaxwellBoltzmannDisplacementHolder(
+        disorder_parameter=TEMPERATURE_K, random_seed=random_seed
     )
 
+    coord = [0.0, 0.0, 0.0]
+    atom_index = 0
+    
     if random_seed is not None:
-        coord = [0.0, 0.0, 0.0]
-        disp1 = displacement_func1.apply_function(coord, atom_index=0)
-        disp2 = displacement_func2.apply_function(coord, atom_index=0)
+        disp1 = displacement_func1.apply_function(coord, material=material, atom_index=atom_index)
+        disp2 = displacement_func2.apply_function(coord, material=material, atom_index=atom_index)
         assert np.allclose(disp1, disp2)
     else:
-        coord = [0.0, 0.0, 0.0]
-        disp1 = displacement_func1.apply_function(coord, atom_index=0)
-        disp2 = displacement_func2.apply_function(coord, atom_index=0)
+        disp1 = displacement_func1.apply_function(coord, material=material, atom_index=atom_index)
+        disp2 = displacement_func2.apply_function(coord, material=material, atom_index=atom_index)
         assert not np.allclose(disp1, disp2) or np.allclose(disp1, [0, 0, 0], atol=1e-10)
 
 
@@ -57,11 +60,9 @@ def test_maxwell_displacement_perturb_integration():
     material = Material.create(BULK_Si_PRIMITIVE)
     original_coords = [coord[:] for coord in material.basis.coordinates.values]
 
-    displacement_func = create_maxwell_displacement_function(
+    perturbed_material = create_maxwell_displacement(
         material, disorder_parameter=TEMPERATURE_K, random_seed=RANDOM_SEED
     )
-
-    perturbed_material = perturb(material, displacement_func, use_cartesian_coordinates=True)
 
     assert len(perturbed_material.basis.coordinates.values) == len(original_coords)
     for i, (orig, pert) in enumerate(zip(original_coords, perturbed_material.basis.coordinates.values)):
@@ -72,18 +73,18 @@ def test_maxwell_displacement_perturb_integration():
 def test_maxwell_displacement_msd_expectation():
     material = Material.create(BULK_Si_PRIMITIVE)
     si_mass = get_atomic_mass_from_element("Si")
-    temperature = TEMPERATURE_K
-    kT = BOLTZMANN_CONSTANT_EV_PER_K * temperature
-    expected_variance = kT / si_mass
+    disorder_parameter = TEMPERATURE_K
+    expected_variance = disorder_parameter / si_mass
     expected_msd = 3 * expected_variance
 
     displacements = []
+    atom_index = 0
+    coord = [0.0, 0.0, 0.0]
     for _ in range(NUM_SAMPLES_FOR_MSD):
-        displacement_func = create_maxwell_displacement_function(
-            material, disorder_parameter=temperature, random_seed=None
+        displacement_func = MaxwellBoltzmannDisplacementHolder(
+            disorder_parameter=disorder_parameter, random_seed=None
         )
-        coord = [0.0, 0.0, 0.0]
-        disp = displacement_func.apply_function(coord, atom_index=0)
+        disp = displacement_func.apply_function(coord, material=material, atom_index=atom_index)
         displacements.append(disp)
 
     displacements_array = np.array(displacements)
@@ -105,11 +106,9 @@ def test_maxwell_boltzmann_on_slab(slab_config, temperature_k, random_seed):
     original_coords = [coord[:] for coord in material.basis.coordinates.values]
     original_lattice = material.lattice.vector_arrays.copy()
 
-    displacement_func = create_maxwell_displacement_function(
+    perturbed_material = create_maxwell_displacement(
         material, disorder_parameter=temperature_k, random_seed=random_seed
     )
-
-    perturbed_material = perturb(material, displacement_func, use_cartesian_coordinates=True)
 
     assert len(perturbed_material.basis.coordinates.values) == len(original_coords)
     assert len(perturbed_material.basis.elements.values) == len(material.basis.elements.values)
@@ -127,8 +126,7 @@ def test_maxwell_boltzmann_on_slab(slab_config, temperature_k, random_seed):
     assert mean_displacement > 0
 
     si_mass = get_atomic_mass_from_element("Si")
-    kT = BOLTZMANN_CONSTANT_EV_PER_K * temperature_k
-    expected_std = np.sqrt(kT / si_mass)
+    expected_std = np.sqrt(temperature_k / si_mass)
 
     assert mean_displacement < 5 * expected_std
 

@@ -1,8 +1,7 @@
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 import numpy as np
 import sympy as sp
-from mat3ra.made.material import Material
 from mat3ra.made.periodic_table import get_atomic_mass_from_element
 from pydantic import Field
 
@@ -16,7 +15,6 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
 
     def __init__(
         self,
-        atom_masses: List[float],
         disorder_parameter: float,
         random_seed: Optional[int] = None,
         is_mass_used: bool = True,
@@ -29,21 +27,21 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
         function_expr = sp.Symbol("f")
         super().__init__(
             function=function_expr,
-            atom_masses=atom_masses,
             disorder_parameter=disorder_parameter,
             random_state=random_state,
             is_mass_used=is_mass_used,
         )
 
-    def apply_function(self, coordinate: List[float], atom_index: int) -> List[float]:
-        if atom_index < 0 or atom_index >= len(self.atom_masses):
-            raise ValueError(f"Atom index {atom_index} out of range [0, {len(self.atom_masses)})")
+    def apply_function(self, coordinate, material=None, atom_index: Optional[int] = None, **kwargs) -> list:
+        if material is None or atom_index is None:
+            raise ValueError("MaxwellBoltzmannDisplacementHolder requires 'material' and 'atom_index' kwargs")
 
         if self.is_mass_used:
-            mass = self.atom_masses[atom_index]
-            variance = self.kT / mass
+            element = material.basis.elements.values[atom_index]
+            mass = get_atomic_mass_from_element(element)
+            variance = self.disorder_parameter / mass
         else:
-            variance = self.kT
+            variance = self.disorder_parameter
 
         std_dev = np.sqrt(variance)
         displacement = self.random_state.normal(0.0, std_dev, size=3)

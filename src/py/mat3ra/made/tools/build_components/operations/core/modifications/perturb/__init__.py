@@ -4,8 +4,8 @@ from .functions import (
     MaxwellBoltzmannDisplacementHolder,
     PerturbationFunctionHolder,
     SineWavePerturbationFunctionHolder,
-    create_maxwell_displacement_function,
 )
+from .helpers import create_maxwell_displacement
 
 __all__ = [
     "AtomicMassDependentFunctionHolder",
@@ -13,5 +13,4 @@ __all__ = [
     "MaxwellBoltzmannDisplacementHolder",
     "PerturbationFunctionHolder",
     "SineWavePerturbationFunctionHolder",
-    "create_maxwell_displacement_function",
 ]
