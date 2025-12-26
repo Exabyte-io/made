@@ -7,7 +7,7 @@ from mat3ra.made.material import Material
 
 from ...build_components.metadata import MaterialWithBuildMetadata
 from ...build_components.operations.core.modifications.perturb import FunctionHolder
-from ...build_components.operations.core.modifications.perturb.functions import ElementalFunctionHolder
+from ...build_components.operations.core.modifications.perturb.functions import AtomicMassDependentFunctionHolder
 from ...convert import from_ase, to_ase
 from ...modify import translate_by_vector, wrap_to_unit_cell
 from ...third_party import ase_make_supercell
@@ -84,7 +84,7 @@ def perturb(
     original_coordinates = new_material.basis.coordinates.values
     perturbed_coordinates: List[List[float]] = []
 
-    is_elemental = isinstance(perturbation_function, ElementalFunctionHolder)
+    is_elemental = isinstance(perturbation_function, AtomicMassDependentFunctionHolder)
 
     for atom_index, coordinate in enumerate(original_coordinates):
         if is_elemental:

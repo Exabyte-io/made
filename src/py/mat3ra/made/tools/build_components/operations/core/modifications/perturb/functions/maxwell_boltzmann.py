@@ -6,12 +6,12 @@ from mat3ra.made.material import Material
 from mat3ra.made.periodic_table import get_atomic_mass_from_element
 from pydantic import Field
 
-from .elemental_function_holder import ElementalFunctionHolder
+from .elemental_function_holder import AtomicMassDependentFunctionHolder
 
 BOLTZMANN_CONSTANT_EV_PER_K = 8.617333262145e-5
 
 
-class MaxwellBoltzmannDisplacementHolder(ElementalFunctionHolder):
+class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
     disorder_parameter: float = Field(exclude=True)
     kT: float = Field(exclude=True)
     random_state: Any = Field(default=None, exclude=True)

@@ -1,5 +1,5 @@
 from .functions import (
-    ElementalFunctionHolder,
+    AtomicMassDependentFunctionHolder,
     FunctionHolder,
     MaxwellBoltzmannDisplacementHolder,
     PerturbationFunctionHolder,
@@ -8,7 +8,7 @@ from .functions import (
 )
 
 __all__ = [
-    "ElementalFunctionHolder",
+    "AtomicMassDependentFunctionHolder",
     "FunctionHolder",
     "MaxwellBoltzmannDisplacementHolder",
     "PerturbationFunctionHolder",
