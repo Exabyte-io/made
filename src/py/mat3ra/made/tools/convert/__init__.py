@@ -2,10 +2,19 @@ import inspect
 from functools import wraps
 from typing import Any, Callable, Dict, Union
 
-from mat3ra.made.material import Material
-from mat3ra.made.utils import map_array_to_array_with_id_value, map_array_with_id_value_to_array
 from mat3ra.utils.mixins import RoundNumericValuesMixin
 
+from mat3ra.made.material import Material
+from mat3ra.made.utils import (
+    map_array_to_array_with_id_value,
+    map_array_with_id_value_to_array,
+)
+from .utils import (
+    extract_labels_from_pymatgen_structure,
+    extract_metadata_from_pymatgen_structure,
+    extract_tags_from_ase_atoms,
+    calculate_padded_cell_simple_cubic,
+)
 from ..third_party import (
     ASEAtoms,
     PymatgenAseAtomsAdaptor,
@@ -13,11 +22,6 @@ from ..third_party import (
     PymatgenLattice,
     PymatgenPoscar,
     PymatgenStructure,
-)
-from .utils import (
-    extract_labels_from_pymatgen_structure,
-    extract_metadata_from_pymatgen_structure,
-    extract_tags_from_ase_atoms,
 )
 
 
@@ -198,15 +202,27 @@ def from_ase(ase_atoms: ASEAtoms) -> Dict[str, Any]:
     Returns:
         dict: A dictionary containing the material information in ESSE format.
     """
+    is_molecule = not any(ase_atoms.pbc)
+
+    if is_molecule:
+        lattice_vectors = calculate_padded_cell_simple_cubic(ase_atoms.get_positions())
+        ase_atoms.set_cell(lattice_vectors)
+        ase_atoms.center()
+
     # TODO: check that atomic labels/tags are properly handled
     structure = PymatgenAseAtomsAdaptor.get_structure(ase_atoms)
+
     material = from_pymatgen(structure)
+    material["isNonPeriodic"] = is_molecule
+    if is_molecule:
+        material["lattice"]["type"] = "CUB"
+
     ase_tags = extract_tags_from_ase_atoms(ase_atoms)
     material["basis"]["labels"] = ase_tags
     ase_metadata = ase_atoms.info.get("metadata", {})
     if ase_metadata:
         material["metadata"].update(ase_metadata)
-    material["name"] = ase_atoms.info.get("name", "")
+    material["name"] = ase_atoms.info.get("name", ase_atoms.get_chemical_formula())
     return material
 
 
