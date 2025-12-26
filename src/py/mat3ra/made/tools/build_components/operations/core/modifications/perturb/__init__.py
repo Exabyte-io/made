@@ -5,7 +5,7 @@ from .functions import (
     PerturbationFunctionHolder,
     SineWavePerturbationFunctionHolder,
 )
-from .helpers import create_maxwell_displacement
+
 
 __all__ = [
     "AtomicMassDependentFunctionHolder",
