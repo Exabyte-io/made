@@ -1,12 +1,12 @@
 import numpy as np
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
 from mat3ra.made.tools.build_components.operations.core.modifications.perturb.functions.maxwell_boltzmann import (
     MaxwellBoltzmannDisplacementHolder,
 )
 from mat3ra.made.tools.build_components.operations.core.modifications.perturb.helpers import create_maxwell_displacement
 from mat3ra.made.tools.helpers import create_supercell
+from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
 
 from .fixtures.bulk import BULK_Si_PRIMITIVE
 from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
@@ -70,7 +70,6 @@ def test_maxwell_displacement_msd_expectation():
     expected_msd = 3 * expected_variance
 
     displacements = []
-    atom_index = 0
     coord = [0.0, 0.0, 0.0]
     for _ in range(NUM_SAMPLES_FOR_MSD):
         displacement_func = MaxwellBoltzmannDisplacementHolder(disorder_parameter=disorder_parameter, random_seed=None)
