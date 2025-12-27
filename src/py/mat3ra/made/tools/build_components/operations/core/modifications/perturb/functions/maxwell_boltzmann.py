@@ -4,7 +4,7 @@ import numpy as np
 import sympy as sp
 from pydantic import Field
 
-from .elemental_function_holder import AtomicMassDependentFunctionHolder
+from .atomic_mass_dependent_function_holder import AtomicMassDependentFunctionHolder
 
 DEFAULT_CONVERSION_CONSTANT = 2e-3
 
