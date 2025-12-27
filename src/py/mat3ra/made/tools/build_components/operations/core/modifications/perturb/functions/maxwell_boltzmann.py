@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 import numpy as np
 import sympy as sp
-from mat3ra.made.periodic_table import get_atomic_mass_from_element
+from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
 from pydantic import Field
 
 from .elemental_function_holder import AtomicMassDependentFunctionHolder

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from mat3ra.made.material import Material
-from mat3ra.made.periodic_table import get_atomic_mass_from_element
+from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
 from mat3ra.made.tools.build_components.operations.core.modifications.perturb.functions.maxwell_boltzmann import (
     MaxwellBoltzmannDisplacementHolder,
 )
