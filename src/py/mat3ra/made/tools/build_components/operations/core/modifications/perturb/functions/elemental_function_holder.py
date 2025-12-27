@@ -1,9 +1,9 @@
 from typing import Any, List, Optional, Union
 
 import sympy as sp
-
 from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
-from .function_holder import AXIS_TO_INDEX_MAP, FunctionHolder
+
+from .function_holder import FunctionHolder
 
 
 class AtomicMassDependentFunctionHolder(FunctionHolder):
@@ -22,20 +22,11 @@ class AtomicMassDependentFunctionHolder(FunctionHolder):
 
         super().__init__(function=function, variables=variables, **data)
 
-    def apply_function(self, coordinate: List[float], material=None, **kwargs: Any) -> Union[float, List[float]]:
+    @staticmethod
+    def get_atomic_mass(coordinate: List[float], material) -> float:
         if material is None:
-            raise ValueError("AtomicMassDependentFunctionHolder requires 'material' and 'atom_index' kwargs")
+            raise ValueError("Material is required to extract atomic mass")
 
-        element = material.basis.elements.values
-        mass = get_atomic_mass_from_element(element)
-
-        values = []
-        for var in self.variables:
-            if var == "m":
-                values.append(mass)
-            elif var in AXIS_TO_INDEX_MAP:
-                values.append(coordinate[AXIS_TO_INDEX_MAP[var]])
-            else:
-                raise ValueError(f"Unknown variable: {var}")
-
-        return self.function_numeric(*values)
+        atom_id = material.basis.coordinates.get_element_id_by_value(coordinate)
+        element = material.basis.elements.get_element_value_by_index(atom_id)
+        return get_atomic_mass_from_element(element)

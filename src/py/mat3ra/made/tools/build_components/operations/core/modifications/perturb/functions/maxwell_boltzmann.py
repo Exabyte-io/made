@@ -2,7 +2,6 @@ from typing import Any, Optional
 
 import numpy as np
 import sympy as sp
-from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
 from pydantic import Field
 
 from .elemental_function_holder import AtomicMassDependentFunctionHolder
@@ -39,12 +38,10 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
 
     def apply_function(self, coordinate, material=None) -> list:
         if material is None:
-            raise ValueError("MaxwellBoltzmannDisplacementHolder requires 'material' and 'atom_index' kwargs")
+            raise ValueError("MaxwellBoltzmannDisplacementHolder requires 'material' kwargs")
 
         if self.is_mass_used:
-            atom_id = material.basis.coordinates.get_element_id_by_value(coordinate)
-            element = material.basis.elements.get_element_value_by_index(atom_id)
-            mass = get_atomic_mass_from_element(element)
+            mass = self.get_atomic_mass(coordinate, material)
             variance = self.disorder_parameter / mass
         else:
             variance = self.disorder_parameter

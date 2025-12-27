@@ -30,20 +30,20 @@ def test_maxwell_displacement_deterministic(random_seed):
     atom_index = 0
 
     if random_seed is not None:
-        disp1 = displacement_func1.apply_function(coord, material=material, atom_index=atom_index)
-        disp2 = displacement_func2.apply_function(coord, material=material, atom_index=atom_index)
+        disp1 = displacement_func1.apply_function(coord, material=material)
+        disp2 = displacement_func2.apply_function(coord, material=material)
         assert np.allclose(disp1, disp2)
 
         # Different seed should give different results
         displacement_func3 = MaxwellBoltzmannDisplacementHolder(
             disorder_parameter=DISORDER_PARAMETER, random_seed=random_seed + 1
         )
-        disp3 = displacement_func3.apply_function(coord, material=material, atom_index=atom_index)
+        disp3 = displacement_func3.apply_function(coord, material=material)
         assert not np.allclose(disp1, disp3) or np.allclose(disp1, [0, 0, 0], atol=1e-10)
     else:
         # No seed: different instances should give different results (non-deterministic)
-        disp1 = displacement_func1.apply_function(coord, material=material, atom_index=atom_index)
-        disp2 = displacement_func2.apply_function(coord, material=material, atom_index=atom_index)
+        disp1 = displacement_func1.apply_function(coord, material=material)
+        disp2 = displacement_func2.apply_function(coord, material=material)
         assert not np.allclose(disp1, disp2) or np.allclose(disp1, [0, 0, 0], atol=1e-10)
 
 
@@ -75,7 +75,7 @@ def test_maxwell_displacement_msd_expectation():
     coord = [0.0, 0.0, 0.0]
     for _ in range(NUM_SAMPLES_FOR_MSD):
         displacement_func = MaxwellBoltzmannDisplacementHolder(disorder_parameter=disorder_parameter, random_seed=None)
-        disp = displacement_func.apply_function(coord, material=material, atom_index=atom_index)
+        disp = displacement_func.apply_function(coord, material=material)
         displacements.append(disp)
 
     displacements_array = np.array(displacements)
