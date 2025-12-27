@@ -12,6 +12,7 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
     disorder_parameter: float = Field(exclude=True)
     random_state: Any = Field(default=None, exclude=True)
     is_mass_used: bool = Field(default=True, exclude=True)
+    conversion_constant: float = Field(default=2e-3, exclude=True)
 
     def __init__(
         self,
@@ -23,11 +24,11 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
             np.random.seed(random_seed)
 
         random_state = np.random.RandomState(random_seed) if random_seed is not None else np.random
-
+        calibrated_disorder_parameter = disorder_parameter * self.conversion_constant
         function_expr = sp.Symbol("f")
         super().__init__(
             function=function_expr,
-            disorder_parameter=disorder_parameter,
+            disorder_parameter=calibrated_disorder_parameter,
             random_state=random_state,
             is_mass_used=is_mass_used,
         )

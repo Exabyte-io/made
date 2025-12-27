@@ -21,7 +21,6 @@ dependencies = [
     "mat3ra-utils",
     "mat3ra-esse",
     "mat3ra-code"
-
 ]
 
 [project.optional-dependencies]
