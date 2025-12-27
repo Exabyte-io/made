@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 import numpy as np
 import sympy as sp
@@ -11,9 +11,10 @@ DEFAULT_CONVERSION_CONSTANT = 2e-3
 
 class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
     disorder_parameter: float = Field(exclude=True)
+    random_seed: Optional[int] = Field(default=None, exclude=True)
     random_state: Any = Field(default=None, exclude=True)
     is_mass_used: bool = Field(default=True, exclude=True)
-    conversion_constant: float = Field(exclude=True)
+    conversion_constant: float = Field(default=DEFAULT_CONVERSION_CONSTANT, exclude=True)
 
     def __init__(
         self,
@@ -22,12 +23,10 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
         is_mass_used: bool = True,
         conversion_constant: float = DEFAULT_CONVERSION_CONSTANT,
     ):
-        if random_seed is not None:
-            np.random.seed(random_seed)
-
-        random_state = np.random.RandomState(random_seed) if random_seed is not None else np.random
         calibrated_disorder_parameter = disorder_parameter * conversion_constant
+        random_state = np.random.RandomState(random_seed) if random_seed is not None else np.random
         function_expr = sp.Symbol("f")
+
         super().__init__(
             function=function_expr,
             disorder_parameter=calibrated_disorder_parameter,
@@ -36,7 +35,7 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
             conversion_constant=conversion_constant,
         )
 
-    def apply_function(self, coordinate, material=None) -> list:
+    def apply_function(self, coordinate, material=None) -> List[float]:
         if material is None:
             raise ValueError("MaxwellBoltzmannDisplacementHolder requires 'material' kwargs")
 
