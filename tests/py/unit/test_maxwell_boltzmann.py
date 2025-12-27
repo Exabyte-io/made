@@ -27,7 +27,6 @@ def test_maxwell_displacement_deterministic(random_seed):
     )
 
     coord = [0.0, 0.0, 0.0]
-    atom_index = 0
 
     if random_seed is not None:
         disp1 = displacement_func1.apply_function(coord, material=material)
