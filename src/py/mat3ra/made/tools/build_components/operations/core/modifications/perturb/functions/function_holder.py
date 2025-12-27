@@ -52,7 +52,7 @@ class FunctionHolder(InMemoryEntityPydantic):
     def function_str(self) -> str:
         return str(self.function)
 
-    def apply_function(self, coordinate: List[float]) -> float:
+    def apply_function(self, coordinate: List[float], **kwargs: Any) -> float:
         values = [coordinate[AXIS_TO_INDEX_MAP[var]] for var in self.variables]
         return self.function_numeric(*values)
 
