@@ -1,4 +1,4 @@
-from .elemental_function_holder import AtomicMassDependentFunctionHolder
+from .atomic_mass_dependent_function_holder import AtomicMassDependentFunctionHolder
 from .function_holder import FunctionHolder
 from .maxwell_boltzmann import MaxwellBoltzmannDisplacementHolder
 from .perturbation_function_holder import PerturbationFunctionHolder

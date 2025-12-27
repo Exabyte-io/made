@@ -6,7 +6,6 @@ from .functions import (
     SineWavePerturbationFunctionHolder,
 )
 
-
 __all__ = [
     "AtomicMassDependentFunctionHolder",
     "FunctionHolder",
