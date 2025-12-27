@@ -83,10 +83,8 @@ def perturb(
     original_coordinates = new_material.basis.coordinates.values
     perturbed_coordinates: List[List[float]] = []
 
-    for atom_index, coordinate in enumerate(original_coordinates):
-        displacement = perturbation_function.apply_function(
-            coordinate, material=new_material, atom_index=atom_index
-        )
+    for coordinate in original_coordinates:
+        displacement = perturbation_function.apply_function(coordinate, material=new_material)
 
         if isinstance(displacement, (list, tuple, np.ndarray)):
             delta = np.array(displacement)

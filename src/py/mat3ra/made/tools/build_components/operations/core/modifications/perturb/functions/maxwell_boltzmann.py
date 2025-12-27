@@ -37,12 +37,13 @@ class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
             conversion_constant=conversion_constant,
         )
 
-    def apply_function(self, coordinate, material=None, atom_index: Optional[int] = None, **kwargs) -> list:
-        if material is None or atom_index is None:
+    def apply_function(self, coordinate, material=None) -> list:
+        if material is None:
             raise ValueError("MaxwellBoltzmannDisplacementHolder requires 'material' and 'atom_index' kwargs")
 
         if self.is_mass_used:
-            element = material.basis.elements.values[atom_index]
+            atom_id = material.basis.coordinates.get_element_id_by_value(coordinate)
+            element = material.basis.elements.get_element_value_by_index(atom_id)
             mass = get_atomic_mass_from_element(element)
             variance = self.disorder_parameter / mass
         else:
