@@ -1,39 +1,28 @@
 from typing import Any, List, Optional
 
 import numpy as np
-import sympy as sp
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from .atomic_mass_dependent_function_holder import AtomicMassDependentFunctionHolder
 
-DEFAULT_CONVERSION_CONSTANT = 2e-3
+DEFAULT_DISORDER_PARAMETER = 1.0
 
 
 class MaxwellBoltzmannDisplacementHolder(AtomicMassDependentFunctionHolder):
-    disorder_parameter: float = Field(exclude=True)
+    disorder_parameter: float = Field(
+        default=DEFAULT_DISORDER_PARAMETER,
+        exclude=True,
+        description="Disorder parameter. Can be viewed as effective temperature in eV.",
+    )
     random_seed: Optional[int] = Field(default=None, exclude=True)
     random_state: Any = Field(default=None, exclude=True)
     is_mass_used: bool = Field(default=True, exclude=True)
-    conversion_constant: float = Field(default=DEFAULT_CONVERSION_CONSTANT, exclude=True)
 
-    def __init__(
-        self,
-        disorder_parameter: float,
-        random_seed: Optional[int] = None,
-        is_mass_used: bool = True,
-        conversion_constant: float = DEFAULT_CONVERSION_CONSTANT,
-    ):
-        calibrated_disorder_parameter = disorder_parameter * conversion_constant
-        random_state = np.random.RandomState(random_seed) if random_seed is not None else np.random
-        function_expr = sp.Symbol("f")
-
-        super().__init__(
-            function=function_expr,
-            disorder_parameter=calibrated_disorder_parameter,
-            random_state=random_state,
-            is_mass_used=is_mass_used,
-            conversion_constant=conversion_constant,
-        )
+    @model_validator(mode="after")
+    def setup_random_state(self):
+        if self.random_state is None:
+            self.random_state = np.random.RandomState(self.random_seed) if self.random_seed is not None else np.random
+        return self
 
     def apply_function(self, coordinate, material=None) -> List[float]:
         if material is None:

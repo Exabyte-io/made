@@ -11,7 +11,7 @@ class AtomicMassDependentFunctionHolder(FunctionHolder):
 
     def __init__(
         self,
-        function: Union[sp.Expr, str],
+        function: Union[sp.Expr, str] = sp.Symbol("f"),
         variables: Optional[List[str]] = None,
         **data: Any,
     ):
