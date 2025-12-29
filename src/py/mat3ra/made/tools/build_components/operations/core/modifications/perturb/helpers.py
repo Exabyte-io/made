@@ -47,7 +47,6 @@ def create_maxwell_displacement(
     disorder_parameter: float,
     random_seed: Optional[int] = None,
     is_mass_used: bool = True,
-    conversion_constant: float = 2e-3,
 ) -> Material:
     """
     Apply Maxwell-Boltzmann random displacements to a material.
@@ -58,11 +57,10 @@ def create_maxwell_displacement(
 
     Args:
         material: The material to be perturbed.
-        disorder_parameter: Disorder parameter controlling displacement magnitude.
+        disorder_parameter: Disorder parameter controlling displacement magnitude, can be viewed as effective temperature in eV.
         random_seed: Optional random seed for deterministic behavior.
         is_mass_used: If True, displacement variance is disorder_parameter/m (mass-dependent).
                      If False, displacement variance is disorder_parameter (mass-independent).
-        conversion_constant: Calibration constant to scale disorder_parameter (default: 2e-3).
 
     Returns:
         Material with applied Maxwell-Boltzmann displacements.
@@ -71,7 +69,6 @@ def create_maxwell_displacement(
         disorder_parameter=disorder_parameter,
         random_seed=random_seed,
         is_mass_used=is_mass_used,
-        conversion_constant=conversion_constant,
     )
 
     configuration = PerturbationConfiguration(
