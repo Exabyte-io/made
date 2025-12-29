@@ -1,14 +1,14 @@
 from typing import Optional, Union
 
 import sympy as sp
-from mat3ra.made.material import Material
 
-from ..... import MaterialWithBuildMetadata
+from mat3ra.made.material import Material
 from .builders.base import PerturbationBuilder
 from .builders.isometric import IsometricPerturbationBuilder
 from .configuration import PerturbationConfiguration
 from .functions import PerturbationFunctionHolder
 from .functions.maxwell_boltzmann import MaxwellBoltzmannDisplacementHolder
+from ..... import MaterialWithBuildMetadata
 
 
 def create_perturbation(
@@ -57,8 +57,9 @@ def create_maxwell_displacement(
 
     Args:
         material: The material to be perturbed.
-        disorder_parameter: Disorder parameter controlling displacement magnitude, can be viewed as effective temperature in eV.
-        random_seed: Optional random seed for deterministic behavior.
+        disorder_parameter: Disorder parameter controlling displacement magnitude,
+                            can be viewed as effective temperature in eV.
+        random_seed: Optional random seed for reproducibility for the same material and parameters.
         is_mass_used: If True, displacement variance is disorder_parameter/m (mass-dependent).
                      If False, displacement variance is disorder_parameter (mass-independent).
 
