@@ -11,7 +11,7 @@ from mat3ra.periodic_table.helpers import get_atomic_mass_from_element
 from .fixtures.bulk import BULK_Si_PRIMITIVE
 from .fixtures.slab import SI_CONVENTIONAL_SLAB_001
 
-DISORDER_PARAMETER = 3000.0  # Temperature-like
+DISORDER_PARAMETER = 1.0  # Temperature-like
 RANDOM_SEED = 42
 NUM_SAMPLES_FOR_MSD = 1000
 
@@ -64,9 +64,7 @@ def test_maxwell_displacement_msd_expectation():
     material = Material.create(BULK_Si_PRIMITIVE)
     si_mass = get_atomic_mass_from_element("Si")
     disorder_parameter = DISORDER_PARAMETER
-    conversion_constant = 2e-3
-    calibrated_disorder_parameter = disorder_parameter * conversion_constant
-    expected_variance = calibrated_disorder_parameter / si_mass
+    expected_variance = disorder_parameter / si_mass
     expected_msd = 3 * expected_variance
 
     displacements = []
