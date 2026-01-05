@@ -67,7 +67,7 @@ export declare class ReciprocalLattice extends Lattice {
      * @param {number} nKpoints - Total number of k-points.
      * @return Grid dimensions
      */
-    getDimensionsFromPointsCount(nKpoints: number): [number, number, number];
+    getDimensionsFromPointsCount(nKpoints: number): Vector3DSchema;
     get conversionTable(): ConversionTable;
     /**
      * Calculate grid dimensions from k-point spacing, i.e.
@@ -75,9 +75,8 @@ export declare class ReciprocalLattice extends Lattice {
      * Note: just as the lattice vectors spacing is in cartesian (2pi / a) units by default
      * @param {number} spacing - maximum Spacing between k-points
      * @param {string} units - units of spacing parameter (default: 2pi / a)
-     * @return {number[]}
      */
-    getDimensionsFromSpacing(spacing: number, units?: string): number[];
+    getDimensionsFromSpacing(spacing: number, units?: string): Vector3DSchema;
     /**
      * Calculate grid spacing as average of spacing along individual reciprocal axes.
      * @param {number[]} dimensions - Array of dimensions

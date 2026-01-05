@@ -139,9 +139,9 @@ export class ReciprocalLattice extends Lattice {
      * @param {number} nKpoints - Total number of k-points.
      * @return Grid dimensions
      */
-    getDimensionsFromPointsCount(nKpoints: number): [number, number, number] {
+    getDimensionsFromPointsCount(nKpoints: number) {
         const indices = [0, 1, 2] as const;
-        return indices.map((i) => this.calculateDimension(nKpoints, i)) as [number, number, number];
+        return indices.map((i) => this.calculateDimension(nKpoints, i)) as Vector3DSchema;
     }
 
     get conversionTable(): ConversionTable {
@@ -162,16 +162,12 @@ export class ReciprocalLattice extends Lattice {
      * Note: just as the lattice vectors spacing is in cartesian (2pi / a) units by default
      * @param {number} spacing - maximum Spacing between k-points
      * @param {string} units - units of spacing parameter (default: 2pi / a)
-     * @return {number[]}
      */
-    getDimensionsFromSpacing(
-        spacing: number,
-        units: string = ATOMIC_COORD_UNITS.cartesian,
-    ): number[] {
+    getDimensionsFromSpacing(spacing: number, units: string = ATOMIC_COORD_UNITS.cartesian) {
         const factor: number = this.conversionTable[units][ATOMIC_COORD_UNITS.cartesian] || 1;
         return this.reciprocalVectorNorms.map((norm: number) => {
             return math.max(1, math.ceil(lodash.round(norm / (spacing * factor), 4))) as number;
-        });
+        }) as Vector3DSchema;
     }
 
     /**

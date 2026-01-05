@@ -123,7 +123,6 @@ class ReciprocalLattice extends lattice_1.Lattice {
      * Note: just as the lattice vectors spacing is in cartesian (2pi / a) units by default
      * @param {number} spacing - maximum Spacing between k-points
      * @param {string} units - units of spacing parameter (default: 2pi / a)
-     * @return {number[]}
      */
     getDimensionsFromSpacing(spacing, units = constants_1.ATOMIC_COORD_UNITS.cartesian) {
         const factor = this.conversionTable[units][constants_1.ATOMIC_COORD_UNITS.cartesian] || 1;
