@@ -66,33 +66,33 @@ function materialPropertiesMixin(item) {
         },
         get name() {
             var _a;
-            return (_a = item.prop("name")) !== null && _a !== void 0 ? _a : this.formula; // if name is not set, use formula, but keep empty string
+            return (_a = this.prop("name")) !== null && _a !== void 0 ? _a : this.formula; // if name is not set, use formula, but keep empty string
         },
         set name(name) {
-            item.setProp("name", name);
+            this.setProp("name", name);
         },
         get src() {
-            return item.prop("src");
+            return this.prop("src");
         },
         set src(src) {
-            item.setProp("src", src);
+            this.setProp("src", src);
         },
         updateFormula() {
-            item.setProp("formula", this.Basis.formula);
-            item.setProp("unitCellFormula", this.Basis.unitCellFormula);
+            this.setProp("formula", this.Basis.formula);
+            this.setProp("unitCellFormula", this.Basis.unitCellFormula);
         },
         /**
          * Gets Bolean value for whether or not a material is non-periodic vs periodic.
          * False = periodic, True = non-periodic
          */
         get isNonPeriodic() {
-            return item.prop("isNonPeriodic", false);
+            return this.prop("isNonPeriodic", false);
         },
         /**
          * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
          */
         set isNonPeriodic(bool) {
-            item.setProp("isNonPeriodic", bool);
+            this.setProp("isNonPeriodic", bool);
         },
         /**
          * @summary Returns the specific derived property (as specified by name) for a material.
@@ -104,21 +104,21 @@ function materialPropertiesMixin(item) {
          * @summary Returns the derived properties array for a material.
          */
         getDerivedProperties() {
-            return item.prop("derivedProperties", []);
+            return this.prop("derivedProperties", []);
         },
         /**
          * Gets material's formula
          */
         get formula() {
-            return item.prop("formula") || this.Basis.formula;
+            return this.prop("formula") || this.Basis.formula;
         },
         get unitCellFormula() {
-            return item.prop("unitCellFormula") || this.Basis.unitCellFormula;
+            return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
         },
         unsetFileProps() {
-            item.unsetProp("src");
-            item.unsetProp("icsdId");
-            item.unsetProp("external");
+            this.unsetProp("src");
+            this.unsetProp("icsdId");
+            this.unsetProp("external");
         },
         /**
          * @param textOrObject Basis text or JSON object.
@@ -133,7 +133,7 @@ function materialPropertiesMixin(item) {
             else {
                 basis = textOrObject;
             }
-            item.setProp("basis", basis);
+            this.setProp("basis", basis);
             this.unsetFileProps();
             this.updateFormula();
         },
@@ -151,7 +151,7 @@ function materialPropertiesMixin(item) {
             this.setBasisConstraints(constraintsInstances);
         },
         get basis() {
-            return item.prop("basis");
+            return this.requiredProp("basis");
         },
         // returns the instance of {ConstrainedBasis} class
         get Basis() {
@@ -169,7 +169,7 @@ function materialPropertiesMixin(item) {
             return this.Basis.uniqueElements;
         },
         get lattice() {
-            return item.prop("lattice");
+            return this.prop("lattice");
         },
         set lattice(config) {
             const originalIsInCrystalUnits = this.Basis.isInCrystalUnits;
@@ -181,8 +181,8 @@ function materialPropertiesMixin(item) {
                 basis.toCrystal();
             // Preserve all properties from the original basis to ensure constraints are included
             const newBasisConfig = basis.toJSON();
-            item.setProp("basis", newBasisConfig);
-            item.setProp("lattice", config);
+            this.setProp("basis", newBasisConfig);
+            this.setProp("lattice", config);
             this.unsetFileProps();
         },
         get Lattice() {
@@ -222,10 +222,10 @@ function materialPropertiesMixin(item) {
             return crypto_js_1.default.MD5(message).toString();
         },
         set hash(hash) {
-            item.setProp("hash", hash);
+            this.setProp("hash", hash);
         },
         get hash() {
-            return item.prop("hash");
+            return this.prop("hash");
         },
         /**
          * Calculates hash from basis and lattice as above + scales lattice properties to make lattice.a = 1
@@ -234,10 +234,10 @@ function materialPropertiesMixin(item) {
             return this.calculateHash("", true);
         },
         get external() {
-            return item.prop("external");
+            return this.prop("external");
         },
         set external(external) {
-            item.setProp("external", external);
+            this.setProp("external", external);
         },
         /**
          * Converts basis to crystal/fractional coordinates.
@@ -245,7 +245,7 @@ function materialPropertiesMixin(item) {
         toCrystal() {
             const basis = this.Basis;
             basis.toCrystal();
-            item.setProp("basis", basis.toJSON());
+            this.setProp("basis", basis.toJSON());
         },
         /**
          * Converts current material's basis coordinates to cartesian.
@@ -254,7 +254,7 @@ function materialPropertiesMixin(item) {
         toCartesian() {
             const basis = this.Basis;
             basis.toCartesian();
-            item.setProp("basis", basis.toJSON());
+            this.setProp("basis", basis.toJSON());
         },
         /**
          * Returns material's basis in XYZ format.
@@ -293,7 +293,7 @@ function materialPropertiesMixin(item) {
          * Returns a copy of the material with conventional cell constructed instead of primitive.
          */
         getACopyWithConventionalCell() {
-            const material = item.clone();
+            const material = this.clone();
             // if conventional and primitive cells are the same => return a copy.
             if ((0, conventional_cell_1.isConventionalCellSameAsPrimitiveForLatticeType)(this.Lattice.type))
                 return material;

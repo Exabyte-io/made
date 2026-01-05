@@ -136,24 +136,24 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
         },
 
         get name() {
-            return item.prop("name") ?? this.formula; // if name is not set, use formula, but keep empty string
+            return this.prop("name") ?? this.formula; // if name is not set, use formula, but keep empty string
         },
 
         set name(name: string) {
-            item.setProp("name", name);
+            this.setProp("name", name);
         },
 
         get src() {
-            return item.prop("src");
+            return this.prop("src");
         },
 
         set src(src: FileSourceSchema | undefined) {
-            item.setProp("src", src);
+            this.setProp("src", src);
         },
 
         updateFormula() {
-            item.setProp("formula", this.Basis.formula);
-            item.setProp("unitCellFormula", this.Basis.unitCellFormula);
+            this.setProp("formula", this.Basis.formula);
+            this.setProp("unitCellFormula", this.Basis.unitCellFormula);
         },
 
         /**
@@ -161,14 +161,14 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
          * False = periodic, True = non-periodic
          */
         get isNonPeriodic(): boolean {
-            return item.prop("isNonPeriodic", false);
+            return this.prop("isNonPeriodic", false);
         },
 
         /**
          * @summary Sets the value of isNonPeriodic based on Boolean value passed as an argument.
          */
         set isNonPeriodic(bool: boolean) {
-            item.setProp("isNonPeriodic", bool);
+            this.setProp("isNonPeriodic", bool);
         },
 
         /**
@@ -182,24 +182,24 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
          * @summary Returns the derived properties array for a material.
          */
         getDerivedProperties(): DerivedPropertiesSchema {
-            return item.prop("derivedProperties", []);
+            return this.prop("derivedProperties", []);
         },
 
         /**
          * Gets material's formula
          */
         get formula(): string {
-            return item.prop("formula") || this.Basis.formula;
+            return this.prop("formula") || this.Basis.formula;
         },
 
         get unitCellFormula(): string {
-            return item.prop("unitCellFormula") || this.Basis.unitCellFormula;
+            return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
         },
 
         unsetFileProps() {
-            item.unsetProp("src");
-            item.unsetProp("icsdId");
-            item.unsetProp("external");
+            this.unsetProp("src");
+            this.unsetProp("icsdId");
+            this.unsetProp("external");
         },
 
         /**
@@ -214,7 +214,7 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
             } else {
                 basis = textOrObject as BasisConfig;
             }
-            item.setProp("basis", basis);
+            this.setProp("basis", basis);
             this.unsetFileProps();
             this.updateFormula();
         },
@@ -234,9 +234,8 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
             this.setBasisConstraints(constraintsInstances);
         },
 
-        get basis(): OptionallyConstrainedBasisConfig {
-            return item.prop<BasisConfig>("basis") as BasisConfig &
-                Partial<Pick<ConstrainedBasisConfig, "constraints">>;
+        get basis() {
+            return this.requiredProp<OptionallyConstrainedBasisConfig>("basis");
         },
 
         // returns the instance of {ConstrainedBasis} class
@@ -246,7 +245,7 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
             return new ConstrainedBasis({
                 ...basisData,
                 cell: this.Lattice.vectors,
-                constraints: (basisData as ConstrainedBasisConfig).constraints || [],
+                constraints: basisData.constraints || [],
             });
         },
 
@@ -258,7 +257,7 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
         },
 
         get lattice(): LatticeSchema {
-            return item.prop("lattice") as LatticeSchema;
+            return this.prop("lattice") as LatticeSchema;
         },
 
         set lattice(config: LatticeSchema) {
@@ -272,8 +271,8 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
 
             // Preserve all properties from the original basis to ensure constraints are included
             const newBasisConfig = basis.toJSON();
-            item.setProp("basis", newBasisConfig);
-            item.setProp("lattice", config);
+            this.setProp("basis", newBasisConfig);
+            this.setProp("lattice", config);
 
             this.unsetFileProps();
         },
@@ -317,11 +316,11 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
         },
 
         set hash(hash: string) {
-            item.setProp("hash", hash);
+            this.setProp("hash", hash);
         },
 
         get hash(): string {
-            return item.prop("hash") as string;
+            return this.prop("hash") as string;
         },
 
         /**
@@ -332,10 +331,10 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
         },
 
         get external() {
-            return item.prop<MaterialSchema["external"]>("external");
+            return this.prop<MaterialSchema["external"]>("external");
         },
         set external(external: MaterialSchema["external"]) {
-            item.setProp("external", external);
+            this.setProp("external", external);
         },
 
         /**
@@ -344,7 +343,7 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
         toCrystal() {
             const basis = this.Basis;
             basis.toCrystal();
-            item.setProp("basis", basis.toJSON());
+            this.setProp("basis", basis.toJSON());
         },
 
         /**
@@ -354,7 +353,7 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
         toCartesian() {
             const basis = this.Basis;
             basis.toCartesian();
-            item.setProp("basis", basis.toJSON());
+            this.setProp("basis", basis.toJSON());
         },
 
         /**
@@ -396,7 +395,7 @@ function materialPropertiesMixin<T extends Base = Base>(item: T) {
          * Returns a copy of the material with conventional cell constructed instead of primitive.
          */
         getACopyWithConventionalCell(): T {
-            const material = item.clone();
+            const material = this.clone();
 
             // if conventional and primitive cells are the same => return a copy.
             if (isConventionalCellSameAsPrimitiveForLatticeType(this.Lattice.type))
