@@ -21,7 +21,6 @@ dependencies = [
     "mat3ra-utils",
     "mat3ra-esse",
     "mat3ra-code"
-
 ]
 
 [project.optional-dependencies]
@@ -31,6 +30,7 @@ tools = [
     "pymatgen==2024.4.13",
     "ase",
     "pymatgen-analysis-defects==2024.4.23",
+    "mat3ra-periodic-table>=2025.12.26",
 ]
 dev = [
     "pre-commit",

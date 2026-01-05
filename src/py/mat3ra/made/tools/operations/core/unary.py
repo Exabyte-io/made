@@ -84,12 +84,11 @@ def perturb(
     perturbed_coordinates: List[List[float]] = []
 
     for coordinate in original_coordinates:
-        # If func_holder returns a scalar, assume z-axis; otherwise vector
-        displacement = perturbation_function.apply_function(coordinate)
+        displacement = perturbation_function.apply_function(coordinate, material=new_material)
+
         if isinstance(displacement, (list, tuple, np.ndarray)):
             delta = np.array(displacement)
         else:
-            # scalar: apply to z-axis
             delta = np.array([0.0, 0.0, displacement])
 
         new_coordinate = np.array(coordinate) + delta
