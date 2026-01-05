@@ -54,20 +54,18 @@ export class ReciprocalLattice extends Lattice {
 
     /**
      * Norms of reciprocal vectors.
-     * @return {number[]}
      */
-    get reciprocalVectorNorms(): number[] {
-        return this.reciprocalVectors.map((vec) => math.norm(vec) as number);
+    get reciprocalVectorNorms(): Vector3DSchema {
+        return this.reciprocalVectors.map((vec) => math.norm(vec) as number) as Vector3DSchema;
     }
 
     /**
      * Ratio of reciprocal vector norms scaled by the inverse of the largest component.
-     * @return {number[]}
      */
-    get reciprocalVectorRatios(): number[] {
+    get reciprocalVectorRatios(): Vector3DSchema {
         const norms: number[] = this.reciprocalVectorNorms;
         const maxNorm: number = math.max(...norms) as number;
-        return norms.map((n: number) => n / maxNorm);
+        return norms.map((n: number) => n / maxNorm) as Vector3DSchema;
     }
 
     /**

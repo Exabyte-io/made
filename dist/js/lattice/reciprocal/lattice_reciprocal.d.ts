@@ -23,14 +23,12 @@ export declare class ReciprocalLattice extends Lattice {
     get reciprocalVectors(): Vector3DSchema[];
     /**
      * Norms of reciprocal vectors.
-     * @return {number[]}
      */
-    get reciprocalVectorNorms(): number[];
+    get reciprocalVectorNorms(): Vector3DSchema;
     /**
      * Ratio of reciprocal vector norms scaled by the inverse of the largest component.
-     * @return {number[]}
      */
-    get reciprocalVectorRatios(): number[];
+    get reciprocalVectorRatios(): Vector3DSchema;
     /**
      * Get point (in crystal coordinates) in cartesian coordinates.
      * @param {KPointCoordinates} point - point in 3D space

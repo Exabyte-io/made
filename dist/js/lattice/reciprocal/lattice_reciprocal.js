@@ -27,14 +27,12 @@ class ReciprocalLattice extends lattice_1.Lattice {
     }
     /**
      * Norms of reciprocal vectors.
-     * @return {number[]}
      */
     get reciprocalVectorNorms() {
         return this.reciprocalVectors.map((vec) => math_1.math.norm(vec));
     }
     /**
      * Ratio of reciprocal vector norms scaled by the inverse of the largest component.
-     * @return {number[]}
      */
     get reciprocalVectorRatios() {
         const norms = this.reciprocalVectorNorms;
