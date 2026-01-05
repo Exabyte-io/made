@@ -100,7 +100,7 @@ class ReciprocalLattice extends lattice_1.Lattice {
     /**
      * Calculate grid dimensions from total number of k-points.
      * @param {number} nKpoints - Total number of k-points.
-     * @return {number[]} - Grid dimensions
+     * @return Grid dimensions
      */
     getDimensionsFromPointsCount(nKpoints) {
         const indices = [0, 1, 2];

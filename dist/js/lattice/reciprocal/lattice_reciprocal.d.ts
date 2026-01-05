@@ -65,9 +65,9 @@ export declare class ReciprocalLattice extends Lattice {
     /**
      * Calculate grid dimensions from total number of k-points.
      * @param {number} nKpoints - Total number of k-points.
-     * @return {number[]} - Grid dimensions
+     * @return Grid dimensions
      */
-    getDimensionsFromPointsCount(nKpoints: number): number[];
+    getDimensionsFromPointsCount(nKpoints: number): [number, number, number];
     get conversionTable(): ConversionTable;
     /**
      * Calculate grid dimensions from k-point spacing, i.e.
