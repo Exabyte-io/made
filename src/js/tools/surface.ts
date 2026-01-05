@@ -1,3 +1,4 @@
+import { math } from "@mat3ra/code/dist/js/math";
 import {
     Coordinate3DSchema,
     MaterialSchema,
@@ -8,7 +9,6 @@ import {
 import { Cell } from "../cell/cell";
 import { Lattice } from "../lattice/lattice";
 import { Material } from "../material";
-import math from "../math";
 import SupercellTools from "./supercell";
 
 const MULT = math.multiply;

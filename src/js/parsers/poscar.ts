@@ -1,3 +1,4 @@
+import { math } from "@mat3ra/code/dist/js/math";
 import {
     BasisSchema,
     Coordinate3DSchema,
@@ -13,7 +14,6 @@ import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { AtomicConstraintValue } from "../constraints/constraints";
 import { Lattice } from "../lattice/lattice";
-import math from "../math";
 
 const _print = (x: number, printFormat = "%14.9f") => s.sprintf(printFormat, math.precise(x));
 const _latticeVectorsToString = (vectors: Vector3DSchema[]) =>

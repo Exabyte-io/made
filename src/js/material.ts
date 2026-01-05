@@ -1,32 +1,50 @@
-import { HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import {
+    type DefaultableInMemoryEntityConstructor,
+    defaultableEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
+import {
+    HasConsistencyChecksInMemoryEntityConstructor,
+    hasConsistencyChecksMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/HasConsistencyChecksMixin";
+import {
+    type HasMetadataInMemoryEntityConstructor,
+    hasMetadataMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/HasMetadataMixin";
+import {
+    type NamedInMemoryEntityConstructor,
+    namedEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { ConsistencyCheck, MaterialSchema } from "@mat3ra/esse/dist/js/types";
 
 import {
     type MaterialMixinConstructor,
     defaultMaterialConfig,
     materialMixin,
-    materialMixinStaticProps,
 } from "./materialMixin";
 
 export { defaultMaterialConfig };
 
-const BaseInMemoryEntity = HasConsistencyChecksHasMetadataNamedDefaultableInMemoryEntity;
-
-type BaseMaterial = MaterialMixinConstructor & typeof BaseInMemoryEntity;
+type BaseMaterial = typeof InMemoryEntity &
+    HasConsistencyChecksInMemoryEntityConstructor &
+    DefaultableInMemoryEntityConstructor &
+    HasMetadataInMemoryEntityConstructor<MaterialSchema["metadata"]> &
+    NamedInMemoryEntityConstructor &
+    MaterialMixinConstructor;
 
 // TODO: remove in-line type creation
 type MaterialSchemaWithConsistencyChecksAsString = Omit<MaterialSchema, "consistencyChecks"> & {
     consistencyChecks?: ConsistencyCheck[];
 };
 
-export class Material
-    extends (BaseInMemoryEntity as BaseMaterial)
-    implements MaterialSchemaWithConsistencyChecksAsString
-{
-    constructor(config: MaterialSchema) {
-        super(config);
-        materialMixin(this);
-    }
+type Schema = MaterialSchemaWithConsistencyChecksAsString;
+
+export class Material extends (InMemoryEntity as BaseMaterial) implements Schema {
+    declare static createDefault: () => Material;
 }
 
-materialMixinStaticProps(Material);
+namedEntityMixin(Material.prototype);
+defaultableEntityMixin(Material);
+hasConsistencyChecksMixin(Material.prototype);
+hasMetadataMixin(Material.prototype);
+materialMixin(Material);

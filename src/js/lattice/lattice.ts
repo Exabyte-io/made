@@ -1,5 +1,6 @@
 import { HASH_TOLERANCE } from "@mat3ra/code/dist/js/constants";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
+import { math } from "@mat3ra/code/dist/js/math";
 import {
     Coordinate3DSchema,
     LatticeSchema,
@@ -12,7 +13,6 @@ import * as lodash from "lodash";
 
 import { Cell } from "../cell/cell";
 import { getPrimitiveLatticeVectorsFromConfig } from "../cell/primitive_cell";
-import math from "../math";
 import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
 import { UnitCell, UnitCellProps } from "./unit_cell";
 

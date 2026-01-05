@@ -1,6 +1,5 @@
+import { math } from "@mat3ra/code/dist/js/math";
 import { LatticeSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
-
-import math from "../math";
 
 /**
  * Routines for calculating primitive cell vectors from conventional cell Bravais parameters.
