@@ -4,12 +4,6 @@ from typing import List, Optional
 import numpy as np
 from mat3ra.code.constants import HASH_TOLERANCE
 from mat3ra.code.entity import InMemoryEntityPydantic
-
-
-def _fmt_hash_value(v: float) -> str:
-    """Format a float for hash strings to match JS number.toString() behavior."""
-    rounded = round(v, HASH_TOLERANCE)
-    return str(int(rounded)) if rounded == int(rounded) else str(rounded)
 from mat3ra.esse.models.properties_directory.structural.lattice import (
     LatticeSchema,
     LatticeTypeEnum,
@@ -138,7 +132,7 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
         """Mirrors JS Lattice.getHashString(isScaled). Rounds to HASH_TOLERANCE decimal places."""
         scale = self.a if is_scaled else 1
         values = [self.a / scale, self.b / scale, self.c / scale, self.alpha, self.beta, self.gamma]
-        return ";".join(_fmt_hash_value(v) for v in values) + ";"
+        return ";".join(f"{round(v, HASH_TOLERANCE):g}" for v in values) + ";"
 
     def get_scaled_by_matrix(self, matrix: List[List[float]]):
         """

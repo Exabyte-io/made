@@ -125,3 +125,4 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
     @property
     def scaled_hash(self) -> str:
         return self.calculate_hash(is_scaled=True)
+

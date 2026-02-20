@@ -4,7 +4,6 @@ import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
 from mat3ra.code.constants import HASH_TOLERANCE
 from mat3ra.code.entity import InMemoryEntityPydantic
-from mat3ra.made.lattice import _fmt_hash_value
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material import BasisSchema, BasisUnitsEnum
 from mat3ra.made.basis.coordinates import Coordinates
@@ -101,7 +100,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         parts = []
         for elem, coord in zip(self.elements.to_dict(), self.coordinates.to_dict()):
             label = labels_map.get(elem["id"], "")
-            rounded = [_fmt_hash_value(v % 1) for v in coord["value"]]
+            rounded = [f"{round(v % 1, HASH_TOLERANCE):g}" for v in coord["value"]]
             parts.append(f"{elem['value']}{label} {','.join(rounded)}")
         if original_is_in_cartesian:
             self.to_cartesian()
