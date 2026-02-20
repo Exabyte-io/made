@@ -1,3 +1,4 @@
+import hashlib
 from typing import Any, List, Optional, Union
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
@@ -111,3 +112,16 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
 
     def set_labels_from_value(self, value: Union[int, str]) -> None:
         self.basis.set_labels_from_list([value] * self.basis.number_of_atoms)
+
+    def calculate_hash(self, salt: str = "", is_scaled: bool = False) -> str:
+        """Mirrors JS materialMixin.calculateHash(). MD5 of basis + lattice hash strings."""
+        message = f"{self.basis.hash_string}#{self.lattice.get_hash_string(is_scaled)}#{salt}"
+        return hashlib.md5(message.encode()).hexdigest()
+
+    @property
+    def hash(self) -> str:
+        return self.calculate_hash()
+
+    @property
+    def scaled_hash(self) -> str:
+        return self.calculate_hash(is_scaled=True)

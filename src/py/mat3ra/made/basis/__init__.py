@@ -2,7 +2,9 @@ from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 from mat3ra.code.array_with_ids import ArrayWithIds
+from mat3ra.code.constants import HASH_TOLERANCE
 from mat3ra.code.entity import InMemoryEntityPydantic
+from mat3ra.made.lattice import _fmt_hash_value
 from mat3ra.esse.models.core.abstract.matrix_3x3 import Matrix3x3Schema
 from mat3ra.esse.models.material import BasisSchema, BasisUnitsEnum
 from mat3ra.made.basis.coordinates import Coordinates
@@ -86,6 +88,24 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
             labels=ArrayWithIds.from_list_of_dicts(labels),
             constraints=ArrayWithIds.from_list_of_dicts(constraints),
         )
+
+    @property
+    def hash_string(self) -> str:
+        """
+        Mirrors JS Basis.hashString (getAsSortedString in crystal units).
+        Converts to crystal, applies mod 1 to bring coords into [0,1), builds sorted atom strings.
+        """
+        original_is_in_cartesian = self.is_in_cartesian_units
+        self.to_crystal()
+        labels_map = {lbl["id"]: str(lbl["value"]) for lbl in self.labels.to_dict()}
+        parts = []
+        for elem, coord in zip(self.elements.to_dict(), self.coordinates.to_dict()):
+            label = labels_map.get(elem["id"], "")
+            rounded = [_fmt_hash_value(v % 1) for v in coord["value"]]
+            parts.append(f"{elem['value']}{label} {','.join(rounded)}")
+        if original_is_in_cartesian:
+            self.to_cartesian()
+        return ";".join(sorted(parts)) + ";"
 
     @property
     def is_in_crystal_units(self):
