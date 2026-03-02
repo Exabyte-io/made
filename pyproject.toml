@@ -20,7 +20,7 @@ dependencies = [
     "numpy<=1.26.4",
     "mat3ra-utils",
     "mat3ra-esse",
-    "mat3ra-code @ git+https://github.com/Exabyte-io/code.git@94858302cb2eadceabba23071c0a3190fda6e238"
+    "mat3ra-code"
 ]
 
 [project.optional-dependencies]
