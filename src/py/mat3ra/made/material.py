@@ -4,7 +4,7 @@ from typing import Any, List, Optional, Union
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
 from mat3ra.esse.models.material import MaterialSchema
-from pydantic import SkipValidation
+from pydantic import ConfigDict, SkipValidation
 
 from .basis import Basis
 from .lattice import Lattice
@@ -54,6 +54,8 @@ defaultMaterialConfig = {
 
 # TODO: replace `-Pydantic` with actual class in the next PR
 class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic):
+    model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
+    
     __default_config__ = defaultMaterialConfig
     __schema__ = MaterialSchema
 
