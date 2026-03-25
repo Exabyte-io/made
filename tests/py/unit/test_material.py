@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 from mat3ra.made.basis import Basis, Coordinates
@@ -7,6 +10,13 @@ from mat3ra.utils import assertion as assertion_utils
 from unit.fixtures.bulk import BULK_Si_PRIMITIVE
 from unit.fixtures.slab import BULK_Si_CONVENTIONAL
 from unit.utils import assert_two_entities_deep_almost_equal
+
+FIXTURES_DIR = Path(__file__).parents[2] / "fixtures"
+
+
+def load_fixture(name: str) -> dict:
+    with open(FIXTURES_DIR / name) as f:
+        return json.load(f)
 
 
 def test_create_default():
@@ -118,3 +128,11 @@ def test_set_labels_from_list(initial_labels, reset_labels, expected_final):
 
     assert len(material.basis.labels.values) == len(expected_final)
     assert material.basis.labels.values == expected_final
+
+
+@pytest.mark.parametrize("fixture_file", ["si-standata.json", "Graphene.json"])
+def test_calculate_hash(fixture_file):
+    fixture = load_fixture(fixture_file)
+    material = Material.create(fixture)
+    assert material.hash == fixture["hash"]
+    assert material.scaled_hash == fixture["scaledHash"]

@@ -2,6 +2,7 @@ import math
 from typing import List, Optional
 
 import numpy as np
+from mat3ra.code.constants import HASH_TOLERANCE
 from mat3ra.code.entity import InMemoryEntityPydantic
 from mat3ra.esse.models.properties_directory.structural.lattice import (
     LatticeSchema,
@@ -126,6 +127,12 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
     @property
     def cell_volume_rounded(self) -> float:
         return self.vectors.volume_rounded
+
+    def get_hash_string(self, is_scaled: bool = False) -> str:
+        """Mirrors JS Lattice.getHashString(isScaled). Rounds to HASH_TOLERANCE decimal places."""
+        scale = self.a if is_scaled else 1
+        values = [self.a / scale, self.b / scale, self.c / scale, self.alpha, self.beta, self.gamma]
+        return ";".join(f"{round(v, HASH_TOLERANCE):g}" for v in values) + ";"
 
     def get_scaled_by_matrix(self, matrix: List[List[float]]):
         """

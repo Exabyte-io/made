@@ -1,9 +1,10 @@
+import hashlib
 from typing import Any, List, Optional, Union
 
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
 from mat3ra.esse.models.material import MaterialSchema
-from pydantic import SkipValidation
+from pydantic import ConfigDict, SkipValidation
 
 from .basis import Basis
 from .lattice import Lattice
@@ -53,6 +54,8 @@ defaultMaterialConfig = {
 
 # TODO: replace `-Pydantic` with actual class in the next PR
 class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic):
+    model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
+    
     __default_config__ = defaultMaterialConfig
     __schema__ = MaterialSchema
 
@@ -111,3 +114,17 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
 
     def set_labels_from_value(self, value: Union[int, str]) -> None:
         self.basis.set_labels_from_list([value] * self.basis.number_of_atoms)
+
+    def calculate_hash(self, salt: str = "", is_scaled: bool = False) -> str:
+        """Mirrors JS materialMixin.calculateHash(). MD5 of basis + lattice hash strings."""
+        message = f"{self.basis.hash_string}#{self.lattice.get_hash_string(is_scaled)}#{salt}"
+        return hashlib.md5(message.encode()).hexdigest()
+
+    @property
+    def hash(self) -> str:
+        return self.calculate_hash()
+
+    @property
+    def scaled_hash(self) -> str:
+        return self.calculate_hash(is_scaled=True)
+
