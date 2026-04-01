@@ -24,3 +24,13 @@ def test_create_strain(material_config, strain_matrix, expected_material_config)
     assert build_step.configuration["type"] == "StrainConfiguration"
     assert build_step.configuration["strain_matrix"] == strain_matrix
     assert build_step.build_parameters == {}
+
+
+def test_create_strain_with_scale_factor():
+    material = Material.create(BULK_Si_CONVENTIONAL)
+    strained_material = create_strain(material, scale_factor=1.1)
+
+    assert strained_material.name == f"{material.name} (scale=1.1000)"
+    build_step = strained_material.metadata.build[-1]
+    assert build_step.configuration["scale_factor"] == 1.1
+    assert build_step.configuration["strain_matrix"] == [[1.1, 0.0, 0.0], [0.0, 1.1, 0.0], [0.0, 0.0, 1.1]]
