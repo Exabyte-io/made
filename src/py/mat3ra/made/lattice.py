@@ -129,9 +129,12 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
         return self.vectors.volume_rounded
 
     @property
+    def reciprocal_vectors(self):
+        return np.linalg.inv(np.array(self.vector_arrays, dtype=float)).T.tolist()
+
+    @property
     def reciprocal_vector_norms(self) -> List[float]:
-        reciprocal_vectors = np.linalg.inv(np.array(self.vector_arrays, dtype=float)).T
-        return [float(np.linalg.norm(vector)) for vector in reciprocal_vectors]
+        return [float(np.linalg.norm(vector)) for vector in self.reciprocal_vectors]
 
     @property
     def reciprocal_vector_ratios(self) -> List[float]:

@@ -1,3 +1,5 @@
+import pytest
+
 from mat3ra.code.vector import RoundedVector3D
 from mat3ra.made.lattice import Lattice
 from mat3ra.utils import assertion as assertion_utils
@@ -73,6 +75,29 @@ def test_lattice_get_scaled_by_matrix():
     assert lattice.units == DEFAULT_UNITS
     assert lattice.type.value == DEFAULT_TYPE
     assertion_utils.assert_deep_almost_equal(lattice.vector_arrays, expected_vector_values)
+
+
+def test_reciprocal_vectors():
+    lattice = Lattice(a=2.0, b=3.0, c=4.0)
+    expected_vectors = [[0.5, 0.0, 0.0], [0.0, 1 / 3, 0.0], [0.0, 0.0, 0.25]]
+    assertion_utils.assert_deep_almost_equal(lattice.reciprocal_vectors, expected_vectors)
+
+
+def test_reciprocal_vector_norms():
+    lattice = Lattice(a=2.0, b=3.0, c=4.0)
+    expected_norms = [0.5, 1 / 3, 0.25]
+    assertion_utils.assert_deep_almost_equal(lattice.reciprocal_vector_norms, expected_norms)
+
+
+@pytest.mark.parametrize(
+    "lattice, expected",
+    [
+        (Lattice(a=2.0, b=3.0, c=4.0), [1.0, 0.667, 0.5]),
+        (Lattice(a=5.43, b=5.43, c=5.43), [1.0, 1.0, 1.0]),
+    ],
+)
+def test_reciprocal_vector_ratios(lattice, expected):
+    assert lattice.reciprocal_vector_ratios == expected
 
 
 # to test: create, calculate_vectors, from_vectors, get_lattice_type, clone
