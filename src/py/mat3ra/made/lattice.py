@@ -128,6 +128,20 @@ class Lattice(RoundNumericValuesMixin, LatticeSchemaVectorless, InMemoryEntityPy
     def cell_volume_rounded(self) -> float:
         return self.vectors.volume_rounded
 
+    @property
+    def reciprocal_vectors(self):
+        return np.linalg.inv(np.array(self.vector_arrays, dtype=float)).T.tolist()
+
+    @property
+    def reciprocal_vector_norms(self) -> List[float]:
+        return [float(np.linalg.norm(vector)) for vector in self.reciprocal_vectors]
+
+    @property
+    def reciprocal_vector_ratios(self) -> List[float]:
+        norms = self.reciprocal_vector_norms
+        max_norm = max(norms)
+        return [round(float(value / max_norm), 3) for value in norms]
+
     def get_hash_string(self, is_scaled: bool = False) -> str:
         """Mirrors JS Lattice.getHashString(isScaled). Rounds to HASH_TOLERANCE decimal places."""
         scale = self.a if is_scaled else 1
