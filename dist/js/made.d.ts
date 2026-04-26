@@ -100,4 +100,3 @@ export declare const Made: {
     };
 };
 export { coefficients, tolerance, units, ATOMIC_COORD_UNITS, Material, defaultMaterialConfig, Lattice, Cell, UnitCell, nonPeriodicLatticeScalingFactor, ReciprocalLattice, Basis, AtomicConstraints, parsers, tools, LATTICE_TYPE_CONFIGS, DEFAULT_LATTICE_UNITS, };
-export type { MaterialInMemoryEntity } from "./materialMixin";
