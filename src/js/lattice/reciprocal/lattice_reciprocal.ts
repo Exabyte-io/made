@@ -1,8 +1,8 @@
 import { ATOMIC_COORD_UNITS, units as UNITS } from "@mat3ra/code/dist/js/constants";
+import { math } from "@mat3ra/code/dist/js/math";
 import { Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 import lodash from "lodash";
 
-import math from "../../math";
 import { Lattice } from "../lattice";
 import { paths } from "./paths";
 import { symmetryPoints } from "./symmetry_points";
@@ -54,20 +54,18 @@ export class ReciprocalLattice extends Lattice {
 
     /**
      * Norms of reciprocal vectors.
-     * @return {number[]}
      */
-    get reciprocalVectorNorms(): number[] {
-        return this.reciprocalVectors.map((vec) => math.norm(vec) as number);
+    get reciprocalVectorNorms(): Vector3DSchema {
+        return this.reciprocalVectors.map((vec) => math.norm(vec) as number) as Vector3DSchema;
     }
 
     /**
      * Ratio of reciprocal vector norms scaled by the inverse of the largest component.
-     * @return {number[]}
      */
-    get reciprocalVectorRatios(): number[] {
+    get reciprocalVectorRatios(): Vector3DSchema {
         const norms: number[] = this.reciprocalVectorNorms;
         const maxNorm: number = math.max(...norms) as number;
-        return norms.map((n: number) => n / maxNorm);
+        return norms.map((n: number) => n / maxNorm) as Vector3DSchema;
     }
 
     /**
@@ -139,11 +137,11 @@ export class ReciprocalLattice extends Lattice {
     /**
      * Calculate grid dimensions from total number of k-points.
      * @param {number} nKpoints - Total number of k-points.
-     * @return {number[]} - Grid dimensions
+     * @return Grid dimensions
      */
-    getDimensionsFromPointsCount(nKpoints: number): number[] {
-        const indices: number[] = [0, 1, 2];
-        return indices.map((i) => this.calculateDimension(nKpoints, i));
+    getDimensionsFromPointsCount(nKpoints: number) {
+        const indices = [0, 1, 2] as const;
+        return indices.map((i) => this.calculateDimension(nKpoints, i)) as Vector3DSchema;
     }
 
     get conversionTable(): ConversionTable {
@@ -164,16 +162,12 @@ export class ReciprocalLattice extends Lattice {
      * Note: just as the lattice vectors spacing is in cartesian (2pi / a) units by default
      * @param {number} spacing - maximum Spacing between k-points
      * @param {string} units - units of spacing parameter (default: 2pi / a)
-     * @return {number[]}
      */
-    getDimensionsFromSpacing(
-        spacing: number,
-        units: string = ATOMIC_COORD_UNITS.cartesian,
-    ): number[] {
+    getDimensionsFromSpacing(spacing: number, units: string = ATOMIC_COORD_UNITS.cartesian) {
         const factor: number = this.conversionTable[units][ATOMIC_COORD_UNITS.cartesian] || 1;
         return this.reciprocalVectorNorms.map((norm: number) => {
             return math.max(1, math.ceil(lodash.round(norm / (spacing * factor), 4))) as number;
-        });
+        }) as Vector3DSchema;
     }
 
     /**

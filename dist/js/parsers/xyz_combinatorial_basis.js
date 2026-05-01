@@ -22,15 +22,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CombinatorialBasis = exports.WrongBasisFormat = void 0;
+const math_1 = require("@mat3ra/code/dist/js/math");
 const lodash_1 = require("lodash");
 const s = __importStar(require("underscore.string"));
 const cell_1 = require("../cell/cell");
-const math_1 = __importDefault(require("../math"));
 /**
  * @summary Combinatorial XYZ basis class and related. Create and get all information about basis and elements in it.
  * Constructor accepts string in extended XYZ format. Extended XYZ format is as follows:
@@ -202,7 +199,7 @@ class CombinatorialBasis {
             dimensions.push(itemsSet);
         });
         // @ts-ignore // We're multiplying objects with math, not numbers. No type casting will help.
-        const basisSet = math_1.default.cartesianProduct.apply(null, dimensions);
+        const basisSet = math_1.math.cartesianProduct.apply(null, dimensions);
         return basisSet.map((basis) => basis.filter((entry) => entry.element !== VACANCY_CHARACTER));
     }
     /**
