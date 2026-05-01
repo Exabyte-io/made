@@ -7,7 +7,7 @@ import type { BasisConfig } from "./basis/basis";
 import { type ConstrainedBasisConfig, ConstrainedBasis } from "./basis/constrained_basis";
 import { Constraint } from "./constraints/constraints";
 import { Lattice } from "./lattice/lattice";
-interface Material extends HasConsistencyChecks, DefaultableInMemoryEntity, HasMetadata {
+interface Material extends HasConsistencyChecks, DefaultableInMemoryEntity, HasMetadata<MaterialSchema["metadata"]> {
 }
 type MaterialSchemaWithConsistencyChecksAsString = Omit<MaterialSchema, "consistencyChecks"> & {
     consistencyChecks?: ConsistencyCheck[];

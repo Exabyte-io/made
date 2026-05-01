@@ -32,7 +32,10 @@ import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 
-interface Material extends HasConsistencyChecks, DefaultableInMemoryEntity, HasMetadata {}
+interface Material
+    extends HasConsistencyChecks,
+        DefaultableInMemoryEntity,
+        HasMetadata<MaterialSchema["metadata"]> {}
 
 // TODO: remove in-line type creation
 type MaterialSchemaWithConsistencyChecksAsString = Omit<MaterialSchema, "consistencyChecks"> & {
