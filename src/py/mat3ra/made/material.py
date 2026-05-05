@@ -4,7 +4,7 @@ from typing import Any, List, Optional, Union
 from mat3ra.code.constants import AtomicCoordinateUnits, Units
 from mat3ra.code.entity import HasDescriptionHasMetadataNamedDefaultableInMemoryEntityPydantic
 from mat3ra.esse.models.material import MaterialSchema
-from pydantic import ConfigDict, SkipValidation
+from pydantic import ConfigDict, SkipValidation, computed_field
 
 from .basis import Basis
 from .lattice import Lattice
@@ -68,6 +68,8 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         if not self.name and self.formula:
             self.name: str = self.formula
         self.basis.cell = self.lattice.vectors
+        if self.scaledHash is None:
+            self.scaledHash = self.scaled_hash
 
     @classmethod
     def create_from_config_or_class_instance(cls, config_or_instance: Union[dict, "Material"]) -> "Material":
@@ -120,6 +122,7 @@ class Material(MaterialSchema, HasDescriptionHasMetadataNamedDefaultableInMemory
         message = f"{self.basis.hash_string}#{self.lattice.get_hash_string(is_scaled)}#{salt}"
         return hashlib.md5(message.encode()).hexdigest()
 
+    @computed_field
     @property
     def hash(self) -> str:
         return self.calculate_hash()
