@@ -39,6 +39,10 @@ from .fixtures.interface.twisted_nanoribbons import TWISTED_INTERFACE_GRAPHENE_G
 from .fixtures.monolayer import GRAPHENE
 from .utils import OSPlatform, assert_two_entities_deep_almost_equal
 
+HASH_KEY = "hash"
+SCALED_HASH_KEY = "scaledHash"
+BULK_ID = "bulk-id"
+
 Si_Ge_SIMPLE_INTERFACE_TEST_CASE = (
     SimpleNamespace(
         bulk_config=BULK_Si_CONVENTIONAL,
@@ -251,6 +255,25 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
     )
 
     assert_two_entities_deep_almost_equal(interface, expected_interface, atol=PRECISION)
+
+
+def test_create_slab_with_conventional_cell_stores_crystal_hashes_in_metadata():
+    material = Material.create({**BULK_Si_CONVENTIONAL, "_id": BULK_ID})
+
+    slab = create_slab(
+        crystal=material,
+        miller_indices=(0, 0, 1),
+        use_conventional_cell=True,
+        use_orthogonal_c=True,
+        number_of_layers=1,
+        vacuum=0.0,
+    )
+    serialized_slab = slab.model_dump()
+    crystal = serialized_slab["metadata"]["build"][-1]["configuration"]["stack_components"][0]["crystal"]
+
+    assert crystal[HASH_KEY]
+    assert crystal[SCALED_HASH_KEY]
+    assert serialized_slab["metadata"]["bulkId"] == BULK_ID
 
 
 @pytest.mark.parametrize(
