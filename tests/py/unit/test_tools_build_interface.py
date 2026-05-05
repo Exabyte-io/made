@@ -5,6 +5,7 @@ import pytest
 from mat3ra.esse.models.core.reusable.axis_enum import AxisEnum
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface.simple import InterfaceAnalyzer
+from mat3ra.made.tools.analyze.lattice_planes import CrystalLatticePlanesMaterialAnalyzer
 from mat3ra.made.tools.build import MaterialWithBuildMetadata
 from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interface.base.build_parameters import (
     InterfaceBuilderParameters,
@@ -41,7 +42,6 @@ from .utils import OSPlatform, assert_two_entities_deep_almost_equal
 
 HASH_KEY = "hash"
 SCALED_HASH_KEY = "scaledHash"
-BULK_ID = "bulk-id"
 
 Si_Ge_SIMPLE_INTERFACE_TEST_CASE = (
     SimpleNamespace(
@@ -258,11 +258,15 @@ def test_commensurate_interface_creation(material_config, analyzer_params, direc
 
 
 def test_create_slab_with_conventional_cell_stores_crystal_hashes_in_metadata():
-    material = Material.create({**BULK_Si_CONVENTIONAL, "_id": BULK_ID})
+    miller_indices = (0, 0, 1)
+    material = Material.create(BULK_Ni_PRIMITIVE)
+    expected_crystal = CrystalLatticePlanesMaterialAnalyzer(
+        material=material, miller_indices=miller_indices
+    ).material_with_conventional_lattice
 
     slab = create_slab(
         crystal=material,
-        miller_indices=(0, 0, 1),
+        miller_indices=miller_indices,
         use_conventional_cell=True,
         use_orthogonal_c=True,
         number_of_layers=1,
@@ -271,9 +275,9 @@ def test_create_slab_with_conventional_cell_stores_crystal_hashes_in_metadata():
     serialized_slab = slab.model_dump()
     crystal = serialized_slab["metadata"]["build"][-1]["configuration"]["stack_components"][0]["crystal"]
 
-    assert crystal[HASH_KEY]
-    assert crystal[SCALED_HASH_KEY]
-    assert serialized_slab["metadata"]["bulkId"] == BULK_ID
+    assert crystal[HASH_KEY] == expected_crystal.hash
+    assert crystal[SCALED_HASH_KEY] == expected_crystal.scaled_hash
+    assert "bulkId" not in serialized_slab["metadata"]
 
 
 @pytest.mark.parametrize(
