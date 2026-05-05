@@ -40,14 +40,6 @@ def create_slab(
     Returns:
         Material: The generated slab material.
     """
-    material_to_use = crystal
-
-    if use_conventional_cell:
-        crystal_lattice_planes_analyzer = CrystalLatticePlanesMaterialAnalyzer(
-            material=crystal, miller_indices=miller_indices
-        )
-        material_to_use = crystal_lattice_planes_analyzer.material_with_conventional_lattice
-
     if termination_top is not None:
         termination_top_formula = termination_top.formula
     if termination_bottom is not None:
@@ -58,7 +50,7 @@ def create_slab(
         use_orthogonal_c=use_orthogonal_c,
     )
     slab_configuration = SlabConfiguration.from_parameters(
-        material_or_dict=material_to_use,
+        material_or_dict=crystal,
         miller_indices=miller_indices,
         number_of_layers=number_of_layers,
         termination_top_formula=termination_top_formula,
