@@ -154,6 +154,7 @@ function generateConfig(material, millerIndices, numberOfLayers = 1, vx = 1, vy 
         lattice: newLattice.toJSON(),
         // extra parameter for use in creating vacuum etc.
         outOfPlaneAxisIndex,
+        metadata: {},
     };
 }
 exports.default = {

@@ -54,6 +54,7 @@ exports.defaultMaterialConfig = {
             angle: "degree",
         },
     },
+    metadata: {},
 };
 class Material extends entity_1.InMemoryEntity {
     static get defaultConfig() {

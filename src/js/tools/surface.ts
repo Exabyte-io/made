@@ -208,6 +208,7 @@ function generateConfig(
         lattice: newLattice.toJSON(),
         // extra parameter for use in creating vacuum etc.
         outOfPlaneAxisIndex,
+        metadata: {},
     };
 }
 

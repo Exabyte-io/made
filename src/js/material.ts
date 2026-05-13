@@ -35,7 +35,7 @@ import supercellTools from "./tools/supercell";
 interface Material
     extends HasConsistencyChecks,
         DefaultableInMemoryEntity,
-        HasMetadata<MaterialSchema["metadata"]> {}
+        Required<HasMetadata<MaterialSchema["metadata"]>> {}
 
 // TODO: remove in-line type creation
 type MaterialSchemaWithConsistencyChecksAsString = Omit<MaterialSchema, "consistencyChecks"> & {
@@ -86,6 +86,7 @@ export const defaultMaterialConfig: MaterialSchema = {
             angle: "degree",
         },
     },
+    metadata: {},
 };
 
 class Material extends InMemoryEntity implements Schema {
