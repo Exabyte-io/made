@@ -28,7 +28,6 @@ Object.defineProperty(exports, "UnitCell", { enumerable: true, get: function () 
 const material_1 = require("./material");
 Object.defineProperty(exports, "defaultMaterialConfig", { enumerable: true, get: function () { return material_1.defaultMaterialConfig; } });
 Object.defineProperty(exports, "Material", { enumerable: true, get: function () { return material_1.Material; } });
-const math_1 = __importDefault(require("./math"));
 const parsers_1 = __importDefault(require("./parsers/parsers"));
 exports.parsers = parsers_1.default;
 const index_1 = __importDefault(require("./tools/index"));
@@ -38,7 +37,6 @@ exports.Made = {
     tolerance: constants_1.tolerance,
     units: constants_1.units,
     ATOMIC_COORD_UNITS: constants_1.ATOMIC_COORD_UNITS,
-    math: math_1.default,
     Material: material_1.Material,
     defaultMaterialConfig: material_1.defaultMaterialConfig,
     Lattice: lattice_1.Lattice,

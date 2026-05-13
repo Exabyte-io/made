@@ -1,9 +1,9 @@
+import { math } from "@mat3ra/code/dist/js/math";
 import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
 import { chunk, flatten } from "lodash";
 
 import { Basis } from "../basis/basis";
 import { AtomicCoordinateValue, Coordinate } from "../basis/coordinates";
-import math from "../math";
 
 const ADD = math.add;
 const MULT = math.multiply;

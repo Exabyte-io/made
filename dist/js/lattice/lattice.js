@@ -22,17 +22,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Lattice = exports.LatticeVectors = exports.nonPeriodicLatticeScalingFactor = void 0;
 const constants_1 = require("@mat3ra/code/dist/js/constants");
 const entity_1 = require("@mat3ra/code/dist/js/entity");
+const math_1 = require("@mat3ra/code/dist/js/math");
 const lodash = __importStar(require("lodash"));
 const cell_1 = require("../cell/cell");
 const primitive_cell_1 = require("../cell/primitive_cell");
-const math_1 = __importDefault(require("../math"));
 const lattice_types_1 = require("./lattice_types");
 const unit_cell_1 = require("./unit_cell");
 /**
@@ -69,17 +66,17 @@ class Lattice extends entity_1.InMemoryEntity {
         const { a } = this;
         const { b } = this;
         const { c } = this;
-        const alphaRad = math_1.default.unit(this.alpha, "deg").toNumber("rad");
-        const betaRad = math_1.default.unit(this.beta, "deg").toNumber("rad");
-        const gammaRad = math_1.default.unit(this.gamma, "deg").toNumber("rad");
-        const cosAlpha = math_1.default.cos(alphaRad);
-        const cosBeta = math_1.default.cos(betaRad);
-        const cosGamma = math_1.default.cos(gammaRad);
-        const sinAlpha = math_1.default.sin(alphaRad);
-        const sinBeta = math_1.default.sin(betaRad);
-        const gammaStar = math_1.default.acos((cosAlpha * cosBeta - cosGamma) / (sinAlpha * sinBeta));
-        const cosGammaStar = math_1.default.cos(gammaStar);
-        const sinGammaStar = math_1.default.sin(gammaStar);
+        const alphaRad = math_1.math.unit(this.alpha, "deg").toNumber("rad");
+        const betaRad = math_1.math.unit(this.beta, "deg").toNumber("rad");
+        const gammaRad = math_1.math.unit(this.gamma, "deg").toNumber("rad");
+        const cosAlpha = math_1.math.cos(alphaRad);
+        const cosBeta = math_1.math.cos(betaRad);
+        const cosGamma = math_1.math.cos(gammaRad);
+        const sinAlpha = math_1.math.sin(alphaRad);
+        const sinBeta = math_1.math.sin(betaRad);
+        const gammaStar = math_1.math.acos((cosAlpha * cosBeta - cosGamma) / (sinAlpha * sinBeta));
+        const cosGammaStar = math_1.math.cos(gammaStar);
+        const sinGammaStar = math_1.math.sin(gammaStar);
         const vectorA = [a * sinBeta, 0.0, a * cosBeta];
         const vectorB = [
             -b * sinAlpha * cosGammaStar,
@@ -94,12 +91,12 @@ class Lattice extends entity_1.InMemoryEntity {
     }
     static fromVectorsArray(vectors, units = Lattice.defaultConfig.units, type = "TRI") {
         const [aVec, bVec, cVec] = vectors;
-        const a = math_1.default.vlen(aVec);
-        const b = math_1.default.vlen(bVec);
-        const c = math_1.default.vlen(cVec);
-        const alpha = math_1.default.angle(bVec, cVec, "deg");
-        const beta = math_1.default.angle(aVec, cVec, "deg");
-        const gamma = math_1.default.angle(aVec, bVec, "deg");
+        const a = math_1.math.vlen(aVec);
+        const b = math_1.math.vlen(bVec);
+        const c = math_1.math.vlen(cVec);
+        const alpha = math_1.math.angle(bVec, cVec, "deg");
+        const beta = math_1.math.angle(aVec, cVec, "deg");
+        const gamma = math_1.math.angle(aVec, bVec, "deg");
         return new Lattice({
             a,
             b,
@@ -144,7 +141,7 @@ class Lattice extends entity_1.InMemoryEntity {
      */
     get typeExtended() {
         const { a, b, c, alpha, beta, gamma, type } = this;
-        const cosAlpha = math_1.default.cos((alpha / 180) * math_1.default.PI);
+        const cosAlpha = math_1.math.cos((alpha / 180) * math_1.math.PI);
         switch (type) {
             case "BCT":
                 return c < a ? "BCT-1" : "BCT-2";
@@ -179,14 +176,14 @@ class Lattice extends entity_1.InMemoryEntity {
      * Calculate the volume of the lattice cell.
      */
     get volume() {
-        return math_1.default.abs(math_1.default.det(this.vectorArrays));
+        return math_1.math.abs(math_1.math.det(this.vectorArrays));
     }
     /*
      * Returns a "default" primitive lattice by type, with lattice parameters scaled by the length of "a",
      * @param latticeConfig {Object} LatticeBravais config (see constructor)
      */
     static getDefaultPrimitiveLatticeConfigByType(latticeConfig) {
-        const f_ = math_1.default.roundArrayOrNumber;
+        const f_ = math_1.math.roundArrayOrNumber;
         // construct new primitive cell using lattice parameters and skip rounding the vectors
         const vectors = (0, primitive_cell_1.getPrimitiveLatticeVectorsFromConfig)(latticeConfig);
         // create new lattice from primitive cell
@@ -224,7 +221,7 @@ class Lattice extends entity_1.InMemoryEntity {
             scaledLattice.beta,
             scaledLattice.gamma,
         ]
-            .map((x) => math_1.default.round(x, constants_1.HASH_TOLERANCE))
+            .map((x) => math_1.math.round(x, constants_1.HASH_TOLERANCE))
             .join(";")};`;
     }
     /**
