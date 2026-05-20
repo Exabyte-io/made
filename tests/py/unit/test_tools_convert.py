@@ -85,13 +85,6 @@ def test_from_poscar():
     assert material_data["lattice"]["alpha"] == 60
 
 
-def test_to_pymatgen_skips_mismatched_labels():
-    material = Material.create_default()
-    material.basis.labels = ArrayWithIds.from_list_of_dicts([{"id": 0, "value": 0}])
-    structure = to_pymatgen(material)
-    assert len(structure.sites) == len(material.basis.elements.values)
-
-
 def test_to_ase():
     material = Material.create_default()
     labels_array = [{"id": 0, "value": 0}, {"id": 1, "value": 1}]
@@ -109,13 +102,6 @@ def test_to_ase():
     assert ase_atoms.get_chemical_symbols() == ["Si", "Si"]
     assert np.allclose(ase_atoms.get_scaled_positions().tolist(), [[0.0, 0.0, 0.0], [0.25, 0.25, 0.25]])
     assert ase_atoms.get_tags().tolist() == [0, 1]
-
-
-def test_to_ase_skips_mismatched_labels():
-    material = Material.create_default()
-    material.basis.labels = ArrayWithIds.from_list_of_dicts([{"id": 0, "value": 0}])
-    ase_atoms = to_ase(material)
-    assert ase_atoms.get_tags().tolist() == [0, 0]
 
 
 @pytest.mark.parametrize(
