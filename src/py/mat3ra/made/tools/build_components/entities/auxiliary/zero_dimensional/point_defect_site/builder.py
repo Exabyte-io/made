@@ -26,5 +26,6 @@ class PointDefectSiteBuilder(BaseSingleBuilder):
         new_material.basis.add_atom(
             element=configuration.element.chemical_element,
             coordinate=configuration.coordinate,
+            label=configuration.host_atom_label,
         )
         return new_material

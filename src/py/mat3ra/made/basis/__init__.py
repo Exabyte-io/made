@@ -132,6 +132,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
         coordinate: Optional[List[float]] = None,
         use_cartesian_coordinates: bool = False,
         force: bool = False,
+        label: Optional[Union[int, str]] = None,
     ):
         """
         Add an atom to the basis at a specified coordinate. Check that no other atom is overlapping with it.
@@ -141,6 +142,7 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
             coordinate (List[float]): Coordinate of the atom to be added.
             use_cartesian_coordinates (bool): Whether the coordinate is in Cartesian units (or crystal by default).
             force (bool): Whether to force adding the atom even if it overlaps with another atom.
+            label (int|str|None): Per-atom label when the basis already uses labels; omit if the basis has none.
         """
         if coordinate is None:
             coordinate = [0, 0, 0]
@@ -162,6 +164,8 @@ class Basis(BasisSchema, InMemoryEntityPydantic):
                 return
         self.elements.add_item(element)
         self.coordinates.add_item(coordinate)
+        if label is not None:
+            self.labels.add_item(label)
 
     def add_atoms_from_another_basis(self, other_basis: "Basis"):
         """

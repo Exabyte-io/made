@@ -7,11 +7,22 @@ from mat3ra.esse.models.materials_category_components.entities.core.zero_dimensi
 from mat3ra.esse.models.materials_category_components.operations.core.combinations.merge import MergeMethodsEnum
 
 from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.other import get_closest_site_id_from_coordinate
 from ..base.configuration import PointDefectConfiguration
 from ......build_components import MaterialWithBuildMetadata
 from ......build_components.entities.auxiliary.zero_dimensional.point_defect_site.configuration import (
     PointDefectSiteConfiguration,
 )
+
+
+def _host_atom_label_at_coordinate(
+    crystal: Union[Material, MaterialWithBuildMetadata], coordinate: List[float]
+) -> Union[int, str, None]:
+    host_labels = crystal.basis.labels.values
+    if not host_labels:
+        return None
+    site_index = get_closest_site_id_from_coordinate(crystal, coordinate)
+    return host_labels[site_index]
 
 
 class SubstitutionalDefectConfiguration(PointDefectConfiguration, SubstitutionalPointDefectSchema):
@@ -25,5 +36,6 @@ class SubstitutionalDefectConfiguration(PointDefectConfiguration, Substitutional
             crystal=crystal,
             element=AtomSchema(chemical_element=element),
             coordinate=coordinate,
+            host_atom_label=_host_atom_label_at_coordinate(crystal, coordinate),
         )
         return cls(merge_components=[crystal, substitution_site], merge_method=MergeMethodsEnum.REPLACE, **kwargs)
