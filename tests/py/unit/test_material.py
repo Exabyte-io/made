@@ -12,6 +12,8 @@ from unit.fixtures.slab import BULK_Si_CONVENTIONAL
 from unit.utils import assert_two_entities_deep_almost_equal
 
 FIXTURES_DIR = Path(__file__).parents[2] / "fixtures"
+HASH_KEY = "hash"
+SCALED_HASH_KEY = "scaledHash"
 
 
 def load_fixture(name: str) -> dict:
@@ -136,3 +138,11 @@ def test_calculate_hash(fixture_file):
     material = Material.create(fixture)
     assert material.hash == fixture["hash"]
     assert material.scaled_hash == fixture["scaledHash"]
+
+
+def test_model_dump_includes_hashes():
+    material = Material.create_default()
+    serialized_material = material.model_dump()
+
+    assert serialized_material[HASH_KEY] == material.hash
+    assert serialized_material[SCALED_HASH_KEY] == material.scaled_hash

@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from mat3ra.esse.models.materials_category.defective_structures.two_dimensional.adatom.configuration import (
     PointDefectSiteSchema,
@@ -11,3 +11,4 @@ from ..crystal_site import CrystalSite
 
 class PointDefectSiteConfiguration(CrystalSite, PointDefectSiteSchema):
     element: Union[VacancySchema, AtomSchema]
+    host_atom_label: Optional[Union[int, str]] = None

@@ -3,8 +3,10 @@ from typing import Final
 
 import numpy as np
 import pytest
+from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.interface import InterfaceAnalyzer
 from mat3ra.made.tools.analyze.interface.commensurate import CommensurateLatticeInterfaceAnalyzer
+from mat3ra.made.tools.analyze.interface.utils import calculate_interfacial_distance_from_rdf
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabConfiguration
 from unit.fixtures.bulk import BULK_GRAPHENE, BULK_Ge_CONVENTIONAL, BULK_Si_CONVENTIONAL
 
@@ -195,3 +197,27 @@ def test_optimal_supercell_functions(substrate, film, expected_n, expected_m):
 
     assert optimal_n == expected_n
     assert optimal_m == expected_m
+
+
+@pytest.mark.parametrize(
+    "substrate_config, film_config, expected_distance_range",
+    [
+        (BULK_Si_CONVENTIONAL, BULK_Si_CONVENTIONAL, (3.8, 3.9)),
+        (BULK_Si_CONVENTIONAL, BULK_Ge_CONVENTIONAL, (3.1, 3.2)),
+    ],
+)
+def test_calculate_interfacial_distance_from_rdf(substrate_config, film_config, expected_distance_range):
+    """Test RDF-based interfacial distance calculation with different material types."""
+    substrate_material = Material.create(substrate_config)
+    film_material = Material.create(film_config)
+
+    distance = calculate_interfacial_distance_from_rdf(
+        substrate_material=substrate_material,
+        film_material=film_material,
+        rdf_cutoff=10.0,
+        rdf_bin_size=0.1,
+        supercell_size=(3, 3, 3),
+    )
+
+    assert isinstance(distance, float)
+    assert expected_distance_range[0] <= distance <= expected_distance_range[1]
