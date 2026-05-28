@@ -140,7 +140,7 @@ def get_primitive_lattice_vectors_from_config(lattice_config: LatticeSchema) -> 
         3x3 list of lists (rows = vectors a, b, c) in the same units as the
         input lattice parameters (typically Angstroms).
     """
-    lattice_type = lattice_config.type or "TRI"
+    lattice_type = lattice_config.type.value if lattice_config.type else "TRI"
     generator = PRIMITIVE_CELLS.get(lattice_type)
     if generator is None:
         raise ValueError(
