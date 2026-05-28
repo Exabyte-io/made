@@ -23,8 +23,8 @@ def supercell(material: MaterialWithBuildMetadata, supercell_matrix) -> Material
 
     supercell_atoms = ase_make_supercell(atoms, supercell_matrix)
     new_material = MaterialWithBuildMetadata.create(from_ase(supercell_atoms))
-    if material.metadata:
-        new_material.metadata = material.metadata
+    # if material.metadata:
+    #     new_material.metadata.update(**material.metadata.to_dict())
     new_material.name = material.name
     return new_material
 

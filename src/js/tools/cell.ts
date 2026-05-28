@@ -1,7 +1,7 @@
+import { math } from "@mat3ra/code/dist/js/math";
 import { Coordinate3DSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
 
 import { Cell } from "../cell/cell";
-import math from "../math";
 
 /**
  * Returns the list of points on the original lattice contained in the supercell in fractional coordinates.
