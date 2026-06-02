@@ -3,6 +3,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from mat3ra.made.cell.primitive_cell import get_primitive_lattice_vectors_from_config
+from tests.py.unit.utils import assert_two_entities_deep_almost_equal
 
 
 # Helper to mock LatticeSchema since it relies on mat3ra.esse
@@ -22,13 +23,6 @@ def create_mock_lattice(l_type=None, a=1.0, b=1.0, c=1.0, alpha=90.0, beta=90.0,
     return lattice
 
 
-def assert_matrix_almost_equal(mat1, mat2, abs=1e-5):
-    """Helper to assert that two 3x3 matrices are almost equal."""
-    for row1, row2 in zip(mat1, mat2):
-        for val1, val2 in zip(row1, row2):
-            assert val1 == pytest.approx(val2, abs=abs)
-
-
 class TestPrimitiveCell:
 
     def test_primitive_lattice_vectors_na4cl4(self):
@@ -45,7 +39,7 @@ class TestPrimitiveCell:
             [0.0, 0.0, 5.691694],
         ]
 
-        assert_matrix_almost_equal(actual_primitive_cell, expected_primitive_cell)
+        assert_two_entities_deep_almost_equal(actual_primitive_cell, expected_primitive_cell)
 
     @pytest.mark.parametrize(
         "l_type, kwargs, expected",
@@ -102,7 +96,7 @@ class TestPrimitiveCell:
         """
         lattice = create_mock_lattice(l_type=l_type, **kwargs)
         result = get_primitive_lattice_vectors_from_config(lattice)
-        assert_matrix_almost_equal(result, expected)
+        assert_two_entities_deep_almost_equal(result, expected)
 
     def test_fallback_to_tri_when_type_is_none(self):
         """
@@ -117,7 +111,7 @@ class TestPrimitiveCell:
             [0.0, 2.0, 0.0],
             [0.0, 0.0, 2.0],
         ]
-        assert_matrix_almost_equal(result, expected)
+        assert_two_entities_deep_almost_equal(result, expected)
 
     def test_unsupported_lattice_type_raises_value_error(self):
         """
