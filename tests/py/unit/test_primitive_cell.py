@@ -83,9 +83,17 @@ class TestPrimitiveCell:
 
     def test_fallback_to_tri_when_type_is_none(self):
         """Tests default fallback to 'TRI' when lattice_config.type is None."""
-        lattice = Lattice(type=None, a=2.0, b=2.0, c=2.0, alpha=90.0, beta=90.0, gamma=90.0)
+        # Use a simple dummy class to bypass Pydantic's strict validation
+        # and simulate a malformed or incomplete Lattice config.
+        class MockLattice:
+            type = None
+            a, b, c = 2.0, 2.0, 2.0
+            alpha, beta, gamma = 90.0, 90.0, 90.0
+
+        lattice = MockLattice()
         result = get_primitive_lattice_vectors_from_config(lattice)
         expected = [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]]
+
         assert_two_entities_deep_almost_equal(expected, result)
 
     def test_unsupported_lattice_type_raises_value_error(self):
@@ -93,13 +101,18 @@ class TestPrimitiveCell:
 
         # Using a MagicMock specifically here to force an invalid type value
         # since LatticeTypeEnum won't allow arbitrary strings
-        class InvalidLatticeMock:
-            class MockType:
-                value = "INVALID_TYPE"
+        class MockType:
+            value = "INVALID_TYPE"
 
+        class MockLattice:
             type = MockType()
+            # Provide dummy parameters just in case
+            a, b, c = 2.0, 2.0, 2.0
+            alpha, beta, gamma = 90.0, 90.0, 90.0
+
+        lattice = MockLattice()
 
         with pytest.raises(ValueError) as exc_info:
-            get_primitive_lattice_vectors_from_config(InvalidLatticeMock())
+            get_primitive_lattice_vectors_from_config(lattice)
 
         assert "Unsupported lattice type 'INVALID_TYPE'" in str(exc_info.value)
