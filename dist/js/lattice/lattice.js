@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Lattice = exports.LatticeVectors = exports.nonPeriodicLatticeScalingFactor = void 0;
+exports.Lattice = exports.LatticeVectors = exports.molecularLatticePaddingFactor = exports.diatomicLatticePaddingFactor = exports.defaultNonPeriodicMinimumLatticeSize = exports.nonPeriodicLatticeScalingFactor = void 0;
 const constants_1 = require("@mat3ra/code/dist/js/constants");
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const math_1 = require("@mat3ra/code/dist/js/math");
@@ -37,6 +37,9 @@ const unit_cell_1 = require("./unit_cell");
  * The scaling factor ensures that a non-periodic structure will have have a lattice greater than the structures size.
  */
 exports.nonPeriodicLatticeScalingFactor = 2.0;
+exports.defaultNonPeriodicMinimumLatticeSize = 3.0;
+exports.diatomicLatticePaddingFactor = 3.0;
+exports.molecularLatticePaddingFactor = 2.0;
 class LatticeVectors extends cell_1.Cell {
 }
 exports.LatticeVectors = LatticeVectors;

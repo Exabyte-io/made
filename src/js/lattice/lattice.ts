@@ -22,6 +22,12 @@ import { UnitCell, UnitCellProps } from "./unit_cell";
  */
 export const nonPeriodicLatticeScalingFactor = 2.0;
 
+export const defaultNonPeriodicMinimumLatticeSize = 3.0;
+
+export const diatomicLatticePaddingFactor = 3.0;
+
+export const molecularLatticePaddingFactor = 2.0;
+
 export class LatticeVectors extends Cell implements LatticeVectorsSchema {}
 
 export type { LatticeVectorsSchema };
