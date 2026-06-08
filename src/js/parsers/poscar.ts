@@ -79,7 +79,8 @@ function toPoscar(materialOrConfig: MaterialSchema, omitConstraints = false): st
  * Poscar file formatting: https://www.vasp.at/wiki/index.php/POSCAR
  */
 export function atomsCount(poscarFileContent: string): number {
-    const atomsLine = poscarFileContent.split("\n")[6].split(/\s+/);
+    const lines = stripPoscarComments(poscarFileContent).split("\n");
+    const atomsLine = lines[6].split(/\s+/);
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
 
@@ -176,7 +177,7 @@ function fromPoscar(fileContent: string): object {
  * @param text - string to check
  */
 function isPoscar(text: string): boolean {
-    const lines = text.split("\n");
+    const lines = stripPoscarComments(text).split("\n");
 
     // Checking number of lines, minimum requirement for POSCAR
     if (lines.length < 7) {
