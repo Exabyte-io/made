@@ -21,6 +21,18 @@ const _latticeVectorsToString = (vectors: Vector3DSchema[]) =>
 const atomicConstraintsCharFromBool = (bool: boolean): string => (bool ? "T" : "F");
 
 /**
+ * Strip VASP-style comments (everything after !) from POSCAR content.
+ * @param poscarContent - POSCAR file content with potential comments.
+ * @return POSCAR content without comments.
+ */
+function stripPoscarComments(poscarContent: string): string {
+    return poscarContent
+        .split("\n")
+        .map((line) => (line.includes("!") ? line.split("!")[0].trimEnd() : line))
+        .join("\n");
+}
+
+/**
  * Obtain a textual representation of a material in POSCAR format.
  * @param materialOrConfig - material class instance or config object.
  * @param omitConstraints - whether to discard constraints passed with material.
@@ -77,7 +89,8 @@ export function atomsCount(poscarFileContent: string): number {
  * @return Material config.
  */
 function fromPoscar(fileContent: string): object {
-    const lines = fileContent.split("\n");
+    const cleanContent = stripPoscarComments(fileContent);
+    const lines = cleanContent.split("\n");
 
     const comment = lines[0];
     // TODO: alat should be handled!!!!
@@ -206,4 +219,5 @@ export default {
     fromPoscar,
     atomicConstraintsCharFromBool,
     atomsCount,
+    stripPoscarComments,
 };

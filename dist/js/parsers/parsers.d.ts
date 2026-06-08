@@ -12,6 +12,7 @@ declare const _default: {
         fromPoscar: (fileContent: string) => object;
         atomicConstraintsCharFromBool: (bool: boolean) => string;
         atomsCount: typeof import("./poscar").atomsCount;
+        stripPoscarComments: (poscarContent: string) => string;
     };
     cif: {
         parseMeta: (txt: string) => import("./cif").Meta;

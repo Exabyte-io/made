@@ -55,6 +55,7 @@ export declare const Made: {
             fromPoscar: (fileContent: string) => object;
             atomicConstraintsCharFromBool: (bool: boolean) => string;
             atomsCount: typeof import("./parsers/poscar").atomsCount;
+            stripPoscarComments: (poscarContent: string) => string;
         };
         cif: {
             parseMeta: (txt: string) => import("./parsers/cif").Meta;

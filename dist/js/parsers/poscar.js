@@ -14,6 +14,17 @@ const _print = (x, printFormat = "%14.9f") => underscore_string_1.default.sprint
 const _latticeVectorsToString = (vectors) => vectors.map((v) => v.map((c) => _print(c)).join("\t")).join("\n");
 const atomicConstraintsCharFromBool = (bool) => (bool ? "T" : "F");
 /**
+ * Strip VASP-style comments (everything after !) from POSCAR content.
+ * @param poscarContent - POSCAR file content with potential comments.
+ * @return POSCAR content without comments.
+ */
+function stripPoscarComments(poscarContent) {
+    return poscarContent
+        .split("\n")
+        .map((line) => (line.includes("!") ? line.split("!")[0].trimEnd() : line))
+        .join("\n");
+}
+/**
  * Obtain a textual representation of a material in POSCAR format.
  * @param materialOrConfig - material class instance or config object.
  * @param omitConstraints - whether to discard constraints passed with material.
@@ -68,7 +79,8 @@ exports.atomsCount = atomsCount;
  * @return Material config.
  */
 function fromPoscar(fileContent) {
-    const lines = fileContent.split("\n");
+    const cleanContent = stripPoscarComments(fileContent);
+    const lines = cleanContent.split("\n");
     const comment = lines[0];
     // TODO: alat should be handled!!!!
     // const latticeConstant = parseFloat(lines[1].trim());
@@ -179,4 +191,5 @@ exports.default = {
     fromPoscar,
     atomicConstraintsCharFromBool,
     atomsCount,
+    stripPoscarComments,
 };
