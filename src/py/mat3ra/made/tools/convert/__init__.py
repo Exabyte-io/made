@@ -14,6 +14,7 @@ from .utils import (
     extract_metadata_from_pymatgen_structure,
     extract_tags_from_ase_atoms,
     calculate_padded_cell_simple_cubic,
+    strip_poscar_comments,
 )
 from ..third_party import (
     ASEAtoms,
@@ -161,8 +162,20 @@ def from_poscar(poscar: str) -> Dict[str, Any]:
     Returns:
         dict: A dictionary containing the material information in ESSE format.
     """
-    structure = PymatgenStructure.from_str(poscar, "poscar")
+    poscar_clean = strip_poscar_comments(poscar)
+    structure = PymatgenStructure.from_str(poscar_clean, "poscar")
     return from_pymatgen(structure)
+
+
+def from_poscar_molecule(poscar: str) -> Dict[str, Any]:
+    """
+    Converts a molecule POSCAR string to a non-periodic ESSE material.
+    """
+    poscar_clean = strip_poscar_comments(poscar)
+    structure = PymatgenStructure.from_str(poscar_clean, "poscar")
+    ase_atoms = PymatgenAseAtomsAdaptor.get_atoms(structure)
+    ase_atoms.set_pbc(False)
+    return from_ase(ase_atoms)
 
 
 def to_ase(material_or_material_data: Union[Material, Dict[str, Any]]) -> ASEAtoms:

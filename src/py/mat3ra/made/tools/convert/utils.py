@@ -2,12 +2,54 @@ import json
 from typing import Any, Dict, List, Union
 
 import numpy as np
+from mat3ra.made.utils import get_center_of_coordinates, map_array_to_array_with_id_value
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
 from scipy.spatial.distance import pdist
 
-from mat3ra.made.utils import map_array_to_array_with_id_value, get_center_of_coordinates
-from .interface_parts_enum import INTERFACE_LABELS_MAP
 from ..third_party import ASEAtoms, PymatgenInterface, PymatgenStructure
+from .interface_parts_enum import INTERFACE_LABELS_MAP
+
+DEFAULT_NON_PERIODIC_MIN_LATTICE_SIZE = 3.0
+DIATOMIC_LATTICE_PADDING_FACTOR = 3.0
+MOLECULAR_LATTICE_PADDING_FACTOR = 2.0
+
+
+def _get_non_periodic_lattice_padding_factor(max_distance: float, min_distance: float) -> float:
+    if max_distance <= 0:
+        return MOLECULAR_LATTICE_PADDING_FACTOR
+    width_ratio = min_distance / max_distance
+    if np.isclose(width_ratio, 1.0):
+        return DIATOMIC_LATTICE_PADDING_FACTOR
+    return MOLECULAR_LATTICE_PADDING_FACTOR
+
+
+def _get_non_periodic_lattice_size(
+    shifted_positions: np.ndarray,
+    default_min_size: float = DEFAULT_NON_PERIODIC_MIN_LATTICE_SIZE,
+) -> float:
+    if len(shifted_positions) < 2:
+        return max(default_min_size, 10.0)
+    distances = pdist(shifted_positions)
+    max_distance = float(np.max(distances))
+    min_distance = float(np.min(distances))
+    padding_factor = _get_non_periodic_lattice_padding_factor(max_distance, min_distance)
+    return max(default_min_size, max_distance * padding_factor)
+
+
+def strip_poscar_comments(poscar_string: str) -> str:
+    """
+    Remove VASP-style comments (everything after !) from POSCAR string.
+    Pymatgen doesn't handle these comments, but they're common in VASP5 format.
+
+    Args:
+        poscar_string (str): POSCAR content with potential comments.
+
+    Returns:
+        str: POSCAR content without comments.
+    """
+    lines = poscar_string.split("\n")
+    cleaned_lines = [line.split("!")[0].rstrip() if "!" in line else line for line in lines]
+    return "\n".join(cleaned_lines)
 
 
 def extract_labels_from_pymatgen_structure(structure: PymatgenStructure) -> List[int]:
@@ -42,21 +84,21 @@ def extract_tags_from_ase_atoms(atoms: ASEAtoms) -> List[Union[str, int]]:
 
 
 def calculate_padded_cell_simple_cubic(
-    coordinates: List[List[float]], padding_factor: float = 2.0
+    coordinates: List[List[float]],
+    default_min_size: float = DEFAULT_NON_PERIODIC_MIN_LATTICE_SIZE,
 ) -> List[List[float]]:
     """
     Calculate values for a padded cell for a molecule based on its coordinates.
     Args:
         coordinates (Array[Array[float]]): A list of atomic coordinates.
-        padding_factor (float): The factor by which to multiply the maximum distance for padding.
+        default_min_size (float): Minimum cubic lattice parameter in angstroms.
     Returns:
         Array[float]: A list containing the final cell latice vectors with padding applied.
     """
     positions = np.array(coordinates)
     center = get_center_of_coordinates(positions)
     shifted_positions = positions - center
-    max_distance = np.max(pdist(shifted_positions)) if len(positions) >= 2 else 10.0
-    padding_value = padding_factor * max_distance
+    padding_value = _get_non_periodic_lattice_size(shifted_positions, default_min_size)
 
     return [
         [padding_value, 0.0, 0.0],
