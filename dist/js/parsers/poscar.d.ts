@@ -1,11 +1,5 @@
 import { MaterialSchema } from "@mat3ra/esse/dist/js/types";
 /**
- * Strip VASP-style comments (everything after !) from POSCAR content.
- * @param poscarContent - POSCAR file content with potential comments.
- * @return POSCAR content without comments.
- */
-declare function stripPoscarComments(poscarContent: string): string;
-/**
  * Obtain a textual representation of a material in POSCAR format.
  * @param materialOrConfig - material class instance or config object.
  * @param omitConstraints - whether to discard constraints passed with material.
@@ -32,7 +26,5 @@ declare const _default: {
     toPoscar: typeof toPoscar;
     fromPoscar: typeof fromPoscar;
     atomicConstraintsCharFromBool: (bool: boolean) => string;
-    atomsCount: typeof atomsCount;
-    stripPoscarComments: typeof stripPoscarComments;
 };
 export default _default;

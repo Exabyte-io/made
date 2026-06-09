@@ -1,4 +1,5 @@
 import { math } from "@mat3ra/code/dist/js/math";
+import { removeCommentsFromSourceCode } from "@mat3ra/code/dist/js/utils";
 import {
     BasisSchema,
     Coordinate3DSchema,
@@ -19,18 +20,6 @@ const _print = (x: number, printFormat = "%14.9f") => s.sprintf(printFormat, mat
 const _latticeVectorsToString = (vectors: Vector3DSchema[]) =>
     vectors.map((v) => v.map((c) => _print(c)).join("\t")).join("\n");
 const atomicConstraintsCharFromBool = (bool: boolean): string => (bool ? "T" : "F");
-
-/**
- * Strip VASP-style comments (everything after !) from POSCAR content.
- * @param poscarContent - POSCAR file content with potential comments.
- * @return POSCAR content without comments.
- */
-function stripPoscarComments(poscarContent: string): string {
-    return poscarContent
-        .split("\n")
-        .map((line) => (line.includes("!") ? line.split("!")[0].trimEnd() : line))
-        .join("\n");
-}
 
 /**
  * Obtain a textual representation of a material in POSCAR format.
@@ -79,7 +68,7 @@ function toPoscar(materialOrConfig: MaterialSchema, omitConstraints = false): st
  * Poscar file formatting: https://www.vasp.at/wiki/index.php/POSCAR
  */
 export function atomsCount(poscarFileContent: string): number {
-    const lines = stripPoscarComments(poscarFileContent).split("\n");
+    const lines = removeCommentsFromSourceCode(poscarFileContent).split("\n");
     const atomsLine = lines[6].split(/\s+/);
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
@@ -90,7 +79,7 @@ export function atomsCount(poscarFileContent: string): number {
  * @return Material config.
  */
 function fromPoscar(fileContent: string): object {
-    const cleanContent = stripPoscarComments(fileContent);
+    const cleanContent = removeCommentsFromSourceCode(fileContent);
     const lines = cleanContent.split("\n");
 
     const comment = lines[0];
@@ -177,7 +166,7 @@ function fromPoscar(fileContent: string): object {
  * @param text - string to check
  */
 function isPoscar(text: string): boolean {
-    const lines = stripPoscarComments(text).split("\n");
+    const lines = removeCommentsFromSourceCode(text, "fortran").split("\n");
 
     // Checking number of lines, minimum requirement for POSCAR
     if (lines.length < 7) {
@@ -219,6 +208,4 @@ export default {
     toPoscar,
     fromPoscar,
     atomicConstraintsCharFromBool,
-    atomsCount,
-    stripPoscarComments,
 };

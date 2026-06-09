@@ -162,7 +162,7 @@ def from_poscar(poscar: str) -> Dict[str, Any]:
     Returns:
         dict: A dictionary containing the material information in ESSE format.
     """
-    poscar_clean = remove_comments_from_source_code(poscar)
+    poscar_clean = remove_comments_from_source_code(poscar, "fortran")
     structure = PymatgenStructure.from_str(poscar_clean, "poscar")
     return from_pymatgen(structure)
 
@@ -171,7 +171,7 @@ def from_poscar_molecule(poscar: str) -> Dict[str, Any]:
     """
     Converts a molecule POSCAR string to a non-periodic ESSE material.
     """
-    poscar_clean = remove_comments_from_source_code(poscar)
+    poscar_clean = remove_comments_from_source_code(poscar, "fortran")
     structure = PymatgenStructure.from_str(poscar_clean, "poscar")
     ase_atoms = PymatgenAseAtomsAdaptor.get_atoms(structure)
     ase_atoms.set_pbc(False)

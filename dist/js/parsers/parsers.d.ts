@@ -11,8 +11,6 @@ declare const _default: {
         toPoscar: (materialOrConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema, omitConstraints?: boolean) => string;
         fromPoscar: (fileContent: string) => object;
         atomicConstraintsCharFromBool: (bool: boolean) => string;
-        atomsCount: typeof import("./poscar").atomsCount;
-        stripPoscarComments: (poscarContent: string) => string;
     };
     cif: {
         parseMeta: (txt: string) => import("./cif").Meta;

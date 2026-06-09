@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.atomsCount = void 0;
 const math_1 = require("@mat3ra/code/dist/js/math");
+const utils_1 = require("@mat3ra/code/dist/js/utils");
 const underscore_string_1 = __importDefault(require("underscore.string"));
 const constrained_basis_1 = require("../basis/constrained_basis");
 const cell_1 = require("../cell/cell");
@@ -13,17 +14,6 @@ const lattice_1 = require("../lattice/lattice");
 const _print = (x, printFormat = "%14.9f") => underscore_string_1.default.sprintf(printFormat, math_1.math.precise(x));
 const _latticeVectorsToString = (vectors) => vectors.map((v) => v.map((c) => _print(c)).join("\t")).join("\n");
 const atomicConstraintsCharFromBool = (bool) => (bool ? "T" : "F");
-/**
- * Strip VASP-style comments (everything after !) from POSCAR content.
- * @param poscarContent - POSCAR file content with potential comments.
- * @return POSCAR content without comments.
- */
-function stripPoscarComments(poscarContent) {
-    return poscarContent
-        .split("\n")
-        .map((line) => (line.includes("!") ? line.split("!")[0].trimEnd() : line))
-        .join("\n");
-}
 /**
  * Obtain a textual representation of a material in POSCAR format.
  * @param materialOrConfig - material class instance or config object.
@@ -69,7 +59,7 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
  * Poscar file formatting: https://www.vasp.at/wiki/index.php/POSCAR
  */
 function atomsCount(poscarFileContent) {
-    const lines = stripPoscarComments(poscarFileContent).split("\n");
+    const lines = (0, utils_1.removeCommentsFromSourceCode)(poscarFileContent).split("\n");
     const atomsLine = lines[6].split(/\s+/);
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
@@ -80,7 +70,7 @@ exports.atomsCount = atomsCount;
  * @return Material config.
  */
 function fromPoscar(fileContent) {
-    const cleanContent = stripPoscarComments(fileContent);
+    const cleanContent = (0, utils_1.removeCommentsFromSourceCode)(fileContent);
     const lines = cleanContent.split("\n");
     const comment = lines[0];
     // TODO: alat should be handled!!!!
@@ -156,7 +146,7 @@ function fromPoscar(fileContent) {
  * @param text - string to check
  */
 function isPoscar(text) {
-    const lines = stripPoscarComments(text).split("\n");
+    const lines = (0, utils_1.removeCommentsFromSourceCode)(text, "fortran").split("\n");
     // Checking number of lines, minimum requirement for POSCAR
     if (lines.length < 7) {
         return false;
@@ -191,6 +181,4 @@ exports.default = {
     toPoscar,
     fromPoscar,
     atomicConstraintsCharFromBool,
-    atomsCount,
-    stripPoscarComments,
 };

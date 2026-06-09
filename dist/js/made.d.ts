@@ -54,8 +54,6 @@ export declare const Made: {
             toPoscar: (materialOrConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema, omitConstraints?: boolean) => string;
             fromPoscar: (fileContent: string) => object;
             atomicConstraintsCharFromBool: (bool: boolean) => string;
-            atomsCount: typeof import("./parsers/poscar").atomsCount;
-            stripPoscarComments: (poscarContent: string) => string;
         };
         cif: {
             parseMeta: (txt: string) => import("./parsers/cif").Meta;
