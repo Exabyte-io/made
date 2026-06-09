@@ -1,11 +1,11 @@
 import { math } from "@mat3ra/code/dist/js/math";
-import { removeCommentsFromSourceCode } from "@mat3ra/code/dist/js/utils";
 import {
     BasisSchema,
     Coordinate3DSchema,
     MaterialSchema,
     Vector3DSchema,
 } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 import s from "underscore.string";
 
 import { ConstrainedBasis } from "../basis/constrained_basis";
@@ -68,7 +68,7 @@ function toPoscar(materialOrConfig: MaterialSchema, omitConstraints = false): st
  * Poscar file formatting: https://www.vasp.at/wiki/index.php/POSCAR
  */
 export function atomsCount(poscarFileContent: string): number {
-    const lines = removeCommentsFromSourceCode(poscarFileContent).split("\n");
+    const lines = Utils.str.removeCommentsFromSourceCode(poscarFileContent).split("\n");
     const atomsLine = lines[6].split(/\s+/);
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
@@ -79,7 +79,7 @@ export function atomsCount(poscarFileContent: string): number {
  * @return Material config.
  */
 function fromPoscar(fileContent: string): object {
-    const cleanContent = removeCommentsFromSourceCode(fileContent);
+    const cleanContent = Utils.str.removeCommentsFromSourceCode(fileContent, "fortran");
     const lines = cleanContent.split("\n");
 
     const comment = lines[0];
@@ -166,7 +166,7 @@ function fromPoscar(fileContent: string): object {
  * @param text - string to check
  */
 function isPoscar(text: string): boolean {
-    const lines = removeCommentsFromSourceCode(text, "fortran").split("\n");
+    const lines = Utils.str.removeCommentsFromSourceCode(text, "fortran").split("\n");
 
     // Checking number of lines, minimum requirement for POSCAR
     if (lines.length < 7) {

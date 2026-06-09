@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DEFAULT_LATTICE_UNITS = exports.LATTICE_TYPE_CONFIGS = exports.tools = exports.parsers = exports.AtomicConstraints = exports.Basis = exports.ReciprocalLattice = exports.nonPeriodicLatticeScalingFactor = exports.UnitCell = exports.Cell = exports.Lattice = exports.defaultMaterialConfig = exports.Material = exports.ATOMIC_COORD_UNITS = exports.units = exports.tolerance = exports.coefficients = exports.Made = void 0;
+exports.DEFAULT_LATTICE_UNITS = exports.LATTICE_TYPE_CONFIGS = exports.tools = exports.parsers = exports.AtomicConstraints = exports.Basis = exports.ReciprocalLattice = exports.molecularLatticePaddingFactor = exports.diatomicLatticePaddingFactor = exports.defaultNonPeriodicMinimumLatticeSize = exports.UnitCell = exports.Cell = exports.Lattice = exports.defaultMaterialConfig = exports.Material = exports.ATOMIC_COORD_UNITS = exports.units = exports.tolerance = exports.coefficients = exports.Made = void 0;
 const basis_1 = require("./basis/basis");
 Object.defineProperty(exports, "Basis", { enumerable: true, get: function () { return basis_1.Basis; } });
 const cell_1 = require("./cell/cell");
@@ -17,7 +17,9 @@ const constraints_1 = require("./constraints/constraints");
 Object.defineProperty(exports, "AtomicConstraints", { enumerable: true, get: function () { return constraints_1.AtomicConstraints; } });
 const lattice_1 = require("./lattice/lattice");
 Object.defineProperty(exports, "Lattice", { enumerable: true, get: function () { return lattice_1.Lattice; } });
-Object.defineProperty(exports, "nonPeriodicLatticeScalingFactor", { enumerable: true, get: function () { return lattice_1.nonPeriodicLatticeScalingFactor; } });
+Object.defineProperty(exports, "defaultNonPeriodicMinimumLatticeSize", { enumerable: true, get: function () { return lattice_1.defaultNonPeriodicMinimumLatticeSize; } });
+Object.defineProperty(exports, "diatomicLatticePaddingFactor", { enumerable: true, get: function () { return lattice_1.diatomicLatticePaddingFactor; } });
+Object.defineProperty(exports, "molecularLatticePaddingFactor", { enumerable: true, get: function () { return lattice_1.molecularLatticePaddingFactor; } });
 const lattice_types_1 = require("./lattice/lattice_types");
 Object.defineProperty(exports, "DEFAULT_LATTICE_UNITS", { enumerable: true, get: function () { return lattice_types_1.DEFAULT_LATTICE_UNITS; } });
 Object.defineProperty(exports, "LATTICE_TYPE_CONFIGS", { enumerable: true, get: function () { return lattice_types_1.LATTICE_TYPE_CONFIGS; } });
@@ -42,7 +44,9 @@ exports.Made = {
     Lattice: lattice_1.Lattice,
     Cell: cell_1.Cell,
     UnitCell: unit_cell_1.UnitCell,
-    nonPeriodicLatticeScalingFactor: lattice_1.nonPeriodicLatticeScalingFactor,
+    defaultNonPeriodicMinimumLatticeSize: lattice_1.defaultNonPeriodicMinimumLatticeSize,
+    diatomicLatticePaddingFactor: lattice_1.diatomicLatticePaddingFactor,
+    molecularLatticePaddingFactor: lattice_1.molecularLatticePaddingFactor,
     ReciprocalLattice: lattice_reciprocal_1.ReciprocalLattice,
     Basis: basis_1.Basis,
     AtomicConstraints: constraints_1.AtomicConstraints,

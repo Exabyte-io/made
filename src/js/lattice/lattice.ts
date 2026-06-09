@@ -20,13 +20,11 @@ import { UnitCell, UnitCellProps } from "./unit_cell";
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
  * The scaling factor ensures that a non-periodic structure will have have a lattice greater than the structures size.
  */
-export const nonPeriodicLatticeScalingFactor = 2.0;
-
-export const defaultNonPeriodicMinimumLatticeSize = 3.0;
-
-export const diatomicLatticePaddingFactor = 3.0;
-
-export const molecularLatticePaddingFactor = 2.0;
+export {
+    defaultNonPeriodicMinimumLatticeSize,
+    diatomicLatticePaddingFactor,
+    molecularLatticePaddingFactor,
+} from "../constants/molecule";
 
 export class LatticeVectors extends Cell implements LatticeVectorsSchema {}
 

@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.atomsCount = void 0;
 const math_1 = require("@mat3ra/code/dist/js/math");
-const utils_1 = require("@mat3ra/code/dist/js/utils");
+const utils_1 = require("@mat3ra/utils");
 const underscore_string_1 = __importDefault(require("underscore.string"));
 const constrained_basis_1 = require("../basis/constrained_basis");
 const cell_1 = require("../cell/cell");
@@ -59,7 +59,7 @@ function toPoscar(materialOrConfig, omitConstraints = false) {
  * Poscar file formatting: https://www.vasp.at/wiki/index.php/POSCAR
  */
 function atomsCount(poscarFileContent) {
-    const lines = (0, utils_1.removeCommentsFromSourceCode)(poscarFileContent).split("\n");
+    const lines = utils_1.Utils.str.removeCommentsFromSourceCode(poscarFileContent).split("\n");
     const atomsLine = lines[6].split(/\s+/);
     return atomsLine.map((x) => parseInt(x, 10)).reduce((a, b) => a + b);
 }
@@ -70,7 +70,7 @@ exports.atomsCount = atomsCount;
  * @return Material config.
  */
 function fromPoscar(fileContent) {
-    const cleanContent = (0, utils_1.removeCommentsFromSourceCode)(fileContent);
+    const cleanContent = utils_1.Utils.str.removeCommentsFromSourceCode(fileContent, "fortran");
     const lines = cleanContent.split("\n");
     const comment = lines[0];
     // TODO: alat should be handled!!!!
@@ -146,7 +146,7 @@ function fromPoscar(fileContent) {
  * @param text - string to check
  */
 function isPoscar(text) {
-    const lines = (0, utils_1.removeCommentsFromSourceCode)(text, "fortran").split("\n");
+    const lines = utils_1.Utils.str.removeCommentsFromSourceCode(text, "fortran").split("\n");
     // Checking number of lines, minimum requirement for POSCAR
     if (lines.length < 7) {
         return false;

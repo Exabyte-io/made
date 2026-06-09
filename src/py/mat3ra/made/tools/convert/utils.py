@@ -2,16 +2,17 @@ import json
 from typing import Any, Dict, List, Union
 
 import numpy as np
+from mat3ra.made.constants import (
+    DEFAULT_NON_PERIODIC_MIN_LATTICE_SIZE,
+    DIATOMIC_LATTICE_PADDING_FACTOR,
+    MOLECULAR_LATTICE_PADDING_FACTOR,
+)
 from mat3ra.made.utils import get_center_of_coordinates, map_array_to_array_with_id_value
 from mat3ra.utils.object import NumpyNDArrayRoundEncoder
 from scipy.spatial.distance import pdist
 
 from ..third_party import ASEAtoms, PymatgenInterface, PymatgenStructure
 from .interface_parts_enum import INTERFACE_LABELS_MAP
-
-DEFAULT_NON_PERIODIC_MIN_LATTICE_SIZE = 3.0
-DIATOMIC_LATTICE_PADDING_FACTOR = 3.0
-MOLECULAR_LATTICE_PADDING_FACTOR = 2.0
 
 
 def _get_non_periodic_lattice_padding_factor(max_distance: float, min_distance: float) -> float:
