@@ -36,22 +36,6 @@ def _get_non_periodic_lattice_size(
     return max(default_min_size, max_distance * padding_factor)
 
 
-def strip_poscar_comments(poscar_string: str) -> str:
-    """
-    Remove VASP-style comments (everything after !) from POSCAR string.
-    Pymatgen doesn't handle these comments, but they're common in VASP5 format.
-
-    Args:
-        poscar_string (str): POSCAR content with potential comments.
-
-    Returns:
-        str: POSCAR content without comments.
-    """
-    lines = poscar_string.split("\n")
-    cleaned_lines = [line.split("!")[0].rstrip() if "!" in line else line for line in lines]
-    return "\n".join(cleaned_lines)
-
-
 def extract_labels_from_pymatgen_structure(structure: PymatgenStructure) -> List[int]:
     labels = []
     if isinstance(structure, PymatgenInterface):
