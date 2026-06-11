@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "MAterials DEfinitions and/or MAterials DEsign library."
 readme = "README.md"
 requires-python = ">=3.8"
-license = {file = "LICENSE.md"}
+license = { file = "LICENSE.md" }
 authors = [
     { name = "Exabyte Inc.", email = "info@mat3ra.com" }
 ]
@@ -73,6 +73,10 @@ git_describe_command = "git describe --tags --long"
 
 [tool.setuptools.packages.find]
 where = ["src/py"]
+
+[tool.setuptools.package-data]
+"mat3ra.made" = ["constants.json"]
+
 
 [tool.black]
 line-length = 120
