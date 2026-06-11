@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Lattice = exports.LatticeVectors = exports.nonPeriodicLatticeScalingFactor = void 0;
+exports.Lattice = exports.LatticeVectors = exports.molecularLatticePaddingFactor = exports.diatomicLatticePaddingFactor = exports.defaultNonPeriodicMinimumLatticeSize = void 0;
 const constants_1 = require("@mat3ra/code/dist/js/constants");
 const entity_1 = require("@mat3ra/code/dist/js/entity");
 const math_1 = require("@mat3ra/code/dist/js/math");
@@ -36,7 +36,10 @@ const unit_cell_1 = require("./unit_cell");
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
  * The scaling factor ensures that a non-periodic structure will have have a lattice greater than the structures size.
  */
-exports.nonPeriodicLatticeScalingFactor = 2.0;
+var molecule_1 = require("../constants/molecule");
+Object.defineProperty(exports, "defaultNonPeriodicMinimumLatticeSize", { enumerable: true, get: function () { return molecule_1.defaultNonPeriodicMinimumLatticeSize; } });
+Object.defineProperty(exports, "diatomicLatticePaddingFactor", { enumerable: true, get: function () { return molecule_1.diatomicLatticePaddingFactor; } });
+Object.defineProperty(exports, "molecularLatticePaddingFactor", { enumerable: true, get: function () { return molecule_1.molecularLatticePaddingFactor; } });
 class LatticeVectors extends cell_1.Cell {
 }
 exports.LatticeVectors = LatticeVectors;

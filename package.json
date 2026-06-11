@@ -37,7 +37,7 @@
         "@mat3ra/code": "2026.5.27-0",
         "@mat3ra/esse": "2026.5.27-0",
         "@mat3ra/tsconfig": "2024.6.3-0",
-        "@mat3ra/utils": "2025.4.14-0",
+        "@mat3ra/utils": "^2026.6.11-0",
         "@types/crypto-js": "^4.2.2",
         "@typescript-eslint/eslint-plugin": "^5.9.1",
         "@typescript-eslint/parser": "^5.9.1",
@@ -79,7 +79,8 @@
     },
     "peerDependencies": {
         "@mat3ra/code": "*",
-        "@mat3ra/esse": "*"
+        "@mat3ra/esse": "*",
+        "@mat3ra/utils": "*"
     },
     "lint-staged": {
         "*.js": "eslint --cache --fix",

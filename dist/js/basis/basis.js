@@ -366,19 +366,25 @@ class Basis extends entity_1.InMemoryEntity {
             .some((x) => !x);
     }
     /**
-     * @summary function returns the minimum basis lattice size for a structure.
-     * The lattice size is based on the atomic radius of an element if the basis contains a single atom.
-     * The lattice size is based on the maximum pairwise distance across a structure if the basis contains > 2 atoms.
+     * @summary Returns the minimum cubic lattice size for a non-periodic structure.
+     * Single-atom structures use the element atomic radius floored at defaultMinimumLatticeSize.
+     * Multi-atom structures scale the maximum pairwise distance by 3 when W=min/max pairwise distance
+     * is ~1 (diatomic), otherwise by 2.
      */
-    getMinimumLatticeSize(latticeScalingFactor = lattice_1.nonPeriodicLatticeScalingFactor) {
-        let latticeSizeAdditiveContribution = 0;
+    getMinimumLatticeSize(defaultMinimumLatticeSize = lattice_1.defaultNonPeriodicMinimumLatticeSize) {
         if (this._elements.values.length === 1) {
             const elementSymbol = this._elements.getElementValueByIndex(0);
-            latticeSizeAdditiveContribution = (0, periodic_table_js_1.getElementAtomicRadius)(elementSymbol);
+            const atomicRadius = (0, periodic_table_js_1.getElementAtomicRadius)(elementSymbol);
+            return Math.max(defaultMinimumLatticeSize, atomicRadius);
         }
-        const moleculeLatticeSize = this.maxPairwiseDistance * latticeScalingFactor;
-        const latticeSize = latticeSizeAdditiveContribution + moleculeLatticeSize;
-        return latticeSize;
+        const maxDistance = this.maxPairwiseDistance;
+        const minDistance = this.minPairwiseDistance;
+        const widthRatio = maxDistance > 0 ? minDistance / maxDistance : 1;
+        const latticeScalingFactor = math_1.math.almostEqual(widthRatio, 1)
+            ? lattice_1.diatomicLatticePaddingFactor
+            : lattice_1.molecularLatticePaddingFactor;
+        const moleculeLatticeSize = maxDistance * latticeScalingFactor;
+        return Math.max(defaultMinimumLatticeSize, moleculeLatticeSize);
     }
     /**
      * @summary function returns an array of overlapping atoms within specified tolerance.
@@ -428,22 +434,33 @@ class Basis extends entity_1.InMemoryEntity {
      *
      */
     get maxPairwiseDistance() {
+        return this.getPairwiseDistanceExtremum("max");
+    }
+    get minPairwiseDistance() {
+        return this.getPairwiseDistanceExtremum("min");
+    }
+    getPairwiseDistanceExtremum(extremum) {
         const originalUnits = this.units;
         this.toCartesian();
-        let maxDistance = 0;
+        let resultDistance = extremum === "max" ? 0 : Infinity;
         if (this._elements.values.length >= 2) {
             for (let i = 0; i < this._elements.values.length; i++) {
                 for (let j = i + 1; j < this._elements.values.length; j++) {
                     const distance = math_1.math.vDist(this._coordinates.getElementValueByIndex(i), this._coordinates.getElementValueByIndex(j));
-                    if (distance && distance > maxDistance) {
-                        maxDistance = distance;
+                    if (!distance)
+                        continue;
+                    if (extremum === "max" && distance > resultDistance) {
+                        resultDistance = distance;
+                    }
+                    if (extremum === "min" && distance < resultDistance) {
+                        resultDistance = distance;
                     }
                 }
             }
         }
         if (originalUnits !== constants_1.ATOMIC_COORD_UNITS.cartesian)
             this.toCrystal();
-        return maxDistance;
+        return extremum === "min" && resultDistance === Infinity ? 0 : resultDistance;
     }
     /**
      * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the

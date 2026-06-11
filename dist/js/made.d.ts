@@ -2,7 +2,7 @@ import { Basis } from "./basis/basis";
 import { Cell } from "./cell/cell";
 import { ATOMIC_COORD_UNITS, coefficients, tolerance, units } from "./constants";
 import { AtomicConstraints } from "./constraints/constraints";
-import { Lattice, nonPeriodicLatticeScalingFactor } from "./lattice/lattice";
+import { Lattice, defaultNonPeriodicMinimumLatticeSize, diatomicLatticePaddingFactor, molecularLatticePaddingFactor } from "./lattice/lattice";
 import { DEFAULT_LATTICE_UNITS, LATTICE_TYPE_CONFIGS } from "./lattice/lattice_types";
 import { ReciprocalLattice } from "./lattice/reciprocal/lattice_reciprocal";
 import { UnitCell } from "./lattice/unit_cell";
@@ -37,7 +37,9 @@ export declare const Made: {
     Lattice: typeof Lattice;
     Cell: typeof Cell;
     UnitCell: typeof UnitCell;
-    nonPeriodicLatticeScalingFactor: number;
+    defaultNonPeriodicMinimumLatticeSize: number;
+    diatomicLatticePaddingFactor: number;
+    molecularLatticePaddingFactor: number;
     ReciprocalLattice: typeof ReciprocalLattice;
     Basis: typeof Basis;
     AtomicConstraints: typeof AtomicConstraints;
@@ -54,7 +56,6 @@ export declare const Made: {
             toPoscar: (materialOrConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema, omitConstraints?: boolean) => string;
             fromPoscar: (fileContent: string) => object;
             atomicConstraintsCharFromBool: (bool: boolean) => string;
-            atomsCount: typeof import("./parsers/poscar").atomsCount;
         };
         cif: {
             parseMeta: (txt: string) => import("./parsers/cif").Meta;
@@ -99,4 +100,4 @@ export declare const Made: {
         };
     };
 };
-export { coefficients, tolerance, units, ATOMIC_COORD_UNITS, Material, defaultMaterialConfig, Lattice, Cell, UnitCell, nonPeriodicLatticeScalingFactor, ReciprocalLattice, Basis, AtomicConstraints, parsers, tools, LATTICE_TYPE_CONFIGS, DEFAULT_LATTICE_UNITS, };
+export { coefficients, tolerance, units, ATOMIC_COORD_UNITS, Material, defaultMaterialConfig, Lattice, Cell, UnitCell, defaultNonPeriodicMinimumLatticeSize, diatomicLatticePaddingFactor, molecularLatticePaddingFactor, ReciprocalLattice, Basis, AtomicConstraints, parsers, tools, LATTICE_TYPE_CONFIGS, DEFAULT_LATTICE_UNITS, };

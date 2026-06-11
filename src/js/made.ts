@@ -2,7 +2,12 @@ import { Basis } from "./basis/basis";
 import { Cell } from "./cell/cell";
 import { ATOMIC_COORD_UNITS, coefficients, tolerance, units } from "./constants";
 import { AtomicConstraints } from "./constraints/constraints";
-import { Lattice, nonPeriodicLatticeScalingFactor } from "./lattice/lattice";
+import {
+    Lattice,
+    defaultNonPeriodicMinimumLatticeSize,
+    diatomicLatticePaddingFactor,
+    molecularLatticePaddingFactor,
+} from "./lattice/lattice";
 import { DEFAULT_LATTICE_UNITS, LATTICE_TYPE_CONFIGS } from "./lattice/lattice_types";
 import { ReciprocalLattice } from "./lattice/reciprocal/lattice_reciprocal";
 import { UnitCell } from "./lattice/unit_cell";
@@ -21,7 +26,9 @@ export const Made = {
     Lattice,
     Cell,
     UnitCell,
-    nonPeriodicLatticeScalingFactor,
+    defaultNonPeriodicMinimumLatticeSize,
+    diatomicLatticePaddingFactor,
+    molecularLatticePaddingFactor,
     ReciprocalLattice,
     Basis,
     AtomicConstraints,
@@ -42,7 +49,9 @@ export {
     Lattice,
     Cell,
     UnitCell,
-    nonPeriodicLatticeScalingFactor,
+    defaultNonPeriodicMinimumLatticeSize,
+    diatomicLatticePaddingFactor,
+    molecularLatticePaddingFactor,
     ReciprocalLattice,
     Basis,
     AtomicConstraints,

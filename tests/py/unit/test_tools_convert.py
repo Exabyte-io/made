@@ -1,19 +1,24 @@
 import numpy as np
 import pytest
 from ase import Atoms
+from ase.build import molecule
 from mat3ra.code.array_with_ids import ArrayWithIds
+from mat3ra.made.material import Material
+from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
+from mat3ra.made.tools.convert.utils import (
+    DEFAULT_NON_PERIODIC_MIN_LATTICE_SIZE,
+    calculate_padded_cell_simple_cubic,
+)
 from mat3ra.utils import assertion as assertion_utils
 from pymatgen.core.structure import Element, Lattice, Structure
 
-from mat3ra.made.material import Material
-from mat3ra.made.tools.convert import from_ase, from_poscar, from_pymatgen, to_ase, to_poscar, to_pymatgen
 from .fixtures.monolayer import GRAPHENE
 from .fixtures.thrid_party.ase_atoms import (
-    ASE_BULK_Si,
     ASE_MOLECULE_H2O,
+    BULK_SI_LABELS,
     BULK_SI_LATTICE_A,
     BULK_SI_LATTICE_ALPHA,
-    BULK_SI_LABELS,
+    ASE_BULK_Si,
 )
 
 PYMATGEN_LATTICE = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120, beta=90, gamma=60)
@@ -143,3 +148,30 @@ def test_from_ase(
     assert material_data["isNonPeriodic"] == expected_is_non_periodic
     if expected_lattice_type is not None:
         assert material_data["lattice"]["type"] == expected_lattice_type
+
+
+TOLERANCE = 1e-4
+
+H2_EXPECTED_LATTICE_A = DEFAULT_NON_PERIODIC_MIN_LATTICE_SIZE
+O2_EXPECTED_LATTICE_A = 3.7379
+H2O_EXPECTED_LATTICE_A = 3.0530
+C2H4_EXPECTED_LATTICE_A = 6.1754
+
+
+@pytest.mark.parametrize(
+    "molecule_name, expected_lattice_a",
+    [
+        ("H2", H2_EXPECTED_LATTICE_A),
+        ("O2", O2_EXPECTED_LATTICE_A),
+        ("H2O", H2O_EXPECTED_LATTICE_A),
+        ("C2H4", C2H4_EXPECTED_LATTICE_A),
+    ],
+)
+def test_calculate_padded_cell_simple_cubic(molecule_name, expected_lattice_a):
+    atoms = molecule(molecule_name)
+    cell_vectors = calculate_padded_cell_simple_cubic(atoms.get_positions().tolist())
+    lattice_a = cell_vectors[0][0]
+    assert np.isclose(lattice_a, expected_lattice_a, atol=TOLERANCE)
+    assert lattice_a >= DEFAULT_NON_PERIODIC_MIN_LATTICE_SIZE
+    assert np.isclose(cell_vectors[0][0], cell_vectors[1][1], atol=TOLERANCE)
+    assert np.isclose(cell_vectors[0][0], cell_vectors[2][2], atol=TOLERANCE)
