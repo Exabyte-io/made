@@ -1,7 +1,7 @@
 import json
 import os
 
-_CONSTANTS_FILE = os.path.join(os.path.dirname(__file__), "../../../../constants.json")
+_CONSTANTS_FILE = os.path.join(os.path.dirname(__file__), "constants.json")
 with open(_CONSTANTS_FILE) as f:
     _CONSTANTS = json.load(f)
 

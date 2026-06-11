@@ -74,6 +74,10 @@ git_describe_command = "git describe --tags --long"
 [tool.setuptools.packages.find]
 where = ["src/py"]
 
+[tool.setuptools.package-data]
+"mat3ra.made" = ["constants.json"]
+
+
 [tool.black]
 line-length = 120
 target-version = ['py38']
