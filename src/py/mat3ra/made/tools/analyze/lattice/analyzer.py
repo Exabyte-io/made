@@ -157,8 +157,18 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
                 transformed_coordinates[index, 0] = x_value
                 transformed_coordinates[index, 1] = y_value
 
-            x_candidates = sorted({self._normalize_fractional_coordinate(coord[0], tolerance) for coord in transformed_coordinates})
-            y_candidates = sorted({self._normalize_fractional_coordinate(coord[1], tolerance) for coord in transformed_coordinates})
+            x_candidates = sorted(
+                {
+                    self._normalize_fractional_coordinate(coord[0], tolerance)
+                    for coord in transformed_coordinates
+                }
+            )
+            y_candidates = sorted(
+                {
+                    self._normalize_fractional_coordinate(coord[1], tolerance)
+                    for coord in transformed_coordinates
+                }
+            )
 
             for x_shift in x_candidates:
                 for y_shift in y_candidates:
@@ -200,11 +210,17 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
             return material
 
         canonical_material.basis.coordinates.values = best_coordinates[best_order].tolist()
-        canonical_material.basis.elements = ArrayWithIds.from_values([elements[index] for index in best_order])
+        canonical_material.basis.elements = ArrayWithIds.from_values(
+            [elements[index] for index in best_order]
+        )
         if labels:
-            canonical_material.basis.labels = ArrayWithIds.from_values([labels[index] for index in best_order])
+            canonical_material.basis.labels = ArrayWithIds.from_values(
+                [labels[index] for index in best_order]
+            )
         if constraints and len(constraints) == len(best_order):
-            canonical_material.basis.constraints = ArrayWithIds.from_values([constraints[index] for index in best_order])
+            canonical_material.basis.constraints = ArrayWithIds.from_values(
+                [constraints[index] for index in best_order]
+            )
 
         if original_is_cartesian:
             canonical_material.to_cartesian()
@@ -248,6 +264,9 @@ class LatticeMaterialAnalyzer(BaseMaterialAnalyzer):
         return normalized_value
 
     def _canonical_atom_key(self, element, label, coordinate, tolerance: float):
-        rounded_coordinate = tuple(round(self._normalize_fractional_coordinate(value, tolerance), 8) for value in coordinate)
+        rounded_coordinate = tuple(
+            round(self._normalize_fractional_coordinate(value, tolerance), 8)
+            for value in coordinate
+        )
         label_key = "" if label is None else str(label)
         return (element, label_key, rounded_coordinate[2], rounded_coordinate[0], rounded_coordinate[1])
