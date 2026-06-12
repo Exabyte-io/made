@@ -3,8 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.XYZ_COORDINATE_PRECISION = void 0;
-exports.validate = validate;
+exports.validate = exports.XYZ_COORDINATE_PRECISION = void 0;
 const lodash_1 = require("lodash");
 const underscore_string_1 = __importDefault(require("underscore.string"));
 const constrained_basis_1 = require("../basis/constrained_basis");
@@ -44,6 +43,7 @@ function validate(xyzTxt) {
         .filter((x) => x.trim() !== "")
         .forEach(validateLine);
 }
+exports.validate = validate;
 /**
  * Parses XYZ line and returns an object.
  * @param line - line of text

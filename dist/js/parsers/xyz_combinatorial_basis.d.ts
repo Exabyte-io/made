@@ -1,4 +1,3 @@
-import { BasisSchema } from "@mat3ra/esse/dist/js/types";
 import { ElementsAndCoordinatesConfig } from "../basis/basis";
 import { AtomicCoordinateValue } from "../basis/coordinates";
 import { AtomicElementValue } from "../basis/elements";
@@ -38,7 +37,7 @@ export declare class CombinatorialBasis {
      * @return {String[]}
      */
     get uniqueElements(): any[];
-    static toBasisConfigForElementsAndCoordinates(array: ElementWithCoordinate[], units?: BasisSchema["units"], cell?: Cell): ElementsAndCoordinatesConfig;
+    static toBasisConfigForElementsAndCoordinates(array: ElementWithCoordinate[], units?: "crystal" | "cartesian" | undefined, cell?: Cell): ElementsAndCoordinatesConfig;
     /**
      * Returns array of regular bases extracted from current combinatorial basis.
      * @return {Basis[]|Object[]}

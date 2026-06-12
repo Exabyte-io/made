@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES = exports.PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS = void 0;
-exports.isConventionalCellSameAsPrimitiveForLatticeType = isConventionalCellSameAsPrimitiveForLatticeType;
+exports.isConventionalCellSameAsPrimitiveForLatticeType = exports.PRIMITIVE_TO_CONVENTIONAL_CELL_LATTICE_TYPES = exports.PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS = void 0;
 /**
  * Routines for calculating conventional cell vectors from primitive cell Bravais parameters.
  * Following Setyawan, W., & Curtarolo, S. (2010). doi:10.1016/j.commatsci.2010.05.010
@@ -78,3 +77,4 @@ function isConventionalCellSameAsPrimitiveForLatticeType(latticeType) {
     const multiplier = exports.PRIMITIVE_TO_CONVENTIONAL_CELL_MULTIPLIERS[latticeType || "TRI"];
     return multiplier === unitMatrix;
 }
+exports.isConventionalCellSameAsPrimitiveForLatticeType = isConventionalCellSameAsPrimitiveForLatticeType;

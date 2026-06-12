@@ -3,7 +3,7 @@ import pytest
 
 from mat3ra.made.cell.primitive_cell import get_primitive_lattice_vectors_from_config
 from mat3ra.made.lattice import Lattice, LatticeTypeEnum
-from tests.py.unit.utils import assert_two_entities_deep_almost_equal
+from unit.utils import assert_two_entities_deep_almost_equal
 
 
 class TestPrimitiveCell:
@@ -83,6 +83,7 @@ class TestPrimitiveCell:
 
     def test_fallback_to_tri_when_type_is_none(self):
         """Tests default fallback to 'TRI' when lattice_config.type is None."""
+
         # Use a simple dummy class to bypass Pydantic's strict validation
         # and simulate a malformed or incomplete Lattice config.
         class MockLattice:
