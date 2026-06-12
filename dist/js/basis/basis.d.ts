@@ -147,11 +147,12 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
      */
     hasEquivalentCellTo(anotherBasisClsInstance: Basis): boolean;
     /**
-     * @summary function returns the minimum basis lattice size for a structure.
-     * The lattice size is based on the atomic radius of an element if the basis contains a single atom.
-     * The lattice size is based on the maximum pairwise distance across a structure if the basis contains > 2 atoms.
+     * @summary Returns the minimum cubic lattice size for a non-periodic structure.
+     * Single-atom structures use the element atomic radius floored at defaultMinimumLatticeSize.
+     * Multi-atom structures scale the maximum pairwise distance by 3 when W=min/max pairwise distance
+     * is ~1 (diatomic), otherwise by 2.
      */
-    getMinimumLatticeSize(latticeScalingFactor?: number): number;
+    getMinimumLatticeSize(defaultMinimumLatticeSize?: number): number;
     /**
      * @summary function returns an array of overlapping atoms within specified tolerance.
      */
@@ -172,6 +173,8 @@ export declare class Basis extends InMemoryEntity implements BasisSchema {
      *
      */
     get maxPairwiseDistance(): number;
+    get minPairwiseDistance(): number;
+    getPairwiseDistanceExtremum(extremum: "max" | "min"): number;
     /**
      * @summary Function takes basis coordinates and transposes them so that the values for each dimension of the
      *  the basis are in their own nested array.

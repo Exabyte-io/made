@@ -37,7 +37,7 @@
         "@mat3ra/code": "^2026.5.27-0",
         "@mat3ra/esse": "^2026.6.5-0",
         "@mat3ra/tsconfig": "^2024.6.3-0",
-        "@mat3ra/utils": "git+https://github.com/exabyte-io/utils.git#1574df23cb9b0f249ee589e2c338546c4b83a97a",
+        "@mat3ra/utils": "git+https://github.com/exabyte-io/utils.git#c88d62c22bbd4203875183194677af03476e0f1a",
         "@types/crypto-js": "^4.2.2",
         "@typescript-eslint/eslint-plugin": "^5.62.0",
         "@typescript-eslint/parser": "^5.62.0",
@@ -79,7 +79,8 @@
     },
     "peerDependencies": {
         "@mat3ra/code": "*",
-        "@mat3ra/esse": "*"
+        "@mat3ra/esse": "*",
+        "@mat3ra/utils": "*"
     },
     "lint-staged": {
         "*.js": "eslint --cache --fix",

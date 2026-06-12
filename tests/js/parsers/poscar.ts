@@ -4,6 +4,18 @@ import { AtomicConstraints } from "../../../src/js/constraints/constraints";
 import { Material } from "../../../src/js/material";
 import parsers from "../../../src/js/parsers/parsers";
 import { atomsCount } from "../../../src/js/parsers/poscar";
+
+const O2_POSCAR_WITH_COMMENTS = `O2 molecule in a box
+1.0 ! universal scaling parameters
+12.0 0.0 0.0 ! lattice vector a(1)
+0.0 12.0 0.0 ! lattice vector a(2)
+0.0 0.0 12.0 ! lattice vector a(3)
+O
+2 ! number of atoms
+cart ! positions in cartesian coordinates
+0 0 0 O
+0 0 1.21 O
+`;
 import {
     atomicConstraints,
     H2OPoscar,
@@ -27,6 +39,21 @@ describe("Parsers.POSCAR", () => {
 
     it("should return the number of atoms for a molecule in a poscar file", () => {
         expect(atomsCount(H2OPoscar)).to.be.equal(3);
+    });
+
+    it("should detect POSCAR with VASP-style comments", () => {
+        expect(parsers.poscar.isPoscar(O2_POSCAR_WITH_COMMENTS)).to.be.equal(true);
+        expect(parsers.nativeFormatParsers.detectFormat(O2_POSCAR_WITH_COMMENTS)).to.be.equal(
+            "poscar",
+        );
+    });
+
+    it("should parse POSCAR with VASP-style comments", () => {
+        const materialConfig = parsers.poscar.fromPoscar(O2_POSCAR_WITH_COMMENTS);
+        expect(materialConfig).to.have.property("basis");
+        expect((materialConfig as { basis: { elements: object[] } }).basis.elements).to.have.length(
+            2,
+        );
     });
 
     it("should return constraints as string with given map function", () => {

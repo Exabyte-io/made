@@ -26,6 +26,5 @@ declare const _default: {
     toPoscar: typeof toPoscar;
     fromPoscar: typeof fromPoscar;
     atomicConstraintsCharFromBool: (bool: boolean) => string;
-    atomsCount: typeof atomsCount;
 };
 export default _default;

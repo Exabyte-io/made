@@ -7,7 +7,11 @@ import { chain, toPairs, uniq, values } from "lodash";
 
 import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
-import { nonPeriodicLatticeScalingFactor } from "../lattice/lattice";
+import {
+    defaultNonPeriodicMinimumLatticeSize,
+    diatomicLatticePaddingFactor,
+    molecularLatticePaddingFactor,
+} from "../lattice/lattice";
 import { AtomicCoordinateValue, Coordinates } from "./coordinates";
 import { AtomicElementValue, Elements } from "./elements";
 import { AtomicLabelValue, Labels } from "./labels";
@@ -476,19 +480,27 @@ export class Basis extends InMemoryEntity implements BasisSchema {
     }
 
     /**
-     * @summary function returns the minimum basis lattice size for a structure.
-     * The lattice size is based on the atomic radius of an element if the basis contains a single atom.
-     * The lattice size is based on the maximum pairwise distance across a structure if the basis contains > 2 atoms.
+     * @summary Returns the minimum cubic lattice size for a non-periodic structure.
+     * Single-atom structures use the element atomic radius floored at defaultMinimumLatticeSize.
+     * Multi-atom structures scale the maximum pairwise distance by 3 when W=min/max pairwise distance
+     * is ~1 (diatomic), otherwise by 2.
      */
-    getMinimumLatticeSize(latticeScalingFactor = nonPeriodicLatticeScalingFactor): number {
-        let latticeSizeAdditiveContribution = 0;
+    getMinimumLatticeSize(
+        defaultMinimumLatticeSize = defaultNonPeriodicMinimumLatticeSize,
+    ): number {
         if (this._elements.values.length === 1) {
             const elementSymbol = this._elements.getElementValueByIndex(0);
-            latticeSizeAdditiveContribution = getElementAtomicRadius(elementSymbol);
+            const atomicRadius = getElementAtomicRadius(elementSymbol);
+            return Math.max(defaultMinimumLatticeSize, atomicRadius);
         }
-        const moleculeLatticeSize = this.maxPairwiseDistance * latticeScalingFactor;
-        const latticeSize = latticeSizeAdditiveContribution + moleculeLatticeSize;
-        return latticeSize;
+        const maxDistance = this.maxPairwiseDistance;
+        const minDistance = this.minPairwiseDistance;
+        const widthRatio = maxDistance > 0 ? minDistance / maxDistance : 1;
+        const latticeScalingFactor = math.almostEqual(widthRatio, 1)
+            ? diatomicLatticePaddingFactor
+            : molecularLatticePaddingFactor;
+        const moleculeLatticeSize = maxDistance * latticeScalingFactor;
+        return Math.max(defaultMinimumLatticeSize, moleculeLatticeSize);
     }
 
     /**
@@ -545,9 +557,17 @@ export class Basis extends InMemoryEntity implements BasisSchema {
      *
      */
     get maxPairwiseDistance(): number {
+        return this.getPairwiseDistanceExtremum("max");
+    }
+
+    get minPairwiseDistance(): number {
+        return this.getPairwiseDistanceExtremum("min");
+    }
+
+    getPairwiseDistanceExtremum(extremum: "max" | "min"): number {
         const originalUnits = this.units;
         this.toCartesian();
-        let maxDistance = 0;
+        let resultDistance = extremum === "max" ? 0 : Infinity;
         if (this._elements.values.length >= 2) {
             for (let i = 0; i < this._elements.values.length; i++) {
                 for (let j = i + 1; j < this._elements.values.length; j++) {
@@ -555,14 +575,18 @@ export class Basis extends InMemoryEntity implements BasisSchema {
                         this._coordinates.getElementValueByIndex(i) as Coordinate3DSchema,
                         this._coordinates.getElementValueByIndex(j) as Coordinate3DSchema,
                     );
-                    if (distance && distance > maxDistance) {
-                        maxDistance = distance;
+                    if (!distance) continue;
+                    if (extremum === "max" && distance > resultDistance) {
+                        resultDistance = distance;
+                    }
+                    if (extremum === "min" && distance < resultDistance) {
+                        resultDistance = distance;
                     }
                 }
             }
         }
         if (originalUnits !== ATOMIC_COORD_UNITS.cartesian) this.toCrystal();
-        return maxDistance;
+        return extremum === "min" && resultDistance === Infinity ? 0 : resultDistance;
     }
 
     /**
