@@ -1,3 +1,41 @@
+from copy import deepcopy
+
+from mat3ra.made.material import Material
+from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
+
+
+def _canonicalize_in_plane_fixture(config):
+    analyzer = LatticeMaterialAnalyzer(material=Material.create(config))
+    canonical_material = analyzer._canonicalize_in_plane_primitive_material(analyzer.material)
+
+    canonical_config = deepcopy(config)
+    canonical_config["basis"]["elements"] = [
+        {"id": index, "value": value} for index, value in enumerate(canonical_material.basis.elements.values)
+    ]
+    canonical_config["basis"]["coordinates"] = [
+        {"id": index, "value": coordinate}
+        for index, coordinate in enumerate(canonical_material.basis.coordinates.values)
+    ]
+
+    if "labels" in canonical_config["basis"]:
+        canonical_config["basis"]["labels"] = [
+            {"id": index, "value": value} for index, value in enumerate(canonical_material.basis.labels.values)
+        ]
+
+    canonical_config["lattice"].update(
+        {
+            "a": canonical_material.lattice.a,
+            "b": canonical_material.lattice.b,
+            "c": canonical_material.lattice.c,
+            "alpha": canonical_material.lattice.alpha,
+            "beta": canonical_material.lattice.beta,
+            "gamma": canonical_material.lattice.gamma,
+        }
+    )
+
+    return canonical_config
+
+
 GALLIUM_ARSENIDE_DIAMOND_INTERFACE = {
     "name": "AsGa(001)-C(001), Interface, Strain 2.068pct",
     "basis": {
@@ -835,3 +873,9 @@ GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF = {
         "type": "TRI",
     },
 }
+
+
+GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE = _canonicalize_in_plane_fixture(
+    GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE
+)
+GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF = GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE
