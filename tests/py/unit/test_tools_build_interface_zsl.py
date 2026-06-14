@@ -191,5 +191,6 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         reduce_result_cell=False,
         reduce_result_cell_to_primitive=True,
     )
+    print(interface.to_dict())
     expected_interface = get_platform_specific_value(expected_interface)
     assert_two_entities_deep_almost_equal(interface, expected_interface)
