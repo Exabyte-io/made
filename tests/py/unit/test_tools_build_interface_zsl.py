@@ -153,7 +153,6 @@ def test_create_zsl_interface(substrate, film, gap, vacuum, max_area, expected_i
     assert_two_entities_deep_almost_equal(interface, expected_interface)
 
 
-@pytest.mark.skip(reason="Construction differs on Darwin vs GHA up to translation symmetry")
 @pytest.mark.parametrize(
     "substrate, film, gap, vacuum, max_area, expected_interface",
     [GRAPHENE_NICKEL_TEST_CASE, DIAMOND_GAAS_CSL_TEST_CASE],
