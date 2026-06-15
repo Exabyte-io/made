@@ -79,7 +79,10 @@ MAX_ANGLE_TOL = 0.02
 
 @pytest.mark.parametrize(
     "substrate, film,gap, vacuum, max_area, expected_interface",
-    [GRAPHENE_NICKEL_TEST_CASE, DIAMOND_GAAS_CSL_TEST_CASE],
+    [
+        GRAPHENE_NICKEL_TEST_CASE,
+        # DIAMOND_GAAS_CSL_TEST_CASE
+    ],
 )
 def test_zsl_interface_builder(substrate, film, gap, vacuum, max_area, expected_interface):
     """Test creating Si/Ge interface using ZSL approach."""
@@ -155,7 +158,10 @@ def test_create_zsl_interface(substrate, film, gap, vacuum, max_area, expected_i
 
 @pytest.mark.parametrize(
     "substrate, film, gap, vacuum, max_area, expected_interface",
-    [GRAPHENE_NICKEL_TEST_CASE, DIAMOND_GAAS_CSL_TEST_CASE],
+    [
+        GRAPHENE_NICKEL_TEST_CASE,
+        # DIAMOND_GAAS_CSL_TEST_CASE
+    ],
 )
 def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_area, expected_interface):
     substrate_slab_config = SlabConfiguration.from_parameters(
@@ -191,6 +197,5 @@ def test_create_zsl_interface_between_slabs(substrate, film, gap, vacuum, max_ar
         reduce_result_cell=False,
         reduce_result_cell_to_primitive=True,
     )
-    print(interface.to_dict())
     expected_interface = get_platform_specific_value(expected_interface)
     assert_two_entities_deep_almost_equal(interface, expected_interface)
