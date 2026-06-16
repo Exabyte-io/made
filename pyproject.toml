@@ -47,8 +47,9 @@ tests = [
     # B/c of https://github.com/binary-husky/gpt_academic/issues/1237
     "gradio",
     "pydantic",
+    "spglib==2.6.0",
     "mat3ra-made[tools]",
-    "mat3ra-standata"
+    "mat3ra-standata",
 ]
 all = [
     "mat3ra-made[tests]",

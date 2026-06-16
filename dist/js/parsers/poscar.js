@@ -180,4 +180,5 @@ exports.default = {
     toPoscar,
     fromPoscar,
     atomicConstraintsCharFromBool,
+    atomsCount,
 };
