@@ -37,7 +37,7 @@
         "@mat3ra/code": "^2026.5.27-0",
         "@mat3ra/esse": "^2026.6.5-0",
         "@mat3ra/tsconfig": "^2024.6.3-0",
-        "@mat3ra/utils": "git+https://github.com/exabyte-io/utils.git#c88d62c22bbd4203875183194677af03476e0f1a",
+        "@mat3ra/utils": "git+https://github.com/exabyte-io/utils.git#ab9f4971c3625f39e17798e2762889a21b345edf",
         "@types/crypto-js": "^4.2.2",
         "@typescript-eslint/eslint-plugin": "^5.62.0",
         "@typescript-eslint/parser": "^5.62.0",
