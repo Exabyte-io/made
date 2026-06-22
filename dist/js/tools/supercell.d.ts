@@ -9,8 +9,6 @@ import type { Material } from "../material";
 declare function generateNewBasisWithinSupercell(basis: Basis | ConstrainedBasis, cell: Cell, supercell: Cell, supercellMatrix: Matrix3X3Schema): Basis;
 /**
  * @summary Generates supercell config for the specified material.
- * @param material
- * @param supercellMatrix {Number[][]}
  */
 declare function generateConfig(material: Material, supercellMatrix: Matrix3X3Schema): {
     name: string;

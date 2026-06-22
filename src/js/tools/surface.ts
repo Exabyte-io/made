@@ -175,7 +175,7 @@ function generateConfig(
     if (numberOfLayers < 1)
         throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
 
-    const cell = material.Lattice.vectors;
+    const cell = material.getLattice().vectors;
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
@@ -189,7 +189,7 @@ function generateConfig(
     );
     const supercellMatrix = MULT(dimensionsScalingMatrix, millerScalingMatrix);
     const supercell = millerSupercell.cloneAndScaleByMatrix(dimensionsScalingMatrix);
-    const tempBasis = material.Basis.clone();
+    const tempBasis = material.getBasis().clone();
     const newBasis = SupercellTools.generateNewBasisWithinSupercell(
         tempBasis,
         cell,

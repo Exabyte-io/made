@@ -2,6 +2,7 @@ import { HASH_TOLERANCE } from "@mat3ra/code/dist/js/constants";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { math } from "@mat3ra/code/dist/js/math";
 import {
+    BaseInMemoryEntitySchema,
     Coordinate3DSchema,
     LatticeSchema,
     LatticeTypeEnum,
@@ -30,7 +31,9 @@ export class LatticeVectors extends Cell implements LatticeVectorsSchema {}
 
 export type { LatticeVectorsSchema };
 
-export class Lattice extends InMemoryEntity implements LatticeSchema {
+type LatticeEntitySchema = LatticeSchema & BaseInMemoryEntitySchema;
+
+export class Lattice extends InMemoryEntity<LatticeEntitySchema> implements LatticeSchema {
     static defaultConfig: LatticeSchema = {
         a: 1,
         b: 1,
@@ -294,11 +297,10 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         return object;
     }
 
-    // @ts-ignore
-    toJSON(exclude?: string[]): LatticeSchema {
+    toJSON(exclude: (keyof LatticeSchema)[] = []): LatticeSchema {
         return {
             ...super.toJSON(exclude),
             vectors: this.vectors.toJSON(),
-        } as LatticeSchema;
+        };
     }
 }
