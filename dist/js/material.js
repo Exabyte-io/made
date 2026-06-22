@@ -16,17 +16,6 @@ const MaterialSchemaMixin_1 = require("./generated/MaterialSchemaMixin");
 const lattice_1 = require("./lattice/lattice");
 const parsers_1 = __importDefault(require("./parsers/parsers"));
 const supercell_1 = __importDefault(require("./tools/supercell"));
-// TODO: remove in-line type creation
-// type OptionallyConstrainedBasisConfig = BasisConfig &
-//     Partial<Pick<ConstrainedBasisConfig, "constraints">>;
-// interface MaterialOverrides {
-//     formula: string;
-//     unitCellFormula: string;
-//     basis: OptionallyConstrainedBasisConfig;
-//     lattice: LatticeSchema;
-//     scaledHash: string;
-//     isNonPeriodic: boolean;
-// }
 function parseBasis(textOrObject, format, unitz) {
     if (typeof textOrObject === "string") {
         if (format !== "xyz") {
@@ -162,19 +151,6 @@ class Material extends BaseMaterial {
     getLattice() {
         return new lattice_1.Lattice(this.lattice);
     }
-    // private setBasisConstraints(constraints: Constraint[]) {
-    //     const basisWithConstraints = {
-    //         ...this.basis,
-    //         constraints: constraints.map((c) => c.toJSON()),
-    //     };
-    //     this.setBasis(basisWithConstraints);
-    // }
-    // setBasisConstraintsFromArrayOfObjects(constraints: AtomicConstraintsSchema) {
-    //     const constraintsInstances = constraints.map((c) => {
-    //         return Constraint.fromValueAndId(c.value, c.id);
-    //     });
-    //     this.setBasisConstraints(constraintsInstances);
-    // }
     /**
      * High-level access to unique elements from material instead of basis.
      */

@@ -39,19 +39,6 @@ import { Lattice } from "./lattice/lattice";
 import parsers from "./parsers/parsers";
 import supercellTools from "./tools/supercell";
 
-// TODO: remove in-line type creation
-// type OptionallyConstrainedBasisConfig = BasisConfig &
-//     Partial<Pick<ConstrainedBasisConfig, "constraints">>;
-
-// interface MaterialOverrides {
-//     formula: string;
-//     unitCellFormula: string;
-//     basis: OptionallyConstrainedBasisConfig;
-//     lattice: LatticeSchema;
-//     scaledHash: string;
-//     isNonPeriodic: boolean;
-// }
-
 function parseBasis(
     textOrObject: string | BasisConfig,
     format?: "xyz",
@@ -231,21 +218,6 @@ class Material extends BaseMaterial implements MaterialSchema {
     getLattice() {
         return new Lattice(this.lattice);
     }
-
-    // private setBasisConstraints(constraints: Constraint[]) {
-    //     const basisWithConstraints = {
-    //         ...this.basis,
-    //         constraints: constraints.map((c) => c.toJSON()),
-    //     };
-    //     this.setBasis(basisWithConstraints);
-    // }
-
-    // setBasisConstraintsFromArrayOfObjects(constraints: AtomicConstraintsSchema) {
-    //     const constraintsInstances = constraints.map((c) => {
-    //         return Constraint.fromValueAndId(c.value, c.id);
-    //     });
-    //     this.setBasisConstraints(constraintsInstances);
-    // }
 
     /**
      * High-level access to unique elements from material instead of basis.
@@ -427,53 +399,5 @@ class Material extends BaseMaterial implements MaterialSchema {
         } as MaterialSchema;
     }
 }
-
-// function materialOverridesMixin(
-//     item: InMemoryEntity,
-// ): asserts item is InMemoryEntity & MaterialOverrides {
-//     // @ts-expect-error — mixin properties installed on Material.prototype
-//     const properties: Material & MaterialOverrides = {
-//         get formula() {
-//             return this.prop("formula") || this.Basis.formula;
-//         },
-//         get unitCellFormula() {
-//             return this.prop("unitCellFormula") || this.Basis.unitCellFormula;
-//         },
-//         get basis() {
-//             return this.requiredProp("basis");
-//         },
-//         get lattice() {
-//             return this.requiredProp("lattice");
-//         },
-//         set lattice(config: LatticeSchema) {
-//             const originalIsInCrystalUnits = this.Basis.isInCrystalUnits;
-//             const basis = this.Basis;
-//             basis.toCartesian();
-
-//             const newLattice = new Lattice(config);
-//             basis.cell = newLattice.vectors;
-//             if (originalIsInCrystalUnits) basis.toCrystal();
-
-//             const newBasisConfig = basis.toJSON();
-//             this.setProp("basis", newBasisConfig);
-//             this.setProp("lattice", config);
-
-//             this.unsetFileProps();
-//         },
-//         get scaledHash() {
-//             return this.calculateHash("", true);
-//         },
-//         get isNonPeriodic() {
-//             return this.prop("isNonPeriodic", false) ?? false;
-//         },
-//         set isNonPeriodic(bool: boolean) {
-//             this.setProp("isNonPeriodic", bool);
-//         },
-//     };
-
-//     Object.defineProperties(item, Object.getOwnPropertyDescriptors(properties));
-// }
-
-// materialOverridesMixin(Material.prototype);
 
 export { Material };
