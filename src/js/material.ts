@@ -1,9 +1,5 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import {
-    BankableEntity,
-    bankableEntityMixin,
-} from "@mat3ra/code/dist/js/entity/mixins/BankableEntityMixin";
-import {
     type Defaultable,
     defaultableEntityMixin,
 } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
@@ -101,7 +97,6 @@ export const defaultMaterialConfig: MaterialSchema = {
 
 interface BaseMaterial
     extends MaterialSchemaMixin,
-        BankableEntity,
         NamedEntity,
         Defaultable,
         Required<HasMetadata<MaterialSchema["metadata"]>> {}
@@ -109,7 +104,6 @@ interface BaseMaterial
 class BaseMaterial extends InMemoryEntity<MaterialSchema> {}
 
 materialSchemaMixin(BaseMaterial.prototype);
-bankableEntityMixin(BaseMaterial.prototype);
 namedEntityMixin(BaseMaterial.prototype);
 defaultableEntityMixin(BaseMaterial);
 hasMetadataMixin(BaseMaterial.prototype);

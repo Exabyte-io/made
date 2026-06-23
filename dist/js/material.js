@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Material = exports.defaultMaterialConfig = void 0;
 const entity_1 = require("@mat3ra/code/dist/js/entity");
-const BankableEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/BankableEntityMixin");
 const DefaultableMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/DefaultableMixin");
 const HasMetadataMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/HasMetadataMixin");
 const NamedEntityMixin_1 = require("@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin");
@@ -69,7 +68,6 @@ exports.defaultMaterialConfig = {
 class BaseMaterial extends entity_1.InMemoryEntity {
 }
 (0, MaterialSchemaMixin_1.materialSchemaMixin)(BaseMaterial.prototype);
-(0, BankableEntityMixin_1.bankableEntityMixin)(BaseMaterial.prototype);
 (0, NamedEntityMixin_1.namedEntityMixin)(BaseMaterial.prototype);
 (0, DefaultableMixin_1.defaultableEntityMixin)(BaseMaterial);
 (0, HasMetadataMixin_1.hasMetadataMixin)(BaseMaterial.prototype);

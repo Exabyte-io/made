@@ -1,5 +1,4 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { BankableEntity } from "@mat3ra/code/dist/js/entity/mixins/BankableEntityMixin";
 import { type Defaultable } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import { type HasMetadata } from "@mat3ra/code/dist/js/entity/mixins/HasMetadataMixin";
 import { type NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
@@ -11,7 +10,7 @@ import { Lattice } from "./lattice/lattice";
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 type MaterialConfig = PartialBy<MaterialSchema, "name" | "metadata">;
 export declare const defaultMaterialConfig: MaterialSchema;
-interface BaseMaterial extends MaterialSchemaMixin, BankableEntity, NamedEntity, Defaultable, Required<HasMetadata<MaterialSchema["metadata"]>> {
+interface BaseMaterial extends MaterialSchemaMixin, NamedEntity, Defaultable, Required<HasMetadata<MaterialSchema["metadata"]>> {
 }
 declare class BaseMaterial extends InMemoryEntity<MaterialSchema> {
 }
