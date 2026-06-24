@@ -1,14 +1,9 @@
 import { math } from "@mat3ra/code/dist/js/math";
-import {
-    Coordinate3DSchema,
-    MaterialSchema,
-    Matrix3X3Schema,
-    Vector3DSchema,
-} from "@mat3ra/esse/dist/js/types";
+import { Coordinate3DSchema, Matrix3X3Schema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 
 import { Cell } from "../cell/cell";
 import { Lattice } from "../lattice/lattice";
-import { Material } from "../material";
+import { type MaterialConfig, Material } from "../material";
 import SupercellTools from "./supercell";
 
 const MULT = math.multiply;
@@ -152,7 +147,7 @@ function getDimensionsScalingMatrix(
     return transformationMatrix as Matrix3X3Schema;
 }
 
-export type SlabConfigSchema = MaterialSchema & {
+export type SlabConfigSchema = MaterialConfig & {
     outOfPlaneAxisIndex: number;
 };
 

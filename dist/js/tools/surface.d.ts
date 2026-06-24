@@ -1,6 +1,6 @@
-import { Coordinate3DSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
-import { Material } from "../material";
-export type SlabConfigSchema = MaterialSchema & {
+import { Coordinate3DSchema } from "@mat3ra/esse/dist/js/types";
+import { type MaterialConfig, Material } from "../material";
+export type SlabConfigSchema = MaterialConfig & {
     outOfPlaneAxisIndex: number;
 };
 declare function generateConfig(material: Material, millerIndices: Coordinate3DSchema, numberOfLayers?: number, vx?: number, vy?: number): SlabConfigSchema;

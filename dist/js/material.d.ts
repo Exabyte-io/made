@@ -1,5 +1,6 @@
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { type Defaultable } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
+import { type HashedEntity } from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
 import { type HasMetadata } from "@mat3ra/code/dist/js/entity/mixins/HasMetadataMixin";
 import { type NamedEntity } from "@mat3ra/code/dist/js/entity/mixins/NamedEntityMixin";
 import type { AtomicConstraintsSchema, BasisSchema, ConsistencyCheck, DerivedPropertiesSchema, FileSourceSchema, LatticeSchema, MaterialSchema } from "@mat3ra/esse/dist/js/types";
@@ -8,19 +9,20 @@ import { ConstrainedBasis } from "./basis/constrained_basis";
 import { type MaterialSchemaMixin } from "./generated/MaterialSchemaMixin";
 import { Lattice } from "./lattice/lattice";
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-type MaterialConfig = PartialBy<MaterialSchema, "name" | "metadata">;
-export declare const defaultMaterialConfig: MaterialSchema;
-interface BaseMaterial extends MaterialSchemaMixin, NamedEntity, Defaultable, Required<HasMetadata<MaterialSchema["metadata"]>> {
+export type MaterialConfig = PartialBy<MaterialSchema, "name" | "metadata" | "hash">;
+export declare const defaultMaterialConfig: MaterialConfig;
+interface BaseMaterial extends MaterialSchemaMixin, NamedEntity, Defaultable, HashedEntity, Required<HasMetadata<MaterialSchema["metadata"]>> {
 }
 declare class BaseMaterial extends InMemoryEntity<MaterialSchema> {
 }
 declare class Material extends BaseMaterial implements MaterialSchema {
     static createDefault: () => Material;
-    static get defaultConfig(): MaterialSchema;
+    static get defaultConfig(): MaterialConfig;
     static constructMaterialFileSource(fileName: string, fileContent: string, fileExtension: string): FileSourceSchema;
     private constraints;
     constructor(config: MaterialConfig, constraints?: AtomicConstraintsSchema);
     updateFormula(): void;
+    updateHash(): void;
     /**
      * @summary Returns the specific derived property (as specified by name) for a material.
      */

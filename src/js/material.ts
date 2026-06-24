@@ -4,6 +4,10 @@ import {
     defaultableEntityMixin,
 } from "@mat3ra/code/dist/js/entity/mixins/DefaultableMixin";
 import {
+    type HashedEntity,
+    hashedEntityMixin,
+} from "@mat3ra/code/dist/js/entity/mixins/HashedEntityMixin";
+import {
     type HasMetadata,
     hasMetadataMixin,
 } from "@mat3ra/code/dist/js/entity/mixins/HasMetadataMixin";
@@ -51,9 +55,9 @@ function parseBasis(
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-type MaterialConfig = PartialBy<MaterialSchema, "name" | "metadata">;
+export type MaterialConfig = PartialBy<MaterialSchema, "name" | "metadata" | "hash">;
 
-export const defaultMaterialConfig: MaterialSchema = {
+export const defaultMaterialConfig: MaterialConfig = {
     name: "Silicon FCC",
     basis: {
         elements: [
@@ -99,6 +103,7 @@ interface BaseMaterial
     extends MaterialSchemaMixin,
         NamedEntity,
         Defaultable,
+        HashedEntity,
         Required<HasMetadata<MaterialSchema["metadata"]>> {}
 
 class BaseMaterial extends InMemoryEntity<MaterialSchema> {}
@@ -107,11 +112,12 @@ materialSchemaMixin(BaseMaterial.prototype);
 namedEntityMixin(BaseMaterial.prototype);
 defaultableEntityMixin(BaseMaterial);
 hasMetadataMixin(BaseMaterial.prototype);
+hashedEntityMixin(BaseMaterial.prototype);
 
 class Material extends BaseMaterial implements MaterialSchema {
     declare static createDefault: () => Material;
 
-    static get defaultConfig() {
+    static get defaultConfig(): MaterialConfig {
         return defaultMaterialConfig;
     }
 
@@ -136,17 +142,23 @@ class Material extends BaseMaterial implements MaterialSchema {
             formula: config.formula ?? "",
             name: config.name ?? config.formula ?? "",
             metadata: config.metadata ?? {},
+            hash: config.hash ?? "",
         });
 
         this.formula = config.formula || this.getBasis().formula;
         this.name = this.name || this.formula;
         this.constraints = constraints;
+        this.hash = config.hash ?? this.calculateHash("", false, this.isNonPeriodic);
     }
 
     updateFormula() {
         const basis = this.getBasis();
         this.formula = basis.formula;
         this.unitCellFormula = basis.unitCellFormula;
+    }
+
+    updateHash() {
+        this.hash = this.calculateHash("", false, this.isNonPeriodic);
     }
 
     /**
@@ -180,6 +192,7 @@ class Material extends BaseMaterial implements MaterialSchema {
         this.constraints = constraints;
         this.unsetFileProps();
         this.updateFormula();
+        this.updateHash();
     }
 
     getBasis(constraints?: AtomicConstraintsSchema) {
@@ -207,6 +220,7 @@ class Material extends BaseMaterial implements MaterialSchema {
         this.lattice = lattice;
 
         this.unsetFileProps();
+        this.updateHash();
     }
 
     getLattice() {
@@ -263,6 +277,7 @@ class Material extends BaseMaterial implements MaterialSchema {
      */
     toCrystal(constraints: AtomicConstraintsSchema = []) {
         this.basis = this.getBasis(constraints).toCrystal().toJSON();
+        this.updateHash();
     }
 
     /**
@@ -271,6 +286,7 @@ class Material extends BaseMaterial implements MaterialSchema {
      */
     toCartesian(constraints: AtomicConstraintsSchema = []) {
         this.basis = this.getBasis(constraints).toCartesian().toJSON();
+        this.updateHash();
     }
 
     /**
