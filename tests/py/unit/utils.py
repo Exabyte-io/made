@@ -134,6 +134,7 @@ def assert_interfaces_almost_equal(interface1: Any, interface2: Any) -> None:
         assert False, "Bases are not structurally equivalent"
     dict_1 = copy.deepcopy(json.loads(obj1.to_json()))
     dict_2 = copy.deepcopy(obj2 if isinstance(obj2, dict) else json.loads(obj2.to_json()))
+    # Remove name, basis, and coordinate hashes (fragile under translations, rotation, or wrapping)
     for d in [dict_1, dict_2]:
         for key in ["basis", "name", "hash", "scaledHash"]:
             if key in d:
