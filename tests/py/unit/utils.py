@@ -163,6 +163,14 @@ def are_bases_almost_equal(b1: Basis, b2: Basis, atol: float) -> bool:
     return True
 
 
+def print_bases_diff(b1: Basis, b2: Basis):
+    print("\n=== BASE ALMOST EQUAL FAILED ===")
+    print("b1 elements:", b1.elements.values)
+    print("b1 coords:", [c.tolist() if hasattr(c, "tolist") else c for c in b1.coordinates.values])
+    print("b2 elements:", b2.elements.values)
+    print("b2 coords:", [c.tolist() if hasattr(c, "tolist") else c for c in b2.coordinates.values])
+
+
 def assert_interfaces_almost_equal(interface1: Any, interface2: Any) -> None:
     """
     Assert that two interface structures are almost equal, checking bases permutation-invariantly.
@@ -175,7 +183,9 @@ def assert_interfaces_almost_equal(interface1: Any, interface2: Any) -> None:
         b2 = b2.clone()
         b2.to_crystal() if b1.is_in_crystal_units else b2.to_cartesian()
     atol = UPDATED_COORDINATE_TOLERANCE
-    assert are_bases_almost_equal(b1, b2, atol=atol), "Bases are not almost equal"
+    if not are_bases_almost_equal(b1, b2, atol=atol):
+        print_bases_diff(b1, b2)
+        assert False, "Bases are not almost equal"
     dict_1 = copy.deepcopy(json.loads(obj1.to_json()))
     dict_2 = copy.deepcopy(obj2 if isinstance(obj2, dict) else json.loads(obj2.to_json()))
     for d in [dict_1, dict_2]:
