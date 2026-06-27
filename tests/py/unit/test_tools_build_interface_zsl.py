@@ -1,7 +1,5 @@
 import copy
-import json
 from types import SimpleNamespace
-from typing import Any
 
 import numpy as np
 import pytest
@@ -19,7 +17,6 @@ from mat3ra.made.tools.build.compound_pristine_structures.two_dimensional.interf
 )
 from mat3ra.made.tools.build.pristine_structures.two_dimensional.slab import SlabBuilder, SlabConfiguration
 from mat3ra.made.tools.build_components.entities.core.two_dimensional.vacuum.configuration import VacuumConfiguration
-from mat3ra.made.tools.utils import unwrap
 from mat3ra.standata.materials import Materials
 
 from .fixtures.bulk import BULK_Ni_PRIMITIVE
@@ -29,7 +26,7 @@ from .fixtures.interface.gr_ni_111_top_hcp import (
 )
 from .fixtures.interface.zsl import DIAMOND_GaAs_INTERFACE, DIAMOND_GaAs_INTERFACE_GH
 from .fixtures.monolayer import GRAPHENE
-from .utils import OSPlatform, assert_two_entities_deep_almost_equal, get_platform_specific_value
+from .utils import OSPlatform, assert_interfaces_almost_equal, get_platform_specific_value
 
 GRAPHENE_NICKEL_TEST_CASE = (
     SimpleNamespace(
@@ -146,46 +143,6 @@ def are_bases_almost_equal(b1: Basis, b2: Basis, atol: float) -> bool:
         if not found:
             return False
     return True
-
-
-def assert_interfaces_almost_equal(interface1: Any, interface2: Any) -> None:
-    """
-    Assert that two interface structures are almost equal, checking bases with tolerance.
-
-    Args:
-        interface1 (Any): The actual calculated interface object.
-        interface2 (Any): The expected interface object/dict.
-    """
-    obj1 = unwrap(interface1)
-    obj2 = unwrap(interface2)
-
-    basis_dict_1 = obj1.basis.to_dict()
-    basis_dict_2 = obj2.basis.to_dict() if hasattr(obj2, "basis") else obj2["basis"]
-
-    b1 = to_basis_obj(basis_dict_1)
-    b2 = to_basis_obj(basis_dict_2)
-
-    if b1.units != b2.units:
-        b2 = b2.clone()
-        if b1.is_in_crystal_units:
-            b2.to_crystal()
-        else:
-            b2.to_cartesian()
-
-    atol = UPDATED_COORDINATE_TOLERANCE
-    assert are_bases_almost_equal(b1, b2, atol=atol), "Bases are not almost equal"
-
-    dict_1 = json.loads(obj1.to_json())
-    dict_2 = obj2 if isinstance(obj2, dict) else json.loads(obj2.to_json())
-
-    dict_1 = copy.deepcopy(dict_1)
-    dict_2 = copy.deepcopy(dict_2)
-    if "basis" in dict_1:
-        del dict_1["basis"]
-    if "basis" in dict_2:
-        del dict_2["basis"]
-
-    assert_two_entities_deep_almost_equal(dict_1, dict_2, atol=atol)
 
 
 @pytest.mark.parametrize(
