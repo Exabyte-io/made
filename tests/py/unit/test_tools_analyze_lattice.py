@@ -1,7 +1,7 @@
 import pytest
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer, get_lattice_type
+
 from .fixtures.bulk import BULK_GRAPHITE, BULK_Hf2O_MCL, BULK_Si_CONVENTIONAL, BULK_Si_PRIMITIVE, BULK_Si_PRIMITIVIZED
 from .fixtures.interface.gaas_dia import (
     GALLIUM_ARSENIDE_DIAMOND_INTERFACE,
