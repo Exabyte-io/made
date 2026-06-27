@@ -5,12 +5,12 @@ import sys
 from enum import Enum
 from typing import Any, Dict
 
+from mat3ra.made.tools.convert import to_pymatgen
 from mat3ra.made.tools.third_party import PymatgenAseAtomsAdaptor
 from mat3ra.made.tools.utils import unwrap
 from mat3ra.utils import assertion as assertion_utils
-from pymatgen.core.structure import Structure
 from pymatgen.analysis.structure_matcher import StructureMatcher
-from mat3ra.made.tools.convert import to_pymatgen
+from pymatgen.core.structure import Structure
 
 UPDATED_COORDINATE_TOLERANCE = 1e-6
 
@@ -135,8 +135,7 @@ def assert_interfaces_almost_equal(interface1: Any, interface2: Any) -> None:
     dict_1 = copy.deepcopy(json.loads(obj1.to_json()))
     dict_2 = copy.deepcopy(obj2 if isinstance(obj2, dict) else json.loads(obj2.to_json()))
     for d in [dict_1, dict_2]:
-        if "basis" in d:
-            del d["basis"]
-        if "name" in d:
-            del d["name"]
+        for key in ["basis", "name", "hash", "scaledHash"]:
+            if key in d:
+                del d[key]
     assert_two_entities_deep_almost_equal(dict_1, dict_2, atol=UPDATED_COORDINATE_TOLERANCE)
