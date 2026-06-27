@@ -2,15 +2,28 @@
 
 from mat3ra.made.reciprocal import RECIPROCAL_PATHS
 
-
 EXPECTED_KEYS = [
-    "CUB", "BCC", "FCC", "TET",
-    "BCT-1", "BCT-2",
-    "ORC", "ORCF-1", "ORCF-2", "ORCF-3", "ORCI", "ORCC",
+    "CUB",
+    "BCC",
+    "FCC",
+    "TET",
+    "BCT-1",
+    "BCT-2",
+    "ORC",
+    "ORCF-1",
+    "ORCF-2",
+    "ORCF-3",
+    "ORCI",
+    "ORCC",
     "HEX",
-    "RHL-1", "RHL-2",
+    "RHL-1",
+    "RHL-2",
     "MCL",
-    "MCLC-1", "MCLC-2", "MCLC-3", "MCLC-4", "MCLC-5",
+    "MCLC-1",
+    "MCLC-2",
+    "MCLC-3",
+    "MCLC-4",
+    "MCLC-5",
     "TRI",
 ]
 

@@ -1,18 +1,15 @@
 import pytest
-
 from mat3ra.made.material import Material
 from mat3ra.made.tools.analyze.lattice import LatticeMaterialAnalyzer
 from mat3ra.made.tools.analyze.lattice_swap_analyzer import MaterialLatticeSwapAnalyzer
+
 from .fixtures.interface.gaas_dia import (
     GALLIUM_ARSENIDE_DIAMOND_INTERFACE,
     GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE,
     GALLIUM_ARSENIDE_DIAMOND_INTERFACE_PRIMITIVE_GH_WF,
 )
 from .fixtures.interface.gr_ni_111_top_hcp import GRAPHENE_NICKEL_INTERFACE_TOP_HCP_GH_WF
-from .fixtures.slab import (
-    SLAB_SrTiO3_011_TERMINATION_O2,
-    SLAB_SrTiO3_011_TERMINATION_SrTiO,
-)
+from .fixtures.slab import SLAB_SrTiO3_011_TERMINATION_O2, SLAB_SrTiO3_011_TERMINATION_SrTiO
 from .utils import (
     OSPlatform,
     assert_interfaces_almost_equal,
