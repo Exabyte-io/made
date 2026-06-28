@@ -1,6 +1,5 @@
 import pytest
 from mat3ra.code.entity import InMemoryEntityPydantic
-
 from mat3ra.made.tools.build_components.metadata import BuildMetadata, MaterialBuildMetadata
 
 

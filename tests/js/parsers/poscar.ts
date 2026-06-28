@@ -4,6 +4,15 @@ import { AtomicConstraints } from "../../../src/js/constraints/constraints";
 import { Material } from "../../../src/js/material";
 import parsers from "../../../src/js/parsers/parsers";
 import { atomsCount } from "../../../src/js/parsers/poscar";
+import {
+    atomicConstraints,
+    H2OPoscar,
+    Na4Cl4,
+    Na4Cl4Poscar,
+    Silicon,
+    Zr1H23Zr1H1,
+    Zr1H23Zr1H1Poscar,
+} from "../fixtures";
 
 const O2_POSCAR_WITH_COMMENTS = `O2 molecule in a box
 1.0 ! universal scaling parameters
@@ -16,15 +25,6 @@ cart ! positions in cartesian coordinates
 0 0 0 O
 0 0 1.21 O
 `;
-import {
-    atomicConstraints,
-    H2OPoscar,
-    Na4Cl4,
-    Na4Cl4Poscar,
-    Silicon,
-    Zr1H23Zr1H1,
-    Zr1H23Zr1H1Poscar,
-} from "../fixtures";
 
 describe("Parsers.POSCAR", () => {
     it("should return a valid poscar", () => {
