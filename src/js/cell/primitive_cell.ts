@@ -1,5 +1,8 @@
-import { math } from "@mat3ra/code/dist/js/math";
 import { LatticeSchema, Matrix3X3Schema } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const math: any = Utils.math;
 
 /**
  * Routines for calculating primitive cell vectors from conventional cell Bravais parameters.

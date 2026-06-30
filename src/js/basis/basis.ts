@@ -1,12 +1,14 @@
 // @ts-ignore
 import { getElectronegativity, getElementAtomicRadius } from "@exabyte-io/periodic-table.js";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { math } from "@mat3ra/code/dist/js/math";
 import { BasisSchema, Coordinate3DSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 import { chain, toPairs, uniq, values } from "lodash";
 
 import { Cell } from "../cell/cell";
 import { ATOMIC_COORD_UNITS, HASH_TOLERANCE } from "../constants";
+
+const { math } = Utils;
 import {
     defaultNonPeriodicMinimumLatticeSize,
     diatomicLatticePaddingFactor,
@@ -392,7 +394,7 @@ export class Basis extends InMemoryEntity implements BasisSchema {
             const element = entry[0];
             const coordinate = entry[1];
             const atomicLabel = entry[2];
-            const toleratedCoordinate = coordinate.map((x) => math.round(x, HASH_TOLERANCE));
+            const toleratedCoordinate = coordinate.map((x) => math.roundCustom(x, HASH_TOLERANCE));
             return `${element}${atomicLabel} ${toleratedCoordinate.join()}`;
         });
         return `${standardRep.sort().join(";")};`;

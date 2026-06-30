@@ -1,15 +1,17 @@
-import { math } from "@mat3ra/code/dist/js/math";
 import {
     Coordinate3DSchema,
     MaterialSchema,
     Matrix3X3Schema,
     Vector3DSchema,
 } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 
 import { Cell } from "../cell/cell";
 import { Lattice } from "../lattice/lattice";
 import { Material } from "../material";
 import SupercellTools from "./supercell";
+
+const { math } = Utils;
 
 const MULT = math.multiply;
 const ADD = math.add;
@@ -99,6 +101,7 @@ function getMillerScalingMatrix(
             // For mathjs version 5.10: round(-0.5) = -1
             // Here we specify rounding method to Bankers
             // For Python 3.11: round(-0.5) = 0
+            // @ts-ignore - mathjs v12 dot return type
             const value = k1 / k2;
             const roundedValue = math.roundCustom(value, 0, math.RoundingMethod.Bankers);
             const i = -roundedValue;

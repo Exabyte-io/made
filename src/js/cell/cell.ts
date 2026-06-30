@@ -1,13 +1,15 @@
 import { RoundedVector3D } from "@mat3ra/code";
-import { math } from "@mat3ra/code/dist/js/math";
 import {
     Coordinate3DSchema,
     LatticeVectorsSchema as CellSchema,
     Matrix3X3Schema,
     Vector3DSchema,
 } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 
 import constants from "../constants";
+
+const { math } = Utils;
 
 const MATRIX = math.matrix;
 const MULT = math.multiply;
@@ -133,6 +135,7 @@ export class Cell implements CellSchema {
     }
 
     scaleByMatrix(matrix: number[][]) {
+        // @ts-ignore - mathjs v12 multiply return type is broader than runtime
         [this.a, this.b, this.c] = MATRIX_MULT(matrix, this.vectorArrays);
     }
 

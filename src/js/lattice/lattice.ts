@@ -1,6 +1,4 @@
-import { HASH_TOLERANCE } from "@mat3ra/code/dist/js/constants";
 import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
-import { math } from "@mat3ra/code/dist/js/math";
 import {
     Coordinate3DSchema,
     LatticeSchema,
@@ -9,6 +7,7 @@ import {
     LatticeVectorsSchema,
     Matrix3X3Schema,
 } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 import * as lodash from "lodash";
 
 import { Cell } from "../cell/cell";
@@ -16,6 +15,8 @@ import { getPrimitiveLatticeVectorsFromConfig } from "../cell/primitive_cell";
 import { LATTICE_TYPE_CONFIGS } from "./lattice_types";
 import { UnitCell, UnitCellProps } from "./unit_cell";
 
+const { math } = Utils;
+const { HASH_TOLERANCE } = Utils.constants;
 /**
  * Scaling factor used to calculate the new lattice size for non-periodic systems.
  * The scaling factor ensures that a non-periodic structure will have have a lattice greater than the structures size.
@@ -97,7 +98,9 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
         const sinBeta = math.sin(betaRad);
 
         const gammaStar = math.acos((cosAlpha * cosBeta - cosGamma) / (sinAlpha * sinBeta));
+        // @ts-ignore - mathjs v12 acos return type includes Complex, but inputs are always real
         const cosGammaStar = math.cos(gammaStar);
+        // @ts-ignore
         const sinGammaStar = math.sin(gammaStar);
 
         const vectorA: Coordinate3DSchema = [a * sinBeta, 0.0, a * cosBeta];
@@ -268,7 +271,7 @@ export class Lattice extends InMemoryEntity implements LatticeSchema {
             scaledLattice.beta,
             scaledLattice.gamma,
         ]
-            .map((x) => math.round(x, HASH_TOLERANCE))
+            .map((x) => math.roundCustom(x, HASH_TOLERANCE))
             .join(";")};`;
     }
 
