@@ -33,7 +33,7 @@ export declare const Made: {
         cartesian: string;
     };
     Material: typeof Material;
-    defaultMaterialConfig: import("@mat3ra/esse/dist/js/types").MaterialSchema;
+    defaultMaterialConfig: import("./material").MaterialConfig;
     Lattice: typeof Lattice;
     Cell: typeof Cell;
     UnitCell: typeof UnitCell;

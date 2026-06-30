@@ -16,8 +16,8 @@ describe("Material", () => {
     it("should return cloned material", () => {
         const material = new Material(Silicon);
         const clonedMaterial = material.clone();
-        clonedMaterial.setBasis(newBasisXYZ, "xyz", clonedMaterial.Basis.units);
-        expect(clonedMaterial.Basis.elements).to.have.lengthOf(2);
+        clonedMaterial.setBasis(newBasisXYZ, "xyz", clonedMaterial.getBasis().units);
+        expect(clonedMaterial.getBasis().elements).to.have.lengthOf(2);
     });
 
     describe("calculateHash", () => {

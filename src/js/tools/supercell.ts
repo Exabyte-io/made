@@ -52,18 +52,16 @@ function generateNewBasisWithinSupercell(
 
 /**
  * @summary Generates supercell config for the specified material.
- * @param material
- * @param supercellMatrix {Number[][]}
  */
 function generateConfig(material: Material, supercellMatrix: Matrix3X3Schema) {
     const det = math.det(supercellMatrix);
     if (det === 0) {
         throw new Error("Scaling matrix is degenerate.");
     }
-    const cell = material.Lattice.vectors;
+    const cell = material.getLattice().vectors;
     const supercell = cell.cloneAndScaleByMatrix(supercellMatrix);
     const newBasis = generateNewBasisWithinSupercell(
-        material.Basis,
+        material.getBasis(),
         cell,
         supercell,
         supercellMatrix,

@@ -17,9 +17,9 @@ function scaleOneLatticeVector(material: Material, key: "a" | "b" | "c" = "a", f
     if (lattice.vectors === undefined) {
         throw new Error("Lattice vectors are undefined");
     }
-    lattice.vectors[key] = lattice.vectors![key].map((v) => v * factor) as Vector3DSchema;
+    lattice.vectors[key] = lattice.vectors[key].map((v) => v * factor) as Vector3DSchema;
 
-    material.lattice = Lattice.fromVectors(lattice.vectors).toJSON();
+    material.setLattice(Lattice.fromVectors(lattice.vectors).toJSON());
 }
 
 /**
@@ -28,10 +28,12 @@ function scaleOneLatticeVector(material: Material, key: "a" | "b" | "c" = "a", f
  * @param material {Material}
  */
 function scaleLatticeToMakeNonPeriodic(material: Material) {
-    material.lattice = Lattice.fromConfigPartial({
-        a: material.Basis.getMinimumLatticeSize(),
-        type: "CUB",
-    } as LatticeSchema).toJSON();
+    material.setLattice(
+        Lattice.fromConfigPartial({
+            a: material.getBasis().getMinimumLatticeSize(),
+            type: "CUB",
+        } as LatticeSchema).toJSON(),
+    );
 }
 
 /**
@@ -40,13 +42,14 @@ function scaleLatticeToMakeNonPeriodic(material: Material) {
  * @param material {Material}
  * */
 function translateAtomsToCenter(material: Material) {
-    const originalUnits = material.Basis.units;
+    const basis = material.getBasis();
+    const originalUnits = basis.units;
     material.toCartesian();
-    const updatedBasis = material.Basis;
+    const updatedBasis = basis.toCartesian();
     const centerOfCoordinates = updatedBasis.centerOfCoordinatesPoint;
     const centerOfLattice = math.multiply(
         0.5,
-        material.Lattice.vectorArrays.reduce((a, b) => math.add(a, b) as Vector3DSchema),
+        material.getLattice().vectorArrays.reduce((a, b) => math.add(a, b) as Vector3DSchema),
     );
     const translationVector = math.subtract(centerOfLattice, centerOfCoordinates);
     updatedBasis.translateByVector(translationVector as Vector3DSchema);

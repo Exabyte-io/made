@@ -1,14 +1,9 @@
 import { math } from "@mat3ra/code/dist/js/math";
-import {
-    Coordinate3DSchema,
-    MaterialSchema,
-    Matrix3X3Schema,
-    Vector3DSchema,
-} from "@mat3ra/esse/dist/js/types";
+import { Coordinate3DSchema, Matrix3X3Schema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
 
 import { Cell } from "../cell/cell";
 import { Lattice } from "../lattice/lattice";
-import { Material } from "../material";
+import { type MaterialConfig, Material } from "../material";
 import SupercellTools from "./supercell";
 
 const MULT = math.multiply;
@@ -152,7 +147,7 @@ function getDimensionsScalingMatrix(
     return transformationMatrix as Matrix3X3Schema;
 }
 
-export type SlabConfigSchema = MaterialSchema & {
+export type SlabConfigSchema = MaterialConfig & {
     outOfPlaneAxisIndex: number;
 };
 
@@ -175,7 +170,7 @@ function generateConfig(
     if (numberOfLayers < 1)
         throw new Error("Made.tools.surface.generateConfig: number of layers < 1.");
 
-    const cell = material.Lattice.vectors;
+    const cell = material.getLattice().vectors;
     const millerScalingMatrix = getMillerScalingMatrix(cell, millerIndices);
     const millerSupercell = cell.cloneAndScaleByMatrix(millerScalingMatrix);
     const millerPlanePseudoNormal = cell.convertPointToCartesian(millerIndices);
@@ -189,7 +184,7 @@ function generateConfig(
     );
     const supercellMatrix = MULT(dimensionsScalingMatrix, millerScalingMatrix);
     const supercell = millerSupercell.cloneAndScaleByMatrix(dimensionsScalingMatrix);
-    const tempBasis = material.Basis.clone();
+    const tempBasis = material.getBasis().clone();
     const newBasis = SupercellTools.generateNewBasisWithinSupercell(
         tempBasis,
         cell,
