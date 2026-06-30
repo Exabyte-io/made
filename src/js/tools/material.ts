@@ -1,9 +1,11 @@
-import { math } from "@mat3ra/code/dist/js/math";
 import { LatticeSchema, Vector3DSchema } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 
 import { ATOMIC_COORD_UNITS } from "../constants";
 import { Lattice } from "../lattice/lattice";
 import { Material } from "../material";
+
+const { math } = Utils;
 
 /**
  * Scales one lattice vector for the given material

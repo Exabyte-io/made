@@ -1,12 +1,14 @@
 import { RoundedArrayWithIds, RoundedValueWithId, RoundedVector3D, Vector3D } from "@mat3ra/code";
-import { math } from "@mat3ra/code/dist/js/math";
 import {
     AtomicCoordinateSchema,
     Coordinate3DSchema,
     Matrix3X3Schema,
     Vector3DSchema,
 } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 import { sprintf } from "underscore.string";
+
+const { math } = Utils;
 
 export type AtomicCoordinateValue = AtomicCoordinateSchema["value"];
 

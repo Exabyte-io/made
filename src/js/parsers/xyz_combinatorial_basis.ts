@@ -1,5 +1,5 @@
-import { math } from "@mat3ra/code/dist/js/math";
 import { BasisSchema } from "@mat3ra/esse/dist/js/types";
+import { Utils } from "@mat3ra/utils";
 import { chain, last, map } from "lodash";
 import * as s from "underscore.string";
 
@@ -7,6 +7,8 @@ import { ElementsAndCoordinatesConfig } from "../basis/basis";
 import { AtomicCoordinateValue } from "../basis/coordinates";
 import { AtomicElementValue } from "../basis/elements";
 import { Cell } from "../cell/cell";
+
+const { math } = Utils;
 
 /**
  * @summary Combinatorial XYZ basis class and related. Create and get all information about basis and elements in it.
