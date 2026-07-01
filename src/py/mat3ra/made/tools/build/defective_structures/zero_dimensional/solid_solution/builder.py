@@ -65,7 +65,9 @@ def _select_sites_uniform(
     min_dist[start] = -1.0
 
     for _ in range(n_select - 1):
-        next_idx = int(np.argmax(min_dist))
+        max_val = np.max(min_dist)
+        candidates = np.where(np.isclose(min_dist, max_val))[0]
+        next_idx = int(rng.choice(candidates))
         selected.append(next_idx)
         np.minimum(min_dist, dist_matrix[next_idx], out=min_dist)
         min_dist[next_idx] = -1.0
