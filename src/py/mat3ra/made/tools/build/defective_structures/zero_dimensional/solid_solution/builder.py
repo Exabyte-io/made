@@ -91,7 +91,12 @@ class SolidSolutionBuilder(BaseSingleBuilder):
         n_replace = max(0, min(round(configuration.concentration * len(source_indices)), len(source_indices)))
 
         if configuration.site_selection_method == "uniform":
-            selected = _select_sites_uniform(material, source_indices, n_replace, configuration.seed)
+            n_keep = len(source_indices) - n_replace
+            if n_keep < n_replace:
+                kept = _select_sites_uniform(material, source_indices, n_keep, configuration.seed)
+                selected = sorted(set(source_indices) - set(kept))
+            else:
+                selected = _select_sites_uniform(material, source_indices, n_replace, configuration.seed)
         else:
             rng = random.Random(configuration.seed)
             selected = sorted(rng.sample(source_indices, n_replace))
