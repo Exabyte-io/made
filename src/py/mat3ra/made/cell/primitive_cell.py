@@ -15,18 +15,18 @@ Matrix3x3 = List[List[float]]
 
 def _rhl(p: LatticeSchema) -> Matrix3x3:
     a = p.a
-    alpha_rad = (p.alpha / 180) * math.pi
+    alpha_rad = math.radians(p.alpha)
+
     cos_alpha = math.cos(alpha_rad)
-    cos_half_alpha = math.sqrt((1 / 2) * (1 + cos_alpha))
-    sin_half_alpha = math.sqrt((1 / 2) * (1 - cos_alpha))
+    cos_half_alpha = math.cos(alpha_rad / 2.0)
+    sin_half_alpha = math.sin(alpha_rad / 2.0)
+
+    z_comp = a * math.sqrt(1.0 - (cos_alpha / cos_half_alpha) ** 2)
+
     return [
         [a * cos_half_alpha, -a * sin_half_alpha, 0.0],
         [a * cos_half_alpha, a * sin_half_alpha, 0.0],
-        [
-            (a * cos_alpha) / cos_half_alpha,
-            0.0,
-            a * math.sqrt(1 - (cos_alpha * cos_alpha) / (cos_half_alpha * cos_half_alpha)),
-        ],
+        [(a * cos_alpha) / cos_half_alpha, 0.0, z_comp],
     ]
 
 
@@ -112,7 +112,7 @@ PRIMITIVE_CELLS = {
         [p.a / 2, (p.a * math.sqrt(3)) / 2, 0],
         [0, 0, p.c],
     ],
-    "RHL": lambda p: _rhl(p),
+    "RHL": _rhl,
     "MCL": lambda p: [
         [p.a, 0, 0],
         [0, p.b, 0],
@@ -123,7 +123,7 @@ PRIMITIVE_CELLS = {
         [-p.a / 2, p.b / 2, 0],
         [0, p.c * math.cos(math.radians(p.alpha)), p.c * math.sin(math.radians(p.alpha))],
     ],
-    "TRI": lambda p: _tri(p),
+    "TRI": _tri,
 }
 
 
@@ -147,3 +147,9 @@ def get_primitive_lattice_vectors_from_config(lattice_config: LatticeSchema) -> 
             f"Unsupported lattice type '{lattice_type}'. " f"Must be one of: {list(PRIMITIVE_CELLS.keys())}"
         )
     return generator(lattice_config)
+
+
+def get_primitive_cell_from_config(lattice_config: LatticeSchema) -> Cell:
+    """Returns a full Cell object instantiated with the primitive lattice vectors."""
+    vectors = get_primitive_lattice_vectors_from_config(lattice_config)
+    return Cell.from_vectors_array(vectors)
