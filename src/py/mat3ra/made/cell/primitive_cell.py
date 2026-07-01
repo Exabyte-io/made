@@ -9,6 +9,7 @@ import math
 from typing import List
 
 from mat3ra.esse.models.properties_directory.structural.lattice import LatticeSchema
+from mat3ra.made.cell import Cell
 
 Matrix3x3 = List[List[float]]
 
