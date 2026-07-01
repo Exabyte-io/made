@@ -15,42 +15,21 @@ from .....build_components.entities.reusable.three_dimensional.supercell.helpers
 from .configuration import SolidSolutionConfiguration
 
 
-def _get_cartesian_coordinates(material: Union[Material, MaterialWithBuildMetadata]) -> np.ndarray:
-    cloned = material.clone()
-    cloned.to_cartesian()
-    return np.array(cloned.basis.coordinates.values)
-
-
-def _minimum_image_distances(
-    frac_coords: np.ndarray,
-    lattice_vectors: np.ndarray,
-) -> np.ndarray:
-    """
-    Compute pairwise minimum image distances for fractional coordinates under PBC.
-
-    Args:
-        frac_coords (np.ndarray): Fractional coordinates, shape (N, 3).
-        lattice_vectors (np.ndarray): Lattice vectors as rows, shape (3, 3).
-
-    Returns:
-        np.ndarray: Symmetric distance matrix, shape (N, N).
-    """
+def _minimum_image_distances(frac_coords: np.ndarray, lattice_vectors: np.ndarray) -> np.ndarray:
     n = len(frac_coords)
     distances = np.zeros((n, n))
     for i in range(n):
         delta = frac_coords[i] - frac_coords[i + 1 :]
         delta -= np.round(delta)
-        cart = delta @ lattice_vectors
-        dists = np.linalg.norm(cart, axis=1)
+        dists = np.linalg.norm(delta @ lattice_vectors, axis=1)
         distances[i, i + 1 :] = dists
         distances[i + 1 :, i] = dists
     return distances
 
 
-def _farthest_point_sampling(
+def _select_sites_uniform(
+    material: Union[Material, MaterialWithBuildMetadata],
     source_indices: List[int],
-    frac_coords: np.ndarray,
-    lattice_vectors: np.ndarray,
     n_select: int,
     seed: int = None,
 ) -> List[int]:
@@ -59,33 +38,43 @@ def _farthest_point_sampling(
 
     Iteratively picks the site whose minimum distance to all already-selected
     sites is largest, producing a maximally dispersed subset under PBC.
+
+    Args:
+        material: Material with lattice and coordinates.
+        source_indices: Indices of candidate sites in the material basis.
+        n_select: Number of sites to select.
+        seed: Random seed for the initial site choice.
+
+    Returns:
+        Sorted list of selected site indices.
     """
     if n_select <= 0:
         return []
     if n_select >= len(source_indices):
         return sorted(source_indices)
 
-    sublattice_coords = frac_coords[source_indices]
-    dist_matrix = _minimum_image_distances(sublattice_coords, lattice_vectors)
-    n = len(source_indices)
+    material.to_crystal()
+    frac_coords = np.array(material.basis.coordinates.values)
+    lattice_vectors = np.array(material.lattice.vector_arrays)
+    dist_matrix = _minimum_image_distances(frac_coords[source_indices], lattice_vectors)
 
     rng = random.Random(seed)
-    start = rng.randrange(n)
+    start = rng.randrange(len(source_indices))
     selected = [start]
     min_dist = dist_matrix[start].copy()
     min_dist[start] = -1.0
 
     for _ in range(n_select - 1):
-        next_site = int(np.argmax(min_dist))
-        selected.append(next_site)
-        np.minimum(min_dist, dist_matrix[next_site], out=min_dist)
-        min_dist[next_site] = -1.0
+        next_idx = int(np.argmax(min_dist))
+        selected.append(next_idx)
+        np.minimum(min_dist, dist_matrix[next_idx], out=min_dist)
+        min_dist[next_idx] = -1.0
 
-    return sorted([source_indices[s] for s in selected])
+    return sorted([source_indices[i] for i in selected])
 
 
 class SolidSolutionBuilderParameters(BaseBuilderParameters):
-    site_selection_method: str = "random"
+    site_selection_method: str = "uniform"
 
 
 class SolidSolutionBuilder(BaseSingleBuilder):
@@ -94,33 +83,21 @@ class SolidSolutionBuilder(BaseSingleBuilder):
     _DefaultBuildParameters: SolidSolutionBuilderParameters = SolidSolutionBuilderParameters()
 
     def _generate(self, configuration: SolidSolutionConfiguration) -> MaterialWithBuildMetadata:
-        supercell = create_supercell(
-            material=configuration.crystal,
-            scaling_factor=configuration.supercell_dimensions,
-        )
+        supercell = create_supercell(material=configuration.crystal, scaling_factor=configuration.supercell_dimensions)
         material = MaterialWithBuildMetadata.create(supercell.to_dict())
 
         elements = material.basis.elements.values
         source_indices = [i for i, el in enumerate(elements) if el == configuration.source_element]
+        n_replace = max(0, min(round(configuration.concentration * len(source_indices)), len(source_indices)))
 
-        n_replace = round(configuration.concentration * len(source_indices))
-        n_replace = max(0, min(n_replace, len(source_indices)))
-
-        method = configuration.site_selection_method
-
-        if method == "uniform":
-            material.to_crystal()
-            frac_coords = np.array(material.basis.coordinates.values)
-            lattice_vectors = np.array(material.lattice.vector_arrays)
-            selected_indices = _farthest_point_sampling(
-                source_indices, frac_coords, lattice_vectors, n_replace, seed=configuration.seed
-            )
+        if configuration.site_selection_method == "uniform":
+            selected = _select_sites_uniform(material, source_indices, n_replace, configuration.seed)
         else:
             rng = random.Random(configuration.seed)
-            selected_indices = sorted(rng.sample(source_indices, n_replace))
+            selected = sorted(rng.sample(source_indices, n_replace))
 
-        for idx in selected_indices:
-            material.basis.elements.values[idx] = configuration.target_element
+        for idx in selected:
+            elements[idx] = configuration.target_element
 
         return material
 

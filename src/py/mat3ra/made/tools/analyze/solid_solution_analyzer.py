@@ -5,6 +5,8 @@ from mat3ra.made.tools.build.defective_structures.zero_dimensional.solid_solutio
     SolidSolutionConfiguration,
 )
 
+MAX_SUPERCELL_CELLS = 128
+
 
 def _most_isotropic_dimensions(total_cells: int) -> List[int]:
     best = [1, 1, total_cells]
@@ -30,9 +32,8 @@ class SolidSolutionAnalyzer(BaseMaterialAnalyzer):
     """
     Plans supercell dimensions to achieve a target composition and produces a Configuration.
 
-    Given a unit cell material and a desired substitution ratio, computes the
-    smallest (most isotropic) supercell that achieves the target concentration
-    within the specified tolerance.
+    Given a unit cell material and a desired substitution ratio, finds the
+    most isotropic supercell matching the target concentration within tolerance.
     """
 
     source_element: str
@@ -52,36 +53,31 @@ class SolidSolutionAnalyzer(BaseMaterialAnalyzer):
         if n_per_cell == 0:
             raise ValueError(f"No {self.source_element} atoms found in the unit cell.")
 
-        max_cells = 512
-        for total_cells in range(1, max_cells + 1):
+        best_dims, best_spread = None, MAX_SUPERCELL_CELLS
+        for total_cells in range(1, MAX_SUPERCELL_CELLS + 1):
             n_source = n_per_cell * total_cells
-            n_replace = round(self.target_concentration * n_source)
-            n_replace = max(0, min(n_replace, n_source))
-            achieved = n_replace / n_source
-            if abs(achieved - self.target_concentration) <= self.tolerance:
-                return _most_isotropic_dimensions(total_cells)
+            n_replace = max(0, min(round(self.target_concentration * n_source), n_source))
+            if abs(n_replace / n_source - self.target_concentration) > self.tolerance:
+                continue
+            dims = _most_isotropic_dimensions(total_cells)
+            spread = dims[2] - dims[0]
+            if spread < best_spread:
+                best_dims, best_spread = dims, spread
+            if spread == 0:
+                break
 
-        raise ValueError(
-            f"Cannot achieve concentration {self.target_concentration} "
-            f"within tolerance {self.tolerance} for up to {max_cells} cells."
-        )
+        if best_dims is None:
+            raise ValueError(
+                f"Cannot achieve concentration {self.target_concentration} "
+                f"within tolerance {self.tolerance} for up to {MAX_SUPERCELL_CELLS} cells."
+            )
+        return best_dims
 
     @property
     def achievable_concentration(self) -> float:
         dims = self.optimal_supercell_dimensions
-        total_cells = dims[0] * dims[1] * dims[2]
-        n_source = self.source_element_count_per_cell * total_cells
-        n_replace = round(self.target_concentration * n_source)
-        n_replace = max(0, min(n_replace, n_source))
-        return n_replace / n_source
-
-    @property
-    def number_of_substitutions(self) -> int:
-        dims = self.optimal_supercell_dimensions
-        total_cells = dims[0] * dims[1] * dims[2]
-        n_source = self.source_element_count_per_cell * total_cells
-        n_replace = round(self.target_concentration * n_source)
-        return max(0, min(n_replace, n_source))
+        n_source = self.source_element_count_per_cell * dims[0] * dims[1] * dims[2]
+        return max(0, min(round(self.target_concentration * n_source), n_source)) / n_source
 
     @property
     def configuration(self) -> SolidSolutionConfiguration:
